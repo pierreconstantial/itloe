@@ -53,10 +53,10 @@ function apply(action: ServerAction): boolean {
 
 const lan = await pickLan();
 const serveStatic = makeStaticHandler(ROOT);
-const serveApi = makeApiHandler((req) => ({
-  url: `http://${lan ? `${lan.address}:${PORT}` : (req?.headers.host ?? `localhost:${PORT}`)}/play?room=${game.room}`,
-  code: game.room,
-}));
+/** The address phones open (the QR's content); without a LAN IP, the host the request came in on. */
+const joinUrl = (hostHeader?: string): string =>
+  `http://${lan ? `${lan.address}:${PORT}` : (hostHeader ?? `localhost:${PORT}`)}/play?room=${game.room}`;
+const serveApi = makeApiHandler((req) => ({ url: joinUrl(req?.headers.host), code: game.room }));
 
 const httpServer = createServer((req, res) => {
   serveApi(req, res)
@@ -210,7 +210,7 @@ httpServer.listen(PORT, () => {
     console.log('[bloko] no LAN IPv4 detected (internal interfaces only) — set BLOKO_HOST to the address phones reach');
     return;
   }
-  const url = `http://${lan.address}:${PORT}/play`;
+  const url = joinUrl();
   qrcodeTerminal.generate(url, { small: true }, (qr) => {
     console.log(qr);
     console.log(`[bloko] phones → ${url}   room ${game.room}   (via ${lan.iface})`);
