@@ -3,6 +3,7 @@
 // Path ../../shared: resolved on disk by tsc, normalized to /shared/ by the browser.
 import { canPlace, place, findClears, applyClears } from '../../shared/board.js';
 import { PIECES } from '../../shared/pieces.js';
+import { ranking } from '../../shared/game.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('../../shared/game.js').Player} Player */
@@ -32,15 +33,6 @@ function bounds(cells) {
   let w = 0, h = 0;
   for (const [x, y] of cells) { if (x + 1 > w) w = x + 1; if (y + 1 > h) h = y + 1; }
   return { w, h };
-}
-
-/**
- * Player ids sorted by score, descending (ties: join order).
- * @param {State} v @returns {string[]}
- */
-function ranking(v) {
-  return [...v.order].sort((a, b) =>
-    v.players[b].score - v.players[a].score || v.order.indexOf(a) - v.order.indexOf(b));
 }
 
 /** @param {number} rank 1-based @returns {string} */
@@ -170,8 +162,8 @@ function renderLobby(v, me) {
 
 /** @param {State} v @param {Player} me */
 function renderGame(v, me) {
-  const order = ranking(v);
-  $('my-rank').textContent = RANK_BADGES[order.indexOf(me.id)] ?? '';
+  const myRank = ranking(v).find((r) => r.id === me.id);
+  $('my-rank').textContent = myRank ? RANK_BADGES[myRank.rank - 1] ?? '' : '';
   $('my-score').textContent = String(me.score);
 
   const opp = $('opponents');
@@ -240,11 +232,12 @@ function pieceEl(id, color, cellPx) {
 /** @param {State} v @param {Player} me */
 function renderGameOver(v, me) {
   $('final-score').textContent = String(me.score);
-  const order = ranking(v);
-  $('final-rank').textContent = `${ordinal(order.indexOf(me.id) + 1)} of ${v.order.length}`;
+  const ranks = ranking(v);
+  const mine = ranks.find((r) => r.id === me.id);
+  $('final-rank').textContent = `${ordinal(mine ? mine.rank : v.order.length)} of ${v.order.length}`;
   const ul = $('final-others');
   ul.replaceChildren();
-  for (const id of order) {
+  for (const { id } of ranks) {
     if (id === me.id) continue;
     const p = v.players[id];
     const li = document.createElement('li');
@@ -255,22 +248,21 @@ function renderGameOver(v, me) {
 
 /** @param {State} v @param {Player} me */
 function renderPodium(v, me) {
-  const order = ranking(v);
   const MEDALS = ['🥇', '🥈', '🥉', ''];
   const ol = $('podium-list');
   ol.replaceChildren();
-  order.forEach((id, i) => {
+  for (const { id, rank, score } of ranking(v)) {
     const p = v.players[id];
     const li = document.createElement('li');
-    if (i === 0) li.className = 'champion';
+    if (rank === 1) li.className = 'champion'; // ties share rank 1: co-champions
     if (id === me.id) li.classList.add('me');
     li.append(
-      document.createTextNode(`${MEDALS[i] || `${i + 1}.`} `),
+      document.createTextNode(`${MEDALS[rank - 1] || `${rank}.`} `),
       dotEl(p.color),
-      document.createTextNode(` ${p.name} — ${p.score}`),
+      document.createTextNode(` ${p.name} — ${score}`),
     );
     ol.append(li);
-  });
+  }
   const isHost = me.id === v.hostId;
   $('btn-again').hidden = !isHost;
   $('podium-hint').hidden = isHost;
