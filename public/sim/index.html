@@ -12,10 +12,11 @@
 <body>
   <iframe src="/screen/" title="screen"></iframe>
   <div class="phones">
-    <iframe src="/play/" title="player 1"></iframe>
-    <iframe src="/play/" title="player 2"></iframe>
-    <iframe src="/play/" title="player 3"></iframe>
-    <iframe src="/play/" title="player 4"></iframe>
+    <!-- slot= namespaces localStorage per iframe; without it all four would rejoin as the same player -->
+    <iframe src="/play/?slot=1" title="player 1"></iframe>
+    <iframe src="/play/?slot=2" title="player 2"></iframe>
+    <iframe src="/play/?slot=3" title="player 3"></iframe>
+    <iframe src="/play/?slot=4" title="player 4"></iframe>
   </div>
 </body>
 </html>
