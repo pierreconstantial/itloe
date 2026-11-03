@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Bloko</title>
+  <link rel="stylesheet" href="/commun/base.css">
+  <link rel="stylesheet" href="/commun/play-base.css">
+</head>
+<body>
+  <main id="app">
+
+    <section id="view-loading" class="menu">
+      <h1 class="logo">Bloko</h1>
+      <p class="dim">Connecting…</p>
+    </section>
+
+    <section id="view-name" class="menu" hidden>
+      <h1 class="logo">Bloko</h1>
+      <form id="name-form">
+        <input id="name-input" maxlength="12" placeholder="Your name" autocomplete="given-name" enterkeyhint="go" required>
+        <button type="submit" class="primary">Play</button>
+        <p id="name-error" class="error" hidden></p>
+      </form>
+    </section>
+
+    <section id="view-waiting" class="menu" hidden>
+      <h1 class="logo">Bloko</h1>
+      <p>A game is already in progress…</p>
+      <p class="dim">Come back when it's over!</p>
+    </section>
+
+    <section id="view-lobby" class="menu" hidden>
+      <h1 class="logo">Bloko</h1>
+      <p class="dim">Waiting for players…</p>
+      <ul id="lobby-players"></ul>
+      <button id="btn-start" class="primary" hidden>Start game</button>
+      <p id="lobby-hint" class="dim">The host starts the game when everyone's here.</p>
+    </section>
+
+    <section id="view-game" hidden>
+      <header id="topbar">
+        <div id="me-chip">
+          <span id="my-rank">①</span>
+          <span id="my-score">0</span>
+        </div>
+        <div id="opponents"></div>
+      </header>
+      <div id="board-zone"><div id="board"></div></div>
+      <div id="tray">
+        <div class="slot" id="slot-0"></div>
+        <div class="slot" id="slot-1"></div>
+        <div class="slot" id="slot-2"></div>
+      </div>
+    </section>
+
+    <section id="view-over" class="menu" hidden>
+      <p class="skull">💀</p>
+      <h2>Done!</h2>
+      <p>Your score: <strong id="final-score"></strong></p>
+      <p>Position: <strong id="final-rank"></strong></p>
+      <ul id="final-others"></ul>
+      <p class="dim">Watch the big screen for the finale…</p>
+    </section>
+
+    <section id="view-podium" class="menu" hidden>
+      <h2>Podium</h2>
+      <ol id="podium-list"></ol>
+      <button id="btn-again" class="primary" hidden>Play again</button>
+      <p id="podium-hint" class="dim">The host can start a new game.</p>
+    </section>
+
+  </main>
+  <div id="conn-banner" hidden>Reconnecting…</div>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
