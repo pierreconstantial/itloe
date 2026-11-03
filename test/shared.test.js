@@ -2,8 +2,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyBoard, canPlace, place, findClears, applyClears, anyFit, legalPlacementCount } from '../shared/board.js';
-import { PIECES, handAt } from '../shared/pieces.js';
-import { initState, newPlayer, placementScore, ranking, reduce } from '../shared/game.js';
+import { PIECES, PIECE_SETS, handAt } from '../shared/pieces.js';
+import {
+  DEFAULT_SETTINGS, SETTINGS_SCHEMA, initState, newPlayer, normalizeSettings, placementScore, ranking, reduce,
+} from '../shared/game.js';
 
 /** @typedef {import('../shared/game.js').State} State */
 /** @typedef {import('../shared/game.js').Player} Player */
@@ -398,4 +400,219 @@ test('Player.last: move record on each place, with clears before applyClears', (
   assert.equal(l2.n, 2);
   assert.deepEqual(l2.rows, []);
   assert.equal(l2.cleanBoard, false);
+});
+
+// ---------- Q4: settings, timed mode, piece sets ----------
+
+const SZT = ['s_h', 'z_h', 's_v', 'z_v', 't_down', 't_up', 't_right', 't_left'];
+
+/**
+ * Lobby with host 'a' and player 'b'.
+ * @param {Partial<import('../shared/game.js').Settings>} [settings]
+ * @returns {State}
+ */
+function lobby2(settings) {
+  let s = initState(42, settings);
+  s = reduce(s, { t: 'join', id: 'a', name: 'Ana' });
+  return reduce(s, { t: 'join', id: 'b', name: 'Bob' });
+}
+
+test('defaults = M1 behaviour; initState normalizes the settings it is given', () => {
+  assert.deepEqual(DEFAULT_SETTINGS, {
+    size: 8, mode: 'marathon', timedSeconds: 180, pieceSet: 'full', grace: 1, cleanBoardBonus: 300,
+  });
+  const s = initState(1);
+  assert.deepEqual(s.settings, DEFAULT_SETTINGS);
+  assert.deepEqual(s.rules, DEFAULT_SETTINGS);
+  assert.equal(s.size, 8);
+  assert.equal(s.deadline, null);
+  assert.equal(s.endReason, null);
+  const t = initState(1, { size: 10, timedSeconds: 999, pieceSet: /** @type {any} */ ('weird') });
+  assert.equal(t.size, 10);
+  assert.equal(t.rules.size, 10);
+  assert.equal(t.settings.timedSeconds, 300);
+  assert.equal(t.settings.pieceSet, 'full');
+  assert.deepEqual(Object.keys(SETTINGS_SCHEMA).sort(), Object.keys(DEFAULT_SETTINGS).sort());
+});
+
+test('normalizeSettings: clamp + snap ranges, reject bad choices, ignore junk', () => {
+  const n = (/** @type {unknown} */ patch) => normalizeSettings(patch);
+  assert.equal(n({ timedSeconds: 10 }).timedSeconds, 60);
+  assert.equal(n({ timedSeconds: 1e9 }).timedSeconds, 300);
+  assert.equal(n({ timedSeconds: 100 }).timedSeconds, 90); // snapped to step 30 from 60
+  assert.equal(n({ timedSeconds: 106 }).timedSeconds, 120);
+  assert.equal(n({ cleanBoardBonus: -5 }).cleanBoardBonus, 0);
+  assert.equal(n({ cleanBoardBonus: 520 }).cleanBoardBonus, 500);
+  assert.equal(n({ cleanBoardBonus: 130 }).cleanBoardBonus, 150);
+  assert.equal(n({ cleanBoardBonus: NaN }).cleanBoardBonus, 300);
+  assert.equal(n({ timedSeconds: '120' }).timedSeconds, 180); // string → ignored
+  assert.equal(n({ size: 11 }).size, 8); // choice: not in values → ignored
+  assert.equal(n({ size: 9 }).size, 9);
+  assert.equal(n({ grace: 3 }).grace, 1);
+  assert.equal(n({ grace: 0 }).grace, 0);
+  assert.equal(n({ mode: 'TIMED' }).mode, 'marathon');
+  assert.equal(n({ pieceSet: 'simple' }).pieceSet, 'simple');
+  assert.deepEqual(n({ bogus: 1, __proto__: { size: 10 } }), DEFAULT_SETTINGS);
+  for (const junk of [null, undefined, 42, 'x', [1]]) assert.deepEqual(n(junk), DEFAULT_SETTINGS);
+  const base = normalizeSettings({ size: 10 });
+  assert.equal(normalizeSettings({ grace: 2 }, base).size, 10); // patch applies on top of base
+});
+
+test('config: host only, lobby/finished only, no-op patch → same state', () => {
+  const s = lobby2();
+  assert.equal(reduce(s, { t: 'config', id: 'b', patch: { size: 9 } }), s); // not host
+  assert.equal(reduce(s, { t: 'config', id: 'a', patch: { size: 8 } }), s); // no change
+  assert.equal(reduce(s, { t: 'config', id: 'a', patch: /** @type {any} */ ({ size: 7 }) }), s); // invalid → no change
+  assert.equal(reduce(s, { t: 'config', id: 'a', patch: /** @type {any} */ (null) }), s);
+  const started = reduce(s, { t: 'start', id: 'a' });
+  assert.equal(reduce(started, { t: 'config', id: 'a', patch: { size: 9 } }), started); // locked mid-game
+});
+
+test('config in lobby: settings + rules + size + lobby boards follow', () => {
+  const s = reduce(lobby2(), { t: 'config', id: 'a', patch: { size: 10, grace: 2 } });
+  assert.equal(s.settings.size, 10);
+  assert.equal(s.rules.size, 10);
+  assert.equal(s.size, 10);
+  assert.equal(s.players.a.board.length, 100);
+  assert.equal(s.players.b.graceLeft, 2);
+  assert.deepEqual(s.order, ['a', 'b']);
+  assert.equal(s.players.b.color, 2);
+  const joined = reduce(s, { t: 'join', id: 'c', name: 'Cal' });
+  assert.equal(joined.players.c.board.length, 100); // late joiner gets the current size
+});
+
+test('config in finished: only settings change, again locks them in', () => {
+  const s = reduce(lobby2(), { t: 'start', id: 'a' });
+  /** @type {State} */
+  const fin = { ...s, phase: 'finished' };
+  const cfg = reduce(fin, { t: 'config', id: 'a', patch: { size: 9, pieceSet: 'simple' } });
+  assert.equal(cfg.settings.size, 9);
+  assert.equal(cfg.rules.size, 8); // podium boards still 8×8
+  assert.equal(cfg.size, 8);
+  assert.equal(cfg.players.a.board, fin.players.a.board);
+  const again = reduce(cfg, { t: 'again', id: 'a' });
+  assert.equal(again.rules.size, 9);
+  assert.equal(again.size, 9);
+  assert.equal(again.rules.pieceSet, 'simple');
+  assert.equal(again.players.a.board.length, 81);
+  assert.deepEqual(again.players.a.hand, handAt(again.seed, 0, 'simple'));
+});
+
+test('size 9 and 10: boards sized at start, full rows of that width clear', () => {
+  for (const size of /** @type {const} */ ([9, 10])) {
+    let s = reduce(lobby2({ size }), { t: 'start', id: 'a' });
+    assert.equal(s.size, size);
+    assert.equal(s.players.a.board.length, size * size);
+    // fill row 0 except the last cell, plus a stray to avoid a clean board
+    const board = emptyBoard(size);
+    for (let x = 0; x < size - 1; x++) board[x] = 2;
+    board[3 * size + 3] = 2;
+    s = { ...s, players: { ...s.players, a: { ...s.players.a, board, hand: ['dot', 'dot', 'dot'] } } };
+    assert.equal(reduce(s, { t: 'place', id: 'a', piece: 0, x: size, y: 0 }), s); // out of bounds
+    const p = reduce(s, { t: 'place', id: 'a', piece: 0, x: size - 1, y: 0 }).players.a;
+    assert.deepEqual(p.last?.rows, [0]);
+    assert.equal(p.score, 1 + 10);
+    assert.equal(p.board.filter((c) => c !== 0).length, 1);
+  }
+});
+
+test('piece sets: simple never deals S/Z/T, full unchanged for an existing seed', () => {
+  assert.deepEqual(Object.keys(PIECE_SETS.simple.weights).length, 21);
+  for (const id of SZT) assert.equal(PIECE_SETS.simple.weights[id], undefined);
+  for (const id of Object.keys(PIECES)) assert.equal(PIECE_SETS.full.weights[id], PIECES[id].w);
+  for (const seed of [1, 42, 987654]) {
+    for (let n = 0; n < 500; n++) {
+      for (const id of handAt(seed, n, 'simple')) assert.ok(!SZT.includes(id), `${id} in simple set`);
+    }
+  }
+  // pinned from the pre-Q4 handAt: tuning-free refactor must not move existing sequences
+  assert.deepEqual(handAt(42, 0), ['r2x3', 't_left', 's_h']);
+  assert.deepEqual(handAt(42, 3), ['sq3', 'v3', 'h5']);
+  assert.deepEqual(handAt(42, 0, 'full'), handAt(42, 0));
+  assert.throws(() => handAt(42, 0, /** @type {any} */ ('nope')));
+  // reduce deals from rules.pieceSet, including refills
+  let s = reduce(lobby2({ pieceSet: 'simple' }), { t: 'start', id: 'a' });
+  assert.deepEqual(s.players.a.hand, handAt(42, 0, 'simple'));
+  s = { ...s, players: { ...s.players, a: { ...s.players.a, hand: [null, null, 'dot'] } } };
+  s = reduce(s, { t: 'place', id: 'a', piece: 2, x: 0, y: 0 });
+  assert.deepEqual(s.players.a.hand, handAt(42, 1, 'simple'));
+});
+
+test('grace 0 and 2, custom clean-board bonus', () => {
+  /** @param {Partial<import('../shared/game.js').Settings>} rules @param {Partial<Player>} over */
+  const st = (rules, over) => {
+    const base = playing(over);
+    return { ...base, rules: { ...base.rules, ...rules } };
+  };
+  const nonClear = /** @type {const} */ ({ t: 'place', id: 'a', piece: 0, x: 4, y: 4 });
+  // grace 0: first non-clearing placement resets the streak
+  let p = reduce(st({ grace: 0 }, { hand: ['dot', 'dot', null], streak: 3, graceLeft: 0 }), nonClear).players.a;
+  assert.equal(p.streak, 0);
+  // grace 2: two forgiven, third resets
+  let s = st({ grace: 2 }, { hand: ['dot', 'dot', 'dot'], streak: 3, graceLeft: 2 });
+  s = reduce(s, nonClear);
+  assert.deepEqual([s.players.a.streak, s.players.a.graceLeft], [3, 1]);
+  s = reduce(s, { t: 'place', id: 'a', piece: 1, x: 0, y: 7 });
+  assert.deepEqual([s.players.a.streak, s.players.a.graceLeft], [3, 0]);
+  s = reduce(s, { t: 'place', id: 'a', piece: 2, x: 7, y: 7 });
+  assert.equal(s.players.a.streak, 0);
+  // a clear restores graceLeft to rules.grace
+  const row = emptyBoard(SIZE);
+  for (let x = 0; x < 7; x++) row[x] = 2;
+  p = reduce(st({ grace: 2, cleanBoardBonus: 50 }, { board: row, hand: ['dot', null, null], graceLeft: 0 }),
+    { t: 'place', id: 'a', piece: 0, x: 7, y: 0 }).players.a;
+  assert.equal(p.graceLeft, 2);
+  assert.equal(p.score, 1 + 10 + 50); // clean board with bonus 50
+  assert.equal(p.last?.gained, 61);
+  assert.equal(placementScore(1, 1, 0, true, 0), 11);
+  assert.equal(placementScore(1, 1, 0, true), 311); // default stays 300
+  // start initializes graceLeft from rules
+  const g = reduce(lobby2({ grace: 0 }), { t: 'start', id: 'a' });
+  assert.equal(g.players.a.graceLeft, 0);
+});
+
+test('timed: start/again set the deadline from now; now required', () => {
+  const s = lobby2({ mode: 'timed', timedSeconds: 120 });
+  assert.equal(reduce(s, { t: 'start', id: 'a' }), s); // timed without now → invalid
+  assert.equal(reduce(s, { t: 'start', id: 'a', now: NaN }), s);
+  const started = reduce(s, { t: 'start', id: 'a', now: 1_000_000 });
+  assert.equal(started.phase, 'playing');
+  assert.equal(started.deadline, 1_000_000 + 120_000);
+  assert.equal(started.endReason, null);
+  // marathon ignores now and has no deadline
+  const m = reduce(lobby2(), { t: 'start', id: 'a', now: 5 });
+  assert.equal(m.deadline, null);
+  assert.equal(reduce(m, { t: 'timeUp', deadline: 5 }), m);
+});
+
+test('timed: timeUp ends the game, matching deadline only; place after is rejected', () => {
+  let s = reduce(lobby2({ mode: 'timed', timedSeconds: 60 }), { t: 'start', id: 'a', now: 0 });
+  s = reduce(s, { t: 'place', id: 'a', piece: 0, x: 0, y: 0 });
+  const lastA = s.players.a.last;
+  assert.ok(lastA);
+  assert.equal(reduce(s, { t: 'timeUp', deadline: 59_999 }), s); // stale / wrong deadline
+  const end = reduce(s, { t: 'timeUp', deadline: 60_000 });
+  assert.equal(end.phase, 'finished');
+  assert.equal(end.endReason, 'time');
+  assert.ok(end.players.a.done && end.players.b.done);
+  assert.equal(end.players.a.last, lastA); // final move record kept
+  assert.equal(end.players.a.score, s.players.a.score);
+  assert.equal(reduce(end, { t: 'timeUp', deadline: 60_000 }), end); // idempotent
+  assert.equal(reduce(end, { t: 'place', id: 'b', piece: 0, x: 0, y: 0 }), end);
+  // again resets the clock; the old timer is now stale
+  const again = reduce(end, { t: 'again', id: 'a', now: 500_000 });
+  assert.equal(again.phase, 'playing');
+  assert.equal(again.deadline, 560_000);
+  assert.equal(again.endReason, null);
+  assert.equal(reduce(again, { t: 'timeUp', deadline: 60_000 }), again);
+  assert.equal(reduce(end, { t: 'again', id: 'a' }), end); // timed again without now → invalid
+});
+
+test('endReason stuck when everyone is stuck (also before the bell)', () => {
+  /** @type {State} */
+  const s = { ...playing({ board: isolatedHolesBoard(), hand: ['dot', 'h2', null] }), deadline: 99 };
+  const end = reduce(s, { t: 'place', id: 'a', piece: 0, x: 0, y: 0 });
+  assert.equal(end.phase, 'finished');
+  assert.equal(end.endReason, 'stuck');
+  assert.equal(reduce(end, { t: 'timeUp', deadline: 99 }), end); // late bell is a no-op
 });

@@ -1,5 +1,5 @@
-// P0 contract — signatures and State/Action shapes FROZEN.
-// P1 implements `reduce` (rules in BUILD-PLAN.md «Contract A», normative) + tests.
+// P0 contract + Q4 addendum (2026-11-04) — signatures and State/Action shapes FROZEN.
+// Rules: BUILD-PLAN.md «Contract A» (normative) + the Q4 settings/timed-mode addendum.
 
 import { emptyBoard, canPlace, place, findClears, applyClears, anyFit } from './board.js';
 import { PIECES, handAt } from './pieces.js';
@@ -7,6 +7,16 @@ import { mulberry32 } from './rng.js';
 
 /**
  * @typedef {import('./pieces.js').PieceId} PieceId
+ * @typedef {import('./pieces.js').PieceSetId} PieceSetId
+ *
+ * @typedef {{
+ *   size: 8 | 9 | 10,
+ *   mode: 'marathon' | 'timed',
+ *   timedSeconds: number,       // 60..300, step 30
+ *   pieceSet: PieceSetId,
+ *   grace: 0 | 1 | 2,
+ *   cleanBoardBonus: number     // 0..500, step 50
+ * }} Settings
  *
  * @typedef {{
  *   id: string,
@@ -17,8 +27,8 @@ import { mulberry32 } from './rng.js';
  *   hand: (PieceId | null)[],   // length 3, null = already placed
  *   score: number,
  *   streak: number,             // consecutive clearing placements before now
- *   graceLeft: number,          // 1 = next non-clearing placement forgiven
- *   done: boolean,              // stuck, board frozen
+ *   graceLeft: number,          // non-clearing placements still forgiven (reset to rules.grace on a clear)
+ *   done: boolean,              // stuck or stopped by the bell, board frozen
  *   last: null | {
  *     n: number,                // per-player move counter (event id — clients react to n changing)
  *     pieceId: PieceId, x: number, y: number,
@@ -32,24 +42,98 @@ import { mulberry32 } from './rng.js';
  * @typedef {{
  *   phase: 'lobby' | 'playing' | 'finished',
  *   seed: number,
- *   size: number,
+ *   size: number,               // === rules.size (kept for existing readers)
  *   hostId: string | null,
  *   order: string[],
- *   players: Record<string, Player>
+ *   players: Record<string, Player>,
+ *   settings: Settings,         // host's current choice; editable in lobby and finished
+ *   rules: Settings,            // locked snapshot used by the game being played / shown
+ *   deadline: number | null,    // epoch ms of the timed-mode bell; null otherwise
+ *   endReason: 'stuck' | 'time' | null
  * }} State
  *
+ * `now` on start/again and the whole `timeUp` action are SERVER-injected, never from the wire.
  * @typedef {{ t: 'join', id: string, name: string }
- *   | { t: 'start', id: string }
- *   | { t: 'again', id: string }
+ *   | { t: 'start', id: string, now?: number }
+ *   | { t: 'again', id: string, now?: number }
+ *   | { t: 'config', id: string, patch: Partial<Settings> }
+ *   | { t: 'timeUp', deadline: number }
  *   | { t: 'place', id: string, piece: 0 | 1 | 2, x: number, y: number }} Action
  */
 
+/** @type {Readonly<Settings>} */
+export const DEFAULT_SETTINGS = Object.freeze({
+  size: 8,
+  mode: 'marathon',
+  timedSeconds: 180,
+  pieceSet: 'full',
+  grace: 1,
+  cleanBoardBonus: 300,
+});
+
+/**
+ * Data table for the settings UI and the validator.
+ * `choice`: the value must be one of `values` (else that key is ignored).
+ * `range`: a finite number is clamped to [min, max] and snapped to `step` from `min`.
+ * @type {{ [K in keyof Settings]:
+ *   { kind: 'choice', values: readonly Settings[K][] }
+ * | { kind: 'range', min: number, max: number, step: number } }}
+ */
+export const SETTINGS_SCHEMA = {
+  size: { kind: 'choice', values: [8, 9, 10] },
+  mode: { kind: 'choice', values: ['marathon', 'timed'] },
+  timedSeconds: { kind: 'range', min: 60, max: 300, step: 30 },
+  pieceSet: { kind: 'choice', values: ['full', 'simple'] },
+  grace: { kind: 'choice', values: [0, 1, 2] },
+  cleanBoardBonus: { kind: 'range', min: 0, max: 500, step: 50 },
+};
+
+/**
+ * Pure validator: `base` with every valid key of `patch` applied (see SETTINGS_SCHEMA).
+ * Unknown keys and invalid values are ignored; a non-object patch yields a copy of `base`.
+ * @param {unknown} patch
+ * @param {Settings} [base]
+ * @returns {Settings}
+ */
+export function normalizeSettings(patch, base = DEFAULT_SETTINGS) {
+  /** @type {Record<string, unknown>} */
+  const out = { ...base };
+  if (patch === null || typeof patch !== 'object' || Array.isArray(patch)) return /** @type {Settings} */ (out);
+  const src = /** @type {Record<string, unknown>} */ (patch);
+  for (const [key, spec] of Object.entries(SETTINGS_SCHEMA)) {
+    if (!Object.hasOwn(src, key)) continue;
+    const v = src[key];
+    if (spec.kind === 'choice') {
+      if (/** @type {readonly unknown[]} */ (spec.values).includes(v)) out[key] = v;
+    } else if (typeof v === 'number' && Number.isFinite(v)) {
+      const clamped = Math.min(spec.max, Math.max(spec.min, v));
+      out[key] = Math.min(spec.max, spec.min + Math.round((clamped - spec.min) / spec.step) * spec.step);
+    }
+  }
+  return /** @type {Settings} */ (out);
+}
+
+/**
+ * @param {Settings} a
+ * @param {Settings} b
+ */
+function sameSettings(a, b) {
+  return Object.keys(SETTINGS_SCHEMA).every(
+    (k) => a[/** @type {keyof Settings} */ (k)] === b[/** @type {keyof Settings} */ (k)]
+  );
+}
+
 /**
  * @param {number} seed
+ * @param {Partial<Settings>} [settings]  e.g. the persisted settings file; normalized
  * @returns {State}
  */
-export function initState(seed) {
-  return { phase: 'lobby', seed, size: 8, hostId: null, order: [], players: {} };
+export function initState(seed, settings) {
+  const s = normalizeSettings(settings ?? {});
+  return {
+    phase: 'lobby', seed, size: s.size, hostId: null, order: [], players: {},
+    settings: s, rules: { ...s }, deadline: null, endReason: null,
+  };
 }
 
 /**
@@ -58,15 +142,16 @@ export function initState(seed) {
  * @param {string} name
  * @param {number} color
  * @param {number} size
+ * @param {number} [grace]  rules.grace
  * @returns {Player}
  */
-export function newPlayer(id, name, color, size) {
+export function newPlayer(id, name, color, size, grace = DEFAULT_SETTINGS.grace) {
   return {
     id, name, color,
     board: emptyBoard(size),
     handIndex: 0,
     hand: [null, null, null],
-    score: 0, streak: 0, graceLeft: 1, done: false,
+    score: 0, streak: 0, graceLeft: grace, done: false,
     last: null,
   };
 }
@@ -78,10 +163,11 @@ export function newPlayer(id, name, color, size) {
  * @param {number} lines  rows + cols cleared by this placement
  * @param {number} streak
  * @param {boolean} boardEmptied
+ * @param {number} [cleanBoardBonus]  rules.cleanBoardBonus
  * @returns {number}
  */
-export function placementScore(cells, lines, streak, boardEmptied) {
-  return cells + 10 * lines * lines * (1 + streak) + (boardEmptied ? 300 : 0);
+export function placementScore(cells, lines, streak, boardEmptied, cleanBoardBonus = DEFAULT_SETTINGS.cleanBoardBonus) {
+  return cells + 10 * lines * lines * (1 + streak) + (boardEmptied ? cleanBoardBonus : 0);
 }
 
 /**
@@ -111,7 +197,7 @@ export function ranking(state) {
 /**
  * Pure reducer. Invalid or out-of-phase actions return `state` unchanged
  * (the SAME object, reference-equal — the server uses that to skip broadcasts).
- * Rules: BUILD-PLAN.md «Contract A», normative paragraph.
+ * Rules: BUILD-PLAN.md «Contract A», normative paragraph, + Q4 addendum.
  * @param {State} state
  * @param {Action} action
  * @returns {State}
@@ -129,39 +215,59 @@ export function reduce(state, action) {
         ...state,
         hostId: state.hostId ?? action.id,
         order: [...state.order, action.id],
-        players: { ...state.players, [action.id]: newPlayer(action.id, action.name, color, state.size) },
+        players: {
+          ...state.players,
+          [action.id]: newPlayer(action.id, action.name, color, state.rules.size, state.rules.grace),
+        },
       };
+    }
+
+    case 'config': {
+      if (state.phase === 'playing') return state;
+      if (action.id !== state.hostId || state.hostId === null) return state;
+      const settings = normalizeSettings(action.patch, state.settings);
+      if (sameSettings(settings, state.settings)) return state;
+      if (state.phase === 'finished') return { ...state, settings };
+      const rules = { ...settings };
+      /** @type {Record<string, Player>} */
+      const players = {};
+      for (const id of state.order) {
+        const p = state.players[id];
+        players[id] = newPlayer(id, p.name, p.color, rules.size, rules.grace);
+      }
+      return { ...state, settings, rules, size: rules.size, players };
     }
 
     case 'start': {
       if (state.phase !== 'lobby') return state;
       if (action.id !== state.hostId || state.hostId === null) return state;
       if (state.order.length < 1) return state;
-      return beginPlay(state, state.seed);
+      return beginPlay(state, state.seed, action.now);
     }
 
     case 'place': {
       if (state.phase !== 'playing') return state;
       const p = state.players[action.id];
       if (!p || p.done) return state;
+      const { rules } = state;
       const { piece, x, y } = action;
       if (piece !== 0 && piece !== 1 && piece !== 2) return state;
       const pieceId = p.hand[piece];
       if (pieceId == null) return state;
       const cells = PIECES[pieceId].cells;
-      if (!canPlace(p.board, state.size, cells, x, y)) return state;
+      if (!canPlace(p.board, rules.size, cells, x, y)) return state;
 
-      let board = place(p.board, state.size, cells, x, y, p.color);
-      const clears = findClears(board, state.size);
+      let board = place(p.board, rules.size, cells, x, y, p.color);
+      const clears = findClears(board, rules.size);
       const lines = clears.rows.length + clears.cols.length;
-      if (lines > 0) board = applyClears(board, state.size, clears);
+      if (lines > 0) board = applyClears(board, rules.size, clears);
       const boardEmptied = lines > 0 && board.every((c) => c === 0);
-      const gained = placementScore(cells.length, lines, p.streak, boardEmptied);
+      const gained = placementScore(cells.length, lines, p.streak, boardEmptied, rules.cleanBoardBonus);
 
       let { streak, graceLeft } = p;
       if (lines > 0) {
         streak += 1;
-        graceLeft = 1;
+        graceLeft = rules.grace;
       } else if (graceLeft > 0) {
         graceLeft -= 1;
       } else {
@@ -174,9 +280,9 @@ export function reduce(state, action) {
       let handIndex = p.handIndex;
       if (hand.every((h) => h === null)) {
         handIndex += 1;
-        hand = handAt(state.seed, handIndex);
+        hand = handAt(state.seed, handIndex, rules.pieceSet);
       }
-      const done = !anyFit(board, state.size, hand);
+      const done = !anyFit(board, rules.size, hand);
 
       const players = {
         ...state.players,
@@ -191,13 +297,27 @@ export function reduce(state, action) {
         },
       };
       const allDone = state.order.every((id) => players[id].done);
-      return { ...state, players, phase: allDone ? 'finished' : state.phase };
+      return allDone
+        ? { ...state, players, phase: 'finished', endReason: 'stuck' }
+        : { ...state, players };
+    }
+
+    case 'timeUp': {
+      if (state.phase !== 'playing') return state;
+      if (state.deadline === null || action.deadline !== state.deadline) return state;
+      /** @type {Record<string, Player>} */
+      const players = {};
+      for (const id of state.order) {
+        const p = state.players[id];
+        players[id] = p.done ? p : { ...p, done: true };
+      }
+      return { ...state, players, phase: 'finished', endReason: 'time' };
     }
 
     case 'again': {
       if (state.phase !== 'finished') return state;
       if (action.id !== state.hostId || state.hostId === null) return state;
-      return beginPlay(state, nextSeed(state.seed));
+      return beginPlay(state, nextSeed(state.seed), action.now);
     }
 
     default:
@@ -206,23 +326,33 @@ export function reduce(state, action) {
 }
 
 /**
- * Same players (ids/names/colors), fresh boards/scores, hand 0 of `seed` dealt, phase playing.
+ * Locks rules ← settings, same players (ids/names/colors), fresh boards/scores, hand 0 dealt,
+ * deadline set in timed mode. Timed mode without a finite `now` → `state` unchanged.
  * @param {State} state
  * @param {number} seed
+ * @param {number | undefined} now
  * @returns {State}
  */
-function beginPlay(state, seed) {
+function beginPlay(state, seed, now) {
+  const rules = { ...state.settings };
+  const timed = rules.mode === 'timed';
+  if (timed && !(typeof now === 'number' && Number.isFinite(now))) return state;
+  const hand0 = handAt(seed, 0, rules.pieceSet);
   /** @type {Record<string, Player>} */
   const players = {};
   for (const id of state.order) {
     const old = state.players[id];
-    players[id] = { ...newPlayer(id, old.name, old.color, state.size), hand: handAt(seed, 0) };
+    players[id] = { ...newPlayer(id, old.name, old.color, rules.size, rules.grace), hand: hand0.slice() };
   }
-  return { ...state, phase: 'playing', seed, players };
+  return {
+    ...state, phase: 'playing', seed, players, rules, size: rules.size,
+    deadline: timed ? /** @type {number} */ (now) + rules.timedSeconds * 1000 : null,
+    endReason: null,
+  };
 }
 
 /**
- * Deterministic next seed for «Rejouer» (reduce stays pure; the seed is part of the state).
+ * Deterministic next seed for «Replay» (reduce stays pure; the seed is part of the state).
  * @param {number} seed
  * @returns {number}
  */

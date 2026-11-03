@@ -53,25 +53,57 @@ export const PIECES = Object.fromEntries(
   ]).map(([id, cells, w]) => [id, { id, cells, w }])
 );
 
-const IDS = Object.keys(PIECES);
-const TOTAL_W = IDS.reduce((s, id) => s + PIECES[id].w, 0);
+/**
+ * @typedef {'full' | 'simple'} PieceSetId
+ * @typedef {{ weights: Record<PieceId, number> }} PieceSet
+ */
+
+const SZT = new Set(['s_h', 'z_h', 's_v', 'z_v', 't_down', 't_up', 't_right', 't_left']);
+
+/**
+ * The single table where piece weights are tuned, per set (Q5).
+ * A set's members = the ids listed with weight > 0; the iteration order of `weights` is
+ * part of the hand sequence, so keep keys in PIECES order.
+ * PIECES[id].w stays equal to PIECE_SETS.full.weights[id].
+ * @type {Record<PieceSetId, PieceSet>}
+ */
+export const PIECE_SETS = {
+  full: { weights: Object.fromEntries(Object.values(PIECES).map((p) => [p.id, p.w])) },
+  simple: {
+    weights: Object.fromEntries(Object.values(PIECES).filter((p) => !SZT.has(p.id)).map((p) => [p.id, p.w])),
+  },
+};
+
+/** @type {Map<string, { ids: PieceId[], ws: number[], total: number }>} */
+const TABLES = new Map(
+  Object.entries(PIECE_SETS).map(([setId, { weights }]) => {
+    const ids = Object.keys(weights).filter((id) => weights[id] > 0);
+    const ws = ids.map((id) => weights[id]);
+    return [setId, { ids, ws, total: ws.reduce((s, w) => s + w, 0) }];
+  })
+);
 
 /**
  * Deterministic n-th hand of the game (n = 0, 1, 2, …).
- * Every player of a game gets the exact same hands.
+ * Every player of a game gets the exact same hands. The sequence is a function of
+ * (seed, set, that set's weights).
  * @param {number} seed
  * @param {number} n
+ * @param {PieceSetId} [set]
  * @returns {[PieceId, PieceId, PieceId]}
  */
-export function handAt(seed, n) {
+export function handAt(seed, n, set = 'full') {
+  const table = TABLES.get(set);
+  if (!table) throw new Error(`handAt: unknown piece set ${set}`);
+  const { ids, ws, total } = table;
   const rng = mulberry32((seed ^ Math.imul(n + 1, 0x9e3779b9)) >>> 0);
   const pick = () => {
-    let r = rng() * TOTAL_W;
-    for (const id of IDS) {
-      r -= PIECES[id].w;
-      if (r < 0) return id;
+    let r = rng() * total;
+    for (let i = 0; i < ids.length; i++) {
+      r -= ws[i];
+      if (r < 0) return ids[i];
     }
-    return IDS[IDS.length - 1];
+    return ids[ids.length - 1];
   };
   return [pick(), pick(), pick()];
 }
