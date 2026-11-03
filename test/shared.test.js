@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyBoard, canPlace, place, findClears, applyClears, anyFit } from '../shared/board.js';
 import { PIECES, handAt } from '../shared/pieces.js';
-import { initState, newPlayer, placementScore, reduce } from '../shared/game.js';
+import { initState, newPlayer, placementScore, ranking, reduce } from '../shared/game.js';
 
 /** @typedef {import('../shared/game.js').State} State */
 /** @typedef {import('../shared/game.js').Player} Player */
@@ -345,4 +345,23 @@ test('smoke: a full 2-player game plays to the podium', () => {
   assert.ok(s.players.a.done && s.players.b.done);
   assert.ok(s.players.a.score > 0 && s.players.b.score > 0);
   assert.ok(s.players.a.handIndex >= 1, 'at least one refill happened');
+});
+
+// ---------- ranking (P5 contract addition) ----------
+
+test('ranking: ties share a rank, standard competition (1,1,3), join order within ties', () => {
+  const s = initState(42);
+  s.order = ['a', 'b', 'c', 'd'];
+  s.players = {
+    a: { ...newPlayer('a', 'Ana', 1, SIZE), score: 10 },
+    b: { ...newPlayer('b', 'Bob', 2, SIZE), score: 30 },
+    c: { ...newPlayer('c', 'Cal', 3, SIZE), score: 30 },
+    d: { ...newPlayer('d', 'Dan', 4, SIZE), score: 5 },
+  };
+  assert.deepEqual(ranking(s), [
+    { id: 'b', rank: 1, score: 30 },
+    { id: 'c', rank: 1, score: 30 },
+    { id: 'a', rank: 3, score: 10 },
+    { id: 'd', rank: 4, score: 5 },
+  ]);
 });
