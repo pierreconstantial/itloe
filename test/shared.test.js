@@ -95,7 +95,7 @@ test('piece set: 29 pieces, sane shapes', () => {
     const p = PIECES[id];
     assert.equal(p.id, id);
     assert.ok(p.cells.length >= 1 && p.cells.length <= 9);
-    assert.ok(p.w >= 1);
+    assert.ok(p.w > 0 && Number.isFinite(p.w));
     // origin convention: bounding box starts at (0,0)
     assert.equal(Math.min(...p.cells.map((c) => c[0])), 0);
     assert.equal(Math.min(...p.cells.map((c) => c[1])), 0);
@@ -525,9 +525,12 @@ test('piece sets: simple never deals S/Z/T, full unchanged for an existing seed'
       for (const id of handAt(seed, n, 'simple')) assert.ok(!SZT.includes(id), `${id} in simple set`);
     }
   }
-  // pinned from the pre-Q4 handAt: tuning-free refactor must not move existing sequences
-  assert.deepEqual(handAt(42, 0), ['r2x3', 't_left', 's_h']);
-  assert.deepEqual(handAt(42, 3), ['sq3', 'v3', 'h5']);
+  // pinned sequences: any weight change moves them, so it must be a deliberate update here
+  // (last: balance R1, sq3 0.5 + big corners 1.5, 2026-11-04 — see docs/balance.md)
+  assert.deepEqual(handAt(42, 0), ['c_nw', 't_left', 's_h']);
+  assert.deepEqual(handAt(42, 3), ['r3x2', 'v3', 'v2']);
+  assert.equal(PIECE_SETS.simple.weights.sq3, PIECES.sq3.w); // simple derives from the PIECES weights
+  assert.equal(PIECE_SETS.simple.weights.bc_nw, PIECES.bc_nw.w);
   assert.deepEqual(handAt(42, 0, 'full'), handAt(42, 0));
   assert.throws(() => handAt(42, 0, /** @type {any} */ ('nope')));
   // reduce deals from rules.pieceSet, including refills
