@@ -1,7 +1,9 @@
 // P0 contract — signatures and State/Action shapes FROZEN.
 // P1 implements `reduce` (rules in BUILD-PLAN.md «Contract A», normative) + tests.
 
-import { emptyBoard } from './board.js';
+import { emptyBoard, canPlace, place, findClears, applyClears, anyFit } from './board.js';
+import { PIECES, handAt } from './pieces.js';
+import { mulberry32 } from './rng.js';
 
 /**
  * @typedef {import('./pieces.js').PieceId} PieceId
@@ -82,6 +84,107 @@ export function placementScore(cells, lines, streak, boardEmptied) {
  * @returns {State}
  */
 export function reduce(state, action) {
-  void action;
-  throw new Error('P1: implement reduce()');
+  switch (action.t) {
+    case 'join': {
+      if (state.phase !== 'lobby') return state;
+      if (state.order.length >= 4) return state;
+      if (typeof action.id !== 'string' || action.id === '') return state;
+      if (typeof action.name !== 'string' || action.name.trim() === '') return state;
+      if (state.players[action.id]) return state;
+      const color = state.order.length + 1;
+      return {
+        ...state,
+        hostId: state.hostId ?? action.id,
+        order: [...state.order, action.id],
+        players: { ...state.players, [action.id]: newPlayer(action.id, action.name, color, state.size) },
+      };
+    }
+
+    case 'start': {
+      if (state.phase !== 'lobby') return state;
+      if (action.id !== state.hostId || state.hostId === null) return state;
+      if (state.order.length < 1) return state;
+      return beginPlay(state, state.seed);
+    }
+
+    case 'place': {
+      if (state.phase !== 'playing') return state;
+      const p = state.players[action.id];
+      if (!p || p.done) return state;
+      const { piece, x, y } = action;
+      if (piece !== 0 && piece !== 1 && piece !== 2) return state;
+      const pieceId = p.hand[piece];
+      if (pieceId == null) return state;
+      const cells = PIECES[pieceId].cells;
+      if (!canPlace(p.board, state.size, cells, x, y)) return state;
+
+      let board = place(p.board, state.size, cells, x, y, p.color);
+      const clears = findClears(board, state.size);
+      const lines = clears.rows.length + clears.cols.length;
+      if (lines > 0) board = applyClears(board, state.size, clears);
+      const boardEmptied = lines > 0 && board.every((c) => c === 0);
+      const gained = placementScore(cells.length, lines, p.streak, boardEmptied);
+
+      let { streak, graceLeft } = p;
+      if (lines > 0) {
+        streak += 1;
+        graceLeft = 1;
+      } else if (graceLeft > 0) {
+        graceLeft -= 1;
+      } else {
+        streak = 0;
+      }
+
+      /** @type {(PieceId | null)[]} */
+      let hand = p.hand.slice();
+      hand[piece] = null;
+      let handIndex = p.handIndex;
+      if (hand.every((h) => h === null)) {
+        handIndex += 1;
+        hand = handAt(state.seed, handIndex);
+      }
+      const done = !anyFit(board, state.size, hand);
+
+      const players = {
+        ...state.players,
+        [p.id]: { ...p, board, hand, handIndex, score: p.score + gained, streak, graceLeft, done },
+      };
+      const allDone = state.order.every((id) => players[id].done);
+      return { ...state, players, phase: allDone ? 'finished' : state.phase };
+    }
+
+    case 'again': {
+      if (state.phase !== 'finished') return state;
+      if (action.id !== state.hostId || state.hostId === null) return state;
+      return beginPlay(state, nextSeed(state.seed));
+    }
+
+    default:
+      return state;
+  }
+}
+
+/**
+ * Same players (ids/names/colors), fresh boards/scores, hand 0 of `seed` dealt, phase playing.
+ * @param {State} state
+ * @param {number} seed
+ * @returns {State}
+ */
+function beginPlay(state, seed) {
+  /** @type {Record<string, Player>} */
+  const players = {};
+  for (const id of state.order) {
+    const old = state.players[id];
+    players[id] = { ...newPlayer(id, old.name, old.color, state.size), hand: handAt(seed, 0) };
+  }
+  return { ...state, phase: 'playing', seed, players };
+}
+
+/**
+ * Deterministic next seed for «Rejouer» (reduce stays pure; the seed is part of the state).
+ * @param {number} seed
+ * @returns {number}
+ */
+function nextSeed(seed) {
+  return Math.floor(mulberry32(seed)() * 4294967296) >>> 0;
 }
