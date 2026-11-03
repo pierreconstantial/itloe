@@ -35,17 +35,22 @@ export function leaders(s) {
 
 /**
  * @param {State} s
- * @param {State | null} prev  previous view, for the clear flash
+ * @param {State | null} prev  previous view (entrance animations only)
+ * @param {{ danger?: Set<string> }} [opts]  ids of players close to being stuck
  */
-export function renderGame(s, prev) {
+export function renderGame(s, prev, { danger = new Set() } = {}) {
   const root = h('section', 'arena');
   root.dataset.players = String(s.order.length);
   const crowned = leaders(s);
-  // Only diff boards within the same game: «again» resets boards and must not flash.
+  // Only compare with the previous view of the same game («again» resets everything).
   const prevPlayers = prev?.phase === 'playing' && prev.seed === s.seed ? prev.players : undefined;
   for (const id of s.order) {
     const p = s.players[id];
-    root.append(renderPanel(s.size, p, crowned.has(id), prevPlayers?.[id]?.board));
+    root.append(renderPanel(s.size, p, {
+      isLeader: crowned.has(id),
+      inDanger: danger.has(id) && !p.done,
+      justDone: p.done && prevPlayers?.[id]?.done === false,
+    }));
   }
   return root;
 }
@@ -53,11 +58,14 @@ export function renderGame(s, prev) {
 /**
  * @param {number} size
  * @param {Player} p
- * @param {boolean} isLeader
- * @param {number[] | undefined} prevBoard
+ * @param {{ isLeader: boolean, inDanger: boolean, justDone: boolean }} flags
  */
-function renderPanel(size, p, isLeader, prevBoard) {
-  const panel = h('article', 'panel' + (p.done ? ' is-done' : ''));
+function renderPanel(size, p, { isLeader, inDanger, justDone }) {
+  const panel = h('article', 'panel'
+    + (p.done ? ' is-done' : '')
+    + (justDone ? ' just-done' : '')
+    + (inDanger ? ' is-danger' : ''));
+  panel.dataset.id = p.id;
   panel.style.setProperty('--pc', playerColor(p.color));
 
   const score = h('span', 'score');
@@ -73,35 +81,28 @@ function renderPanel(size, p, isLeader, prevBoard) {
   if (p.streak >= 1) side.append(h('div', 'streak', [`🔥 ×${p.streak + 1}`]));
 
   panel.append(h('div', 'panel-body', [
-    h('div', 'board-wrap', [renderBoard(size, p, prevBoard)]),
+    h('div', 'board-wrap', [renderBoard(size, p)]),
     side,
   ]));
   return panel;
 }
 
 /**
+ * Cell-level clear visuals live in fx.js (they must outlive re-renders).
  * @param {number} size
  * @param {Player} p
- * @param {number[] | undefined} prevBoard
  */
-function renderBoard(size, p, prevBoard) {
+function renderBoard(size, p) {
   const board = h('div', 'board');
   board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-  const cleared = clearedCells(prevBoard, p.board);
-  p.board.forEach((v, i) => {
+  for (const v of p.board) {
     const cell = h('div', 'cell');
     if (v) {
       cell.classList.add('filled');
       cell.style.background = playerColor(v);
-    } else {
-      const was = cleared.get(i);
-      if (was) {
-        cell.classList.add('flash');
-        cell.style.setProperty('--fc', playerColor(was));
-      }
     }
     board.append(cell);
-  });
+  }
   if (p.done) board.append(h('div', 'done-overlay', ['💀 Done']));
   return board;
 }

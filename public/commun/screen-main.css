@@ -40,16 +40,47 @@ body.offline #offline-banner { display: flex; }
   flex: 1;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: calc(42 * var(--u));
+  gap: calc(40 * var(--u));
   text-align: center;
 }
-.lobby-invite { margin: 0; font-size: calc(44 * var(--u)); color: var(--fg-dim); }
+.lobby .title { font-size: calc(80 * var(--u)); }
+.join {
+  display: flex; align-items: center;
+  gap: calc(64 * var(--u));
+}
+.join-qr {
+  width: calc(440 * var(--u)); height: calc(440 * var(--u));
+  image-rendering: pixelated;
+  border-radius: calc(18 * var(--u));
+  border: calc(10 * var(--u)) solid #fff;
+  background: #fff;
+}
+.join-info {
+  display: flex; flex-direction: column; align-items: flex-start;
+  text-align: left;
+}
+.lobby-invite { margin: 0 0 calc(18 * var(--u)); font-size: calc(48 * var(--u)); font-weight: 800; }
+.join-label {
+  margin: calc(14 * var(--u)) 0 calc(4 * var(--u));
+  font-size: calc(30 * var(--u));
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.room-code {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: calc(150 * var(--u));
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
 .join-url {
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
-  font-size: calc(72 * var(--u));
+  font-size: calc(48 * var(--u));
   font-weight: 700;
-  padding: calc(26 * var(--u)) calc(60 * var(--u));
-  border-radius: calc(22 * var(--u));
+  padding: calc(14 * var(--u)) calc(28 * var(--u));
+  border-radius: calc(16 * var(--u));
   background: var(--bg-2);
   border: 3px solid var(--accent);
 }
@@ -80,7 +111,6 @@ body.offline #offline-banner { display: flex; }
   50% { opacity: 0.9; }
 }
 .lobby-count { margin: 0; font-size: calc(36 * var(--u)); color: var(--fg-dim); }
-.lobby-hint { margin: 0; font-size: calc(28 * var(--u)); color: var(--fg-dim); }
 
 /* ---- game: layout 1 / 2 / 2×2 ---- */
 .arena {
@@ -163,12 +193,6 @@ body.offline #offline-banner { display: flex; }
 }
 .cell { background: var(--cell); border-radius: 4px; }
 .cell.filled { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.12); }
-.cell.flash { animation: flash 0.55s ease-out; }
-@keyframes flash {
-  0% { background: #ffffff; }
-  35% { background: var(--fc); }
-  100% { background: var(--cell); }
-}
 
 .done-overlay {
   position: absolute; inset: 0;
@@ -250,3 +274,163 @@ body.offline #offline-banner { display: flex; }
   color: var(--accent);
 }
 .podium-hint { margin: 0; font-size: calc(30 * var(--u)); color: var(--fg-dim); }
+
+/* ======================================================================
+   Q1 juice — entrance animations (rendered from view diffs) and the #fx layer.
+   Nothing here takes pointer events; the page stays a pure render of the state.
+   ====================================================================== */
+
+/* lobby: a new player's slot pops in */
+.slot.just-joined { animation: pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes pop-in {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* danger: frame pulses when the player has very few legal placements left */
+.panel.is-danger { animation: danger 0.9s ease-in-out infinite; }
+@keyframes danger {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0); border-color: var(--pc); }
+  50% { box-shadow: 0 0 calc(36 * var(--u)) calc(6 * var(--u)) rgba(229, 57, 53, 0.55); border-color: var(--bad); }
+}
+
+/* player just got stuck: overlay slams in */
+.panel.just-done .done-overlay { animation: done-in 0.6s cubic-bezier(0.2, 1.4, 0.4, 1); }
+@keyframes done-in {
+  0% { opacity: 0; transform: scale(1.4); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* screen shake on 2+ lines (class toggled on #app) */
+#app.fx-shake { animation: shake 0.35s linear; }
+#app.fx-shake-big { animation: shake-big 0.5s linear; }
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(calc(-8 * var(--u)), calc(4 * var(--u))); }
+  40% { transform: translate(calc(7 * var(--u)), calc(-5 * var(--u))); }
+  60% { transform: translate(calc(-5 * var(--u)), calc(3 * var(--u))); }
+  80% { transform: translate(calc(3 * var(--u)), calc(-2 * var(--u))); }
+}
+@keyframes shake-big {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  15% { transform: translate(calc(-16 * var(--u)), calc(8 * var(--u))) rotate(-0.4deg); }
+  30% { transform: translate(calc(14 * var(--u)), calc(-10 * var(--u))) rotate(0.4deg); }
+  50% { transform: translate(calc(-10 * var(--u)), calc(6 * var(--u))) rotate(-0.2deg); }
+  70% { transform: translate(calc(6 * var(--u)), calc(-4 * var(--u))); }
+  85% { transform: translate(calc(-3 * var(--u)), calc(2 * var(--u))); }
+}
+
+/* ---- #fx layer ---- */
+#fx, #fx-canvas {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+#fx > div { position: fixed; }
+
+.fx-ghost {
+  border-radius: 4px;
+  animation: ghost 0.6s ease-out both;
+}
+@keyframes ghost {
+  0% { filter: brightness(2.6); transform: scale(1); opacity: 1; }
+  30% { filter: brightness(1.4); transform: scale(1.12); opacity: 1; }
+  100% { filter: brightness(1); transform: scale(0.2); opacity: 0; }
+}
+
+.fx-sweep {
+  border-radius: 6px;
+  mix-blend-mode: screen;
+  animation: 0.6s ease-out both;
+}
+.fx-sweep-row {
+  background: linear-gradient(90deg, transparent, var(--sc) 40%, #fff 50%, var(--sc) 60%, transparent);
+  animation-name: sweep-row;
+}
+.fx-sweep-col {
+  background: linear-gradient(180deg, transparent, var(--sc) 40%, #fff 50%, var(--sc) 60%, transparent);
+  animation-name: sweep-col;
+}
+@keyframes sweep-row {
+  0% { transform: scaleX(0); opacity: 1; }
+  45% { transform: scaleX(1.06); opacity: 1; }
+  100% { transform: scaleX(1.06) scaleY(0.1); opacity: 0; }
+}
+@keyframes sweep-col {
+  0% { transform: scaleY(0); opacity: 1; }
+  45% { transform: scaleY(1.06); opacity: 1; }
+  100% { transform: scaleY(1.06) scaleX(0.1); opacity: 0; }
+}
+
+.fx-callout {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 900;
+  color: #fff;
+  animation: callout 1.6s cubic-bezier(0.2, 1.2, 0.3, 1) both;
+}
+.fx-callout-main {
+  font-size: min(calc(78 * var(--u)), calc(var(--bw) * 0.13));
+  letter-spacing: 0.02em;
+  -webkit-text-stroke: calc(3 * var(--u)) var(--cc);
+  text-shadow: 0 0 calc(30 * var(--u)) var(--cc), 0 calc(6 * var(--u)) 0 rgba(0, 0, 0, 0.6);
+}
+.fx-callout-sub {
+  font-size: min(calc(46 * var(--u)), calc(var(--bw) * 0.08));
+  color: var(--accent);
+  text-shadow: 0 0 calc(20 * var(--u)) rgba(255, 209, 102, 0.6), 0 calc(4 * var(--u)) 0 rgba(0, 0, 0, 0.6);
+}
+@keyframes callout {
+  0% { transform: scale(0.3) rotate(-6deg); opacity: 0; }
+  18% { transform: scale(1.12) rotate(2deg); opacity: 1; }
+  30% { transform: scale(1) rotate(0); }
+  75% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(calc(-60 * var(--u))); opacity: 0; }
+}
+
+.fx-floater {
+  text-align: right;
+  font-size: calc(38 * var(--u));
+  font-weight: 900;
+  color: var(--accent);
+  text-shadow: 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.6);
+  animation: floater 1.1s ease-out both;
+}
+.fx-floater-big { font-size: calc(56 * var(--u)); color: #fff; }
+@keyframes floater {
+  0% { transform: translateY(0); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(calc(-36 * var(--u))); opacity: 0; }
+}
+
+/* ---- podium staged reveal (delays set inline, negative when resuming) ---- */
+.reveal { animation: reveal 0.7s cubic-bezier(0.2, 1.3, 0.4, 1) var(--delay, 0ms) both; }
+@keyframes reveal {
+  0% { transform: translateY(calc(40 * var(--u))) scale(0.9); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+.rank-row.champion.reveal { animation-name: reveal-champion; animation-duration: 1s; }
+@keyframes reveal-champion {
+  0% { transform: scale(0.4); opacity: 0; }
+  55% { transform: scale(1.08); opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+
+/* ---- sound hint ---- */
+#sound-hint {
+  position: fixed;
+  right: calc(20 * var(--u)); bottom: calc(14 * var(--u));
+  font-size: calc(22 * var(--u));
+  color: var(--fg-dim);
+  opacity: 0.8;
+  z-index: 6;
+  pointer-events: none;
+}
+#sound-hint[data-state="on"] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  #app.fx-shake, #app.fx-shake-big, .panel.is-danger { animation: none; }
+}
