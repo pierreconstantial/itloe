@@ -11,9 +11,9 @@ Spec: `SPEC-BLOCKS.md`. Where this plan and the spec disagree for M1, **this pla
 
 ### M1 scope (cuts are deliberate)
 
-**In:** join by typed URL + room-less (one game per server), name entry, lobby, host starts, 1–4 players, 8×8 board, full piece set, shared seeded hand sequence, drag-to-place with local ghost, server-authoritative placement/clears/score/streak, stuck detection, podium, «Rejouer», silent auto-rejoin after phone sleep (localStorage id).
+**In:** join by typed URL + room-less (one game per server), name entry, lobby, host starts, 1–4 players, 8×8 board, full piece set, shared seeded hand sequence, drag-to-place with local ghost, server-authoritative placement/clears/score/streak, stuck detection, podium, "Play again", silent auto-rejoin after phone sleep (localStorage id).
 
-**Out (M2+):** QR code, room code, LAN interface picker, persistence to disk, settings UI, chrono mode, sounds, animations beyond a basic clear flash, danger indicator, best scores, colour picker (colours auto-assigned), French-polish pass (plain French labels are enough in M1).
+**Out (M2+):** QR code, room code, LAN interface picker, persistence to disk, settings UI, timed mode, sounds, animations beyond a basic clear flash, danger indicator, best scores, colour picker (colours auto-assigned), copy-polish pass (plain English labels are enough in M1).
 
 ### Phases
 
@@ -38,7 +38,7 @@ Deliverables:
    ```
    server/   main.ts  mock.ts
    shared/   rng.js  pieces.js  board.js  game.js
-   public/   jouer/index.html  ecran/index.html  sim/index.html  commun/base.css
+   public/   play/index.html  screen/index.html  sim/index.html  commun/base.css
    ```
 3. `shared/` files containing the **full JSDoc-typed signatures** from «Contract A» below, with naive-or-throwing bodies (P1 replaces bodies, never signatures).
 4. `PROTOCOL.md` = «Contract B» below, verbatim + any clarifications.
@@ -88,8 +88,8 @@ WebSocket, JSON text frames. Server: HTTP static on **:3131** + WS on same port,
 
 Client → server:
 ```json
-{ "t": "hello", "role": "jouer", "playerId": "p-abc123" }   // playerId optional (rejoin)
-{ "t": "hello", "role": "ecran" }
+{ "t": "hello", "role": "player", "playerId": "p-abc123" }   // playerId optional (rejoin)
+{ "t": "hello", "role": "screen" }
 { "t": "join",  "name": "Léa" }        // after hello; server assigns/reuses id
 { "t": "start" } { "t": "again" }
 { "t": "place", "piece": 0, "x": 3, "y": 5 }
@@ -97,12 +97,12 @@ Client → server:
 
 Server → client:
 ```json
-{ "t": "welcome", "playerId": "p-abc123" }   // to jouer after hello/join
+{ "t": "welcome", "playerId": "p-abc123" }   // to player after hello/join
 { "t": "view", "state": { …full State… } }   // broadcast to ALL clients after every change
 { "t": "err", "code": "full" | "bad-place" | "not-host" | "not-playing" }
 ```
 
-**M1 sends the full `State` to everyone** (no secrets in this game); clients derive their own view. `role:'ecran'` gets no `welcome`, just `view`s. Rejoin = `hello` with a known `playerId` → server re-attaches, sends `welcome` + `view`.
+**M1 sends the full `State` to everyone** (no secrets in this game); clients derive their own view. `role:'screen'` gets no `welcome`, just `view`s. Rejoin = `hello` with a known `playerId` → server re-attaches, sends `welcome` + `view`.
 
 ---
 
@@ -118,28 +118,28 @@ Server → client:
 
 **Owns:** `server/main.ts` (and any `server/*.ts` it adds). **Must not touch** shared bodies or public.
 
-- HTTP: serve `public/` (hand-rolled static handler, no dep); `/` → redirect `/ecran/`, `/jouer`, `/sim`.
+- HTTP: serve `public/` (hand-rolled static handler, no dep); `/` → redirect `/screen/`, `/play`, `/sim`.
 - WS (`ws` pkg): implement Contract B exactly over `shared/game.js` `reduce`. One game in memory, `seed = Date.now()`.
 - Rejoin: map `playerId → socket`, replace old socket on re-hello.
 - On start: print LAN URL (`os.networkInterfaces()`, first external IPv4) for phones.
 - Done when: starts clean, two `wscat`/node-client sessions can join, start, place, finish (can be tested against P1 stubs early + real shared at integration).
 
-## P3 — Phone client `/jouer` (agent 3)
+## P3 — Phone client `/play` (agent 3)
 
-**Owns:** `public/jouer/*`, may add `public/commun/jouer-*.css`. **Develops against `npm run mock`.**
+**Owns:** `public/play/*`, may add `public/commun/play-*.css`. **Develops against `npm run mock`.**
 
-- Screens: name entry → lobby (players list, host sees «Lancer») → game → terminé → podium (+ host «Rejouer»).
+- Screens: name entry → lobby (players list, host sees "Start") → game → done → podium (+ host "Play again").
 - Game: top bar (score, rank, opponents' scores small), own board ~60% height (CSS grid), 3-piece tray.
 - **Drag:** pointer events; piece renders offset ~1.5 cells above finger; grid-snapped ghost, green/red via `shared/board.js canPlace`; preview of lines that would clear; drop sends `place`, release elsewhere cancels. Render strictly from last `view` — optimistic paint allowed but must reconcile.
 - localStorage: `playerId`, `name`; auto re-hello on WS close (retry 1 s).
 - Done when: full flow works against the mock, drag feels right on a real phone (test at 390 px), `npm run check` passes.
 
-## P4 — Big screen `/ecran` (agent 4)
+## P4 — Big screen `/screen` (agent 4)
 
-**Owns:** `public/ecran/*`, may add `public/commun/ecran-*.css`. **Develops against `npm run mock`.**
+**Owns:** `public/screen/*`, may add `public/commun/screen-*.css`. **Develops against `npm run mock`.**
 
-- Lobby: join URL huge (`http://<ip>:3131/jouer` — read from `location`), player slots live.
-- Game: boards laid out 1 / 2 / 2×2 by player count; per board: name+colour, animated score, hand preview, streak flame, leader crown, «Terminé» overlay; basic clear flash (CSS) on lines that disappeared between views (diff old/new state).
+- Lobby: join URL huge (`http://<ip>:3131/play` — read from `location`), player slots live.
+- Game: boards laid out 1 / 2 / 2×2 by player count; per board: name+colour, animated score, hand preview, streak flame, leader crown, "Done" overlay; basic clear flash (CSS) on lines that disappeared between views (diff old/new state).
 - Podium: ranking, champion highlighted; basic only, juice is M2.
 - Dark, 1080p-at-3m legible. Done when: renders all phases correctly from mock views at 1/2/3/4 players.
 
@@ -147,7 +147,7 @@ Server → client:
 
 **Owns:** `public/sim/*`, small cross-cutting fixes anywhere (announce them).
 
-- `/sim`: `/ecran` + 4 `/jouer` iframes in one page.
+- `/sim`: `/screen` + 4 `/play` iframes in one page.
 - Replace mock with real server; run a full 2-player game in `/sim`; fix protocol/rendering seams; verify phone-sleep rejoin (kill a socket mid-game); `npm run check` + `npm test` green.
 - Tag the repo state `m1` (git tag). **M1 done = a real game is playable on a TV + 2 phones.**
 
@@ -157,11 +157,11 @@ Server → client:
 
 | Pkg | What | Owns |
 |---|---|---|
-| Q1 Juice | Clear/combo animations, screen-shake, call-outs («Combo ×3 !», «Plateau net !»), sounds on `/ecran` (autoplay unlocked on start click), podium sequence, danger pulse | `public/ecran` |
-| Q2 Onboarding | `qrcode` lib QR on `/ecran` lobby + `qrcode-terminal`, room code, LAN interface picker, «Inviter» menu on phone | `server`, both clients' lobby |
+| Q1 Juice | Clear/combo animations, screen-shake, call-outs ("Combo ×3!", "Clean board!"), sounds on `/screen` (autoplay unlocked on start click), podium sequence, danger pulse | `public/screen` |
+| Q2 Onboarding | `qrcode` lib QR on `/screen` lobby + `qrcode-terminal`, room code, LAN interface picker, "Invite" menu on phone | `server`, both clients' lobby |
 | Q3 Robustness | State persisted to disk after each action, resume on restart, settings file, solo best scores | `server`, `shared` |
-| Q4 Options | Settings UI (host phone): board size, chrono mode + timer, simple piece set, grace; colour picker | `shared/game.js`, `public/jouer` |
-| Q5 Feel | Phone haptics, piece-weight tuning from playtests, French copy pass, rules screen | `shared/pieces.js`, `public/jouer` |
+| Q4 Options | Settings UI (host phone): board size, timed mode + timer, simple piece set, grace; colour picker | `shared/game.js`, `public/play` |
+| Q5 Feel | Phone haptics, piece-weight tuning from playtests, copy polish pass, rules screen | `shared/pieces.js`, `public/play` |
 
 Playtest after Q1/Q2 — tuning questions in SPEC §13 get answered there, then Q5.
 
@@ -173,3 +173,5 @@ Playtest after Q1/Q2 — tuning questions in SPEC §13 get answered there, then 
 - Contracts (A, B, `shared` signatures) are **frozen after P0** — breaking them silently breaks three other agents. Contract changes go through the orchestrator only.
 - TS for server, JSDoc-typed JS for `shared` and clients' inline logic; ESM everywhere; no build step; deps only `ws` (+ `qrcode*` in M2). Keep `npm run check` green **for your own files**; errors in other packages' in-progress files are not yours to fix.
 - **Subagents never commit.** The orchestrator reviews and commits each package (one line, present tense, prefixed: `P3: drag ghost + clear preview`).
+- **English everywhere:** UI copy, identifiers, comments, CSS classes, DOM ids, routes, docs. (Decided 2026-11-03, mid-M1: routes are /play and /screen, protocol roles "player" and "screen".)
+- **Build for growth** — the game will grow a lot (attack mode, settings, more modes/players). Decent, reusable, extendable code: small pure functions over God files; data-driven over branching (pieces, scoring, settings, modes as data/tables); no logic duplicated between clients — promote shared helpers into shared/ or public/commun through the orchestrator; clean seams where M2 features will plug in (projections, settings object, mode hooks).

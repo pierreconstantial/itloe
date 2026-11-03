@@ -22,8 +22,8 @@ export function makeStaticHandler(rootDir: string) {
 
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     let path = (req.url ?? '/').split('?')[0];
-    if (path === '/') { res.writeHead(302, { location: '/ecran/' }); res.end(); return; }
-    if (path === '/ecran' || path === '/jouer' || path === '/sim') {
+    if (path === '/') { res.writeHead(302, { location: '/screen/' }); res.end(); return; }
+    if (path === '/screen' || path === '/play' || path === '/sim') {
       res.writeHead(302, { location: path + '/' }); res.end(); return;
     }
     if (path.endsWith('/')) path += 'index.html';

@@ -1,4 +1,4 @@
-/* P0 — shared tokens. P3/P4 add their own files (jouer-*.css / ecran-*.css); only the orchestrator edits this one. */
+/* P0 — shared tokens. P3/P4 add their own files (play-*.css / screen-*.css); only the orchestrator edits this one. */
 :root {
   --bg: #111418;
   --bg-2: #1b2026;

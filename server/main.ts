@@ -20,7 +20,7 @@ let state: State = initState(Date.now() >>> 0);
 const httpServer = createServer(makeStaticHandler(ROOT));
 const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
-/** playerId of each identified jouer socket */
+/** playerId of each identified player socket */
 const who = new Map<WebSocket, string>();
 /** live socket of each player (rejoin replaces it) */
 const sockets = new Map<string, WebSocket>();
@@ -63,11 +63,11 @@ function dispatch(ws: WebSocket, action: Action, errCode: ErrCode): boolean {
 
 function handleMessage(ws: WebSocket, m: any): void {
   if (m.t === 'hello') {
-    if (m.role === 'jouer' && typeof m.playerId === 'string' && state.players[m.playerId]) {
+    if (m.role === 'player' && typeof m.playerId === 'string' && state.players[m.playerId]) {
       attach(ws, m.playerId); // rejoin: re-attach, welcome + view
       send(ws, { t: 'welcome', playerId: m.playerId });
     }
-    send(ws, { t: 'view', state }); // ecran, fresh jouer and rejoin all get the current view
+    send(ws, { t: 'view', state }); // screen, fresh player and rejoin all get the current view
     return;
   }
 
@@ -107,7 +107,7 @@ function handleMessage(ws: WebSocket, m: any): void {
 }
 
 wss.on('connection', (ws) => {
-  send(ws, { t: 'view', state }); // ecran gets a view immediately on connect
+  send(ws, { t: 'view', state }); // screen gets a view immediately on connect
 
   ws.on('message', (raw) => {
     let m: any;
@@ -140,7 +140,7 @@ function lanIPv4(): string | null {
 
 httpServer.listen(PORT, () => {
   const ip = lanIPv4();
-  console.log(`[bloko] serveur → http://localhost:${PORT}/  (ecran: /ecran/, jouer: /jouer/, sim: /sim/)`);
-  if (ip) console.log(`[bloko] téléphones → http://${ip}:${PORT}/jouer`);
-  else console.log('[bloko] pas d’IPv4 LAN détectée (interfaces internes uniquement)');
+  console.log(`[bloko] server → http://localhost:${PORT}/  (screen: /screen/, play: /play/, sim: /sim/)`);
+  if (ip) console.log(`[bloko] phones → http://${ip}:${PORT}/play`);
+  else console.log('[bloko] no LAN IPv4 detected (internal interfaces only)');
 });

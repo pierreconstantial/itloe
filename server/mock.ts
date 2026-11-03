@@ -1,4 +1,4 @@
-// P0 — mock server for client development (P3 /jouer, P4 /ecran).
+// P0 — mock server for client development (P3 /play, P4 /screen).
 // Near-real rules without shared/game.js reduce(). Throwaway: replaced by main.ts at integration.
 // Run: npm run mock   (PORT=3132 npm run mock for a second instance)
 
@@ -17,7 +17,7 @@ let state = initState(Date.now() >>> 0);
 const httpServer = createServer(makeStaticHandler(ROOT));
 const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
-/** playerId per socket (jouer only) */
+/** playerId per socket (player clients only) */
 const who = new Map<WebSocket, string>();
 
 function broadcast(): void {
@@ -43,7 +43,7 @@ wss.on('connection', (ws) => {
     try { m = JSON.parse(String(raw)); } catch { return; }
 
     if (m.t === 'hello') {
-      if (m.role === 'jouer' && typeof m.playerId === 'string' && state.players[m.playerId]) {
+      if (m.role === 'player' && typeof m.playerId === 'string' && state.players[m.playerId]) {
         who.set(ws, m.playerId);
         send(ws, { t: 'welcome', playerId: m.playerId });
       }
@@ -116,7 +116,7 @@ wss.on('connection', (ws) => {
     }
 
     if (m.t === 'debug') {
-      const names = ['Léa', 'Tom', 'Inès', 'Max'];
+      const names = ['Lea', 'Tom', 'Ines', 'Max'];
       state = initState(42);
       names.forEach((name, i) => {
         const id = `p-mock${i + 1}`;
@@ -151,5 +151,5 @@ wss.on('connection', (ws) => {
 });
 
 httpServer.listen(PORT, () => {
-  console.log(`[mock] Bloko mock server → http://localhost:${PORT}/  (ecran: /ecran/, jouer: /jouer/, sim: /sim/)`);
+  console.log(`[mock] Bloko mock server → http://localhost:${PORT}/  (screen: /screen/, play: /play/, sim: /sim/)`);
 });
