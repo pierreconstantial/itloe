@@ -58,6 +58,7 @@ import { mulberry32 } from './rng.js';
  *   | { t: 'again', id: string, now?: number }
  *   | { t: 'config', id: string, patch: Partial<Settings> }
  *   | { t: 'timeUp', deadline: number }
+ *   | { t: 'leave', id: string }
  *   | { t: 'place', id: string, piece: 0 | 1 | 2, x: number, y: number }} Action
  */
 
@@ -210,7 +211,9 @@ export function reduce(state, action) {
       if (typeof action.id !== 'string' || action.id === '') return state;
       if (typeof action.name !== 'string' || action.name.trim() === '') return state;
       if (state.players[action.id]) return state;
-      const color = state.order.length + 1;
+      const used = new Set(state.order.map((id) => state.players[id].color));
+      let color = 1;
+      while (used.has(color)) color++;
       return {
         ...state,
         hostId: state.hostId ?? action.id,
@@ -314,9 +317,26 @@ export function reduce(state, action) {
       return { ...state, players, phase: 'finished', endReason: 'time' };
     }
 
+    case 'leave': {
+      const p = state.players[action.id];
+      if (!p) return state;
+      const hostId = state.hostId === p.id ? nextHost(state, p.id) : state.hostId;
+      if (state.phase !== 'playing') {
+        const { [p.id]: _gone, ...players } = state.players;
+        return { ...state, hostId, order: state.order.filter((id) => id !== p.id), players };
+      }
+      if (p.done && hostId === state.hostId) return state;
+      const players = p.done ? state.players : { ...state.players, [p.id]: { ...p, done: true } };
+      const allDone = state.order.every((id) => players[id].done);
+      return allDone
+        ? { ...state, hostId, players, phase: 'finished', endReason: 'stuck' }
+        : { ...state, hostId, players };
+    }
+
     case 'again': {
       if (state.phase !== 'finished') return state;
       if (action.id !== state.hostId || state.hostId === null) return state;
+      if (state.order.length < 1) return state;
       return beginPlay(state, nextSeed(state.seed), action.now);
     }
 
@@ -349,6 +369,20 @@ function beginPlay(state, seed, now) {
     deadline: timed ? /** @type {number} */ (now) + rules.timedSeconds * 1000 : null,
     endReason: null,
   };
+}
+
+/**
+ * Who inherits the host role when `leaverId` leaves: the next player after them in join order
+ * (wrapping), preferring one who is not done — mid-game, players who left are `done` too, and
+ * this keeps the role away from them whenever someone is still playing. null if nobody is left.
+ * @param {State} state
+ * @param {string} leaverId
+ * @returns {string | null}
+ */
+function nextHost(state, leaverId) {
+  const i = state.order.indexOf(leaverId);
+  const others = [...state.order.slice(i + 1), ...state.order.slice(0, i)];
+  return others.find((id) => !state.players[id].done) ?? others[0] ?? null;
 }
 
 /**

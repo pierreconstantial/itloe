@@ -616,3 +616,106 @@ test('endReason stuck when everyone is stuck (also before the bell)', () => {
   assert.equal(end.endReason, 'stuck');
   assert.equal(reduce(end, { t: 'timeUp', deadline: 99 }), end); // late bell is a no-op
 });
+
+// ---------- leave + colour reuse ----------
+
+/**
+ * Lobby with players a (host), b, c.
+ * @returns {State}
+ */
+function lobby3() {
+  let s = initState(42);
+  for (const [id, name] of [['a', 'Ana'], ['b', 'Bob'], ['c', 'Cal']]) s = reduce(s, { t: 'join', id, name });
+  return s;
+}
+
+test('join takes the lowest free colour; a lobby leave frees the slot', () => {
+  let s = lobby3();
+  s = reduce(s, { t: 'leave', id: 'b' });
+  assert.deepEqual(s.order, ['a', 'c']);
+  assert.equal(s.players.b, undefined);
+  s = reduce(s, { t: 'join', id: 'd', name: 'Dan' });
+  assert.equal(s.players.d.color, 2); // b's freed colour, not c's (3)
+  s = reduce(s, { t: 'join', id: 'e', name: 'Eve' });
+  assert.equal(s.players.e.color, 4);
+  assert.deepEqual(new Set(s.order.map((id) => s.players[id].color)).size, 4);
+  assert.equal(reduce(s, { t: 'join', id: 'f', name: 'Fay' }), s); // still capped at 4
+});
+
+test('leave in lobby: host passes to the next player; empty lobby stays valid', () => {
+  let s = lobby3();
+  s = reduce(s, { t: 'leave', id: 'a' });
+  assert.equal(s.hostId, 'b');
+  assert.equal(s.phase, 'lobby');
+  s = reduce(s, { t: 'leave', id: 'c' }); // non-host leave keeps the host
+  assert.equal(s.hostId, 'b');
+  s = reduce(s, { t: 'leave', id: 'b' });
+  assert.equal(s.hostId, null);
+  assert.deepEqual(s.order, []);
+  assert.deepEqual(s.players, {});
+  assert.equal(reduce(s, { t: 'start', id: 'b' }), s);
+  s = reduce(s, { t: 'join', id: 'z', name: 'Zoé' }); // next joiner becomes host, colour 1
+  assert.equal(s.hostId, 'z');
+  assert.equal(s.players.z.color, 1);
+});
+
+test('leave: unknown or already-removed id → same state', () => {
+  const s = lobby3();
+  assert.equal(reduce(s, { t: 'leave', id: 'nobody' }), s);
+  const gone = reduce(s, { t: 'leave', id: 'b' });
+  assert.equal(reduce(gone, { t: 'leave', id: 'b' }), gone);
+});
+
+test('leave while playing: marked done, last kept, host passes, game goes on', () => {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  s = reduce(s, { t: 'place', id: 'a', piece: 0, x: 0, y: 0 });
+  const lastA = s.players.a.last;
+  const left = reduce(s, { t: 'leave', id: 'a' });
+  assert.equal(left.phase, 'playing');
+  assert.deepEqual(left.order, ['a', 'b', 'c']); // stays on the boards / podium
+  assert.equal(left.players.a.done, true);
+  assert.equal(left.players.a.last, lastA);
+  assert.equal(left.players.a.score, s.players.a.score);
+  assert.equal(left.hostId, 'b');
+  assert.equal(left.endReason, null);
+  assert.equal(reduce(left, { t: 'leave', id: 'a' }), left); // second leave → no-op
+  assert.equal(reduce(left, { t: 'place', id: 'a', piece: 1, x: 3, y: 3 }), left); // frozen
+});
+
+test('leave while playing: host skips players already out, and the last leave finishes the game', () => {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  s = reduce(s, { t: 'leave', id: 'b' }); // b out first
+  assert.equal(s.hostId, 'a');
+  s = reduce(s, { t: 'leave', id: 'a' }); // host leaves: b is done, so c inherits
+  assert.equal(s.hostId, 'c');
+  assert.equal(s.phase, 'playing');
+  s = reduce(s, { t: 'leave', id: 'c' }); // everyone done → finished
+  assert.equal(s.phase, 'finished');
+  assert.equal(s.endReason, 'stuck');
+  assert.equal(s.hostId, 'a'); // all done: plain next in order
+});
+
+test('leave while playing by a stuck host still hands the host role over', () => {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  s = { ...s, players: { ...s.players, a: { ...s.players.a, done: true } } };
+  const left = reduce(s, { t: 'leave', id: 'a' });
+  assert.notEqual(left, s);
+  assert.equal(left.hostId, 'b');
+  assert.equal(left.players.a, s.players.a); // already done: player object untouched
+});
+
+test('leave in finished: removed from the podium, host passes, again needs a player', () => {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  /** @type {State} */
+  const fin = { ...s, phase: 'finished' };
+  s = reduce(fin, { t: 'leave', id: 'a' });
+  assert.deepEqual(s.order, ['b', 'c']);
+  assert.equal(s.hostId, 'b');
+  assert.deepEqual(ranking(s).map((r) => r.id).sort(), ['b', 'c']);
+  const again = reduce(s, { t: 'again', id: 'b' });
+  assert.equal(again.phase, 'playing');
+  assert.deepEqual(again.order, ['b', 'c']);
+  s = reduce(reduce(s, { t: 'leave', id: 'b' }), { t: 'leave', id: 'c' });
+  assert.equal(s.hostId, null);
+  assert.deepEqual(s.order, []);
+});
