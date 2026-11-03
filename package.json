@@ -6,7 +6,8 @@
     "start": "node server/main.ts",
     "mock": "node server/mock.ts",
     "check": "tsc",
-    "test": "node --test"
+    "test": "node --test",
+    "sim": "node scripts/simulate.mts"
   },
   "dependencies": {
     "qrcode": "^1.5.4",
