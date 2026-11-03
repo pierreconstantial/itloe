@@ -4,52 +4,52 @@
 import { canPlace, place, findClears, applyClears } from '../../shared/board.js';
 import { PIECES } from '../../shared/pieces.js';
 import { ranking } from '../../shared/game.js';
+import { KEYS, load, save, forget } from './storage.js';
+import { $, bounds, pieceEl, dotEl } from './dom.js';
+import * as haptics from './haptics.js';
+import { initMenu } from './menu.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('../../shared/game.js').Player} Player */
 /** @typedef {import('../../shared/pieces.js').PieceId} PieceId */
 
 const RANK_BADGES = ['①', '②', '③', '④'];
+const MEDALS = ['🥇', '🥈', '🥉', ''];
 const GAP = 2; // px between cells, = the `gap` value in play-base.css
 const TRAY_CELL = 13; // px per cell for tray miniatures
+const LIFT = 1.5; // the dragged piece floats this many cells above the finger
 
-// ---------- helpers ----------
-
-/** @param {string} id @returns {HTMLElement} */
-function $(id) {
-  const el = document.getElementById(id);
-  if (!el) throw new Error(`#${id} missing`);
-  return el;
-}
-
-/** @param {string} key @returns {string | null} */
-function storageGet(key) { try { return localStorage.getItem(key); } catch { return null; } }
-
-/** @param {string} key @param {string} value */
-function storageSet(key, value) { try { localStorage.setItem(key, value); } catch { /* private mode */ } }
-
-/** Bounding box of a piece's cells. @param {[number, number][]} cells @returns {{ w: number, h: number }} */
-function bounds(cells) {
-  let w = 0, h = 0;
-  for (const [x, y] of cells) { if (x + 1 > w) w = x + 1; if (y + 1 > h) h = y + 1; }
-  return { w, h };
-}
+// ---------- pure helpers ----------
 
 /** @param {number} rank 1-based @returns {string} */
 function ordinal(rank) {
   return rank === 1 ? '1st' : rank === 2 ? '2nd' : rank === 3 ? '3rd' : `${rank}th`;
 }
 
+/** @param {State} v @param {string} id @returns {number} 1-based, shared with ties */
+function rankOf(v, id) {
+  return ranking(v).find((r) => r.id === id)?.rank ?? v.order.length;
+}
+
+/**
+ * End-of-run event this view brings to the player, for haptics.
+ * @param {State} prev @param {State} next @param {string} id
+ * @returns {'win' | 'death' | null}
+ */
+function outcome(prev, next, id) {
+  const before = prev.players[id];
+  const after = next.players[id];
+  if (!before || !after) return null;
+  const justFinished = prev.phase === 'playing' && next.phase === 'finished';
+  if (justFinished && next.order.length > 1 && rankOf(next, id) === 1) return 'win';
+  if (!before.done && after.done) return 'death';
+  return null;
+}
+
 // ---------- client state ----------
 
-// /sim loads four /play iframes on one origin: ?slot=1..4 namespaces their storage.
-// Real phones have no ?slot and keep the plain keys.
-const SLOT = new URLSearchParams(location.search).get('slot') ?? '';
-const KEY_ID = `bloko-id${SLOT}`;
-const KEY_NAME = `bloko-name${SLOT}`;
-
 /** @type {State | null} */ let lastView = null;
-/** @type {string | null} */ let playerId = storageGet(KEY_ID);
+/** @type {string | null} */ let playerId = load(KEYS.id);
 /** @type {WebSocket | null} */ let ws = null;
 /** Placement sent but not yet confirmed: simulated board + tray slot hidden.
  * @type {{ index: number, board: number[] } | null} */
@@ -85,6 +85,14 @@ function connect() {
   });
 }
 
+/** Drop the socket on purpose (no reconnect banner) and open a fresh one. */
+function reconnect() {
+  const old = ws;
+  ws = null;
+  old?.close();
+  connect();
+}
+
 /** @param {unknown} msg */
 function send(msg) {
   if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
@@ -96,17 +104,30 @@ function receive(raw) {
   try { m = JSON.parse(raw); } catch { return; }
   if (m.t === 'welcome' && typeof m.playerId === 'string') {
     playerId = m.playerId;
-    storageSet(KEY_ID, m.playerId);
+    save(KEYS.id, m.playerId);
     render();
   } else if (m.t === 'view') {
+    const prev = lastView;
     lastView = m.state;
     pending = null;
+    const event = prev && playerId ? outcome(prev, m.state, playerId) : null;
+    if (event) haptics.buzz(event);
     render();
   } else if (m.t === 'err') {
     pending = null;
-    if (m.code === 'full') showNameError('Game is full (4 players max).');
+    if (m.code === 'full') showNameError('Sorry, the game is full (4 players max).');
     render(); // bad-place and friends: repaint from the last view
   }
+}
+
+/** Forget this phone's player and come back as a stranger (name screen in the lobby). */
+function leaveGame() {
+  forget(KEYS.id);
+  playerId = null;
+  if (drag) endDrag();
+  pending = null;
+  reconnect();
+  render();
 }
 
 // ---------- rendering ----------
@@ -119,6 +140,7 @@ function show(name) {
 }
 
 function render() {
+  menu.refresh();
   const v = lastView;
   if (!v) { show('loading'); return; }
   const me = playerId ? v.players[playerId] ?? null : null;
@@ -137,13 +159,6 @@ function render() {
   renderGame(v, me);
 }
 
-/** @param {number} color @returns {HTMLElement} */
-function dotEl(color) {
-  const dot = document.createElement('span');
-  dot.className = `dot c${color}`;
-  return dot;
-}
-
 /** @param {State} v @param {Player} me */
 function renderLobby(v, me) {
   const ul = $('lobby-players');
@@ -157,13 +172,14 @@ function renderLobby(v, me) {
   }
   const isHost = me.id === v.hostId;
   $('btn-start').hidden = !isHost;
-  $('lobby-hint').hidden = isHost;
+  $('lobby-hint').textContent = isHost
+    ? (v.order.length === 1 ? 'Play solo, or wait for friends to join.' : 'Everyone in? Hit start!')
+    : 'Waiting for the host to start…';
 }
 
 /** @param {State} v @param {Player} me */
 function renderGame(v, me) {
-  const myRank = ranking(v).find((r) => r.id === me.id);
-  $('my-rank').textContent = myRank ? RANK_BADGES[myRank.rank - 1] ?? '' : '';
+  $('my-rank').textContent = RANK_BADGES[rankOf(v, me.id) - 1] ?? '';
   $('my-score').textContent = String(me.score);
 
   const opp = $('opponents');
@@ -208,47 +224,34 @@ function renderTray(me) {
   }
 }
 
-/**
- * DOM element for a piece (grid of cells).
- * @param {PieceId} id @param {number} color @param {number} cellPx
- * @returns {HTMLElement}
- */
-function pieceEl(id, color, cellPx) {
-  const { cells } = PIECES[id];
-  const { w, h } = bounds(cells);
-  const el = document.createElement('div');
-  el.className = 'piece';
-  el.style.gridTemplateColumns = `repeat(${w}, ${cellPx}px)`;
-  el.style.gridTemplateRows = `repeat(${h}, ${cellPx}px)`;
-  const filled = new Set(cells.map(([x, y]) => y * w + x));
-  for (let i = 0; i < w * h; i++) {
-    const cell = document.createElement('div');
-    if (filled.has(i)) cell.className = `cell c${color}`;
-    el.append(cell);
-  }
-  return el;
-}
-
 /** @param {State} v @param {Player} me */
 function renderGameOver(v, me) {
   $('final-score').textContent = String(me.score);
-  const ranks = ranking(v);
-  const mine = ranks.find((r) => r.id === me.id);
-  $('final-rank').textContent = `${ordinal(mine ? mine.rank : v.order.length)} of ${v.order.length}`;
+  $('final-rank').textContent = v.order.length > 1
+    ? `You're ${ordinal(rankOf(v, me.id))} of ${v.order.length} so far.`
+    : '';
   const ul = $('final-others');
   ul.replaceChildren();
-  for (const { id } of ranks) {
+  for (const { id, score } of ranking(v)) {
     if (id === me.id) continue;
     const p = v.players[id];
     const li = document.createElement('li');
-    li.append(dotEl(p.color), document.createTextNode(`${p.name} — ${p.score}${p.done ? ' 💀' : ''}`));
+    li.append(dotEl(p.color), document.createTextNode(`${p.name} — ${score}${p.done ? ' 💀' : ''}`));
     ul.append(li);
   }
 }
 
 /** @param {State} v @param {Player} me */
+function podiumTitle(v, me) {
+  if (v.order.length === 1) return 'Nice run!';
+  const ranks = ranking(v);
+  if (rankOf(v, me.id) !== 1) return 'Podium';
+  return ranks.filter((r) => r.rank === 1).length > 1 ? "It's a tie! 🎉" : 'You win! 🎉';
+}
+
+/** @param {State} v @param {Player} me */
 function renderPodium(v, me) {
-  const MEDALS = ['🥇', '🥈', '🥉', ''];
+  $('podium-title').textContent = podiumTitle(v, me);
   const ol = $('podium-list');
   ol.replaceChildren();
   for (const { id, rank, score } of ranking(v)) {
@@ -296,6 +299,7 @@ function startDrag(e, index) {
   window.addEventListener('pointermove', onDragMove, { passive: false });
   window.addEventListener('pointerup', onDragDrop);
   window.addEventListener('pointercancel', onDragCancel);
+  haptics.buzz('pickup');
   onDragMove(e);
   renderTray(me); // hide the lifted piece
 }
@@ -315,9 +319,8 @@ function onDragMove(e) {
   const pitch = cell + GAP;
   const width = d.w * pitch - GAP;
   const height = d.h * pitch - GAP;
-  // the piece floats ~1.5 cells above the finger, horizontally centered
   const left = e.clientX - width / 2;
-  const top = e.clientY - 1.5 * cell - height;
+  const top = e.clientY - LIFT * cell - height;
   d.el.style.transform = `translate(${left}px, ${top}px)`;
 
   const origin = cellEls[0].getBoundingClientRect();
@@ -366,7 +369,11 @@ function onDragDrop(e) {
     send({ t: 'place', piece: d.index, x: d.gx, y: d.gy });
     // optimistic paint: same simulation as the server, reconciled by the next view/err
     const after = place(me.board, v.size, d.cells, d.gx, d.gy, me.color);
-    pending = { index: d.index, board: applyClears(after, v.size, findClears(after, v.size)) };
+    const clears = findClears(after, v.size);
+    const lines = clears.rows.length + clears.cols.length;
+    pending = { index: d.index, board: applyClears(after, v.size, clears) };
+    if (lines > 0) haptics.buzzClear(lines);
+    else haptics.buzz('place');
   }
   render();
 }
@@ -391,14 +398,19 @@ function endDrag() {
 
 // ---------- wiring ----------
 
+const menu = initMenu({
+  canLeave: () => playerId !== null && lastView !== null && lastView.players[playerId] !== undefined,
+  onLeave: leaveGame,
+});
+
 const nameInput = /** @type {HTMLInputElement} */ ($('name-input'));
-nameInput.value = storageGet(KEY_NAME) ?? '';
+nameInput.value = load(KEYS.name) ?? '';
 
 $('name-form').addEventListener('submit', (e) => {
   e.preventDefault();
   const name = nameInput.value.trim();
   if (!name) { nameInput.focus(); return; }
-  storageSet(KEY_NAME, name);
+  save(KEYS.name, name);
   $('name-error').hidden = true;
   send({ t: 'join', name });
 });

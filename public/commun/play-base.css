@@ -7,7 +7,7 @@ html, body {
 #app, main {
   height: 100dvh;
 }
-section[hidden] { display: none !important; }
+[hidden] { display: none !important; }
 
 /* ---------- "menu" views (name, lobby, game over, podium…) ---------- */
 
@@ -117,6 +117,7 @@ button.primary:active { transform: scale(0.97); }
   justify-content: space-between;
   gap: 10px;
   min-height: 44px;
+  padding-right: 44px; /* room for the fixed ☰ button */
 }
 #me-chip {
   display: flex;
@@ -226,6 +227,108 @@ button.primary:active { transform: scale(0.97); }
   filter: drop-shadow(0 6px 10px rgb(0 0 0 / 50%));
 }
 #floating-piece > div { border-radius: 3px; }
+
+/* ---------- ☰ menu + sheets ---------- */
+
+#btn-menu {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top));
+  right: 10px;
+  z-index: 15;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
+  border: none;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 6%);
+  color: var(--fg-dim);
+  touch-action: manipulation;
+}
+
+button.link {
+  background: none;
+  border: none;
+  color: var(--fg-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 15px;
+  padding: 0.4em;
+}
+button.danger {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgb(0 0 0 / 55%);
+}
+.sheet-panel {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90dvh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
+  background: var(--bg-2);
+  border-radius: 18px 18px 0 0;
+  text-align: center;
+}
+.sheet-panel h2 { margin: 0 0 4px; font-size: 22px; }
+.sheet-panel p { margin: 0; }
+.sheet-panel > button:not(.link) {
+  width: 100%;
+  padding: 0.8em 1em;
+  font-size: 17px;
+  background: var(--bg);
+  touch-action: manipulation;
+}
+.sheet-panel > button.primary { background: var(--accent); }
+
+#rules-list {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+#rules-list li {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.rule-icon {
+  display: grid;
+  place-items: center;
+  height: 44px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 4%);
+}
+
+.url {
+  font-family: ui-monospace, monospace;
+  font-size: 17px;
+  color: var(--accent);
+  word-break: break-all;
+  user-select: all;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--bg);
+}
 
 /* ---------- reconnection banner ---------- */
 
