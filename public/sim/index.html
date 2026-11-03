@@ -11,12 +11,24 @@
 </head>
 <body>
   <iframe src="/screen/" title="screen"></iframe>
-  <div class="phones">
-    <!-- slot= namespaces localStorage per iframe; without it all four would rejoin as the same player -->
-    <iframe src="/play/?slot=1" title="player 1"></iframe>
-    <iframe src="/play/?slot=2" title="player 2"></iframe>
-    <iframe src="/play/?slot=3" title="player 3"></iframe>
-    <iframe src="/play/?slot=4" title="player 4"></iframe>
-  </div>
+  <div class="phones" id="phones"></div>
+  <script>
+    // slot= namespaces localStorage per iframe (otherwise all four rejoin as the same player);
+    // room= comes from /api/join so the real server's room check passes (mock has no /api, no room needed).
+    (async () => {
+      let room = '';
+      try {
+        const res = await fetch('/api/join');
+        if (res.ok) room = '&room=' + encodeURIComponent((await res.json()).code);
+      } catch { /* mock server: no /api/join */ }
+      const phones = document.getElementById('phones');
+      for (let i = 1; i <= 4; i++) {
+        const frame = document.createElement('iframe');
+        frame.src = `/play/?slot=${i}${room}`;
+        frame.title = `player ${i}`;
+        phones.append(frame);
+      }
+    })();
+  </script>
 </body>
 </html>
