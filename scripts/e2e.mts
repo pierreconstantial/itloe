@@ -1,5 +1,5 @@
 // P2 end-to-end runtime test: drives a running server with WebSocket clients.
-// Usage: PORT=3141 node e2e.ts
+// Usage: start the server, then: PORT=<same port> node scripts/e2e.mts
 import { canPlace } from '../shared/board.js';
 import { PIECES } from '../shared/pieces.js';
 
