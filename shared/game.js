@@ -18,7 +18,15 @@ import { mulberry32 } from './rng.js';
  *   score: number,
  *   streak: number,             // consecutive clearing placements before now
  *   graceLeft: number,          // 1 = next non-clearing placement forgiven
- *   done: boolean               // stuck, board frozen
+ *   done: boolean,              // stuck, board frozen
+ *   last: null | {
+ *     n: number,                // per-player move counter (event id — clients react to n changing)
+ *     pieceId: PieceId, x: number, y: number,
+ *     rows: number[], cols: number[],  // clears of this move, BEFORE applyClears
+ *     gained: number,           // placementScore of this move
+ *     streak: number,           // streak AFTER the move
+ *     cleanBoard: boolean
+ *   }                           // record of the latest move (contract addition, Q1 2026-11-04)
  * }} Player
  *
  * @typedef {{
@@ -59,6 +67,7 @@ export function newPlayer(id, name, color, size) {
     handIndex: 0,
     hand: [null, null, null],
     score: 0, streak: 0, graceLeft: 1, done: false,
+    last: null,
   };
 }
 
@@ -171,7 +180,15 @@ export function reduce(state, action) {
 
       const players = {
         ...state.players,
-        [p.id]: { ...p, board, hand, handIndex, score: p.score + gained, streak, graceLeft, done },
+        [p.id]: {
+          ...p, board, hand, handIndex, score: p.score + gained, streak, graceLeft, done,
+          last: {
+            n: (p.last ? p.last.n : 0) + 1,
+            pieceId, x, y,
+            rows: clears.rows, cols: clears.cols,
+            gained, streak, cleanBoard: boardEmptied,
+          },
+        },
       };
       const allDone = state.order.every((id) => players[id].done);
       return { ...state, players, phase: allDone ? 'finished' : state.phase };

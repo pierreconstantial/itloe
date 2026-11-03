@@ -1,7 +1,7 @@
 // P1 — test suite for shared/ (see BUILD-PLAN.md §P1).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { emptyBoard, canPlace, place, findClears, applyClears, anyFit } from '../shared/board.js';
+import { emptyBoard, canPlace, place, findClears, applyClears, anyFit, legalPlacementCount } from '../shared/board.js';
 import { PIECES, handAt } from '../shared/pieces.js';
 import { initState, newPlayer, placementScore, ranking, reduce } from '../shared/game.js';
 
@@ -364,4 +364,38 @@ test('ranking: ties share a rank, standard competition (1,1,3), join order withi
     { id: 'a', rank: 3, score: 10 },
     { id: 'd', rank: 4, score: 5 },
   ]);
+});
+
+// ---------- legalPlacementCount + Player.last (Q1 contract additions) ----------
+
+test('legalPlacementCount: counts slots, respects limit, null slots skipped', () => {
+  const b = isolatedHolesBoard(); // 16 isolated empty cells
+  assert.equal(legalPlacementCount(b, SIZE, ['dot']), 16);
+  assert.equal(legalPlacementCount(b, SIZE, ['dot', 'dot', null]), 32); // same id in two slots counts twice
+  assert.equal(legalPlacementCount(b, SIZE, ['h2']), 0);
+  assert.equal(legalPlacementCount(b, SIZE, ['dot'], 3), 3);
+});
+
+test('Player.last: move record on each place, with clears before applyClears', () => {
+  const b = emptyBoard(SIZE);
+  for (let x = 0; x < 7; x++) b[x] = 2; // row 0 full except (7,0)
+  let s = playing({ board: b, hand: ['dot', 'h2', 'h3'] });
+  s = reduce(s, { t: 'place', id: 'a', piece: 0, x: 7, y: 0 });
+  const l1 = s.players.a.last;
+  assert.ok(l1);
+  assert.equal(l1.n, 1);
+  assert.equal(l1.pieceId, 'dot');
+  assert.deepEqual([l1.x, l1.y], [7, 0]);
+  assert.deepEqual(l1.rows, [0]);
+  assert.deepEqual(l1.cols, []);
+  assert.equal(l1.cleanBoard, true); // the board held only row 0
+  assert.equal(l1.streak, 1);
+  assert.equal(l1.gained, placementScore(1, 1, 0, true));
+
+  s = reduce(s, { t: 'place', id: 'a', piece: 1, x: 0, y: 4 });
+  const l2 = s.players.a.last;
+  assert.ok(l2);
+  assert.equal(l2.n, 2);
+  assert.deepEqual(l2.rows, []);
+  assert.equal(l2.cleanBoard, false);
 });

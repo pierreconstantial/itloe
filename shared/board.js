@@ -83,6 +83,30 @@ export function applyClears(board, size, clears) {
 }
 
 /**
+ * Number of distinct legal (piece slot, x, y) placements over the non-null pieces of `hand`.
+ * The same piece id held in two slots counts twice (two slots). Counting stops early at
+ * `limit` (the return value is then exactly `limit`). Pure.
+ * @param {number[]} board
+ * @param {number} size
+ * @param {(import('./pieces.js').PieceId | null)[]} hand
+ * @param {number} [limit]
+ * @returns {number}
+ */
+export function legalPlacementCount(board, size, hand, limit = Infinity) {
+  let count = 0;
+  for (const id of hand) {
+    if (id === null) continue;
+    const cells = PIECES[id].cells;
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        if (canPlace(board, size, cells, x, y) && ++count >= limit) return count;
+      }
+    }
+  }
+  return count;
+}
+
+/**
  * Does any remaining piece of the hand fit anywhere?
  * @param {number[]} board
  * @param {number} size
@@ -90,14 +114,5 @@ export function applyClears(board, size, clears) {
  * @returns {boolean}
  */
 export function anyFit(board, size, hand) {
-  for (const id of hand) {
-    if (id === null) continue;
-    const cells = PIECES[id].cells;
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        if (canPlace(board, size, cells, x, y)) return true;
-      }
-    }
-  }
-  return false;
+  return legalPlacementCount(board, size, hand, 1) > 0;
 }
