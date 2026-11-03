@@ -1,5 +1,6 @@
 // P0 — mock server for client development (P3 /play, P4 /screen).
-// Near-real rules without shared/game.js reduce(). Throwaway: replaced by main.ts at integration.
+// Near-real rules without shared/game.js reduce(). SUPERSEDED for client dev since M2: it lacks
+// config/room/leave/now/best — prefer a private real server: BLOKO_VAR=<scratch> PORT=<free> npm start -- --new
 // Run: npm run mock   (PORT=3132 npm run mock for a second instance)
 
 import { createServer } from 'node:http';
