@@ -15,14 +15,20 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 { "t": "start" }                                            // host only, phase lobby
 { "t": "again" }                                            // host only, phase finished
 { "t": "place", "piece": 0, "x": 3, "y": 5 }                // piece = index 0..2 in own hand; (x,y) = piece origin
+{ "t": "config", "patch": { "mode": "timed" } }             // host only, phase lobby/finished (M2 Q4); invalid keys/values ignored
 ```
+
+Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `deadline`) are NEVER accepted from the wire: the server injects them itself and strips them from client messages.
 
 ## Server → client
 
 ```jsonc
 { "t": "welcome", "playerId": "p-abc123" }   // to a player client after join or successful rejoin
-{ "t": "view", "state": { /* full State, see shared/game.js */ } }  // broadcast to ALL after every change
-{ "t": "err", "code": "full" | "bad-place" | "not-host" | "not-playing" | "unknown-player" }
+{ "t": "view", "state": { /* full State, see shared/game.js */ }, "now": 1730700000000 }
+// broadcast to ALL after every change; "now" = server epoch ms (M2 Q4): clients compute
+// clock skew = now - Date.now() on receive and render timed-mode countdowns from state.deadline - (Date.now() + skew)
+{ "t": "err", "code": "full" | "bad-place" | "not-host" | "not-playing" | "unknown-player" | "locked" }
+// "locked": config refused because a game is in progress
 ```
 
 - M1 sends the **full State to everyone** (this game has no secrets); each client derives its own view.
