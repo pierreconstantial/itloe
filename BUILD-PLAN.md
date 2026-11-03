@@ -162,6 +162,7 @@ Server → client:
 | Q3 Robustness | State persisted to disk after each action, resume on restart, settings file, solo best scores | `server`, `shared` |
 | Q4 Options | Settings UI (host phone): board size, timed mode + timer, simple piece set, grace; colour picker | `shared/game.js`, `public/play` |
 | Q5 Feel | Phone haptics, piece-weight tuning from playtests, copy polish pass, rules screen | `shared/pieces.js`, `public/play` |
+| Q6 Cleanup | Promote the duplicated piece-shape renderer + colour dot into a public/commun module used by both clients (deferred from P5 to avoid blind refactors at the finish line) | `public/commun`, both clients |
 
 Playtest after Q1/Q2 — tuning questions in SPEC §13 get answered there, then Q5.
 
