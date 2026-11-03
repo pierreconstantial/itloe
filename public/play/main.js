@@ -8,7 +8,7 @@ import { KEYS, load, save, forget } from './storage.js';
 import { $, bounds, pieceEl, dotEl, toast } from './dom.js';
 import * as haptics from './haptics.js';
 import { initMenu } from './menu.js';
-import { syncClock, secondsLeft, mmss } from './clock.js';
+import { syncClock, secondsLeft, mmss } from '../commun/clock.js';
 import { createSettingsSheet, summarize } from './settings-ui.js';
 
 /** @typedef {import('../../shared/game.js').State} State */

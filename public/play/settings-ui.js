@@ -3,7 +3,7 @@
 // adds nicer wording, and unknown keys fall back to the key name and String(value).
 import { SETTINGS_SCHEMA, DEFAULT_SETTINGS } from '../../shared/game.js';
 import { $ } from './dom.js';
-import { mmss } from './clock.js';
+import { mmss } from '../commun/clock.js';
 
 /** @typedef {import('../../shared/game.js').Settings} Settings */
 /** @typedef {Record<string, unknown>} AnySettings */

@@ -1,7 +1,7 @@
 // Timed-mode countdown pill. Lives outside #app (re-renders don't touch it) and ticks on its own
 // from the latest state; it only reads state.deadline, never decides the end (the server does).
 
-import { secondsLeft, mmss } from './clock.js';
+import { secondsLeft, mmss } from '../commun/clock.js';
 import { sfx } from './audio.js';
 
 /** @typedef {import('../../shared/game.js').State} State */

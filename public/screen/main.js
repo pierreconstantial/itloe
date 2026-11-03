@@ -8,7 +8,7 @@ import { renderPodium, revealSchedule } from './podium-view.js';
 import { detectEvents, calloutsFor } from './events.js';
 import { sfx, installAudioUnlock, onAudioState } from './audio.js';
 import * as fx from './fx.js';
-import { syncClock } from './clock.js';
+import { syncClock } from '../commun/clock.js';
 import { updateCountdown } from './countdown.js';
 import { legalPlacementCount } from '../../shared/board.js';
 

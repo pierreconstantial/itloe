@@ -2,7 +2,7 @@
 
 import { DEFAULT_SETTINGS } from '../../shared/game.js';
 import { h, colorDot } from './dom.js';
-import { mmss } from './clock.js';
+import { mmss } from '../commun/clock.js';
 
 const MAX_PLAYERS = 4;
 const QR_SRC = '/api/join-qr.svg';
