@@ -166,6 +166,8 @@ Server → client:
 
 Playtest after Q1/Q2 — tuning questions in SPEC §13 get answered there, then Q5.
 
+**M2 assignments (2026-11-04):** P1 → Q4 game-logic (settings in State, timed mode, simple set — contract addendum proposed to the orchestrator BEFORE implementing) + Q5 weight structure. P2 → Q3 (persistence, resume, settings file, best scores) + Q2 server side (QR endpoints `GET /api/join` → `{url, code}` and `GET /api/join-qr.svg`, LAN picker, room code — protocol changes proposed first). P4 → Q1 juice, then Q2 screen-lobby QR once P2's endpoint lands. P3 → Q5 feel (haptics, rules screen, menu), then Q4 settings UI once P1's contract lands. Q6 cleanup last, by the orchestrator. Dependencies flow through the orchestrator.
+
 ---
 
 ## Working agreements (all agents)
