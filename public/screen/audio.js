@@ -133,6 +133,18 @@ export const sfx = {
   start() {
     [0, 5, 9, 12].forEach((s, i) => tone({ freq: note(s), dur: 0.2, type: 'square', gain: 0.07, at: i * 0.09 }));
   },
+  /** countdown tick in the last seconds; higher and louder as it nears 0 @param {number} secondsLeft */
+  tick(secondsLeft) {
+    const k = Math.max(0, 10 - secondsLeft);
+    tone({ freq: note(12 + k), dur: 0.06, type: 'square', gain: 0.05 + 0.012 * k });
+  },
+  /** time's up: struck bell (inharmonic partials, long decay) */
+  bell() {
+    for (const [ratio, gain, dur] of [[1, 0.3, 2.4], [2.76, 0.12, 1.6], [5.4, 0.06, 1.0], [8.93, 0.03, 0.6]]) {
+      tone({ freq: 523 * ratio, dur, type: 'sine', gain });
+      tone({ freq: 523 * ratio, dur, type: 'sine', gain: gain * 0.8, at: 0.55 });
+    }
+  },
   /** one podium step (3rd, 2nd…) */
   reveal() {
     tone({ freq: note(-2), dur: 0.25, type: 'triangle', gain: 0.2 });

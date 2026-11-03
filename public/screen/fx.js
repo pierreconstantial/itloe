@@ -140,6 +140,13 @@ export function scoreFloater(playerId, gained) {
   if (gained >= 40) el.classList.add('fx-floater-big');
 }
 
+/** Full-screen "Time's up!" card, held for `ms` (the podium reveal starts after it). @param {number} ms */
+export function timesUp(ms) {
+  const el = place('fx-times-up', { left: 0, top: 0, width: innerWidth, height: innerHeight }, ms);
+  el.style.setProperty('--hold', `${ms}ms`);
+  el.append(Object.assign(document.createElement('div'), { className: 'fx-times-up-text', textContent: "⏰ Time's up!" }));
+}
+
 /** @param {number} lines lines cleared at once (shake only for ≥ 2) */
 export function shake(lines) {
   if (lines < 2) return;

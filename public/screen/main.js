@@ -8,12 +8,16 @@ import { renderPodium, revealSchedule } from './podium-view.js';
 import { detectEvents, calloutsFor } from './events.js';
 import { sfx, installAudioUnlock, onAudioState } from './audio.js';
 import * as fx from './fx.js';
+import { syncClock } from './clock.js';
+import { updateCountdown } from './countdown.js';
 import { legalPlacementCount } from '../../shared/board.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('./events.js').ScreenEvent} ScreenEvent */
 
 const RECONNECT_MS = 1000;
+/** How long "Time's up!" holds the screen before the podium reveal starts. */
+const TIMES_UP_MS = 2600;
 
 const app = /** @type {HTMLElement} */ (document.getElementById('app'));
 const soundHint = /** @type {HTMLElement} */ (document.getElementById('sound-hint'));
@@ -58,11 +62,13 @@ function show(next) {
   stale = false;
   current = next;
   const events = detectEvents(prev, next);
-  if (events.some((e) => e.t === 'finished')) finishedAt = performance.now();
+  const finished = events.find((e) => e.t === 'finished');
+  if (finished) finishedAt = performance.now() + (finished.t === 'finished' && finished.reason === 'time' ? TIMES_UP_MS : 0);
   if (next.phase !== 'finished') finishedAt = -Infinity;
   if (next.phase === 'lobby') fx.clearAll();
 
   app.replaceChildren(VIEWS[next.phase](next, prev));
+  updateCountdown(next);
   for (const e of events) react(e, next);
 }
 
@@ -95,7 +101,13 @@ function react(e, s) {
       sfx.done();
       break;
     case 'finished':
-      podiumSequence(s);
+      if (e.reason === 'time') {
+        sfx.bell();
+        fx.timesUp(TIMES_UP_MS);
+        setTimeout(() => podiumSequence(s), TIMES_UP_MS);
+      } else {
+        podiumSequence(s);
+      }
       break;
   }
 }
@@ -122,10 +134,12 @@ function connect() {
     sock.send(JSON.stringify({ t: 'hello', role: 'screen' }));
   });
   sock.addEventListener('message', (ev) => {
-    /** @type {{ t?: string, state?: State }} */
+    /** @type {{ t?: string, state?: State, now?: number }} */
     let msg;
     try { msg = JSON.parse(String(ev.data)); } catch { return; }
-    if (msg.t === 'view' && msg.state) show(msg.state);
+    if (msg.t !== 'view' || !msg.state) return;
+    syncClock(msg.now);
+    show(msg.state);
   });
   sock.addEventListener('close', () => {
     document.body.classList.add('offline');

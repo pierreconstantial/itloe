@@ -19,7 +19,7 @@ import { clearedCells } from './game-view.js';
  *   | { t: 'start' }
  *   | { t: 'move', move: Move }
  *   | { t: 'done', id: string }
- *   | { t: 'finished' }} ScreenEvent
+ *   | { t: 'finished', reason: State['endReason'] }} ScreenEvent
  */
 
 /**
@@ -71,7 +71,7 @@ export function detectEvents(prev, next) {
       if (!p.done && n.done) events.push({ t: 'done', id });
     }
   }
-  if (prev.phase === 'playing' && next.phase === 'finished') events.push({ t: 'finished' });
+  if (prev.phase === 'playing' && next.phase === 'finished') events.push({ t: 'finished', reason: next.endReason });
   return events;
 }
 

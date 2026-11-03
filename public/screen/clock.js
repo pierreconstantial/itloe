@@ -1,0 +1,21 @@
+// Server-clock helpers for timed games: each view carries the server's `now`, and the skew
+// between it and this machine's clock makes the countdown follow state.deadline exactly.
+// Same helpers as /play/clock.js; candidates for public/commun once both clients settle.
+
+let skew = 0;
+
+/** @param {unknown} serverNow the `now` field of a view (epoch ms) */
+export function syncClock(serverNow) {
+  if (typeof serverNow === 'number' && Number.isFinite(serverNow)) skew = serverNow - Date.now();
+}
+
+/** Seconds left until `deadline` (epoch ms, server clock); can go negative. @param {number} deadline */
+export function secondsLeft(deadline) {
+  return (deadline - (Date.now() + skew)) / 1000;
+}
+
+/** 185 → "3:05"; rounds up so the display hits 0:00 only at the bell. @param {number} seconds */
+export function mmss(seconds) {
+  const s = Math.max(0, Math.ceil(seconds));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
