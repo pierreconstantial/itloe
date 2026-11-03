@@ -50,8 +50,14 @@ function ordinal(rank) {
 
 // ---------- client state ----------
 
+// /sim loads four /play iframes on one origin: ?slot=1..4 namespaces their storage.
+// Real phones have no ?slot and keep the plain keys.
+const SLOT = new URLSearchParams(location.search).get('slot') ?? '';
+const KEY_ID = `bloko-id${SLOT}`;
+const KEY_NAME = `bloko-name${SLOT}`;
+
 /** @type {State | null} */ let lastView = null;
-/** @type {string | null} */ let playerId = storageGet('bloko-id');
+/** @type {string | null} */ let playerId = storageGet(KEY_ID);
 /** @type {WebSocket | null} */ let ws = null;
 /** Placement sent but not yet confirmed: simulated board + tray slot hidden.
  * @type {{ index: number, board: number[] } | null} */
@@ -98,7 +104,7 @@ function receive(raw) {
   try { m = JSON.parse(raw); } catch { return; }
   if (m.t === 'welcome' && typeof m.playerId === 'string') {
     playerId = m.playerId;
-    storageSet('bloko-id', m.playerId);
+    storageSet(KEY_ID, m.playerId);
     render();
   } else if (m.t === 'view') {
     lastView = m.state;
@@ -394,13 +400,13 @@ function endDrag() {
 // ---------- wiring ----------
 
 const nameInput = /** @type {HTMLInputElement} */ ($('name-input'));
-nameInput.value = storageGet('bloko-name') ?? '';
+nameInput.value = storageGet(KEY_NAME) ?? '';
 
 $('name-form').addEventListener('submit', (e) => {
   e.preventDefault();
   const name = nameInput.value.trim();
   if (!name) { nameInput.focus(); return; }
-  storageSet('bloko-name', name);
+  storageSet(KEY_NAME, name);
   $('name-error').hidden = true;
   send({ t: 'join', name });
 });
