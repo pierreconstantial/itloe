@@ -80,12 +80,25 @@ await screen.waitFor((m) => m.t === 'view');
 check(true, 'screen gets a view immediately on connect');
 screen.send({ t: 'hello', role: 'screen' });
 
-const A = new Client('A'); await A.open(); A.send({ t: 'hello', role: 'player' });
-const B = new Client('B'); await B.open(); B.send({ t: 'hello', role: 'player' });
+// --- room code ---
+const join = await (await fetch(URL_WS.replace(/^ws/, 'http').replace(/\/ws$/, '/api/join'))).json();
+const room: string = join.code;
+check(/^[A-Z]{4}$/.test(room) && join.url.endsWith(`/play?room=${room}`), `/api/join → 4-letter code + url with ?room= (${join.url})`);
+const R = new Client('R'); await R.open();
+R.send({ t: 'hello', role: 'player' });
+let i = R.mark(); R.send({ t: 'join', name: 'NoRoom' });
+check((await R.waitFor((m) => m.t === 'err', i)).code === 'bad-room', 'join without room → err bad-room');
+R.send({ t: 'hello', role: 'player', room: room === 'ABCD' ? 'ABCE' : 'ABCD' });
+i = R.mark(); R.send({ t: 'join', name: 'WrongRoom' });
+check((await R.waitFor((m) => m.t === 'err', i)).code === 'bad-room', 'join with wrong room → err bad-room');
+R.ws.close();
+
+const A = new Client('A'); await A.open(); A.send({ t: 'hello', role: 'player', room });
+const B = new Client('B'); await B.open(); B.send({ t: 'hello', role: 'player', room: room.toLowerCase() });
 await A.waitFor((m) => m.t === 'view'); await B.waitFor((m) => m.t === 'view');
 
 // unidentified start
-let i = A.mark();
+i = A.mark();
 A.send({ t: 'start' });
 check((await A.waitFor((m) => m.t === 'err', i)).code === 'unknown-player', 'start before join → err unknown-player');
 
@@ -97,7 +110,23 @@ i = B.mark(); B.send({ t: 'join', name: 'Tom' });
 const idB = (await B.waitFor((m) => m.t === 'welcome', i)).playerId;
 await B.waitFor((m) => m.t === 'view' && m.state.players[idB], i);
 await screen.waitFor((m) => m.t === 'view' && m.state.order.length === 2);
+check(true, 'room code accepted (B typed it in lower case)');
 check(B.lastView().hostId === idA && B.lastView().order.join() === `${idA},${idB}`, 'two joins → welcome each, A is host, view broadcast to all (incl. screen)');
+
+// --- leave in the lobby: player removed, its id can no longer rejoin ---
+const L = new Client('L'); await L.open(); L.send({ t: 'hello', role: 'player', room });
+i = L.mark(); L.send({ t: 'join', name: 'Leaver' });
+const idL = (await L.waitFor((m) => m.t === 'welcome', i)).playerId;
+await A.waitFor((m) => m.t === 'view' && m.state.players[idL]);
+i = A.mark(); L.send({ t: 'leave' });
+const vl = (await A.waitFor((m) => m.t === 'view', i)).state;
+check(!vl.players[idL] && vl.order.join() === `${idA},${idB}`, 'lobby leave → player removed, broadcast');
+L.ws.close();
+const L2 = new Client('L2'); await L2.open();
+i = L2.mark(); L2.send({ t: 'hello', role: 'player', room, playerId: idL });
+await L2.waitFor((m) => m.t === 'view', i); await sleep(150);
+check(!L2.since(i).some((m) => m.t === 'welcome'), 'left player id → no welcome on rejoin');
+L2.ws.close();
 
 // --- start: host guard ---
 let ia = A.mark(), ib = B.mark();
@@ -156,7 +185,7 @@ const Acur = A3;
 
 // unknown playerId → fresh client
 const X = new Client('X'); await X.open();
-i = X.mark(); X.send({ t: 'hello', role: 'player', playerId: 'p-nope' });
+i = X.mark(); X.send({ t: 'hello', role: 'player', room, playerId: 'p-nope' });
 await X.waitFor((m) => m.t === 'view', i); await sleep(150);
 check(!X.since(i).some((m) => m.t === 'welcome'), 'unknown playerId → no welcome (fresh client)');
 i = X.mark(); X.send({ t: 'join', name: 'Late' });
@@ -192,6 +221,15 @@ const pa = va.players[idA], pb = va.players[idB];
 check(va.phase === 'playing' && va.seed !== seed1, `host again → playing, new seed (${seed1} → ${va.seed})`);
 check(va.order.join() === `${idA},${idB}` && pa.score === 0 && pb.score === 0 && pa.board.every((c: number) => c === 0) && !pa.done && !pb.done
   && JSON.stringify(pa.hand) === JSON.stringify(pb.hand), 'again → same players, fresh boards/scores, identical new hand 0');
+
+// --- leave mid-game: player stays, marked done; the other keeps playing ---
+ia = Acur.mark();
+B.send({ t: 'leave' });
+const vm = (await Acur.waitFor((m) => m.t === 'view', ia)).state;
+check(!!vm.players[idB] && vm.players[idB].done && vm.phase === 'playing', 'mid-game leave → player kept, done; game goes on');
+ia = Acur.mark();
+Acur.send({ t: 'place', ...legalMoves(vm, idA)[0] });
+check((await Acur.waitFor((m) => m.t === 'view' || m.t === 'err', ia)).t === 'view', 'remaining player can still place');
 
 for (const c of [screen, Acur, B]) c.ws.close();
 console.log(failures ? `\n${failures} FAILURE(S)` : '\nALL PASS');
