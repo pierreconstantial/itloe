@@ -8,6 +8,7 @@ export const KEYS = Object.freeze({
   id: `bloko-id${SLOT}`,
   name: `bloko-name${SLOT}`,
   vibrate: `bloko-vibrate${SLOT}`,
+  room: `bloko-room${SLOT}`,
 });
 
 /** @param {string} key @returns {string | null} */

@@ -5,19 +5,30 @@ import { canPlace, place, findClears, applyClears } from '../../shared/board.js'
 import { PIECES } from '../../shared/pieces.js';
 import { ranking } from '../../shared/game.js';
 import { KEYS, load, save, forget } from './storage.js';
-import { $, bounds, pieceEl, dotEl } from './dom.js';
+import { $, bounds, pieceEl, dotEl, toast } from './dom.js';
 import * as haptics from './haptics.js';
 import { initMenu } from './menu.js';
+import { syncClock, secondsLeft, mmss } from './clock.js';
+import { createSettingsSheet, summarize } from './settings-ui.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('../../shared/game.js').Player} Player */
 /** @typedef {import('../../shared/pieces.js').PieceId} PieceId */
+/** @typedef {{ score: number, previous: number | null }} Best */
 
 const RANK_BADGES = ['①', '②', '③', '④'];
 const MEDALS = ['🥇', '🥈', '🥉', ''];
 const GAP = 2; // px between cells, = the `gap` value in play-base.css
 const TRAY_CELL = 13; // px per cell for tray miniatures
 const LIFT = 1.5; // the dragged piece floats this many cells above the finger
+const URGENT_SECONDS = 10; // the countdown turns red from here
+const CLOCK_TICK_MS = 250;
+
+/** @type {Record<string, string>} */
+const ERR_TOASTS = {
+  locked: 'Settings are locked while a game is on.',
+  'not-host': 'Only the host can do that.',
+};
 
 // ---------- pure helpers ----------
 
@@ -31,10 +42,15 @@ function rankOf(v, id) {
   return ranking(v).find((r) => r.id === id)?.rank ?? v.order.length;
 }
 
+/** Room codes are typed loosely on phones: "ab cd" → "ABCD". @param {string} raw */
+function normalizeRoom(raw) {
+  return raw.replace(/\s+/g, '').toUpperCase();
+}
+
 /**
  * End-of-run event this view brings to the player, for haptics.
  * @param {State} prev @param {State} next @param {string} id
- * @returns {'win' | 'death' | null}
+ * @returns {'win' | 'bell' | 'death' | null}
  */
 function outcome(prev, next, id) {
   const before = prev.players[id];
@@ -42,6 +58,7 @@ function outcome(prev, next, id) {
   if (!before || !after) return null;
   const justFinished = prev.phase === 'playing' && next.phase === 'finished';
   if (justFinished && next.order.length > 1 && rankOf(next, id) === 1) return 'win';
+  if (justFinished && next.endReason === 'time' && !before.done) return 'bell';
   if (!before.done && after.done) return 'death';
   return null;
 }
@@ -49,11 +66,22 @@ function outcome(prev, next, id) {
 // ---------- client state ----------
 
 /** @type {State | null} */ let lastView = null;
+/** Solo record for the current (size, mode), sent with views in solo games. @type {Best | null} */
+let lastBest = null;
 /** @type {string | null} */ let playerId = load(KEYS.id);
 /** @type {WebSocket | null} */ let ws = null;
 /** Placement sent but not yet confirmed: simulated board + tray slot hidden.
  * @type {{ index: number, board: number[] } | null} */
 let pending = null;
+
+/** Room code: the join URL's ?room= wins over the stored one (the TV may show a new code). */
+const urlRoom = new URLSearchParams(location.search).get('room');
+if (urlRoom) save(KEYS.room, normalizeRoom(urlRoom));
+/** @type {string | null} */ let room = load(KEYS.room);
+/** The server refused our join for the room code: ask for it, then join with this name. */
+let roomPrompt = /** @type {{ name: string, retried: boolean } | null} */ (null);
+/** Name typed on the name screen, kept for the join that follows a room prompt. */
+let wantedName = '';
 
 /** @type {{
  *   pointerId: number, index: number, pieceId: PieceId,
@@ -67,15 +95,21 @@ let cellEls = [];
 
 // ---------- connection ----------
 
+function helloMsg() {
+  return {
+    t: 'hello', role: 'player',
+    ...(room ? { room } : {}),
+    ...(playerId ? { playerId } : {}),
+  };
+}
+
 function connect() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const sock = new WebSocket(`${proto}://${location.host}/ws`);
   ws = sock;
   sock.addEventListener('open', () => {
     $('conn-banner').hidden = true;
-    send(playerId
-      ? { t: 'hello', role: 'player', playerId }
-      : { t: 'hello', role: 'player' });
+    send(helloMsg());
   });
   sock.addEventListener('message', (ev) => receive(String(ev.data)));
   sock.addEventListener('close', () => {
@@ -104,11 +138,14 @@ function receive(raw) {
   try { m = JSON.parse(raw); } catch { return; }
   if (m.t === 'welcome' && typeof m.playerId === 'string') {
     playerId = m.playerId;
+    roomPrompt = null;
     save(KEYS.id, m.playerId);
     render();
   } else if (m.t === 'view') {
+    syncClock(m.now);
     const prev = lastView;
     lastView = m.state;
+    lastBest = m.best ?? null;
     pending = null;
     const event = prev && playerId ? outcome(prev, m.state, playerId) : null;
     if (event) haptics.buzz(event);
@@ -116,12 +153,15 @@ function receive(raw) {
   } else if (m.t === 'err') {
     pending = null;
     if (m.code === 'full') showNameError('Sorry, the game is full (4 players max).');
+    else if (m.code === 'bad-room') roomPrompt = { name: wantedName, retried: roomPrompt !== null };
+    else if (ERR_TOASTS[m.code]) toast(ERR_TOASTS[m.code]);
     render(); // bad-place and friends: repaint from the last view
   }
 }
 
-/** Forget this phone's player and come back as a stranger (name screen in the lobby). */
+/** Tell the server, forget this phone's player and come back as a stranger. */
 function leaveGame() {
+  send({ t: 'leave' });
   forget(KEYS.id);
   playerId = null;
   if (drag) endDrag();
@@ -132,7 +172,7 @@ function leaveGame() {
 
 // ---------- rendering ----------
 
-const VIEWS = ['loading', 'name', 'waiting', 'lobby', 'game', 'over', 'podium'];
+const VIEWS = ['loading', 'name', 'room', 'waiting', 'lobby', 'game', 'over', 'podium'];
 
 /** @param {string} name */
 function show(name) {
@@ -144,23 +184,35 @@ function render() {
   const v = lastView;
   if (!v) { show('loading'); return; }
   const me = playerId ? v.players[playerId] ?? null : null;
+  const isHost = me !== null && me.id === v.hostId;
+  const configurable = v.phase !== 'playing';
+
+  settingsSheet.render(v.settings, isHost && configurable);
+  if (!isHost || !configurable) menu.close('settings');
+  updateClock();
 
   // the piece being dragged left our hand → the drag is stale
   if (drag && (!me || me.hand[drag.index] !== drag.pieceId)) endDrag();
 
   if (!me) {
+    if (roomPrompt) { show('room'); renderRoomPrompt(roomPrompt); return; }
     show(v.phase === 'lobby' ? 'name' : 'waiting');
     return;
   }
-  if (v.phase === 'lobby') { show('lobby'); renderLobby(v, me); return; }
-  if (v.phase === 'finished') { show('podium'); renderPodium(v, me); return; }
+  if (v.phase === 'lobby') { show('lobby'); renderLobby(v, me, isHost); return; }
+  if (v.phase === 'finished') { show('podium'); renderPodium(v, me, isHost); return; }
   if (me.done) { show('over'); renderGameOver(v, me); return; }
   show('game');
   renderGame(v, me);
 }
 
-/** @param {State} v @param {Player} me */
-function renderLobby(v, me) {
+/** @param {{ retried: boolean }} prompt */
+function renderRoomPrompt(prompt) {
+  $('room-error').hidden = !prompt.retried;
+}
+
+/** @param {State} v @param {Player} me @param {boolean} isHost */
+function renderLobby(v, me, isHost) {
   const ul = $('lobby-players');
   ul.replaceChildren();
   for (const id of v.order) {
@@ -170,7 +222,8 @@ function renderLobby(v, me) {
       p.name + (id === v.hostId ? ' 👑' : '') + (id === me.id ? ' (you)' : '')));
     ul.append(li);
   }
-  const isHost = me.id === v.hostId;
+  $('lobby-settings').textContent = summarize(v.settings);
+  $('btn-settings-lobby').hidden = !isHost;
   $('btn-start').hidden = !isHost;
   $('lobby-hint').textContent = isHost
     ? (v.order.length === 1 ? 'Play solo, or wait for friends to join.' : 'Everyone in? Hit start!')
@@ -241,17 +294,40 @@ function renderGameOver(v, me) {
   }
 }
 
-/** @param {State} v @param {Player} me */
-function podiumTitle(v, me) {
-  if (v.order.length === 1) return 'Nice run!';
-  const ranks = ranking(v);
-  if (rankOf(v, me.id) !== 1) return 'Podium';
-  return ranks.filter((r) => r.rank === 1).length > 1 ? "It's a tie! 🎉" : 'You win! 🎉';
+/** Countdown text in the top bar (and on the Done screen while the others still play). */
+function updateClock() {
+  const v = lastView;
+  const deadline = v !== null && v.phase === 'playing' ? v.deadline : null;
+  $('clock-game').hidden = deadline === null;
+  $('over-clock-line').hidden = deadline === null || v === null || v.order.length < 2;
+  if (deadline === null) return;
+  const left = secondsLeft(deadline);
+  for (const el of document.querySelectorAll('.clock')) {
+    el.textContent = mmss(left);
+    el.classList.toggle('urgent', left <= URGENT_SECONDS);
+  }
 }
 
 /** @param {State} v @param {Player} me */
-function renderPodium(v, me) {
+function podiumTitle(v, me) {
+  if (v.order.length === 1) return isNewBest(me) ? 'New best! 🎉' : 'Nice run!';
+  if (rankOf(v, me.id) !== 1) return 'Podium';
+  return ranking(v).filter((r) => r.rank === 1).length > 1 ? "It's a tie! 🎉" : 'You win! 🎉';
+}
+
+/** @param {Player} me */
+function isNewBest(me) {
+  return lastBest !== null && (lastBest.previous === null || me.score > lastBest.previous);
+}
+
+/** @param {State} v @param {Player} me @param {boolean} isHost */
+function renderPodium(v, me, isHost) {
+  $('podium-kicker').hidden = v.endReason !== 'time';
   $('podium-title').textContent = podiumTitle(v, me);
+  const best = $('podium-best');
+  best.hidden = v.order.length !== 1 || lastBest === null || isNewBest(me);
+  if (lastBest) best.textContent = `Your best: ${lastBest.score}`;
+
   const ol = $('podium-list');
   ol.replaceChildren();
   for (const { id, rank, score } of ranking(v)) {
@@ -266,7 +342,8 @@ function renderPodium(v, me) {
     );
     ol.append(li);
   }
-  const isHost = me.id === v.hostId;
+  $('podium-settings').textContent = `Next game: ${summarize(v.settings)}`;
+  $('btn-settings-podium').hidden = !isHost;
   $('btn-again').hidden = !isHost;
   $('podium-hint').hidden = isHost;
 }
@@ -304,7 +381,7 @@ function startDrag(e, index) {
   renderTray(me); // hide the lifted piece
 }
 
-/** Side of one board cell in px (measured, follows screen size). */
+/** Side of one board cell in px (measured, follows screen and board size). */
 function cellSize() {
   return cellEls[0].getBoundingClientRect().width;
 }
@@ -402,6 +479,7 @@ const menu = initMenu({
   canLeave: () => playerId !== null && lastView !== null && lastView.players[playerId] !== undefined,
   onLeave: leaveGame,
 });
+const settingsSheet = createSettingsSheet({ send });
 
 const nameInput = /** @type {HTMLInputElement} */ ($('name-input'));
 nameInput.value = load(KEYS.name) ?? '';
@@ -411,8 +489,23 @@ $('name-form').addEventListener('submit', (e) => {
   const name = nameInput.value.trim();
   if (!name) { nameInput.focus(); return; }
   save(KEYS.name, name);
+  wantedName = name;
   $('name-error').hidden = true;
   send({ t: 'join', name });
+});
+
+const roomInput = /** @type {HTMLInputElement} */ ($('room-input'));
+roomInput.value = room ?? '';
+
+$('room-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const code = normalizeRoom(roomInput.value);
+  if (!code) { roomInput.focus(); return; }
+  room = code;
+  save(KEYS.room, code);
+  // a second hello on the same socket updates the room check, then the held join goes through
+  send(helloMsg());
+  send({ t: 'join', name: roomPrompt?.name || wantedName || nameInput.value.trim() || 'Player' });
 });
 
 $('btn-start').addEventListener('click', () => send({ t: 'start' }));
@@ -422,5 +515,6 @@ for (let i = 0; i < 3; i++) {
   $(`slot-${i}`).addEventListener('pointerdown', (e) => startDrag(e, i));
 }
 
+setInterval(updateClock, CLOCK_TICK_MS);
 show('loading');
 connect();

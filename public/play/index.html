@@ -25,6 +25,16 @@
       <button type="button" class="link" data-open="rules">How to play</button>
     </section>
 
+    <section id="view-room" class="menu" hidden>
+      <h1 class="logo">Bloko</h1>
+      <p>Ask for the code on the TV.</p>
+      <form id="room-form">
+        <input id="room-input" maxlength="6" placeholder="CODE" autocapitalize="characters" autocomplete="off" spellcheck="false" enterkeyhint="go" required>
+        <button type="submit" class="primary">Join</button>
+        <p id="room-error" class="error" hidden>That code didn't work. Check the TV and try again.</p>
+      </form>
+    </section>
+
     <section id="view-waiting" class="menu" hidden>
       <h1 class="logo">Bloko</h1>
       <p>A game is already running.</p>
@@ -35,6 +45,8 @@
       <h1 class="logo">Bloko</h1>
       <p class="dim">Who's playing?</p>
       <ul id="lobby-players"></ul>
+      <p id="lobby-settings" class="settings-summary"></p>
+      <button id="btn-settings-lobby" type="button" data-open="settings" hidden>⚙ Settings</button>
       <button id="btn-start" class="primary" hidden>Start game</button>
       <p id="lobby-hint" class="dim"></p>
     </section>
@@ -45,6 +57,7 @@
           <span id="my-rank">①</span>
           <span id="my-score">0</span>
         </div>
+        <span id="clock-game" class="clock" hidden></span>
         <div id="opponents"></div>
       </header>
       <div id="board-zone"><div id="board"></div></div>
@@ -60,13 +73,18 @@
       <h2>Out of moves!</h2>
       <p>Final score <strong id="final-score"></strong></p>
       <p id="final-rank"></p>
+      <p id="over-clock-line" hidden>The others have <strong class="clock"></strong> left.</p>
       <ul id="final-others"></ul>
       <p class="dim">Eyes on the big screen!</p>
     </section>
 
     <section id="view-podium" class="menu" hidden>
+      <p id="podium-kicker" class="kicker" hidden>⏰ Time's up!</p>
       <h2 id="podium-title">Podium</h2>
+      <p id="podium-best" class="dim" hidden></p>
       <ol id="podium-list"></ol>
+      <p id="podium-settings" class="settings-summary"></p>
+      <button id="btn-settings-podium" type="button" data-open="settings" hidden>⚙ Settings</button>
       <button id="btn-again" class="primary" hidden>Play again</button>
       <p id="podium-hint" class="dim">Waiting for the host to start a rematch…</p>
     </section>
@@ -96,13 +114,23 @@
   <div id="sheet-invite" class="sheet" hidden>
     <div class="sheet-panel">
       <h2>Invite friends</h2>
-      <p>On the same Wi-Fi, open:</p>
+      <img id="invite-qr" alt="QR code to join the game" hidden>
+      <p id="invite-code-line" hidden>Room code <strong id="invite-code" class="room-code"></strong></p>
+      <p class="dim">On the same Wi-Fi, scan the code or open:</p>
       <p id="invite-url" class="url"></p>
-      <p class="dim">QR code coming soon.</p>
       <button type="button" class="link" data-close>Close</button>
     </div>
   </div>
 
+  <div id="sheet-settings" class="sheet" hidden>
+    <div class="sheet-panel">
+      <h2>Game settings</h2>
+      <div id="settings-body"></div>
+      <button type="button" class="primary" data-close>Done</button>
+    </div>
+  </div>
+
+  <div id="toast" role="status" hidden></div>
   <div id="conn-banner" hidden>Reconnecting…</div>
   <script type="module" src="./main.js"></script>
 </body>

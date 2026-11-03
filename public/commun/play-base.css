@@ -330,6 +330,147 @@ button.danger {
   background: var(--bg);
 }
 
+/* ---------- room code ---------- */
+
+#room-input {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.room-code {
+  font-family: ui-monospace, monospace;
+  font-size: 22px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+#invite-qr {
+  align-self: center;
+  width: min(220px, 60vw);
+  aspect-ratio: 1;
+  padding: 10px;
+  border-radius: 12px;
+  background: #fff; /* QR codes need a light quiet zone to scan */
+}
+
+/* ---------- settings ---------- */
+
+.settings-summary {
+  color: var(--fg-dim);
+  font-size: 14px;
+}
+#view-lobby > button:not(.primary),
+#view-podium > button:not(.primary) {
+  font-size: 15px;
+  padding: 0.5em 1.1em;
+  touch-action: manipulation;
+}
+#settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 4px 0 8px;
+  text-align: left;
+}
+.setting {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.setting-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.seg {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+.seg button {
+  flex: 1;
+  border: none;
+  border-radius: 9px;
+  padding: 0.6em 0.4em;
+  font-size: 16px;
+  background: transparent;
+  color: var(--fg-dim);
+  touch-action: manipulation;
+}
+.seg button.on {
+  background: var(--accent);
+  color: #201a08;
+  font-weight: 700;
+}
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stepper button {
+  width: 48px;
+  height: 44px;
+  padding: 0;
+  font-size: 22px;
+  background: var(--bg);
+  touch-action: manipulation;
+}
+.stepper output {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- timed mode ---------- */
+
+#clock-game {
+  font-size: 22px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 10px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 6%);
+}
+.clock.urgent {
+  color: var(--bad);
+  animation: clock-pulse 1s ease-in-out infinite;
+}
+@keyframes clock-pulse { 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) {
+  .clock.urgent { animation: none; }
+}
+.kicker {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ---------- toast ---------- */
+
+#toast {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  z-index: 40;
+  margin: 0 auto;
+  max-width: 420px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #2b323b;
+  color: var(--fg);
+  text-align: center;
+  font-size: 15px;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 45%);
+  pointer-events: none;
+}
+
 /* ---------- reconnection banner ---------- */
 
 #conn-banner {

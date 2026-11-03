@@ -1,16 +1,16 @@
-// ☰ menu and its sheets (menu, rules, invite). Sheets are overlays outside the view
-// switcher in main.js, so a re-render from a new `view` never closes them.
+// ☰ menu and the bottom sheets (menu, rules, invite, settings). Sheets are overlays outside
+// the view switcher in main.js, so a re-render from a new `view` never closes them.
 // Any element with data-open="<sheet>" opens that sheet; data-close closes them all.
 import { $, pieceEl } from './dom.js';
 import * as haptics from './haptics.js';
 import { RULES } from './rules.js';
 
-const SHEETS = ['menu', 'rules', 'invite'];
+const SHEETS = ['menu', 'rules', 'invite', 'settings'];
 const RULE_CELL = 10; // px per cell for rule illustrations
 
 /**
  * @param {{ canLeave: () => boolean, onLeave: () => void }} hooks
- * @returns {{ refresh: () => void }}
+ * @returns {{ refresh: () => void, close: (name?: string) => void }}
  */
 export function initMenu(hooks) {
   let leaveArmed = false;
@@ -29,15 +29,16 @@ export function initMenu(hooks) {
   /** @param {string} name */
   function open(name) {
     refresh();
+    if (name === 'invite') loadInvite();
     for (const s of SHEETS) $(`sheet-${s}`).hidden = s !== name;
   }
 
-  function close() {
-    for (const s of SHEETS) $(`sheet-${s}`).hidden = true;
+  /** Closes one sheet, or all of them. @param {string} [name] */
+  function close(name) {
+    for (const s of SHEETS) if (!name || s === name) $(`sheet-${s}`).hidden = true;
   }
 
   renderRules();
-  $('invite-url').textContent = `${location.origin}/play/`;
 
   document.addEventListener('click', (e) => {
     if (!(e.target instanceof Element)) return;
@@ -67,7 +68,26 @@ export function initMenu(hooks) {
   });
 
   refresh();
-  return { refresh };
+  return { refresh, close };
+}
+
+/** Join URL + room code + QR from the server (GET /api/join); plain page URL if that fails. */
+async function loadInvite() {
+  const qr = /** @type {HTMLImageElement} */ ($('invite-qr'));
+  try {
+    const res = await fetch('/api/join', { cache: 'no-store' });
+    if (!res.ok) throw new Error(String(res.status));
+    const { url, code } = await res.json();
+    $('invite-url').textContent = String(url);
+    $('invite-code').textContent = String(code);
+    $('invite-code-line').hidden = !code;
+    qr.src = `/api/join-qr.svg?t=${Date.now()}`;
+    qr.hidden = false;
+  } catch {
+    $('invite-url').textContent = `${location.origin}/play/`;
+    $('invite-code-line').hidden = true;
+    qr.hidden = true;
+  }
 }
 
 function renderRules() {

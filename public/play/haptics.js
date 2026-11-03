@@ -2,13 +2,14 @@
 // every call is a silent no-op. Patterns are millisecond lists: on, off, on, …
 import { KEYS, load, save } from './storage.js';
 
-/** @typedef {'pickup' | 'place' | 'death' | 'win'} Haptic */
+/** @typedef {'pickup' | 'place' | 'death' | 'bell' | 'win'} Haptic */
 
 /** @type {Record<Haptic, number[]>} */
 const PATTERNS = {
   pickup: [8],
   place: [25],
   death: [220, 90, 220],
+  bell: [100, 60, 100, 60, 100],
   win: [60, 50, 60, 50, 200],
 };
 const MAX_CLEAR_PULSES = 4;
