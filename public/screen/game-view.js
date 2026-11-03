@@ -1,6 +1,7 @@
 // In-game view: one panel per player, laid out 1 / 2 side by side / 2×2 by player count (CSS, data-players).
 
 import { PIECES } from '../../shared/pieces.js';
+import { ranking } from '../../shared/game.js';
 import { h, colorDot, playerColor } from './dom.js';
 import { bindScore } from './score-ticker.js';
 
@@ -23,15 +24,13 @@ export function clearedCells(prev, next) {
 }
 
 /**
- * Ids of the current leader(s); none in solo or while everyone is at 0.
+ * Ids wearing the crown: every rank-1 player (shared ranking rule) with a score > 0; none in solo.
  * @param {State} s
  * @returns {Set<string>}
  */
 export function leaders(s) {
   if (s.order.length < 2) return new Set();
-  const best = Math.max(...s.order.map((id) => s.players[id].score));
-  if (best <= 0) return new Set();
-  return new Set(s.order.filter((id) => s.players[id].score === best));
+  return new Set(ranking(s).filter((r) => r.rank === 1 && r.score > 0).map((r) => r.id));
 }
 
 /**

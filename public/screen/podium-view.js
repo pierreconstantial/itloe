@@ -1,29 +1,17 @@
 // Finished: ranking, champion highlighted. Basic; the podium sequence is M2 juice.
 
+import { ranking } from '../../shared/game.js';
 import { h, colorDot, playerColor, formatScore } from './dom.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
-/** @typedef {import('../../shared/game.js').Player} Player */
 
 const RANK_LABELS = ['🏆', '2nd', '3rd', '4th'];
-
-/**
- * Players by score, best first; ties share a rank (1, 1, 3…).
- * @param {State} s
- * @returns {{ player: Player, rank: number }[]}
- */
-export function ranking(s) {
-  const sorted = s.order.map((id) => s.players[id]).sort((a, b) => b.score - a.score);
-  return sorted.map((player, i) => ({
-    player,
-    rank: sorted.findIndex((q) => q.score === player.score) + 1,
-  }));
-}
 
 /** @param {State} s */
 export function renderPodium(s) {
   const list = h('ol', 'ranking');
-  for (const { player: p, rank } of ranking(s)) {
+  for (const { id, rank } of ranking(s)) {
+    const p = s.players[id];
     const row = h('li', 'rank-row' + (rank === 1 ? ' champion' : ''), [
       h('span', 'rank', [RANK_LABELS[rank - 1] ?? `${rank}th`]),
       colorDot(p.color),
