@@ -4,9 +4,11 @@
 import { emptyBoard, canPlace, place, findClears, applyClears, anyFit } from './board.js';
 import { PIECES, handAt } from './pieces.js';
 import { mulberry32 } from './rng.js';
+import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
 
 /**
  * @typedef {import('./pieces.js').PieceId} PieceId
+ * @typedef {import('./characters.js').CharacterId} CharacterId
  * @typedef {import('./pieces.js').PieceSetId} PieceSetId
  *
  * @typedef {{
@@ -20,8 +22,9 @@ import { mulberry32 } from './rng.js';
  *
  * @typedef {{
  *   id: string,
- *   name: string,
- *   color: number,              // 1..4, maps to CSS var --p1..--p4
+ *   name: string,               // copied from CHARACTERS[character] at join
+ *   color: number,              // 1..4, maps to CSS var --p1..--p4; = CHARACTERS[character].color
+ *   character: CharacterId | null,  // null only for saves from before M3 and the mock server
  *   board: number[],            // see board.js
  *   handIndex: number,          // n of the hand currently held (0-based)
  *   hand: (PieceId | null)[],   // length 3, null = already placed
@@ -54,7 +57,7 @@ import { mulberry32 } from './rng.js';
  * }} State
  *
  * `now` on start/again and the whole `timeUp` action are SERVER-injected, never from the wire.
- * @typedef {{ t: 'join', id: string, name: string }
+ * @typedef {{ t: 'join', id: string, character: CharacterId }
  *   | { t: 'start', id: string, now?: number }
  *   | { t: 'again', id: string, now?: number }
  *   | { t: 'config', id: string, patch: Partial<Settings> }
@@ -145,11 +148,12 @@ export function initState(seed, settings) {
  * @param {number} color
  * @param {number} size
  * @param {number} [grace]  rules.grace
+ * @param {CharacterId | null} [character]
  * @returns {Player}
  */
-export function newPlayer(id, name, color, size, grace = DEFAULT_SETTINGS.grace) {
+export function newPlayer(id, name, color, size, grace = DEFAULT_SETTINGS.grace, character = null) {
   return {
-    id, name, color,
+    id, name, color, character,
     board: emptyBoard(size),
     handIndex: 0,
     hand: [null, null, null],
@@ -208,20 +212,17 @@ export function reduce(state, action) {
   switch (action.t) {
     case 'join': {
       if (state.phase !== 'lobby') return state;
-      if (state.order.length >= 4) return state;
       if (typeof action.id !== 'string' || action.id === '') return state;
-      if (typeof action.name !== 'string' || action.name.trim() === '') return state;
       if (state.players[action.id]) return state;
-      const used = new Set(state.order.map((id) => state.players[id].color));
-      let color = 1;
-      while (used.has(color)) color++;
+      if (!isCharacterId(action.character) || !freeCharacters(state).includes(action.character)) return state;
+      const { name, color } = CHARACTERS[action.character];
       return {
         ...state,
         hostId: state.hostId ?? action.id,
         order: [...state.order, action.id],
         players: {
           ...state.players,
-          [action.id]: newPlayer(action.id, action.name, color, state.rules.size, state.rules.grace),
+          [action.id]: newPlayer(action.id, name, color, state.rules.size, state.rules.grace, action.character),
         },
       };
     }
@@ -237,7 +238,7 @@ export function reduce(state, action) {
       const players = {};
       for (const id of state.order) {
         const p = state.players[id];
-        players[id] = newPlayer(id, p.name, p.color, rules.size, rules.grace);
+        players[id] = newPlayer(id, p.name, p.color, rules.size, rules.grace, p.character ?? null);
       }
       return { ...state, settings, rules, size: rules.size, players };
     }
@@ -365,7 +366,10 @@ function beginPlay(state, seed, now) {
   const players = {};
   for (const id of order) {
     const old = state.players[id];
-    players[id] = { ...newPlayer(id, old.name, old.color, rules.size, rules.grace), hand: hand0.slice() };
+    players[id] = {
+      ...newPlayer(id, old.name, old.color, rules.size, rules.grace, old.character ?? null),
+      hand: hand0.slice(),
+    };
   }
   return {
     ...state, phase: 'playing', seed, order, players, rules, size: rules.size,

@@ -170,7 +170,7 @@ export function playGame(
   seed: number, settings: Partial<Settings>, policy: Policy, weights?: Weights, salt = 0
 ): GameResult {
   let s: State = initState(seed, settings);
-  s = reduce(s, { t: 'join', id: 'a', name: 'Bot' });
+  s = reduce(s, { t: 'join', id: 'a', character: 'pierre' });
   s = reduce(s, { t: 'start', id: 'a', now: 0 });
   const { rules } = s;
   const rng = mulberry32((seed ^ hashName(policy.name) ^ Math.imul(salt, 0x85ebca6b)) >>> 0);
