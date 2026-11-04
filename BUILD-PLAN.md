@@ -344,6 +344,12 @@ Rules that keep the evening safe:
 - **One persisted envelope** `{ v, campaign, room, savedAt }`, written atomically after every action and
   resumed in every phase. Today's block `State` becomes `campaign.at.activity`. Migration: a saved bare
   State loads as the hub's false-start blocks tableau.
+- **Server-only inputs stay server-only:** an `activity` action is rebuilt field by field by the server;
+  `now`, `deadline` and `timeUp` are never taken from the wire.
+- **Timed-pause fairness follows the move:** `shiftDeadline` and the heartbeat apply to `campaign.at.activity`,
+  and the envelope keeps `savedAt`.
+- **Acks name what they acknowledge:** news entries carry an increasing `seq`, and `{ t:'ack', id, upTo: seq }`
+  drops only the entries up to it. Then two open TVs, or a TV reconnecting mid-cutscene, never lose a cutscene.
 - **Wire:** `view` carries `campaign` (TV and phones derive their screens from it), `news` drives the TV
   reward and unlock cutscenes, and the phone host panel sends `gm` ops.
 
