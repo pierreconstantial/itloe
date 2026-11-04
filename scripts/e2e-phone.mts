@@ -11,7 +11,7 @@
 // ONLY=3 / 4 / 5 runs just that part (campaign screens / quiz / refused room code); a full run is the acceptance.
 // SHOTS=<dir> saves screenshots of the campaign screens.
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { check, Client, finish, HTTP, sleep, SLOW } from './e2e-lib.mts';
@@ -22,6 +22,10 @@ const CDP = process.env.CDP ?? '9222';
 const LOCK_MS = Number(process.env.LOCK_MS ?? 5 * 60_000);
 const SHOTS = process.env.SHOTS; // a folder: screenshots of the campaign screens land there
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-phone-'));
+// the quiz part plays a FIXED bank (a copy of the placeholder file), whatever the real bank holds
+const FIXED_BANK = join(VAR, 'fixed-bank');
+mkdirSync(FIXED_BANK, { recursive: true });
+copyFileSync(new URL('../data/quiz/placeholder.json', import.meta.url), join(FIXED_BANK, 'placeholder.json'));
 const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 
 /** check() with the observed detail appended to the label. */
@@ -34,7 +38,7 @@ let room = '';
 async function boot(fresh = false): Promise<void> {
   log = '';
   server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1' },
+    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   server.stdout!.on('data', (d) => { log += d; });
