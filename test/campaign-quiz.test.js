@@ -2,7 +2,7 @@
 // seeded from the party → finished exactly once → counters, totals and the evening's asked ids.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newCampaign, reduceCampaign, loadCampaign, activityRunning, SAMPLE_CONTENT, COUNTER } from '../shared/campaign/index.js';
+import { newCampaign, reduceCampaign, loadCampaign, activityRunning, SAMPLE_CONTENT, COUNTER, record, holds } from '../shared/campaign/index.js';
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
 /** @typedef {import('../shared/campaign/types.js').CampaignAction} CampaignAction */
@@ -73,7 +73,8 @@ test('finished → quiz.finished recorded exactly once: counters, totals, asked'
   assert.equal(f.counters[COUNTER.correctBy('elodie')], 5);
   assert.equal(f.counters[COUNTER.correctBy('sol')] ?? 0, 0);
   assert.equal(f.counters[COUNTER.quizWon('elodie')], 1);
-  assert.equal(f.totals.elodie, q.players.e.score);
+  assert.equal(f.totals.quiz?.elodie, q.players.e.score, 'quiz points in totals.quiz');
+  assert.equal(f.totals.blocks, undefined, 'never mixed with block points');
   assert.deepEqual(f.asked, q.asked);
   assert.equal(f.asked.length, 5);
   assert.ok(f.done.includes(QUIZ), 'default completion: its activity finished once');
@@ -115,4 +116,29 @@ test('an injected quiz.finished event is refused: only the engine derives it (ex
   const c = newCampaign(SAMPLE_CONTENT, 1);
   const injected = reduceCampaign(c, { t: 'event', event: { t: 'quiz.finished', node: 'childhood.quiz', ranking: [], asked: ['q1'], endReason: 'done' } }, SAMPLE_CONTENT);
   assert.equal(injected, c);
+});
+
+test('quiz.finished counts right answers per node (total and per character) for content conditions', () => {
+  const C = SAMPLE_CONTENT;
+  let c = newCampaign(C, 1);
+  c = reduceCampaign(c, { t: 'gm', id: 'x', op: { op: 'goto', node: 'childhood.quiz' } }, C); // refused: no host yet
+  /** @type {import('../shared/campaign/types.js').CampaignEvent} */
+  const e = {
+    t: 'quiz.finished', node: 'childhood.quiz', asked: [], endReason: 'done',
+    ranking: [{ character: 'elodie', score: 900, rank: 1, correct: 3 }, { character: 'sol', score: 400, rank: 2, correct: 2 }],
+  };
+  const f = record(c.facts, e);
+  assert.equal(f.counters[COUNTER.nodeCorrect('childhood.quiz')], 5);
+  assert.equal(f.counters[COUNTER.nodeCorrectBy('childhood.quiz', 'elodie')], 3);
+  assert.equal(f.counters[COUNTER.nodeCorrectBy('childhood.quiz', 'sol')], 2);
+  assert.ok(holds({ count: COUNTER.nodeCorrect('childhood.quiz'), gte: 4 }, f), '"unlock X when the childhood quiz had ≥ 4 right"');
+  assert.deepEqual(f.totals, { quiz: { elodie: 900, sol: 400 } });
+});
+
+test('loadCampaign migrates an older flat totals into totals.blocks', () => {
+  const c = newCampaign(SAMPLE_CONTENT, 1);
+  const old = JSON.parse(JSON.stringify({ ...c, facts: { ...c.facts, totals: { elodie: 120, sol: 80 } } }));
+  assert.deepEqual(loadCampaign(old, SAMPLE_CONTENT).facts.totals, { blocks: { elodie: 120, sol: 80 } });
+  const already = JSON.parse(JSON.stringify({ ...c, facts: { ...c.facts, totals: { blocks: { elodie: 1 }, quiz: { sol: 2 } } } }));
+  assert.deepEqual(loadCampaign(already, SAMPLE_CONTENT).facts.totals, { blocks: { elodie: 1 }, quiz: { sol: 2 } });
 });

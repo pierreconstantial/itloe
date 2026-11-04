@@ -20,7 +20,7 @@
 import { CHARACTERS, isCharacterId } from '../characters.js';
 import { initState, ranking, reduce } from '../game.js';
 import { initQuiz, reduceQuiz, quizRanking, quizRunning } from '../quiz/index.js';
-import { emptyFacts, holds, record, settle, COUNTER } from './rules.js';
+import { emptyFacts, holds, record, settle, migrateTotals, COUNTER } from './rules.js';
 import { validateContent, zoneAt, childrenOf } from './content.js';
 import { SAMPLE_CONTENT } from './sample.js';
 
@@ -177,6 +177,7 @@ export function loadCampaign(raw, content) {
     unlocked: (f.unlocked ?? []).filter(known),
     done: (f.done ?? []).filter(known),
     seen: (f.seen ?? []).filter(known),
+    totals: migrateTotals(f.totals), // older saves: flat block totals → { blocks: … }
   };
   const news = (raw.news ?? []).filter((n) => n.t !== 'unlocked' || known(n.node));
   const newsSeq = raw.newsSeq ?? Math.max(0, ...news.map((n) => n.seq));

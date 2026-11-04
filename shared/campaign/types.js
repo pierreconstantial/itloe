@@ -72,7 +72,7 @@ export {};
  *   done: string[],                     // derived by settle (complete held), rewards applied once
  *   seen: string[],                     // nodes the party has entered
  *   asked: string[],                    // quiz question ids already asked this evening (never asked again)
- *   totals: Record<string, number>,     // CharacterId → points across the evening
+ *   totals: Record<string, Record<string, number>>,  // activity kind ('blocks' | 'quiz') → CharacterId → points
  * }} Facts
  */
 

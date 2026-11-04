@@ -89,7 +89,7 @@ test('record: game.finished counts plays, per-node finishes, wins and totals by 
   assert.equal(f.counters[COUNTER.finished('hub.false-start')], 1);
   assert.equal(f.counters[COUNTER.blocksWon('elodie')], 1);
   assert.equal(f.counters[COUNTER.blocksWon('sol')], undefined);
-  assert.deepEqual(f.totals, { elodie: 30, sol: 10 });
+  assert.deepEqual(f.totals, { blocks: { elodie: 30, sol: 10 } }, 'block points kept apart from quiz points');
 });
 
 test('settle: idempotent (same object, no news) and monotonic', () => {

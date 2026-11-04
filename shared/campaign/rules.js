@@ -25,6 +25,10 @@ export const COUNTER = {
   quizWon: (character) => `quiz.won.${character}`,
   /** @param {string} character — right answers across every quiz of the evening */
   correctBy: (character) => `quiz.correct.${character}`,
+  /** @param {string} node — right answers in that quiz tableau, everyone together (content: "≥ 4 right") */
+  nodeCorrect: (node) => `node.${node}.correct`,
+  /** @param {string} node @param {string} character — right answers in that quiz tableau by one character */
+  nodeCorrectBy: (node, character) => `node.${node}.correct.${character}`,
   /** @param {string} sceneId */
   sceneSeen: (sceneId) => `scene.${sceneId}.seen`,
   /** @param {string} zone @param {string} character */
@@ -57,13 +61,30 @@ export function holds(c, f) {
   return false;
 }
 
-/** @param {Facts} f @param {Record<string, number>} add @param {Record<string, number>} [totals] @returns {Facts} */
-function bump(f, add, totals = {}) {
+/**
+ * Adds counters, and points to `totals[kind]` (per activity kind: block and quiz points have
+ * different scales, so they are never summed here — an "evening total" is a presentation choice).
+ * @param {Facts} f @param {Record<string, number>} add @param {string} [kind] @param {Record<string, number>} [points]
+ * @returns {Facts}
+ */
+function bump(f, add, kind, points = {}) {
   const counters = { ...f.counters };
   for (const [k, n] of Object.entries(add)) counters[k] = (counters[k] ?? 0) + n;
-  const t = { ...f.totals };
-  for (const [k, n] of Object.entries(totals)) t[k] = (t[k] ?? 0) + n;
-  return { ...f, counters, totals: t };
+  if (!kind || !Object.keys(points).length) return { ...f, counters };
+  const mine = { ...(f.totals[kind] ?? {}) };
+  for (const [c, n] of Object.entries(points)) mine[c] = (mine[c] ?? 0) + n;
+  return { ...f, counters, totals: { ...f.totals, [kind]: mine } };
+}
+
+/**
+ * Facts.totals of an older save was flat (CharacterId → points, block games only): → { blocks: … }.
+ * @param {unknown} totals @returns {Facts['totals']}
+ */
+export function migrateTotals(totals) {
+  if (!totals || typeof totals !== 'object') return {};
+  const entries = Object.entries(totals);
+  if (entries.length && entries.every(([, v]) => typeof v === 'number')) return { blocks: /** @type {Record<string, number>} */ (totals) };
+  return /** @type {Facts['totals']} */ (totals);
 }
 
 /**
@@ -84,7 +105,7 @@ export function record(f, e) {
         totals[r.character] = (totals[r.character] ?? 0) + r.score;
         if (r.rank === 1 && e.ranking.length > 1) add[COUNTER.blocksWon(r.character)] = 1;
       }
-      return bump(f, add, totals);
+      return bump(f, add, e.kind, totals);
     }
     case 'quiz.finished': {
       /** @type {Record<string, number>} */
@@ -94,10 +115,15 @@ export function record(f, e) {
       for (const r of e.ranking) {
         if (!r.character) continue;
         totals[r.character] = (totals[r.character] ?? 0) + r.score;
-        if (r.correct > 0) add[COUNTER.correctBy(r.character)] = r.correct;
+        if (r.correct > 0) {
+          add[COUNTER.correctBy(r.character)] = r.correct;
+          add[COUNTER.nodeCorrectBy(e.node, r.character)] = r.correct;
+        }
         if (r.rank === 1 && e.ranking.length > 1) add[COUNTER.quizWon(r.character)] = 1;
       }
-      const bumped = bump(f, add, totals);
+      const right = e.ranking.reduce((n, r) => n + (r.correct > 0 ? r.correct : 0), 0);
+      if (right > 0) add[COUNTER.nodeCorrect(e.node)] = right;
+      const bumped = bump(f, add, 'quiz', totals);
       const known = new Set(f.asked ?? []);
       const fresh = (e.asked ?? []).filter((id) => typeof id === 'string' && !known.has(id));
       return fresh.length ? { ...bumped, asked: [...(f.asked ?? []), ...fresh] } : bumped;
