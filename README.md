@@ -48,7 +48,10 @@ Set them in front of `npm start`, e.g. `PORT=8080 npm start`.
 | Variable | What it does |
 |---|---|
 | `PORT` | Port to use (default `3131`). |
+| `BLOKO_BIND` | Listen address. Use `127.0.0.1` for a local tunnel, or the guest's private IP in production. Default: all interfaces. |
 | `BLOKO_HOST` | The address phones should use: an interface name (`wlan0`) or an IP address. Use it when the printed address is wrong. |
+| `BLOKO_PUBLIC_ORIGIN` | Public HTTPS origin, e.g. `https://itloe.kputnik.com`. Requires `BLOKO_ACCESS_TOKEN`; replaces LAN address detection for invitations. |
+| `BLOKO_ACCESS_TOKEN` | Shared invitation secret, at least 32 characters. Requires `BLOKO_PUBLIC_ORIGIN`. Never put it in Git, release files or logs. |
 | `BLOKO_NEW=1` | Start a brand-new game instead of resuming the saved one. Same as `npm start -- --new`. |
 | `BLOKO_VAR` | Folder for saved data (default `var/`). |
 | `BLOKO_QUIZ_DIR` | Folder of the quiz question bank (default `data/quiz/`). |
@@ -59,6 +62,25 @@ If the laptop has several network connections (Wi-Fi + Ethernet, VPN…), `npm s
 With WSL's mirrored networking (`networkingMode=mirrored` in `.wslconfig`), the printed address is already the right one.
 Otherwise, forward the port from Windows into WSL and start with `BLOKO_HOST=<the Windows Wi-Fi IP>`.
 Either way, allow the port through the Windows firewall when asked.
+
+## Hosted production
+
+Infrastructure owns the LXC, Node 24 runtime, systemd service, public HTTPS/WebSocket proxy, secrets, backups and deployment timer. The game runs as an unprivileged user, with releases under `/opt/itloe/releases/<commit>`, `/opt/itloe/current` pointing at the active release, and `BLOKO_VAR=/var/lib/itloe` outside the release. The proxy forwards to the guest's private port `3131`; it must suppress URL/Referer-bearing access and error logs for this host.
+
+Open `https://itloe.kputnik.com/?token=<shared-secret>` to authorize a browser. The server exchanges the token for a Secure/HttpOnly cookie and redirects to a clean URL. All HTTP routes and WebSocket upgrades require authorization; WebSockets also require the configured public Origin. The token-bearing join links and QR codes authorize new phones. Everyone with the invitation joins the same evening, with the existing four-character roster. Rotating the configured secret invalidates existing cookies after a restart. Without either public setting, local LAN play stays open.
+
+Pushing to `production` runs [the production workflow](.github/workflows/production.yml): locked dependency install, type-checking, tests, save/resume checks, packaging and an extracted-runtime access test. It then publishes a GitHub Release tagged `prod-<full-commit-sha>` with:
+
+- `itloe-<full-commit-sha>-linux-x64.tar.gz`: `server/`, `shared/`, `public/`, `data/quiz/`, `package.json`, `package-lock.json`, production `node_modules/`, and `release.json`.
+- `SHA256SUMS`: the SHA-256 checksum and archive filename.
+
+`release.json` is `{ "commit": "<full-sha>", "nodeMajor": 24, "platform": "linux", "arch": "x64" }`. Node executes the TypeScript directly. No development tools, saves, raw quiz imports or secrets are packaged. For a manual build on Linux x64 with Node 24, run `npm run release` (or `npm run release -- <commit>`); output is in ignored `dist/release/`. The builder packages **committed files**, so uncommitted edits are not released.
+
+Publishing the completed release is the handover to Infrastructure. Its guest-local timer checks the `production` branch every two minutes and downloads that commit's release by its exact URL, without a GitHub token or public deployment webhook. Failed builds or missing releases leave the current game running; rapid pushes may coalesce into deployment of the newest commit. GitHub Actions uses its built-in `GITHUB_TOKEN` with `contents: write`, with no server credentials.
+
+Infrastructure verifies checksums and the manifest, rechecks the branch head before activation, stops the process, copies the current saves, switches `current`, and restarts. Authenticated `/api/join` (a read-only route), a WebSocket connection and saved-room comparison validate startup. On failure, restore both the previous release and its saved data: startup can migrate or replace an incompatible save. Deployments briefly disconnect clients; they reconnect, though application changes may require a browser refresh.
+
+For deployment readiness, derive the cookie value as hex HMAC-SHA256 with the UTF-8 access token as key and `itloe-access-v1` as message. Send it as `Cookie: __Host-itloe_access=<value>`. The `/ws` upgrade also needs `Origin: https://itloe.kputnik.com`; its first message is a `view`. Never log the `/api/join` response: its `url` contains the invitation token.
 
 ## If the server stops
 

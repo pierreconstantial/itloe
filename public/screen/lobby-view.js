@@ -18,7 +18,7 @@ const QR_SRC = '/api/join-qr.svg';
 
 /** Fallback when /api/join is unavailable: same host/port as this page. @returns {JoinInfo} */
 export function fallbackJoinInfo() {
-  return { url: `http://${location.host}/play`, code: null, qr: false };
+  return { url: `${location.origin}/play`, code: null, qr: false };
 }
 
 /**
@@ -38,13 +38,14 @@ export async function fetchJoinInfo() {
 }
 
 /**
- * URL as people type it: the room code is shown separately, so the query string is dropped.
+ * Keep the access token in hosted invitations; the room code is shown separately.
  * @param {string} url
  */
 export function typedUrl(url) {
   try {
     const u = new URL(url);
-    return `${u.protocol}//${u.host}${u.pathname}`;
+    u.searchParams.delete('room');
+    return `${u.origin}${u.pathname}${u.search}`;
   } catch {
     return url;
   }
