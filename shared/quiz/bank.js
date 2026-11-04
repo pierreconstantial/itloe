@@ -16,6 +16,7 @@ import { judgeLocal, expectedAnswers } from './judge-local.js';
  *   accept?: string[],             // other spellings accepted when typed
  *   category: string, level: 1 | 2 | 3,
  *   source: string,                // dataset + licence (attribution is kept)
+ *   anecdote?: string,             // a fun fact, shown with the answer (often gives the answer away)
  * }} Question
  */
 
@@ -46,6 +47,7 @@ export function validateBank(questions) {
       problems.push(`${at}: answer must be a non-empty string (no choices)`);
     }
     if (q.accept !== undefined && !(Array.isArray(q.accept) && q.accept.every(nonEmpty))) problems.push(`${at}: accept must be a list of strings`);
+    if (q.anecdote !== undefined && !nonEmpty(q.anecdote)) problems.push(`${at}: anecdote must be a non-empty string when present`);
     if (!nonEmpty(q.category)) problems.push(`${at}: missing category`);
     if (![1, 2, 3].includes(/** @type {number} */ (q.level))) problems.push(`${at}: level must be 1, 2 or 3`);
     if (!nonEmpty(q.source)) problems.push(`${at}: missing source (dataset + licence)`);
@@ -90,7 +92,7 @@ export const answerText = (q) => expectedAnswers(q)[0] ?? '';
  *   question: { q: string, category: string, level: number, choices: string[] | null },
  *   answered: string[],                       // who has answered (never what, before the reveal)
  *   answers: Record<string, { choice?: number, text?: string, ok: boolean | null, points: number, overridden?: boolean }> | null,
- *   answer: { choice: number | null, text: string } | null,   // null until the reveal
+ *   answer: { choice: number | null, text: string, anecdote?: string } | null,   // null until the reveal (the anecdote too: it often gives the answer away)
  * }} RoundView
  */
 /**
@@ -121,7 +123,11 @@ export function projectQuiz(s, lookup) {
         }]))
         : null,
       answer: open && q
-        ? { choice: round.asChoice && round.perm ? round.perm.indexOf(/** @type {number} */ (q.answer)) : null, text: answerText(q) }
+        ? {
+          choice: round.asChoice && round.perm ? round.perm.indexOf(/** @type {number} */ (q.answer)) : null,
+          text: answerText(q),
+          ...(q.anecdote ? { anecdote: q.anecdote } : {}),
+        }
         : null,
     };
   }

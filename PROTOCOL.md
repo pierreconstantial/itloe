@@ -102,7 +102,8 @@ The bank (`data/quiz/*.json`) stays on the server and is never served. While a q
   `view.quiz` is the PUBLIC projection (shared/quiz/bank.js `projectQuiz`), and `view.campaign.at.activity`
   carries the same projection. During `question`: the question text, category, level, the displayed choices
   (choice rounds), and `answered` (who answered, never what). From `reveal` on: `answers` (choice/text, ok,
-  points) and `answer` `{ choice: displayed index | null, text }`.
+  points) and `answer` `{ choice: displayed index | null, text, anecdote? }`. The anecdote (a bank question's
+  optional fun fact) is part of the answer: it often gives it away, so it never travels before the reveal.
 - **Scoring:** right = 100 + up to 50 for speed (linear on the time left); wrong or none = 0.
 - **Timed fairness:** an open question's deadline shifts on resume and after a suspended laptop, like the timed
   block game. An answer left waiting for the judge when the server stopped is never re-judged: it is wrong,

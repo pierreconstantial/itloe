@@ -162,7 +162,8 @@ export function createGmPanel(io) {
       `flags: ${f.flags.join(', ') || '—'}`,
       'counters:',
       ...Object.entries(f.counters).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `  ${k} = ${v}`),
-      `totals: ${Object.entries(f.totals).map(([k, v]) => `${k} ${v}`).join(', ') || '—'}`,
+      // totals per activity kind, never summed across kinds: "blocks: elodie 120, sol 80 · quiz: …"
+      `totals: ${Object.entries(f.totals).map(([kind, byChar]) => `${kind}: ${Object.entries(byChar ?? {}).map(([ch, n]) => `${ch} ${n}`).join(', ') || '—'}`).join(' · ') || '—'}`,
     ];
     $('gm-progress').textContent = lines.join('\n');
   }

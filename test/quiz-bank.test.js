@@ -15,6 +15,7 @@ const T0 = 1_700_000_000_000;
 
 test('the placeholder bank is valid, mixed (choice + text), marked placeholder in its source', () => {
   assert.deepEqual(validateBank(BANK), []);
+  assert.ok(BANK.filter((q) => q.anecdote).length >= 2, 'some questions carry an anecdote');
   assert.ok(BANK.length >= 10);
   assert.ok(BANK.some((q) => q.choices) && BANK.some((q) => !q.choices));
   assert.ok(BANK.every((q) => /placeholder/.test(q.source)));
@@ -26,9 +27,11 @@ test('validateBank lists every problem', () => {
     { id: 'a', q: '', choices: ['1', '2', '3'], answer: 5, category: '', level: 4 },
     { id: 'c', q: 'Q?', choices: ['A', 'a', 'B', 'C'], answer: 0, category: 'c', level: 2, source: 's' },
     { q: 'Q?', answer: '', category: 'c', level: 1, source: 's', accept: 'nope' },
+    { id: 'd', q: 'Q?', answer: 'x', category: 'c', level: 1, source: 's', anecdote: '' },
   ]);
   for (const part of ['duplicate id', 'missing question text', 'choices must be 4', 'answer must be the right choice', 'missing category',
-    'level must be', 'missing source', 'duplicate choices', 'missing id', 'answer must be a non-empty string', 'accept must be']) {
+    'level must be', 'missing source', 'duplicate choices', 'missing id', 'answer must be a non-empty string', 'accept must be',
+    'anecdote must be']) {
     assert.ok(bad.some((p) => p.includes(part)), part);
   }
 });
@@ -102,11 +105,13 @@ for (const mode of /** @type {const} */ (['choice', 'text', 'mixed'])) {
         if (shown.has(text)) continue; // it is one of the 4 displayed choices: that is the question itself
         assert.ok(!json.includes(JSON.stringify(text)), `${q.id}: "${text}" leaked in ${json}`);
       }
+      if (q.anecdote) assert.ok(!json.includes(q.anecdote) && !json.includes('anecdote'), `${q.id}: the anecdote leaked before the reveal`);
       assert.ok(!/"(ok|verdict|text|choice)":/.test(json.replace(/"choices":\[[^\]]*\]/, '')), `${q.id}: no verdict/text/choice fields`);
     }
     for (const { json, q } of seen.filter((v) => v.phase === 'reveal')) {
       const view = JSON.parse(json);
       assert.equal(view.round.answer.text, answerText(q), 'reveal: the answer');
+      assert.equal(view.round.answer.anecdote, q.anecdote, 'reveal: the anecdote when there is one');
       assert.ok(view.round.answers.a.ok === true && view.round.answers.b.ok === false, 'reveal: verdicts');
     }
   });

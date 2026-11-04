@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-visual">
   <title>Bloko</title>
   <link rel="stylesheet" href="/commun/base.css">
   <link rel="stylesheet" href="/commun/play-base.css">
   <link rel="stylesheet" href="./campaign.css">
+  <link rel="stylesheet" href="./quiz.css">
 </head>
 <body>
   <main id="app">
@@ -75,6 +76,59 @@
         <p id="place-wait" class="dim"></p>
       </div>
       <!-- #stick-pad moves here from the lobby while the party is on the hub or in a world -->
+    </section>
+
+    <section id="view-quiz" hidden>
+      <header class="quiz-top">
+        <span id="quiz-progress" class="kicker">Quiz</span>
+        <span id="quiz-clock" class="clock" hidden></span>
+        <span id="quiz-score" class="quiz-score"></span>
+      </header>
+
+      <div id="quiz-lobby" class="quiz-pane">
+        <h2>Quiz!</h2>
+        <ul id="quiz-players" class="quiz-chips"></ul>
+        <p id="quiz-summary" class="settings-summary"></p>
+        <div class="lobby-actions">
+          <button id="btn-settings-quiz" type="button" data-open="settings" hidden>⚙ Settings</button>
+          <button id="quiz-start" type="button" class="primary" hidden>Start the quiz</button>
+        </div>
+        <p id="quiz-lobby-hint" class="dim"></p>
+      </div>
+
+      <div id="quiz-question" class="quiz-pane" hidden>
+        <p id="quiz-category" class="dim"></p>
+        <h2 id="quiz-q"></h2>
+        <div id="quiz-choices" class="quiz-choices"></div>
+        <form id="quiz-text-form" class="quiz-text-form" hidden>
+          <input id="quiz-text" type="text" lang="fr" inputmode="text" enterkeyhint="send" placeholder="Your answer"
+                 autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" aria-label="Your answer">
+          <button id="quiz-send" type="submit" class="primary">Send</button>
+        </form>
+        <p id="quiz-sent" class="quiz-sent" hidden>Answer sent ✓</p>
+        <ul id="quiz-answered" class="quiz-chips"></ul>
+      </div>
+
+      <div id="quiz-reveal" class="quiz-pane" hidden>
+        <p id="quiz-verdict" class="quiz-verdict"></p>
+        <p id="quiz-reveal-q" class="dim"></p>
+        <p class="quiz-correct">Answer: <strong id="quiz-answer"></strong></p>
+        <p id="quiz-anecdote" class="quiz-anecdote" hidden></p>
+        <ul id="quiz-results" class="quiz-results"></ul>
+        <button id="quiz-next" type="button" class="primary" hidden>Next question</button>
+        <p id="quiz-reveal-hint" class="dim">Waiting for the host…</p>
+      </div>
+
+      <div id="quiz-finished" class="quiz-pane" hidden>
+        <p id="quiz-finished-kicker" class="kicker"></p>
+        <h2>Quiz over!</h2>
+        <ol id="quiz-ranking" class="quiz-ranking"></ol>
+        <div class="lobby-actions">
+          <button id="quiz-again" type="button" class="primary" hidden>Play again</button>
+          <button id="quiz-back" type="button" hidden>Back</button>
+        </div>
+        <p id="quiz-finished-hint" class="dim">Waiting for the host…</p>
+      </div>
     </section>
 
     <section id="view-game" hidden>

@@ -20,6 +20,8 @@ import { createConnection } from './connection.js';
 import { installBackGuard } from './back-guard.js';
 import { createHostControls } from './host-controls.js';
 import { createGmPanel } from './gm-panel.js';
+import { createQuizUi } from './quiz-ui.js';
+import { QUIZ_SETTINGS } from './quiz-text.js';
 import { childMarks, content, onContentChange, syncContent, titleOf } from './campaign-view.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
@@ -92,6 +94,9 @@ function outcome(prev, next, id) {
 let lastView = null;
 /** The whole evening (slice 3), null from a pre-campaign server. @type {Campaign | null} */
 let campaign = null;
+/** The quiz running here (the view's PUBLIC projection: no answer before the reveal), else null.
+ *  @type {import('../../shared/quiz/bank.js').QuizView | null} */
+let quizView = null;
 /** At least one view arrived. */
 let viewed = false;
 /** Solo record for the current (size, mode), sent with views in solo games. @type {Best | null} */
@@ -195,6 +200,7 @@ function receive(raw) {
     const prevNode = campaign?.at.node ?? null;
     lastView = m.state ?? null;
     campaign = m.campaign ?? null;
+    quizView = m.quiz ?? null;
     viewed = true;
     syncContent(m.contentVersion); // fetches the content on the first view and whenever it changed
     lastBest = m.best ?? null;
@@ -259,7 +265,7 @@ function member() {
 const isGameMaster = () => campaign !== null && playerId !== null && campaign.party.hostId === playerId && !!member();
 
 /** Walking: a member, on the hub / in a world, or in an open block lobby. */
-const canWalk = () => member() !== null && (!lastView || lastView.phase === 'lobby');
+const canWalk = () => member() !== null && !quizView && (!lastView || lastView.phase === 'lobby');
 
 /** First back press: close a sheet, or say how to get around (back-guard.js). */
 function onBack() {
@@ -271,7 +277,7 @@ function onBack() {
 
 // ---------- rendering ----------
 
-const VIEWS = ['loading', 'pick', 'room', 'replaced', 'waiting', 'place', 'lobby', 'game', 'over', 'podium'];
+const VIEWS = ['loading', 'pick', 'room', 'replaced', 'waiting', 'place', 'quiz', 'lobby', 'game', 'over', 'podium'];
 
 /** @param {string} name */
 function show(name) {
@@ -287,10 +293,15 @@ function render() {
   const mem = member();
   const isHost = me !== null && v !== null && me.id === v.hostId;
   const configurable = v !== null && v.phase !== 'playing';
+  const q = quizView;
+  const quizHost = q !== null && playerId !== null && q.hostId === playerId;
+  const quizConfigurable = q !== null && (q.phase === 'lobby' || q.phase === 'finished');
 
+  // the settings sheet follows the activity: the block game's schema, or the quiz's
   if (v) settingsSheet.render(v.settings, isHost && configurable);
+  else if (q) settingsSheet.render(q.settings, quizHost && quizConfigurable, QUIZ_SETTINGS);
   hostControls.render(v, online, me?.id ?? '');
-  if (!isHost || !configurable) menu.close('settings');
+  if (q ? !(quizHost && quizConfigurable) : (!isHost || !configurable)) menu.close('settings');
   if (campaign && isGameMaster()) gmPanel.render(campaign);
   else menu.close('gm');
   updateClock();
@@ -305,7 +316,8 @@ function render() {
     // the picker shows whenever there is something to tap: a free character while no block game is
     // under way, or (anytime) a character whose phone is offline, to continue as
     const roster = campaign ? campaign.party : v;
-    const states = roster ? pickStates(roster, !v || v.phase === 'lobby', online) : null;
+    const joinable = (!v || v.phase === 'lobby') && (!q || q.phase === 'lobby');
+    const states = roster ? pickStates(roster, joinable, online) : null;
     if (!states || (!anyPickable(states) && pendingPick === null)) {
       show('waiting');
       $('waiting-text').textContent = v?.phase === 'finished' ? 'A game just ended.' : 'A game is already running.';
@@ -314,6 +326,16 @@ function render() {
     show('pick');
     const last = load(KEYS.character);
     picker.render(states, pendingPick, isCharacterId(last) ? last : null);
+    return;
+  }
+  if (q) {
+    if (!playerId || !q.players[playerId]) { // in the evening, but this quiz started before we joined
+      show('waiting');
+      $('waiting-text').textContent = "A quiz is on. You'll play the next one!";
+      return;
+    }
+    show('quiz');
+    quizUi.render(q, playerId);
     return;
   }
   if (!v) { show('place'); if (campaign) renderPlace(campaign, mem); return; }
@@ -695,6 +717,7 @@ const menu = initMenu({
 const settingsSheet = createSettingsSheet({ send });
 const hostControls = createHostControls({ send });
 const gmPanel = createGmPanel({ send });
+const quizUi = createQuizUi({ send });
 const picker = createPicker({ onPick: join });
 
 const joystick = createJoystick({
@@ -752,6 +775,6 @@ for (let i = 0; i < 3; i++) {
 
 installBackGuard({ onBack });
 onContentChange(render); // titles, doors and the tree come with the content
-setInterval(updateClock, CLOCK_TICK_MS);
+setInterval(() => { updateClock(); quizUi.tick(); }, CLOCK_TICK_MS);
 show('loading');
 conn.start();

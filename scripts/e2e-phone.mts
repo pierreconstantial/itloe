@@ -8,13 +8,13 @@
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3182 CDP=9222 [LOCK_MS=300000] node scripts/e2e-phone.mts    (never PORT 3131: the live server)
 // LOCK_MS is how long the "phone locked" case freezes the page (default 5 min, as in the acceptance list).
-// ONLY=3 runs just part 3 (campaign screens), for quick iteration; a full run is the acceptance.
+// ONLY=3 / ONLY=4 runs just part 3 (campaign screens) / part 4 (quiz), for quick iteration; a full run is the acceptance.
 // SHOTS=<dir> saves screenshots of the campaign screens.
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, Client, finish, HTTP, sleep } from './e2e-lib.mts';
+import { check, Client, finish, HTTP, sleep, SLOW } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -55,6 +55,17 @@ async function kill9(): Promise<void> {
 const freeze = (on: boolean) => server!.kill(on ? 'SIGSTOP' : 'SIGCONT');
 const joinUrl = () => `${HTTP}/play?room=${room}`;
 
+// ---------- hygiene: never share the port, never leave ghost tabs ----------
+// A test server must be ours alone; tabs left over from a killed run would keep reconnecting to it as
+// ghost clients (extra load, extra broadcasts). Close them by target id (closing a CDP socket does not).
+if (await fetch(`${HTTP}/api/join`).then(() => true, () => false)) throw new Error(`port ${PORT} is busy: stop whatever runs there first`);
+{
+  const tabs: { id: string, url: string }[] = await (await fetch(`http://127.0.0.1:${CDP}/json/list`)).json();
+  const ghosts = tabs.filter((t) => t.url.includes(`:${PORT}/`));
+  for (const t of ghosts) await fetch(`http://127.0.0.1:${CDP}/json/close/${t.id}`).catch(() => {});
+  if (ghosts.length) console.log(`  (closed ${ghosts.length} tab(s) left on :${PORT} by an earlier run)`);
+}
+
 // ---------- CDP: one browser connection, one flattened session per phone ----------
 const version = await (await fetch(`http://127.0.0.1:${CDP}/json/version`)).json();
 const browser = new WebSocket(version.webSocketDebuggerUrl);
@@ -76,6 +87,9 @@ function cmd(method: string, params: object = {}, sessionId?: string): Promise<a
 // Instrumentation that survives navigations (sessionStorage is per tab): did the picker ever show
 // while watched? was the last pageshow a bfcache restore?
 const PROBE = `(() => {
+  // haptics: record every vibration pattern (headless has no motor) so the tests can check them
+  window.__vibes = [];
+  navigator.vibrate = (p) => { window.__vibes.push(JSON.stringify(p)); return true; };
   addEventListener('pageshow', (e) => sessionStorage.setItem('t-persisted', String(e.persisted)));
   setInterval(() => {
     const p = document.getElementById('view-pick');
@@ -120,7 +134,7 @@ async function phone(label: string) {
     };
   })()`).catch(() => null);
   const waitFor = async (pred: (x: Snap) => boolean, ms = 8000): Promise<Snap | null> => {
-    const end = Date.now() + ms;
+    const end = Date.now() + ms * SLOW; // E2E_SLOW=n on a loaded machine
     let last: Snap | null = null;
     while (Date.now() < end) {
       last = await snap();
@@ -165,7 +179,12 @@ async function phone(label: string) {
     const entry = h.entries[h.currentIndex + delta];
     if (entry) await cmd('Page.navigateToHistoryEntry', { entryId: entry.id }, s);
   };
-  const lifecycle = (state: 'frozen' | 'active') => cmd('Page.setWebLifecycleState', { state }, s);
+  // unlocking a real phone makes the page VISIBLE again: bring the tab to the front, or headless Chrome
+  // keeps it hidden and (after 5 min) throttles its timers to about one per minute
+  const lifecycle = async (state: 'frozen' | 'active') => {
+    await cmd('Page.setWebLifecycleState', { state }, s);
+    if (state === 'active') await cmd('Page.bringToFront', {}, s);
+  };
   const board = (): Promise<string> => ev(`[...document.querySelectorAll('#board .cell')].map((c) => c.className.replace(/ ?(ghost-ok|ghost-bad|clear-preview)/g, '')).join('|') + '#' + document.getElementById('my-score').textContent`);
   const card = (id: string): Promise<{ disabled: boolean, badge: string }> =>
     ev(`(() => { const c = document.querySelector('.pick-card[data-id="${id}"]'); return { disabled: c.disabled, badge: c.querySelector('.pick-badge').textContent }; })()`);
@@ -188,6 +207,13 @@ async function phone(label: string) {
     }
     await cmd('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }, s);
   };
+  /** Real typing into a field (focus by a tap, then the keyboard's text). */
+  const type = async (selector: string, value: string) => {
+    await tap(selector);
+    await cmd('Input.insertText', { text: value }, s);
+    await sleep(100);
+  };
+  const vibes = (): Promise<string[]> => ev('window.__vibes ?? []');
   const text = (id: string): Promise<string> => ev(`document.getElementById(${JSON.stringify(id)})?.textContent ?? ''`);
   const visible = (id: string): Promise<boolean> => ev(`(() => { const e = document.getElementById(${JSON.stringify(id)}); return !!e && !e.hidden && e.offsetParent !== null; })()`);
   const shot = async (name: string) => {
@@ -197,7 +223,7 @@ async function phone(label: string) {
     const { data } = await cmd('Page.captureScreenshot', { format: 'png' }, s);
     writeFileSync(join(SHOTS, `${name}.png`), Buffer.from(data, 'base64'));
   };
-  return { label, ev, snap, waitFor, tap, placeOne, watch, navigate, history, lifecycle, board, card, continueButton, hostButtons, steer, text, visible, shot };
+  return { label, ev, snap, waitFor, tap, placeOne, watch, navigate, history, lifecycle, board, card, continueButton, hostButtons, steer, text, visible, shot, type, vibes };
 }
 type Phone = Awaited<ReturnType<typeof phone>>;
 
@@ -453,6 +479,7 @@ try {
 
   } // parts 1–2
 
+  if (!ONLY || ONLY === '3') {
   // ================= part 3: the campaign on the phone =================
   console.log('\n— part 3: campaign (hub, game master, doors) —');
   await kill9();
@@ -532,6 +559,138 @@ try {
   const toast: string = await P3.ev(`document.getElementById('toast').textContent`);
   expect(toast.includes(world.title), 'the other phones get a "→ <world>" toast', toast);
   tv.ws.close();
+  } // part 3
+
+  if (!ONLY || ONLY === '4') {
+  // ================= part 4: the quiz on the phone =================
+  console.log('\n— part 4: quiz (choices, typed answers, reveal, override, finished) —');
+  await kill9();
+  await boot(true);
+  const bank: { id: string, q: string, choices?: string[], answer: string | number, accept?: string[] }[] =
+    JSON.parse(readFileSync(new URL('../data/quiz/placeholder.json', import.meta.url), 'utf8')).questions;
+  // the phone sets French typography (narrow no-break space before ? ! : ;): compare whitespace-normalized
+  const plain = (t: string) => t.replace(/\s+/gu, ' ').trim();
+  const byQ = new Map(bank.map((x) => [plain(x.q), x]));
+  const rightText = (x: typeof bank[number]) => (typeof x.answer === 'number' ? x.choices![x.answer] : x.answer);
+  const H = await phone('H'), Q = await phone('Q'); // H: the host; Q: Élodie
+  await joinAs(H, 'pierre');
+  await joinAs(Q, 'elodie');
+  const idQ = (await Q.snap())?.id;
+  const quizNode = 'childhood.quiz';
+  // the game master takes the party to the quiz (Go there: no unlock needed)
+  await H.tap('#btn-menu');
+  await H.tap('#btn-gm');
+  await H.ev(`(() => { const s = document.getElementById('gm-node'); s.value = ${JSON.stringify(quizNode)}; s.dispatchEvent(new Event('input')); })()`);
+  await H.tap('[data-gm="goto"]');
+  await H.tap('[data-gm="goto"]');
+  await H.ev(`document.querySelector('#sheet-gm [data-close]').click()`);
+  const inQuiz = async (p: Phone) => { for (let k = 0; k < 40; k++) { if ((await p.snap())?.view === 'view-quiz') return true; await sleep(100); } return false; };
+  expect(await inQuiz(H) && await inQuiz(Q), 'Go there → both phones on the quiz screen');
+  expect(await Q.visible('quiz-lobby') && /Waiting for the host/.test(await Q.text('quiz-lobby-hint')) && !(await Q.visible('quiz-start')),
+    'guest: "Quiz! Waiting for the host…", no Start', await Q.text('quiz-lobby-hint'));
+  expect(await H.visible('quiz-start') && await H.visible('btn-settings-quiz'), 'host: Start + ⚙ Settings');
+  await H.shot('quiz-lobby-host');
+
+  /** Host settings through the real sheet (data-driven from QUIZ_SETTINGS_SCHEMA). */
+  const setQuiz = async (count: number, mode: 'Choices' | 'Typed') => {
+    await H.tap('#btn-settings-quiz');
+    const labels: string = await H.ev(`[...document.querySelectorAll('#settings-body .setting-label')].map((e) => e.textContent).join('|')`);
+    for (let k = 0; k < 30; k++) {
+      const now = Number(/\d+/.exec(await H.ev(`document.querySelector('#settings-body .stepper output').textContent`))?.[0]);
+      if (now === count) break;
+      await H.tap(`#settings-body [aria-label="${now > count ? 'Less' : 'More'} questions"]`);
+      await sleep(150);
+    }
+    await H.ev(`[...document.querySelectorAll('#settings-body .seg button')].find((b) => b.textContent === ${JSON.stringify(mode)})?.click()`);
+    await sleep(300);
+    await H.ev(`document.querySelector('#sheet-settings [data-close]').click()`);
+    return labels;
+  };
+  const labels = await setQuiz(3, 'Choices');
+  expect(labels === 'Questions|Time per question|Answers', 'quiz settings sheet from the quiz schema', labels);
+  expect(/^3 questions .* multiple choice$/.test(await Q.text('quiz-summary')), 'guests see the settings summary', await Q.text('quiz-summary'));
+
+  const phaseIs = async (p: Phone, id: string) => { for (let k = 0; k < 60; k++) { if (await p.visible(id)) return true; await sleep(100); } return false; };
+  await H.tap('#quiz-start');
+  expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), 'Start → the first question on both phones');
+  expect(/\d:\d\d/.test(await Q.text('quiz-clock')), 'countdown shown', await Q.text('quiz-clock'));
+
+  // ---- quiz 1: choices. H taps the right one, Élodie a wrong one; override on the first reveal ----
+  for (let round = 0; round < 3; round++) {
+    const qText = plain(await H.text('quiz-q'));
+    const bq = byQ.get(qText)!;
+    const choices: string[] = await H.ev(`[...document.querySelectorAll('#quiz-choices button')].map((b) => b.textContent)`);
+    const right = choices.indexOf(rightText(bq));
+    if (round === 0) { expect(choices.length === 4 && right >= 0, '4 big choices, in the displayed order', choices.join(' | ')); await Q.shot('quiz-question-choices'); }
+    await H.tap(`#quiz-choices [data-choice="${right}"]`);
+    if (round === 0) {
+      expect(await H.visible('quiz-sent') && await H.ev(`[...document.querySelectorAll('#quiz-choices button')].every((b) => b.disabled)`),
+        'after answering: "Answer sent ✓", no change possible');
+      let chip = false;
+      for (let k = 0; k < 30 && !chip; k++) { chip = /✓ Pierre/.test(await Q.text('quiz-answered')); if (!chip) await sleep(100); }
+      expect(chip, 'who answered: the other phone shows ✓ Pierre (never what)', await Q.text('quiz-answered'));
+    }
+    await Q.tap(`#quiz-choices [data-choice="${(right + 1) % 4}"]`);
+    expect(await phaseIs(H, 'quiz-reveal') && await phaseIs(Q, 'quiz-reveal'), `round ${round + 1}: everyone answered → reveal`);
+    if (round === 0) {
+      const hv = await H.text('quiz-verdict'), qvd = await Q.text('quiz-verdict');
+      expect(/^✓ Right! \+1[0-5]\d/.test(hv) && /^✗ Wrong/.test(qvd), 'reveal: right with points for me, wrong for Élodie', `${hv} / ${qvd}`);
+      expect((await Q.text('quiz-answer')) === rightText(bq), 'reveal: the correct answer', await Q.text('quiz-answer'));
+      expect(!(await Q.visible('quiz-next')) && await H.visible('quiz-next'), 'Next: host only');
+      await H.shot('quiz-reveal-host');
+      await Q.shot('quiz-reveal-guest');
+      await H.tap(`[data-override="${idQ}"]`);
+      expect((await H.ev(`document.querySelector('[data-override="${idQ}"]').textContent`)) === 'Tap again', 'override: first tap arms');
+      await H.tap(`[data-override="${idQ}"]`);
+      let fixed = '';
+      for (let k = 0; k < 30; k++) { fixed = await Q.text('quiz-verdict'); if (/Right/.test(fixed)) break; await sleep(100); }
+      expect(/^✓ Right!/.test(fixed), 'host override → Élodie\'s phone now says right', fixed);
+      const v = await H.vibes(), w = await Q.vibes();
+      expect(v.includes('[25]') && v.includes('[30,50,30]') && w.includes('[160]'), 'haptics: send, right, wrong', `${v.join(' ')} / ${w.join(' ')}`);
+    }
+    await H.tap('#quiz-next');
+    if (round < 2) expect(await phaseIs(Q, 'quiz-question'), `Next → question ${round + 2}`);
+  }
+  expect(await phaseIs(H, 'quiz-finished') && await phaseIs(Q, 'quiz-finished'), 'after the last question: finished on both phones');
+  const rank: string = await Q.text('quiz-ranking');
+  expect(/🥇 Pierre/.test(rank) && /Élodie/.test(rank), 'mini ranking', rank);
+  await H.shot('quiz-finished-host');
+  expect(await H.visible('quiz-again') && await H.visible('quiz-back') && !(await Q.visible('quiz-again')), 'host: Play again / Back; guests wait');
+
+  // ---- quiz 2 (Play again): typed answers, really typed ----
+  await H.tap('#quiz-again');
+  expect(await phaseIs(H, 'quiz-lobby'), 'Play again → the quiz lobby');
+  await setQuiz(3, 'Typed');
+  await H.tap('#quiz-start');
+  expect(await phaseIs(Q, 'quiz-question') && await Q.visible('quiz-text-form') && !(await Q.visible('quiz-choices')), 'typed round: a text field, no choices');
+  const attrs = await Q.ev(`(() => { const i = document.getElementById('quiz-text'); return [i.getAttribute('autocorrect'), i.getAttribute('autocapitalize'), i.spellcheck, i.lang].join(','); })()`);
+  expect(attrs === 'off,off,false,fr', 'the field never "fixes" names (autocorrect/autocapitalize/spellcheck off, French)', attrs);
+  const top0: number = await Q.ev(`document.getElementById('quiz-q').getBoundingClientRect().top`);
+  await Q.tap('#quiz-text');
+  const top1: number = await Q.ev(`document.getElementById('quiz-q').getBoundingClientRect().top`);
+  expect(top0 === top1, 'focusing the field does not move the question', `${top0} → ${top1}`);
+  for (let round = 0; round < 3; round++) {
+    const bq = byQ.get(plain(await H.text('quiz-q')))!;
+    // a name typed in lower case, without accents: the server's French matcher accepts it
+    const typed = rightText(bq).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+    await H.type('#quiz-text', typed);
+    if (round === 0) await H.shot('quiz-question-typed');
+    await H.tap('#quiz-send');
+    await Q.type('#quiz-text', 'zzz');
+    await Q.tap('#quiz-send');
+    expect(await phaseIs(H, 'quiz-reveal'), `typed round ${round + 1}: reveal`);
+    const hv = await H.text('quiz-verdict');
+    expect(/^✓ Right!/.test(hv) && /^✗ Wrong/.test(await Q.text('quiz-verdict')), `"${typed}" judged right on the server; "zzz" wrong`, hv);
+    const results: string = await Q.text('quiz-results');
+    expect(results.includes(typed) && results.includes('zzz'), 'the reveal lists what everyone typed', results);
+    await H.tap('#quiz-next');
+  }
+  expect(await phaseIs(H, 'quiz-finished'), 'typed quiz finished');
+  await H.tap('#quiz-back');
+  let back = false;
+  for (let k = 0; k < 40 && !back; k++) { back = (await H.snap())?.view === 'view-place'; if (!back) await sleep(100); }
+  expect(back && (await H.text('place-title')).length > 0, 'host Back → the world screen', await H.text('place-title'));
+  } // part 4
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}`);
   if (log) console.log(`--- server log ---\n${log}`);

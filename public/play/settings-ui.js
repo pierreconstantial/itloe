@@ -1,11 +1,23 @@
-// Host settings sheet, generated from shared SETTINGS_SCHEMA; labels, values and the one-line
-// summary come from public/commun/settings-text.js (the same text as the TV).
+// Host settings sheet, generated from a settings schema: the block game's (shared SETTINGS_SCHEMA, text
+// from public/commun/settings-text.js, the same as the TV) or the quiz's (QUIZ_SETTINGS_SCHEMA, text from
+// ./quiz-text.js). Any activity with a schema and a text table gets its sheet for free.
 import { SETTINGS_SCHEMA } from '../../shared/game.js';
 import { $ } from './dom.js';
 import { formatSetting as format, settingText as describe, summarizeSettings } from '../commun/settings-text.js';
 
 /** @typedef {import('../../shared/game.js').Settings} Settings */
 /** @typedef {Record<string, unknown>} AnySettings */
+/**
+ * What the sheet needs to show one activity's settings.
+ * @typedef {{
+ *   schema: Readonly<Record<string, { kind: string, min?: number, max?: number, step?: number, values?: readonly unknown[] }>>,
+ *   text: (key: string) => { label: string, showIf?: (s: AnySettings) => boolean },
+ *   format: (key: string, value: unknown) => string,
+ * }} SettingsKind
+ */
+
+/** The block game's settings. @type {SettingsKind} */
+export const BLOCK_SETTINGS = { schema: SETTINGS_SCHEMA, text: describe, format };
 
 /** "9×9 · timed 3:00 · simple set" — the shared summary (kept as this module's export). */
 export const summarize = summarizeSettings;
@@ -21,6 +33,9 @@ export function createSettingsSheet(io) {
     io.send({ t: 'config', patch: { [key]: value } });
   }
 
+  /** The kind being shown (labels and formats follow it). @type {SettingsKind} */
+  let kind = BLOCK_SETTINGS;
+
   /** @param {string} key @param {readonly unknown[]} values @param {unknown} current */
   function choiceEl(key, values, current) {
     const seg = document.createElement('div');
@@ -28,7 +43,7 @@ export function createSettingsSheet(io) {
     for (const value of values) {
       const b = document.createElement('button');
       b.type = 'button';
-      b.textContent = format(key, value);
+      b.textContent = kind.format(key, value);
       if (value === current) b.classList.add('on');
       b.addEventListener('click', () => { if (value !== current) patch(key, value); });
       seg.append(b);
@@ -43,15 +58,15 @@ export function createSettingsSheet(io) {
     const minus = document.createElement('button');
     minus.type = 'button';
     minus.textContent = '−';
-    minus.setAttribute('aria-label', `Less ${describe(key).label.toLowerCase()}`);
+    minus.setAttribute('aria-label', `Less ${kind.text(key).label.toLowerCase()}`);
     minus.disabled = current <= spec.min;
     minus.addEventListener('click', () => patch(key, Math.max(spec.min, current - spec.step)));
     const value = document.createElement('output');
-    value.textContent = format(key, current);
+    value.textContent = kind.format(key, current);
     const plus = document.createElement('button');
     plus.type = 'button';
     plus.textContent = '+';
-    plus.setAttribute('aria-label', `More ${describe(key).label.toLowerCase()}`);
+    plus.setAttribute('aria-label', `More ${kind.text(key).label.toLowerCase()}`);
     plus.disabled = current >= spec.max;
     plus.addEventListener('click', () => patch(key, Math.min(spec.max, current + spec.step)));
     box.append(minus, value, plus);
@@ -59,13 +74,18 @@ export function createSettingsSheet(io) {
   }
 
   return {
-    /** @param {Settings} settings @param {boolean} editable */
-    render(settings, editable) {
+    /**
+     * @param {Settings | AnySettings} settings
+     * @param {boolean} editable
+     * @param {SettingsKind} [which] the activity's schema and text (default: the block game)
+     */
+    render(settings, editable, which = BLOCK_SETTINGS) {
+      kind = which;
       const s = /** @type {AnySettings} */ (/** @type {unknown} */ (settings));
       const body = $('settings-body');
       body.replaceChildren();
-      for (const [key, spec] of Object.entries(SETTINGS_SCHEMA)) {
-        const meta = describe(key);
+      for (const [key, spec] of Object.entries(kind.schema)) {
+        const meta = kind.text(key);
         if (meta.showIf && !meta.showIf(s)) continue;
         const row = document.createElement('div');
         row.className = 'setting';
@@ -74,7 +94,7 @@ export function createSettingsSheet(io) {
         label.textContent = meta.label;
         row.append(label, spec.kind === 'choice'
           ? choiceEl(key, /** @type {readonly unknown[]} */ (spec.values), s[key])
-          : rangeEl(key, spec, Number(s[key])));
+          : rangeEl(key, /** @type {{ min: number, max: number, step: number }} */ (spec), Number(s[key])));
         body.append(row);
       }
       if (!editable) for (const b of body.querySelectorAll('button')) b.disabled = true;

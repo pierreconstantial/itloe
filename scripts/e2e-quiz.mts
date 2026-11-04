@@ -21,7 +21,7 @@ const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 const BANK_FILE = new URL('../data/quiz/placeholder.json', import.meta.url).pathname;
 const QUIZ = 'childhood.quiz';
 
-type Q = { id: string, q: string, choices?: string[], answer: string | number, accept?: string[] };
+type Q = { id: string, q: string, choices?: string[], answer: string | number, accept?: string[], anecdote?: string };
 
 let server: ChildProcess | null = null;
 let log = '';
@@ -104,6 +104,7 @@ function leakFree(question: Q): { ok: boolean, frames: number, leak?: string } {
         if (!shown.has(text) && raw.includes(JSON.stringify(text))) return { ok: false, frames, leak: text };
       }
       if (/"(verdict|ok)":/.test(raw)) return { ok: false, frames, leak: 'a verdict field' };
+      if (question.anecdote && raw.includes(question.anecdote.slice(0, 40))) return { ok: false, frames, leak: 'the anecdote' };
     }
   }
   return { ok: true, frames };
@@ -222,7 +223,7 @@ try {
   check(q.endReason === 'done' && f.counters['quiz.played'] === 1 && f.counters[`node.${QUIZ}.finished`] === 1, 'last question → finished, quiz.played = 1, node finished');
   check(f.counters['quiz.correct.pierre'] === 3 && f.counters['quiz.correct.elodie'] === 1 && f.counters['quiz.won.pierre'] === 1, 'counters: correct answers per character, the winner');
   check(JSON.stringify([...f.asked].sort()) === JSON.stringify(shown.map((x) => x.id).sort()), `facts.asked = the 3 questions shown (${f.asked.join(', ')})`);
-  check(f.totals.pierre === q.players[idP].score, 'totals carry the quiz score');
+  check(f.totals.quiz?.pierre === q.players[idP].score, 'quiz totals carry the quiz score (per kind)');
   await restart('on the finished quiz', 'finished');
   f = lastView(T).campaign.facts;
   check(f.counters['quiz.played'] === 1, 'restart on the podium: still counted once');
@@ -257,6 +258,7 @@ try {
   mkdirSync(dir, { recursive: true });
   const tiny = ['Victor Hugo', 'Gustave Flaubert', 'Émile Zola'].map((answer, k) => ({
     id: `t${k}`, q: `Auteur ${k} ?`, answer, category: 'test', level: 1, source: 'e2e',
+    anecdote: `Indice : l'auteur est ${answer}.`, // gives the answer away, like many real anecdotes
   }));
   writeFileSync(join(dir, 'tiny.json'), JSON.stringify({ questions: tiny }));
   await boot(true, { BLOKO_QUIZ_DIR: dir });
@@ -277,6 +279,9 @@ try {
   E.send({ t: 'answer', text: tq.answer.toLowerCase() }); // exact (case): right
   q = await untilQuiz(T, (x) => x.phase === 'reveal' && x.round.answers[idP]?.ok !== null, i);
   check(q.round.answers[idP].ok === false && q.round.answers[idE].ok === true, `"${surname}" for "${tq.answer}": uncertain → no judge → wrong; exact → right`);
+  const tleak = leakFree(tq);
+  check(tleak.ok && tleak.frames > 0 && q.round.answer.anecdote === tq.anecdote,
+    `the anecdote (it names the answer) only arrives with the reveal (${tleak.frames} question frames grepped)${tleak.leak ? ` LEAK: ${tleak.leak}` : ''}`);
   i = T.mark(); P.send({ t: 'override', target: idP, ok: true });
   q = await untilQuiz(T, (x) => x.round.answers[idP].ok === true, i);
   check(q.players[idP].score > 0, 'the host overrides it to right: points credited');

@@ -35,6 +35,7 @@
     {
       "id": "ph-mus-mozart", "q": "Quel compositeur est né à Salzbourg en 1756 ?",
       "answer": "Mozart", "accept": ["Wolfgang Amadeus Mozart"],
+      "anecdote": "Mozart composa ses premières pièces à cinq ans ; son père Leopold les nota pour lui.",
       "category": "musique", "level": 1, "source": "placeholder (Bloko, CC0)"
     },
     {
@@ -50,6 +51,7 @@
     {
       "id": "ph-geo-schonbrunn", "q": "Dans quelle ville se trouve le château de Schönbrunn ?",
       "choices": ["Munich", "Prague", "Vienne", "Budapest"], "answer": 2,
+      "anecdote": "Résidence d'été des Habsbourg à Vienne, Schönbrunn compte plus de 1 400 pièces ; l'impératrice Sissi y vécut.",
       "category": "géographie", "level": 1, "source": "placeholder (Bloko, CC0)"
     },
     {
