@@ -73,6 +73,7 @@
         <p id="place-intro" class="dim" hidden></p>
         <ul id="place-children"></ul>
         <p id="place-hint" class="place-hint" hidden>Walk into a door to enter</p>
+        <button type="button" class="bag-open" data-open="bag" hidden>🎒 Bag</button>
         <p id="place-wait" class="dim"></p>
       </div>
       <!-- #stick-pad moves here from the lobby while the party is on the hub or in a world -->
@@ -180,6 +181,7 @@
     <div class="sheet-panel">
       <button type="button" data-open="rules">How to play</button>
       <button type="button" data-open="invite">Invite friends</button>
+      <button type="button" data-open="bag" hidden>🎒 Bag</button>
       <button type="button" id="btn-gm" data-open="gm" hidden>🎲 Game master</button>
       <button type="button" id="btn-vibrate">Vibration: on</button>
       <span id="host-controls" hidden></span>
@@ -212,6 +214,15 @@
       <h2>Game settings</h2>
       <div id="settings-body"></div>
       <button type="button" class="primary" data-close>Done</button>
+    </div>
+  </div>
+
+  <div id="sheet-bag" class="sheet" hidden>
+    <div class="sheet-panel">
+      <h2>🎒 Your bag</h2>
+      <ul id="bag-items" class="bag-items"></ul>
+      <p id="bag-empty" class="dim">Your bag is empty. Rewards land here.</p>
+      <button type="button" class="primary" data-close>Close</button>
     </div>
   </div>
 
@@ -248,6 +259,17 @@
         <button type="button" data-gm="count-set">Set</button>
       </div>
       <datalist id="gm-counters"></datalist>
+
+      <p class="gm-h">Items</p>
+      <div class="gm-row">
+        <select id="gm-item" aria-label="Item"></select>
+        <select id="gm-who" aria-label="Character"></select>
+      </div>
+      <div class="gm-row">
+        <button type="button" data-gm="give">Give</button>
+        <button type="button" data-gm="take">Take</button>
+      </div>
+      <p id="gm-item-held" class="dim gm-why"></p>
 
       <p class="gm-h">Progress</p>
       <pre id="gm-progress" class="gm-progress"></pre>

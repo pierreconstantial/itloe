@@ -8,7 +8,7 @@
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3182 CDP=9222 [LOCK_MS=300000] node scripts/e2e-phone.mts    (never PORT 3131: the live server)
 // LOCK_MS is how long the "phone locked" case freezes the page (default 5 min, as in the acceptance list).
-// ONLY=3 / 4 / 5 runs just that part (campaign screens / quiz / refused room code); a full run is the acceptance.
+// ONLY=3 / 4 / 5 / 6 runs just that part (campaign screens / quiz / refused room code / inventory); a full run is the acceptance.
 // SHOTS=<dir> saves screenshots of the campaign screens.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -727,6 +727,64 @@ try {
   await N.waitFor((x) => x.view === 'view-room', 5000);
   expect(!(await N.visible('room-error')), 'no code sent → just "ask for the code", no error');
   } // part 5
+
+  if (!ONLY || ONLY === '6') {
+  // ================= part 6: inventory (🎒 Bag, game-master give / take) =================
+  console.log('\n— part 6: inventory (bag, give/take) —');
+  await kill9();
+  await boot(true);
+  const G6 = await phone('G6'), B6 = await phone('B6'); // G6: the host (game master); B6: Élodie
+  await joinAs(G6, 'pierre');
+  await joinAs(B6, 'elodie');
+  const bagText = () => B6.ev(`[...document.querySelectorAll('#bag-items li')].map((li) => li.textContent).join(' | ')`);
+  const waitText = async (get: () => Promise<string>, pred: (t: string) => boolean) => {
+    let t = '';
+    for (let k = 0; k < 40; k++) { t = await get(); if (pred(t)) break; await sleep(100); }
+    return t;
+  };
+  await B6.tap('#btn-menu');
+  expect(await B6.ev(`[...document.querySelectorAll('#sheet-menu [data-open="bag"]')].some((b) => !b.hidden)`), '☰ has a 🎒 Bag entry');
+  await B6.ev(`document.querySelector('#sheet-menu [data-open="bag"]').click()`);
+  expect(await B6.visible('bag-empty') && (await bagText()) === '', 'an empty bag says so');
+
+  // the game master gives Élodie a ticket, twice (two-tap each), then takes one back
+  await G6.tap('#btn-menu');
+  await G6.tap('#btn-gm');
+  await G6.ev(`(() => {
+    const it = document.getElementById('gm-item'); it.value = 'ticket'; it.dispatchEvent(new Event('input'));
+    const who = document.getElementById('gm-who'); who.value = 'elodie'; who.dispatchEvent(new Event('input'));
+  })()`);
+  await G6.tap('[data-gm="give"]');
+  expect(/Tap again: give 🎟️ to Élodie/.test(await G6.ev(`document.querySelector('[data-gm="give"]').textContent`)), 'give: the first tap arms');
+  await G6.tap('[data-gm="give"]');
+  let bag = await waitText(bagText, (t) => t.includes('Ticket'));
+  expect(bag.includes('🎟️') && bag.includes('Ticket') && !bag.includes('×'), 'Élodie\'s open bag shows the ticket live (icon, name, description)', bag);
+  await G6.tap('[data-gm="give"]');
+  await G6.tap('[data-gm="give"]');
+  bag = await waitText(bagText, (t) => t.includes('×2'));
+  expect(bag.includes('×2'), 'a second one: ×2', bag);
+  await G6.tap('[data-gm="take"]');
+  await G6.tap('[data-gm="take"]');
+  bag = await waitText(bagText, (t) => !t.includes('×2'));
+  const held: string = await waitText(() => G6.text('gm-item-held'), (t) => /holds 1 ×/.test(t));
+  expect(bag.includes('Ticket') && !bag.includes('×2') && /Élodie holds 1 × 🎟️/.test(held), 'take one back: ×1 left; the panel says how many she holds', `${bag} / ${held}`);
+  const readout: string = await G6.text('gm-progress');
+  expect(/items: Élodie 🎟️×1/.test(readout), 'progress readout: inventory per character', readout.split('\n')[1]);
+
+  // on the hub the place screen has its own Bag button, with my total
+  await G6.tap('#gm-back');
+  await B6.ev(`document.querySelector('#sheet-bag [data-close]').click()`);
+  let label = '';
+  for (let k = 0; k < 40; k++) {
+    label = await B6.ev(`(() => { const b = document.querySelector('#view-place .bag-open'); return b && !b.hidden && b.offsetParent ? b.textContent : ''; })()`);
+    if (label) break;
+    await sleep(100);
+  }
+  expect(label === '🎒 Bag (1)', 'hub screen: a Bag button with my item count', label);
+  await B6.shot('phone-bag-hub');
+  await B6.tap('#view-place .bag-open');
+  await B6.shot('phone-bag-open');
+  } // part 6
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}`);
   if (log) console.log(`--- server log ---\n${log}`);

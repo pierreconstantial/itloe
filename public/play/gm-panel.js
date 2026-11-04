@@ -5,8 +5,10 @@
 // id is written here. Static controls are built once, so a view arriving mid-typing keeps inputs intact.
 import { $ } from './dom.js';
 import { createConfirm } from './confirm.js';
-import { holds } from '../../shared/campaign/index.js';
+import { holds, holding } from '../../shared/campaign/index.js';
 import { childMarks, content, explain, nodeTree, onContentChange, titleOf } from './campaign-view.js';
+import { catalogue } from './bag.js';
+import { CHARACTERS } from '../../shared/characters.js';
 
 /** @typedef {import('../../shared/campaign/types.js').Campaign} Campaign */
 /** @typedef {import('../../shared/campaign/types.js').GmOp} GmOp */
@@ -32,6 +34,9 @@ function contentNames() {
   return { flags: [...flags], counters: [...counters] };
 }
 
+/** @param {string} id */
+const nameOf = (id) => CHARACTERS[/** @type {keyof typeof CHARACTERS} */ (id)]?.name ?? id;
+
 /** @param {HTMLElement} list @param {string[]} values */
 function fillDatalist(list, values) {
   const sig = values.join('|');
@@ -56,7 +61,21 @@ export function createGmPanel(io) {
     if (keep && content().nodes[keep]) select.value = keep;
   }
   fillNodes();
-  onContentChange(() => { names = contentNames(); fillNodes(); confirm.disarm(); redraw(); });
+  onContentChange(() => { names = contentNames(); fillNodes(); fillItems(); confirm.disarm(); redraw(); });
+  const itemSelect = /** @type {HTMLSelectElement} */ ($('gm-item'));
+  const whoSelect = /** @type {HTMLSelectElement} */ ($('gm-who'));
+  /** Items from the content's catalogue (Contract F: nothing outside it exists); characters from the roster. */
+  function fillItems() {
+    const keep = itemSelect.value;
+    itemSelect.replaceChildren(...Object.values(catalogue()).map((it) => Object.assign(document.createElement('option'), {
+      value: it.id, textContent: `${it.icon} ${it.name}`,
+    })));
+    if (keep && catalogue()[keep]) itemSelect.value = keep;
+    whoSelect.replaceChildren(...Object.values(CHARACTERS).map((ch) => Object.assign(document.createElement('option'), {
+      value: ch.id, textContent: ch.name,
+    })));
+  }
+  fillItems();
   const flagInput = /** @type {HTMLInputElement} */ ($('gm-flag'));
   const counterInput = /** @type {HTMLInputElement} */ ($('gm-counter'));
   const countInput = /** @type {HTMLInputElement} */ ($('gm-count'));
@@ -79,6 +98,14 @@ export function createGmPanel(io) {
       const flag = flagInput.value.trim();
       return flag ? { key: `flag-:${flag}`, label: `clear ${flag}`, act: () => gm({ op: 'setFlag', flag, on: false }) } : null;
     },
+    give: () => {
+      const item = catalogue()[itemSelect.value], who = whoSelect.value;
+      return item && who ? { key: `give:${item.id}:${who}`, label: `give ${item.icon} to ${nameOf(who)}`, act: () => gm({ op: 'give', item: item.id, to: /** @type {import('../../shared/characters.js').CharacterId} */ (who), count: 1 }) } : null;
+    },
+    take: () => {
+      const item = catalogue()[itemSelect.value], who = whoSelect.value;
+      return item && who ? { key: `take:${item.id}:${who}`, label: `take ${item.icon} from ${nameOf(who)}`, act: () => gm({ op: 'take', item: item.id, from: /** @type {import('../../shared/characters.js').CharacterId} */ (who), count: 1 }) } : null;
+    },
     'count-set': () => {
       const counter = counterInput.value.trim();
       const set = Number(countInput.value);
@@ -98,7 +125,7 @@ export function createGmPanel(io) {
     });
   }
   // changing the target disarms (the armed action was for the previous one)
-  for (const el of [select, flagInput, counterInput, countInput]) el.addEventListener('input', () => { confirm.disarm(); redraw(); });
+  for (const el of [select, flagInput, counterInput, countInput, itemSelect, whoSelect]) el.addEventListener('input', () => { confirm.disarm(); redraw(); });
   counterInput.addEventListener('change', () => {
     const v = last?.facts.counters[counterInput.value.trim()];
     if (typeof v === 'number') countInput.value = String(v); // start from the current value
@@ -153,12 +180,18 @@ export function createGmPanel(io) {
       $('gm-node-why').textContent = `${state} · unlock: ${explain(sel.unlock, f)}${sel.complete ? ` · complete: ${explain(sel.complete, f)}` : ''}`;
     }
 
+    // what the picked character holds of the picked item (give/take feedback)
+    const it = catalogue()[itemSelect.value];
+    const held = it ? holding(f, whoSelect.value, it.id) : 0;
+    $('gm-item-held').textContent = it ? `${nameOf(whoSelect.value)} holds ${held} × ${it.icon} ${it.name}` : 'No items in this story yet.';
+
     fillDatalist($('gm-flags'), [...new Set([...f.flags, ...names.flags])]);
     fillDatalist($('gm-counters'), [...new Set([...Object.keys(f.counters), ...names.counters])]);
 
     const lines = [
       `unlocked ${f.unlocked.length}/${Object.keys(nodes).length}, done ${f.done.length}, news waiting ${c.news.length}`,
-      `items: ${f.items.join(', ') || '—'}`,
+      // inventory per character (Contract F): "items: Élodie 🗝️×1 · Sol 🎟️×1, 📷×1"
+      `items: ${Object.entries(f.inventory).map(([ch, inv]) => `${nameOf(ch)} ${Object.entries(inv).map(([it, n]) => `${catalogue()[it]?.icon ?? it}×${n}`).join(', ')}`).join(' · ') || '—'}`,
       `flags: ${f.flags.join(', ') || '—'}`,
       'counters:',
       ...Object.entries(f.counters).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `  ${k} = ${v}`),

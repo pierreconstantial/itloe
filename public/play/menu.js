@@ -5,7 +5,7 @@ import { $, pieceEl } from './dom.js';
 import * as haptics from './haptics.js';
 import { RULES } from './rules.js';
 
-const SHEETS = ['menu', 'rules', 'invite', 'settings', 'gm'];
+const SHEETS = ['menu', 'rules', 'invite', 'settings', 'gm', 'bag'];
 const RULE_CELL = 10; // px per cell for rule illustrations
 
 /**

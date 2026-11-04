@@ -21,6 +21,7 @@ import { installBackGuard } from './back-guard.js';
 import { createHostControls } from './host-controls.js';
 import { createGmPanel } from './gm-panel.js';
 import { createQuizUi } from './quiz-ui.js';
+import { createBag } from './bag.js';
 import { QUIZ_SETTINGS } from './quiz-text.js';
 import { childMarks, content, onContentChange, syncContent, titleOf } from './campaign-view.js';
 
@@ -305,6 +306,9 @@ function render() {
   if (q ? !(quizHost && quizConfigurable) : (!isHost || !configurable)) menu.close('settings');
   if (campaign && isGameMaster()) gmPanel.render(campaign);
   else menu.close('gm');
+  // 🎒 my items (Contract F): they hang on my character, so they follow me to any phone
+  bag.render(campaign && mem ? campaign.facts : null, mem ? myCharacter() : null);
+  if (!mem) menu.close('bag');
   updateClock();
 
   // the piece being dragged left our hand → the drag is stale
@@ -735,6 +739,7 @@ const settingsSheet = createSettingsSheet({ send });
 const hostControls = createHostControls({ send });
 const gmPanel = createGmPanel({ send });
 const quizUi = createQuizUi({ send });
+const bag = createBag();
 const picker = createPicker({ onPick: join });
 
 const joystick = createJoystick({

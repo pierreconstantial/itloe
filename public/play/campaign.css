@@ -88,3 +88,11 @@
   line-height: 1.4;
   white-space: pre-wrap;
 }
+
+/* 🎒 Bag (Contract F): my items, read-only in v1 */
+.bag-open { align-self: center; margin-top: 4px; }
+.bag-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; text-align: left; }
+.bag-items li { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--bg); }
+.bag-icon { font-size: 32px; line-height: 1; }
+.bag-text p { margin: 2px 0 0; }
+.bag-count { color: var(--accent); }
