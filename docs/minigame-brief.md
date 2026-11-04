@@ -19,17 +19,14 @@ Itloe is a party game for one evening, and agents write the code. Build what the
 ## Before starting
 
 - **The work happens on the `konst` branch.** Pierre reviews it and merges it into `master`. When to push and open the pull request is Konstantin's decision. `AGENTS.md` applies to every session working on it.
-- **Bring `konst` up to date with `origin/master` first.** It starts from `6e8e6f6`, behind `origin/master` (`ba3c3cd`) by five commits, and isn't pushed yet; Konstantin decides between rebasing and merging. Konstantin's devbox commit `e649722` overlaps the hosting commit `a04fe5a`, which already reads `BLOKO_BIND` but has no `start:local`.
-- **Re-check this brief against those five commits before phase 1, and raise every decision they affect.** In particular:
-  - `0aa8dea` adds `say`, `emote` (victory, fart, annoy) and `interact`: unsaved, rate-limited events the server relays to every client, a 30-message chat history, and speech bubbles and emote effects drawn inside `createPartyRoom`. `interact` checks positions against `PARTY_ROOM`, and is refused during a quiz or a running block game. That touches the unsaved messages (an existing relay to reuse), the avatar layer (bubbles and emotes now live in `createPartyRoom` too), the names shared code keeps, and the table below.
-  - `a04fe5a` adds token-protected hosting (`server/access.ts`), and changes `server/main.ts` and the TV lobby band (`lobby-view.js`).
+- **`konst` is rebased onto `origin/master` at `ba3c3cd`** and isn't pushed yet. This brief is checked against that base.
 
 ## Terms
 
 - **Minigame**: a registered kind of game with its own rules: `blocks` and `quiz` today. A content node's `activity.kind` names a minigame, or `scene`, which stays a content kind without rules.
 - **Round**: one play of a minigame at a tableau. The host starts it from the room, and it runs until its podium closes. `campaign.at.activity` holds the round's state; between rounds there is none.
 - **Status**: a round's `running` or `finished` (podium), derived by the minigame from its state. The quiz's `question` and `reveal` are both `running`.
-- **Room**: a scene of the RPG where avatars walk. Today there is one, the party room.
+- **Room**: a walkable space with walls and furniture (geometry from `shared/scene.js`). The RPG has one today, the party room, shown between rounds; a minigame can bring its own for its round.
 - **Shared code**: everything that isn't a minigame's own files: the campaign engine (the RPG), the server, and the parts of the phone and TV around the games.
 - **Frame**: the screens every minigame shares: the room at a tableau between rounds, the podium, and the host controls.
 - **Unsaved message**: a message a minigame's server code sends to the phones and TVs during its round, never saved.
@@ -37,7 +34,7 @@ Itloe is a party game for one evening, and agents write the code. Build what the
 
 ## Where shared code is game-specific today
 
-Checked against `origin/master` at `7fbc571`: `npm run check` is clean and `npm test` passes 221 of 221.
+Checked against `origin/master` at `ba3c3cd`: `npm run check` is clean and `npm test` passes 227 of 227.
 
 | File | Game-specific today |
 |---|---|
@@ -45,15 +42,15 @@ Checked against `origin/master` at `7fbc571`: `npm run check` is clean and `npm 
 | `shared/campaign/content.js` | A fixed list of activity kinds; the start node must be a blocks tableau. |
 | `shared/campaign/rules.js`, `types.js` | `record()` has one case per finished event (`game.finished`, `quiz.finished`). |
 | `shared/game.js`, `shared/quiz/index.js` | Each has a lobby phase, `join`, `config`, `newGame`, its own `hostId` and its own rule for passing the host on. |
-| `server/main.ts` | One message switch for both games (`handleMessage`, `handleQuiz`); `viewMsg` sends `state`, `quiz` and a campaign with the quiz re-projected; one clock per game; the best-score hook; `joinRefusal` reads `phase`. |
+| `server/main.ts` | One message switch for both games (`handleMessage`, `handleQuiz`); `viewMsg` sends `state`, `quiz` and a campaign with the quiz re-projected; one clock per game; the best-score hook; `joinRefusal` reads `phase`; `interact` is refused during a quiz and outside a block lobby. |
 | `server/resume.ts`, `server/store.ts` | `isQuiz` branches for deadlines, pending verdicts and the boot log line. |
 | `public/screen/main.js` | Routes on `msg.state` and `msg.quiz`; draws the block lobby (the party room with the ITLOE band), the block game and its podium; cutscene gating reads the block podium schedule and the quiz phase. |
-| `public/play/main.js`, `index.html` | Holds the block phone screens (lobby with joystick, board, drag and drop, game over, podium); `lastView` and `quizView` side by side; one fixed `<section id="view-…">` per screen; `canWalk` reads the block phase. |
+| `public/play/main.js`, `index.html` | Holds the block phone screens (lobby with joystick, board, drag and drop, game over, podium); `lastView` and `quizView` side by side; one fixed `<section id="view-…">` per screen; `canWalk` reads the block phase; the joystick and `updateInteraction` use `PARTY_ROOM`; `createSocial` falls back to the block state for player names. |
 | `public/play/quiz-ui.js`, `public/screen/quiz-view.js` | The quiz's own lobby, play and end screens. |
 | `public/play/gm-panel.js`, `host-controls.js` | Read the block phase; host controls exist only for block games. |
-| `public/screen/party-room.js` | Avatar drawing, easing, labels and `pos` handling are internal to `createPartyRoom`. |
+| `public/screen/party-room.js` | Avatar drawing, easing, labels, `pos` handling, speech bubbles and emotes are internal to `createPartyRoom`, as are the furniture effects of object actions. Avatars and the room's props are drawn in one depth-sorted list (`drawOrder`), which `e2e-tv` asserts. |
 
-`scripts/e2e-resume.mts`, `e2e-quiz.mts` and `e2e-campaign.mts` read and edit `campaign.at.activity` in the save file directly. The e2e suites read the block or quiz state from views in about 250 places, and several follow the lobby flow (`phase === 'lobby'`).
+`scripts/e2e-resume.mts`, `e2e-quiz.mts` and `e2e-campaign.mts` read and edit `campaign.at.activity` in the save file directly. The e2e suites read the block or quiz state from views in about 250 places, and several follow the lobby flow (`phase === 'lobby'`). Chat, emotes and object actions have unit tests (`test/social.test.js`, `test/interactions.test.js`) but no end-to-end test.
 
 ## Decisions
 
@@ -72,6 +69,8 @@ Shared code arms one timer per deadline, as the two clocks do today. A stale tim
 
 The campaign stores the round's kind next to it in `campaign.at`. An older save without it gets a derived kind: a state with `kind: 'quiz'` is a quiz, a state without `kind` is blocks. A saved kind that isn't registered stops the boot with an error naming the kind, and leaves the save file untouched. Today a load failure starts a fresh evening and quarantines the save, so this case needs its own path.
 
+**Hosting.** The production release workflow runs `npm run check`, `npm test`, `e2e:resume` and `test/hosting.test.js`. Infrastructure's deploy check reads `room` at the top of the save file and expects a `view` as the first message on a socket; every save change keeps both. A deploy restarts the server, mid-evening too, and relies on resume. A deploy that meets a save with an unregistered kind stops at boot, and Infrastructure restores the previous release and its saved data.
+
 ### Players, rounds and the host: the RPG owns them
 
 - **Between rounds** the party is in the room at the tableau. The host taps Start, and the RPG starts a round with every party member who hasn't left the evening, online or not, as today's lobby seats them.
@@ -86,22 +85,34 @@ The campaign stores the round's kind next to it in `campaign.at`. An older save 
 - **Leaving the tableau** for the world map stays the game-master panel's Back, as today.
 - **Blocks and quiz lose** their lobby phase, `join`, `newGame`, their copy of the host and their own host rule. A save with a lobby open loads as "the party in the room at that tableau", and settings saved in a lobby or on a podium move into the RPG's per-tableau settings.
 
+### Chat, emotes and object actions: the RPG's
+
+Chat (`say`), emotes (`emote`: victory, fart, annoy) and object actions (`interact`: the sofa, the table, the plant) belong to the RPG. Shared code handles them and never passes them to a minigame.
+
+- **Chat and emotes** work at every moment, during rounds too, as today. A minigame can't switch them off.
+- **Object actions** work only between rounds, in the party room. Their objects are the party room's furniture, so a minigame's own room has no object button. With behaviour change 4, the room at a quiz tableau gets them, like the room at a block tableau.
+
 ### Screens: the frame around every minigame
 
-- **The room at a tableau** shows on the TV under a band with the minigame's title (blocks: "ITLOE", quiz: "Quiz!"), its settings, who's in and the join QR. Phones show the joystick, the settings and the host's Start. This is today's block lobby, drawn by shared code from the campaign.
+- **The room at a tableau** shows on the TV under a band with the minigame's title (blocks: "ITLOE", quiz: "Quiz!"), its settings, who's in and the join QR. Phones show the joystick with the object button, the settings and the host's Start. This is today's block lobby, drawn by shared code from the campaign.
 - **The podium** is today's podium, with the extras the minigames supply: the quiz's right-answer count, and the block game's solo "New best!".
 - **The frame decides when cutscenes may play.** It knows when a round runs and when its podium reveal is over.
 - **A minigame draws only while its round runs.** Its running screens mount into a root element the frame gives them. They build their own markup, scope their CSS under that root, and add nothing to `public/play/index.html`. When the frame replaces them, they remove their listeners, loops, sounds and timers.
 - **Moved out of the entry points:** the block code in both `main.js` files moves into block screens. `quiz-ui.js` and `quiz-view.js` keep only the quiz's running screens.
-- **Shared code keeps** the connection, character picker, ☰ menu, game-master panel, bag, join QR, cutscenes and map.
+- **Shared code keeps** the connection, character picker, ☰ menu, game-master panel, bag, chat sheet, object button, join QR, cutscenes and map.
 
 ### Unsaved messages
 
 A minigame's server code can send unsaved messages to the phones and TVs during its round. Shared code drops them once the round has ended, and the clients pass them only to the running minigame's screens. Phones need nothing new in the other direction: their plain messages already reach the minigame's server code, which can handle a message without changing saved state. Fast-moving games are not a goal.
 
+Unsaved messages are their own message, apart from chat and emotes: those are made by players, reach every client at every moment and belong to no round. Only the server's send-to-everyone step is shared.
+
 ### Avatars: usable by any minigame
 
 - **TV.** The avatar drawing leaves `createPartyRoom` and becomes a layer that any minigame's TV screen can use with its own room (geometry from `shared/scene.js`) and the world-to-screen projection. The party room uses the same layer, unchanged. `pos` messages reach the layer whatever screen is showing.
+  - Speech bubbles and emotes move with the layer: `say` and `emote` reach it whatever screen is showing, like `pos`. A minigame's TV screen can show a bubble or an emote over an avatar from its own unsaved message.
+  - The furniture effects of object actions stay in the party room.
+  - In the party room, avatars and props share one depth-sorted list. Whether a minigame's own room can have props that avatars walk behind is settled with the minigame contract at checkpoint 1.
 - **Phone.** A minigame's phone screen can switch on the joystick with its own room and start position. The room between rounds and the map keep using it as today.
 - **Server.**
   - During a round, `pos` belongs to that minigame's room. Those positions are kept apart from the party-room positions and are dropped when the round ends, so the room resumes where everyone stood.
@@ -118,7 +129,7 @@ A minigame's server code can send unsaved messages to the phones and TVs during 
 
 ### Messages and views
 
-- **Phone to server: plain messages, with today's names.** Shared code handles `hello`, `join`, `leave`, `enter`, `back`, `gm`, `ack`, `pos`, `showJoin` and `hideJoin`, and now also the RPG's round messages:
+- **Phone to server: plain messages, with today's names.** Shared code handles `hello`, `join`, `leave`, `enter`, `back`, `gm`, `ack`, `pos`, `say`, `emote`, `interact`, `showJoin` and `hideJoin`, and now also the RPG's round messages:
   - `start`: start a round;
   - `again`: play again;
   - `newGame`: back to the room;
@@ -147,9 +158,11 @@ Before phase 1, in this order, on today's code:
 
 1. **The game-master panel treats a running quiz as under way.** Today its Back and enter buttons look enabled during a quiz question, and the server refuses them.
 2. **The host can end a quiz from the ☰ menu.** The server already accepts `endGame` during a quiz.
-3. **Remove the mock server:** `server/mock.ts`, `npm run mock`, its README row, the mock section of `PROTOCOL.md`, the TV's `bloko.debug`, and client fallbacks that exist only for it. Fallbacks that also cover a failed request stay.
-4. **The quiz's lobby becomes the room,** like the block lobby. The TV shows the party room with the "Quiz!" band; phones show the joystick, the settings and the host's Start.
+3. **Remove the mock server:** `server/mock.ts`, `npm run mock`, its README row, the mock section of `PROTOCOL.md`, the TV's `bloko.debug`, and client fallbacks that exist only for it. Fallbacks that also cover a failed request stay, such as the TV's `fallbackJoinInfo`.
+4. **The quiz's lobby becomes the room,** like the block lobby. The TV shows the party room with the "Quiz!" band; phones show the joystick with the object button, the settings and the host's Start.
 5. **The quiz's end follows the block flow.** On the phone, "Play again" starts a new quiz at once, and "Back to the room" returns to the room at the tableau.
+
+Between 3 and 4, a test-only commit adds end-to-end tests of chat, emotes and object actions as they work today: a socket-level check, and a TV screenshot with a speech bubble and an emote. Behaviour change 4 extends the object-action check to the room at a quiz tableau.
 
 Right after phase 3:
 
@@ -168,7 +181,7 @@ Scope:
 - the status in place of the phase checks in the campaign;
 - the common result and its recording;
 - content validation through the list, accepting a tableau of any registered minigame as the start node;
-- the server's `isQuiz` and non-quiz checks (resume, boot log, best scores, join refusal, clocks) made explicit through the list.
+- the server's `isQuiz` and non-quiz checks (resume, boot log, best scores, join refusal, clocks, object actions) made explicit through the list.
 
 Lobbies stay inside the games for now, and the wire stays as it is.
 
@@ -249,11 +262,11 @@ Done when:
 
 ### Phase 5: unsaved messages and avatars for minigames
 
-Scope: unsaved messages; the avatar layer extracted from `createPartyRoom`; the joystick for minigame phone screens; `pos` per round; the server-code hooks for who may walk and for reading positions; `PROTOCOL.md`.
+Scope: unsaved messages; the avatar layer extracted from `createPartyRoom`, with speech bubbles and emotes; the joystick for minigame phone screens; `pos` per round; the server-code hooks for who may walk and for reading positions; `PROTOCOL.md`.
 
 Done when:
 
-- the party room looks and behaves as before, by the existing suites and the screenshots;
+- the party room looks and behaves as before, speech bubbles and emotes included, by the existing suites and the screenshots;
 - tests with a stand-in minigame show that a game can enable walking for some players and not others, read their positions, and send an unsaved message that reaches the TVs. They also show that the party-room positions are back after the round, and that an unsaved message after the round ended is dropped. The tests call the shared functions with a stand-in, so nothing test-only ships.
 
 ### Phase 6: development start and the contributor guide
