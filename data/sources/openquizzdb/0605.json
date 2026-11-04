@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mouscron",         
+  "mise-à-jour": "13/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle province belge se situe la ville de Mouscron ?",
+        "propositions": [
+          "Hainaut",
+          "Limbourg",
+          "Liège",
+          "Namur"
+        ],
+        "réponse": "Hainaut",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mouscron",
+        "anecdote": "La ville de Mouscron fait non seulement partie du Hainaut Occidental, mais aussi de la région culturelle de la Flandre romane."
+      },
+      {
+        "id": 2,
+        "question": "Par quel cortège démarre début octobre la fête des Hurlus ?",
+        "propositions": [
+          "Laminoirs",
+          "Allumoirs",
+          "Grattoirs",
+          "Dortoirs"
+        ],
+        "réponse": "Allumoirs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mouscron",
+        "anecdote": "On peut y entendre : « Vivent les allumoirs, ma mère, vivent les allumoirs. On les allume quand il fait noir, Vivent les allumoirs ! »"
+      },
+      {
+        "id": 3,
+        "question": "Quelle actrice montante du cinéma est née à Mouscron, en Belgique ?",
+        "propositions": [
+          "Jade Foret",
+          "Kim Hertogs",
+          "Laurence Bibot",
+          "Fantine Harduin"
+        ],
+        "réponse": "Fantine Harduin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fantine_Harduin",
+        "anecdote": "Issue d'une famille d'artistes, Fantine fut très tôt initiée à la scène et a ainsi foulé les planches dès son plus jeune âge."
+      },
+      {
+        "id": 4,
+        "question": "En quoi a été reconvertie l'ancienne piscine communale de Mouscron ?",
+        "propositions": [
+          "Garages",
+          "Hôtel",
+          "Commerces",
+          "Espace d'exposition"
+        ],
+        "réponse": "Espace d'exposition",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mouscron",
+        "anecdote": "Son architecture claire et fonctionnelle est caractérisée par des lignes harmonieuses, des briques ocres et un lanterneau en verre."
+      }
+    ]
+}

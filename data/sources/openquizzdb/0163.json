@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "California Vibes",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle île hébergea une prison fédérale de haute sécurité jusqu'en 1963 ?",
+        "propositions": [
+          "Santa Cruz",
+          "San Miguel",
+          "Alvatraz",
+          "Anacapa"
+        ],
+        "réponse": "Alvatraz",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Île_d'Alcatraz",
+        "anecdote": "Le complexe d'Alcatraz est aujourd'hui reconverti en un site historique géré par le service des parcs nationaux des États-Unis."
+      },
+      {
+        "id": 2,
+        "question": "Quelle riviera américaine possède une série télévisée à son nom ?",
+        "propositions": [
+          "Santa Monica",
+          "Santa Barbara",
+          "Santa Rosa",
+          "Santa Clarita"
+        ],
+        "réponse": "Santa Barbara",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Santa_Barbara_(Californie)",
+        "anecdote": "Elle est aussi connue pour être le lieu de résidence de nombreuses personnalités d'Hollywood ou du monde des médias californiens."
+      },
+      {
+        "id": 3,
+        "question": "Quel conifère géant est recensé en Californie, dans la Sierra Nevada ?",
+        "propositions": [
+          "Séquoia géant",
+          "Noyer noir",
+          "Frêne blanc",
+          "Sapin gracieux"
+        ],
+        "réponse": "Séquoia géant",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Séquoia_géant",
+        "anecdote": "Le chef indien Sequoyah le Cherokee, inventeur de l'alphabet cherokee, a donné son nom à l'arbre en raison de sa force."
+      },
+      {
+        "id": 4,
+        "question": "Quel parc à thème spécialisé dans le monde marin se situe à Orlando ?",
+        "propositions": [
+          "Epcot",
+          "Magic Kingdom",
+          "Everland",
+          "SeaWorld"
+        ],
+        "réponse": "SeaWorld",
+        "wikipédia": "https://fr.wikipedia.org/wiki/SeaWorld_San_Diego",
+        "anecdote": "Les représentants de la mascotte du parc (l'orque Shamu) s'exécutent dans un spectacle qui existe depuis l'ouverture du parc."
+      }
+    ]
+}

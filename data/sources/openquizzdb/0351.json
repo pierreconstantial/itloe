@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Réalisatrices",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle comédie de Josiane Balasko traite de l'homosexualité féminine ?",
+        "propositions": [
+          "Sac de noeuds",
+          "Gazon maudit",
+          "Cliente",
+          "Les Keufs"
+        ],
+        "réponse": "Gazon maudit",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gazon_maudit",
+        "anecdote": "Josiane Balasko a voulu réaliser un film empreint d'humour et de scènes alliant la poésie au comique de situations tragiques et drôles."
+      },
+      {
+        "id": 2,
+        "question": "Dans lequel de ses films se fait-elle passer pour un garçon ?",
+        "propositions": [
+          "100% cachemire",
+          "Le Derrière",
+          "Palais Royal",
+          "Quadrille"
+        ],
+        "réponse": "Le Derrière",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Derrière",
+        "anecdote": "Valérie Lemercier a adapté au cinéma la pièce de Sacha Guitry, « Quadrille », et a réalisé une quinzaine de films publicitaires."
+      },
+      {
+        "id": 3,
+        "question": "À qui doit-on le film « Je vous trouve très beau », avec Michel Blanc ?",
+        "propositions": [
+          "Isabelle Mergault",
+          "Agnès Varda",
+          "Coline Serreau",
+          "Claire Denis"
+        ],
+        "réponse": "Isabelle Mergault",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Je_vous_trouve_très_beau",
+        "anecdote": "Le titre finalement retenu correspond à la phrase standard en français apprise par toutes les candidates roumaines au mariage."
+      },
+      {
+        "id": 4,
+        "question": "Quelle réalisatrice vous propose de « se souvenir des belles choses » ?",
+        "propositions": [
+          "Coline Serreau",
+          "Zabou Breitman",
+          "Agnès Jaoui",
+          "Léa Fehner"
+        ],
+        "réponse": "Zabou Breitman",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Se_souvenir_des_belles_choses",
+        "anecdote": "Isabelle Carré et Bernard Campan ont reçu pour ce film la Chistera de bronze au Festival de Saint-Jean-de-Luz."
+      }
+    ]
+}

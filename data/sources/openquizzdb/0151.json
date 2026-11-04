@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Déjeuner du matin",         
+  "mise-à-jour": "30/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel petit déjeuner est plus copieux que le repas continental ?",
+        "propositions": [
+          "Norvégien",
+          "Russe",
+          "Croate",
+          "Anglo-saxon"
+        ],
+        "réponse": "Anglo-saxon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Déjeuner",
+        "anecdote": "Il est composé d'oeufs (sur le plat ou brouillés), de bacon, de tomates cuites, parfois de champignons ou de pommes de terre."
+      },
+      {
+        "id": 2,
+        "question": "Quel petit déjeuner est parfois mélangé avec le repas de midi ?",
+        "propositions": [
+          "Banquet",
+          "Brunch",
+          "Pique-nique",
+          "Goûter"
+        ],
+        "réponse": "Brunch",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Brunch",
+        "anecdote": "On en trouve des variantes en Irlande, en Ulster, en Écosse, au pays de Galles, en Angleterre, en Amérique du Nord et centrale."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel établissement prend-on le petit déjeuner avec les clients ?",
+        "propositions": [
+          "Cinéma",
+          "Sauna",
+          "Chambre d'hôte",
+          "Ascenseur"
+        ],
+        "réponse": "Chambre d'hôte",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chambre_d'hôtes",
+        "anecdote": "Le repas en table d'hôtes a un caractère convivial et permet de discuter avec propriétaires et résidents autour de plats régionaux."
+      },
+      {
+        "id": 4,
+        "question": "Comment Stephan Eicher souhaite-il prendre son déjeuner ?",
+        "propositions": [
+          "En pyjama",
+          "En lévitation",
+          "En musique",
+          "En paix"
+        ],
+        "réponse": "En paix",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Engelberg_(album)",
+        "anecdote": "« Engelberg », sorti en 1991, est le sixième album studio de Stephan Eicher, fruit d'une collaboration avec l'écrivain Philippe Djian."
+      }
+    ]
+}

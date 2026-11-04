@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #O",         
+  "mise-à-jour": "06/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment se prénomme la copine de Popeye le marin ?",
+        "propositions": [
+          "Odile",
+          "Olive",
+          "Octavie",
+          "Océane"
+        ],
+        "réponse": "Olive",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Popeye",
+        "anecdote": "Dans le dessin animé, Olive se fait régulièrement séduire et kidnapper par Brutus avant d'être sauvée par Popeye."
+      },
+      {
+        "id": 2,
+        "question": "Quel groupe de rock alternatif était composé des frères Gallagher ?",
+        "propositions": [
+          "OMD",
+          "Oasis",
+          "Offspring",
+          "Ottawan"
+        ],
+        "réponse": "Oasis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Oasis_(groupe)",
+        "anecdote": "Formé en 1991 et initialement nommé The Rain, Oasis est l'un des pionniers du mouvement Britpop, refusant cette étiquette."
+      },
+      {
+        "id": 3,
+        "question": "Quelle capitale de la Norvège s'est appelée Christiania de 1624 à 1924 ?",
+        "propositions": [
+          "Oulan Bator",
+          "Oxford",
+          "Oslo",
+          "Ottawa"
+        ],
+        "réponse": "Oslo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Oslo",
+        "anecdote": "Il n'y a pas de gentilé d'usage générique dans la langue norvégienne pour les habitants et originaires d'Oslo."
+      },
+      {
+        "id": 4,
+        "question": "Dans le domaine financier, que signifie le « O » du sigle boursier OPA ?",
+        "propositions": [
+          "Ouverture",
+          "Opportunité",
+          "Opération",
+          "Offre"
+        ],
+        "réponse": "Offre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/OPA",
+        "anecdote": "Certains raideurs sont des personnes qui lancent seuls une OPA hostile."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Peuples dans l'histoire",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel peuple germanique s'installa au Ve siècle dans l'actuelle Espagne ?",
+        "propositions": [
+          "Wisigoths",
+          "Ostrogoths",
+          "Burgondes",
+          "Jutes"
+        ],
+        "réponse": "Wisigoths",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Royaume_wisigoth",
+        "anecdote": "Le royaume wisigoth a existé de 418 à 711, à la suite des Grandes invasions et jusqu'au Haut Moyen Âge."
+      },
+      {
+        "id": 2,
+        "question": "Lequel de ces termes faisait autrefois référence aux Vikings ?",
+        "propositions": [
+          "Gallois",
+          "Normands",
+          "Germains",
+          "Bretons"
+        ],
+        "réponse": "Normands",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vikings",
+        "anecdote": "Les peuples en contact avec les Vikings leur ont donné différents noms : Normands, Danois ou Rus."
+      },
+      {
+        "id": 3,
+        "question": "Quel peuple antique occupait les territoires de l'actuelle Bulgarie ?",
+        "propositions": [
+          "Alains",
+          "Wisigothes",
+          "Thraces",
+          "Scythes"
+        ],
+        "réponse": "Thraces",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Thraces",
+        "anecdote": "Orale, la culture des Thraces était faite de légendes et de mythes incluant la croyance en l'immortalité."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel pays les Parses se sont-ils installés au XIIIe siècle ?",
+        "propositions": [
+          "Inde",
+          "Égypte",
+          "Afghanistan",
+          "Chine"
+        ],
+        "réponse": "Inde",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Perses",
+        "anecdote": "Les Parses descendent des anciens Perses qui émigrèrent en Inde pour se soustraire aux persécutions musulmanes."
+      }
+    ]
+}

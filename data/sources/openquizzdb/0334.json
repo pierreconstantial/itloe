@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Bruce Willis au cinéma",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel rôle joue Bruce Willis dans la saga à succès « Die Hard » ?",
+        "propositions": [
+          "Peter Fallow",
+          "John McClane",
+          "Tom Mix",
+          "Walter Davis"
+        ],
+        "réponse": "John McClane",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Die_Hard",
+        "anecdote": "La franchise met en vedette un policier, John McClane, qui n'a pas peur de recourir à des méthodes musclées."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le métier de Bruce Willis dans « Pulp Fiction », de Tarantino ?",
+        "propositions": [
+          "Boxeur",
+          "Footballeur",
+          "Vétérinaire",
+          "Avocat"
+        ],
+        "réponse": "Boxeur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pulp_Fiction",
+        "anecdote": "« Pulp Fiction » a été récompensé par la Palme d'or au Festival de Cannes 1994."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel film Bruce Willis incarne-t-il un psychologue pour enfant ?",
+        "propositions": [
+          "Sixième Sens",
+          "Sale Môme",
+          "Une vie à deux",
+          "Otage"
+        ],
+        "réponse": "Sixième Sens",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sixième_Sens_(film)",
+        "anecdote": "« Sixième Sens » est le premier vrai succès commercial, critique et public de M. Night Shyamalan."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel film Bruce Willis commande-t-il une équipe d'astronautes ?",
+        "propositions": [
+          "Armageddon",
+          "Looper",
+          "Sin City",
+          "Sixième Sens"
+        ],
+        "réponse": "Armageddon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Armageddon_(film,_1998)",
+        "anecdote": "La bande originale du film « Armageddon » est composée de quatorze titres, dont quatre du groupe Aerosmith."
+      }
+    ]
+}

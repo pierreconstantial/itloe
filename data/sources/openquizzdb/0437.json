@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Rio 2016",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel était le nom de la mascotte des Jeux olympiques d'été de 2016 ?",
+        "propositions": [
+          "Vinicius",
+          "Smiley",
+          "Youppi",
+          "Blaze"
+        ],
+        "réponse": "Vinicius",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mascotte_olympique",
+        "anecdote": "Depuis les Jeux d'hiver de 1968, chaque édition des Jeux (été et hiver) possède une mascotte officielle."
+      },
+      {
+        "id": 2,
+        "question": "Après les JO 2016, à quelle ville a été remise la flamme olympique ?",
+        "propositions": [
+          "Lima",
+          "Copenhague",
+          "Tokyo",
+          "Mexico"
+        ],
+        "réponse": "Tokyo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jeux_olympiques_d'été_de_2020",
+        "anecdote": "Le logo de la candidature japonaise représente des fleurs de cerisier, fleur symbole de Tokyo, disposées en cercle."
+      },
+      {
+        "id": 3,
+        "question": "Quel pays a été suspendu de l'athlétisme aux JO de 2016 ?",
+        "propositions": [
+          "Autriche",
+          "Russie",
+          "Haïti",
+          "Canada"
+        ],
+        "réponse": "Russie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jeux_olympiques_d'été_de_2016",
+        "anecdote": "Suite à des accusations de dopage, l'Agence mondiale antidopage appela à l'exclusion de la Russie des Jeux olympiques."
+      },
+      {
+        "id": 4,
+        "question": "Combien de bénévoles ont aidé aux JO de Rio 2016 ?",
+        "propositions": [
+          "30 000",
+          "90 000",
+          "70 000",
+          "50 000"
+        ],
+        "réponse": "70 000",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jeux_olympiques_d'été_de_2016",
+        "anecdote": "Le budget global du comité d'organisation pour Rio 2016, incluant les frais de candidature, s'élève à 7,4 milliards de réals."
+      }
+    ]
+}

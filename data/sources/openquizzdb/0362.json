@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #35",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Famille encombrante, mot de cinq lettres commençant par un S ?",
+        "propositions": [
+          "Soupe",
+          "Serbe",
+          "Sushi",
+          "Smala"
+        ],
+        "réponse": "Smala",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Ne manque pas d'énergie, mot de sept lettres commençant par un B ?",
+        "propositions": [
+          "Bouquet",
+          "Baguage",
+          "Bidasse",
+          "Batterie"
+        ],
+        "réponse": "Batterie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Petit trésor en toque, mot de sept lettres commençant par un R ?",
+        "propositions": [
+          "Recette",
+          "Rapport",
+          "Récolte",
+          "Royaume"
+        ],
+        "réponse": "Recette",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Pilier de l'horoscope, mot de cinq lettres commençant par un A ?",
+        "propositions": [
+          "Astre",
+          "Alpha",
+          "Appui",
+          "Agent"
+        ],
+        "réponse": "Astre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

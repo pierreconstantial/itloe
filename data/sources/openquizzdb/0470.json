@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Visite à Londres",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quel palais britannique Big Ben est-elle désignée la grande cloche ?",
+        "propositions": [
+          "Warrington",
+          "Winchester",
+          "Westminster",
+          "Worcester"
+        ],
+        "réponse": "Westminster",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Palais_de_Westminster",
+        "anecdote": "Le palais borde la rive nord de la Tamise et se situe dans l'arrondissement londonien de la Cité de Westminster."
+      },
+      {
+        "id": 2,
+        "question": "De quelle couleur sont les célèbres LTI, les taxis londoniens ?",
+        "propositions": [
+          "Noire",
+          "Jaune",
+          "Verte",
+          "Rouge"
+        ],
+        "réponse": "Noire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/London_Taxis_International",
+        "anecdote": "La compagnie London Taxis International produit chaque année pas moins de 30 000 nouveaux « taxis noirs »."
+      },
+      {
+        "id": 3,
+        "question": "À Londres, où êtes-vous si vous circulez dans le « Tube » ?",
+        "propositions": [
+          "Dans le métro",
+          "Dans le taxi",
+          "Dans le train",
+          "Dans le bus"
+        ],
+        "réponse": "Dans le métro",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Métro_de_Londres",
+        "anecdote": "Ouvert en 1863, le métro de Londres ou « London Underground » est le plus vieux métro du monde."
+      },
+      {
+        "id": 4,
+        "question": "À Londres, quel grand édifice porte le nom de Sir Benjamin Hall ?",
+        "propositions": [
+          "Big Ben",
+          "Kew Palace",
+          "Old Bailey",
+          "Syon House"
+        ],
+        "réponse": "Big Ben",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Big_Ben",
+        "anecdote": "Seules les personnes qui habitent au Royaume-Uni peuvent visiter Big Ben, après avoir toutefois réussi à obtenir une autorisation."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #32",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel accent est la réunion d'un accent aigu et d'un accent grave ?",
+        "propositions": [
+          "Sirconflexe",
+          "Cireconflexe",
+          "Sireconflexe",
+          "Circonflexe"
+        ],
+        "réponse": "Circonflexe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel signe a traditionnellement la forme d'une virgule placée en hauteur ?",
+        "propositions": [
+          "Apaustrophe",
+          "Apostrophe",
+          "Apostrofe",
+          "Appostrophe"
+        ],
+        "réponse": "Apostrophe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel fruit se développe sur un pseudo-tronc en un régime de 60 baies ?",
+        "propositions": [
+          "Bannane",
+          "Banane",
+          "Bananne",
+          "Bannanne"
+        ],
+        "réponse": "Banane",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel gaz plus léger que l'air peut être utilisé pour gonfler des dirigeables ?",
+        "propositions": [
+          "Hélium",
+          "Élium",
+          "Héliume",
+          "Hellium"
+        ],
+        "réponse": "Hélium",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

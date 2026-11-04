@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Victime de la mode",         
+  "mise-à-jour": "27/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle icône de la mode portait un catogan et des lunettes noires ?",
+        "propositions": [
+          "Thierry Mugler",
+          "Karl Lagerfeld",
+          "Paco Rabanne",
+          "Pierre Cardin"
+        ],
+        "réponse": "Karl Lagerfeld",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Karl_Lagerfeld",
+        "anecdote": "En plus de ses occupations en haute couture, Karl Lagerfeld a édité des livres en Allemagne et possédait une librairie."
+      },
+      {
+        "id": 2,
+        "question": "Quel prénom monsieur Takada a-t-il su faire rayonner dans la mode ?",
+        "propositions": [
+          "Kyrio",
+          "Kalvin",
+          "Karl",
+          "Kenzo"
+        ],
+        "réponse": "Kenzo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kenzo_Takada",
+        "anecdote": "En 1993, Kenzo Takada a revendu la marque Kenzo au groupe LVMH, demeurant propriétaire du nom complet."
+      },
+      {
+        "id": 3,
+        "question": "Quelle fleur est devenue un symbole de la maison Coco Chanel ?",
+        "propositions": [
+          "Coquelicot",
+          "Rose",
+          "Camélia",
+          "Marguerite"
+        ],
+        "réponse": "Camélia",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Camellia",
+        "anecdote": "Coco Chanel a fait du camélia son emblème et a lancé la mode du camélia blanc à la boutonnière, très vite devenue un engouement."
+      },
+      {
+        "id": 4,
+        "question": "Quelle couleur signe les semelles des chaussures Louboutin ?",
+        "propositions": [
+          "Rouge",
+          "Doré",
+          "Mauve",
+          "Bleu"
+        ],
+        "réponse": "Rouge",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Christian_Louboutin",
+        "anecdote": "Il aurait vu son assistante vernir ses ongles avec un rouge vif et décidé que cette couleur pourrait devenir sa future signature."
+      }
+    ]
+}

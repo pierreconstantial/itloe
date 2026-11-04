@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Gérard Le Bras",
+  "thème": "Ville de Vannes",         
+  "mise-à-jour": "17/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À l'entrée de quel golfe se situe la ville de Vannes ?",
+        "propositions": [
+          "Du Lion",
+          "Du Morbihan",
+          "De Saint Florent",
+          "De Sagone"
+        ],
+        "réponse": "Du Morbihan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Golfe_du_Morbihan",
+        "anecdote": "Le golfe du Morbihan est une destination prisée pour la beauté de ses paysages couvrant une centaine de kilomètres carrés avec des paysages maritimes et de nombreuses îles et îlots."
+      },
+      {
+        "id": 2,
+        "question": "Comment appelle-t-on les habitants de la ville de Vannes ?",
+        "propositions": [
+          "Vannetais",
+          "Vannois",
+          "Vannais",
+          "Vannetois"
+        ],
+        "réponse": "Vannetais",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vannes",
+        "anecdote": "Il est à noter que la ville est la deuxième plus peuplée du département après Lorient et la 5e de la région Bretagne."
+      },
+      {
+        "id": 3,
+        "question": "Vannes se situe entre Quimper et quelle autre grande ville de France ?",
+        "propositions": [
+          "Bordeaux",
+          "Bourges",
+          "Nantes",
+          "Laval"
+        ],
+        "réponse": "Nantes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nantes",
+        "anecdote": "L'histoire de Nantes est en grande partie liée à celle de la Bretagne, qui deviendra la capitale du duché au XVe siècle."
+      },
+      {
+        "id": 4,
+        "question": "Quel peuple de Gaule celtique occupait le pays de Vannes ?",
+        "propositions": [
+          "Wisigoths",
+          "Vanètes",
+          "Vénigoths",
+          "Vénètes"
+        ],
+        "réponse": "Vénètes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vénètes_(Gaule)",
+        "anecdote": "Les Vénètes, dotés d'un sénat, disposaient d'une flotte importante pour commercer avec les îles Britanniques et la péninsule italienne."
+      }
+    ]
+}

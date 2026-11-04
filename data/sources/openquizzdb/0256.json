@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #V",         
+  "mise-à-jour": "15/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle ville peut-on admirer le très touristique pont des Soupirs ?",
+        "propositions": [
+          "Valence",
+          "Venise",
+          "Vérone",
+          "Versailles"
+        ],
+        "réponse": "Venise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pont_des_Soupirs",
+        "anecdote": "Le pont des Soupirs, suggérant le soupir des prisonniers, est l'un des lieux touristiques les plus célèbres de la ville de Venise."
+      },
+      {
+        "id": 2,
+        "question": "À quel violoniste et compositeur doit-on « Les Quatre Saisons » ?",
+        "propositions": [
+          "Vivaldi",
+          "Vassiliev",
+          "Vitali",
+          "Verdi"
+        ],
+        "réponse": "Vivaldi",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Quatre_Saisons",
+        "anecdote": "À ce jour, il existe plus de 600 versions différentes des « Quatre Saisons »."
+      },
+      {
+        "id": 3,
+        "question": "Quelle ville est depuis 1596 la capitale de la Pologne ?",
+        "propositions": [
+          "Vilnius",
+          "Vaduz",
+          "Vienne",
+          "Varsovie"
+        ],
+        "réponse": "Varsovie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Varsovie",
+        "anecdote": "Varsovie a été détruite à plusieurs reprises par des conflits puis reconstruite."
+      },
+      {
+        "id": 4,
+        "question": "Quelle marque spécialisée en eaux minérales a pour logo un volcan vert ?",
+        "propositions": [
+          "Volvic",
+          "Valvert",
+          "Vittel",
+          "Vichy"
+        ],
+        "réponse": "Volvic",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Volvic_(eau_minérale)",
+        "anecdote": "Cette eau minérale est filtrée naturellement à travers des roches volcaniques pendant plus de cinq ans avant d'être embouteillée."
+      }
+    ]
+}

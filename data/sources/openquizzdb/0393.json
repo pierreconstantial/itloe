@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Hunger Games »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans la saga « Hunger Games », que manque-t-il à un Avox ?",
+        "propositions": [
+          "La parole",
+          "L'odorat",
+          "La vue",
+          "Les dents"
+        ],
+        "réponse": "La parole",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Un Avox est une personne qui a été puni pour être un rebelle contre le Capitole, un traître ou un déserteur."
+      },
+      {
+        "id": 2,
+        "question": "Que représente la broche de Katniss dans « Hunger Games » ?",
+        "propositions": [
+          "Globe",
+          "Pioche",
+          "Geai moqueur",
+          "Arc"
+        ],
+        "réponse": "Geai moqueur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Le geai moqueur est un drôle d'oiseau qui représente une forme de mouflet pour le Capitole."
+      },
+      {
+        "id": 3,
+        "question": "Quelles baies sont empoisonnées dans « Hunger Games » ?",
+        "propositions": [
+          "Baies de sureau",
+          "Baies de goji",
+          "Myrtilles",
+          "Baies de la nuit"
+        ],
+        "réponse": "Baies de sureau",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Peeta est allé à l'école avec Katniss mais n'a jamais été assez courageux pour lui parler car il l'aime en secret."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le nom de famille de Haymitch dans « Hunger Game » ?",
+        "propositions": [
+          "Everdeen",
+          "Trinket",
+          "Abernathy",
+          "Mellark"
+        ],
+        "réponse": "Abernathy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Depuis sa victoire, Haymitch vit de façon aisée dans sa maison située dans le Village des Vainqueurs."
+      }
+    ]
+}

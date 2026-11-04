@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Britney Spears",         
+  "mise-à-jour": "25/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En quelle année Britney Spears a-t-elle vu le jour dans le Mississippi ?",
+        "propositions": [
+          "1981",
+          "1987",
+          "1984",
+          "1978"
+        ],
+        "réponse": "1981",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Britney_Spears",
+        "anecdote": "Les parents de Britney Spears sont Lynne Irene Bridges, ancienne institutrice, et James Parnell Spears, agent immobilier."
+      },
+      {
+        "id": 2,
+        "question": "Comment est-elle habillée dans le clip « ...Baby One More Time » ?",
+        "propositions": [
+          "En lionne",
+          "En policière",
+          "En écolière",
+          "En cosmonaute"
+        ],
+        "réponse": "En écolière",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Britney_Spears",
+        "anecdote": "Pour promouvoir son single, elle a fait la tournée des centres commerciaux dans la plupart des grandes villes des États-Unis."
+      },
+      {
+        "id": 3,
+        "question": "De quel télé-crochet Britney Spears fut-elle une des jurés ?",
+        "propositions": [
+          "The X-Factor",
+          "The Voice",
+          "American Idol",
+          "The Simple Life"
+        ],
+        "réponse": "The X-Factor",
+        "wikipédia": "https://fr.wikipedia.org/wiki/The_X_Factor_(États-Unis)",
+        "anecdote": "En mai 2012, Britney Spears devient juré de la deuxième saison du télé-crochet, décrochant ainsi un contrat de 15 millions de dollars."
+      },
+      {
+        "id": 4,
+        "question": "Avec qui Britney Spears a-t-elle chanté en duo « Me Against the Music » ?",
+        "propositions": [
+          "Madonna",
+          "Dido",
+          "Jennifer Lopez",
+          "Christina Aguilera"
+        ],
+        "réponse": "Madonna",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Me_Against_the_Music",
+        "anecdote": "À la fin du clip, Britney Spears et Madonna se retrouvent nez-à-nez et Madonna disparaît avant que Britney lui ait donné un baiser."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #06",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui mérite une image, mot de quatre lettres commençant par un S ?",
+        "propositions": [
+          "Sage",
+          "Sève",
+          "Slip",
+          "Stop"
+        ],
+        "réponse": "Sage",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Jongleuse de cirque, mot de six lettres commençant par un O ?",
+        "propositions": [
+          "Osmose",
+          "Ovaire",
+          "Otarie",
+          "Octave"
+        ],
+        "réponse": "Otarie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Monstre sacré, mot de cinq lettres commençant par un I ?",
+        "propositions": [
+          "Idole",
+          "Image",
+          "Index",
+          "Inuit"
+        ],
+        "réponse": "Idole",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Se tient au barreau, mot de six lettres commençant par un A ?",
+        "propositions": [
+          "Abruti",
+          "Agenda",
+          "Adulte",
+          "Avocat"
+        ],
+        "réponse": "Avocat",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Animaux et habitats",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle bâtisse est destinée au logement des ânes et des chevaux ?",
+        "propositions": [
+          "Écurie",
+          "Arène",
+          "Ranch",
+          "Hippodrome"
+        ],
+        "réponse": "Écurie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Écurie",
+        "anecdote": "Les différents éléments qui composent l'écurie doivent satisfaire aux conditions d'hygiène nécessaires au maintien en intérieur d'équidés."
+      },
+      {
+        "id": 2,
+        "question": "Quel abri, aménagé par l'homme, est aussi appelé « cabane à oiseaux » ?",
+        "propositions": [
+          "Garenne",
+          "Poulailler",
+          "Frayère",
+          "Nichoir"
+        ],
+        "réponse": "Nichoir",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nichoir",
+        "anecdote": "La construction et l'aménagement de nichoirs n'offrent qu'une maigre compensation face à la disparition des sites naturels."
+      },
+      {
+        "id": 3,
+        "question": "Dans quoi sont généralement réunis les lapins au fond des jardins ?",
+        "propositions": [
+          "Clapier",
+          "Écloserie",
+          "Nichoir",
+          "Volière"
+        ],
+        "réponse": "Clapier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Clapier_(élevage)",
+        "anecdote": "Le clapier comporte habituellement plusieurs cases souvent dotées de portes grillagées, chaque case étant affectée à un lapin."
+      },
+      {
+        "id": 4,
+        "question": "Quelle cage de grande taille est destinée à contenir des oiseaux ?",
+        "propositions": [
+          "Volière",
+          "Valise",
+          "Volute",
+          "Vitrine"
+        ],
+        "réponse": "Volière",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cage",
+        "anecdote": "La cage est très souvent reprise comme symbole ou comme métaphore pour désigner l'emprisonnement."
+      }
+    ]
+}

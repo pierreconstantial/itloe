@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Titres officiels",         
+  "mise-à-jour": "27/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel titre inférieur à celui de vicomte est supérieur à celui de chevalier ?",
+        "propositions": [
+          "Lord",
+          "Consort",
+          "Comte",
+          "Baron"
+        ],
+        "réponse": "Baron",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Baron_(noblesse)",
+        "anecdote": "En Belgique, le titre de baron, accordé par le Roi, est supérieur à celui de chevalier et inférieur à celui de vicomte."
+      },
+      {
+        "id": 2,
+        "question": "Quel titre était attribué à sa naissance au fils aîné du roi de France ?",
+        "propositions": [
+          "Baleine",
+          "Orque",
+          "Dauphin",
+          "Requin"
+        ],
+        "réponse": "Dauphin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dauphin_(titre)",
+        "anecdote": "Dauphin fut à l'origine le surnom, puis le titre, des seigneurs du Dauphiné de Viennois, comtes d'Albon-Viennois."
+      },
+      {
+        "id": 3,
+        "question": "Quel terme a servi à désigner les rois et reines de l'Égypte antique ?",
+        "propositions": [
+          "Émir",
+          "Pacha",
+          "Pharaon",
+          "Khan"
+        ],
+        "réponse": "Pharaon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pharaon",
+        "anecdote": "Les noms de 345 pharaons nous sont parvenus grâce à de multiples attestations, dont des listes royales compilées par les scribes."
+      },
+      {
+        "id": 4,
+        "question": "Quel titre officiel est décerné au chef du gouvernement allemand ?",
+        "propositions": [
+          "Gouverneur",
+          "Recteur",
+          "Chambellan",
+          "Chancelier"
+        ],
+        "réponse": "Chancelier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chancelier",
+        "anecdote": "Dans « Star Wars : La Menace fantôme » (1999), le sénateur Palpatine devient le chancelier suprême de la République galactique."
+      }
+    ]
+}

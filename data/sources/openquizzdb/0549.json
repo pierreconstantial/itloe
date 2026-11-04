@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Autour de la neige",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle substance utilise-t-on pour faire fondre la neige sur les routes ?",
+        "propositions": [
+          "Poivre",
+          "Sucre",
+          "Sel",
+          "Farine"
+        ],
+        "réponse": "Sel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Neige",
+        "anecdote": "En France, les routes sont classées en quatre niveaux de priorité, les routes de niveau 1 étant traitées 24h sur 24 si nécessaire."
+      },
+      {
+        "id": 2,
+        "question": "Quelle jeune artiste a chanté « Jour de neige » à la télévision en 1988 ?",
+        "propositions": [
+          "Patricia Kaas",
+          "Elsa",
+          "Jakie Quartz",
+          "Lio"
+        ],
+        "réponse": "Elsa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jour_de_neige_(chanson)",
+        "anecdote": "Les producteurs ont accompagné le single de ce titre le plus rythmé de l'album de versions clubs destinées aux discothèques."
+      },
+      {
+        "id": 3,
+        "question": "Quel engin est utilisé pour dégager la neige de nos chaussées ?",
+        "propositions": [
+          "Épandeuse",
+          "Pelleteuse",
+          "Dameuse",
+          "Chasse-neige"
+        ],
+        "réponse": "Chasse-neige",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chasse-neige",
+        "anecdote": "Un dispositif de salage peut se trouver à l'arrière ou sur le côté gauche du chasse-neige afin d'éviter la formation de glace."
+      },
+      {
+        "id": 4,
+        "question": "Quel général africain traversa les Alpes avec des éléphants ?",
+        "propositions": [
+          "Scipion",
+          "Hannon",
+          "Hannibal",
+          "Hasdrubal"
+        ],
+        "réponse": "Hannibal",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hannibal_Barca",
+        "anecdote": "La plupart des 27 éléphants d'Hannibal moururent en réalité dans la traversée des Alpes ou dans l'humidité des marais étrusques."
+      }
+    ]
+}

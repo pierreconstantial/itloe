@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #41",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle erreur involontaire de langage peut être commise à voix haute ?",
+        "propositions": [
+          "Lapsuce",
+          "Lapsusse",
+          "Labsus",
+          "Lapsus"
+        ],
+        "réponse": "Lapsus",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel instrument acoustique utilise-t-on surtout en médecine ?",
+        "propositions": [
+          "Stéthoscope",
+          "Stétoscoppe",
+          "Sthétoscope",
+          "Sthéthoscope"
+        ],
+        "réponse": "Stéthoscope",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle opinion, fondée sur les apparences, ressemble à un soupçon ?",
+        "propositions": [
+          "Présumption",
+          "Présomption",
+          "Présemption",
+          "Présamption"
+        ],
+        "réponse": "Présomption",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel adjectif qualificatif signifie extraordinaire, mais avec ironie ?",
+        "propositions": [
+          "Mirrobolent",
+          "Mirobolent",
+          "Mirrobolant",
+          "Mirobolant"
+        ],
+        "réponse": "Mirobolant",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #43",         
+  "mise-à-jour": "15/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle plante herbacée a un goût proche de celui de l'huître ?",
+        "propositions": [
+          "Salsiffille",
+          "Salsifis",
+          "Salsifit",
+          "Salesifi"
+        ],
+        "réponse": "Salsifis",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle histoire ou conte merveilleux peuvent apparaître des fées ?",
+        "propositions": [
+          "Féerie",
+          "Féérrie",
+          "Féérie",
+          "Féerrie"
+        ],
+        "réponse": "Féerie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel genre éteint d'éléphants formait un groupe largement répandu ?",
+        "propositions": [
+          "Mammouth",
+          "Mamout",
+          "Mammout",
+          "Mamouth"
+        ],
+        "réponse": "Mammouth",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle pratique vise à rééquilibrer l'organisme par des moyens naturels ?",
+        "propositions": [
+          "Naturopatie",
+          "Naturopathie",
+          "Naturopathye",
+          "Naturopattie"
+        ],
+        "réponse": "Naturopathie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

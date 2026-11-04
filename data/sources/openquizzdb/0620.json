@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Disco français",         
+  "mise-à-jour": "25/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel titre marque le virage disco du chanteur Claude François ?",
+        "propositions": [
+          "Rubis",
+          "Le mal aimé",
+          "Je vais à Rio",
+          "Après tout"
+        ],
+        "réponse": "Je vais à Rio",
+        "wikipédia": "https://fr.wikipedia.org/wiki/I_Go_to_Rio",
+        "anecdote": "Les estimations de ventes du 45 tours se chiffrent à 317 000 exemplaires. Il atteint la cinquième place des classements français."
+      },
+      {
+        "id": 2,
+        "question": "Quel titre d'Alain Chamfort rend hommage au navigateur Alain Colas ?",
+        "propositions": [
+          "Géant",
+          "Bambou",
+          "Paradis",
+          "Manureva"
+        ],
+        "réponse": "Manureva",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Manureva_(chanson)",
+        "anecdote": "Lors de sa sortie, « Manureva » rencontra un énorme succès commercial, parvenant à se classer à la seconde place du hit-parade."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel album figure « Où sont les femmes », de Patrick Juvet ?",
+        "propositions": [
+          "I Love America",
+          "Chrysalide",
+          "Paris by Night",
+          "Lady night"
+        ],
+        "réponse": "Paris by Night",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Où_sont_les_femmes_  ?",
+        "anecdote": "Ce titre aux sonorités disco marque une nouvelle collaboration entre Patrick Juvet (compositeur) et Jean-Michel Jarre (parolier)."
+      },
+      {
+        "id": 4,
+        "question": "Sous quel nom Isabelle Morizet a-t-elle sorti « Sing to me Mama » ?",
+        "propositions": [
+          "Karen Cheryl",
+          "Amanda Lear",
+          "Anita Ward",
+          "Sheila"
+        ],
+        "réponse": "Karen Cheryl",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Karen_Cheryl",
+        "anecdote": "Karen Cheryl a participé en tant que choriste à une chanson de l'album de Liane Foly, sorti en 2001, « Entre Nous »."
+      }
+    ]
+}

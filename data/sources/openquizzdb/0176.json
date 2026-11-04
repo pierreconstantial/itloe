@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #15",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quelle pratique sexuelle les « swingers » sont-ils les adeptes ?",
+        "propositions": [
+          "Triolisme",
+          "Abstinence",
+          "Méditation",
+          "Échangisme"
+        ],
+        "réponse": "Échangisme",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Swinging_(sexualité)",
+        "anecdote": "Dans les cultures contemporaines, certains couples choisissent d'explorer leur sexualité en dehors du cadre strict de la monogamie traditionnelle. Ces pratiques sont encadrées par des règles de consentement mutuel entre adultes."
+      },
+      {
+        "id": 2,
+        "question": "Quelle chaîne TV diffusa la première un film érotique en France ?",
+        "propositions": [
+          "TF1",
+          "Canal+",
+          "M6",
+          "France 2"
+        ],
+        "réponse": "Canal+",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Canal+",
+        "anecdote": "La chaîne Canal+, lancée en 1984, a révolutionné la télévision française en introduisant un modèle payant sans publicité et une programmation plus libre que celle des chaînes publiques."
+      },
+      {
+        "id": 3,
+        "question": "Pour quelle attirance un scotophile est-il supposé être atteint ?",
+        "propositions": [
+          "Obscurité",
+          "Baisers",
+          "Caresses",
+          "Chaussures"
+        ],
+        "réponse": "Obscurité",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Paraphilie",
+        "anecdote": "Dans la science moderne, on parle plutôt de paraphilies spécifiques ou de comportements atypiques, mais le mot “scotophile” est rarement utilisé en clinique."
+      },
+      {
+        "id": 4,
+        "question": "Quelle nymphe amoureuses garda Ulysse prisonnier sur son île ?",
+        "propositions": [
+          "Calypso",
+          "Daphné",
+          "Circé",
+          "Sapho"
+        ],
+        "réponse": "Calypso",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Calypso_(mythologie)",
+        "anecdote": "Elle lui propose de rester à ses côtés pour toujours et de devenir immortel, mais Ulysse refuse, car son désir de retrouver sa patrie et sa famille est plus fort."
+      }
+    ]
+}

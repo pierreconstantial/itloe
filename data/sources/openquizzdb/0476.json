@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Groupes eighties français",         
+  "mise-à-jour": "08/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel était le métier des deux membres du groupe Début de Soirée ?",
+        "propositions": [
+          "Plombiers",
+          "Avocats",
+          "Comptables",
+          "Disc-jockeys"
+        ],
+        "réponse": "Disc-jockeys",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Début_de_soirée",
+        "anecdote": "Les arrangements de la version la plus connue de 1988 de « Nuit de folie » proviendraient d'une chanson de Patty Ryan."
+      },
+      {
+        "id": 2,
+        "question": "Quel membre du groupe Mano Negra est aussi appelé Oscar Tramor ?",
+        "propositions": [
+          "Pierre Gauthé",
+          "Joseph Dahan",
+          "Daniel Jamet",
+          "Manu Chao"
+        ],
+        "réponse": "Manu Chao",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mano_Negra",
+        "anecdote": "Manu Chao a aussi évolué avec les groupes Joint de culasse, Les Flappers, Hot Pants, Parachute, The Kingsnakes et Los Carayos."
+      },
+      {
+        "id": 3,
+        "question": "Quel titre des Avions sera d'abord un flop avant de devenir un tube ?",
+        "propositions": [
+          "Loin",
+          "Cargo de nuit",
+          "Fanfare",
+          "Nuit Sauvage"
+        ],
+        "réponse": "Nuit Sauvage",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Avions_(groupe)",
+        "anecdote": "Au retour d'un voyage et de nuits en boîte à Lisbonne, les Avions enregistrèrent trois maquettes dont « Nuit Sauvage »."
+      },
+      {
+        "id": 4,
+        "question": "À quel groupe originaire de Toulouse doit-on le tube « Thaï nana » ?",
+        "propositions": [
+          "Les Vagabonds",
+          "Images",
+          "Kazero",
+          "Les Forbans"
+        ],
+        "réponse": "Kazero",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kazero",
+        "anecdote": "Produit par Jacques Cardona, le titre aussi rapide que désabusé et au climat absurde sera leur plus grand succès."
+      }
+    ]
+}

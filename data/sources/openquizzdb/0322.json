@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Potins de stars 2014",         
+  "mise-à-jour": "08/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle rappeuse australienne a été révélation rap en 2014 ?",
+        "propositions": [
+          "Iggy Azalea",
+          "Minzy",
+          "Amber Liu",
+          "Leslie Hall"
+        ],
+        "réponse": "Iggy Azalea",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Iggy_Azalea",
+        "anecdote": "Iggy Azalea a été influencée par le hip-hop dès l'âge de 11 ans, alors qu'elle écoutait Tupac Shakur et sa chanson « Baby Don't Cry »."
+      },
+      {
+        "id": 2,
+        "question": "Quelle actrice et chanteuse américaine a émancipé sa famille en 2014 ?",
+        "propositions": [
+          "Nicki Minaj",
+          "Miley Cyrus",
+          "Selena Gomez",
+          "Hilary Duff"
+        ],
+        "réponse": "Selena Gomez",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Selena_Gomez",
+        "anecdote": "En parallèle à sa carrière, Selena Gomez est également une ambassadrice de bonne volonté pour l'Unicef depuis 2009."
+      },
+      {
+        "id": 3,
+        "question": "Qui a été sacré « homme le plus sexy de 2014 » par le magazine « People » ?",
+        "propositions": [
+          "Hugh Jackman",
+          "Brad Pitt",
+          "Tom Cruise",
+          "Chris Hemsworth"
+        ],
+        "réponse": "Chris Hemsworth",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chris_Hemsworth",
+        "anecdote": "Chris Hemsworth est mondialement reconnu grâce à l'interprétation du super-héros Thor dans les films Marvel."
+      },
+      {
+        "id": 4,
+        "question": "Qui a gagné la saison 4 de « Danse avec les stars » avec Grégoire Lyonnet ?",
+        "propositions": [
+          "Shy'm",
+          "Lorie",
+          "Alizée",
+          "Tal"
+        ],
+        "réponse": "Alizée",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alizée",
+        "anecdote": "Après cette victoire, Alizée sort en juin 2014 un sixième album intitulé « Blonde », réalisé en collaboration avec Pascal Obispo."
+      }
+    ]
+}

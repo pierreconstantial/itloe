@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Boxe",         
+  "mise-à-jour": "19/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de temps dure un round de boxe chez les hommes ?",
+        "propositions": [
+          "Trois minutes",
+          "Cinq minutes",
+          "Deux minutes",
+          "Quatre minutes"
+        ],
+        "réponse": "Trois minutes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Reprise_(boxe)",
+        "anecdote": "Les boxeurs professionnels s'affrontent en 4 rounds de 3 minutes et jusqu'à 12 rounds de 3 minutes lorsqu'un titre est en jeu."
+      },
+      {
+        "id": 2,
+        "question": "En boxe, quel coup touche le boxeur adverse en passant sous sa garde ?",
+        "propositions": [
+          "Direct",
+          "Esquive",
+          "Crochet",
+          "Uppercut"
+        ],
+        "réponse": "Uppercut",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coup_de_poing_remontant",
+        "anecdote": "En boxe anglaise, au XVIIIe siècle, le boxeur anglais Dutch Sam a donné le nom d'uppercut à ce coup appelé auparavant « undercut »."
+      },
+      {
+        "id": 3,
+        "question": "Combien de temps un boxeur est-il compté avant de passer K.O. ?",
+        "propositions": [
+          "10 secondes",
+          "5 secondes",
+          "15 secondes",
+          "20 secondes"
+        ],
+        "réponse": "10 secondes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Knockout",
+        "anecdote": "Le KO technique ou TKO est décidé par l'arbitre quand un des adversaires est blessé et est incapable de continuer le combat."
+      },
+      {
+        "id": 4,
+        "question": "Si vous pesez 48 kilos, dans quelle catégorie boxeriez-vous ?",
+        "propositions": [
+          "Pailles",
+          "Coqs",
+          "Plumes",
+          "Mouches"
+        ],
+        "réponse": "Mouches",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Poids_mouches_(catégorie_de_poids)",
+        "anecdote": "Le britannique Jimmy Wilde est reconnu comme étant le tout premier boxeur champion du monde des poids mouches."
+      }
+    ]
+}

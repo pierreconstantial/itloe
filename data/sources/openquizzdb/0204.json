@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #34",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel titre de Michel Berger est celui d'une compilation de France Gall ?",
+        "propositions": [
+          "Évidemment",
+          "Évidament",
+          "Évidamment",
+          "Évidamant"
+        ],
+        "réponse": "Évidemment",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel type de pirogue légère utilise une pagaie pour la propulsion ?",
+        "propositions": [
+          "Cayak",
+          "Kayaque",
+          "Cayaque",
+          "Kayak"
+        ],
+        "réponse": "Kayak",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Comment appelle-t-on la partie continentale de la France métropolitaine ?",
+        "propositions": [
+          "Héxagone",
+          "Hexagone",
+          "Exhagone",
+          "Hexaguone"
+        ],
+        "réponse": "Hexagone",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "De couleur noire, quel est le plus grand des crocodiliens américains ?",
+        "propositions": [
+          "Kayman",
+          "Cailleman",
+          "Caïman",
+          "Kaïment"
+        ],
+        "réponse": "Caïman",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

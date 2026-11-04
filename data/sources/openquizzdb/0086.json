@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #08",         
+  "mise-à-jour": "07/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un B, il faut un vêtement, un brillant, un truc et une sacoche.",
+        "propositions": [
+          "Bague",
+          "Bidule",
+          "Bermuda",
+          "Besace"
+        ],
+        "réponse": "Bermuda",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un D, il faut un déclencheur, un prêtre, une frontière et un carburant.",
+        "propositions": [
+          "Détente",
+          "Diesel",
+          "Diacre",
+          "Douane"
+        ],
+        "réponse": "Détente",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un G, il faut des crevettes, un surveillant, une hôtesse et un animal.",
+        "propositions": [
+          "Girafe",
+          "Gardien",
+          "Geisha",
+          "Gambas"
+        ],
+        "réponse": "Gambas",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un B, il faut une gifle, une sculpture, une assise et un instrument.",
+        "propositions": [
+          "Bronze",
+          "Banjo",
+          "Banc",
+          "Baigne"
+        ],
+        "réponse": "Baigne",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

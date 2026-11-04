@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Enveloppes de la nature",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel fruit se compose d'une coque sphérique protégeant une amande ?",
+        "propositions": [
+          "Noix du Brésil",
+          "Noix de cajou",
+          "Noix de pécan",
+          "Noix de coco"
+        ],
+        "réponse": "Noix de coco",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Noix_de_coco",
+        "anecdote": "À maturité, la pulpe de la noix de coco est solide et prend une couleur blanche, entourée d'une épaisse couche de fibres ligneuses."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle enveloppe se cachent les graines de petits-pois ?",
+        "propositions": [
+          "Gousse",
+          "Capsule",
+          "Drupe",
+          "Follicule"
+        ],
+        "réponse": "Gousse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gousse",
+        "anecdote": "Chacune des valves emporte une partie du placenta et porte la moitié des graines."
+      },
+      {
+        "id": 3,
+        "question": "Comment appelle-t-on un fruit charnu à noyau tel que la cerise ?",
+        "propositions": [
+          "Faîne",
+          "Nucule",
+          "Drupe",
+          "Baie"
+        ],
+        "réponse": "Drupe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Drupe",
+        "anecdote": "La drupe est caractérisée par un péricarpe composé d'une partie charnue, succulent ou fibreux, et d'une partie sclérifiée, donc dure."
+      },
+      {
+        "id": 4,
+        "question": "Quelle enveloppe verte entourant la coque est spécifique à la noix ?",
+        "propositions": [
+          "Brou",
+          "Pédoncule",
+          "Cramoisi",
+          "Pourpre"
+        ],
+        "réponse": "Brou",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Noix",
+        "anecdote": "Dans certaines cultures, le brou est utilisé pour ses propriétés antiseptiques et astringentes, et pour traiter des problèmes de peau."
+      }
+    ]
+}

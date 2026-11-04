@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #02",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À quel âge Mozart a-t-il composé « Bastien und Bastienn » ?",
+        "propositions": [
+          "12 ans",
+          "14 ans",
+          "10 ans",
+          "16 ans"
+        ],
+        "réponse": "12 ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Wolfgang_Amadeus_Mozart",
+        "anecdote": "À seulement douze ans, Mozart séjourne à Vienne avec son père, Leopold Mozart. C'est durant cette période qu'il compose Bastien und Bastienne, un petit opéra comique en allemand inspiré d'une parodie de l'oeuvre de Jean-Jacques Rousseau, Le Devin du villag"
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la durée de vie moyenne d'une anémone de mer ?",
+        "propositions": [
+          "2 à 5 ans",
+          "30 à 50 ans",
+          "10 à 20 ans",
+          "Plus de 60 ans"
+        ],
+        "réponse": "Plus de 60 ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Actiniaria",
+        "anecdote": "Contrairement à ce que leur nom pourrait laisser croire, les anémones de mer ne sont pas des plantes, mais des animaux proches des coraux et des méduses. Elles possèdent des cellules urticantes leur permettant de capturer leurs proies. Certaines vivent en"
+      },
+      {
+        "id": 3,
+        "question": "Combien de tuiles contient un jeu de Mah-jong ?",
+        "propositions": [
+          "160 tuiles",
+          "108 tuiles",
+          "128 tuiles",
+          "144 tuiles"
+        ],
+        "réponse": "144 tuiles",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mah-jong",
+        "anecdote": "Le mah-jong est apparu en Chine au XIXe siècle et s'est rapidement répandu dans le monde entier. Son nom signifie approximativement « moineau de chanvre », en référence au bruit que produisent les tuiles lorsqu'elles sont mélangées."
+      },
+      {
+        "id": 4,
+        "question": "Combien de piquants possède un porc-épic d'Amérique du Nord ?",
+        "propositions": [
+          "70 000",
+          "30 000",
+          "5 000",
+          "10 000"
+        ],
+        "réponse": "30 000",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Porc-épic_d'Amérique_du_Nord",
+        "anecdote": "Contrairement à une idée répandue, le porc-épic ne tire pas ses piquants : ils se détachent très facilement au contact. Chaque piquant est en réalité un poil durci muni de petites écailles microscopiques orientées vers l'arrière, ce qui le rend difficile "
+      }
+    ]
+}

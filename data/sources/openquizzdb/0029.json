@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Francis Cabrel",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle région habite la dame chantée par Francis Cabrel ?",
+        "propositions": [
+          "Gironde",
+          "Ardèche",
+          "Haute-Savoie",
+          "Haute-Corse"
+        ],
+        "réponse": "Haute-Savoie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Francis_Cabrel",
+        "anecdote": "Francis Cabrel, père de trois filles dont une adoptée, connaît très bien le répertoire de Bob Dylan dont il est un fan inconditionnel."
+      },
+      {
+        "id": 2,
+        "question": "De quoi sont faits les murs du premier album de Francis Cabrel ?",
+        "propositions": [
+          "De briques",
+          "De poussière",
+          "De paille",
+          "De terre"
+        ],
+        "réponse": "De poussière",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Murs_de_poussière",
+        "anecdote": "La maison de disques CBS avait recruté Francis Cabrel après l'avoir entendu chanter « Petite Marie » lors d'un concours à Toulouse."
+      },
+      {
+        "id": 3,
+        "question": "Quel artiste a eu une forte influence dans la carrière de Francis Cabrel ?",
+        "propositions": [
+          "Bob Dylan",
+          "Jimmy Page",
+          "Elvis Presley",
+          "Frank Sinatra"
+        ],
+        "réponse": "Bob Dylan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bob_Dylan",
+        "anecdote": "À treize ans, Francis Cabrel trouve sa voix en entendant pour la première fois « Like a Rolling Stone » de Bob Dylan à la radio."
+      },
+      {
+        "id": 4,
+        "question": "Qui a parodié Francis Cabrel avec « Ma Cabane au fond du jardin » ?",
+        "propositions": [
+          "Nicolas Canteloup",
+          "Laurent Gerra",
+          "Didier Gustin",
+          "Jean Roucas"
+        ],
+        "réponse": "Laurent Gerra",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Cabane_du_pêcheur",
+        "anecdote": "Francis Cabrel n'apprécie pas cette parodie et l'exprimera en 2009 dans une interview de Nicolas Poincaré sur RTL."
+      }
+    ]
+}

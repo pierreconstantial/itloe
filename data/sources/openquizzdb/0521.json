@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Comédies françaises",         
+  "mise-à-jour": "18/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel acteur joue avec Christian Clavier dans le film « Les anges gardiens » ?",
+        "propositions": [
+          "Gérard Depardieu",
+          "Gérard Jugnot",
+          "Jean Reno",
+          "Pierre Richard"
+        ],
+        "réponse": "Gérard Depardieu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Anges_gardiens_(film,_1995)",
+        "anecdote": "Tout au long du film, on peut remarquer  un nombre très important de marques de produits, visibles ou citées."
+      },
+      {
+        "id": 2,
+        "question": "Quelle somme les héros des « Trois Frères » pensent-ils hériter ?",
+        "propositions": [
+          "100 euros",
+          "100 briques",
+          "100 patates",
+          "100 francs"
+        ],
+        "réponse": "100 patates",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Trois_Frères",
+        "anecdote": "À la fin du film, le cuisinier de l'orphelinat les appelle les Rois mages, qui est le nom du film qu'ils tourneront six ans plus tard."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel film Jean Dujardin est-il surfeur blond à planche jaune ?",
+        "propositions": [
+          "Brice de Nice",
+          "OSS 117",
+          "99 francs",
+          "Cash"
+        ],
+        "réponse": "Brice de Nice",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Brice_de_Nice_(film)",
+        "anecdote": "Apparu pour la première fois aux yeux du grand public dans un sketch télévisé, le personnage de Brice a spontanément plu."
+      },
+      {
+        "id": 4,
+        "question": "Lequel de ces acteurs n'apparaît pas dans « Le gendarme se marie » ?",
+        "propositions": [
+          "Maurice Rich",
+          "Christian Marin",
+          "Jean Lefebvre",
+          "Michel Galabru"
+        ],
+        "réponse": "Maurice Rich",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_gendarme_se_marie",
+        "anecdote": "Le tournage fut marqué par une longue grève déclenchée par les événements de Mai 68 et par la mort d'un cascadeur du film."
+      }
+    ]
+}

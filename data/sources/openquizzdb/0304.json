@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #Z",         
+  "mise-à-jour": "01/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle capitale de la Croatie compte près de 700 000 habitants ?",
+        "propositions": [
+          "Zaria",
+          "Zaporijia",
+          "Zagreb",
+          "Zaragoza"
+        ],
+        "réponse": "Zagreb",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Zagreb",
+        "anecdote": "Zagreb est située au nord du pays sur les flancs de la Medvednica à côté de la Save à une altitude d'environ 122 mètres."
+      },
+      {
+        "id": 2,
+        "question": "Quel fleuve se jette dans les chutes Victoria, hautes de 108 mètres ?",
+        "propositions": [
+          "Zala",
+          "Zambèze",
+          "Zanskar",
+          "Zaire"
+        ],
+        "réponse": "Zambèze",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chutes_Victoria",
+        "anecdote": "P"
+      },
+      {
+        "id": 3,
+        "question": "Avec quel fils de Bob Marley le chanteur Sting a-t-il fait un duo ?",
+        "propositions": [
+          "Ziad",
+          "Zachary",
+          "Ziggy",
+          "Zane"
+        ],
+        "réponse": "Ziggy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marley",
+        "anecdote": "P"
+      },
+      {
+        "id": 4,
+        "question": "Quel groupe de blues-rock est composé de trois Texans barbus ?",
+        "propositions": [
+          "Zed Yago",
+          "Zella Day",
+          "ZZ Top",
+          "Zwan"
+        ],
+        "réponse": "ZZ Top",
+        "wikipédia": "https://fr.wikipedia.org/wiki/W",
+        "anecdote": "P"
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Geocaching",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment appelle-t-on la « boîte » recharchée en geocaching ?",
+        "propositions": [
+          "Mega",
+          "Surprise",
+          "Casse-tête",
+          "Cache"
+        ],
+        "réponse": "Cache",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Géocaching",
+        "anecdote": "Une géocache typique est constituée d'un contenant étanche et résistant, d'un registre des visites et d'un ou plusieurs « trésors »."
+      },
+      {
+        "id": 2,
+        "question": "Quel objet sert à trouver des caches en geocaching ?",
+        "propositions": [
+          "Crayon",
+          "GPS",
+          "Lampe de poche",
+          "Parapluie"
+        ],
+        "réponse": "GPS",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Global_Positioning_System",
+        "anecdote": "Ce système de géolocalisation mondial repose sur l'exploitation de signaux radio émis par des satellites dédiés."
+      },
+      {
+        "id": 3,
+        "question": "Comment doit être une geocache pour mieux résister dans le temps ?",
+        "propositions": [
+          "Cartonnée",
+          "Colorée",
+          "Ouverte",
+          "Étanche"
+        ],
+        "réponse": "Étanche",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Étanchéité",
+        "anecdote": "L'étanchéité physique concerne l'interdiction de passage d'un solide, d'un fluide ou d'un gaz, souvent au moyen d'un joint."
+      },
+      {
+        "id": 4,
+        "question": "Comment les non-initiés au geocaching sont-ils appelés ?",
+        "propositions": [
+          "Rapetous",
+          "Gobelins",
+          "Moldus",
+          "Cracmous"
+        ],
+        "réponse": "Moldus",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Géocaching",
+        "anecdote": "Cette appellation, faisant partie du jargon du geocaching, est en fait une référence à la série littéraire « Harry Potter »."
+      }
+    ]
+}

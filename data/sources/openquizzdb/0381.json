@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Chasse aux insectes",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment sont appelées les larves du hanneton qui sont radicivores ?",
+        "propositions": [
+          "Vers blancs",
+          "Nymphes",
+          "Chenilles",
+          "Coques"
+        ],
+        "réponse": "Vers blancs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Melolonthinae",
+        "anecdote": "Les vers blancs se transforment en nymphes. Au bout de 4 à 6 semaines, un coléoptère sortira du cocon."
+      },
+      {
+        "id": 2,
+        "question": "Quelle partie du corps de la mouche bleue lui permet de manger ?",
+        "propositions": [
+          "Pattes",
+          "Ailes",
+          "Trompe",
+          "Mâchoire"
+        ],
+        "réponse": "Trompe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mouche_bleue",
+        "anecdote": "Grâce à cette trompe, la mouche bleue, pollinisatrice de fleurs à forte odeur, peut aspirer pollens et nectars."
+      },
+      {
+        "id": 3,
+        "question": "Combien de points visibles a la coccinelle des légumineuses ?",
+        "propositions": [
+          "24",
+          "14",
+          "44",
+          "34"
+        ],
+        "réponse": "24",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Subcoccinella_vigintiquatuorpunctata",
+        "anecdote": "La coccinelle des légumineuses possède des ailes oranges marquées de 24 points."
+      },
+      {
+        "id": 4,
+        "question": "Considéré comme ravageur, à quelle hauteur un criquet peut-il sauter ?",
+        "propositions": [
+          "12 cm",
+          "130 cm",
+          "70 cm",
+          "210 cm"
+        ],
+        "réponse": "70 cm",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Caelifera",
+        "anecdote": "Par rapport à sa taille, aucun être vivant sur Terre n'est capable de sauter aussi haut."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Boucles de corde",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel noeud marin forme une boule et sert de lest ?",
+        "propositions": [
+          "Poing de singe",
+          "Noeud de palan",
+          "Noeud de sang",
+          "Noeud plat"
+        ],
+        "réponse": "Poing de singe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Poing_de_singe",
+        "anecdote": "Enroulement continu du même cordage, le poing de singe est souvent réalisé autour d'une bille qui va lui donner sa forme."
+      },
+      {
+        "id": 2,
+        "question": "Quel noeud non coulant est facile à défaire après traction ?",
+        "propositions": [
+          "Noeud de ride",
+          "Noeud plat",
+          "Noeud de chaise",
+          "Noeud de lestage"
+        ],
+        "réponse": "Noeud de chaise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Noeud_de_chaise",
+        "anecdote": "Toutefois, s'il ne peut être dénoué sous tension, il risque de se dénouer tout seul s'il n'est pas soumis à une tension constante."
+      },
+      {
+        "id": 3,
+        "question": "Quel noeud d'arrêt est aussi appelé noeud entier ou noeud plein ?",
+        "propositions": [
+          "Noeud double",
+          "Noeud de voleur",
+          "Noeud de bois",
+          "Noeud papillon"
+        ],
+        "réponse": "Noeud double",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Noeud_double",
+        "anecdote": "En spéléologie, le noeud double est souvent utilisé pour terminer la corde de progression, généralement enkitée (ensachée)."
+      },
+      {
+        "id": 4,
+        "question": "Quel noeud scout sert à attacher le foulard ?",
+        "propositions": [
+          "Noeud carré",
+          "Noeud de fouet",
+          "Noeud plat",
+          "Noeud de lapin"
+        ],
+        "réponse": "Noeud carré",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Noeud_carré",
+        "anecdote": "Initialement symbole du scoutisme féminin mondial, l'usage du noeud carré s'est répandu dans toutes les branches du scoutisme."
+      }
+    ]
+}

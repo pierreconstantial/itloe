@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Vocabulaire du vin",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment appelle-t-on les sensations olfactives du vin ?",
+        "propositions": [
+          "Bouquet",
+          "Texture",
+          "Nez",
+          "Robe"
+        ],
+        "réponse": "Bouquet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Le terme « bouquet » est exclusivement réservé aux parfums issus du vieillissement en bouteille dits secondaires ou tertiaires."
+      },
+      {
+        "id": 2,
+        "question": "Quel verbe signifie refroidir un vin dans de la glace ?",
+        "propositions": [
+          "Forcer",
+          "Frapper",
+          "Froncer",
+          "Figer"
+        ],
+        "réponse": "Frapper",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Glossaire_de_la_viticulture",
+        "anecdote": "Pour beaucoup, frappé a le sens de rafraîchir ce qui est une erreur car un vin est frappé lorsqu'il est frappé de glace."
+      },
+      {
+        "id": 3,
+        "question": "Comment appelle-t-on un vin qui peut se garder longtemps et vieillir ?",
+        "propositions": [
+          "Échanson",
+          "Graves",
+          "Élixir",
+          "Vin de garde"
+        ],
+        "réponse": "Vin de garde",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vin_de_garde",
+        "anecdote": "Les vins de garde ne doivent pas se boire trop jeunes et doivent subir une période de maturation de l'ordre de trois à cinq ans."
+      },
+      {
+        "id": 4,
+        "question": "Quel appareil permet une mesure directe du taux d'alcool d'un vin ?",
+        "propositions": [
+          "Oenolitre",
+          "Ebullioscope",
+          "Alcoomètre",
+          "Barrica"
+        ],
+        "réponse": "Alcoomètre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Loi_de_l'ébulliométrie",
+        "anecdote": "Puisque l'alcool bout à 78° et l'eau à 100°, l'ébullioscope permet de mesurer la quantité d'alcool contenue dans une boisson alcoolisée."
+      }
+    ]
+}

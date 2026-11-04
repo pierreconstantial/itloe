@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Paris de nos jours",         
+  "mise-à-jour": "25/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel quartier est situé le point culminant de la capitale française ?",
+        "propositions": [
+          "Opéra",
+          "Montmartre",
+          "Vaugirard",
+          "Popincourt"
+        ],
+        "réponse": "Montmartre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Montmartre",
+        "anecdote": "Les deux accès au sommet de la colline les plus connus sont le funiculaire et l'escalier de la rue Foyatier, avec ses 222 marches."
+      },
+      {
+        "id": 2,
+        "question": "Quel transport en commun assure 20 % des déplacements parisiens ?",
+        "propositions": [
+          "Bus",
+          "RER",
+          "Taxi",
+          "Métro"
+        ],
+        "réponse": "Métro",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Métro_de_Paris",
+        "anecdote": "Le métro parisien est le principal représentant des transports en commun à Paris et assure environ 20 % des déplacements, qu'ils soient effectués à l'intérieur de la capitale ou entre Paris et la banlieue."
+      },
+      {
+        "id": 3,
+        "question": "Quel aéroport francilien est situé à 10 km au sud de Paris ?",
+        "propositions": [
+          "Beauvais",
+          "Charles-de-Gaulle",
+          "Orly",
+          "Mérignac"
+        ],
+        "réponse": "Orly",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Aéroport_de_Paris-Orly",
+        "anecdote": "L'aéroport compte 270 entreprises représentant 25 000 salariés, des bureaux et 15 000 places de parking réparties en 14 parcs."
+      },
+      {
+        "id": 4,
+        "question": "À Paris, quel jardin à l'anglaise imite un paysage de montagne ?",
+        "propositions": [
+          "Palais-Royal",
+          "Trocadéro",
+          "Invalides",
+          "Buttes-Chaumont"
+        ],
+        "réponse": "Buttes-Chaumont",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Parc_des_Buttes-Chaumont",
+        "anecdote": "Il s'agit d'un des espaces verts parisiens présentant le plus grand dénivelé (plus de 40 m), héritage des carrières de ses fondations."
+      }
+    ]
+}

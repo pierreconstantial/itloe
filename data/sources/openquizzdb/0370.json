@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Fleurs de nos jardins",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la couleur du coquelicot des terrains fraîchement remués ?",
+        "propositions": [
+          "Pourpre",
+          "Rouge",
+          "Jaune",
+          "Verte"
+        ],
+        "réponse": "Rouge",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coquelicot",
+        "anecdote": "Le coquelicot se distingue par la couleur rouge de ses fleurs et par le fait qu'elle forme souvent des tapis colorés visibles de très loin."
+      },
+      {
+        "id": 2,
+        "question": "Quel est l'autre nom de la primevère ?",
+        "propositions": [
+          "Pivert",
+          "Merle",
+          "Moineau",
+          "Coucou"
+        ],
+        "réponse": "Coucou",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Primevère",
+        "anecdote": "Les petites fleurs jaunes de la primevère annoncent le printemps comme le fait le coucou, l'oiseau."
+      },
+      {
+        "id": 3,
+        "question": "Avec quelle plante peut-on confondre l'ail des ours ?",
+        "propositions": [
+          "Muguet",
+          "Origan",
+          "Primevère",
+          "Basilic"
+        ],
+        "réponse": "Muguet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Allium_ursinum",
+        "anecdote": "La confusion, assez fréquente, peut être très dangereuse et entraîner la mort."
+      },
+      {
+        "id": 4,
+        "question": "Quand fleurit la camomille sauvage, ou camomille allemande ?",
+        "propositions": [
+          "Automne",
+          "Hiver",
+          "Été",
+          "Printemps uniquement"
+        ],
+        "réponse": "Été",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Matricaria_recutita",
+        "anecdote": "Cette plante médicinale, utilisée depuis l'Antiquité gréco-latine, est simplement appelée « camomille » en herboristerie."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Règles du basket",         
+  "mise-à-jour": "28/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien y a-t-il de joueurs sur le terrain durant un match de basket ?",
+        "propositions": [
+          "5 joueurs",
+          "11 joueurs",
+          "10 joueurs",
+          "15 joueurs"
+        ],
+        "réponse": "10 joueurs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Basket-ball",
+        "anecdote": "Basket-ball signifie littéralement en anglais « ballon panier », expression encore utilisée au Canada."
+      },
+      {
+        "id": 2,
+        "question": "Combien de temps a-t-on pour tirer au basket-ball ?",
+        "propositions": [
+          "24 secondes",
+          "10 secondes",
+          "45 secondes",
+          "30 secondes"
+        ],
+        "réponse": "24 secondes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Basket-ball",
+        "anecdote": "Le basket-ball se pratique exclusivement à la main, et les joueurs ne peuvent se déplacer balle en main qu'en la dribblant au sol."
+      },
+      {
+        "id": 3,
+        "question": "Comment appelle-t-on un arrêt de jeu au basket-ball ?",
+        "propositions": [
+          "Temps mort",
+          "Entre-deux",
+          "Dribble",
+          "Zone press"
+        ],
+        "réponse": "Temps mort",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Basket-ball",
+        "anecdote": "Le basket-ball a été inventé en 1891 par James Naismith, un pasteur canadien."
+      },
+      {
+        "id": 4,
+        "question": "Combien de points vaut un panier normal au basket-ball ?",
+        "propositions": [
+          "Un points",
+          "Deux points",
+          "Quatre points",
+          "Trois points"
+        ],
+        "réponse": "Deux points",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Basket-ball",
+        "anecdote": "En 2010, on compte plus de 500 millions de pratiquants à travers le monde."
+      }
+    ]
+}

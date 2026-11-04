@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Histoire du foot",         
+  "mise-à-jour": "29/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de pays sont à l'origine de la création de la FIFA en 1904 ?",
+        "propositions": [
+          "Douze",
+          "Huit",
+          "Cinq",
+          "Dix"
+        ],
+        "réponse": "Cinq",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fédération_internationale_de_football_association",
+        "anecdote": "En 2016, la FIFA comptait 211 associations nationales affiliées qui doivent être reconnues par l'une des six confédérations."
+      },
+      {
+        "id": 2,
+        "question": "Qui était le gardien de but du Benfica Lisbonne en 1981 ?",
+        "propositions": [
+          "Pedro Estrems",
+          "Manuel Bento",
+          "José Valero",
+          "Carlos Medrano"
+        ],
+        "réponse": "Manuel Bento",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Manuel_Bento",
+        "anecdote": "Manuel Bento a été le gardien indiscutable du Portugal entre 1976 et 1986 en alignant 63 sélections en équipe du Portugal."
+      },
+      {
+        "id": 3,
+        "question": "Quel joueur de football portugais était souvent comparé à Pelé ?",
+        "propositions": [
+          "Figo",
+          "Manecas",
+          "Eusébio",
+          "Nani"
+        ],
+        "réponse": "Eusébio",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eusébio_(football)",
+        "anecdote": "Considéré comme l'un des meilleurs joueurs de l'histoire, Eusébio est surnommé la panthère noire ou bien encore le roi."
+      },
+      {
+        "id": 4,
+        "question": "Quel footballeur fut élu Meilleur joueur français de l'année 1989 ?",
+        "propositions": [
+          "Jean-Pierre Papin",
+          "Michel Platini",
+          "Alain Giresse",
+          "Eric Cantona"
+        ],
+        "réponse": "Jean-Pierre Papin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jean-Pierre_Papin",
+        "anecdote": "Avant-centre efficace et spectaculaire, ses reprises de volée et retournés acrobatiques (papinades) sont restés célèbres."
+      }
+    ]
+}

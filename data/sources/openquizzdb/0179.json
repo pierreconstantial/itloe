@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Ron Howard",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel film de Ron Howard rend hommage à une brigade de pompiers ?",
+        "propositions": [
+          "Cocoon",
+          "Copycat",
+          "Backdraft",
+          "La Rançon"
+        ],
+        "réponse": "Backdraft",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Backdraft_(film)",
+        "anecdote": "Sorti en 1991, le film « Backdraft » a donné lieu à la création d'une des attractions du parc Universal Studios, fermée en 2010."
+      },
+      {
+        "id": 2,
+        "question": "Quel personnage interprétait Ron Howard dans la série « Happy Days » ?",
+        "propositions": [
+          "Charles",
+          "Howard",
+          "Arthur",
+          "Richie"
+        ],
+        "réponse": "Richie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ron_Howard",
+        "anecdote": "Il est également le père de l'actrice américaine Bryce Dallas Howard."
+      },
+      {
+        "id": 3,
+        "question": "Quelle créature est l'héroïne du film « Splash », de Ron Howard ?",
+        "propositions": [
+          "Une pieuvre",
+          "Une tortue",
+          "Une sirène",
+          "Une méduse"
+        ],
+        "réponse": "Une sirène",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Splash_(film)",
+        "anecdote": "« Splash » a mis au goût du jour le prénom Madison aux États-Unis, passant de la 216e place en 1990 à la 3e place en 2000."
+      },
+      {
+        "id": 4,
+        "question": "Quel film est revenu sur la rivalité entre James Hunt et Niki Lauda ?",
+        "propositions": [
+          "Backdraft",
+          "La Rançon",
+          "Rush",
+          "Made in America"
+        ],
+        "réponse": "Rush",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rush_(film,_2013)",
+        "anecdote": "Niki Lauda fut un des principaux consultants pour le script ainsi que pour les aspects techniques, garantissant une grande fidélité."
+      }
+    ]
+}

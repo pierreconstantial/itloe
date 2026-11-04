@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Dragon Ball Z »",         
+  "mise-à-jour": "02/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans « Dragon Ball Z », combien de fois la Lune a-t-elle été détruite ?",
+        "propositions": [
+          "Trois fois",
+          "Une fois",
+          "Jamais",
+          "Deux fois"
+        ],
+        "réponse": "Deux fois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Planètes_de_Dragon_Ball",
+        "anecdote": "Elle fut détruite deux fois, par Kamé Sennin lors du 21e Tenkaichi Budokai et par Piccolo lors de son entrainement avec Son Gohan."
+      },
+      {
+        "id": 2,
+        "question": "Quel héros de la saga « Dragon Ball Z » est parvenu à tuer Freezer ?",
+        "propositions": [
+          "Vegeta",
+          "Petit-Coeur",
+          "Goku",
+          "Trunks"
+        ],
+        "réponse": "Trunks",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Trunks",
+        "anecdote": "Ce personnage de fiction créé par Akira Toriyama dans le manga « Dragon Ball » a la particularité d'exister deux fois dans l'histoire."
+      },
+      {
+        "id": 3,
+        "question": "Quel personnage utilise les Potaras dans « Dragon Ball Z » ?",
+        "propositions": [
+          "Aralé",
+          "Dr. Slump",
+          "Lao",
+          "Kaio Shin"
+        ],
+        "réponse": "Kaio Shin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kaio_Shin",
+        "anecdote": "Les potalas sont des boucles d'oreilles détenues de génération en génération par les Kaio Shin et par leurs assistants."
+      },
+      {
+        "id": 4,
+        "question": "Dans « Dragon Ball », quel métal est censé être le plus dur de l'univers ?",
+        "propositions": [
+          "Cooler",
+          "Katchin",
+          "Piccolo",
+          "Dabra"
+        ],
+        "réponse": "Katchin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dragon_Ball",
+        "anecdote": "L'histoire suit la vie de Son Goku, un garçon à la queue de singe inspiré du conte traditionnel chinois « La Pérégrination vers l'Ouest »."
+      }
+    ]
+}

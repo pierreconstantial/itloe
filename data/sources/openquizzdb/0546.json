@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #07",         
+  "mise-à-jour": "07/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À combien de degrés est égale la somme des angles d'un triangle ?",
+        "propositions": [
+          "360 degrés",
+          "120 degrés",
+          "90 degrés",
+          "180 degrés"
+        ],
+        "réponse": "180 degrés",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Triangle",
+        "anecdote": "Dans un espace euclidien (géométrie classique), la somme des trois angles intérieurs d'un triangle est toujours égale à 180°, quelle que soit sa forme : équilatéral, isocèle, rectangle ou scalène. Cette propriété est l'un des fondements de la géométrie en"
+      },
+      {
+        "id": 2,
+        "question": "Quel serait le poids d'un homme de 80 kg sur la Lune ?",
+        "propositions": [
+          "Environ 100 kg",
+          "Environ 50 kg",
+          "Environ 80 kg",
+          "Environ 13 kg"
+        ],
+        "réponse": "Environ 13 kg",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lune",
+        "anecdote": "La gravité sur la Lune est environ 6 fois plus faible que sur Terre, ce qui a permis aux astronautes d'Apollo de sauter plus haut."
+      },
+      {
+        "id": 3,
+        "question": "Combien de fuseaux horaires traversent le Mexique d'est en ouest ?",
+        "propositions": [
+          "Quatre",
+          "Deux",
+          "Cinq",
+          "Trois"
+        ],
+        "réponse": "Quatre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Heure_au_Mexique",
+        "anecdote": "Jusqu'à récemment, le Mexique utilisait encore l'heure d'été, ce qui compliquait parfois les choses à la frontière avec les États-Unis."
+      },
+      {
+        "id": 4,
+        "question": "Sur quelle tension électrique faut-il régler ses appareils à New York ?",
+        "propositions": [
+          "110-120 volts",
+          "220 volts",
+          "230 volts",
+          "100 volts"
+        ],
+        "réponse": "110-120 volts",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tension_électrique",
+        "anecdote": "Cela diffère de nombreux pays européens qui utilisent 230 volts à 50 Hz, ce qui peut nécessiter un adaptateur ou un transformateur."
+      }
+    ]
+}

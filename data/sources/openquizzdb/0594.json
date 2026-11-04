@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #15",         
+  "mise-à-jour": "06/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien d'atomes d'oxygène sont présents dans une molécule d'eau ?",
+        "propositions": [
+          "Aucun",
+          "Trois",
+          "Un",
+          "Deux"
+        ],
+        "réponse": "Un",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eau_(composé_chimique)",
+        "anecdote": "La disposition angulaire de ces atomes crée une molécule polaire, responsable des propriétés uniques de l'eau, essentielle à la vie."
+      },
+      {
+        "id": 2,
+        "question": "Combien de lettres peut-on poser au maximum au Scrabble ?",
+        "propositions": [
+          "Dix",
+          "Cinq",
+          "Sept",
+          "Douze"
+        ],
+        "réponse": "Sept",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Scrabble",
+        "anecdote": "Chaque joueur commence avec 7 lettres sur son chevalet, qu'il complète au fur et à mesure des tours pour toujours avoir 7 lettres."
+      },
+      {
+        "id": 3,
+        "question": "Combien de couleurs distinctes composent le logo de Google ?",
+        "propositions": [
+          "Cinq",
+          "Trois",
+          "Quatre",
+          "Six"
+        ],
+        "réponse": "Quatre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Logo_de_Google",
+        "anecdote": "Depuis 2015, le design du logo est devenu plus plat et moderne, reflétant la tendance au minimalisme dans le design numérique."
+      },
+      {
+        "id": 4,
+        "question": "Combien d'années séparent les championnats du monde de handball ?",
+        "propositions": [
+          "Trois",
+          "Quatre",
+          "Cinq",
+          "Deux"
+        ],
+        "réponse": "Deux",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Championnat_du_monde_de_handball",
+        "anecdote": "Depuis les années 1990, le championnat se tient tous les deux ans, avec une alternance entre les éditions masculines et féminines."
+      }
+    ]
+}

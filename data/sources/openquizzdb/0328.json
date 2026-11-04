@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Automobile",         
+  "mise-à-jour": "08/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel pays se situe le circuit de course automobile du Mans ?",
+        "propositions": [
+          "Suisse",
+          "Belgique",
+          "France",
+          "Pays-Bas"
+        ],
+        "réponse": "France",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Circuit_des_24_Heures",
+        "anecdote": "Le circuit du Mans est aussi utilisé par les voitures de course anciennes lors du Mans Classic qui a lieu une fois tous les deux ans."
+      },
+      {
+        "id": 2,
+        "question": "Comment s'appelle la voiture de Batman ?",
+        "propositions": [
+          "Batmobile",
+          "Batdrive",
+          "Batauto",
+          "Batcar"
+        ],
+        "réponse": "Batmobile",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Batmobile",
+        "anecdote": "Au fil des années, les artistes ayant travaillé sur la série ont souvent modifié l'aspect et les caractéristiques de la Batmobile."
+      },
+      {
+        "id": 3,
+        "question": "Quelle enseigne du groupe Belron répare les pare-brises ?",
+        "propositions": [
+          "Norauto",
+          "Speedy",
+          "Carglass",
+          "Midas"
+        ],
+        "réponse": "Carglass",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Carglass",
+        "anecdote": "Le siège français se situe à Courbevoie dans les Hauts-de-Seine au nord du quartier d'affaires de La Défense."
+      },
+      {
+        "id": 4,
+        "question": "Quelle partie de votre voiture est parfois appelée « le dentier » ?",
+        "propositions": [
+          "Calandre",
+          "Coffre",
+          "Radiateur",
+          "Boîte de vitesse"
+        ],
+        "réponse": "Boîte de vitesse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Boîte_de_vitesses",
+        "anecdote": "La boîte de vitesse permet d'adapter la transmission d'un mouvement entre un arbre moteur et un arbre récepteur."
+      }
+    ]
+}

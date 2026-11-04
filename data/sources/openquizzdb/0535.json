@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Rappeurs français",         
+  "mise-à-jour": "01/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui fut en 2020 meilleur vendeur de disque de l'histoire du rap français ?",
+        "propositions": [
+          "Bambi Cruz",
+          "Jul",
+          "Stomy Bugsy",
+          "Passi"
+        ],
+        "réponse": "Jul",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jul_(rappeur)",
+        "anecdote": "Plutôt que de donner des interviews, Julien Mari s'appuie sur les réseaux sociaux pour communiquer directement avec ses fans."
+      },
+      {
+        "id": 2,
+        "question": "À quel rappeur doit-on les succès comme « Bouge de là » et « Caroline » ?",
+        "propositions": [
+          "Dayen",
+          "MC Solaar",
+          "Komplex",
+          "Treyz"
+        ],
+        "réponse": "MC Solaar",
+        "wikipédia": "https://fr.wikipedia.org/wiki/MC_Solaar",
+        "anecdote": "« Bouge de là », qui a connu un franc succès dès sa sortie, est basé sur un sample de « The Message » du groupe Cymande."
+      },
+      {
+        "id": 3,
+        "question": "Qui est considéré comme le rappeur ayant popularisé la trap en France ?",
+        "propositions": [
+          "Booba",
+          "Katana",
+          "Rod Janois",
+          "Joe Lucazz"
+        ],
+        "réponse": "Booba",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kaaris",
+        "anecdote": "La trap se caractérise par son contenu lyrique et un son particulier, lié à l'utilisation du kick de la boîte à rythme Roland TR-808."
+      },
+      {
+        "id": 4,
+        "question": "Quel rappeur et acteur français se faisait appeler « le fennec » au collège ?",
+        "propositions": [
+          "Hayce Lemsi",
+          "Sofiane",
+          "Rimkus",
+          "Seth Gueko"
+        ],
+        "réponse": "Sofiane",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nekfeu",
+        "anecdote": "Membre du groupe S-Crew, il appartient au collectif L'Entourage et a également fait partie du collectif 5 Majeur et du groupe 1995."
+      }
+    ]
+}

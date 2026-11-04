@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sports pour tous",         
+  "mise-à-jour": "04/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quel petit objet utilise un golfeur pour poser sa balle ?",
+        "propositions": [
+          "Caddie",
+          "Pitch",
+          "Tee",
+          "Putter"
+        ],
+        "réponse": "Tee",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Matériel_de_golf",
+        "anecdote": "Le joueur peut poser sa balle sur une cheville de bois ou de plastique qui ne peut pas être utilisée en dehors des départs."
+      },
+      {
+        "id": 2,
+        "question": "Quel nom de sport de raquette vient d'une ville anglaise ?",
+        "propositions": [
+          "Squash",
+          "Badminton",
+          "Padel",
+          "Tennis"
+        ],
+        "réponse": "Badminton",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Badminton",
+        "anecdote": "Le badminton est toujours pratiqué en intérieur car avec le vent, en extérieur, le volant peut brusquement changer de direction."
+      },
+      {
+        "id": 3,
+        "question": "À combien de sauts a droit un athlète en longueur en qualification ?",
+        "propositions": [
+          "Cinq",
+          "Trois",
+          "Quatre",
+          "Deux"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Saut_en_longueur",
+        "anecdote": "Le record du monde masculin de saut en longueur est détenu depuis 1991 par Mike Powell avec un saut à 8,95 mètres."
+      },
+      {
+        "id": 4,
+        "question": "Dans le jargon de l'alpinisme, que fait un alpiniste qui dévisse ?",
+        "propositions": [
+          "Il dort",
+          "Il mange",
+          "Il tombe",
+          "Il ôte un piton"
+        ],
+        "réponse": "Il tombe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alpinisme",
+        "anecdote": "L'alpinisme est une pratique sportive d'ascension en haute montagne qui repose sur différentes techniques de progression."
+      }
+    ]
+}

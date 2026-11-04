@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Café au lait",         
+  "mise-à-jour": "07/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel café expresso est préparé avec du lait chauffé à la vapeur ?",
+        "propositions": [
+          "Moka",
+          "Barista",
+          "Vaporetto",
+          "Latte"
+        ],
+        "réponse": "Latte",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Latte_(café)",
+        "anecdote": "Un latte art est quant à lui un café latte proposant des motifs variés tracés à sa surface avec du lait et une tige fine."
+      },
+      {
+        "id": 2,
+        "question": "En Suisse romande, que demande-t-on pour boire un café au lait ?",
+        "propositions": [
+          "Un renversé",
+          "Une roulade",
+          "Un poirier",
+          "Un salto"
+        ],
+        "réponse": "Un renversé",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Café",
+        "anecdote": "Le renversé est un café au lait où les proportions lait-café sont inversées (renversées), soit 60% de lait pour 40% de café."
+      },
+      {
+        "id": 3,
+        "question": "Que devient un expresso auquel on ajoute un peu de mousse de lait ?",
+        "propositions": [
+          "Noisette",
+          "Pistache",
+          "Châtaigne",
+          "Amande"
+        ],
+        "réponse": "Noisette",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Expresso",
+        "anecdote": "La crema idéale, de couleur noisette, doit être dense, uniforme et lisse et ne pas présenter des bulles à sa surface."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel expresso ajoute-t-on du lait et un tiers de mousse de lait ?",
+        "propositions": [
+          "Irish coffee",
+          "Moka",
+          "Café viennois",
+          "Cappuccino"
+        ],
+        "réponse": "Cappuccino",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cappuccino_(café)",
+        "anecdote": "Alors que le cappuccino se boit avec du lait, quand on ajoute de la chantilly au café, il s'agit alors d'un café viennois."
+      }
+    ]
+}

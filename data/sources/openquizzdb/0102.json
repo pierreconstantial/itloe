@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #17",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Au Canada, quelle embarcation est utilisée pour la pêche sportive ?",
+        "propositions": [
+          "Challoupe",
+          "Chalouppe",
+          "Challouppe",
+          "Chaloupe"
+        ],
+        "réponse": "Chaloupe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel chausson d'intérieur ne possède ni tige ni talon ?",
+        "propositions": [
+          "Pentouffle",
+          "Pentoufle",
+          "Pantoufle",
+          "Pantouffle"
+        ],
+        "réponse": "Pantoufle",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle plante, principalement produite au Maroc, sert pour le thé ?",
+        "propositions": [
+          "Mante",
+          "Manthe",
+          "Mente",
+          "Menthe"
+        ],
+        "réponse": "Menthe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel animal possède la capacité de changer de couleur ?",
+        "propositions": [
+          "Caméléon",
+          "Kaméléon",
+          "Chaméléon",
+          "Chameléon"
+        ],
+        "réponse": "Caméléon",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

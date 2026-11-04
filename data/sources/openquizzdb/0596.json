@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Prénoms du cinéma #2",         
+  "mise-à-jour": "09/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel prénom se partagent les acteurs canadiens Gosling et Reynolds ?",
+        "propositions": [
+          "Evan",
+          "Alan",
+          "Brian",
+          "Ryan"
+        ],
+        "réponse": "Ryan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ryan_Gosling",
+        "anecdote": "Depuis septembre 2011, Ryan Gosling vit avec l'actrice Eva Mendes, avec laquelle il a eu deux filles, Esmeralda et Amada."
+      },
+      {
+        "id": 2,
+        "question": "Comment se prénomme le propriétaire des crevettes Bubba Gump ?",
+        "propositions": [
+          "Winston",
+          "Forrest",
+          "Benjamin",
+          "Dan"
+        ],
+        "réponse": "Forrest",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Forrest_Gump_(personnage)",
+        "anecdote": "Pourtant simple d'esprit, l'histoire de Forrest Gump se confond avec celle des États-Unis des années 1950 aux années 1980."
+      },
+      {
+        "id": 3,
+        "question": "Comment se prénomme le héros de la saga « Mission Impossible » ?",
+        "propositions": [
+          "Ethan",
+          "Jim",
+          "Luther",
+          "Owen"
+        ],
+        "réponse": "Ethan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ethan_Hunt",
+        "anecdote": "Ethan Matthew Hunt est le personnage principal de la série de films « Mission Impossible ». Il est interprété par l'acteur Tom Cruise."
+      },
+      {
+        "id": 4,
+        "question": "Quel tueur solitaire a été incarné au cinéma par Jean Reno ?",
+        "propositions": [
+          "Simon",
+          "Odilon",
+          "Léon",
+          "Gaston"
+        ],
+        "réponse": "Léon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Léon_(film)",
+        "anecdote": "Sixième long métrage réalisé par Besson, « Léon » retrace la vie d'un tueur à gages du même nom, vivant en solitaire à New York."
+      }
+    ]
+}

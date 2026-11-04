@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Histoire du Japon",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En 1941, quel pays décréta un embargo total sur le Japon ?",
+        "propositions": [
+          "Allemagne",
+          "URSS",
+          "France",
+          "États-Unis"
+        ],
+        "réponse": "États-Unis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Attaque_de_Pearl_Harbor",
+        "anecdote": "L'attaque de Pearl Harbor déclencha la guerre du Pacifique et engagea l'Empire du Japon dans la Seconde Guerre mondiale."
+      },
+      {
+        "id": 2,
+        "question": "Quels aviateurs suicides ont marqué la Seconde Guerre mondiale ?",
+        "propositions": [
+          "Kazoku",
+          "Shinobi",
+          "Kamikazes",
+          "Samuraïs"
+        ],
+        "réponse": "Kamikazes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kamikaze",
+        "anecdote": "Par extension, ce terme est utilisé pour désigner toute personne qui sacrifie sa vie volontairement dans un attentat-suicide."
+      },
+      {
+        "id": 3,
+        "question": "Quelle ville du Kansai fut la capitale impériale du Japon ?",
+        "propositions": [
+          "Kamakura",
+          "Noro",
+          "Kyoto",
+          "Tokyo"
+        ],
+        "réponse": "Kyoto",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kyoto",
+        "anecdote": "Avec ses 2 000 temples, sanctuaires, palais, ponts et jardins, Kyoto est considérée comme le centre culturel du Japon."
+      },
+      {
+        "id": 4,
+        "question": "Quelle ville japonaise a organisé les Jeux olympiques d'hiver de 1972 ?",
+        "propositions": [
+          "Sapporo",
+          "Nagano",
+          "Yokohama",
+          "Kumamoto"
+        ],
+        "réponse": "Sapporo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jeux_olympiques_d'hiver_de_1972",
+        "anecdote": "Les premiers Jeux d'hiver attribués à Sapporo sont ceux de 1940, prévus la même année que les Jeux d'été de Tokyo."
+      }
+    ]
+}

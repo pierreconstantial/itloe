@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Les Nuls",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Sur quelle chaîne de télévision Les Nuls ont-ils débuté ?",
+        "propositions": [
+          "TF1",
+          "France 2",
+          "M6",
+          "Canal+"
+        ],
+        "réponse": "Canal+",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quelle comédie a été écrite et interprétée par Les Nuls ?",
+        "propositions": [
+          "Le Dîners de cons",
+          "La Cité de la Peur",
+          "Big",
+          "Les Visiteurs"
+        ],
+        "réponse": "La Cité de la Peur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Dans quelle émission Les Nuls présentaient-ils un faux JT ?",
+        "propositions": [
+          "NPA",
+          "Ici Paris",
+          "Groland",
+          "Les Nuls, l'émission"
+        ],
+        "réponse": "Les Nuls, l'émission",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quel membre des Nuls est décédé après la création du groupe ?",
+        "propositions": [
+          "Alain Chabat",
+          "Coluche",
+          "Bruno Carette",
+          "Chantal Lauby"
+        ],
+        "réponse": "Bruno Carette",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

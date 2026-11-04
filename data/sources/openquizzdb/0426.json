@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Pokemon »",         
+  "mise-à-jour": "28/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de Pokémon un dresseur peut-il transporter ?",
+        "propositions": [
+          "Six",
+          "Dix",
+          "Quatre",
+          "Un seul"
+        ],
+        "réponse": "Six",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Un dresseur de Pokémon est une personne qui capture et entraîne des Pokémon en vue de les faire combattre."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le prénom du jeune héros du dessin animé « Pokémon » ?",
+        "propositions": [
+          "Florent",
+          "Sacha",
+          "Pierre",
+          "Jacky"
+        ],
+        "réponse": "Sacha",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Originaire du Bourg Palette, Sacha a reçu Pikachu, son Pokémon de départ, des mains du Professeur Chen."
+      },
+      {
+        "id": 3,
+        "question": "De quelle famille de Pokémon Pikachu et Rattatac font-ils partie ?",
+        "propositions": [
+          "Oeufs",
+          "Brebis",
+          "Souris",
+          "Chiots"
+        ],
+        "réponse": "Souris",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Probablement le plus célèbre des Pokémon, Pikachu est très vite devenu la mascotte officielle de la licence."
+      },
+      {
+        "id": 4,
+        "question": "Que peut-on voir sur le ventre de Ptitard et de ses évolutions ?",
+        "propositions": [
+          "Un cercle",
+          "Une étoile",
+          "Un carré",
+          "Une spirale"
+        ],
+        "réponse": "Une spirale",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Ce dessin est inspiré des intestins de certains têtards qui sont visibles et en forme de spirale."
+      }
+    ]
+}

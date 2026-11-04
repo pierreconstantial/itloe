@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Château de Chambord",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel département peut-on visiter le château de Chambord ?",
+        "propositions": [
+          "Haute-Garonne",
+          "Drôme",
+          "Loir-et-Cher",
+          "Aveyron"
+        ],
+        "réponse": "Loir-et-Cher",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Loir-et-Cher",
+        "anecdote": "Le Loir-et-Cher, dont la préfecture est Blois, est un département relativement plat avec un point culminant de 256 mètres."
+      },
+      {
+        "id": 2,
+        "question": "En quoi Chambord fut-il transformé durant la guerre franco-prussienne ?",
+        "propositions": [
+          "Caserne",
+          "Musée",
+          "Hôpital militaire",
+          "Prison"
+        ],
+        "réponse": "Hôpital militaire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Guerre_franco-allemande_de_1870",
+        "anecdote": "La guerre franco-allemande opposa de juillet 1870 à janvier 1871 la France et les États allemands coalisés sous l'égide de la Prusse."
+      },
+      {
+        "id": 3,
+        "question": "Combien de pièces dénombre-t-on dans le château de Chambord ?",
+        "propositions": [
+          "282",
+          "372",
+          "198",
+          "426"
+        ],
+        "réponse": "426",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Château_de_Chambord",
+        "anecdote": "Le château de Chambord compte également 77 escaliers, 282 cheminées et 800 chapiteaux sculptés."
+      },
+      {
+        "id": 4,
+        "question": "Combien de niveaux habitables possède le donjon de Chambord ?",
+        "propositions": [
+          "Cinq",
+          "Trois",
+          "Six",
+          "Quatre"
+        ],
+        "réponse": "Cinq",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Château_de_Chambord",
+        "anecdote": "À l'intérieur du donjon, il y a quatre appartements carrés et quatre appartements dans les tours rondes par niveau."
+      }
+    ]
+}

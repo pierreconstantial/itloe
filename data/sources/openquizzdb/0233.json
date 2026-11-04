@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Keanu Reeves",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel acteur donne la réplique à Keanu Reeves dans le film « Speed » ?",
+        "propositions": [
+          "Dennis Hopper",
+          "Harvey Keittel",
+          "Nicolas Cage",
+          "Val Kilmer"
+        ],
+        "réponse": "Dennis Hopper",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Speed_(film,_1994)",
+        "anecdote": "Sorti sur les écrans en 1994, « Speed » est souvent considéré comme étant le film qui a véritablement révélé Sandra Bullock."
+      },
+      {
+        "id": 2,
+        "question": "Quel hacker Keanu Reeves incarne-t-il dans la trilogie « Matrix » ?",
+        "propositions": [
+          "Morpheus",
+          "Neo",
+          "Trinity",
+          "Smith"
+        ],
+        "réponse": "Neo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Matrix_(série_de_films)",
+        "anecdote": "« Néo » est un préfixe signifiant « nouveau ». C'est également l'anagramme du mot anglais « one »."
+      },
+      {
+        "id": 3,
+        "question": "Dans quelle franchise d'action incarne-t-il un ancien assassin redouté ?",
+        "propositions": [
+          "John Wick",
+          "The Equalizer",
+          "Speed",
+          "Taken"
+        ],
+        "réponse": "John Wick",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Keanu_Reeves",
+        "anecdote": "Keanu Reeves a effectué une grande partie de ses cascades lui-même, s'entraînant pendant des mois au tir tactique et aux arts martiaux pour rendre les combats très réalistes."
+      },
+      {
+        "id": 4,
+        "question": "Pour quelle raison ne participa-t-il pas au tournage de « Speed 2 » ?",
+        "propositions": [
+          "Son salaire",
+          "Son poids",
+          "Sa réputation",
+          "Son caractère"
+        ],
+        "réponse": "Son poids",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Keanu_Reeves",
+        "anecdote": "Parallèlement, il est bassiste dans le groupe grunge Dogstar, de 1991 à 2002, et plus récemment dans le groupe Becky."
+      }
+    ]
+}

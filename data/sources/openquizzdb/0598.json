@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Stars mondiales #3",         
+  "mise-à-jour": "09/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle ancienne actrice X française se dénude sur douze mois ?",
+        "propositions": [
+          "Mélanie Coste",
+          "Sylvia Kristel",
+          "Laure Sainclair",
+          "Clara Morgane"
+        ],
+        "réponse": "Clara Morgane",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Clara_Morgane",
+        "anecdote": "Afin de gérer ses actifs (calendriers, clips, disques, ...), Clara Morgane a créé sa propre boîte de production : Pêché Capital Média."
+      },
+      {
+        "id": 2,
+        "question": "À qui Oprah Winfrey a-t-elle demandé : « Êtes-vous une droguée » ?",
+        "propositions": [
+          "Shannen Doherty",
+          "Lindsay Lohan",
+          "Traci Bingham",
+          "Joan Collins"
+        ],
+        "réponse": "Lindsay Lohan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Oprah_Winfrey",
+        "anecdote": "Oprah est connue pour son talk show « The Oprah Winfrey Show » produit par sa propre société Harpo Productions basée à Chicago."
+      },
+      {
+        "id": 3,
+        "question": "De qui la jeune actrice montante Ava Sambora est-elle la fille ?",
+        "propositions": [
+          "Goldie Hawn",
+          "Heather Locklear",
+          "Sharon Stone",
+          "Marcia Cross"
+        ],
+        "réponse": "Heather Locklear",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Heather_Locklear",
+        "anecdote": "Passionnée d'automobiles, Heather Locklear a écourté ses études à l'université UCLA pour se lancer dans une carrière de comédienne."
+      },
+      {
+        "id": 4,
+        "question": "Quelle Première dame a fêté ses 50 ans en avril 2020 ?",
+        "propositions": [
+          "Melania Trump",
+          "Beatrix",
+          "Angela Merkel",
+          "Brigitte Macron"
+        ],
+        "réponse": "Melania Trump",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Melania_Trump",
+        "anecdote": "Grâce à son élégance légendaire et son sens pointu de la mode, la belle slovène nous donne des leçons de style à chaque apparition."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sexy playmate",         
+  "mise-à-jour": "23/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle femme était en couverture du tout premier numéro de « Playboy » ?",
+        "propositions": [
+          "Marilyn Monroe",
+          "Jayne Mansfield",
+          "Bettie Page",
+          "Janet Pilgrim"
+        ],
+        "réponse": "Marilyn Monroe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marilyn_Monroe",
+        "anecdote": "Playboy, divertissement pour hommes. Pour la première fois en couleurs dans la presse, les fameux nus de Marilyn Monroe."
+      },
+      {
+        "id": 2,
+        "question": "Quelle Playmate a fait le plus de couvertures « Playboy » ?",
+        "propositions": [
+          "China Lee",
+          "Janet Pilgrim",
+          "Pamela Anderson",
+          "Jeane Manson"
+        ],
+        "réponse": "Pamela Anderson",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pamela_Anderson",
+        "anecdote": "Pendant un certain temps, elle était connue sous le nom de Pamela Anderson Lee suite à son mariage avec Tommy Lee."
+      },
+      {
+        "id": 3,
+        "question": "Quelle Playmate de 1989 a épousé Hugh Hefner la même année ?",
+        "propositions": [
+          "Holly Madison",
+          "Liv Lindeland",
+          "Kimberley Conrad",
+          "Caty Myers"
+        ],
+        "réponse": "Kimberley Conrad",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kimberley_Conrad",
+        "anecdote": "Cette actrice et mannequin américaine lui donnera deux fils, Marston Glenn et Cooper Bradford, avant de divorcer en mars 2010."
+      },
+      {
+        "id": 4,
+        "question": "Quelle Miss d'août 1964 fut la première Playmate d'origine asiatique ?",
+        "propositions": [
+          "China Lee",
+          "Liu Wen",
+          "Naomi Shimada",
+          "Sayo Akasaka"
+        ],
+        "réponse": "China Lee",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Playmate",
+        "anecdote": "Les playmates de type non-européen, parfois Playmate de l'Année, accrurent rapidement leur présence au fil des ans."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "En avant la jeunesse",         
+  "mise-à-jour": "13/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel sport consiste à envoyer une petite balle blanche dans un trou ?",
+        "propositions": [
+          "Cricket",
+          "Chistera",
+          "Croquet",
+          "Golf"
+        ],
+        "réponse": "Golf",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Golf",
+        "anecdote": "En 2009, Le Comité international olympique a réintégré le golf parmi la liste des sports présents aux Jeux olympiques d'été."
+      },
+      {
+        "id": 2,
+        "question": "Que porte sur la tête le capitaine Haddock, meilleur ami de Tintin ?",
+        "propositions": [
+          "Casque",
+          "Casquette",
+          "Turban",
+          "Chapeau"
+        ],
+        "réponse": "Casquette",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Capitaine_Haddock",
+        "anecdote": "En 1996, il a été désigné comme le personnage principal préféré de la série avec 37,5 % des suffrages devant Milou et Tintin."
+      },
+      {
+        "id": 3,
+        "question": "De quelle montagne peuvent parfois sortir des matières brûlantes ?",
+        "propositions": [
+          "Talus",
+          "Rocher",
+          "Dune",
+          "Volcan"
+        ],
+        "réponse": "Volcan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Volcan",
+        "anecdote": "Les laves refroidies peuvent atteindre des milliers de mètres d'épaisseur, formant parfois des montagnes ou des îles."
+      },
+      {
+        "id": 4,
+        "question": "Dans la coquille de quel animal peut-on parfois trouver une perle ?",
+        "propositions": [
+          "Tortue",
+          "Escargot",
+          "Moule",
+          "Huître"
+        ],
+        "réponse": "Huître",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Huître",
+        "anecdote": "Les huîtres sont des mollusques qui ne vivent que dans l'eau salée ou saumâtre et se trouvent dans toutes les mers."
+      }
+    ]
+}

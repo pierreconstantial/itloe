@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Russia 2018",         
+  "mise-à-jour": "28/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel pays a remporté la Coupe du monde de football 2018 ?",
+        "propositions": [
+          "Croatie",
+          "France",
+          "Angleterre",
+          "Belgique"
+        ],
+        "réponse": "France",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coupe_du_monde_de_football_de_2018",
+        "anecdote": "Cette finale, très intense, voit la victoire des Bleus qui s'imposent 4 buts à 2 sur l'équipe au damier, décrochant leur deuxième étoile."
+      },
+      {
+        "id": 2,
+        "question": "Qui fut le meilleur buteur de la Coupe du monde de football 2018 ?",
+        "propositions": [
+          "Harry Kane",
+          "Eden Hazard",
+          "Cristiano Ronaldo",
+          "Neymar"
+        ],
+        "réponse": "Harry Kane",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Harry_Kane",
+        "anecdote": "Harry Kane a inscrit un doublé pour une victoire 2-1 et a réalisé un triplé contre le Panama lors d'un écrasant succès 6-1."
+      },
+      {
+        "id": 3,
+        "question": "Quelle marque a apposé son logo sur le ballon officiel du Mondial 2018 ?",
+        "propositions": [
+          "Addidas",
+          "Nike",
+          "Reebok",
+          "Kappa"
+        ],
+        "réponse": "Addidas",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Telstar_18_(ballon_de_football)",
+        "anecdote": "Le Telstar 18 de chez Adidas s'inspire du Telstar, ballon produit par l'entreprise pour la Coupe du monde 1970 qui a eu lieu au Mexique."
+      },
+      {
+        "id": 4,
+        "question": "Quel fut le score de la demi-finale France-Belgique en 2018 ?",
+        "propositions": [
+          "4-3",
+          "3-2",
+          "1-0",
+          "2-1"
+        ],
+        "réponse": "1-0",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coupe_du_monde_de_football_de_2018",
+        "anecdote": "Malgré la pression imposée par l'équipe belge, le score n'évoluera plus, Tolisso et Griezmann manquant le but du break."
+      }
+    ]
+}

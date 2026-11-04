@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Terres du Périgord",         
+  "mise-à-jour": "09/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Laquelle de ces couleurs ne désigne pas une région du Périgord ?",
+        "propositions": [
+          "Blanc",
+          "Vert",
+          "Pourpre",
+          "Bleu"
+        ],
+        "réponse": "Bleu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Périgord",
+        "anecdote": "Le nom Périgord vient du peuple gaulois des Pétrocores, « Petrocorii » en gaulois, ce qui veut dire Quatre armées."
+      },
+      {
+        "id": 2,
+        "question": "Comment appelle-t-on les habitants de la ville de Périgueux ?",
+        "propositions": [
+          "Pirigueusois",
+          "Périeusins",
+          "Promontois",
+          "Périgourdins"
+        ],
+        "réponse": "Périgourdins",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Périgeux",
+        "anecdote": "Labellisée 4 fleurs, Périgueux est la capitale culturelle et touristique du Périgord blanc, dans la vallée de l'Isle."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel département le Périgord est-il inscrit ?",
+        "propositions": [
+          "Aveyron",
+          "Vaucluse",
+          "Calvados",
+          "Dordogne"
+        ],
+        "réponse": "Dordogne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dordogne_(département)",
+        "anecdote": "La Dordogne, troisième département français métropolitain par sa superficie, fait partie de la région Nouvelle-Aquitaine."
+      },
+      {
+        "id": 4,
+        "question": "Quelle grotte ornée du Paléolithique se situe dans la Vézère ?",
+        "propositions": [
+          "Lascaux",
+          "Razet",
+          "Cussac",
+          "Niaux"
+        ],
+        "réponse": "Lascaux",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Grotte_de_Lascaux",
+        "anecdote": "Les peintures et les gravures qu'elle renferme n'ont pas pu faire l'objet de datations directes précises : environ 18 000 et 17 000 ans."
+      }
+    ]
+}

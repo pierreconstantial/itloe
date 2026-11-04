@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Culture jeune",         
+  "mise-à-jour": "09/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel livre trouve-t-on principalement des cartes de géographie ?",
+        "propositions": [
+          "Atlas",
+          "Roman",
+          "Agenda",
+          "Dictionnaire"
+        ],
+        "réponse": "Atlas",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Atlas_géographique",
+        "anecdote": "Les atlas mieux que les cartes fournissent une représentation des conceptions politiques d'une société ou d'une culture donnée."
+      },
+      {
+        "id": 2,
+        "question": "De quelle matière très dure est principalement constituée la banquise ?",
+        "propositions": [
+          "Glace",
+          "Terre",
+          "Métal",
+          "Roche"
+        ],
+        "réponse": "Glace",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Banquise",
+        "anecdote": "La banquise est la couche de glace qui se forme à la surface d'une étendue d'eau par solidification des premières couches d'eau."
+      },
+      {
+        "id": 3,
+        "question": "Quelle opération arithmétique calcule le produit de deux nombres ?",
+        "propositions": [
+          "Soustraction",
+          "Multiplication",
+          "Simplification",
+          "Division"
+        ],
+        "réponse": "Multiplication",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Multiplication",
+        "anecdote": "Cette opération est souvent notée avec la croix de multiplication, mais peut aussi être notée par d'autres symboles."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel dessin animé peux-tu entendre la phrase « Hakuna matata » ?",
+        "propositions": [
+          "Toy Story",
+          "Cars",
+          "Le Roi lion",
+          "Dinosaure"
+        ],
+        "réponse": "Le Roi lion",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Roi_lion",
+        "anecdote": "Sorti en 1994, le film est inspiré de l'oeuvre d'Osamu Tezuka « Le Roi Léo » (1951) et d'« Hamlet » de William Shakespeare."
+      }
+    ]
+}

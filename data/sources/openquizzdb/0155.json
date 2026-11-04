@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Louise Bourgoin",         
+  "mise-à-jour": "30/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec quel réalisateur Louise Bourgoin a-t-elle tourné « Adèle Blanc-Sec » ?",
+        "propositions": [
+          "Claude Sautet",
+          "Luc Besson",
+          "Abel Gance",
+          "François Ozon"
+        ],
+        "réponse": "Luc Besson",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Louise_Bourgoin",
+        "anecdote": "Le tournage a impliqué beaucoup d'effets spéciaux et de scènes en studio. Le film est adapté de la bande dessinée de Jacques Tardi."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel domaine artistique Louise Bourgoin a-t-elle étudié ?",
+        "propositions": [
+          "Journalisme",
+          "Musique",
+          "Beaux-Arts",
+          "Cinéma"
+        ],
+        "réponse": "Beaux-Arts",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Louise_Bourgoin",
+        "anecdote": "Elle souhaitait initialement devenir peintre. Elle continue de pratiquer le dessin en parallèle de sa carrière."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel film Louise Bourgoin joue-t-elle avec Romain Duris ?",
+        "propositions": [
+          "Intouchables",
+          "Populaire",
+          "L'Arnacoeur",
+          "De rouille et d'os"
+        ],
+        "réponse": "L'Arnacoeur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Louise_Bourgoin",
+        "anecdote": "Elle joue une riche héritière difficile à séduire. Le film a été un grand succès au box-office en France."
+      },
+      {
+        "id": 4,
+        "question": "Avant le cinéma, où Louise Bourgoin travaillait-elle ?",
+        "propositions": [
+          "Sur Canal+",
+          "Dans la mode",
+          "À RTL",
+          "Au théâtre national"
+        ],
+        "réponse": "Sur Canal+",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Louise_Bourgoin",
+        "anecdote": "Elle présentait la météo de manière humoristique et parfois improvisée. Son style atypique a marqué la télévision française des années 2000."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #08",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel morceau de toile grossière et résistante sert à laver les sols ?",
+        "propositions": [
+          "Serpillaire",
+          "Serrepillère",
+          "Serpillière",
+          "Serpière"
+        ],
+        "réponse": "Serpillière",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle femme doit obéir aux voeux de pauvreté, chasteté et obéissance ?",
+        "propositions": [
+          "Nonne",
+          "Nônne",
+          "None",
+          "Nône"
+        ],
+        "réponse": "Nonne",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle sorte de papier végétal est confectionné à base de plante ?",
+        "propositions": [
+          "Papyrusse",
+          "Papirusse",
+          "Papyrus",
+          "Papirus"
+        ],
+        "réponse": "Papyrus",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Outre la comparaison, quelle figure de style est fondée sur l'analogie ?",
+        "propositions": [
+          "Métaforre",
+          "Métaphore",
+          "Métafort",
+          "Métafore"
+        ],
+        "réponse": "Métaphore",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Langue fourchue",         
+  "mise-à-jour": "01/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Où se trouvent les « lunettes » du serpent à lunettes ?",
+        "propositions": [
+          "Sur le ventre",
+          "Sur le cou",
+          "Sur la queue",
+          "Sur la langue"
+        ],
+        "réponse": "Sur le cou",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cobra",
+        "anecdote": "Dans l'imagerie populaire, le serpent à lunettes (ou le cobra égyptien) est associé au fakir charmeur de serpents."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le plus grand serpent venimeux du monde de par sa longueur ?",
+        "propositions": [
+          "Python réticulé",
+          "Grand anaconda",
+          "Mamba noir",
+          "Cobra royal"
+        ],
+        "réponse": "Cobra royal",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cobra_royal",
+        "anecdote": "Le cobra royal adopte une posture d'intimidation caractéristique, capable de se dresser à 1 mètre 70 du sol."
+      },
+      {
+        "id": 3,
+        "question": "Quel serpent accompagne le Prince Jean dans « Robin des Bois » de Disney ?",
+        "propositions": [
+          "Triste Sire",
+          "Affreux Jojo",
+          "Troube-Fête",
+          "Rabat-Joie"
+        ],
+        "réponse": "Triste Sire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Robin_des_Bois_(film,_1973)",
+        "anecdote": "Le film s'inspire à la fois de la légende de Robin des Bois et du « Roman de Renart », un recueil de récits médiévaux français."
+      },
+      {
+        "id": 4,
+        "question": "Quelle langue est parlée par les serpents dans « Harry Potter » ?",
+        "propositions": [
+          "Le cuillerlang",
+          "Le fourchelang",
+          "Le verrelang",
+          "Le coutelang"
+        ],
+        "réponse": "Le fourchelang",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Univers_de_Harry_Potter",
+        "anecdote": "Le fourchelang permet de communiquer avec les serpents par le biais de sifflements."
+      }
+    ]
+}

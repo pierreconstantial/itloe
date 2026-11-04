@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Constructeur automobile",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À quel constructeur automobile doit-on la célèbre Dauphine ?",
+        "propositions": [
+          "Citroën",
+          "Simca",
+          "Peugeot",
+          "Renault"
+        ],
+        "réponse": "Renault",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gonçalo_Velho_Cabral",
+        "anecdote": "Aujourd'hui encore, la grand'place de la capitale des Açores porte son nom."
+      },
+      {
+        "id": 2,
+        "question": "Quel était le prénom du constructeur automobile italien Ferrari ?",
+        "propositions": [
+          "Elio",
+          "Ernesto",
+          "Emilio",
+          "Enzo"
+        ],
+        "réponse": "Enzo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Enzo_Ferrari",
+        "anecdote": "Surnommé Il Commendatore, Enzo Anselmo Giuseppe Maria Ferrari consacrera sa vie à la Scuderia Ferrari qu'il fonda en 1929."
+      },
+      {
+        "id": 3,
+        "question": "Quel constructeur allemand a repris en 1991 la marque Skoda ?",
+        "propositions": [
+          "Opel",
+          "Volkswagen",
+          "Audi",
+          "Porsche"
+        ],
+        "réponse": "Volkswagen",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Skoda_Auto",
+        "anecdote": "Skoda appartient au groupe VAG au même titre que Volkswagen, Audi, Seat et Lamborghini."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le plus vieux constructeur automobile nippon ?",
+        "propositions": [
+          "Mazda",
+          "Daihatsu",
+          "Honda",
+          "Suzuki"
+        ],
+        "réponse": "Daihatsu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Daihatsu",
+        "anecdote": "Aujourd'hui la firme Daihatsu est, comme son rival Suzuki, surtout spécialisée dans les keijidosha, ces petites voitures qui bénéficient de taxes allégées au Japon."
+      }
+    ]
+}

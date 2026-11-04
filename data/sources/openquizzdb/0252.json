@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #42",         
+  "mise-à-jour": "15/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel droit d'inscription est perçu par les hautes écoles belges ?",
+        "propositions": [
+          "Minerval",
+          "Minnerval",
+          "Minervale",
+          "Minervalle"
+        ],
+        "réponse": "Minerval",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle aptitude est comparable à la virtuosité du musicien ?",
+        "propositions": [
+          "Habileté",
+          "Habilleté",
+          "Habilté",
+          "Habiletée"
+        ],
+        "réponse": "Habileté",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Comment appelle-t-on la paralysie de la partie basse du tronc ?",
+        "propositions": [
+          "Paraplégye",
+          "Paraplégie",
+          "Parraplégie",
+          "Parraplégye"
+        ],
+        "réponse": "Paraplégie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "De quel liseron épineux les Schtroumps sont-ils grands consommateurs ?",
+        "propositions": [
+          "Sallesepareille",
+          "Salsepareille",
+          "Salcepareille",
+          "Salesepareille"
+        ],
+        "réponse": "Salsepareille",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

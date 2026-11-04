@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Fiction pour tous",         
+  "mise-à-jour": "28/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel acteur interprète le héros d'« Independance Day », sorti en 1996 ?",
+        "propositions": [
+          "Tom Cruise",
+          "Jeff Goldblum",
+          "Bruce Willis",
+          "Will Smith"
+        ],
+        "réponse": "Will Smith",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Independence_Day_(film,_1996)",
+        "anecdote": "« Independance Day » est ressorti en 2010 en version longue (édition spéciale) avec huit minutes de scènes supplémentaires."
+      },
+      {
+        "id": 2,
+        "question": "Sur quelle planète se déroule l'action du film « John Carter » ?",
+        "propositions": [
+          "Mars",
+          "Jupiter",
+          "Saturne",
+          "Pluton"
+        ],
+        "réponse": "Mars",
+        "wikipédia": "https://fr.wikipedia.org/wiki/John_Carter_(film)",
+        "anecdote": "Il s'agit d'une libre adaptation du roman « Une princesse de Mars » de l'auteur américain Edgar Rice Burroughs, paru en 1917."
+      },
+      {
+        "id": 3,
+        "question": "Quel acteur interprète un homme bicentenaire dans un film de 1999 ?",
+        "propositions": [
+          "Sam Neil",
+          "Guy Pearce",
+          "Robin Williams",
+          "Kevin Spacey"
+        ],
+        "réponse": "Robin Williams",
+        "wikipédia": "https://fr.wikipedia.org/wiki/L'Homme_bicentenaire_(film)",
+        "anecdote": "L'intrigue du film explore les questions d'humanité, esclavage, liberté intellectuelle, conformité, sexe, amour et de mortalité."
+      },
+      {
+        "id": 4,
+        "question": "Qu'est-ce que le Transperceneige dans le film « Snowpiercer » ?",
+        "propositions": [
+          "Plante",
+          "Plate-forme",
+          "Vaisseau spatial",
+          "Train"
+        ],
+        "réponse": "Train",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Snowpiercer,_le_Transperceneige",
+        "anecdote": "En France, à l'occasion de l'adaptation au cinéma, Casterman réunit les trois albums originaux en intégrale sous le titre « Transperceneige »."
+      }
+    ]
+}

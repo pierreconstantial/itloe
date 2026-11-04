@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Intrusion #2",         
+  "mise-à-jour": "06/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel intrus se cache parmi ces albums de Madonna ?",
+        "propositions": [
+          "In the Zone",
+          "Erotica",
+          "Like a Virgin",
+          "True Blue"
+        ],
+        "réponse": "In the Zone",
+        "wikipédia": "https://fr.wikipedia.org/wiki/In_the_Zone",
+        "anecdote": "« In the Zone » est le quatrième album studio de chanteuse américaine Britney Spears, aux critiques mitigées, sorti le 16 novembre 2003."
+      },
+      {
+        "id": 2,
+        "question": "Quel intrus se cache parmi ces célèbres fumeurs de pipe ?",
+        "propositions": [
+          "Sherlock Holmes",
+          "Kojak",
+          "Maigret",
+          "Popeye"
+        ],
+        "réponse": "Kojak",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kojak_(série_télévisée,_1973)",
+        "anecdote": "Theo Kojak (interprété par Telly Savalas), est un élégant policier d'origine grecque au crâne rasé, amateur de cigares et de sucettes."
+      },
+      {
+        "id": 3,
+        "question": "Quel intrus se cache parmi ces films de catastrophe naturelle ?",
+        "propositions": [
+          "Volcano",
+          "Twister",
+          "2012",
+          "Independence Day"
+        ],
+        "réponse": "Independence Day",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Independence_Day_(film,_1996)",
+        "anecdote": "Sorti en 1996, « Independence Day » est un film de science-fiction de Roland Emmerich racontant l'invasion d'extraterrestres."
+      },
+      {
+        "id": 4,
+        "question": "Quel intrus se cache parmi ces pays au drapeau bleu, blanc et rouge ?",
+        "propositions": [
+          "Pays-Bas",
+          "Australie",
+          "Estonie",
+          "Islande"
+        ],
+        "réponse": "Estonie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Drapeau_de_l'Estonie",
+        "anecdote": "Le drapeau national de l'Estonie est composé de trois bandes horizontales égales, avec de haut en bas le bleu, le noir et le blanc."
+      }
+    ]
+}

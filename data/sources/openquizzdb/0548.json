@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Chevaux au quotidien",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le nom du cheval de Lucky Luke, célèbre cow-boy de BD ?",
+        "propositions": [
+          "Pégase",
+          "Yakari",
+          "Tornado",
+          "Jolly Jumper"
+        ],
+        "réponse": "Jolly Jumper",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jolly_Jumper",
+        "anecdote": "Par certains côtés, notamment son intelligence, son caractère et sa couleur de robe, Jolly Jumper ressemble à Milou, le chien de Tintin."
+      },
+      {
+        "id": 2,
+        "question": "Quelle célèbre marque automobile a pour emblème un cheval cabré ?",
+        "propositions": [
+          "Alfa Romeo",
+          "Ferrari",
+          "Peugeot",
+          "Lamborghini"
+        ],
+        "réponse": "Ferrari",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ferrari_(entreprise)",
+        "anecdote": "Dès 1947, le logo initial, dit Scudetto, est réservé aux modèles préparés par la Scuderia Ferrari, l'écurie de compétition."
+      },
+      {
+        "id": 3,
+        "question": "Comment s'appelle le cheval ailé relaté dans la mythologie grecque ?",
+        "propositions": [
+          "Fungus",
+          "Arion",
+          "Bucéphale",
+          "Pégase"
+        ],
+        "réponse": "Pégase",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pégase",
+        "anecdote": "Pégase est monté au ciel après sa naissance pour se mettre au service de Zeus qui le chargera d'apporter les éclairs sur l'Olympe."
+      },
+      {
+        "id": 4,
+        "question": "Combien y a-t-il de cavaliers sur un échiquier au début d'une partie ?",
+        "propositions": [
+          "Trois",
+          "Deux",
+          "Quatre",
+          "Un"
+        ],
+        "réponse": "Quatre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Échiquier",
+        "anecdote": "On dispose l'échiquier de façon telle que, pour chacun des adversaires, la case du coin gauche de l'échiquier soit noire."
+      }
+    ]
+}

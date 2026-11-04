@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Toutânkhamon",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle ville est exposé le masque doré de Toutânkhamon ?",
+        "propositions": [
+          "Louxor",
+          "Boulaq",
+          "Le Caire",
+          "Alexandrie"
+        ],
+        "réponse": "Le Caire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Masque_funéraire_de_Toutânkhamon",
+        "anecdote": "Ouvert au public en 1902, le musée égyptien du Caire est l'un des plus grands musées entièrement consacré à l'Antiquité égyptienne."
+      },
+      {
+        "id": 2,
+        "question": "Combien de sarcophages protégeaient la momie de Toutânkhamon ?",
+        "propositions": [
+          "Quatre",
+          "Cinq",
+          "Trois",
+          "Deux"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Toutânkhamon",
+        "anecdote": "Au bout de soixante jours, Toutânkhamon sera inhumé dans un sarcophage en granite, selon les rites funéraires royaux égyptiens."
+      },
+      {
+        "id": 3,
+        "question": "De quelle matière est fait le masque mortuaire de Toutânkhamon ?",
+        "propositions": [
+          "Or",
+          "Bronze",
+          "Plâtre",
+          "Argent"
+        ],
+        "réponse": "Or",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Toutânkhamon",
+        "anecdote": "Sur le visage de Toutânkhamon est rabattu un masque en or dont les traits rappellent le visage de la reine Tiyi, épouse d'Amenhotep III."
+      },
+      {
+        "id": 4,
+        "question": "Comment les Égyptiens ouvraient-ils à l'âme le monde souterrain ?",
+        "propositions": [
+          "Crémation",
+          "Pendaison",
+          "Embaumement",
+          "Dissection"
+        ],
+        "réponse": "Embaumement",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Embaumement",
+        "anecdote": "Dans l'Égypte ancienne, les embaumeurs étaient également appelés taricheutes, signifiant viande conservée, corps embaumé."
+      }
+    ]
+}

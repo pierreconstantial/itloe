@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Héros de « Game of Thrones »",         
+  "mise-à-jour": "08/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui est la mère des dragons dans « Game of Thrones » ?",
+        "propositions": [
+          "Lisa",
+          "Jon",
+          "Donan",
+          "Daenerys"
+        ],
+        "réponse": "Daenerys",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Daenerys_Targaryen",
+        "anecdote": "Ses dragons ont grandi avec la jeune femme au point qu'elle peut presque les monter."
+      },
+      {
+        "id": 2,
+        "question": "Comment meurt Ned Stark dans « Game of Thrones » ?",
+        "propositions": [
+          "Brûlé vif",
+          "Poignardé",
+          "Pendu",
+          "Décapité"
+        ],
+        "réponse": "Décapité",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eddard_Stark",
+        "anecdote": "Eddard Stark est un homme profondément juste et noble, mais également dur et austère."
+      },
+      {
+        "id": 3,
+        "question": "Comment s'appelle la fiancée de Joffrey dans « Game of Thrones » ?",
+        "propositions": [
+          "Daenerys",
+          "Arya",
+          "Catelyn",
+          "Sansa"
+        ],
+        "réponse": "Sansa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Personnages_du_Trône_de_fer",
+        "anecdote": "Malgré cela, Joffrey humilie et fait battre Sansa à plusieurs reprises pour son propre amusement."
+      },
+      {
+        "id": 4,
+        "question": "Qui est poussé dans le vide par Jaime Lannister dans « Game of Thrones » ?",
+        "propositions": [
+          "Craster",
+          "Ned",
+          "Bran",
+          "Jon"
+        ],
+        "réponse": "Bran",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Personnages_du_Trône_de_fer",
+        "anecdote": "Il ne faut pas confondre Bran avec le frère décédé de Lord Eddard Stark en l'honneur duquel il a été prénommé."
+      }
+    ]
+}

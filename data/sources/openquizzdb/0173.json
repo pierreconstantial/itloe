@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Barack Obama",         
+  "mise-à-jour": "06/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel État des États-Unis est né Barack Obama ?",
+        "propositions": [
+          "Hawaï",
+          "Colorado",
+          "Arkansas",
+          "Californie"
+        ],
+        "réponse": "Hawaï",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Barack_Obama",
+        "anecdote": "Seuls 19 % des américains pensent que leur président méritait le prix Nobel de la Paix."
+      },
+      {
+        "id": 2,
+        "question": "Quelle était la profession de Barack Obama avant de devenir président ?",
+        "propositions": [
+          "Programmeur",
+          "Consultant financier",
+          "Agent du FBI",
+          "Prêtre"
+        ],
+        "réponse": "Consultant financier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Barack_Obama",
+        "anecdote": "Le parcours de Barack Obama a suscité dans les médias du monde entier un grand intérêt."
+      },
+      {
+        "id": 3,
+        "question": "Qui a chanté l'hymne national pour l'investiture de Barack Obama ?",
+        "propositions": [
+          "Beyoncé",
+          "Rihanna",
+          "Madonna",
+          "Britney Spears"
+        ],
+        "réponse": "Beyoncé",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Beyoncé",
+        "anecdote": "L'ancienne membre du trio Destiny's Child aura traversé la décennie en renforçant son statut de star incontournable."
+      },
+      {
+        "id": 4,
+        "question": "De quel pays le père de Barack Obama était-il originaire ?",
+        "propositions": [
+          "Afrique du Sud",
+          "Mozambique",
+          "Congo",
+          "Kenya"
+        ],
+        "réponse": "Kenya",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Barack_Obama",
+        "anecdote": "Fils d'un Kényan et d'une Américaine du Kansas d'ascendance anglaise et irlandaise, Barack Obama fut élevé en Indonésie."
+      }
+    ]
+}

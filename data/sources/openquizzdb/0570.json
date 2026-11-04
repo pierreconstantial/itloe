@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #11",         
+  "mise-à-jour": "21/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de dimensions possède une image holographique ?",
+        "propositions": [
+          "Deux",
+          "Une",
+          "Quatre",
+          "Trois"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hologramme",
+        "anecdote": "Le secret de l'holographie réside dans l'enregistrement de l'intensité et de la phase de la lumière réfléchie par un objet via laser."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le besoin calorique quotidien moyen d'un adulte sédentaire ?",
+        "propositions": [
+          "3 000 calories",
+          "2 000 calories",
+          "1 200 calories",
+          "4 000 calories"
+        ],
+        "réponse": "2 000 calories",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Besoin_énergétique",
+        "anecdote": "Même au repos, notre corps brûle des calories pour réguler la respiration, la circulation sanguine et la température corporelle."
+      },
+      {
+        "id": 3,
+        "question": "Quelle est la longueur réglementaire d'une piste de bowling ?",
+        "propositions": [
+          "Environ 21 m",
+          "Environ 18 m",
+          "Environ 15 m",
+          "Environ 12 m"
+        ],
+        "réponse": "Environ 18 m",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bowling",
+        "anecdote": "Régulièrement huilée, une même piste peut devenir très facile ou extrêmement technique selon la façon dont elle est préparée."
+      },
+      {
+        "id": 4,
+        "question": "Combien Cadet Rousselle a-t-il de maisons dans une chanson populaire ?",
+        "propositions": [
+          "Deux",
+          "Cinq",
+          "Trois",
+          "Quatre"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cadet_Rousselle",
+        "anecdote": "Bien qu'humoristique, la chanson de Cadet Rousselle a été réutilisée comme chant patriotique pendant la Révolution française."
+      }
+    ]
+}

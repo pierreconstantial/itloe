@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Planche à voile",         
+  "mise-à-jour": "19/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel sport nautique combine à la fois glisse et voile ?",
+        "propositions": [
+          "Voile",
+          "Windsurf",
+          "Surf",
+          "Kitesurf"
+        ],
+        "réponse": "Windsurf",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Planche_à_voile",
+        "anecdote": "Ce type d'embarcation à voile minimaliste est aussi le sport de glisse pratiqué avec cette embarcation."
+      },
+      {
+        "id": 2,
+        "question": "Quel matériau est surtout utilisé pour fabriquer des planches à voile ?",
+        "propositions": [
+          "Plastique",
+          "Fibre de verre",
+          "Bois",
+          "Aluminium"
+        ],
+        "réponse": "Fibre de verre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Planche_à_voile",
+        "anecdote": "De nouveaux matériaux sont de plus en plus utilisés pour améliorer la légèreté et la résistance, au détriment d'un coût plus élevé."
+      },
+      {
+        "id": 3,
+        "question": "Quelle est la position de base standard en planche à voile ?",
+        "propositions": [
+          "Accroupi",
+          "Debout",
+          "Assis",
+          "Allongé"
+        ],
+        "réponse": "Debout",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Planche_à_voile",
+        "anecdote": "La planche à voile se caractérise par la position debout de son pratiquant et par l'absence de gouvernail et d'écoutes."
+      },
+      {
+        "id": 4,
+        "question": "Comment appelle-t-on une personne pratiquant la planche à voile ?",
+        "propositions": [
+          "Voiliste",
+          "Véliplanchiste",
+          "Planiste",
+          "Plancheur"
+        ],
+        "réponse": "Véliplanchiste",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Planche_à_voile",
+        "anecdote": "C'est le véliplanchiste qui soulève puis maintient le mât et la voile en position active, s'orientant sur l'eau en inclinant le gréement."
+      }
+    ]
+}

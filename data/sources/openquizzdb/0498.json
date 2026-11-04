@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Boissons de stars",         
+  "mise-à-jour": "25/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Pour quelle marque de boisson Nicole Kidman fut-elle égérie ?",
+        "propositions": [
+          "Pepsi",
+          "Aquarius",
+          "Gini",
+          "Schweppes"
+        ],
+        "réponse": "Schweppes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Schweppes",
+        "anecdote": "L'actrice prononce le slogan « What did you expect » (À quoi vous attendiez-vous), qui reste le slogan actuel de Schweppes."
+      },
+      {
+        "id": 2,
+        "question": "Pour quelle marque de boisson Omar Sy a-t-il fait plusieurs publicités ?",
+        "propositions": [
+          "Get 27",
+          "Ovomaltine",
+          "Finley",
+          "Ricqlès"
+        ],
+        "réponse": "Finley",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Finley_(boisson)",
+        "anecdote": "Finley est une ancienne marque de boisson gazeuse, à l'origine un tonic, distribuée par The Coca-Cola Company depuis 2014."
+      },
+      {
+        "id": 3,
+        "question": "De quelle boisson était friande la marionnette de Jean-Pierre Papin ?",
+        "propositions": [
+          "Cacolac",
+          "Ovomaltine",
+          "Tropico",
+          "Pulco"
+        ],
+        "réponse": "Cacolac",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cacolac",
+        "anecdote": "Le Cacolac est une boisson lactée au cacao (qui peut se boire froide ou chaude) créée en 1954 par l'entreprise bordelaise du même nom."
+      },
+      {
+        "id": 4,
+        "question": "Quelle boisson énergétique a été promue par Neymar ?",
+        "propositions": [
+          "Red Bull",
+          "Gatorade",
+          "Powerade",
+          "Monster Energy"
+        ],
+        "réponse": "Powerade",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

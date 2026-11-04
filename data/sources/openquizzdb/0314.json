@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #27",         
+  "mise-à-jour": "30/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Cercle de moine, mot de sept lettres commençant par un T ?",
+        "propositions": [
+          "Truelle",
+          "Tambour",
+          "Tonsure",
+          "Terrier"
+        ],
+        "réponse": "Tonsure",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Ne garde que l'essentiel, mot de six lettres commençant par un R ?",
+        "propositions": [
+          "Ressac",
+          "Radium",
+          "Rayure",
+          "Résumé"
+        ],
+        "réponse": "Résumé",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Pâtisserie du tonnerre, mot de six lettres commençant par un E ?",
+        "propositions": [
+          "Éclair",
+          "Expert",
+          "Essaim",
+          "Engobe"
+        ],
+        "réponse": "Éclair",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Se vend en ruban, mot de cinq lettres commençant par un M ?",
+        "propositions": [
+          "Marin",
+          "Magot",
+          "Morue",
+          "Mètre"
+        ],
+        "réponse": "Mètre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

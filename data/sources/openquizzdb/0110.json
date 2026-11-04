@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #10",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un S, il faut un pays, une confiserie, une culotte et un sport.",
+        "propositions": [
+          "Suisse",
+          "Squash",
+          "Sucette",
+          "String"
+        ],
+        "réponse": "Suisse",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un A, il faut une alerte, une attache, un gaz et un contrat.",
+        "propositions": [
+          "Alarme",
+          "Abonnement",
+          "Agrafe",
+          "Azote"
+        ],
+        "réponse": "Alarme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un J, il faut un vêtement, une maladie, une viande et une feuille.",
+        "propositions": [
+          "Jupe",
+          "Jaunisse",
+          "Jambon",
+          "Journal"
+        ],
+        "réponse": "Jupe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un C, il faut une dent, un divan, un oiseau et un abri.",
+        "propositions": [
+          "Canine",
+          "Cabane",
+          "Canari",
+          "Canapé"
+        ],
+        "réponse": "Canine",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

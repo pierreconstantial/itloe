@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Clint Eastwood",         
+  "mise-à-jour": "18/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec qui joue Clint Eastwood dans le film « Sur la route de Madison » ?",
+        "propositions": [
+          "Jane Fonda",
+          "Sondra Locke",
+          "Meryl Streep",
+          "Jodie Foster"
+        ],
+        "réponse": "Meryl Streep",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sur_la_route_de_Madison",
+        "anecdote": "Le film a reçu un Oscar de la meilleure actrice pour Meryl Streep et un César du meilleur film étranger en 1996."
+      },
+      {
+        "id": 2,
+        "question": "Quel film de Clint Eastwood est consacré à Charlie Parker ?",
+        "propositions": [
+          "La Dernière Chance",
+          "Pink Cadillac",
+          "Bird",
+          "Breezy"
+        ],
+        "réponse": "Bird",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bird_(film)",
+        "anecdote": "Le film « Bird » est l'un des très rares films consacrés au jazz et émane d'un réalisateur lui-même musicien."
+      },
+      {
+        "id": 3,
+        "question": "Quel film Clint Eastwood a-t-il tourné en accord avec la NASA ?",
+        "propositions": [
+          "Space Cowboys",
+          "Invictus",
+          "La Relève",
+          "Au-delà"
+        ],
+        "réponse": "Space Cowboys",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Space_Cowboys",
+        "anecdote": "Clint Eastwood a voulu ici rendre hommage à des pionniers de l'aviation moderne qui n'ont pu participer à la conquête spatiale."
+      },
+      {
+        "id": 4,
+        "question": "Quel réalisateur a embauché Clint Eastwood pour la « Trilogie du dollar » ?",
+        "propositions": [
+          "Sergio Leone",
+          "Giorgio Ferroni",
+          "Tonino Valerii",
+          "Sergio Corbucci"
+        ],
+        "réponse": "Sergio Leone",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Trilogie_du_dollar",
+        "anecdote": "Les films ont été réunis sous ce nom commun pour des raisons promotionnelles postérieures à leur réalisation et diffusion."
+      }
+    ]
+}

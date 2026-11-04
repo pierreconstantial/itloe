@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Tisanes et infusions",         
+  "mise-à-jour": "08/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle fleur de la Toussaint est consommée en infusion en Chine ?",
+        "propositions": [
+          "Myosotis",
+          "Jasmin",
+          "Gerbera",
+          "Chrysanthème"
+        ],
+        "réponse": "Chrysanthème",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chrysanthème",
+        "anecdote": "Parmi les variétés les plus réputées, la variété gongju des monts Huang, poussant à l'état sauvage sur le territoire de Huangshan."
+      },
+      {
+        "id": 2,
+        "question": "La racine de quelle plante est réputée aphrodisiaque en infusion ?",
+        "propositions": [
+          "Bardane",
+          "Gingembre",
+          "Topinambour",
+          "Radis"
+        ],
+        "réponse": "Gingembre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gingembre",
+        "anecdote": "Ce rhizome est une épice très employée dans un grand nombre de cuisines asiatiques, et en particulier dans la cuisine indienne."
+      },
+      {
+        "id": 3,
+        "question": "Quelle plante de jardin a des vertus digestives et respiratoires ?",
+        "propositions": [
+          "Estragon",
+          "Thym",
+          "Persil",
+          "Ciboulette"
+        ],
+        "réponse": "Thym",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Thym",
+        "anecdote": "En aromate ou en infusion, c'est un désinfectant des voies digestives, souvent utilisé en association avec le romarin et la sauge."
+      },
+      {
+        "id": 4,
+        "question": "Quelle plante vivace est souvent confondue avec la citronnelle ?",
+        "propositions": [
+          "Sauge",
+          "Sarriette",
+          "Mélisse",
+          "Romarin"
+        ],
+        "réponse": "Mélisse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mélisse_officinale",
+        "anecdote": "La mélisse a des petites feuilles ovales gaufrées et dentelées qui exhalent un parfum doux et citronné quand on les froisse."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Plantes aromatiques",         
+  "mise-à-jour": "31/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle plante composait la couronne des vainqueurs dans l'Antiquité ?",
+        "propositions": [
+          "Persil",
+          "Basilic",
+          "Laurier",
+          "Thym"
+        ],
+        "réponse": "Laurier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Laurier",
+        "anecdote": "Dans le sport, les concours ou les prix intellectuels, le laurier (Laurus nobilis) est le symbole de la victoire, d'où l'origine du mot lauréat."
+      },
+      {
+        "id": 2,
+        "question": "Quelle plante sert à préparer le thé au Maghreb ?",
+        "propositions": [
+          "Menthe",
+          "Anis",
+          "Coriandre",
+          "Cannelle"
+        ],
+        "réponse": "Menthe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Thé_à_la_menthe",
+        "anecdote": "Le thé à la menthe, la boisson de l'hospitalité, n'est pas seulement proposée lors des repas mais tout au long de la journée."
+      },
+      {
+        "id": 3,
+        "question": "Quelle plante est appelée « farigoule » en Provence ?",
+        "propositions": [
+          "Thym",
+          "Marjolaine",
+          "Bergamote",
+          "Basilic"
+        ],
+        "réponse": "Thym",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Thym",
+        "anecdote": "Ces plantes rampantes ou en coussinet sont riches en huiles essentielles et, à ce titre, font partie des plantes aromatiques."
+      },
+      {
+        "id": 4,
+        "question": "Quelle plante compose le pistou, avec l'ail et l'huile d'olive ?",
+        "propositions": [
+          "Cumin",
+          "Menthe",
+          "Marjolaine",
+          "Basilic"
+        ],
+        "réponse": "Basilic",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pistou",
+        "anecdote": "Le pistou constitue l'ingrédient essentiel de la soupe au pistou, une soupe de légumes frais et secs à laquelle on ajoute des pâtes."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #12",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un M, il faut un fruit, un meuble, un transport et un métier de santé.",
+        "propositions": [
+          "Mangue",
+          "Malle",
+          "Médecin",
+          "Métro"
+        ],
+        "réponse": "Mangue",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un P, il faut un omnivore, un sac conique, un fourneau et une couleur.",
+        "propositions": [
+          "Panda",
+          "Poche",
+          "Pourpre",
+          "Piano"
+        ],
+        "réponse": "Panda",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un S, il faut un pays, un jeu lumineux, un légume et une empreinte.",
+        "propositions": [
+          "Simon",
+          "Suisse",
+          "Sceau",
+          "Salade"
+        ],
+        "réponse": "Suisse",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un B, il faut un vêtement, une boisson, un hématome et une laverie.",
+        "propositions": [
+          "Blouson",
+          "Buanderie",
+          "Bière",
+          "Bleu"
+        ],
+        "réponse": "Blouson",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

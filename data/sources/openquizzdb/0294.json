@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #49",         
+  "mise-à-jour": "18/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel type de glacier influence le climat terrestre ?",
+        "propositions": [
+          "Calote",
+          "Callote",
+          "Callotte",
+          "Calotte"
+        ],
+        "réponse": "Calotte",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel équipement protège ou soutient le genou autour de la rotule ?",
+        "propositions": [
+          "Genouière",
+          "Genouillère",
+          "Genouillaire",
+          "Genoullière"
+        ],
+        "réponse": "Genouillère",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle protection permet aux diplomates d'échapper à certaines lois ?",
+        "propositions": [
+          "Immunité",
+          "Imunnité",
+          "Imunité",
+          "Immunnité"
+        ],
+        "réponse": "Immunité",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle affirmation incontestable est formulée par une autorité ?",
+        "propositions": [
+          "Doghme",
+          "Daugme",
+          "Dogme",
+          "Dhogme"
+        ],
+        "réponse": "Dogme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

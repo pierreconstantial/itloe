@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Harry Potter »",         
+  "mise-à-jour": "02/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel poste tient Harry Potter dans son équipe de quidditch ?",
+        "propositions": [
+          "Attrapeur",
+          "Lanceur",
+          "Gardien",
+          "Poursuiveur"
+        ],
+        "réponse": "Attrapeur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Quidditch",
+        "anecdote": "La création du Vif d'Or, la balle dorée attrapée par un attrapeur, est inspirée d'un jeu médiéval existant, le cuissot de l'hermine."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le nom de famille de Hermione dans la saga « Harry Potter » ?",
+        "propositions": [
+          "Gaunt",
+          "Greengrass",
+          "Granger",
+          "Grindelwald"
+        ],
+        "réponse": "Granger",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hermione_Granger",
+        "anecdote": "Hermione est la meilleure amie d'Harry Potter et de Ron Weasley, et réside, durant sa scolarité, à Poudlard, à la maison Gryffondor."
+      },
+      {
+        "id": 3,
+        "question": "Dans « Harry Potter », quel titre Voldemort a-t-il décidé de porter ?",
+        "propositions": [
+          "Comte",
+          "Baron",
+          "Duc",
+          "Lord"
+        ],
+        "réponse": "Lord",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Voldemort",
+        "anecdote": "Lord Voldemort est aussi appelé « Le Seigneur des Ténèbres » ou encore « Celui-Dont-On-Ne-Doit-Pas-Prononcer-Le-Nom »."
+      },
+      {
+        "id": 4,
+        "question": "Quelle forme prend l'épouvantard de Ron dans la saga « Harry Potter » ?",
+        "propositions": [
+          "Une araignée",
+          "Un loup",
+          "Un dragon",
+          "Un scorpion"
+        ],
+        "réponse": "Une araignée",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ron_Weasley",
+        "anecdote": "Dix-neuf ans après la chute de Voldemort, Ron et Hermione se marièrent et eurent deux enfants : Rose et son frère cadet Hugo."
+      }
+    ]
+}

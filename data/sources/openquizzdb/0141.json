@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Rendez-vous au bar",         
+  "mise-à-jour": "26/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle boisson spiritueuse est aromatisée à l'anis et à la réglisse ?",
+        "propositions": [
+          "Ouzo",
+          "Peket",
+          "Raki",
+          "Pastis"
+        ],
+        "réponse": "Pastis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pastis",
+        "anecdote": "Variante de l'absinthe, le pastis est un apéritif traditionnel de la cuisine provençale et de la cuisine française qui titre souvent à 40 %."
+      },
+      {
+        "id": 2,
+        "question": "Quel cocktail est fait à base de crème de cassis et de vin blanc ?",
+        "propositions": [
+          "Tequila sunrise",
+          "Kir",
+          "Cuba libre",
+          "Mojito"
+        ],
+        "réponse": "Kir",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kir",
+        "anecdote": "Le terme s'est étendu depuis à de nombreuses variantes du blanc-cassis (vin blanc aromatisé au sirop de cassis) dans le monde."
+      },
+      {
+        "id": 3,
+        "question": "Quelle boisson alcoolisée est faite à partir de pommes fermentées ?",
+        "propositions": [
+          "Armagnac",
+          "Sureau",
+          "Cidre",
+          "Frênette"
+        ],
+        "réponse": "Cidre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cidre",
+        "anecdote": "Chez les producteurs, l'adjectif cidricole fait référence aussi bien à la boisson fermentée à base de pomme qu'à base de poire."
+      },
+      {
+        "id": 4,
+        "question": "Quel vin blanc effervescent italien est plus doux que le Prosecco ?",
+        "propositions": [
+          "Vouvray",
+          "Friuli",
+          "Asti",
+          "Alghero"
+        ],
+        "réponse": "Asti",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Asti_spumante_(DOCG)",
+        "anecdote": "Seuls ont droit à la DOCG les vins blancs récoltés à l'intérieur de l'aire de production définie par le décret."
+      }
+    ]
+}

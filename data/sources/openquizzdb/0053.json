@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sean Connery",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel personnage Roger Moore et Sean Connery ont-ils interprété ?",
+        "propositions": [
+          "James Bond",
+          "Le Saint",
+          "OSS 117",
+          "Dick Tracy"
+        ],
+        "réponse": "James Bond",
+        "wikipédia": "https://fr.wikipedia.org/wiki/James_Bond",
+        "anecdote": "Connu par son matricule 007, James Bond est un personnage de fiction créé en 1953."
+      },
+      {
+        "id": 2,
+        "question": "Quel film a réuni sur les écrans Sean Connery et Christophe Lambert ?",
+        "propositions": [
+          "Greystoke",
+          "Highlander",
+          "Mad Max",
+          "Subway"
+        ],
+        "réponse": "Highlander",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Highlander",
+        "anecdote": "« A Kind of Magic » est un album du groupe Queen, sorti en juin 1986, dont six de ses neuf morceaux sont utilisés dans le film « Highlander »."
+      },
+      {
+        "id": 3,
+        "question": "De quel pays Sean Connery est-il originaire ?",
+        "propositions": [
+          "Etats-Unis",
+          "Irlande",
+          "Écosse",
+          "Angleterre"
+        ],
+        "réponse": "Écosse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sean_Connery",
+        "anecdote": "Sean Connery est célèbre pour avoir interprété le rôle de James Bond à sept reprises."
+      },
+      {
+        "id": 4,
+        "question": "Quel single de Vangelis comprend un texte récité par Sean Connery ?",
+        "propositions": [
+          "Mythodea",
+          "Alexandre",
+          "Pulstar",
+          "Ithaka"
+        ],
+        "réponse": "Ithaka",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vangelis",
+        "anecdote": "Ce CD single, sorti en 2003, fait partie d'un coffret comprenant un livre d'art, projet signé Micheline Roquebrune Connery."
+      }
+    ]
+}

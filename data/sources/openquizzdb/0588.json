@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #14",         
+  "mise-à-jour": "02/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de chiffres contient un code postal français standard ?",
+        "propositions": [
+          "Quatre",
+          "Trois",
+          "Cinq",
+          "Six"
+        ],
+        "réponse": "Cinq",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Code_postal_en_France",
+        "anecdote": "Les deux premiers chiffres correspondent au numéro du département, tandis que les trois derniers chiffres identifient la commune."
+      },
+      {
+        "id": 2,
+        "question": "Au tennis, combien y a-t-il au minimum de jeux dans un set ?",
+        "propositions": [
+          "Quatre",
+          "Sept",
+          "Cinq",
+          "Six"
+        ],
+        "réponse": "Six",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tennis",
+        "anecdote": "Si les joueurs arrivent à 6-6, le set ne peut pas se terminer ainsi. Dans la plupart des tournois modernes, on joue alors un tie-break."
+      },
+      {
+        "id": 3,
+        "question": "Combien y a-t-il de fous noirs au début d'une partie d'échecs ?",
+        "propositions": [
+          "Trois",
+          "Un seul",
+          "Deux",
+          "Quatre"
+        ],
+        "réponse": "Deux",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Échecs",
+        "anecdote": "Comme ils se déplacent uniquement en diagonale, les fous ne peuvent jamais changer de couleur de case pendant toute la partie."
+      },
+      {
+        "id": 4,
+        "question": "En quelle année la marque Apple a-t-elle lancé le premier iPhone ?",
+        "propositions": [
+          "2008",
+          "2006",
+          "2007",
+          "2005"
+        ],
+        "réponse": "2007",
+        "wikipédia": "https://fr.wikipedia.org/wiki/iPhone",
+        "anecdote": "Le premier iPhone avait seulement 4 Go ou 8 Go de stockage, pas d'App Store (qui arrivera en 2008) et une caméra de 2 mégapixels."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #25",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel objet spiralé équipe encore certains matelas de nos chambres ?",
+        "propositions": [
+          "Ressort",
+          "Ressord",
+          "Resort",
+          "Ressaurd"
+        ],
+        "réponse": "Ressort",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle large voie comprend des allées piétonnières sur ses bords ?",
+        "propositions": [
+          "Boulevart",
+          "Boullevard",
+          "Boulvard",
+          "Boulevard"
+        ],
+        "réponse": "Boulevard",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle technologie centralise le contrôle d'une maison connectée ?",
+        "propositions": [
+          "Daumautique",
+          "Domautique",
+          "Domotique",
+          "Domotik"
+        ],
+        "réponse": "Domotique",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel raisonnement mène à l'identification de l'origine d'une défaillance ?",
+        "propositions": [
+          "Diagnaustic",
+          "Diagnostic",
+          "Diagnostique",
+          "Diagnaustique"
+        ],
+        "réponse": "Diagnostic",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

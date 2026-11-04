@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #09",         
+  "mise-à-jour": "13/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel pays trouve-t-on des temples ornés de sculptures érotiques ?",
+        "propositions": [
+          "Inde",
+          "Cambodge",
+          "Indonésie",
+          "Thaïlande"
+        ],
+        "réponse": "Inde",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Khajuraho",
+        "anecdote": "Les temples de Khajuraho, en Inde, construits principalement entre le IX ? et le XI ? siècle sous la dynastie des Chandela, sont mondialement célèbres pour leurs sculptures extrêmement détaillées."
+      },
+      {
+        "id": 2,
+        "question": "Que sucez-vous lorsque vous pratiquez « le petit salé » ?",
+        "propositions": [
+          "Sexe",
+          "Nez",
+          "Doigts de pied",
+          "Fesses"
+        ],
+        "réponse": "Doigts de pied",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "De quoi le porc-épic asperge-t-il son élue avant de l'honorer ?",
+        "propositions": [
+          "Salive",
+          "Urine",
+          "Sang",
+          "Graisse"
+        ],
+        "réponse": "Urine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Où se fit attacher Ulysse pour résister aux charmes des sirènes ?",
+        "propositions": [
+          "Rocher en mer",
+          "île déserte",
+          "Câle du bateau",
+          "Mât du bateau"
+        ],
+        "réponse": "Mât du bateau",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

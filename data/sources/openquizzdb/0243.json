@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Grands monuments",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel pays se dresse la Liberté éclairant le monde ?",
+        "propositions": [
+          "France",
+          "Royaume-Uni",
+          "Canada",
+          "États-Unis"
+        ],
+        "réponse": "États-Unis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Statue_de_la_Liberté",
+        "anecdote": "La Statue de la Liberté est située sur l'île de Liberty Island au sud de Manhattan, à l'embouchure de l'Hudson et à proximité d'Ellis Island."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel État européen se situe la Sagrada Familia ?",
+        "propositions": [
+          "Chypre",
+          "Portugal",
+          "Espagne",
+          "Italie"
+        ],
+        "réponse": "Espagne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sagrada_Familia",
+        "anecdote": "La basilique est l'un des exemples les plus connus du modernisme catalan et un monument emblématique de la ville de Barcelone."
+      },
+      {
+        "id": 3,
+        "question": "Sur quelles îles se trouvent les Moaï, gigantesques ancêtres divinisés ?",
+        "propositions": [
+          "Îles Cook",
+          "Îles de Pâques",
+          "Îles de Noël",
+          "Îles Galapagos"
+        ],
+        "réponse": "Îles de Pâques",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Moaï",
+        "anecdote": "La majorité des immenses monolithes de l'Île de Pâques est sculptée dans du tuf issu principalement de la carrière de Rano Raraku."
+      },
+      {
+        "id": 4,
+        "question": "Quel grand monument métallique représente Bruxelles ?",
+        "propositions": [
+          "Atomium",
+          "Tour et Taxis",
+          "Voortrekker",
+          "Luizenmolen"
+        ],
+        "réponse": "Atomium",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Atomium",
+        "anecdote": "L'Atomium représente la maille conventionnelle du cristal de fer (structure cubique centrée) agrandie plus de 165 milliards de fois."
+      }
+    ]
+}

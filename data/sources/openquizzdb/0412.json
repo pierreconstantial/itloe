@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Secrets du cinéma",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment s'appelle la recherche des lieux de tournage d'un film ?",
+        "propositions": [
+          "Storyboard",
+          "Repérage",
+          "Montage",
+          "Casting"
+        ],
+        "réponse": "Repérage",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Repérage",
+        "anecdote": "Cette recherche peut être effectuée par le réalisateur, par ses assistants, ou par des membres de l'équipe de production."
+      },
+      {
+        "id": 2,
+        "question": "Combien de personnes ont voté pour l'attribution des Oscars en 2026 ?",
+        "propositions": [
+          "Environ 3 000",
+          "Environ 10 000",
+          "Environ 2 000",
+          "Environ 1 000"
+        ],
+        "réponse": "Environ 10 000",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Oscars_du_cinéma",
+        "anecdote": "Les « Academy Awards » sont les plus anciennes récompenses dans le domaine des médias et du spectacle."
+      },
+      {
+        "id": 3,
+        "question": "Quel pays le film « Les Dieux sont tombés sur la tête » fit-il connaître ?",
+        "propositions": [
+          "Botswana",
+          "Gabon",
+          "Zambie",
+          "Rwanda"
+        ],
+        "réponse": "Botswana",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_dieux_sont_tombés_sur_la_tête",
+        "anecdote": "Le film a connu un succès considérable dans le monde et en France, rendant le réalisateur et son interprète célèbres."
+      },
+      {
+        "id": 4,
+        "question": "Quelle comédienne américaine a créé une forme de gymnastique ?",
+        "propositions": [
+          "Diane Keaton",
+          "Jane Fonda",
+          "Sally Field",
+          "Faye Dunaway"
+        ],
+        "réponse": "Jane Fonda",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jane_Fonda",
+        "anecdote": "Bien que parlant parfaitement français, Jane Fonda a été doublée à plusieurs reprises en France."
+      }
+    ]
+}

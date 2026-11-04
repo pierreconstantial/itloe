@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Kim Kardashian",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle demi-soeur de Kim Kardashian est devenue milliardaire ?",
+        "propositions": [
+          "Beatrice Keeler",
+          "Kylie Jenner",
+          "Maria Voskania",
+          "Nicole Polizzi"
+        ],
+        "réponse": "Kylie Jenner",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kylie_Jenner",
+        "anecdote": "Influenceuse sur Instagram, elle tourne dans l'émission « L'Incroyable Famille Kardashian » qui filme son quotidien et celui de sa famille."
+      },
+      {
+        "id": 2,
+        "question": "Combien Kanye West a-t-il dépensé pour demander Kim en mariage ?",
+        "propositions": [
+          "2 millions",
+          "3 millions",
+          "4 millions",
+          "5 millions"
+        ],
+        "réponse": "3 millions",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kanye_West",
+        "anecdote": "Kanye West est l'un des plus gros vendeurs de disques de l'industrie musicale avec plus de 32 millions d'exemplaires vendus."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel magazine Kim Kardashian a-t-elle posé nue en 2014 ?",
+        "propositions": [
+          "Glamour",
+          "Vogue",
+          "Paper",
+          "Cosmopolitan"
+        ],
+        "réponse": "Paper",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kim_Kardashian",
+        "anecdote": "Kim Kardashian a réalisé « Kim Kardashian Superstar », une sextape en amateur en 2003 avec le chanteur R'n'B Ray J."
+      },
+      {
+        "id": 4,
+        "question": "Quel français avait dessiné la robe de Kim Kardashian au Met Gala ?",
+        "propositions": [
+          "Pierre Balmain",
+          "Christian Dior",
+          "Thierry Mugler",
+          "Guy Laroche"
+        ],
+        "réponse": "Thierry Mugler",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Thierry_Mugler",
+        "anecdote": "Il ne s'est jamais laissé emprisonner dans le statut de grand couturier et refusait notamment les rétrospectives de ses créations."
+      }
+    ]
+}

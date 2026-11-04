@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Tubes disco",         
+  "mise-à-jour": "15/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel tube de Village People évoque un mouvement de jeunesse ?",
+        "propositions": [
+          "Go West",
+          "In the Navy",
+          "Y.M.C.A.",
+          "Macho Man"
+        ],
+        "réponse": "Y.M.C.A.",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Y.M.C.A._(chanson)",
+        "anecdote": "Dans la culture gay, la chanson a été comprise comme célébrant la réputation de la YMCA en tant que lieu de drague."
+      },
+      {
+        "id": 2,
+        "question": "Quel tube disco planétaire du groupe ABBA est sorti en 1979 ?",
+        "propositions": [
+          "SOS",
+          "Mamma Mia",
+          "Waterloo",
+          "Voulez-Vous"
+        ],
+        "réponse": "Voulez-Vous",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Voulez-Vous_(chanson)",
+        "anecdote": "Le groupe est originellement composé d'Agnetha Fältskog, Anni-Frid Lyngstad, dite Frida, Benny Andersson et Björn Ulvaeus."
+      },
+      {
+        "id": 3,
+        "question": "Quel tube disco fut initialement écrit pour Stacy Lattisaw ?",
+        "propositions": [
+          "Viva America",
+          "Ring My Bell",
+          "Shadow Dancing",
+          "Copacabana"
+        ],
+        "réponse": "Ring My Bell",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ring_My_Bell",
+        "anecdote": "La chanson « Ring My Bell » est caractérisée par le son d'un carillon et de la batterie électronique Synare jouant un ton aigu."
+      },
+      {
+        "id": 4,
+        "question": "Quel titre des Gibson Brothers leur a valu quatorze disques d'or ?",
+        "propositions": [
+          "Oooh What a Life",
+          "Que Sera Mi Vida",
+          "Mariana",
+          "Cuba"
+        ],
+        "réponse": "Cuba",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gibson_Brothers",
+        "anecdote": "C'est en 1976 que les frères Gibson (Chris, Patrick et Alex), originaires de la Martinique, formèrent le groupe Gibson Brothers."
+      }
+    ]
+}

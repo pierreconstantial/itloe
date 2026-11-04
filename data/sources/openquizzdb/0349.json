@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Reggae",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel chanteur de reggae a été découvert par son tube « Boombastic » ?",
+        "propositions": [
+          "Bob Marley",
+          "Alpha Blondy",
+          "Ziggy Marley",
+          "Shaggy"
+        ],
+        "réponse": "Shaggy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Shaggy",
+        "anecdote": "Le tube d'Orville Richard Burrell, dit Shaggy, sera plus tard repris dans une publicité pour la marque Levi's."
+      },
+      {
+        "id": 2,
+        "question": "Qui est le musicien de reggae le plus célèbre et le plus influent ?",
+        "propositions": [
+          "King Sporty",
+          "Dobby Dobson",
+          "Bob Marley",
+          "Dawn Penn"
+        ],
+        "réponse": "Bob Marley",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bob_Marley",
+        "anecdote": "Bob Marley a également permis à la musique jamaïcaine et au mouvement rastafari de connaître une audience planétaire."
+      },
+      {
+        "id": 3,
+        "question": "À qui doit-on le célèbre titre « Reggae Night », sorti en 1983 ?",
+        "propositions": [
+          "Maxi Priest",
+          "Jimmy Cliff",
+          "Alpha Blondy",
+          "Bob Marley"
+        ],
+        "réponse": "Jimmy Cliff",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jimmy_Cliff",
+        "anecdote": "Jimmy Cliff est un des artistes reggae qui s'est le plus ouvert à d'autres formes de musique."
+      },
+      {
+        "id": 4,
+        "question": "Que chanteur français est connu pour son tube « Chacun sa route » ?",
+        "propositions": [
+          "Papa Dee",
+          "Purpleman",
+          "Pierpoljak",
+          "Tonton David"
+        ],
+        "réponse": "Tonton David",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tonton_David",
+        "anecdote": "Désormais installé en Moselle, Tonton David diffuse ses chansons sur les scènes partout en France."
+      }
+    ]
+}

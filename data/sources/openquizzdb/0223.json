@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Couples du cinéma",         
+  "mise-à-jour": "28/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui donne la réplique à Meryl Streep « Sur la route de Madison » ?",
+        "propositions": [
+          "Robert Redford",
+          "Clint Eastwood",
+          "Colin Firth",
+          "Richard Gere"
+        ],
+        "réponse": "Clint Eastwood",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sur_la_route_de_Madison",
+        "anecdote": "Meryl Streep a improvisé certaines scènes du film, ajoutant ainsi une profondeur supplémentaire à Francesca, son personnage."
+      },
+      {
+        "id": 2,
+        "question": "Qui hante Andie MacDowell dans « Quatre mariages et un enterrement » ?",
+        "propositions": [
+          "Hugh Grant",
+          "Colin Firth",
+          "Kevin Costner",
+          "Rowan Atkinson"
+        ],
+        "réponse": "Hugh Grant",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Quatre_mariages_et_un_enterrement",
+        "anecdote": "Le scénario de Richard Curtis a été inspiré par ses propres expériences lors de mariages où il croisait les mêmes personnes."
+      },
+      {
+        "id": 3,
+        "question": "Quel acteur danse avec Jennifer Grey dans  « Dirty Dancing » ?",
+        "propositions": [
+          "Patrick Swayze",
+          "John Travolta",
+          "Kevin Costner",
+          "Michael Keaton"
+        ],
+        "réponse": "Patrick Swayze",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dirty_Dancing",
+        "anecdote": "Le film a eu beaucoup de succès malgré un petit budget et des acteurs alors peu connus, qui de plus ne s'entendaient pas très bien."
+      },
+      {
+        "id": 4,
+        "question": "Qui est le « Bodyguard » de Whitney Houston dans un film du même nom ?",
+        "propositions": [
+          "Richard Gere",
+          "Kevin Costner",
+          "Mel Gibson",
+          "Bruce Willis"
+        ],
+        "réponse": "Kevin Costner",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bodyguard",
+        "anecdote": "L'affiche du film montrant Kevin Costner portant Whitney Houston cache un secret : ce n'est pas elle sur la photo, mais une doublure."
+      }
+    ]
+}

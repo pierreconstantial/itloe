@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Dragons",         
+  "mise-à-jour": "18/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel jeune Viking est le héros de « Dragons » (2010) ?",
+        "propositions": [
+          "Harold",
+          "Hector",
+          "Harry",
+          "Victor"
+        ],
+        "réponse": "Harold",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dragons_(film,_2010)",
+        "anecdote": "Le film « Dragons » est inspiré du roman pour enfant de Cressida Cowell publié en 2003, « Comment dresser votre dragon »."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel pays le dragon est-il un symbole de vie et de puissance ?",
+        "propositions": [
+          "Chine",
+          "Pérou",
+          "Inde",
+          "Islande"
+        ],
+        "réponse": "Chine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dragon",
+        "anecdote": "Le dragon est une créature légendaire représentée comme une sorte de gigantesque reptile, ailes déployées et pattes armées de griffes."
+      },
+      {
+        "id": 3,
+        "question": "Comment s'appelle le petit dragon dans « Mulan » ?",
+        "propositions": [
+          "Fitou",
+          "Golu",
+          "Krokmou",
+          "Mushu"
+        ],
+        "réponse": "Mushu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fa_Mulan",
+        "anecdote": "Mulan va à l'encontre des archétypes des jeunes filles chinoises de l'époque, calmes, réservées, polies, obéissantes et silencieuses."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel film Dragon est un vaisseau militaire du colonel Quaritch ?",
+        "propositions": [
+          "X-Men",
+          "Avatar",
+          "Cloverfield",
+          "Avengers"
+        ],
+        "réponse": "Avatar",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Avatar_(film,_2009)",
+        "anecdote": "Le colonel Quaritch, chef de la sécurité militaire de la mission Avatar, a fait détruire « l'Arbre Maison » par les forces terriennes."
+      }
+    ]
+}

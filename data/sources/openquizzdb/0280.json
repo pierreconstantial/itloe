@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #X",         
+  "mise-à-jour": "31/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment appelle-t-on les extraterrestres dans la saga « Alien » ?",
+        "propositions": [
+          "Xénomorphes",
+          "Xénélases",
+          "Xiphoïdiens",
+          "Xiphophores"
+        ],
+        "réponse": "Xénomorphes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alien_(créature)",
+        "anecdote": "Le terme xénomorphe, qui signifie forme étrangère, désigne une créature non répertoriée à l'excellente sensibilité."
+      },
+      {
+        "id": 2,
+        "question": "Quel nom porte la console de jeux vidéo conçue par Microsoft ?",
+        "propositions": [
+          "X Window",
+          "Xbox",
+          "Xfinity",
+          "Xerxès"
+        ],
+        "réponse": "Xbox",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Xbox",
+        "anecdote": "Une Xbox ne pouvait à l'origine exécuter que des programmes Xbox provenant d'un média au format propriétaire Microsoft sur DVD."
+      },
+      {
+        "id": 3,
+        "question": "Quelle société a inventé (et pas breveté) la souris de votre ordinateur ?",
+        "propositions": [
+          "Xfinity",
+          "Xiaomi",
+          "Xerox",
+          "Xoom"
+        ],
+        "réponse": "Xerox",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Douglas_Engelbart",
+        "anecdote": "Douglas Carl Engelbart est un ingénieur américain qui a déposé 21 brevets au total, dont un pour sa souris en 1967 qu'il reçut en 1970."
+      },
+      {
+        "id": 4,
+        "question": "Quel roi est sorti vainqueur à la bataille des Thermopyles ?",
+        "propositions": [
+          "Xerxès",
+          "Ximénès",
+          "Xin",
+          "Xocolatl"
+        ],
+        "réponse": "Xerxès",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bataille_des_Thermopyles",
+        "anecdote": "La bataille des Thermopyles est l'un des plus célèbres faits d'armes de l'histoire antique."
+      }
+    ]
+}

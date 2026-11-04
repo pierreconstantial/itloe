@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Joueurs de tennis",         
+  "mise-à-jour": "15/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la nationalité de Roger Federer, grand joueur de tennis ?",
+        "propositions": [
+          "Française",
+          "Suisse",
+          "Belge",
+          "Allemande"
+        ],
+        "réponse": "Suisse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Roger_Federer",
+        "anecdote": "Roger Federer demeure en effet le seul joueur de l'histoire du tennis à avoir gagné cinq fois de suite deux tournois du Grand Chelem."
+      },
+      {
+        "id": 2,
+        "question": "Parmi ces joueurs de tennis professionnels, lequel est le plus âgé ?",
+        "propositions": [
+          "Rafael Nadal",
+          "Roger Federer",
+          "Marat Safin",
+          "Andre Agassi"
+        ],
+        "réponse": "Andre Agassi",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Andre_Agassi",
+        "anecdote": "Andre Agassi est l'un des rares joueurs à avoir remporté les quatre tournois du Grand Chelem, réalisant ainsi un Career Grand Slam."
+      },
+      {
+        "id": 3,
+        "question": "Qui est devenu à 19 ans le plus jeune vainqueur du tournoi US Open ?",
+        "propositions": [
+          "Andre Agassi",
+          "Boris Becker",
+          "Pete Sampras",
+          "Roger Federer"
+        ],
+        "réponse": "Pete Sampras",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pete_Sampras",
+        "anecdote": "Capable de conclure les points rapidement, Pete Sampras est le seul joueur de l'ère Open à avoir achevé six saisons au premier rang."
+      },
+      {
+        "id": 4,
+        "question": "Quel ancien joueur de tennis était surnommé « le Terrible » ?",
+        "propositions": [
+          "John McEnroe",
+          "Boris Becker",
+          "Pete Sampras",
+          "Ivan Lendl"
+        ],
+        "réponse": "Ivan Lendl",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ivan_Lendl",
+        "anecdote": "Lendl était considéré comme un pionnier du tennis moderne, pour son approche physique et son jeu de fond de court puissant."
+      }
+    ]
+}

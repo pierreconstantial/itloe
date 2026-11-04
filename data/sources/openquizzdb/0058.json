@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #05",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Première chambre de bébé, mot de six lettres commençant par un V ?",
+        "propositions": [
+          "Ventre",
+          "Volcan",
+          "Valise",
+          "Vidoir"
+        ],
+        "réponse": "Ventre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Mot doux pour être cher, mot de six lettres commençant par un T ?",
+        "propositions": [
+          "Tortue",
+          "Tocade",
+          "Trésor",
+          "Tampon"
+        ],
+        "réponse": "Trésor",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Fait chambre à part, mot de huit lettres commençant par un S ?",
+        "propositions": [
+          "Suzerain",
+          "Sabotier",
+          "Sénateur",
+          "Sicilien"
+        ],
+        "réponse": "Sénateur",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Noble serviteur, mot de quatre lettres commençant par un P ?",
+        "propositions": [
+          "Père",
+          "Pion",
+          "Page",
+          "Paon"
+        ],
+        "réponse": "Page",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

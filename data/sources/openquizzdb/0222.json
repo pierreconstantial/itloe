@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #37",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle roche plutonique à la texture grenue est riche en quartz ?",
+        "propositions": [
+          "Granite",
+          "Granith",
+          "Granitte",
+          "Granit"
+        ],
+        "réponse": "Granite",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "En quelle unité mesure-t-on la fréquence d'un son ?",
+        "propositions": [
+          "Ertz",
+          "Hertz",
+          "Errtz",
+          "Herrtz"
+        ],
+        "réponse": "Hertz",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "En géométrie, quelle propriété est relative aux droites et aux plans ?",
+        "propositions": [
+          "Parralléllisthme",
+          "Parallélisme",
+          "Parrallélisme",
+          "Paraléllisme"
+        ],
+        "réponse": "Parallélisme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel instrument se joue avec des lames frappées par des maillets ?",
+        "propositions": [
+          "Xhilophone",
+          "Xylophone",
+          "Xilophone",
+          "Xhylophone"
+        ],
+        "réponse": "Xylophone",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

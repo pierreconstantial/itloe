@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "PlayStation 2",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle société a commercialisé la console de jeux PlayStation 2 ?",
+        "propositions": [
+          "Microsoft",
+          "Nintendo",
+          "Sega",
+          "Sony"
+        ],
+        "réponse": "Sony",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sony_Interactive_Entertainment",
+        "anecdote": "Sony Interactive Entertainment est une filiale de Sony spécialisée dans l'industrie vidéoludique, basée à San Mateo."
+      },
+      {
+        "id": 2,
+        "question": "Quel média la PlayStation 2 pouvait-elle lire de manière innovante ?",
+        "propositions": [
+          "Blue-ray",
+          "Midi Disc",
+          "DVD",
+          "Optical disc"
+        ],
+        "réponse": "DVD",
+        "wikipédia": "https://fr.wikipedia.org/wiki/PlayStation_2",
+        "anecdote": "À cette époque, inclure de série la lecture des DVD (format alors tout récent) dans ce type d'appareil était une innovation importante."
+      },
+      {
+        "id": 3,
+        "question": "Quelle variante esthétique de la PlayStation 2 est sortie en 2004 ?",
+        "propositions": [
+          "PS2 Boy",
+          "PS2 Slim",
+          "PS2 Grid",
+          "PS2 Fat"
+        ],
+        "réponse": "PS2 Slim",
+        "wikipédia": "https://fr.wikipedia.org/wiki/PlayStation_2",
+        "anecdote": "Ce nouveau modèle à la silhouette affinée fut introduit le 1er novembre 2004 en Amérique du Nord et en Europe."
+      },
+      {
+        "id": 4,
+        "question": "Comment était qualifiée la PS2, acceptant les jeux PlayStation ?",
+        "propositions": [
+          "Ascensionnelle",
+          "Rétrocompatible",
+          "Autopilotée",
+          "Admissive"
+        ],
+        "réponse": "Rétrocompatible",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Compatibilité_ascendante_et_descendante",
+        "anecdote": "Les problèmes de compatibilité sont fréquents en informatique en raison de la rapidité de l'évolution du matériel et des logiciels."
+      }
+    ]
+}

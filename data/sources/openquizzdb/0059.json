@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sylvester Stallone",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel film Stallone incarne-t-il un shérif sourd de l'oreille droite ?",
+        "propositions": [
+          "Cop Land",
+          "Daylight",
+          "Judge Dredd",
+          "Spy Kids 3"
+        ],
+        "réponse": "Cop Land",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cop_Land",
+        "anecdote": "Pour le rôle du shérif Heflin, Sylvester Stallone a grossi de vingt kilos et accepté de réduire considérablement son cachet."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel film Stallone incarne-t-il un secouriste des montagnes ?",
+        "propositions": [
+          "Cliffhanger",
+          "Évasion",
+          "Driven",
+          "Le Vainqueur"
+        ],
+        "réponse": "Cliffhanger",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cliffhanger_:_Traque_au_sommet",
+        "anecdote": "Sylvester Stallone est doublé par trois grimpeurs professionnels : Wolfgang Güllich, Ron Kauk et le Français Kévin Thibaudeau."
+      },
+      {
+        "id": 3,
+        "question": "Le film « Tango et Cash » réunit Sylvester Stallone et quel autre acteur ?",
+        "propositions": [
+          "Edward Norton",
+          "Brandon Lee",
+          "Kurt Russel",
+          "Russell Crow"
+        ],
+        "réponse": "Kurt Russel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tango_et_Cash",
+        "anecdote": "Deux policiers se disputent le titre de « meilleur flic de Los Angeles »."
+      },
+      {
+        "id": 4,
+        "question": "Quel film fait se confronter Sylvester Stallone et Antonio Banderas ?",
+        "propositions": [
+          "Assassins",
+          "Cliffhanger",
+          "Judge Dredd",
+          "Demolition Man"
+        ],
+        "réponse": "Assassins",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Assassins_(film)",
+        "anecdote": "Richard Donner avait d'abord pensé à Mel Gibson pour le rôle de Robert Rath mais celui-ci était pris avec le tournage de « Braveheart »."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Saveurs du Périgord",         
+  "mise-à-jour": "06/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle spécialité du Périgord est issue du gavage ?",
+        "propositions": [
+          "Blanc de boeuf",
+          "Poil de jarre",
+          "Propolis",
+          "Foie gras"
+        ],
+        "réponse": "Foie gras",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Foie_gras",
+        "anecdote": "Le foie gras se consomme cru, mi-cuit ou cuit, et peut être proposé sous forme de produit frais ou en conserve."
+      },
+      {
+        "id": 2,
+        "question": "Quel confit accompagne souvent les pommes de terre à la sarladaise ?",
+        "propositions": [
+          "De vin",
+          "De fleurs",
+          "D'oignons",
+          "De canard"
+        ],
+        "réponse": "De canard",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Confit_de_canard",
+        "anecdote": "Ce confit se prépare avec des oiseaux gras, engraissés par gavage, les mêmes qui servent à produire le magret et le foie gras."
+      },
+      {
+        "id": 3,
+        "question": "Que produisent, en classification AOC, 612 communes du Périgord ?",
+        "propositions": [
+          "Noix",
+          "Pommes",
+          "Haricots",
+          "Citrons"
+        ],
+        "réponse": "Noix",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Noix_du_Périgord",
+        "anecdote": "Noix du Périgord est une appellation d'origine qui désigne les noix fraîches ou primeurs, les noix sèches et les cerneaux de noix."
+      },
+      {
+        "id": 4,
+        "question": "Quel château domine le vignoble, face à Bergerac ?",
+        "propositions": [
+          "Magny",
+          "Montardier",
+          "Marfontaine",
+          "Monbazillac"
+        ],
+        "réponse": "Monbazillac",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Château_de_Monbazillac",
+        "anecdote": "Vers 1550, le château fut construit d'un seul jet par Charles d'Aydie sur un plan simple : un rectangle et quatre tours circulaires."
+      }
+    ]
+}

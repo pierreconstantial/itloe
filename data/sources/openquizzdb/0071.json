@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Louis de Funès",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui est le complice de Louis de Funès dans « La Soupe aux choux » ?",
+        "propositions": [
+          "Michel Galabru",
+          "Bourvil",
+          "Jean Carmet",
+          "Jacques Villeret"
+        ],
+        "réponse": "Jean Carmet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Soupe_aux_choux_(film)",
+        "anecdote": "« La Soupe aux Choux » aura véritablement lancé la carrière de l'acteur Jacques Villeret."
+      },
+      {
+        "id": 2,
+        "question": "Qui incarne le serviteur de Louis de Funès dans « La Folie des grandeurs » ?",
+        "propositions": [
+          "Bourvil",
+          "Yves Montand",
+          "Coluche",
+          "Michel Galabru"
+        ],
+        "réponse": "Yves Montand",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Folie_des_grandeurs",
+        "anecdote": "Dans ce film, réalisé par Gérard Oury et sorti en 1971, Alice Sapritch est doublée dans la scène du strip-tease par Sophia Palladium."
+      },
+      {
+        "id": 3,
+        "question": "Que lancent Bourvil et De Funès sur la route dans « La Grande Vadrouille » ?",
+        "propositions": [
+          "Citrouilles",
+          "Billets",
+          "Barriques de vin",
+          "Tomates"
+        ],
+        "réponse": "Citrouilles",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Grande_Vadrouille",
+        "anecdote": "Le film raconte les déboires des Français face aux Allemands sous l'Occupation."
+      },
+      {
+        "id": 4,
+        "question": "Qui était la femme de Louis de Funès dans la série des « Gendarme » ?",
+        "propositions": [
+          "Annie Girardot",
+          "Maria Pacôme",
+          "Claude Gensac",
+          "Micheline Dax"
+        ],
+        "réponse": "Claude Gensac",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Claude_Gensac",
+        "anecdote": "Elle a été mariée en premières noces, de 1951 à 1955, avec l'acteur Pierre Mondy."
+      }
+    ]
+}

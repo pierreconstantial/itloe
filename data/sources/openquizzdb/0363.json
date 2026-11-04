@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jean-Michel Jarre",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle ville a eu lieu le concert « Rendez-Vous », de Jean-Michel Jarre ?",
+        "propositions": [
+          "Los Angeles",
+          "Houston",
+          "Miami",
+          "Chicago"
+        ],
+        "réponse": "Houston",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jean_Michel_Jarre",
+        "anecdote": "Le concert a été mis en scène par Christian Bourret, qui réalisera par la suite la plupart des concerts de Jean-Michel Jarre."
+      },
+      {
+        "id": 2,
+        "question": "Le texte de quel tube de Christophe a été écrit par Jean-Michel Jarre ?",
+        "propositions": [
+          "La Dolce Vita",
+          "Succès Fou",
+          "Les Mots Bleus",
+          "Aline"
+        ],
+        "réponse": "Les Mots Bleus",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jean_Michel_Jarre",
+        "anecdote": "Jean-Michel Jarre a participé aux textes des albums « Les Paradis perdus » (1973) et « Les Mots bleus » (1974) pour Christophe."
+      },
+      {
+        "id": 3,
+        "question": "Quel album de Jean-Michel Jarre est sorti en 1976 ?",
+        "propositions": [
+          "Rendez-vous",
+          "Equinoxe",
+          "Oxygène",
+          "Chronologie"
+        ],
+        "réponse": "Oxygène",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Oxygène_(album)",
+        "anecdote": "Vendu à environ 18 millions d'exemplaires, il s'agit d'un des plus gros succès de l'histoire de la discographie française."
+      },
+      {
+        "id": 4,
+        "question": "Quel album de Jean-Michel Jarre est un hommage au vent ?",
+        "propositions": [
+          "Téo et Téa",
+          "Aero",
+          "Chronologie",
+          "Geometry of Love"
+        ],
+        "réponse": "Aero",
+        "wikipédia": "https://fr.wikipedia.org/wiki/AERO",
+        "anecdote": "« Aero » est présenté par Jean Michel Jarre comme étant le premier album entièrement conçu en son 5.1."
+      }
+    ]
+}

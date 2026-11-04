@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Datte medjool",         
+  "mise-à-jour": "29/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quel pays provient principalement la datte medjool ?",
+        "propositions": [
+          "Maroc",
+          "Japon",
+          "Canada",
+          "France"
+        ],
+        "réponse": "Maroc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mejhoul",
+        "anecdote": "Les medjool sont parfois appelées les « reines des dattes » car elles sont plus grosses, plus moelleuses et plus sucrées que la plupart des autres variétés."
+      },
+      {
+        "id": 2,
+        "question": "Quel goût a généralement la datte medjool ?",
+        "propositions": [
+          "Salé",
+          "Sucré",
+          "Amère",
+          "Acide"
+        ],
+        "réponse": "Sucré",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mejhoul",
+        "anecdote": "Contrairement à beaucoup de fruits secs, la datte medjool est souvent consommée comme un « bonbon naturel »."
+      },
+      {
+        "id": 3,
+        "question": "Qu'est-ce qui distingue la datte medjool d'autres variétés ?",
+        "propositions": [
+          "Sans sucre",
+          "Croquante",
+          "Toujours verte",
+          "Plus charnue"
+        ],
+        "réponse": "Plus charnue",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mejhoul",
+        "anecdote": "À l'origine, les medjool étaient difficiles à cultiver car elles étaient sensibles à certaines maladies des palmiers."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la couleur typique de la datte medjool mûre ?",
+        "propositions": [
+          "Brun foncé",
+          "Bleu violacé",
+          "Vert vif",
+          "Jaune citron"
+        ],
+        "réponse": "Brun foncé",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mejhoul",
+        "anecdote": "La couleur foncée des medjool vient de leur forte teneur en sucres naturels qui se concentrent en fin de maturation, donnant cet aspect proche du caramel."
+      }
+    ]
+}

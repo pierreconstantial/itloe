@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Léa Seydoux",         
+  "mise-à-jour": "18/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel film de la série James Bond Léa Seydoux a-t-elle joué ?",
+        "propositions": [
+          "Spectre",
+          "Licence to Kill",
+          "Casino Royale",
+          "Skyfall"
+        ],
+        "réponse": "Spectre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quel film a révélé Léa Seydoux au grand public ?",
+        "propositions": [
+          "Intouchables",
+          "La Vie d'Adèle",
+          "Amélie Poulain",
+          "Kill Bill"
+        ],
+        "réponse": "La Vie d'Adèle",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Dans quel film de Quentin Tarantino Léa Seydoux a-t-elle joué ?",
+        "propositions": [
+          "Django Unchained",
+          "Pulp Fiction",
+          "Kill Bill",
+          "Jackie Brown"
+        ],
+        "réponse": "Django Unchained",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Dans quel pays a-t-elle une forte carrière internationale ?",
+        "propositions": [
+          "Chine",
+          "États-Unis",
+          "Brésil",
+          "Inde"
+        ],
+        "réponse": "États-Unis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "John Travolta",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel film John Travolta incarne-t-il un ange tombé du ciel ?",
+        "propositions": [
+          "Michael",
+          "Jerry",
+          "Johnny",
+          "Sam"
+        ],
+        "réponse": "Michael",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Michael_(film,_1996)",
+        "anecdote": "Dans le film « Michael », deux journalistes enquêtent sur un soi-disant vrai ange vivant chez une dame âgée."
+      },
+      {
+        "id": 2,
+        "question": "Qui donne la réplique à John Travolta dans le film « Volte-face » ?",
+        "propositions": [
+          "Nicolas Cage",
+          "Wesley Snipes",
+          "Sean Connery",
+          "Mel Gibson"
+        ],
+        "réponse": "Nicolas Cage",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Volte-face_(film,_1997)",
+        "anecdote": "Les premiers choix des scénaristes pour incarner Sean Archer et Castor Troy étaient S. Stallone et A. Schwarzenegger."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le prénom de John Travolta dans le film « Grease » ?",
+        "propositions": [
+          "Tony",
+          "Johnny",
+          "Billy",
+          "Danny"
+        ],
+        "réponse": "Danny",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Grease",
+        "anecdote": "La bande originale du film fut numéro un des ventes dans de nombreux pays."
+      },
+      {
+        "id": 4,
+        "question": "Quel film de Tarantino a signé le retour de John Travolta au cinéma ?",
+        "propositions": [
+          "Django Unchained",
+          "Pulp Fiction",
+          "Jackie Brown",
+          "Kill Bill"
+        ],
+        "réponse": "Pulp Fiction",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Quentin_Tarantino",
+        "anecdote": "Le style très cinéphile de Tarantino se reconnaît entre autres par ses dialogues travaillés émaillés de références à la culture populaire."
+      }
+    ]
+}

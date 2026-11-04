@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Gardiens de but au football",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel gardien de but français est devenu pilote sur Porsche en 2008 ?",
+        "propositions": [
+          "Fabien Barthez",
+          "Roland Amar",
+          "Jean Castaneda",
+          "Rudy Riou"
+        ],
+        "réponse": "Fabien Barthez",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fabien_Barthez",
+        "anecdote": "Il compte 87 sélections en équipe de France, mais est devancé par un autre gardien, Hugo Lloris, qui a dépassé la centaine."
+      },
+      {
+        "id": 2,
+        "question": "Quel gardien de but a joué dix-sept ans pour le club de la Juventus ?",
+        "propositions": [
+          "Gianluigi Buffon",
+          "Dino Zoff",
+          "Luciano Bodini",
+          "Mattia Perin"
+        ],
+        "réponse": "Gianluigi Buffon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gianluigi_Buffon",
+        "anecdote": "Au terme d'un match de qualification pour le Mondial 2018 face à l'Albanie, Buffon a honoré le millième match de sa carrière."
+      },
+      {
+        "id": 3,
+        "question": "Quel gardien a joué son dernier match en Bundesliga en mai 2008 ?",
+        "propositions": [
+          "Jens Lehmann",
+          "Sepp Maier",
+          "Oliver Kahn",
+          "Robert Enke"
+        ],
+        "réponse": "Oliver Kahn",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Oliver_Kahn",
+        "anecdote": "Durant sa carrière pro, il était considéré comme l'un des meilleurs gardiens du monde."
+      },
+      {
+        "id": 4,
+        "question": "Qui est gardien de but dans le film « À nous la victoire » de John Huston ?",
+        "propositions": [
+          "Jason Statham",
+          "Bruce Willis",
+          "Sylvester Stallone",
+          "Tom Cruise"
+        ],
+        "réponse": "Sylvester Stallone",
+        "wikipédia": "https://fr.wikipedia.org/wiki/À_nous_la_victoire",
+        "anecdote": "Pendant la Seconde Guerre mondiale, des prisonniers tuent le temps en jouant au foot."
+      }
+    ]
+}

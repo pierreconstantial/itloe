@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Citations littéraires",         
+  "mise-à-jour": "08/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel écrivain et mathématicien a dit : « Je pense, donc je suis » ?",
+        "propositions": [
+          "Descartes",
+          "Newton",
+          "Harriot",
+          "Mercator"
+        ],
+        "réponse": "Descartes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/René_Descartes",
+        "anecdote": "Le « cogito » de Descartes fonde ainsi le système des sciences sur le sujet connaissant face au monde qu'il se représente."
+      },
+      {
+        "id": 2,
+        "question": "Qu'est-ce que La Fontaine appelle « la machine ronde » ?",
+        "propositions": [
+          "La royauté",
+          "La Terre",
+          "L'argent",
+          "La supercherie"
+        ],
+        "réponse": "La Terre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jean_de_La_Fontaine",
+        "anecdote": "Ses Fables constituent la principale oeuvre poétique de la période classique et l'un des chefs-d'oeuvre de la littérature française."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel livre Rabelais a-t-il écrit la devise « Fais ce que tu voudras » ?",
+        "propositions": [
+          "Le Quart Livre",
+          "Pantagruel",
+          "Tiers Livre",
+          "Gargantua"
+        ],
+        "réponse": "Gargantua",
+        "wikipédia": "https://fr.wikipedia.org/wiki/François_Rabelais",
+        "anecdote": "Ses oeuvres majeures, comme « Pantagruel » et « Gargantua », sont considérées comme une des premières formes du roman moderne."
+      },
+      {
+        "id": 4,
+        "question": "Qui a dit à Las Cases : « L'homme doit avoir plusieurs femmes » ?",
+        "propositions": [
+          "Napoléon",
+          "Louis XVI",
+          "Henri III",
+          "Charles X"
+        ],
+        "réponse": "Napoléon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Napoléon_Ier",
+        "anecdote": "Une tradition romantique fait de Napoléon l'archétype du « grand homme » appelé à bouleverser le monde."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Histoire du Louvre",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel métier fut exercé au Louvre par Jean-François Champollion ?",
+        "propositions": [
+          "Conservateur",
+          "Architecte",
+          "Archéologue",
+          "Surveillant"
+        ],
+        "réponse": "Conservateur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jean-François_Champollion",
+        "anecdote": "Considéré comme le père de l'égyptologie, Champollion fut le premier à déchiffrer les hiéroglyphes."
+      },
+      {
+        "id": 2,
+        "question": "Comment était utilisé le Louvre à sa construction en 1190 ?",
+        "propositions": [
+          "En ferme",
+          "En forteresse",
+          "En musée",
+          "En bureau"
+        ],
+        "réponse": "En forteresse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Musée_du_Louvre",
+        "anecdote": "C'est en voulant renforcer la défense de Paris que Philippe Auguste entreprît de faire construire une enceinte."
+      },
+      {
+        "id": 3,
+        "question": "Quelle exposition annuelle présentait au Louvre les artistes officiels ?",
+        "propositions": [
+          "La Crèche",
+          "La Vente",
+          "La Biennale",
+          "Le Salon"
+        ],
+        "réponse": "Le Salon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Salon_de_peinture_et_de_sculpture",
+        "anecdote": "La manifestation, orthographiée initialement « Sallon », fut organisée par l'Académie à partir de 1737."
+      },
+      {
+        "id": 4,
+        "question": "Quand le Louvre est-il devenu un musée, le plus grand de Paris ?",
+        "propositions": [
+          "Sous Mitterrand",
+          "À la Révolution",
+          "À l'Antiquité",
+          "Au Moyen Âge"
+        ],
+        "réponse": "À la Révolution",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Musée_du_Louvre",
+        "anecdote": "Le musée du Louvre a pris naissance sous Louis XV mais n'aboutira véritablement qu'avec la Révolution."
+      }
+    ]
+}

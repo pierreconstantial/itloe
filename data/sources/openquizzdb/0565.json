@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Albums de France Gall",         
+  "mise-à-jour": "21/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel album retrouve-t-on à la fois France Gall et Michel Berger ?",
+        "propositions": [
+          "Baby pop",
+          "France Gall",
+          "Débranche !",
+          "Double Jeu"
+        ],
+        "réponse": "Double Jeu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Double_Jeu_(album)",
+        "anecdote": "Michel Berger et France Gall présentèrent leur album à leurs proches lors d'une session au club de jazz le New Morning en 1992."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le titre du premier album studio enregistré par France Gall ?",
+        "propositions": [
+          "Babacar",
+          "Dancing Disco",
+          "France Gall",
+          "Débranche !"
+        ],
+        "réponse": "France Gall",
+        "wikipédia": "https://fr.wikipedia.org/wiki/France_Gall_(album,_1976)",
+        "anecdote": "Sorti le 6 janvier 1976, cet album s'est vendu à plus de 100 000 exemplaires en France (182 100 exemplaires selon InfoDisc). Il marque le début d'une nouvelle étape artistique pour France Gall après sa période yé-yé."
+      },
+      {
+        "id": 3,
+        "question": "Quel album reste à ce jour le plus grand succès de France Gall ?",
+        "propositions": [
+          "Double Jeu",
+          "Dancing Disco",
+          "Babacar",
+          "Débranche !"
+        ],
+        "réponse": "Babacar",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Babacar",
+        "anecdote": "L'album contient des tubes incontournables comme « Ella, elle l'a », « Évidemment » (hommage à Daniel Balavoine) et « La Chanson d'Azima »."
+      },
+      {
+        "id": 4,
+        "question": "Quel titre porte l'unique album-concept enregistré par France Gall ?",
+        "propositions": [
+          "Double Jeu",
+          "Dancing Disco",
+          "Débranche !",
+          "Babacar"
+        ],
+        "réponse": "Dancing Disco",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dancing_Disco",
+        "anecdote": "L'héroïne de « Dancing Disco » n'est pas sans rappeler Marie-Jeanne, la serveuse automate du futur opéra-rock « Starmania »."
+      }
+    ]
+}

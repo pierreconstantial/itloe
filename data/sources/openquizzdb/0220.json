@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #S",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Où étaient tournées les scènes extérieures de « Sous le soleil » ?",
+        "propositions": [
+          "Saint-Nazaire",
+          "Saint-Brieuc",
+          "Saint-Tropez",
+          "Saint-Malo"
+        ],
+        "réponse": "Saint-Tropez",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sous_le_soleil",
+        "anecdote": "Même si certaines scènes ont été tournées en studio, les prises de vue extérieures mettent en valeur la ville de Saint-Tropez et ses environs."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le prénom de l'animateur et chroniqueur français Cauet ?",
+        "propositions": [
+          "Sébastien",
+          "Simon",
+          "Stan",
+          "Stéphane"
+        ],
+        "réponse": "Sébastien",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sébastien_Cauet",
+        "anecdote": "L'animateur connu sous le nom de Cauet s'appelle en réalité Sébastien Cauet. Il s'est fait connaître à la radio dans les années 1990 avant de devenir une figure majeure de la télévision française."
+      },
+      {
+        "id": 3,
+        "question": "Quelle application permet d'identifier une chanson en l'écoutant ?",
+        "propositions": [
+          "Shazam",
+          "Skype",
+          "Spotify",
+          "Snapchat"
+        ],
+        "réponse": "Shazam",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Shazam_(service)",
+        "anecdote": "Apple a racheté l'entreprise en 2017 sans donner d'indication sur le prix d'acquisition (400 millions de dollars selon plusieurs sources)."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est l'origine nationale du célèbre groupe musical ABBA ?",
+        "propositions": [
+          "Suédoise",
+          "Serbe",
+          "Suisse",
+          "Slovaque"
+        ],
+        "réponse": "Suédoise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/ABBA",
+        "anecdote": "Le groupe ABBA est originaire de Suède. Il est formé à Stockholm en 1972 et réunit deux couples : Agnetha Fältskog, Björn Ulvaeus, Benny Andersson et Anni-Frid Lyngstad."
+      }
+    ]
+}

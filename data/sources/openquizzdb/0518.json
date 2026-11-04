@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Histoire de France",         
+  "mise-à-jour": "18/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle ville française était appelée la cité des papes au Moyen Âge ?",
+        "propositions": [
+          "Tours",
+          "Avignon",
+          "Metz",
+          "Nantes"
+        ],
+        "réponse": "Avignon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Avignon",
+        "anecdote": "Avignon est appelée « la cité des papes » car, au XIVe siècle, plusieurs papes y ont résidé au lieu de Rome. Cette période commence en 1309 lorsque le pape Clément V s'installe en Provence, à la suite de tensions politiques en Italie."
+      },
+      {
+        "id": 2,
+        "question": "Quel diplomate français a succédé au Cardinal de Richelieu ?",
+        "propositions": [
+          "Colbert",
+          "Mazarin",
+          "Sully",
+          "Talleyrand"
+        ],
+        "réponse": "Mazarin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jules_Mazarin",
+        "anecdote": "Après la mort du cardinal de Richelieu en 1642, c'est Jules Mazarin, diplomate italien naturalisé français, qui devient le principal ministre de Louis XIII puis surtout de son successeur Louis XIV durant sa minorité."
+      },
+      {
+        "id": 3,
+        "question": "Quelle ville Jeanne d'Arc a-t-elle héroïquement libérée des Anglais ?",
+        "propositions": [
+          "Angers",
+          "Orléans",
+          "Tours",
+          "Le Mans"
+        ],
+        "réponse": "Orléans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jeanne_d'Arc",
+        "anecdote": "Jeanne d'Arc a été condamnée à être brûlée vive en 1431 après un procès en hérésie conduit par Pierre Cauchon."
+      },
+      {
+        "id": 4,
+        "question": "Quel âge avait Clovis lorsqu'il fut élu roi des Francs en 481 ?",
+        "propositions": [
+          "26 ans",
+          "46 ans",
+          "16 ans",
+          "36 ans"
+        ],
+        "réponse": "16 ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Clovis_Ier",
+        "anecdote": "Beaucoup auraient considéré un adolescent comme trop jeune pour gouverner et mener des guerres. Pourtant, quelques années plus tard, il démontre des talents exceptionnels de stratège et de chef militaire."
+      }
+    ]
+}

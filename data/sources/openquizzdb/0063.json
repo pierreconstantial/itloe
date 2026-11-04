@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Satellites naturels",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel satellite naturel est le principal responsable des marées ?",
+        "propositions": [
+          "Neptune",
+          "Mars",
+          "Mercure",
+          "La Lune"
+        ],
+        "réponse": "La Lune",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marée",
+        "anecdote": "La marée est le mouvement montant puis descendant des eaux des mers et des océans."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le satellite naturel le plus proche de sa planète-mère ?",
+        "propositions": [
+          "Deimos",
+          "Titan",
+          "Charon",
+          "Phobos"
+        ],
+        "réponse": "Phobos",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Phobos_(lune)",
+        "anecdote": "Phobos est à une distance de près de 9380 kilomètres du centre de Mars."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le plus grand satellite naturel de notre système solaire ?",
+        "propositions": [
+          "La Lune",
+          "Ganymède",
+          "Umbriel",
+          "Titan"
+        ],
+        "réponse": "Ganymède",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ganymède_(lune)",
+        "anecdote": "Sur l'échelle des distances au centre de Jupiter, il s'agit du septième satellite naturel connu de la planète."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le satellite naturel le plus éloigné de sa planète-mère ?",
+        "propositions": [
+          "Phobos",
+          "Sinopé",
+          "Titan",
+          "Charon"
+        ],
+        "réponse": "Sinopé",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sinopé_(lune)",
+        "anecdote": "Sinope est situé à plus de 24 millions de kilomètres de sa planète-mère, Jupiter."
+      }
+    ]
+}

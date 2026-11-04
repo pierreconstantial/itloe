@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Actrices dans la saga « Alien »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle actrice interprète le rôle culte d'Ellen Ripley dans la saga « Alien » ?",
+        "propositions": [
+          "Julianne Moore",
+          "Sigourney Weaver",
+          "Meryl Streep",
+          "Briel Larson"
+        ],
+        "réponse": "Sigourney Weaver",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sigourney_Weaver",
+        "anecdote": "Durant les années 2010, elle opéra un retour au premier plan grâce à des seconds rôles dans le blockbuster « Avatar » (2009)."
+      },
+      {
+        "id": 2,
+        "question": "Quelle actrice interprète la fille de Weyland dans le film « Prometheus » ?",
+        "propositions": [
+          "Charlize Theron",
+          "Winona Ryder",
+          "Jodie Foster",
+          "Emily Watson"
+        ],
+        "réponse": "Charlize Theron",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Univers_d'Alien",
+        "anecdote": "Le Prometheus est un vaisseau scientifique équipé de matériel médical, d'exploration et de recherche de haute technologie."
+      },
+      {
+        "id": 3,
+        "question": "Quelle actrice interprète le rôle de Call dans la saga « Alien » ?",
+        "propositions": [
+          "Geena Davis",
+          "Winona Ryder",
+          "Natalia Dyer",
+          "Natalie Portman"
+        ],
+        "réponse": "Winona Ryder",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Univers_d'Alien",
+        "anecdote": "Ingénieur, elle se révèle être une androïde de type Auton prête à tout pour protéger l'humanité, car programmée pour cela."
+      },
+      {
+        "id": 4,
+        "question": "Quelle actrice joue le rôle de Daniels dans « Alien: Covenant » ?",
+        "propositions": [
+          "Mila Kunis",
+          "Noomi Rapace",
+          "Winona Ryder",
+          "Katherine Waterston"
+        ],
+        "réponse": "Katherine Waterston",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

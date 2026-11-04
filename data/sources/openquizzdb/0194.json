@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #17",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un V, il faut une couleur, un ruminant, une friandise et un pays.",
+        "propositions": [
+          "Venezuela",
+          "Violette",
+          "Violet",
+          "Vache"
+        ],
+        "réponse": "Violet",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un A, il faut une sanction, un pays, une veine et une cloque.",
+        "propositions": [
+          "Ampoule",
+          "Allemagne",
+          "Aorte",
+          "Amende"
+        ],
+        "réponse": "Amende",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un C, il faut un support, un reptile, un sport britannique et un fruit.",
+        "propositions": [
+          "Cobra",
+          "Cerise",
+          "Cricket",
+          "Cintre"
+        ],
+        "réponse": "Cintre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un S, il faut un mécanisme, une capitale, un omnivore et un épineux.",
+        "propositions": [
+          "Sanglier",
+          "Séoul",
+          "Sapin",
+          "Serrure"
+        ],
+        "réponse": "Serrure",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

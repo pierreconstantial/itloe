@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sandra Bullock",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel film Sandra Bullock est-elle astronaute avec George Clooney ?",
+        "propositions": [
+          "Minority Report",
+          "The Warrior",
+          "Gravity",
+          "Skyfall"
+        ],
+        "réponse": "Gravity",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gravity_(film)",
+        "anecdote": "En 2014, le film « Gravity » remportera sept Oscars dont celui du meilleur réalisateur pour le mexicain Alfonso Cuaron."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle comédie Sandra Bullock joue-t-elle une cruciverbiste ?",
+        "propositions": [
+          "The Heat",
+          "The Proposal",
+          "Gravity",
+          "All about Steve"
+        ],
+        "réponse": "All about Steve",
+        "wikipédia": "https://fr.wikipedia.org/wiki/All_About_Steve",
+        "anecdote": "Dans All About Steve, Sandra Bullock incarne Mary Horowitz, une créatrice de mots croisés extrêmement intelligente mais socialement maladroite."
+      },
+      {
+        "id": 3,
+        "question": "À qui Sandra Bullock fait-elle une « proposition » dans une comédie ?",
+        "propositions": [
+          "Jim Carrey",
+          "Ryan Reynolds",
+          "Michael J. Fox",
+          "Simon Baker"
+        ],
+        "réponse": "Ryan Reynolds",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Proposition_(film,_2009)",
+        "anecdote": "Dans The Proposal, Sandra Bullock joue Margaret Tate, une éditrice autoritaire menacée d'expulsion vers le Canada. Pour éviter cela, elle force son assistant Andrew Paxton, interprété par Ryan Reynolds, à accepter un mariage fictif."
+      },
+      {
+        "id": 4,
+        "question": "Quel a été le premier thriller dans lequel a participé Sandra Bullock ?",
+        "propositions": [
+          "Murder by Numbers",
+          "<T>The Net",
+          "Speed",
+          "Demolition Man"
+        ],
+        "réponse": "Demolition Man",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Demolition_Man_(film)",
+        "anecdote": "Le film Demolition Man (1993) est l'un des premiers rôles marquants de Sandra Bullock dans un univers policier et futuriste."
+      }
+    ]
+}

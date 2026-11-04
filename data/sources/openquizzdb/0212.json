@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #18",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment qualifie-t-on un amour sans relation charnelle ?",
+        "propositions": [
+          "Sans lendemain",
+          "Conjugal",
+          "Passionnel",
+          "Platonique"
+        ],
+        "réponse": "Platonique",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Amour_platonique",
+        "anecdote": "L'expression amour platonique vient du philosophe grec Platon. À l'origine, sa pensée ne désignait pas forcément l'absence totale de sexualité, mais plutôt un amour qui élève l'âme vers le beau et le bien, au-delà du simple désir physique."
+      },
+      {
+        "id": 2,
+        "question": "Qu'est-ce qu'une polyandre possède en plusieurs exemplaires ?",
+        "propositions": [
+          "Des chaussures",
+          "Des maris",
+          "Des enfants",
+          "Des maisons"
+        ],
+        "réponse": "Des maris",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Polyandrie",
+        "anecdote": "Elle est beaucoup plus rare que la polygynie (un homme avec plusieurs épouses) et existe historiquement dans certaines régions comme le Tibet, le Népal ou certaines zones de l'Himalaya."
+      },
+      {
+        "id": 3,
+        "question": "Quel médecin est spécialisé dans l'appareil génital masculin ?",
+        "propositions": [
+          "Urologue",
+          "Cardiologue",
+          "Dermatologue",
+          "Neurologue"
+        ],
+        "réponse": "Urologue",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Urologie",
+        "anecdote": "L'urologue intervient pour des pathologies variées comme les infections urinaires, les calculs rénaux, ou encore les troubles de la fonction reproductive masculine."
+      },
+      {
+        "id": 4,
+        "question": "Quel chanteur hispanique aurait fait l'amour à 3 000 femmes ?",
+        "propositions": [
+          "Ricky Martin",
+          "David Bisbal",
+          "Julio Iglesias",
+          "Enrique Iglesias"
+        ],
+        "réponse": "Julio Iglesias",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Julio_Iglesias",
+        "anecdote": "Julio Iglesias est aussi l'un des artistes les plus vendus de l'histoire de la musique latine, avec des chansons romantiques traduites dans de nombreuses langues, ce qui a renforcé son image de “chanteur de l'amour”."
+      }
+    ]
+}

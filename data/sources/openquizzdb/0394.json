@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Guerres et batailles",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans les plaines de quel champ de bataille se dresse la Butte du Lion ?",
+        "propositions": [
+          "Warburg",
+          "Wagram",
+          "White Mountain",
+          "Waterloo"
+        ],
+        "réponse": "Waterloo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Butte_du_Lion",
+        "anecdote": "Une table d'orientation permet de situer les fermes et les troupes antagonistes."
+      },
+      {
+        "id": 2,
+        "question": "Où a eu lieu le grand procès des criminels de guerre nazis ?",
+        "propositions": [
+          "Munich",
+          "Nuremberg",
+          "Hambourg",
+          "Berlin"
+        ],
+        "réponse": "Nuremberg",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Procès_de_Nuremberg",
+        "anecdote": "Le procès de Nuremberg fut intenté contre 24 responsables du Troisième Reich."
+      },
+      {
+        "id": 3,
+        "question": "En 1515, quelle bataille fit 16 000 morts en seize heures ?",
+        "propositions": [
+          "Valmy",
+          "Marignan",
+          "Waterloo",
+          "Marino"
+        ],
+        "réponse": "Marignan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bataille_de_Marignan",
+        "anecdote": "Elle donna lieu à une intense propagande développée par le pouvoir royal afin de justifier cette expédition."
+      },
+      {
+        "id": 4,
+        "question": "Dans quelle ville fut signé le traité de fin de la Première Guerre mondiale ?",
+        "propositions": [
+          "Lyon",
+          "Bordeaux",
+          "Paris",
+          "Versailles"
+        ],
+        "réponse": "Versailles",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Traité_de_Versailles_(1919)",
+        "anecdote": "Le traité de Versailles de 1919 est le traité de paix entre l'Allemagne et les Alliés."
+      }
+    ]
+}

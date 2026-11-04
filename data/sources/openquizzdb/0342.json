@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Nos amis les chats",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien le chat possède-t-il de doigts aux pattes antérieures ?",
+        "propositions": [
+          "Cinq",
+          "Quatre",
+          "Trois",
+          "Six"
+        ],
+        "réponse": "Cinq",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chat",
+        "anecdote": "Le chat possède cinq doigts aux pattes antérieures, dont seulement quatre touchent le sol, le pouce restant à l'écart."
+      },
+      {
+        "id": 2,
+        "question": "Comment s'appellent les « moustaches » du chat ?",
+        "propositions": [
+          "Vibrisses",
+          "Bréchets",
+          "Tectrices",
+          "Barbules"
+        ],
+        "réponse": "Vibrisses",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vibrisse",
+        "anecdote": "Chez l'Homme, les vibrisses désignent les poils à l'intérieur des narines et sous les bras."
+      },
+      {
+        "id": 3,
+        "question": "Quel est en moyenne le nombre de lapées par seconde pour le chat ?",
+        "propositions": [
+          "Quatre",
+          "Deux",
+          "Cinq",
+          "Trois"
+        ],
+        "réponse": "Quatre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chat",
+        "anecdote": "Une hypothèse expliquant ce lapement met en cause la région extrêmement sensible du nez et des moustaches du chat."
+      },
+      {
+        "id": 4,
+        "question": "Quel chat est presque sans poils ?",
+        "propositions": [
+          "Sphynx",
+          "Persan",
+          "Maine coon",
+          "Siamois"
+        ],
+        "réponse": "Sphynx",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sphynx",
+        "anecdote": "C'est en 1966 au Canada qu'une chatte de gouttière donna naissance à une portée de chatons nus."
+      }
+    ]
+}

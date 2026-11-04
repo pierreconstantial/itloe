@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #22",         
+  "mise-à-jour": "24/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Enceinte d'un bébé, mot de quatre lettres commençant par un P ?",
+        "propositions": [
+          "Parc",
+          "Père",
+          "Peur",
+          "Puce"
+        ],
+        "réponse": "Parc",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Perceur de mur, mot de cinq lettres commençant par un A ?",
+        "propositions": [
+          "Atome",
+          "Agent",
+          "Avion",
+          "Azote"
+        ],
+        "réponse": "Avion",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Attribut de cuisinière, mot de sept lettres commençant par un B ?",
+        "propositions": [
+          "Bretzel",
+          "Bardage",
+          "Briseur",
+          "Brûleur"
+        ],
+        "réponse": "Brûleur",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Plein d'essence, mot de cinq lettres commençant par un S ?",
+        "propositions": [
+          "Sirop",
+          "Stère",
+          "Savon",
+          "Sport"
+        ],
+        "réponse": "Stère",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

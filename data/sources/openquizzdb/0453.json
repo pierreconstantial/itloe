@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Égypte ancienne",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel musée est conservée la pierre de Rosette ?",
+        "propositions": [
+          "Musée du Caire",
+          "British Museum",
+          "MET",
+          "Le Louvre"
+        ],
+        "réponse": "British Museum",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pierre_de_Rosette",
+        "anecdote": "L'inscription qu'elle comporte est un décret promulgué à Memphis par le pharaon Ptolémée V en 196 av. J.-C."
+      },
+      {
+        "id": 2,
+        "question": "Combien de grandes pyramides y a-t-il sur le plateau de Gizeh ?",
+        "propositions": [
+          "Une seule",
+          "Trois",
+          "Dix",
+          "Aucune"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pyramides_de_Gizeh",
+        "anecdote": "Les trois plus grandes pyramides d'Égypte (Khéops, Khéphren et Mykérinos) se situent sur la nécropole de Gizeh."
+      },
+      {
+        "id": 3,
+        "question": "Quelle partie du visage manque au Sphinx de Gizeh ?",
+        "propositions": [
+          "Coin de bouche",
+          "Oreille",
+          "Bras",
+          "Nez"
+        ],
+        "réponse": "Nez",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sphinx_de_Gizeh",
+        "anecdote": "Le corps du sphinx, sculpté dans la couche sous-jacente de calcaire plus tendre, pourrait être celui d'un lion couché."
+      },
+      {
+        "id": 4,
+        "question": "Près de quelle grande ville actuelle se situe la Vallée des Rois ?",
+        "propositions": [
+          "Assiout",
+          "Gizeh",
+          "El-Minia",
+          "Louxor"
+        ],
+        "réponse": "Louxor",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vallée_des_rois",
+        "anecdote": "La vallée des rois est connue pour abriter les hypogées de nombreux pharaons, d'épouses et d'enfants de pharaons."
+      }
+    ]
+}

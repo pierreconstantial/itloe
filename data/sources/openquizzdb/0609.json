@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Au coeur d'OpenBSD",         
+  "mise-à-jour": "15/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans combien de dépôts CVS le noyau d'OpenBSD est-il développé ?",
+        "propositions": [
+          "Quatre",
+          "Deux",
+          "Trois",
+          "Un seul"
+        ],
+        "réponse": "Un seul",
+        "wikipédia": "https://fr.wikipedia.org/wiki/OpenBSD",
+        "anecdote": "Les logiciels tiers sont offerts en paquets binaires ou peuvent être compilés depuis leurs sources grâce à la collection des ports."
+      },
+      {
+        "id": 2,
+        "question": "Quel pare-feu d'OpenBSD équipe désormais macOS ?",
+        "propositions": [
+          "Firestarter",
+          "ClearOS",
+          "Packet Filter",
+          "Comodo"
+        ],
+        "réponse": "Packet Filter",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Packet_Filter",
+        "anecdote": "Un port gratuit de PF a été réalisé pour les systèmes d'exploitation Windows 2000 et XP par la communauté Core FORCE."
+      },
+      {
+        "id": 3,
+        "question": "Quelle licence open source propre est utilisée par OpenBSD ?",
+        "propositions": [
+          "Licence GPL",
+          "Licence LPPL",
+          "Licence MIT",
+          "Licence ISC"
+        ],
+        "réponse": "Licence ISC",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Licence_ISC",
+        "anecdote": "Cette licence propre a conduit à un audit exhaustif des licences et des remplacements, voire des suppressions de codes sous licences."
+      },
+      {
+        "id": 4,
+        "question": "Quel algorithme a été ajouté à OpenBSD pour hacher les mots de passe ?",
+        "propositions": [
+          "Camellia",
+          "Blowfish",
+          "Skipjack",
+          "Square"
+        ],
+        "réponse": "Blowfish",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Blowfish",
+        "anecdote": "Conçu par Bruce Schneier, Blowfish utilise une taille de bloc de 64 bits et la clé de longueur variable peut aller de 32 à 448 bits."
+      }
+    ]
+}

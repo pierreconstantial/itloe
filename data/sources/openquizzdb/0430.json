@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Canada",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelles sont les deux couleurs du drapeau du Québec, révélé en 1948 ?",
+        "propositions": [
+          "Rouge et bleu",
+          "Bleu et blanc",
+          "Bleu et rouge",
+          "Rouge et blanc"
+        ],
+        "réponse": "Bleu et blanc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Drapeau_du_Québec",
+        "anecdote": "Le drapeau national du Québec, adopté en 1948, est composé d'une croix blanche et de quatre fleurs de lys blanches sur fond azur."
+      },
+      {
+        "id": 2,
+        "question": "Comment appelle-t-on le renne des régions arctiques au Canada ?",
+        "propositions": [
+          "Boisé",
+          "Grand cerf",
+          "Caribou",
+          "Renne canadien"
+        ],
+        "réponse": "Caribou",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rangifer_tarandus",
+        "anecdote": "Les plus grandes hardes de caribous sauvages se trouvent en Alaska et dans le nord du Québec et du Labrador."
+      },
+      {
+        "id": 3,
+        "question": "Quelle artiste célèbre, née à Nieppe, a chanté « Ma cabane au Canada » ?",
+        "propositions": [
+          "Sheila",
+          "Line Renaud",
+          "Régine",
+          "Juliette Greco"
+        ],
+        "réponse": "Line Renaud",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Line_Renaud",
+        "anecdote": "En 1950, Line Renaud épouse Loulou Gasté, qui restera son mari jusqu'à sa mort en 1995."
+      },
+      {
+        "id": 4,
+        "question": "Sur la rive nord de quel lac se situe la ville frontière de Toronto ?",
+        "propositions": [
+          "Lac Ontario",
+          "Lac Érié",
+          "Lac Huron",
+          "Lac Michigan"
+        ],
+        "réponse": "Lac Ontario",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Toronto",
+        "anecdote": "Avec ses 2,5 millions d'habitants, Toronto est la plus grande ville du Canada et la capitale de la province de l'Ontario."
+      }
+    ]
+}

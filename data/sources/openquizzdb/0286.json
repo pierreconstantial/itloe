@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #24",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Guerrier avec des plumes, mot de six lettres commençant par un A ?",
+        "propositions": [
+          "Apache",
+          "Amante",
+          "Apôtre",
+          "Adulte"
+        ],
+        "réponse": "Apache",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Prison populaire, mot de cinq lettres commençant par un T ?",
+        "propositions": [
+          "Tombe",
+          "Trône",
+          "Taule",
+          "Tente"
+        ],
+        "réponse": "Taule",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "On le voit en naissant, mot de quatre lettres commençant par un J ?",
+        "propositions": [
+          "Jour",
+          "Jury",
+          "Juge",
+          "Jean"
+        ],
+        "réponse": "Jour",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Action mémorable, mot de sept lettres commençant par un E ?",
+        "propositions": [
+          "Emprise",
+          "Élagage",
+          "Erratum",
+          "Exploit"
+        ],
+        "réponse": "Exploit",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Belles du cinéma",         
+  "mise-à-jour": "08/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle actrice joue Mikaela Banes dans « Transformers » ?",
+        "propositions": [
+          "Kate Winslet",
+          "Megan Fox",
+          "Eva Mendes",
+          "Jennifer Connelly"
+        ],
+        "réponse": "Megan Fox",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Megan_Fox",
+        "anecdote": "Considérée comme un sex-symbol, Megan Fox apparaît dans des magazines masculins tels que « Maxim » ou « FHM »."
+      },
+      {
+        "id": 2,
+        "question": "Quelle actrice a joué Catwoman et Tornade dans « X-Men » ?",
+        "propositions": [
+          "Amber Heard",
+          "Halle Berry",
+          "Eva Mendes",
+          "Kristen Stewart"
+        ],
+        "réponse": "Halle Berry",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Halle_Berry",
+        "anecdote": "Halle Berry est la première afro-américaine à avoir reçu l'Oscar de la meilleure actrice."
+      },
+      {
+        "id": 3,
+        "question": "Quelle actrice est devenue célèbre grâce à « Hunger Games » ?",
+        "propositions": [
+          "Jennifer Lawrence",
+          "Nina Dobrev",
+          "Halle Berry",
+          "Emma Watson"
+        ],
+        "réponse": "Jennifer Lawrence",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jennifer_Lawrence",
+        "anecdote": "En 2015, selon le magazine « Forbes », elle est l'actrice la mieux payée au monde avec près de 52 millions de dollars."
+      },
+      {
+        "id": 4,
+        "question": "Qui joue avec Justin Timberlake dans « Sexe entre amis » ?",
+        "propositions": [
+          "Cameron Diaz",
+          "Mila Kunis",
+          "Emma Stone",
+          "Rachel Weisz"
+        ],
+        "réponse": "Mila Kunis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mila_Kunis",
+        "anecdote": "Mila Kunis est arrivée à sept ans aux États-Unis avec sa famille et pas plus de 250 dollars en poche."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #25",         
+  "mise-à-jour": "18/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Gaz en tube, mot de quatre lettres commençant par un N ?",
+        "propositions": [
+          "Néon",
+          "Nerf",
+          "Note",
+          "Noce"
+        ],
+        "réponse": "Néon",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Travail au verger, mot de dix lettres commençant par un C ?",
+        "propositions": [
+          "Claquement",
+          "Cueillette",
+          "Calendrier",
+          "Cabotinage"
+        ],
+        "réponse": "Cueillette",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Exclamation du public, mot de cinq lettres commençant par un B ?",
+        "propositions": [
+          "Bidon",
+          "Bravo",
+          "Bulle",
+          "Bisou"
+        ],
+        "réponse": "Bravo",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Récolte d'automne, mot de huit lettres commençant par un V ?",
+        "propositions": [
+          "Vendange",
+          "Volaille",
+          "Vacherin",
+          "Vaseline"
+        ],
+        "réponse": "Vendange",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

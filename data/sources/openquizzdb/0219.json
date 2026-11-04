@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Bretagne",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle ville bretonne est connue pour ses alignements de menhirs ?",
+        "propositions": [
+          "Quimper",
+          "Carnac",
+          "Brest",
+          "Lorient"
+        ],
+        "réponse": "Carnac",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alignements_de_Carnac",
+        "anecdote": "La ville de Carnac propose également un musée préhistorique où vous pouvez explorer l'histoire fascinante de ces mégalithes."
+      },
+      {
+        "id": 2,
+        "question": "Quel symbole à trois branches est emblématique de la Bretagne ?",
+        "propositions": [
+          "Croix celtique",
+          "Hermine",
+          "Flèche",
+          "Triskell"
+        ],
+        "réponse": "Triskell",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Triskèle",
+        "anecdote": "En Bretagne, le triskell est souvent représenté dans des tons noirs et blancs, en harmonie avec le drapeau breton, le Gwenn ha Du."
+      },
+      {
+        "id": 3,
+        "question": "À partir de quoi est élaboré le chouchen, proche de l'hydromel ?",
+        "propositions": [
+          "Malt d'orge",
+          "Sirop de menthe",
+          "Jus de pomme",
+          "Miel Fermenté"
+        ],
+        "réponse": "Miel Fermenté",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chouchen",
+        "anecdote": "Prisé par les druides, on croyait que le chouchen avait des vertus magiques et qu'il pouvait renforcer les liens avec les divinités."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel département français se dresse le phare de l'Île Vierge ?",
+        "propositions": [
+          "Finistère",
+          "Ille-et-Vilaine",
+          "Morbihan",
+          "Côtes-d'Armor"
+        ],
+        "réponse": "Finistère",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Phare_de_l'Île_Vierge",
+        "anecdote": "Avec ses 82,5 mètres de hauteur, le phare de l'Île Vierge est le plus haut phare d'Europe et également l'un des plus hauts du monde."
+      }
+    ]
+}

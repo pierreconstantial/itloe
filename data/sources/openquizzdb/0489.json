@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Saints",         
+  "mise-à-jour": "19/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle sainte est la mère de la Vierge Marie ?",
+        "propositions": [
+          "Sainte Jeanne",
+          "Sainte Anne",
+          "Sainte Marthe",
+          "Sainte Odile"
+        ],
+        "réponse": "Sainte Anne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marie_(mère_de_Jésus)",
+        "anecdote": "Les Églises catholique et orthodoxe accordent une place essentielle à Marie, qu'elles appellent « Sainte Vierge »."
+      },
+      {
+        "id": 2,
+        "question": "Durant quel mois ont lieu les « Saints de glace » ?",
+        "propositions": [
+          "Mois de février",
+          "Mois de mars",
+          "Mois de juin",
+          "Mois de mai"
+        ],
+        "réponse": "Mois de mai",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Saints_de_glace",
+        "anecdote": "Chaque année, ces saints sont invoqués par les agriculteurs pour éviter l'effet d'une baisse de la température sur les cultures."
+      },
+      {
+        "id": 3,
+        "question": "Quel saint ne faut-il pas trop honorer quand on surveille sa ligne ?",
+        "propositions": [
+          "Saint-Germain",
+          "Saint-Charles",
+          "Saint-Pierre",
+          "Saint-Honoré"
+        ],
+        "réponse": "Saint-Honoré",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Saint-honoré_(pâtisserie)",
+        "anecdote": "Le saint-honoré, qui porte le nom du patron des boulangers, est constitué de petits choux à la crème, nappés de caramel."
+      },
+      {
+        "id": 4,
+        "question": "Quel saint garde les clefs du salut des âmes et du Paradis ?",
+        "propositions": [
+          "Saint Thomas",
+          "Saint Jean",
+          "Saint Pierre",
+          "Saint Luc"
+        ],
+        "réponse": "Saint Pierre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pierre_(apôtre)",
+        "anecdote": "Les statues de saint Pierre tenant les clefs du paradis sont toujours présentes dans les églises et cathédrales des diocèses."
+      }
+    ]
+}

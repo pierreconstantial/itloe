@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Équipement militaire",         
+  "mise-à-jour": "08/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En quelle matière sont généralement fabriqués nos gilets par balles ?",
+        "propositions": [
+          "Ivoire",
+          "Kevlar",
+          "Latex",
+          "Métal"
+        ],
+        "réponse": "Kevlar",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kevlar",
+        "anecdote": "En 1964, Stephanie Kwolek créera accidentellement une fibre synthétique légère, cinq fois plus résistante que l'acier."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le principal avantage d'utilisation d'une grenade à manche ?",
+        "propositions": [
+          "Coût",
+          "Meilleur emport",
+          "Étanchéité",
+          "Distance de jet"
+        ],
+        "réponse": "Distance de jet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Grenade_modèle_24",
+        "anecdote": "Pour utiliser la grenade, on dévisse l'embout et on tire sur une corde, disposant alors de cinq secondes avant l'explosion."
+      },
+      {
+        "id": 3,
+        "question": "Combien de tonnes pèse environ le char Américain M1A1 Abrams ?",
+        "propositions": [
+          "75 tonnes",
+          "12 tonnes",
+          "36 tonnes",
+          "54 tonnes"
+        ],
+        "réponse": "54 tonnes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/M1_Abrams",
+        "anecdote": "Son baptême du feu eût lieu en 1991 lors de la guerre du Golfe, où il s'est bien comporté face à une force mécanisée conventionnelle."
+      },
+      {
+        "id": 4,
+        "question": "Durant la guerre du Vietnam, quelle arme fut surnommée « Mattel Gun » ?",
+        "propositions": [
+          "M14",
+          "M16",
+          "AK47",
+          "L1A1"
+        ],
+        "réponse": "M16",
+        "wikipédia": "https://fr.wikipedia.org/wiki/M16_(fusil)",
+        "anecdote": "Issu d'un développement difficile, le fusil d'assaut M16 est la version militaire de l'AR-15, un fusil achevé par Armalite en 1958."
+      }
+    ]
+}

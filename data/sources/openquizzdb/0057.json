@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Planète bleue",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de temps met la Terre pour faire le tour du Soleil ?",
+        "propositions": [
+          "6 mois",
+          "365 jours",
+          "1 mois",
+          "24 heures"
+        ],
+        "réponse": "365 jours",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Terre",
+        "anecdote": "Elle orbite autour du Soleil en 365,256 jours solaires et réalise une rotation sur elle-même relativement au Soleil en un jour sidéral."
+      },
+      {
+        "id": 2,
+        "question": "Quelle distance approximative sépare la Terre de la Lune ?",
+        "propositions": [
+          "420 000 km",
+          "380 000 km",
+          "460 000 km",
+          "340 000 km"
+        ],
+        "réponse": "380 000 km",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lune",
+        "anecdote": "La Lune est en rotation synchrone avec la Terre, lui montrant donc constamment la même face, celle-ci étant appelée la face visible."
+      },
+      {
+        "id": 3,
+        "question": "Quelle étoile, vue de la Terre, est la plus brillante ?",
+        "propositions": [
+          "Sirius",
+          "Canopus",
+          "Véga",
+          "Le Soleil"
+        ],
+        "réponse": "Le Soleil",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Liste_des_étoiles_les_plus_brillantes",
+        "anecdote": "Les distances exactes des étoiles ne sont pas toujours connues avec précision."
+      },
+      {
+        "id": 4,
+        "question": "Qui a effectué la première mesure de la circonférence de la Terre ?",
+        "propositions": [
+          "Eurydice",
+          "Ératosthène",
+          "Euripide",
+          "Épicure"
+        ],
+        "réponse": "Ératosthène",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ératosthène",
+        "anecdote": "Considéré comme le plus grand savant du IIIe siècle av. J.-C., il est l'inventeur de la géographie, terme encore utilisé de nos jours."
+      }
+    ]
+}

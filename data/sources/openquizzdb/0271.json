@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Potins de stars 2013",         
+  "mise-à-jour": "31/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle star a montré son piercing dentaire sur Instagram en 2013 ?",
+        "propositions": [
+          "Beyoncé",
+          "Rihanna",
+          "Jennifer Lopez",
+          "Gwen Stefani"
+        ],
+        "réponse": "Rihanna",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rihanna",
+        "anecdote": "Rihanna, qui comptabilise 4 singles ayant atteint le million de ventes au Royaume-Uni, a déjà remporté plus de 350 récompenses."
+      },
+      {
+        "id": 2,
+        "question": "Quel DJ de la French Touch a fait une vidéo nu en 2013 ?",
+        "propositions": [
+          "Claude Challe",
+          "Bob Sinclar",
+          "Laurent Wolf",
+          "David Guetta"
+        ],
+        "réponse": "Bob Sinclar",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bob_Sinclar",
+        "anecdote": "Bob Sinclar a également utilisé les noms de scène The Mighty Bop, Chris the French kiss et Reminiscence Quartet."
+      },
+      {
+        "id": 3,
+        "question": "Quelle muse a exposé ses toiles à Milan en 2013 ?",
+        "propositions": [
+          "Karen Cheryl",
+          "Jeanne Mas",
+          "Amanda Lear",
+          "Linda de Suza"
+        ],
+        "réponse": "Amanda Lear",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Amanda_Lear",
+        "anecdote": "Selon plusieurs sources divergentes, Amanda Lear serait née en 1939, 1941 ou 1946 (voire 1950) à Saïgon, Hong Kong ou Hanoï."
+      },
+      {
+        "id": 4,
+        "question": "Quel chanteur a failli perdre son fils en 2013 dans une piscine ?",
+        "propositions": [
+          "Uffie",
+          "Usher",
+          "U-God",
+          "Uncle Murda"
+        ],
+        "réponse": "Usher",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Usher",
+        "anecdote": "Guidé par sa mère, Usher s'est joint à l'âge de neuf ans à une chorale locale dans une église chrétienne de Chattanooga."
+      }
+    ]
+}

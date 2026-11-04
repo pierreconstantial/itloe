@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Ville de Rome",         
+  "mise-à-jour": "02/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Laquelle de ces communes importantes est la plus peuplée d'Italie ?",
+        "propositions": [
+          "Rome",
+          "Naples",
+          "Milan",
+          "Florence"
+        ],
+        "réponse": "Rome",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rome",
+        "anecdote": "En 2014, la ville de Rome comptait 2 869 461 habitants établis sur 1 285 kilomètres carrés."
+      },
+      {
+        "id": 2,
+        "question": "Quel État enclavé est contenu dans le territoire de la ville de Rome ?",
+        "propositions": [
+          "Vatican",
+          "Lichtenstein",
+          "Monaco",
+          "Saint-Marin"
+        ],
+        "réponse": "Vatican",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vatican",
+        "anecdote": "C'est le seul exemple existant d'un pays à l'intérieur d'une ville : Rome est donc la capitale de deux États."
+      },
+      {
+        "id": 3,
+        "question": "De quel climat particulièrement clément bénéficie la ville de Rome ?",
+        "propositions": [
+          "Tropical",
+          "Tempéré",
+          "Océanique",
+          "Méditerranéen"
+        ],
+        "réponse": "Méditerranéen",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rome",
+        "anecdote": "C'est ainsi que les hivers sont doux, même si un coup de froid en provenance des Apennins ne peut être exclu."
+      },
+      {
+        "id": 4,
+        "question": "Quel animal a été choisi comme symbole de la ville de Rome ?",
+        "propositions": [
+          "Louve",
+          "Lion",
+          "Chèvre",
+          "Cerf"
+        ],
+        "réponse": "Louve",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rome",
+        "anecdote": "Le nom de la ville est dû à la légende des jumeaux Romulus et Rémus, élevés par une louve, où le premier tua le second."
+      }
+    ]
+}

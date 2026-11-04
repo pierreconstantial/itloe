@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Bien-être dans la maison",         
+  "mise-à-jour": "21/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel dispositif est l'élément central de toute chambre à coucher ?",
+        "propositions": [
+          "Lit",
+          "Table",
+          "Bureau",
+          "Baignoire"
+        ],
+        "réponse": "Lit",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lit",
+        "anecdote": "De nos jours, il existe une variété infinie de lits, du traditionnel au moderne, avec des options comme les lits réglables et intelligents."
+      },
+      {
+        "id": 2,
+        "question": "Quel ensemble de pièces sont réservées à la vie intime des parents ?",
+        "propositions": [
+          "Salle d'eau",
+          "Suite parentale",
+          "Dressing",
+          "Sauna"
+        ],
+        "réponse": "Suite parentale",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Suite_parentale",
+        "anecdote": "Lorsque l'espace est suffisant, une suite parentale peut également comporter une garde-robe, un bureau ou un salon de détente."
+      },
+      {
+        "id": 3,
+        "question": "Quel élément de la maison symbolise détente et soins personnels ?",
+        "propositions": [
+          "Cave à vin",
+          "Dressing",
+          "Jardin d'hiver",
+          "Salle de bain"
+        ],
+        "réponse": "Salle de bain",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Baignoire",
+        "anecdote": "L'avènement de la plomberie moderne a permis d'introduire des baignoires en fonte émaillée, rendant les bains plus accessibles."
+      },
+      {
+        "id": 4,
+        "question": "Dans quelle pièce prend-on un bain de chaleur sèche ?",
+        "propositions": [
+          "Hammam",
+          "Comble",
+          "Sauna",
+          "Jacuzzi"
+        ],
+        "réponse": "Sauna",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sauna",
+        "anecdote": "La pratique du sauna est une tradition sociale et familiale qui semble exister depuis plus de 2 000 ans dans les pays nordiques."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jeux télévisés #2",         
+  "mise-à-jour": "25/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quels objets sont à la base du jeu télévisé « À prendre ou à laisser » ?",
+        "propositions": [
+          "Cadeaux",
+          "Jetons",
+          "Boules",
+          "Boîtes"
+        ],
+        "réponse": "Boîtes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/À_prendre_ou_à_laisser_(jeu_télévisé)",
+        "anecdote": "24 candidats possèdent une boîte, répartie au hasard par un huissier de justice dans laquelle se cache une somme d'argent différente."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel jeu d'aventure plusieurs binômes voyagent-ils en auto-stop ?",
+        "propositions": [
+          "Intervilles",
+          "Ninja Warrior",
+          "Fear Factor",
+          "Pékin Express"
+        ],
+        "réponse": "Pékin Express",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pékin_Express",
+        "anecdote": "Au cours du jeu, les candidats peuvent gagner des amulettes, une avance dans la course ou un coffre-fort pour ne pas quitter la partie."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel jeu télévisé fallait-il éviter de piocher une boule noire ?",
+        "propositions": [
+          "Pyramide",
+          "Motus",
+          "L'Or à l'appel",
+          "Le Bigdil"
+        ],
+        "réponse": "Motus",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Motus_(jeu_télévisé)",
+        "anecdote": "La plus grosse cagnotte de l'histoire du jeu avec Thierry Beccaro est de 17 600 €, soit 22 émissions sans Super partie gagnée."
+      },
+      {
+        "id": 4,
+        "question": "Sur quelle chaîne se déroule « Le Grand Concours des animateurs » ?",
+        "propositions": [
+          "France 2",
+          "C8",
+          "Canal+",
+          "TF1"
+        ],
+        "réponse": "TF1",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Grand_Concours_des_animateurs",
+        "anecdote": "Cette émission réunit les animateurs des chaînes françaises qui se battent pour remporter le Trophée du Grand Concours."
+      }
+    ]
+}

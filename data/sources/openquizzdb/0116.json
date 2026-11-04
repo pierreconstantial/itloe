@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #10",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le symbole du chignon porté par les hommes Coréens ?",
+        "propositions": [
+          "Virilité",
+          "Punition",
+          "Servitude",
+          "Deuil"
+        ],
+        "réponse": "Virilité",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sangtu",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Combien de temps dure l'acte d'amour chez la tortue marine ?",
+        "propositions": [
+          "Deux minutes",
+          "Deux secondes",
+          "Deux jours",
+          "Deux heures"
+        ],
+        "réponse": "Deux heures",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quel plat recommandait-on au Moyen Âge pour arrondir les seins ?",
+        "propositions": [
+          "Salade de vers",
+          "Purée d'araignées",
+          "Queue de rat",
+          "Gel de poulpe"
+        ],
+        "réponse": "Purée d'araignées",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Qu'est-ce que Polanreff avait affiché à Paris pour « Polnarévolution » ?",
+        "propositions": [
+          "Ses yeux",
+          "Son sexe",
+          "Ses fesses",
+          "Son torse"
+        ],
+        "réponse": "Ses fesses",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

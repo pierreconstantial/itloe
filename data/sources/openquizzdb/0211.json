@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Desserts gourmands",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel fromage italien rentre dans la composition du tiramisu ?",
+        "propositions": [
+          "Ricotta",
+          "Gorgonzola",
+          "Mascarpone",
+          "Grana padano"
+        ],
+        "réponse": "Mascarpone",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tiramisu",
+        "anecdote": "Originaire de la région de Lombardie, le mascarpone est fabriqué à partir de crème, ce qui lui confère une texture douce et veloutée."
+      },
+      {
+        "id": 2,
+        "question": "Quel gâteau comporte oeufs, beurre, farine et sucre en quantités égales ?",
+        "propositions": [
+          "Quatre-gares",
+          "Quatre-parts",
+          "Quatre-fards",
+          "Quatre-quarts"
+        ],
+        "réponse": "Quatre-quarts",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Quatre-quarts",
+        "anecdote": "Ce gâteau a l'avantage d'être facile à réaliser avec des ingrédients de base que l'on trouve dans presque toutes les cuisines."
+      },
+      {
+        "id": 3,
+        "question": "Quel entremets de génoise équilibre le goût café et le chocolat ?",
+        "propositions": [
+          "Diplomate",
+          "Bavarois",
+          "Religieuse",
+          "Opéra"
+        ],
+        "réponse": "Opéra",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gâteau_opéra",
+        "anecdote": "Le Opéra (gâteau) est un entremets raffiné composé de fines couches de génoise imbibée de café, de crème au beurre au café et de ganache au chocolat."
+      },
+      {
+        "id": 4,
+        "question": "Quels fruits rouges entrent dans la préparation du clafoutis ?",
+        "propositions": [
+          "Framboises",
+          "Groseilles",
+          "Cerises",
+          "Fraises"
+        ],
+        "réponse": "Cerises",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Clafoutis",
+        "anecdote": "Pour rester fidèle à la tradition, il est préférable d'utiliser des cerises non dénoyautées, car les noyaux apportent une légère amertume."
+      }
+    ]
+}

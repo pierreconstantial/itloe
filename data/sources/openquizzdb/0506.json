@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sur l'eau ou dans l'eau",         
+  "mise-à-jour": "04/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel navire transporte des passagers en haute mer ?",
+        "propositions": [
+          "Monocoque",
+          "Galère",
+          "Paquebot",
+          "Trimaran"
+        ],
+        "réponse": "Paquebot",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Paquebot",
+        "anecdote": "Les premiers paquebots sont apparus au début du XIXe siècle avec l'essor des migrations internationales et du phénomène colonial."
+      },
+      {
+        "id": 2,
+        "question": "Quel navire submersible est capable de se déplacer sous l'eau ?",
+        "propositions": [
+          "Sous-marin",
+          "Bateau-mouche",
+          "Paquebot",
+          "Ferry"
+        ],
+        "réponse": "Sous-marin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sous-marin",
+        "anecdote": "Il se distingue des autres bateaux et navires, et des bathyscaphes qui se déplacent principalement selon l'axe vertical."
+      },
+      {
+        "id": 3,
+        "question": "Quel bateau de plaisance de luxe voit-on souvent à Saint-Tropez ?",
+        "propositions": [
+          "Bateau-mouche",
+          "Hydravion",
+          "Porte-avions",
+          "Yacht"
+        ],
+        "réponse": "Yacht",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Yacht",
+        "anecdote": "Le yacht moderne est un navire habitable et utilisé aux fins de loisir et de sport, dans une ambiance au luxe affirmé voire raffiné."
+      },
+      {
+        "id": 4,
+        "question": "Quel bateau est utilisé pour le tourisme sur la Seine à Paris ?",
+        "propositions": [
+          "Bateau-bus",
+          "Bateau-mouche",
+          "Ferry",
+          "Paquebot"
+        ],
+        "réponse": "Bateau-mouche",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bateau-mouche",
+        "anecdote": "En France, cette dénomination est une marque déposée et enregistrée depuis 1950 par la Compagnie des Bateaux Mouches."
+      }
+    ]
+}

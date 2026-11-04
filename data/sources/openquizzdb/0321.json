@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Univers « Game of Thrones »",         
+  "mise-à-jour": "08/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel animal figure sur le blason de la maison Lannister ?",
+        "propositions": [
+          "Ours",
+          "Cheval",
+          "Lion",
+          "Aigle"
+        ],
+        "réponse": "Lion",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Personnages_du_Trône_de_fer",
+        "anecdote": "La maison Lannister, la plus riche des Sept Couronnes, est la maison suzeraine des Terres de l'Ouest qui possède son siège à Castral Roc."
+      },
+      {
+        "id": 2,
+        "question": "Combien de couronnes composent le royaume de « Game of Thrones » ?",
+        "propositions": [
+          "Sept",
+          "Trois",
+          "Dix",
+          "Cinq"
+        ],
+        "réponse": "Sept",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Univers_du_Trône_de_fer",
+        "anecdote": "Le Mur sépare le royaume des Sept Couronnes des terres glacées et sauvages situées au-delà."
+      },
+      {
+        "id": 3,
+        "question": "Que protège la Garde de Nuit dans « Game of Thrones » ?",
+        "propositions": [
+          "Le jardin",
+          "La frontière",
+          "Le Mur",
+          "La reine"
+        ],
+        "réponse": "Le Mur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Garde_de_Nuit",
+        "anecdote": "La Garde de Nuit est un ordre militaire exclusivement masculin stationné sur le Mur, formidable édifice de glace."
+      },
+      {
+        "id": 4,
+        "question": "Où habite la famille Stark dans la série « Game of Thrones » ?",
+        "propositions": [
+          "Winterland",
+          "Winterfall",
+          "Winterball",
+          "Winterfell"
+        ],
+        "réponse": "Winterfell",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Univers_du_Trône_de_fer",
+        "anecdote": "Winterfell a été construit par Brandon Stark, le Bâtisseur, l'un des premiers rois du Nord."
+      }
+    ]
+}

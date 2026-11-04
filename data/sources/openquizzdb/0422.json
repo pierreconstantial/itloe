@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Batailles dans l'histoire",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En quelle année a eu lieu la Bataille de Verdun ?",
+        "propositions": [
+          "1926",
+          "1916",
+          "1936",
+          "1946"
+        ],
+        "réponse": "1916",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bataille_de_Verdun_(1916)",
+        "anecdote": "Cette bataille a vu une moyenne de 70 000 victimes pour chacun des dix mois du conflit."
+      },
+      {
+        "id": 2,
+        "question": "Quand eut lieu la première Bataille de la Marne ?",
+        "propositions": [
+          "Avril 1940",
+          "Mai 1942",
+          "Juin 1916",
+          "Septembre 1914"
+        ],
+        "réponse": "Septembre 1914",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bataille_de_la_Marne_(1914)",
+        "anecdote": "Cette bataille doit être distinguée de la seconde bataille de la Marne, qui se déroula en juillet 1918."
+      },
+      {
+        "id": 3,
+        "question": "Quelle bataille marque la défaite finale de Napoléon Ier ?",
+        "propositions": [
+          "Waterloo",
+          "Leipzig",
+          "Trafalgar",
+          "Austerlitz"
+        ],
+        "réponse": "Waterloo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quelle bataille fit de Guillaume le Conquérant le roi d'Angleterre ?",
+        "propositions": [
+          "Crécy",
+          "Azincourt",
+          "Stamford Bridge",
+          "Hastings"
+        ],
+        "réponse": "Hastings",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

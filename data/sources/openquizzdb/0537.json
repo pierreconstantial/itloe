@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Chevaux",         
+  "mise-à-jour": "01/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qu'observe-t-on pour estimer l'âge approximatif d'un cheval ?",
+        "propositions": [
+          "Queue",
+          "Dents",
+          "Sabots",
+          "Crinière"
+        ],
+        "réponse": "Dents",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dentition_du_cheval",
+        "anecdote": "Les dents du cheval poussant en permanence, le mouvement masticatoire n'est souvent pas suffisant pour user la table dentaire."
+      },
+      {
+        "id": 2,
+        "question": "Après combien de temps un poulain peut-il marcher ?",
+        "propositions": [
+          "Une heure",
+          "Deux semaines",
+          "Un mois",
+          "Quatre semaines"
+        ],
+        "réponse": "Une heure",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Poulain",
+        "anecdote": "Le poulain est capable de se lever et de marcher environ une heure après sa naissance. Cette aptitude est essentielle dans la nature, car elle lui permet de suivre rapidement sa mère et d'échapper aux prédateurs."
+      },
+      {
+        "id": 3,
+        "question": "À quelle fréquence faut-il idéalement curer les sabots du cheval ?",
+        "propositions": [
+          "Chaque jour",
+          "Chaque semaine",
+          "Chaque mois",
+          "Chaque année"
+        ],
+        "réponse": "Chaque jour",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sabot_(ongle)",
+        "anecdote": "Les animaux à sabots marchent sur la pointe de leurs doigts, à la différence des humains qui marchent sur la plante des pieds."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la couleur de Stewball dans la chanson d'Hugues Aufray ?",
+        "propositions": [
+          "Alezan",
+          "Gris",
+          "Noir",
+          "Blanc"
+        ],
+        "réponse": "Blanc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stewball",
+        "anecdote": "La chanson d'Hugues Aufray célèbre la victoire d'un cheval blanc à taches alezanes sur une jument grise lors d'une course hippique."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Super-héros",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelles aventures retrouve-t-on les personnages de Loïs et Clark ?",
+        "propositions": [
+          "Superman",
+          "Spider-Man",
+          "Batman",
+          "Hulk"
+        ],
+        "réponse": "Superman",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Loïs_et_Clark",
+        "anecdote": "Jerry Siegel, co-créateur de Superman, s'est inspiré de la journaliste de renom Nellie Bly pour créer le caractère fort de Loïs Lane."
+      },
+      {
+        "id": 2,
+        "question": "Quelle substance constitue le squelette principal de Wolverine ?",
+        "propositions": [
+          "Vibranium",
+          "Cavorite",
+          "Adamantium",
+          "Neutronium"
+        ],
+        "réponse": "Adamantium",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Adamantium",
+        "anecdote": "L'adamantium, alliage de métal imaginaire le plus résistant de tous les métaux imaginaires connus, ne s'oxyde pas et ne rouille pas."
+      },
+      {
+        "id": 3,
+        "question": "Quel jeune garçon est le principal compagnon d'armes de Batman ?",
+        "propositions": [
+          "Tim Drake",
+          "Superboy",
+          "Robin",
+          "Mystek"
+        ],
+        "réponse": "Robin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Robin_(DC_Comics)",
+        "anecdote": "Le personnage de Robin fut créé en 1940 pour attirer un jeune public et donner un contrepoids au personnage sombre de Batman."
+      },
+      {
+        "id": 4,
+        "question": "Quel super-héros ne se sépare jamais de son marteau ?",
+        "propositions": [
+          "Thunderbird",
+          "Tornade",
+          "Thor",
+          "Tempest"
+        ],
+        "réponse": "Thor",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Thor_(Marvel_Comics)",
+        "anecdote": "Thor, le dieu du tonnerre, est connu pour être l'un des membres fondateurs et membre récurrent de l'équipe des Vengeurs."
+      }
+    ]
+}

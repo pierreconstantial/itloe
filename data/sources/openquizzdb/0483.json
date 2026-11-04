@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Auteurs classiques",         
+  "mise-à-jour": "14/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel écrivain allemand a travaillé près de 60 ans sur son oeuvre « Faust » ?",
+        "propositions": [
+          "Becker",
+          "Goethe",
+          "Lingg",
+          "Jacoby"
+        ],
+        "réponse": "Goethe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Johann_Wolfgang_von_Goethe",
+        "anecdote": "Goethe est l'auteur d'une oeuvre abondante aux accents encyclopédiques qui le rattache à deux mouvements littéraires."
+      },
+      {
+        "id": 2,
+        "question": "Quel écrivain russe a été excommunié par l'Église orthodoxe ?",
+        "propositions": [
+          "Roman Goul",
+          "Leonid Andreïev",
+          "Vladimir Charov",
+          "Léon Tolstoï"
+        ],
+        "réponse": "Léon Tolstoï",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Résurrection_(Tolstoï)",
+        "anecdote": "« Résurrection », écrit en 1899, est une oeuvre regroupant la majorité des arguments de la philosophie de Léon Tolstoï."
+      },
+      {
+        "id": 3,
+        "question": "Quelle était la nationalité du romancier et essayiste Aldous Huxley ?",
+        "propositions": [
+          "Grecque",
+          "Britannique",
+          "Russe",
+          "Hongroise"
+        ],
+        "réponse": "Britannique",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Aldous_Huxley",
+        "anecdote": "Le courant de pensée dit du « New Age » se réfère fréquemment à ses écrits mystiques et d'étude des hallucinogènes."
+      },
+      {
+        "id": 4,
+        "question": "Quel écrivain a fait publier les oeuvres de son ami La Boétie ?",
+        "propositions": [
+          "Montesquieu",
+          "Mallarmé",
+          "Montaigne",
+          "Mirabeau"
+        ],
+        "réponse": "Montaigne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Michel_de_Montaigne",
+        "anecdote": "Le plus souvent souffrant ou maladif, Michel de Montaigne essaya de guérir en voyageant vers des lieux de cure."
+      }
+    ]
+}

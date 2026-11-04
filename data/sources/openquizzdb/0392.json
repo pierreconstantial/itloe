@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alien Passagers",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans la saga Alien, qui a réalisé le film « Alien, le retour » ?",
+        "propositions": [
+          "Ridley Scott",
+          "Paul Anderson",
+          "David Fincher",
+          "James Cameron"
+        ],
+        "réponse": "James Cameron",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Aliens,_le_retour",
+        "anecdote": "Sorti en 1986, le film fut cité pour sept Oscars et remporta ceux du meilleur montage son et des meilleurs effets visuels."
+      },
+      {
+        "id": 2,
+        "question": "Comment appelle-t-on la créature principale du film « Alien » ?",
+        "propositions": [
+          "Trilobite",
+          "Facehugger",
+          "Mala'kak",
+          "Xénomorphe"
+        ],
+        "réponse": "Xénomorphe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Univers_d'Alien",
+        "anecdote": "David ayant contaminé un membre d'équipage avec un pathogène extraterrestre, cela donnera naissance au premier xénomorphe."
+      },
+      {
+        "id": 3,
+        "question": "Dans « Alien », quelle entreprise organise et finance le voyage spatial ?",
+        "propositions": [
+          "Requiem",
+          "Cobb",
+          "Fiorina",
+          "Weyland"
+        ],
+        "réponse": "Weyland",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Univers_d'Alien",
+        "anecdote": "Nommée Weyland-Yutani, la Compagnie est un conglomérat dont l'influence s'étend sur la plupart des colonies humaines."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le seul vaisseau spatial à revenir sur Terre dans « Alien » ?",
+        "propositions": [
+          "Betty",
+          "Nostromo",
+          "Artemis",
+          "Boops"
+        ],
+        "réponse": "Nostromo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Univers_d'Alien",
+        "anecdote": "Le Betty est un vieux vaisseau piloté par une bande de six pirates. De la bouche du clone de Ripley, il serait aussi vieux qu'elle."
+      }
+    ]
+}

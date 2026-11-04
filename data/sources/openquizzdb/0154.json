@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #13",         
+  "mise-à-jour": "30/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Réunion arrosée, mot de huit lettres commençant par un B ?",
+        "propositions": [
+          "Biscotte",
+          "Bronzage",
+          "Beuverie",
+          "Banlieue"
+        ],
+        "réponse": "Beuverie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Il trotte en tête, mot de trois lettres commençant par un P ?",
+        "propositions": [
+          "Pot",
+          "Pli",
+          "Pic",
+          "Pou"
+        ],
+        "réponse": "Pou",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "A toujours le dernier mot, mot de quatre lettres commençant par un E ?",
+        "propositions": [
+          "Écho",
+          "Euro",
+          "État",
+          "Émir"
+        ],
+        "réponse": "Écho",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Doit éviter les fuites, mot de douze lettres commençant par un R ?",
+        "propositions": [
+          "Reconduction",
+          "Romanichelle",
+          "Robinetterie",
+          "Regroupement"
+        ],
+        "réponse": "Robinetterie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

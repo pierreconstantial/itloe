@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #20",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel film a pour thème musical la chanson « Sea, Sex and Sun » ?",
+        "propositions": [
+          "Emmanuelle",
+          "La Boum",
+          "Les Bronzés",
+          "Le Grand Bleu"
+        ],
+        "réponse": "Les Bronzés",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quel disque de Pierre Perret fut vendu à un million d'exemplaires ?",
+        "propositions": [
+          "Lily",
+          "Le Zizi",
+          "Le plombier",
+          "Marion"
+        ],
+        "réponse": "Le Zizi",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quel gros animal prend une bain de boue après un rapport ?",
+        "propositions": [
+          "Éléphant",
+          "Sanglier",
+          "Rhinocéros",
+          "Hippopotame"
+        ],
+        "réponse": "Rhinocéros",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Après la chambre, où les Français font le plus souvent l'amour ?",
+        "propositions": [
+          "Grenier",
+          "Salon",
+          "Cuisine",
+          "Salle de bains"
+        ],
+        "réponse": "Salle de bains",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

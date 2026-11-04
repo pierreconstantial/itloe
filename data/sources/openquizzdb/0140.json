@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #12",         
+  "mise-à-jour": "26/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est la section des écrits érotiques de la Bibliothèque nationale ?",
+        "propositions": [
+          "Chambre noire",
+          "Enfer",
+          "Cabinet secret",
+          "Fonds interdit"
+        ],
+        "réponse": "Enfer",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Qu'appelle-t-on un « cylindre consolateur » en argot ?",
+        "propositions": [
+          "Rouleau à pâtisserie",
+          "Cigare",
+          "Godemichet",
+          "Thermos"
+        ],
+        "réponse": "Godemichet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Qui a fait une « Déclaration d'amour » à France Gall ?",
+        "propositions": [
+          "Michel Polnareff",
+          "Julien Clerc",
+          "Serge Lama",
+          "Michel Berger"
+        ],
+        "réponse": "Michel Berger",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quels génies de la nature sont représentés avec d'énormes phallus ?",
+        "propositions": [
+          "Satyres",
+          "Centaures",
+          "Nymphes",
+          "Cyclopes"
+        ],
+        "réponse": "Satyres",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

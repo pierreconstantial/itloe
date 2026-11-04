@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Marion Cotillard",         
+  "mise-à-jour": "30/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel film apparaît-elle aux côtés de Leonardo DiCaprio ?",
+        "propositions": [
+          "The revenant",
+          "Inception",
+          "Tenet",
+          "Interstellar"
+        ],
+        "réponse": "Inception",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Inception",
+        "anecdote": "Elle apparaît principalement dans les rêves et projections mentales du protagoniste, ce qui en fait un personnage à la fois réel et imaginaire."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel film Marion Cotillard joue-t-elle aux côtés de Brad Pitt ?",
+        "propositions": [
+          "Allied",
+          "Troy",
+          "Fury",
+          "Seven"
+        ],
+        "réponse": "Allied",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Allied_(film,_2016)",
+        "anecdote": "Les scènes romantiques tournées à Londres et dans le désert ont été particulièrement travaillées pour recréer l'ambiance des films classiques d'espionnage hollywoodien."
+      },
+      {
+        "id": 3,
+        "question": "Dans quelle saga populaire française est-elle apparue ?",
+        "propositions": [
+          "Les Visiteurs",
+          "OSS 117",
+          "Astérix",
+          "Taxi"
+        ],
+        "réponse": "Taxi",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Taxi_(film,_1998)",
+        "anecdote": "Son personnage est important car il apporte une dimension plus personnelle et sentimentale à l'histoire, souvent centrée sur les courses-poursuites spectaculaires et les gags policiers."
+      },
+      {
+        "id": 4,
+        "question": "Pour quel film a-t-elle remporté l'Oscar de la meilleure actrice ?",
+        "propositions": [
+          "Big Fish",
+          "La Môme",
+          "Cavalcade",
+          "Lisa"
+        ],
+        "réponse": "La Môme",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Môme_(film)",
+        "anecdote": "Sa performance est remarquable car elle couvre différentes périodes de la vie de Piaf, de son enfance difficile jusqu'à ses dernières années marquées par la maladie et la célébrité."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Intrusion #3",         
+  "mise-à-jour": "09/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel intrus se cache parmi ces mots du genre masculin ?",
+        "propositions": [
+          "Algèbre",
+          "Hémisphère",
+          "Haltère",
+          "Tentacule"
+        ],
+        "réponse": "Algèbre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Algèbre",
+        "anecdote": "L'algèbre est une branche des mathématiques qui permet d'exprimer les propriétés des opérations et le traitement des équations."
+      },
+      {
+        "id": 2,
+        "question": "Quel intrus se cache parmi ces films se déroulant à Noël ?",
+        "propositions": [
+          "Un jour sans fin",
+          "Love actually",
+          "Gremlins",
+          "La vie est belle"
+        ],
+        "réponse": "Un jour sans fin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Un_jour_sans_fin",
+        "anecdote": "Bill Murray y interprète Phil Connors, présentateur météo cynique et misanthrope chargé de couvrir le traditionnel jour de la marmotte."
+      },
+      {
+        "id": 3,
+        "question": "Quel intrus se cache parmi ces récompenses cinématographiques ?",
+        "propositions": [
+          "Abricot d'or",
+          "Casque d'or",
+          "Ours d'or",
+          "Palme d'or"
+        ],
+        "réponse": "Casque d'or",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Casque_d'or",
+        "anecdote": "« Casque d'or » est un film dramatique français réalisé par Jacques Becker, sorti en 1952, inspiré de l'histoire vraie d'Amélie Élie."
+      },
+      {
+        "id": 4,
+        "question": "Quel intrus se cache parmi ces capitales situées au sud de Paris ?",
+        "propositions": [
+          "Pékin",
+          "Vienne",
+          "Budapest",
+          "Kiev"
+        ],
+        "réponse": "Kiev",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kiev",
+        "anecdote": "Kiev, la capitale de l'Ukraine, est située au centre nord du pays à 90 kilomètres à vol d'oiseau au sud de la frontière biélorusse."
+      }
+    ]
+}

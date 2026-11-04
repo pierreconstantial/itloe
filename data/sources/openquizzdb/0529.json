@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Beaux gosses",         
+  "mise-à-jour": "27/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec quel ancien chanteur de NSYNC Cameron Diaz a-t-elle vécu ?",
+        "propositions": [
+          "Chris Kirkpatrick",
+          "Joey Fatone",
+          "Justin Timberlake",
+          "Lance Bass"
+        ],
+        "réponse": "Justin Timberlake",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Justin_Timberlake",
+        "anecdote": "Dans une interview, Justin Timberlake a déclaré souffrir de troubles obsessionnels compulsifs (TOC) mélangés à un déficit de l'attention."
+      },
+      {
+        "id": 2,
+        "question": "Qui a vendu un baiser 350 000 euros pour une bonne cause ?",
+        "propositions": [
+          "George Clooney",
+          "Matt Damon",
+          "Andy Garcia",
+          "Brad Pitt"
+        ],
+        "réponse": "George Clooney",
+        "wikipédia": "https://fr.wikipedia.org/wiki/George_Clooney",
+        "anecdote": "George Clooney est devenu célèbre auprès du grand public grâce à son rôle du docteur Doug Ross dans la série télévisée « Urgences »."
+      },
+      {
+        "id": 3,
+        "question": "Quel tennisman américain a été marié à Brooke Shields ?",
+        "propositions": [
+          "John McEnroe",
+          "Björn Borg",
+          "André Agassi",
+          "Jimmy Connors"
+        ],
+        "réponse": "André Agassi",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Andre_Agassi",
+        "anecdote": "Le principal rival d'Agassi au cours de sa carrière fut Pete Sampras, qu'il affronta à 34 reprises dont cinq finales de Grand Chelem."
+      },
+      {
+        "id": 4,
+        "question": "Quel champion de la terre battue est né sur l'île de Majorque ?",
+        "propositions": [
+          "Marcelo Melo",
+          "Andy Murray",
+          "Rafael Nadal",
+          "Roger Federer"
+        ],
+        "réponse": "Rafael Nadal",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rafael_Nadal",
+        "anecdote": "En devenant champion olympique en 2008, Rafael Nadal est le deuxième à réaliser le Grand Chelem doré en carrière après Agassi."
+      }
+    ]
+}

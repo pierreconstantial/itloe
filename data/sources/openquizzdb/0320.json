@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #28",         
+  "mise-à-jour": "30/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À prendre pour mieux juger, mot de cinq lettres commençant par un R ?",
+        "propositions": [
+          "Ronde",
+          "Recul",
+          "Ruine",
+          "Radar"
+        ],
+        "réponse": "Recul",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Pomelo ou mandarinier, mot de six lettres commençant par un A ?",
+        "propositions": [
+          "Argent",
+          "Avoine",
+          "Amorce",
+          "Agrume"
+        ],
+        "réponse": "Agrume",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Attendu à l'arrivée, mot de six lettres commençant par un F ?",
+        "propositions": [
+          "Festin",
+          "Fondue",
+          "Favori",
+          "Flamme"
+        ],
+        "réponse": "Favori",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "A des dessous douteux, mot de cinq lettres commençant par un T ?",
+        "propositions": [
+          "Tombe",
+          "Temps",
+          "Texte",
+          "Table"
+        ],
+        "réponse": "Table",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

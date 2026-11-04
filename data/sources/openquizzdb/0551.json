@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Secret Story »",         
+  "mise-à-jour": "28/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En quelle année fut diffusée pour la première fois « Secret Story » sur TF1 ?",
+        "propositions": [
+          "En 2010",
+          "En 2008",
+          "En 2009",
+          "En 2007"
+        ],
+        "réponse": "En 2007",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Secret_Story",
+        "anecdote": "La présentation de cette émission a été assurée par Benjamin Castaldi jusqu'en 2014 puis relayée par Christophe Beaugrand."
+      },
+      {
+        "id": 2,
+        "question": "Quel personnage invisible de « Secret Story » s'adresse aux candidats ?",
+        "propositions": [
+          "La Voix",
+          "Le Maître",
+          "Le Gardien",
+          "Le Producteur"
+        ],
+        "réponse": "La Voix",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dominique_Duforest",
+        "anecdote": "Il s'agit de la voix du responsable de castings et de l'animateur radio Dominique Duforest, qui se trouve dans une loge isolée."
+      },
+      {
+        "id": 3,
+        "question": "Que peut faire un candidat qui pense avoir trouvé un secret ?",
+        "propositions": [
+          "Buzzer",
+          "Chanter",
+          "Danser",
+          "Crier"
+        ],
+        "réponse": "Buzzer",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Secret_Story",
+        "anecdote": "Un candidat peut déclencher une alarme sonore spécifique en pressant un bouton rouge (buzzeur) situé dans le confessionnal."
+      },
+      {
+        "id": 4,
+        "question": "Sur les principes de quelle autre émission est basée « Secret Story » ?",
+        "propositions": [
+          "Golden Show",
+          "Bachelor",
+          "Dilemme",
+          "Big Brother"
+        ],
+        "réponse": "Big Brother",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Big_Brother_(émission_de_télévision)",
+        "anecdote": "« Big Brother » est un programme de télé-réalité néerlandais dont le nom vient du roman « 1984 » de George Orwell, publié en 1949."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #22",         
+  "mise-à-jour": "15/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un D, il faut un poignard, un métier, un animal et une boisson.",
+        "propositions": [
+          "Diabolo",
+          "Dague",
+          "Dauphin",
+          "Dentiste"
+        ],
+        "réponse": "Dague",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un E, il faut une presse, un animal, une émotion et un soutien.",
+        "propositions": [
+          "Épaule",
+          "Éléphant",
+          "Émerveillement",
+          "Étau"
+        ],
+        "réponse": "Étau",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un A, il faut un fruit, un cahier, un animal et une portion de cercle.",
+        "propositions": [
+          "Antilope",
+          "Abricot",
+          "Album",
+          "Arc"
+        ],
+        "réponse": "Abricot",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un N, il faut une étoffe, une ville, une licorne et une vente de nuit.",
+        "propositions": [
+          "Nocturne",
+          "Nylon",
+          "Narval",
+          "Naples"
+        ],
+        "réponse": "Nylon",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

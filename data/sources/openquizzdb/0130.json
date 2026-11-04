@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #11",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Il mesure les capacités, mot de six lettres commençant par un E ?",
+        "propositions": [
+          "Eczéma",
+          "Examen",
+          "Énoncé",
+          "Empire"
+        ],
+        "réponse": "Examen",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Homme rustre, mot de quatre lettres commençant par un O ?",
+        "propositions": [
+          "Ovni",
+          "Obus",
+          "Ours",
+          "Onde"
+        ],
+        "réponse": "Ours",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "On le devient par frustration, mot de huit lettres commençant par un C ?",
+        "propositions": [
+          "Chocolat",
+          "Choquant",
+          "Certifié",
+          "Cajoleur"
+        ],
+        "réponse": "Chocolat",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Course qui vaut de l'or, mot de quatre lettres commençant par un R ?",
+        "propositions": [
+          "Ruée",
+          "Robe",
+          "Ruse",
+          "Rêve"
+        ],
+        "réponse": "Ruée",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

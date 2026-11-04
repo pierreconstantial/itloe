@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #25",         
+  "mise-à-jour": "31/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un A, il faut une plante, une acquisition, un métier et une attache.",
+        "propositions": [
+          "Agriculteur",
+          "Ancre",
+          "Achat",
+          "Acacia"
+        ],
+        "réponse": "Acacia",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un L, il faut une ville, une pierre, un métier ancien et un éclat.",
+        "propositions": [
+          "Londres",
+          "Lumière",
+          "Luthier",
+          "Lapis"
+        ],
+        "réponse": "Londres",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un P, il faut un louchet, une contravention, un métier et un cocktail.",
+        "propositions": [
+          "Pelle",
+          "Prune",
+          "Punch",
+          "Plombier"
+        ],
+        "réponse": "Pelle",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un T, il faut un fruit, un engin, une petite pelle et un contrefort.",
+        "propositions": [
+          "Tracteur",
+          "Truelle",
+          "Talon",
+          "Tomate"
+        ],
+        "réponse": "Tomate",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

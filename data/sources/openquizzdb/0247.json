@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jeu, set et smash",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Au tennis, que crie-t-on quand une balle rebondit en dehors du terrain ?",
+        "propositions": [
+          "Fausse",
+          "Nulle",
+          "Blanche",
+          "Out"
+        ],
+        "réponse": "Out",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tennis",
+        "anecdote": "Avec l'arrivée du Hawk-Eye, une technologie précise d'arbitrage vidéo, les joueurs peuvent demander une vérification."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la première action effectuée au début d'un point au tennis ?",
+        "propositions": [
+          "Service",
+          "Lift",
+          "Smash",
+          "Volée"
+        ],
+        "réponse": "Service",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tennis",
+        "anecdote": "Le serveur dispose de deux tentatives : si la première balle est faute, il a droit à un second service, souvent frappé avec plus de sécurité."
+      },
+      {
+        "id": 3,
+        "question": "Quelle douleur au coude est fréquente chez les joueurs de tennis ?",
+        "propositions": [
+          "Tennis middow",
+          "Tennis elbow",
+          "Tennis shadow",
+          "Tennis longbow"
+        ],
+        "réponse": "Tennis elbow",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Épicondylite",
+        "anecdote": "Selon la littérature scientifique, les symptômes dureraient en moyenne de six mois et récidiveraient dans 26 % des cas."
+      },
+      {
+        "id": 4,
+        "question": "En quelle année a été créé Wimbledon, le plus vieux tournoi de tennis ?",
+        "propositions": [
+          "1877",
+          "1887",
+          "1897",
+          "1867"
+        ],
+        "réponse": "1877",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tournoi_de_Wimbledon",
+        "anecdote": "Le tournoi de Wimbledon est depuis ses débuts organisé par le All England Lawn Tennis and Croquet Club, un club sportif anglais."
+      }
+    ]
+}

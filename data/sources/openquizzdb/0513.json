@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Machu Picchu",         
+  "mise-à-jour": "08/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Le Machu Picchu a été abandonné après la chute de quel empire ?",
+        "propositions": [
+          "Inca",
+          "Corsaire",
+          "Iroquois",
+          "Aztèque"
+        ],
+        "réponse": "Inca",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Empire_inca",
+        "anecdote": "Machu Picchu, la ville sacrée oubliée durant des siècles, est considérée comme une oeuvre maîtresse de l'architecture inca."
+      },
+      {
+        "id": 2,
+        "question": "Aux limites de quelle forêt se dresse le Machu Picchu ?",
+        "propositions": [
+          "Atlantique",
+          "De Gola",
+          "Boréale",
+          "Amazonienne"
+        ],
+        "réponse": "Amazonienne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Forêt_amazonienne",
+        "anecdote": "Avec une superficie de 5 500 000 km2, soit près de dix fois la taille de la France, il s'agit de la plus grande forêt tropicale du monde."
+      },
+      {
+        "id": 3,
+        "question": "Quelles constructions composent la zone agricole du Machu Picchu ?",
+        "propositions": [
+          "Paillis",
+          "Versoirs",
+          "Terrasses",
+          "Brûlis"
+        ],
+        "réponse": "Terrasses",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Culture_en_terrasses",
+        "anecdote": "D'autres terrasses de moindre largeur se trouvent dans la partie basse de Machu Picchu, tout autour de la cité."
+      },
+      {
+        "id": 4,
+        "question": "À quel animal peut-on associer la forme du site du Machu Picchu ?",
+        "propositions": [
+          "Ours",
+          "Puma",
+          "Serpent",
+          "Dauphin"
+        ],
+        "réponse": "Puma",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Machu_Picchu",
+        "anecdote": "Il est parfois admis que les Incas donnaient à leurs cités la forme d'animaux sacrés (puma, condor, ...)."
+      }
+    ]
+}

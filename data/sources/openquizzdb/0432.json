@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jenna Jameson",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle société de divertissement porno Jenna Jameson a-t-elle fondé ?",
+        "propositions": [
+          "Best For You",
+          "Vivid",
+          "Mega X",
+          "Club Jenna"
+        ],
+        "réponse": "Club Jenna",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jenna_Jameson",
+        "anecdote": "Il s'agissait à l'origine d'un site web personnel, qui aboutit à la création de sites similaires avec d'autres actrices."
+      },
+      {
+        "id": 2,
+        "question": "Quel tatouage sur la fesse droite est devenu sa marque de fabrique ?",
+        "propositions": [
+          "Double coeur",
+          "Ange",
+          "Fleurs",
+          "Dragon"
+        ],
+        "réponse": "Double coeur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jenna_Jameson",
+        "anecdote": "Son corps présente d'autres tatouages : un dragon sur la nuque, des fleurs sur la cheville droite, une fille en monokini sur le mollet droit."
+      },
+      {
+        "id": 3,
+        "question": "Combien d'implants mammaires a-t-elle reçu entre 1994 et 2004 ?",
+        "propositions": [
+          "Douze",
+          "Quatre",
+          "Huit",
+          "Seize"
+        ],
+        "réponse": "Quatre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jenna_Jameson",
+        "anecdote": "Elle se fit poser ses premiers implants mammaires pour donner un nouveau souffle à ses carrières de strip-teaseuse et d'actrice porno."
+      },
+      {
+        "id": 4,
+        "question": "Quelle boisson a incité Jenna Massoli à changer son nom de scène ?",
+        "propositions": [
+          "Vodka",
+          "Gin",
+          "Champagne",
+          "Whisky"
+        ],
+        "réponse": "Whisky",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jenna_Jameson",
+        "anecdote": "Après avoir parcouru l'annuaire à la recherche d'un nom assorti à son prénom, elle choisit Jameson à cause du whiskey qu'elle boit."
+      }
+    ]
+}

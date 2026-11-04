@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #J",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment qualifie-t-on des légumes coupés en fines lanières ?",
+        "propositions": [
+          "Julienne",
+          "Jeton",
+          "Jambon",
+          "Juliette"
+        ],
+        "réponse": "Julienne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Julienne_(cuisine)",
+        "anecdote": "En cuisine, la julienne est en effet une manière de tailler les légumes, en minces lanières de 4 à 5 cm sur 1 mm d'épaisseur."
+      },
+      {
+        "id": 2,
+        "question": "À la télévision, quel est le métier du fils du commissaire Cordier ?",
+        "propositions": [
+          "Jongleur",
+          "Jardinier",
+          "Juge",
+          "Journaliste"
+        ],
+        "réponse": "Juge",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Commissaire_Cordier",
+        "anecdote": "Pierre Mondy mena une dernière partie de carrière à la télévision dans « Les Cordier, juge et flic » puis dans « Commissaire Cordier »."
+      },
+      {
+        "id": 3,
+        "question": "Le vendredi 13 est le jour préféré de quel célèbre tueur en série ?",
+        "propositions": [
+          "Judas",
+          "Jack",
+          "Jason",
+          "Jacob"
+        ],
+        "réponse": "Jason",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vendredi_13_(série_de_films)",
+        "anecdote": "Jason fut d'abord un enfant mort noyé au camp Crystal Lake à l'âge de onze ans, faute qui fut imputée à la négligence de moniteurs."
+      },
+      {
+        "id": 4,
+        "question": "Comment se prénomme la benjamine de la famille Jackson ?",
+        "propositions": [
+          "Joyce",
+          "Jasmine",
+          "Jenifer",
+          "Janet"
+        ],
+        "réponse": "Janet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Janet_Jackson",
+        "anecdote": "Petite, elle rêvait d'être jockey, mais chez les Jackson, tout le monde était musicien."
+      }
+    ]
+}

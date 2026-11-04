@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #10",         
+  "mise-à-jour": "17/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien d'arrondissements compte la ville de Paris ?",
+        "propositions": [
+          "Vingt",
+          "Quinze",
+          "Six",
+          "Douze"
+        ],
+        "réponse": "Vingt",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Arrondissements_de_Paris",
+        "anecdote": "Paris est divisée en 20 arrondissements municipaux depuis 1860. Ils sont organisés en spirale depuis le centre de la capitale, selon un système surnommé « l'escargot parisien »."
+      },
+      {
+        "id": 2,
+        "question": "Combien d'années le mur de Berlin sépara-t-il la ville en deux ?",
+        "propositions": [
+          "15 ans",
+          "42 ans",
+          "35 ans",
+          "28 ans"
+        ],
+        "réponse": "28 ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mur_de_Berlin",
+        "anecdote": "Le mur de Berlin était fortement surveillé, avec des miradors, des zones interdites et des soldats autorisés à tirer sur les fugitifs."
+      },
+      {
+        "id": 3,
+        "question": "Quelle est la durée de vie moyenne d'un globule rouge ?",
+        "propositions": [
+          "120 jours",
+          "6 mois",
+          "1 an",
+          "24 heures"
+        ],
+        "réponse": "120 jours",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Érythrocyte",
+        "anecdote": "Produits en continu dans la moelle osseuse, ils circulent dans tout le système sanguin pour transporter l'oxygène grâce à l'hémoglobine."
+      },
+      {
+        "id": 4,
+        "question": "Combien existe-t-il de mois de 31 jours dans une année ?",
+        "propositions": [
+          "Six",
+          "Sept",
+          "Quatre",
+          "Cinq"
+        ],
+        "réponse": "Sept",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mois",
+        "anecdote": "Les mois de 31 jours servent entre autres à équilibrer l'année de manière à ce que les saisons restent alignées avec les mêmes mois."
+      }
+    ]
+}

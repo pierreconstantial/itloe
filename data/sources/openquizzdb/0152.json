@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #13",         
+  "mise-à-jour": "30/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle actrice interprète le rôle d'Adrienne dans « Pédale douce » ?",
+        "propositions": [
+          "Michèle Laroque",
+          "Fanny Ardant",
+          "Karin Viard",
+          "Zabou Breitman"
+        ],
+        "réponse": "Fanny Ardant",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quel gadget intime féminin est formé de petites boules ?",
+        "propositions": [
+          "Fer à friser",
+          "Boules de geisha",
+          "Chevillère",
+          "Anneau Antistress"
+        ],
+        "réponse": "Boules de geisha",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Dans quel ancien pays Isis était-elle la déesse du mariage ?",
+        "propositions": [
+          "Grèce",
+          "Mésopotamie",
+          "Égypte",
+          "Perse"
+        ],
+        "réponse": "Égypte",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Qu'utilisait-on au XVIIIe siècle pour se colorer les lèvres en rouge ?",
+        "propositions": [
+          "Sable",
+          "Rose",
+          "Cochenille",
+          "Fraise"
+        ],
+        "réponse": "Cochenille",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

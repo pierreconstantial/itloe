@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #10",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Prétendant au titre, mot de six lettres commençant par un F ?",
+        "propositions": [
+          "Favori",
+          "Fidèle",
+          "Frelon",
+          "Fleuve"
+        ],
+        "réponse": "Favori",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Préférable avant le départ, mot de onze lettres commençant par un R ?",
+        "propositions": [
+          "Rembourrage",
+          "Rééquilibre",
+          "Réservation",
+          "Radicalisme"
+        ],
+        "réponse": "Réservation",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Vert au casino, mot de cinq lettres commençant par un T ?",
+        "propositions": [
+          "Trône",
+          "Tronc",
+          "Tapis",
+          "Tibia"
+        ],
+        "réponse": "Tapis",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Boîte pour la crème, mot de trois lettres commençant par un P ?",
+        "propositions": [
+          "Pot",
+          "Pas",
+          "Pic",
+          "Pli"
+        ],
+        "réponse": "Pot",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

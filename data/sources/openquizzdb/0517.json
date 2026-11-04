@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Variété française #1",         
+  "mise-à-jour": "18/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment se prénomme la métisse d'Ibiza chantée par Julien Clerc ?",
+        "propositions": [
+          "Rosanna",
+          "Mélissa",
+          "Marbella",
+          "Cassandra"
+        ],
+        "réponse": "Mélissa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Julien_Clerc",
+        "anecdote": "Avec « Mélissa », Julien Clerc confirmera son succès et deviendra un chanteur désirable sur toutes les stations de télévision."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle ville « Nathalie » guide-t-elle Gilbert Bécaud dans une chanson ?",
+        "propositions": [
+          "Belgrade",
+          "Paris",
+          "Madrid",
+          "Moscou"
+        ],
+        "réponse": "Moscou",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gilbert_Bécaud",
+        "anecdote": "La chanson a été écrite par Pierre Delanoë et sortie en 1964. À cette époque, très peu de chansons françaises évoquaient l'URSS de manière aussi romantique. Le récit alterne entre découverte culturelle et une relation humaine naissante entre les deux pers"
+      },
+      {
+        "id": 3,
+        "question": "Quelle est la matière préférée de la chanteuse Caroline Loeb ?",
+        "propositions": [
+          "Ouate",
+          "Ormeau",
+          "Organza",
+          "Osier"
+        ],
+        "réponse": "Ouate",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Caroline_Loeb",
+        "anecdote": "Parmi les choristes de « C'est la ouate », on notera la participation d'Amina qui représentera la France au Concours Eurovision."
+      },
+      {
+        "id": 4,
+        "question": "Quel artiste strasbourgeois au grand coeur chantait « Pour le plaisir » ?",
+        "propositions": [
+          "Gérard Blanc",
+          "Alain Souchon",
+          "Hervé Vilard",
+          "Herbert Léonard"
+        ],
+        "réponse": "Herbert Léonard",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Herbert_Léonard",
+        "anecdote": "Herbert Léonard, de son vrai nom Hubert Loenhard, est né à Strasbourg en 1945. Avant de connaître le succès dans la chanson, il est passionné d'aviation et s'intéresse même aux avions de combat soviétiques, ce qui lui vaudra de travailler sur des publicati"
+      }
+    ]
+}

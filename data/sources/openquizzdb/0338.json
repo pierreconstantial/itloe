@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Des milliards de fourmis",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel film d'animation Pixar, Tilt est-il un ouvrier fourmi ?",
+        "propositions": [
+          "Toy Story",
+          "Ratatouille",
+          "1001 pattes",
+          "Monstres et Cie"
+        ],
+        "réponse": "1001 pattes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/1001_pattes",
+        "anecdote": "Woody, le cow-boy héros du film d'animation « Toy Story », est apparu dans le bêtisier du générique de fin."
+      },
+      {
+        "id": 2,
+        "question": "Quels insectes sont parfois appelés « fourmis blanches » ?",
+        "propositions": [
+          "Les blattes",
+          "Les termites",
+          "Les cancrelats",
+          "Les cafards"
+        ],
+        "réponse": "Les termites",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Termite",
+        "anecdote": "Les termites se rencontrent surtout dans les pays chauds, où certaines espèces construisent de grands nids en terre mâchée."
+      },
+      {
+        "id": 3,
+        "question": "Avec quel insecte la fourmi est-elle associée dans une fable ?",
+        "propositions": [
+          "La libellule",
+          "La coccinelle",
+          "La mouche",
+          "La cigale"
+        ],
+        "réponse": "La cigale",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Cigale_et_la_Fourmi_(La_Fontaine)",
+        "anecdote": "« La Cigale et la Fourmi » est la première fable du livre I de Jean de La Fontaine située dans le premier recueil des « Fables de La Fontaine »."
+      },
+      {
+        "id": 4,
+        "question": "Quel écrivain français a publié une trilogie sur les fourmis ?",
+        "propositions": [
+          "Alain Grousset",
+          "Robert Merle",
+          "Gaston Boca",
+          "Bernard Werber"
+        ],
+        "réponse": "Bernard Werber",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bernard_Werber",
+        "anecdote": "Son oeuvre, traduite dans une trentaine de langues, fait se rencontrer spiritualité, science-fiction, polar, biologie et mythologie."
+      }
+    ]
+}

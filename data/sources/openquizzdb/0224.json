@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #19",         
+  "mise-à-jour": "28/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel personnage sexy de BD est librement inspiré de Dracula ?",
+        "propositions": [
+          "Morgane",
+          "Vampirella",
+          "Storm",
+          "Catwoman"
+        ],
+        "réponse": "Vampirella",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vampirella",
+        "anecdote": "Bien qu'inspirée de l'imaginaire du vampire et donc indirectement de Dracula, Vampirella s'en distingue par son origine science-fictionnelle et ses aventures mêlant horreur et fantastique."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle ville sert-on des tonnelets de petites vierges ?",
+        "propositions": [
+          "Bordeaux",
+          "Venise",
+          "Séville",
+          "Amsterdam"
+        ],
+        "réponse": "Amsterdam",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Que retrouve-t-on dans le pénis des gorilles et des orangs-outangs ?",
+        "propositions": [
+          "Poils",
+          "Métal",
+          "Coquille",
+          "Os"
+        ],
+        "réponse": "Os",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Baculum",
+        "anecdote": "Cet os permet de rigidifier le pénis sans dépendre uniquement de l'afflux sanguin, comme c'est le cas chez l'être humain."
+      },
+      {
+        "id": 4,
+        "question": "Qu'appelle-t-on, en langage érotique, les beautés occidentales ?",
+        "propositions": [
+          "Les fesses",
+          "Les seins",
+          "Les yeux",
+          "Les hanches"
+        ],
+        "réponse": "Les fesses",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

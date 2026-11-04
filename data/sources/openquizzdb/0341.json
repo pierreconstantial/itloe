@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Roumanie",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la capitale de la Roumanie ?",
+        "propositions": [
+          "Belgrade",
+          "Budapest",
+          "Sofia",
+          "Bucarest"
+        ],
+        "réponse": "Bucarest",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quelle chaîne de montagnes traverse la Roumanie ?",
+        "propositions": [
+          "Himalaya",
+          "Alpes",
+          "Carpates",
+          "Andes"
+        ],
+        "réponse": "Carpates",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quel célèbre personnage est associé à la Roumanie ?",
+        "propositions": [
+          "Dracula",
+          "Tarzan",
+          "Sherlock Holmes",
+          "Harry Potter"
+        ],
+        "réponse": "Dracula",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quelle grande région historique se trouve en Roumanie ?",
+        "propositions": [
+          "Toscane",
+          "Bavière",
+          "Catalogne",
+          "Transylvanie"
+        ],
+        "réponse": "Transylvanie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

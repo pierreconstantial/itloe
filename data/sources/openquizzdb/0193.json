@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Séries américaines",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la couleur des cheveux de Miranda dans « Sex and the City » ?",
+        "propositions": [
+          "Blonde",
+          "Noire",
+          "Rousse",
+          "Brune"
+        ],
+        "réponse": "Rousse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Miranda_Hobbes",
+        "anecdote": "Miranda est avocate au caractère pragmatique et à l'humour caustique, sa carrière tenant la place la plus importante dans sa vie."
+      },
+      {
+        "id": 2,
+        "question": "Pour quelle espèce a-t-on créé une langue artificielle dans « Star Trek » ?",
+        "propositions": [
+          "Sylvidres",
+          "Vulcains",
+          "Klingons",
+          "Romuliens"
+        ],
+        "réponse": "Klingons",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Klingon",
+        "anecdote": "Introduits dès la série originale en 1967, les Klingons sont dans « Star Trek » une espèce extraterrestre originaire de la planète Kronos."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le nom de la famille de Buffy dans « Buffy contre les vampires » ?",
+        "propositions": [
+          "Summers",
+          "Sanders",
+          "Bouwers",
+          "Rogers"
+        ],
+        "réponse": "Summers",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Buffy_contre_les_vampires",
+        "anecdote": "Buffy Summers, la Slayer, est une tueuse de vampires issue d'une longue lignée d'Élues luttant contre les forces du mal."
+      },
+      {
+        "id": 4,
+        "question": "Qui est le créateur de la série télévisée américaine à succès « Alias » ?",
+        "propositions": [
+          "J.J. Williams",
+          "J.J. Abrams",
+          "J.J. Lionel",
+          "J.J. Morgan"
+        ],
+        "réponse": "J.J. Abrams",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alias_(série_télévisée)",
+        "anecdote": "J.J. Abrams est un scénariste, réalisateur, producteur et acteur connu pour son travail dans les genres de l'action et de la science-fiction."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« One Piece »",         
+  "mise-à-jour": "02/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui est navigateur au sein de l'équipage du chapeau de paille ?",
+        "propositions": [
+          "Nami",
+          "Zoro",
+          "Usopp",
+          "Robin"
+        ],
+        "réponse": "Nami",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nami",
+        "anecdote": "Ex-membre de l'équipage d'Arlong, Nami est le deuxième personnage à rejoindre les chapeaux de paille, après Zoro."
+      },
+      {
+        "id": 2,
+        "question": "Dans « One Piece », sous quel autre nom est connu Marshall D. Teach ?",
+        "propositions": [
+          "Shanks",
+          "Barbe Noire",
+          "Barbe Blanche",
+          "Big Mom"
+        ],
+        "réponse": "Barbe Noire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Personnages_de_One_Piece",
+        "anecdote": "Marshall D. Teach fut le seul Capitaine Corsaire à être entré dans le groupe sans prime et sans être connu du Gouvernement Mondial."
+      },
+      {
+        "id": 3,
+        "question": "Dans « One Piece », qui est le capitaine de l'équipage du Heart ?",
+        "propositions": [
+          "Law",
+          "Big Mom",
+          "Baggy",
+          "Kid"
+        ],
+        "réponse": "Law",
+        "wikipédia": "https://fr.wikipedia.org/wiki/One_Piece",
+        "anecdote": "Trafalgar D. Water Law est le seul pirate connu qui soit à la fois un des onze Supernovas et un des sept Capitaines Corsaires."
+      },
+      {
+        "id": 4,
+        "question": "De quelle race font partie Dorry et Broggy, rencontrés sur Little Garden ?",
+        "propositions": [
+          "Géants",
+          "Shandias",
+          "Hommes-Poissons",
+          "Minks"
+        ],
+        "réponse": "Géants",
+        "wikipédia": "https://fr.wikipedia.org/wiki/One_Piece",
+        "anecdote": "Dorry le démon bleu (2 260 cm) et Broggy le démon rouge (2 130 cm) font partie des géants qui peuvent vivre plus de 345 ans."
+      }
+    ]
+}

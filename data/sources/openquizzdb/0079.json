@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Slogans publicitaires",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle enseigne vous invite à rester « tous unis contre la vie chère » ?",
+        "propositions": [
+          "Super U",
+          "Intermarché",
+          "Cora",
+          "Carrefour"
+        ],
+        "réponse": "Intermarché",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Intermarché",
+        "anecdote": "Fondée en 1969 par Jean-Pierre Le Roch sous le nom des EX Offices de distribution, l'enseigne est devenue Intermarché en 1972."
+      },
+      {
+        "id": 2,
+        "question": "Quelle bière belge a pour slogan : « Les hommes savent pourquoi » ?",
+        "propositions": [
+          "Jupiler",
+          "Jopen",
+          "Jacobin",
+          "Judas"
+        ],
+        "réponse": "Jupiler",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jupiler",
+        "anecdote": "Très populaires en Belgique, la bière Jupiler a été créée en 1966 par la Brasserie Piedboeuf dans la ville de Jupille-sur-Meuse."
+      },
+      {
+        "id": 3,
+        "question": "« Secouez-moi, secouez-moi » a été le slogan de quelle marque ?",
+        "propositions": [
+          "Coca-Cola",
+          "Pepsi",
+          "Orangina",
+          "Schweppes"
+        ],
+        "réponse": "Orangina",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Orangina",
+        "anecdote": "La célébrité de la marque vient en partie de l'originalité de sa bouteille arrondie, en forme d'orange, avec une surface granulée."
+      },
+      {
+        "id": 4,
+        "question": "Quelle marque automobile a pour slogan « Le plaisir de conduire » ?",
+        "propositions": [
+          "BMW",
+          "Renault",
+          "Mercedes-Benz",
+          "Kia"
+        ],
+        "réponse": "BMW",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bayerische_Motoren_Werke",
+        "anecdote": "En 2014, le groupe BMW a vendu 2 117 965 véhicules automobiles (BMW, MINI, et Rolls-Royce) et 123 495 deux-roues (BMW)."
+      }
+    ]
+}

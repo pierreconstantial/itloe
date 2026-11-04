@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Récompenses aux César",         
+  "mise-à-jour": "02/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle actrice française a remporté 5 César de la meilleur actrice ?",
+        "propositions": [
+          "Carole Bouquet",
+          "Fanny Ardant",
+          "Nathalie Baye",
+          "Isabelle Adjani"
+        ],
+        "réponse": "Isabelle Adjani",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Isabelle_Adjani",
+        "anecdote": "Isabelle Adjani est reconnue pour l'intensité dramatique de ses compositions ainsi que la dévotion totale qu'elle accorde à son jeu."
+      },
+      {
+        "id": 2,
+        "question": "Quel film musical a remporté en 2012 le César du meilleur film ?",
+        "propositions": [
+          "The Artist",
+          "La La Land",
+          "Polisse",
+          "Intouchables"
+        ],
+        "réponse": "The Artist",
+        "wikipédia": "https://fr.wikipedia.org/wiki/The_Artist",
+        "anecdote": "La bande originale de « The Artist » a été composée par Ludovic Bource qui a dû comme le reste de l'équipe faire du neuf avec du vieux."
+      },
+      {
+        "id": 3,
+        "question": "Quel film de Roman Polanski a été couronné de sept César ?",
+        "propositions": [
+          "Le Pianiste",
+          "Frantic",
+          "Tess",
+          "Oliver Twist"
+        ],
+        "réponse": "Le Pianiste",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Pianiste",
+        "anecdote": "Le film « Le Pianiste » a obtenu la Palme d'or du Festival de Cannes 2002 ainsi que, notamment, sept César et trois Oscars en 2003."
+      },
+      {
+        "id": 4,
+        "question": "Quel réalisateur a reçu un César pour « Frantz » ?",
+        "propositions": [
+          "Cédric Klapisch",
+          "Patrice Chéreau",
+          "Luc Besson",
+          "François Ozon"
+        ],
+        "réponse": "François Ozon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/François_Ozon",
+        "anecdote": "Le film raconte la rencontre entre Anna, une jeune Allemande, et Adrien, un Français venu se recueillir sur la tombe de son fiancé Frantz, mort pendant la Première Guerre mondiale."
+      }
+    ]
+}

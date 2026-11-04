@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Romantisme",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel artiste a peint le célèbre tableau romantique « La Barque de Dante » ?",
+        "propositions": [
+          "Girodet",
+          "Goya",
+          "Delacroix",
+          "Turner"
+        ],
+        "réponse": "Delacroix",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Barque_de_Dante_(Delacroix)",
+        "anecdote": "Extrait de la « Divine Comédie », la scène représente la visite aux Enfers de Dante Alighieri accompagné de Virgile."
+      },
+      {
+        "id": 2,
+        "question": "Quel peintre est célèbre pour sa troublante série des « Peintures noires » ?",
+        "propositions": [
+          "Corot",
+          "Gros",
+          "Füssli",
+          "Goya"
+        ],
+        "réponse": "Goya",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Peintures_noires",
+        "anecdote": "La série de peintures à l'huile auxquelles Goya ne donna aucun titre fut cataloguée en 1828 par un ami de Goya, Antonio de Brugada."
+      },
+      {
+        "id": 3,
+        "question": "Quel artiste danois a peint « Un groupe d'artistes danois à Rome » ?",
+        "propositions": [
+          "Hansen",
+          "Malmström",
+          "Bierstadt",
+          "Delacroix"
+        ],
+        "réponse": "Hansen",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Un_groupe_d'artistes_danois_à_Rome",
+        "anecdote": "Achevée en 1837, la peinture à l'huile de Hansen est aujourd'hui exposée au Statens Museum for Kunst de Copenhague."
+      },
+      {
+        "id": 4,
+        "question": "Quel artiste allemand a peint le tableau « Lever de lune sur la mer » ?",
+        "propositions": [
+          "Quidor",
+          "Raeburn",
+          "Friedrich",
+          "Runge"
+        ],
+        "réponse": "Friedrich",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lever_de_lune_sur_la_mer",
+        "anecdote": "Ce tableau faisait partie de la collection impériale du palais de Ropcha aux abords de Saint-Pétersbourg."
+      }
+    ]
+}

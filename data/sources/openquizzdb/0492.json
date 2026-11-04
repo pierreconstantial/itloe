@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jeux télévisés #1",         
+  "mise-à-jour": "19/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À bord de quel engin voyagent les candidats de la « Chasse aux trésors » ?",
+        "propositions": [
+          "Hélicoptère",
+          "Hydravion",
+          "Taxi",
+          "Sous-marin"
+        ],
+        "réponse": "Hélicoptère",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Chasse_aux_trésors",
+        "anecdote": "Philippe de Dieuleveult incarnait le rôle d'un journaliste-aventurier, prêt à tous les exploits pour le jeu aux quatre coins du monde."
+      },
+      {
+        "id": 2,
+        "question": "Qui a animé « Questions pour un champion » durant 28 ans ?",
+        "propositions": [
+          "Philippe Risoli",
+          "Julien Lepers",
+          "Vincent Perrot",
+          "Samuel Étienne"
+        ],
+        "réponse": "Julien Lepers",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Questions_pour_un_champion",
+        "anecdote": "L'émission est souvent parodiée et de nombreux extraits de plusieurs candidats reviennent dans les bêtisiers et zappings."
+      },
+      {
+        "id": 3,
+        "question": "Quel jeu télévisé comprend une quête de clés et une salle du trésor ?",
+        "propositions": [
+          "Koh-Lanta",
+          "Ninja Warrior",
+          "Money Drop",
+          "Fort Boyard"
+        ],
+        "réponse": "Fort Boyard",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fort_Boyard_(jeu_télévisé)",
+        "anecdote": "La plus jeune célébrité ayant participé est Gloria Palermo de Blasi, chanteuse du groupe Kids United, alors âgée de 9 ans."
+      },
+      {
+        "id": 4,
+        "question": "Quel jeu proposait 250 000 € répartis en 50 liasses indivisibles ?",
+        "propositions": [
+          "The Wall",
+          "Boom",
+          "Money Drop",
+          "Le Bigdil"
+        ],
+        "réponse": "Money Drop",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Money_Drop",
+        "anecdote": "Pour repartir avec la totalité de l'argent, les candidats devaient répondre correctement à huit questions de culture générale."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Forêt de Chambord",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la longueur du mur du parc forestier de Chambord ?",
+        "propositions": [
+          "32 km",
+          "16 km",
+          "27 km",
+          "9 km"
+        ],
+        "réponse": "32 km",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Château_de_Chambord",
+        "anecdote": "Le château de Chambord a été construit au coeur du plus grand parc forestier clos d'Europe (environ 50 km carrés)."
+      },
+      {
+        "id": 2,
+        "question": "En plus du sanglier, quelle espèce est emblématique de Chambord ?",
+        "propositions": [
+          "Lapin",
+          "Autruche",
+          "Cerf",
+          "Lémurien"
+        ],
+        "réponse": "Cerf",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Château_de_Chambord",
+        "anecdote": "On y trouve également des mouflons méditerranéens introduits dans l'enclos à partir de populations issus de Corse."
+      },
+      {
+        "id": 3,
+        "question": "Dans quelle région forestière française se situe le château de Chambord ?",
+        "propositions": [
+          "Drouais",
+          "Sologne",
+          "Beauce",
+          "Cévennes"
+        ],
+        "réponse": "Sologne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sologne",
+        "anecdote": "La Sologne a presque toujours conservé un caractère sauvage et humide voire précaire avec un sol humide l'hiver et sec l'été."
+      },
+      {
+        "id": 4,
+        "question": "Sur les 5 440 hectares de Chambord, combien sont ouverts au public ?",
+        "propositions": [
+          "4 000 ha",
+          "2 000 ha",
+          "3 000 ha",
+          "1 000 ha"
+        ],
+        "réponse": "1 000 ha",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Château_de_Chambord",
+        "anecdote": "Cette immensité de plus de 5 440 hectares en fait aujourd'hui le plus grand parc forestier clos d'Europe."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Intrusion #1",         
+  "mise-à-jour": "02/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel intrus se cache parmi ces vices des sept péchés capitaux ?",
+        "propositions": [
+          "Mensonge",
+          "Envie",
+          "Paresse",
+          "Colère"
+        ],
+        "réponse": "Mensonge",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Péché_capital",
+        "anecdote": "La liste fut définitivement fixée au quatrième concile du Latran en 1215 et consignée par Thomas d'Aquin au XIIIe siècle."
+      },
+      {
+        "id": 2,
+        "question": "Quelle plante est l'intruse parmi celles dont on mange la racine ?",
+        "propositions": [
+          "Navet",
+          "Asperge",
+          "Betterave",
+          "Carotte"
+        ],
+        "réponse": "Asperge",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Asperge",
+        "anecdote": "Les asperges sont depuis longtemps utilisées comme légumes, en raison de leur saveur délicate et leurs propriétés diurétiques."
+      },
+      {
+        "id": 3,
+        "question": "Quel intrus se cache parmi ces adeptes du noeud papillon ?",
+        "propositions": [
+          "Charlot",
+          "James Bond",
+          "Hercule Poirot",
+          "Donald Duck"
+        ],
+        "réponse": "Charlot",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Charlot",
+        "anecdote": "Charlot est un personnage de fiction, un vagabond interprété par l'acteur britannique Charlie Chaplin dans la plupart de ses films."
+      },
+      {
+        "id": 4,
+        "question": "Quel intrus se cache parmi ces mots qui peuvent être vapeur ?",
+        "propositions": [
+          "Friteuse",
+          "Centrale",
+          "Pomme",
+          "Cheval"
+        ],
+        "réponse": "Friteuse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Friteuse",
+        "anecdote": "Utilisées communément dans les restaurants et les collectivités, des modèles domestiques sont disponibles et sont devenus courants."
+      }
+    ]
+}

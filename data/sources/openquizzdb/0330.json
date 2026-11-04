@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Zorg",         
+  "mise-à-jour": "08/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le deuxième prénom de Zorg dans « Le Cinquième Élément » ?",
+        "propositions": [
+          "Simon",
+          "Emmanuel",
+          "Patrick",
+          "Jean-Baptiste"
+        ],
+        "réponse": "Emmanuel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Cinquième_Élément",
+        "anecdote": "Gary Oldman a doublé son propre personnage de Jean-Baptiste Emmanuel Zorg dans le jeu vidéo « Le Cinquième Élément »."
+      },
+      {
+        "id": 2,
+        "question": "Quelle arme fabrique l'entreprise Zorg dans « Le Cinquième Élément » ?",
+        "propositions": [
+          "Zag-1",
+          "ZK-1",
+          "ZZ-Top",
+          "ZF-1"
+        ],
+        "réponse": "ZF-1",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Cinquième_Élément",
+        "anecdote": "Le fusil ZF-1 utilisé par Gary Oldman dans le film de Luc Besson « Le Cinquième Élément » est en passe de devenir réalité."
+      },
+      {
+        "id": 3,
+        "question": "Quel acteur interprète le rôle de Zorg dans « Le Cinquième Élément » ?",
+        "propositions": [
+          "Ian Holm",
+          "Chris Tucker",
+          "Gary Oldman",
+          "Bruce Willis"
+        ],
+        "réponse": "Gary Oldman",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Cinquième_Élément",
+        "anecdote": "C'est le chanteur et musicien Tricky (Adrian Thaws) qui interprète le bras droit de Mr Zorg tout au long du film."
+      },
+      {
+        "id": 4,
+        "question": "Sur combien de temps est réglée la bombe placée par Zorg ?",
+        "propositions": [
+          "20 minutes",
+          "30 minutes",
+          "25 minutes",
+          "15 minutes"
+        ],
+        "réponse": "20 minutes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Cinquième_Élément",
+        "anecdote": "Gary Oldman a joué dans le film pour remercier Besson d'avoir financé « Nil by Mouth », un film qu'il avait écrit et réalisé."
+      }
+    ]
+}

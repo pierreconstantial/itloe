@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Spécial jeunes",         
+  "mise-à-jour": "15/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment appelle-t-on les grandes collines de sable du littoral ?",
+        "propositions": [
+          "Lagunes",
+          "Monts",
+          "Dunes",
+          "Falaises"
+        ],
+        "réponse": "Dunes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dune",
+        "anecdote": "Les dunes étant composées de sable, on ne parle pas de dune de sable, sauf pour préciser la qualité du sable qui la compose."
+      },
+      {
+        "id": 2,
+        "question": "À quelle saison la plupart des arbres fleurissent-ils en Europe ?",
+        "propositions": [
+          "Été",
+          "Automne",
+          "Hiver",
+          "Printemps"
+        ],
+        "réponse": "Printemps",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Arbre",
+        "anecdote": "Sur les arbres, le bourgeon hiverne et au printemps, lorsque les racines reprennent le pompage de la sève brute, celui-ci éclate."
+      },
+      {
+        "id": 3,
+        "question": "Comment appelle-t-on un jeune mouton mâle de moins d'un an ?",
+        "propositions": [
+          "Agneau",
+          "Biquette",
+          "Bélier",
+          "Bouc"
+        ],
+        "réponse": "Agneau",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Agneau",
+        "anecdote": "L'agneau est principalement élevé pour sa viande, mais également pour sa peau (articles de mode) et son poil (feutre des chapeliers)."
+      },
+      {
+        "id": 4,
+        "question": "Quelle médaille reçoit le deuxième d'une épreuve aux JO ?",
+        "propositions": [
+          "Argent",
+          "Cuivre",
+          "Or",
+          "Bronze"
+        ],
+        "réponse": "Argent",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Médaille_d'argent",
+        "anecdote": "Lors des JO de 1896, la médaille d'argent était remise au gagnant : ce n'est qu'en 1904 que l'ordre or/argent/bronze devint un standard."
+      }
+    ]
+}

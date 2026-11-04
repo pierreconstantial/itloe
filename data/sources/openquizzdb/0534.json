@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Santé et bien-être",         
+  "mise-à-jour": "27/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel traitement permet de soigner les maux du corps par l'eau de mer ?",
+        "propositions": [
+          "Sophrologie",
+          "Réflexologie",
+          "Naturopathie",
+          "Thalassothérapie"
+        ],
+        "réponse": "Thalassothérapie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Thalassothérapie",
+        "anecdote": "Les établissements thermaux offrent (aussi) des soins non médicalisés (de confort) appelés souvent remise en forme."
+      },
+      {
+        "id": 2,
+        "question": "Que peut faire un sportif pour éviter l'arrivée inopinée de crampes ?",
+        "propositions": [
+          "Dormir",
+          "Fumer",
+          "S'hydrater",
+          "Manger"
+        ],
+        "réponse": "S'hydrater",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Crampe",
+        "anecdote": "La boisson (une demi-cuillerée à café de sel par litre d'eau) apporte les sels minéraux nécessaires au contrôle de la tension musculaire."
+      },
+      {
+        "id": 3,
+        "question": "Quelle est la position la plus fatigante pour notre colonne vertébrale ?",
+        "propositions": [
+          "Debout",
+          "Assise",
+          "En équilibre",
+          "Couchée"
+        ],
+        "réponse": "Assise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Colonne_vertébrale",
+        "anecdote": "La position assise exerce une forte pression sur le dernier disque lombaire qui peu à peu risque l'écrasement et donc des séquelles."
+      },
+      {
+        "id": 4,
+        "question": "Que sécrètent principalement les glandes sudoripares ?",
+        "propositions": [
+          "Cheveux",
+          "Sueur",
+          "Poils",
+          "Ongles"
+        ],
+        "réponse": "Sueur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Glande_sudoripare",
+        "anecdote": "Les glandes sudoripares (ou sudorales) font partie des glandes exocrines et permettent le phénomène de transpiration."
+      }
+    ]
+}

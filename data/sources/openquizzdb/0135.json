@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Nombreux nombres",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En mesure, quelle est la valeur en millimètres d'un pouce anglais ?",
+        "propositions": [
+          "25 mm",
+          "32 mm",
+          "16 mm",
+          "45 mm"
+        ],
+        "réponse": "25 mm",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pouce_(unité)",
+        "anecdote": "Datant du Moyen Âge, le pouce est aujourd'hui utilisé pour les tailles des pneus ou des écrans d'ordinateur."
+      },
+      {
+        "id": 2,
+        "question": "Combien de travaux Hercule dut-il exécuter pour Eurysthée ?",
+        "propositions": [
+          "Dix",
+          "Cent",
+          "Quarante",
+          "Douze"
+        ],
+        "réponse": "Douze",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Héraclès",
+        "anecdote": "Héraclès correspond à l'Hercule romain, au Melqart phénicien, à l'Hercle étrusque et au Kakasbos en Asie Mineure."
+      },
+      {
+        "id": 3,
+        "question": "À quel âge Nadia Comaneci a-t-elle obtenu la note de 10 aux JO ?",
+        "propositions": [
+          "13 ans",
+          "15 ans",
+          "14 ans",
+          "16 ans"
+        ],
+        "réponse": "14 ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nadia_Comaneci",
+        "anecdote": "Nadia Comaneci a été naturalisée américaine après sa carrière sportive, n'ayant donc jamais représenté ce pays en compétition."
+      },
+      {
+        "id": 4,
+        "question": "En quelle année Charlemagne a-t-il été couronné empereur à Rome ?",
+        "propositions": [
+          "700",
+          "800",
+          "900",
+          "600"
+        ],
+        "réponse": "800",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Charlemagne",
+        "anecdote": "Souverain réformateur, soucieux de culture, il protège les arts et lettres et est à l'origine de la renaissance carolingienne."
+      }
+    ]
+}

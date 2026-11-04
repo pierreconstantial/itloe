@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jeux télévisés #3",         
+  "mise-à-jour": "29/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui fut le tout premier animateur à présenter « Une famille en or » ?",
+        "propositions": [
+          "Laurent Cabrol",
+          "Pascal Brunner",
+          "Patrick Roy",
+          "Bernard Montiel"
+        ],
+        "réponse": "Patrick Roy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Une_famille_en_or",
+        "anecdote": "Le but du jeu est de répondre à des questions ouvertes posées à un panel de Français sondés composé de cent personnes."
+      },
+      {
+        "id": 2,
+        "question": "Quel jeu présenté par Olivier Minne a remplacé le jeu « Pyramide » ?",
+        "propositions": [
+          "Strike",
+          "Slam",
+          "La Cible",
+          "Fear Factor"
+        ],
+        "réponse": "La Cible",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Cible_(jeu_télévisé)",
+        "anecdote": "Le jeu « La Cible » sera quant à lui remplacé par le jeu « Tout le monde veut prendre sa place », animé par Nagui à partir du 3 juillet 2006."
+      },
+      {
+        "id": 3,
+        "question": "Pour quel jeu télévisé Philippe Risoli a-t-il remplacé Patrick Roy ?",
+        "propositions": [
+          "Le Maillon faible",
+          "Le Juste Prix",
+          "Le Bigdil",
+          "L'Or à l'appel"
+        ],
+        "réponse": "Le Juste Prix",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Juste_Prix",
+        "anecdote": "De novembre 1992 à 1996, l'arrivée de Philippe Risoli s'est faite par une entrée spécifique entre la vitrine de droite et la Roue."
+      },
+      {
+        "id": 4,
+        "question": "Quel jeu télévisé a été inventé par Alain Chabat et Kader Aoun ?",
+        "propositions": [
+          "Kamoulox",
+          "Fear Factor",
+          "Burger Quiz",
+          "Slam"
+        ],
+        "réponse": "Burger Quiz",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Burger_Quiz",
+        "anecdote": "Le jeu est produit par la société de production Chez Wam, puis par la société RG Productions et réalisée par Jérôme Revon."
+      }
+    ]
+}

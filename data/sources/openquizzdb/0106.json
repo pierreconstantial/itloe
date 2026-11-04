@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #09",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Homme de main, mot de cinq lettres commençant par un T ?",
+        "propositions": [
+          "Tuyau",
+          "Tueur",
+          "Trapu",
+          "Tigre"
+        ],
+        "réponse": "Tueur",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Attire le poisson, mot de trois lettres commençant par un V ?",
+        "propositions": [
+          "Vis",
+          "Vol",
+          "Vin",
+          "Ver"
+        ],
+        "réponse": "Ver",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Essai de laboratoire, mot de quatre lettres commençant par un T ?",
+        "propositions": [
+          "Trou",
+          "Taxe",
+          "Toit",
+          "Test"
+        ],
+        "réponse": "Test",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Attribut de paon, mot de quatre lettres commençant par un R ?",
+        "propositions": [
+          "Roue",
+          "Ruse",
+          "Rame",
+          "Rhum"
+        ],
+        "réponse": "Roue",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Scarlett Johansson",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel rôle Scarlett Johansson tient-elle dans le film « Iron Man 2 » ?",
+        "propositions": [
+          "Rebecca",
+          "Veuve noire",
+          "Christine Everhart",
+          "Pepper Potts"
+        ],
+        "réponse": "Veuve noire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/W",
+        "anecdote": "P"
+      },
+      {
+        "id": 2,
+        "question": "Dans quel pays les parents de Scarlett Johansson se sont-ils rencontrés ?",
+        "propositions": [
+          "Sénégal",
+          "Danemark",
+          "Inde",
+          "Suède"
+        ],
+        "réponse": "Danemark",
+        "wikipédia": "https://fr.wikipedia.org/wiki/W",
+        "anecdote": "P"
+      },
+      {
+        "id": 3,
+        "question": "Dans quel film avec Ewan McGregor retrouve-t-on Scarlett Johansson ?",
+        "propositions": [
+          "Big Fish",
+          "The Island",
+          "Stay",
+          "Young Adam"
+        ],
+        "réponse": "The Island",
+        "wikipédia": "https://fr.wikipedia.org/wiki/W",
+        "anecdote": "P"
+      },
+      {
+        "id": 4,
+        "question": "Quel film a une nouvelle fois réuni Scarlett Johansson et Hugh Jackman ?",
+        "propositions": [
+          "Scoop",
+          "Real Steel",
+          "Australia",
+          "Le Prestige"
+        ],
+        "réponse": "Le Prestige",
+        "wikipédia": "https://fr.wikipedia.org/wiki/W",
+        "anecdote": "P"
+      }
+    ]
+}

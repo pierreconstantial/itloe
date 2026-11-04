@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Surnoms des auteurs",         
+  "mise-à-jour": "25/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel écrivain français était surnommé « le pape » du surréalisme ?",
+        "propositions": [
+          "Alain Jouffroy",
+          "Paul Éluard",
+          "André Breton",
+          "Louis Aragon"
+        ],
+        "réponse": "André Breton",
+        "wikipédia": "https://fr.wikipedia.org/wiki/André_Breton",
+        "anecdote": "Les oeuvres complètes d'André Breton ont été publiées par Gallimard en quatre tomes dans la Bibliothèque de la Pléiade."
+      },
+      {
+        "id": 2,
+        "question": "Quel écrivain, mort en 1814, est parfois surnommé « le Divin Marquis » ?",
+        "propositions": [
+          "Rimbaud",
+          "Diderot",
+          "Sade",
+          "Montesquieu"
+        ],
+        "réponse": "Sade",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Donatien_Alphonse_François_de_Sade",
+        "anecdote": "Il fut surnommé le divin marquis, en référence au divin Arétin, premier auteur érotique des temps modernes."
+      },
+      {
+        "id": 3,
+        "question": "Quel romancier du XIXe siècle s'est baptisé « le Napoléon des lettres » ?",
+        "propositions": [
+          "Montesquieu",
+          "Dumas",
+          "Verlaine",
+          "Balzac"
+        ],
+        "réponse": "Balzac",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Honoré_de_Balzac",
+        "anecdote": "Comme il l'explique dans « La Comédie humaine », il a pour projet d'identifier les « Espèces sociales » de son époque."
+      },
+      {
+        "id": 4,
+        "question": "Quel poète français fut surnommé « l'homme aux semelles de vent » ?",
+        "propositions": [
+          "Rimbaud",
+          "Mallarmé",
+          "Verlaine",
+          "Baudelaire"
+        ],
+        "réponse": "Rimbaud",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Arthur_Rimbaud",
+        "anecdote": "Arthur Rimbaud abandonnera assez vite l'écriture pour se consacrer aux voyages et à l'étude des langues étrangères."
+      }
+    ]
+}

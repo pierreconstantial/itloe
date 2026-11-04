@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Corps humain",         
+  "mise-à-jour": "13/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De combien de paires de côtes est constitué le squelette humain ?",
+        "propositions": [
+          "32",
+          "24",
+          "12",
+          "6"
+        ],
+        "réponse": "12",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Côte_(os)",
+        "anecdote": "Avec le sternum et les vertèbres thoraciques, les côtes forment la cage thoracique qui protège le coeur et les poumons."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la durée de vie moyenne d'un globule rouge ?",
+        "propositions": [
+          "3 semaines",
+          "4 mois",
+          "1 heure",
+          "2 jours"
+        ],
+        "réponse": "4 mois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Érythrocyte",
+        "anecdote": "La biosynthèse des globules rouges commence au stade embryonnaire, à partir de la troisième semaine de développement."
+      },
+      {
+        "id": 3,
+        "question": "À combien a été mesurée la vitesse record d'un éternuement ?",
+        "propositions": [
+          "105 km/h",
+          "145 km/h",
+          "125 km/h",
+          "165 km/h"
+        ],
+        "réponse": "165 km/h",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Éternuement",
+        "anecdote": "L'éternuement est un mécanisme de défense permettant de nettoyer les particules irritantes présentes dans les voies respiratoires en les expulsant."
+      },
+      {
+        "id": 4,
+        "question": "Quelle quantité d'eau peut-on perdre environ par jour en respirant ?",
+        "propositions": [
+          "2 litres",
+          "3 litres",
+          "1 litre",
+          "4 litres"
+        ],
+        "réponse": "1 litre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Respiration",
+        "anecdote": "En respirant, l'organisme élimine de l'eau sous forme de vapeur contenue dans l'air expiré. Cette perte peut représenter environ 1 litre par jour selon les conditions, notamment l'activité physique, la température ambiante et l'humidité de l'air."
+      }
+    ]
+}

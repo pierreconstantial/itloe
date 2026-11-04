@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #07",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un A, il faut un sport, un homme de loi, un recueil et un camarade.",
+        "propositions": [
+          "Avocat",
+          "Ami",
+          "Almanach",
+          "Aviron"
+        ],
+        "réponse": "Aviron",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un M, il faut un jeu de cartes, une pierre, un écran et une danse.",
+        "propositions": [
+          "Menhir",
+          "Moniteur",
+          "Mambo",
+          "Manille"
+        ],
+        "réponse": "Manille",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un F, il faut un engin, une récompense, un flacon et un demi cul.",
+        "propositions": [
+          "Fusée",
+          "Fève",
+          "Fesse",
+          "Fiole"
+        ],
+        "réponse": "Fusée",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un O, il faut un sens, une épice, un prisonnier et une forme.",
+        "propositions": [
+          "Ouïe",
+          "Otage",
+          "Ovale",
+          "Origan"
+        ],
+        "réponse": "Ouïe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

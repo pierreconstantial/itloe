@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #26",         
+  "mise-à-jour": "31/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un C, il faut un grand pays, un agrume, une émotion et un bossu.",
+        "propositions": [
+          "Canada",
+          "Chameau",
+          "Citron",
+          "Colère"
+        ],
+        "réponse": "Canada",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un M, il faut un religieux, un ovin, un objet de couche et un relief.",
+        "propositions": [
+          "Mouflon",
+          "Moine",
+          "Matelas",
+          "Montagne"
+        ],
+        "réponse": "Moine",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un S, il faut un pantalon, un bond, un lieu naturel et une pierre.",
+        "propositions": [
+          "Saphir",
+          "Sarouel",
+          "Source",
+          "Saut"
+        ],
+        "réponse": "Sarouel",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un O, il faut un déchet, un avis, un petit parapluie et un tuyau.",
+        "propositions": [
+          "Ombrelle",
+          "Ordure",
+          "Opinion",
+          "Oléoduc"
+        ],
+        "réponse": "Ordure",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

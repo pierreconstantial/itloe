@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quentin Tarantino",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel film a révélé Quentin Tarantino au début de sa carrière ?",
+        "propositions": [
+          "Django Unchained",
+          "Reservoir Dogs",
+          "Kill Bill",
+          "Pulp Fiction"
+        ],
+        "réponse": "Reservoir Dogs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quel film a remporté la Palme d'or à Cannes en 1994 ?",
+        "propositions": [
+          "Kill Bill",
+          "Jackie Brown",
+          "Sleep with Me",
+          "Pulp Fiction"
+        ],
+        "réponse": "Pulp Fiction",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quel film raconte l'histoire d'un esclave devenu chasseur de primes ?",
+        "propositions": [
+          "Kill Bill",
+          "Django Unchained",
+          "The Revenant",
+          "Pulp Fiction"
+        ],
+        "réponse": "Django Unchained",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Dans quel film Uma Thurman apparaît-elle en héroïne vengeresse ?",
+        "propositions": [
+          "Be Cool",
+          "Love Coach",
+          "Tape",
+          "Kill Bill"
+        ],
+        "réponse": "Kill Bill",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

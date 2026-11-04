@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Titres new wave",         
+  "mise-à-jour": "01/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel groupe new wave a sorti les tubes « Electricity » et « Enola Gay » ?",
+        "propositions": [
+          "Joy Division",
+          "Yazoo",
+          "Fox The Fox",
+          "OMD"
+        ],
+        "réponse": "OMD",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Orchestral_Manoeuvres_in_the_Dark",
+        "anecdote": "En 1983, un extrait de la chanson « Souvenir » a été utilisé dans une bande publicitaire pour BNP Paribas."
+      },
+      {
+        "id": 2,
+        "question": "Quel groupe a connu son premier tube en 1981 avec « Tainted Love » ?",
+        "propositions": [
+          "Depeche Mode",
+          "Yazoo",
+          "Soft Cell",
+          "Simple Minds"
+        ],
+        "réponse": "Soft Cell",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tainted_Love",
+        "anecdote": "Ce morceau a été repris de nombreuses fois, notamment par Marilyn Manson en 2001 pour la BO du film « Sex Academy »."
+      },
+      {
+        "id": 3,
+        "question": "À quel groupe new wave doit-on le hit « Shout », enregistré en 1984 ?",
+        "propositions": [
+          "Pet Shop Boys",
+          "Dead Or Alive",
+          "Cocteau Twins",
+          "Tears For Fears"
+        ],
+        "réponse": "Tears For Fears",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Shout_(chanson_de_Tears_for_Fears)",
+        "anecdote": "Accompagnée de percussions, la chanson va musicalement devenir de plus en plus riche au fur et à mesure qu'elle progresse."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le plus gros succès commercial du groupe New Order ?",
+        "propositions": [
+          "Paradise",
+          "Sunrise",
+          "Blue Monday",
+          "Ultraviolence"
+        ],
+        "réponse": "Blue Monday",
+        "wikipédia": "https://fr.wikipedia.org/wiki/New_Order",
+        "anecdote": "Le groupe se composait au départ des membres restant du groupe Joy Division dont le chanteur Ian Curtis s'est suicidé."
+      }
+    ]
+}

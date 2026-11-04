@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Princesses Disney",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Passé minuit, en quoi le carrosse de Cendrillon se transforme-t-il ?",
+        "propositions": [
+          "En citrouille",
+          "En gâteau",
+          "En souris",
+          "En pomme"
+        ],
+        "réponse": "En citrouille",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cendrillon_(Disney)",
+        "anecdote": "Cendrillon est une jeune femme soumise à l'autorité de sa marâtre, Lady Trémaine, et ainsi qu'à celle de ses deux demi-soeurs."
+      },
+      {
+        "id": 2,
+        "question": "Qui chante « Un jour, mon prince viendra » dans un dessin animé Disney ?",
+        "propositions": [
+          "Jasmine",
+          "Alice",
+          "Blanche-Neige",
+          "Cendrillon"
+        ],
+        "réponse": "Blanche-Neige",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Blanche-Neige_et_les_Sept_Nains",
+        "anecdote": "La version allemande inclut des éléments sombres comme la demande de la reine de ramener le coeur de Blanche-Neige."
+      },
+      {
+        "id": 3,
+        "question": "Quelle couleur est associée à Aurore dans « La Belle au bois dormant » ?",
+        "propositions": [
+          "Bleue",
+          "Rouge",
+          "Verte",
+          "Rose"
+        ],
+        "réponse": "Rose",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Aurore_(Disney)",
+        "anecdote": "Le célèbre château de la princesse Aurore est entre autres utilisé dans les parcs de Disneyland comme icône de la zone Fantasyland."
+      },
+      {
+        "id": 4,
+        "question": "Quelle princesse Disney est une sirène vivant auprès du roi Triton ?",
+        "propositions": [
+          "Merida",
+          "Tiana",
+          "Jasmine",
+          "Ariel"
+        ],
+        "réponse": "Ariel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ariel_(Disney)",
+        "anecdote": "L'animateur Glen Keane aurait déclaré dans une conférence que l'apparence du personnage était fondée sur sa propre femme."
+      }
+    ]
+}

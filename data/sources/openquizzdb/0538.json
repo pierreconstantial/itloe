@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Neige en littérature",         
+  "mise-à-jour": "01/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui a écrit le roman français « La neige en deuil » proposé aux étudiants ?",
+        "propositions": [
+          "Henri Troyat",
+          "Bernard Clavel",
+          "Hervé Bazin",
+          "Jean Vautrin"
+        ],
+        "réponse": "Henri Troyat",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Neige_en_deuil",
+        "anecdote": "Cette fiction (et le film) s'inspire d'un événement réel : l'accident du Malabar Princess sur les flancs du Mont-Blanc en 1950."
+      },
+      {
+        "id": 2,
+        "question": "Qui a écrit la nouvelle intitulée « Les neiges du Kilimandjaro » ?",
+        "propositions": [
+          "Steinbeck",
+          "Camus",
+          "Mauriac",
+          "Hemingway"
+        ],
+        "réponse": "Hemingway",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Neiges_du_Kilimandjaro_(nouvelle)",
+        "anecdote": "La nouvelle publiée en 1936 fut traduite en France par Marcel Duhamel et adaptée au cinéma sous le même titre par Henry King."
+      },
+      {
+        "id": 3,
+        "question": "Quel écrivain français a publié « L'autre versant » en 1983 ?",
+        "propositions": [
+          "Gauthier",
+          "Genevoix",
+          "Gauvin",
+          "Gay-Lussac"
+        ],
+        "réponse": "Gay-Lussac",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bruno_Gay-Lussac",
+        "anecdote": "Bruno Gay-Lussac descend du chimiste Louis Joseph Gay-Lussac et de Louis Hachette, fondateur des éditions du même nom."
+      },
+      {
+        "id": 4,
+        "question": "Qui a composé la version originale de la chanson « Étoile des neiges » ?",
+        "propositions": [
+          "Jakob Dont",
+          "Franz Winkler",
+          "Paul Pisk",
+          "Marcel Tyberg"
+        ],
+        "réponse": "Franz Winkler",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Étoile_des_neiges",
+        "anecdote": "De nombreux interprètes enregistreront ce tube en français à partir de 1950 : Line Renaud, Patrice et Mario, ou encore André Claveau."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Japon",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle activité très populaire au Japon signifie « orchestre vide » ?",
+        "propositions": [
+          "Karaoké",
+          "Temari",
+          "Origami",
+          "Karaté"
+        ],
+        "réponse": "Karaoké",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Karaoké",
+        "anecdote": "Ce serait Daisuke Inoue qui aurait inventé le « KaraOK », ayant reçu le prix Nobel de la paix en 2004 pour cette invention."
+      },
+      {
+        "id": 2,
+        "question": "Comment s'appelle le jeu « pierre-feuille-ciseaux » en japonais ?",
+        "propositions": [
+          "Maki",
+          "Josei",
+          "Shifumi",
+          "Hokaku"
+        ],
+        "réponse": "Shifumi",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pierre-feuille-ciseaux",
+        "anecdote": "De nombreux spécialistes supposent que ce jeu est arrivé en Occident au contact du Japon."
+      },
+      {
+        "id": 3,
+        "question": "Quelle cithare japonaise possède des cordes en fil de soie ?",
+        "propositions": [
+          "Shakuhachi",
+          "Biwa",
+          "Koto",
+          "Taïko"
+        ],
+        "réponse": "Koto",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Koto",
+        "anecdote": "Originaire de Chine, le koto fut introduit au Japon entre le VIIe et le VIIIe siècle et était principalement joué à la Cour impériale."
+      },
+      {
+        "id": 4,
+        "question": "Quel phénomène naturel vient du japonais signifiant « vague de port » ?",
+        "propositions": [
+          "Séisme",
+          "Tsunami",
+          "Kendo",
+          "Sakura"
+        ],
+        "réponse": "Tsunami",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tsunami",
+        "anecdote": "En eau profonde, les vagues du tsunami ont une période se comptant en dizaines de minutes."
+      }
+    ]
+}

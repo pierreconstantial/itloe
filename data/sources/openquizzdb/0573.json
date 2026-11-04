@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Magnésium et santé",         
+  "mise-à-jour": "26/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Contre quelle pathologie le magnésium est-il parfois conseillé ?",
+        "propositions": [
+          "Boulimie",
+          "Anorexie",
+          "Asthme",
+          "Stress"
+        ],
+        "réponse": "Stress",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stress",
+        "anecdote": "Le stress désigne l'ensemble des réponses d'un organisme soumis à des pressions ou contraintes de la part de son environnement."
+      },
+      {
+        "id": 2,
+        "question": "Lequel de ces troubles peut être lié à une carence en magnésium ?",
+        "propositions": [
+          "Crampes",
+          "Anorexie",
+          "Asthme",
+          "Boulimie"
+        ],
+        "réponse": "Crampes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Crampe",
+        "anecdote": "Cette contraction involontaire douloureuse et temporaire d'un muscle survient souvent au niveau des fléchisseurs."
+      },
+      {
+        "id": 3,
+        "question": "Lequel de ces fruits est de loin le plus riche en magnésium ?",
+        "propositions": [
+          "Poire",
+          "Raisin",
+          "Banane",
+          "Pomme"
+        ],
+        "réponse": "Banane",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Banane",
+        "anecdote": "Il existe trois grands types de bananes alimentaires : les bananes dessert, les bananes à cuire et les bananes à bière."
+      },
+      {
+        "id": 4,
+        "question": "Quel effet est provoqué par un excès de magnésium ?",
+        "propositions": [
+          "Excitant",
+          "Anabolisant",
+          "Somnolent",
+          "Laxatif"
+        ],
+        "réponse": "Laxatif",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Magnésium",
+        "anecdote": "L'empoisonnement par excès de magnésium peut exister chez l'enfant et dans le cas de personnes souffrant d'insuffisance rénale."
+      }
+    ]
+}

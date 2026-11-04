@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Gary Oldman",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel pays Gary Oldman a-t-il vu le jour ?",
+        "propositions": [
+          "États-Unis",
+          "Royaume-Uni",
+          "Australie",
+          "Canada"
+        ],
+        "réponse": "Royaume-Uni",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gary_Oldman",
+        "anecdote": "Il grandit dans un milieu modeste et se passionne très tôt pour le théâtre et la musique avant de se tourner vers le cinéma."
+      },
+      {
+        "id": 2,
+        "question": "Quel personnage emblématique joue-t-il dans « The Dark Knight Trilogy » ?",
+        "propositions": [
+          "Harvey Dent",
+          "Le Joker",
+          "James Gordon",
+          "Alfred"
+        ],
+        "réponse": "James Gordon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/The_Dark_Knight_Trilogy",
+        "anecdote": "Son personnage est l'un des piliers moraux de la trilogie réalisée par Christopher Nolan, apparaissant dans Batman Begins (2005), The Dark Knight (2008) et The Dark Knight Rises (2012)."
+      },
+      {
+        "id": 3,
+        "question": "Quel rôle est incarné par Gary Oldman dans la saga « Harry Potter » ?",
+        "propositions": [
+          "Ron Weasley",
+          "Severus Rogue",
+          "Lucius Malefoy",
+          "Sirius Black"
+        ],
+        "réponse": "Sirius Black",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sirius_Black",
+        "anecdote": "Son personnage est d'abord présenté comme un dangereux criminel évadé d'Azkaban, avant que la vérité ne révèle qu'il est innocent et profondément attaché à Harry."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel film Gary Oldman incarne-t-il Winston Churchill ?",
+        "propositions": [
+          "Léon",
+          "Darkest Hour",
+          "Dunkerque",
+          "Churchill"
+        ],
+        "réponse": "Darkest Hour",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gary_Oldman",
+        "anecdote": "Pour ce rôle, Oldman subit une transformation physique impressionnante : maquillage prosthétique, prise de poids et travail vocal pour reproduire la voix grave et reconnaissable de Churchill."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Cheveux",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment se présentent naturellement les cheveux des africains ?",
+        "propositions": [
+          "Fourchus",
+          "Frisés",
+          "Crépus",
+          "Lisses"
+        ],
+        "réponse": "Crépus",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cheveu",
+        "anecdote": "Un follicule elliptique et pas du tout perpendiculaire à la surface (comme couché sous la peau) produira un cheveu crépu."
+      },
+      {
+        "id": 2,
+        "question": "Quel insecte parasite vit parfois dans les cheveux humains ?",
+        "propositions": [
+          "La mite",
+          "La teigne",
+          "La punaise",
+          "Le pou"
+        ],
+        "réponse": "Le pou",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pou",
+        "anecdote": "Pour les zoologistes, les quelques 500 espèces décrites d'anoploures sont aussi collectivement des « poux », dans un sens plus large."
+      },
+      {
+        "id": 3,
+        "question": "Quelle était la coupe de cheveux des premiers rockers ?",
+        "propositions": [
+          "Banane",
+          "Pomme",
+          "Pêche",
+          "Poire"
+        ],
+        "réponse": "Banane",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Banane_(coiffure)",
+        "anecdote": "Une mèche gardée longue sur le dessus de la tête, roulée et maintenue par de la gomina, dessine une protubérance cylindrique."
+      },
+      {
+        "id": 4,
+        "question": "Comment appelle-t-on la partie non visible et vivante du cheveu ?",
+        "propositions": [
+          "Follicule",
+          "Pointe",
+          "Racine",
+          "Tige"
+        ],
+        "réponse": "Racine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cheveu",
+        "anecdote": "Chez la femme, la durée du cycle de croissance est de quatre à sept ans, contre deux à quatre chez l'homme."
+      }
+    ]
+}

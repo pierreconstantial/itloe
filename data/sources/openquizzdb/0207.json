@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Catherine De Smeytere",
+  "thème": "Requins des Océans",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Grâce à quoi les requins peuvent-ils respirer, tout comme les raies ?",
+        "propositions": [
+          "Peau",
+          "Branchies",
+          "Nageoires",
+          "Poumons"
+        ],
+        "réponse": "Branchies",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Requin",
+        "anecdote": "Sans opercule, les requins possèdent cinq à sept fentes branchiales, situées de chaque côté de la tête, permettant l'oxygénation du sang."
+      },
+      {
+        "id": 2,
+        "question": "Quel élément de la silhouette du requin nous fait trembler ?",
+        "propositions": [
+          "Queue",
+          "Nageoire dorsale",
+          "Nez",
+          "Branchies"
+        ],
+        "réponse": "Nageoire dorsale",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Requin",
+        "anecdote": "Le squelette des nageoires du requin est allongé et soutenu par des rayons mous et non segmentés, nommés cératotriches."
+      },
+      {
+        "id": 3,
+        "question": "De quoi se nourrit surtout le requin-baleine, tout en se déplaçant ?",
+        "propositions": [
+          "De mousses",
+          "De crabes",
+          "De phoques",
+          "Du plancton"
+        ],
+        "réponse": "Du plancton",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Requin-baleine",
+        "anecdote": "Le requin-baleine est un doux géant qui se nourrit de manière passive de plancton, de petits poissons et de crustacés."
+      },
+      {
+        "id": 4,
+        "question": "Quel pourcentage du poids du requin le foie peut-il représenter ?",
+        "propositions": [
+          "Jusqu'à 12 %",
+          "Jusqu'à 25 %",
+          "Jusqu'à 2 %",
+          "Jusqu'à 6 %"
+        ],
+        "réponse": "Jusqu'à 25 %",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Requin",
+        "anecdote": "Le foie des requins (20 % du poids), riche en huiles hépatiques, est exploité dans l'industrie pharmaceutique et dans les cosmétiques."
+      }
+    ]
+}

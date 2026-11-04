@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Femmes de fer",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui a perdu deux fois au second tour face à Emmanuel Macron ?",
+        "propositions": [
+          "Édith Cresson",
+          "Marine Le Pen",
+          "Anne Hidalgo",
+          "Rachida Dati"
+        ],
+        "réponse": "Marine Le Pen",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marine_Le_Pen",
+        "anecdote": "Après le score historique de son parti en 2022, elle fut élue présidente du Rassemblement national à l'Assemblée nationale."
+      },
+      {
+        "id": 2,
+        "question": "Quelle actrice de la saga Harry Potter est devenue une voix féministe ?",
+        "propositions": [
+          "Gal Gadot",
+          "Margot Robbie",
+          "Jennifer Lawrence",
+          "Emma Watson"
+        ],
+        "réponse": "Emma Watson",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Emma_Watson",
+        "anecdote": "Elle fut nommée ambassadrice de bonne volonté par l'ONU Femmes en juillet 2014 et agit en faveur du commerce équitable."
+      },
+      {
+        "id": 3,
+        "question": "En quoi les Obama ont-ils transformé le jardin de la Maison Blanche ?",
+        "propositions": [
+          "Salle de sport",
+          "Théâtre ouvert",
+          "Potager",
+          "Parking"
+        ],
+        "réponse": "Potager",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Michelle_Obama",
+        "anecdote": "Bénéficiant d'une forte popularité, elle s'engagera derrière Hillary Clinton lors de sa campagne pour l'élection présidentielle de 2016."
+      },
+      {
+        "id": 4,
+        "question": "Quelle jeune militante écologiste suédoise engagée est très médiatisée ?",
+        "propositions": [
+          "Hedy Epstein",
+          "Greta Thunberg",
+          "Rachel Corrie",
+          "Mary Dreier"
+        ],
+        "réponse": "Greta Thunberg",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Greta_Thunberg",
+        "anecdote": "Classée dans la liste Forbes des cent femmes les plus influentes au monde, elle est titulaire en 2019 du prix Right Livelihood."
+      }
+    ]
+}

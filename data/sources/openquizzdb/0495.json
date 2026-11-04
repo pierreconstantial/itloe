@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Connus pour un seul titre",         
+  "mise-à-jour": "25/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le seul et unique véritable tube du groupe Bandolero ?",
+        "propositions": [
+          "Tchiki Boum",
+          "Yakadansé",
+          "La saga",
+          "Paris Latino"
+        ],
+        "réponse": "Paris Latino",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bandolero_(groupe)",
+        "anecdote": "Avec un son plutôt funk-disco-rap, le titre sera repris par la suite par les artistes de la saison 2 de la « Star Academy »."
+      },
+      {
+        "id": 2,
+        "question": "Quel groupe de rock'n'roll français est devenu populaire avec « Chante » ?",
+        "propositions": [
+          "Mano Negra",
+          "Pacifique",
+          "Les Forbans",
+          "Luna Parker"
+        ],
+        "réponse": "Les Forbans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Forbans",
+        "anecdote": "En décembre 2012, le groupe a enflammé les réseaux sociaux suite à un éventuel gala privé donné pour le Front national."
+      },
+      {
+        "id": 3,
+        "question": "Quel titre du groupe Trust passe encore en radio en France ?",
+        "propositions": [
+          "Serre les poings",
+          "Certitude",
+          "Idéal",
+          "Antisocial"
+        ],
+        "réponse": "Antisocial",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Trust_(groupe)",
+        "anecdote": "La force et l'originalité du groupe venaient de la façon puissante dont le chanteur Bernard Bonvoisin exprimait ses paroles."
+      },
+      {
+        "id": 4,
+        "question": "Quel groupe de « l'after punk » vous invite à « Chercher le garçon » ?",
+        "propositions": [
+          "Élégance",
+          "Indochine",
+          "Les Ablettes",
+          "Taxi Girl"
+        ],
+        "réponse": "Taxi Girl",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Taxi_Girl",
+        "anecdote": "Le groupe connaîtra son premier drame au décès du batteur Pierre Wolfsohn, mort d'une overdose de cocaïne le 24 juillet 1981."
+      }
+    ]
+}

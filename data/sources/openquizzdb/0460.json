@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Objets et accessoires",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel petit objet sert à maintenir ensemble des feuilles de papier ?",
+        "propositions": [
+          "Trombone",
+          "Rolodex",
+          "Post-it",
+          "Stencil"
+        ],
+        "réponse": "Trombone",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Trombone_(papeterie)",
+        "anecdote": "Le mot s'emploie pour désigner une agrafe provisoire aisée à utiliser, qui serre sans déchirer et s'empile sans se tordre notablement."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la couleur de la « boîte noire » en aviation ?",
+        "propositions": [
+          "Blanche",
+          "Orange",
+          "Noire",
+          "Verte"
+        ],
+        "réponse": "Orange",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Boîte_noire_(aéronautique)",
+        "anecdote": "Dans la pratique, les boîtes noires sont de couleur orange ou rouge avec des bandes blanches réfléchissantes."
+      },
+      {
+        "id": 3,
+        "question": "Quel mammifère a donné son nom à un instrument de rasage ?",
+        "propositions": [
+          "Buffle",
+          "Bison",
+          "Blaireau",
+          "Bouquetin"
+        ],
+        "réponse": "Blaireau",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Blaireau_(rasage)",
+        "anecdote": "Traditionnellement fabriqué en poils de blaireau, il en existe aussi en soies de sanglier, en crin de cheval ou poils synthétiques."
+      },
+      {
+        "id": 4,
+        "question": "Quel appareil de levage permet entre autre de soulever une voiture ?",
+        "propositions": [
+          "Delco",
+          "Rustine",
+          "Hayon",
+          "Cric"
+        ],
+        "réponse": "Cric",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cric",
+        "anecdote": "L'utilisation la plus fréquente du cric permet de changer une roue après une crevaison ou un problème de pneumatique."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Maria Sharapova",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Elle est la première joueuse russe à avoir remporté quel tournoi ?",
+        "propositions": [
+          "Open d'Australie",
+          "Wimbledon",
+          "Roland-Garros",
+          "US Open"
+        ],
+        "réponse": "Wimbledon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maria_Sharapova",
+        "anecdote": "Le tournoi de Wimbledon, à Londres, se joue sur gazon et commence généralement la dernière semaine de juin."
+      },
+      {
+        "id": 2,
+        "question": "Comme quelle joueuse Sharapova crie-t-elle à chaque frappe ?",
+        "propositions": [
+          "Coco Gauff",
+          "Monica Seles",
+          "Ana Ivanovic",
+          "Nathalie Dechy"
+        ],
+        "réponse": "Monica Seles",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maria_Sharapova",
+        "anecdote": "Monica Seles, qui jouait revers et coup droit à deux mains, est restée célèbre auprès du public pour ses cris sur les courts."
+      },
+      {
+        "id": 3,
+        "question": "Quel surnom est utilisé pour désigner la joueuse Maria Sharapova ?",
+        "propositions": [
+          "La Guêpe",
+          "Masha",
+          "Opa",
+          "Boum-Boum"
+        ],
+        "réponse": "Masha",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maria_Sharapova",
+        "anecdote": "Maria Sharapova, au physique avantageux de 1.88m pour 59 kg, a déjà engendré plus de 36 millions de dollars en gains de tournois."
+      },
+      {
+        "id": 4,
+        "question": "En quelle année Sharapova est-elle devenue numéro un mondiale ?",
+        "propositions": [
+          "2005",
+          "2002",
+          "2011",
+          "2008"
+        ],
+        "réponse": "2005",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maria_Sharapova",
+        "anecdote": "Le 22 août 2005, Maria Sharapova devient la 16e joueuse de l'histoire et la première Russe à devenir n°1 au classement WTA."
+      }
+    ]
+}

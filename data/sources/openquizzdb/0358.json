@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sites touristiques",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle ville peut-on admirer la Petite Sirène sur son rocher ?",
+        "propositions": [
+          "Bucarest",
+          "Amsterdam",
+          "Copenhague",
+          "Budapest"
+        ],
+        "réponse": "Copenhague",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Petite_Sirène_(Copenhague)",
+        "anecdote": "Située dans le parc Churchill, il s'agit d'une représentation en bronze du personnage du conte éponyme de Hans Christian Andersen."
+      },
+      {
+        "id": 2,
+        "question": "Quel célèbre mausolée de marbre blanc peut-on visiter à Agra, en Inde ?",
+        "propositions": [
+          "Yantra Mandir",
+          "Raj Ghat",
+          "Bombay House",
+          "Taj Mahal"
+        ],
+        "réponse": "Taj Mahal",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Taj_Mahal",
+        "anecdote": "La construction du mausolée a commencé en 1631 et s'est achevée, dans sa plus grande partie, en 1648."
+      },
+      {
+        "id": 3,
+        "question": "Dans quelle ville espagnole se trouve l'Alhambra ?",
+        "propositions": [
+          "Grenade",
+          "Bilbao",
+          "Séville",
+          "Malaga"
+        ],
+        "réponse": "Grenade",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alhambra_(Grenade)",
+        "anecdote": "L'Alhambra est composée de quatre parties : l'Acazaba, les palais nastrides, le generalife et ses jardins et le palais de Charles V."
+      },
+      {
+        "id": 4,
+        "question": "Quel site grec célèbre se trouve sur le Mont Parnasse ?",
+        "propositions": [
+          "Delphes",
+          "Olympie",
+          "Amphipolis",
+          "Lindos"
+        ],
+        "réponse": "Delphes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Delphes",
+        "anecdote": "Delphes était le centre du monde, aussi l'« omphalos » y était-il représenté par une pierre de forme conique."
+      }
+    ]
+}

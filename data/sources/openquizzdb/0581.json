@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Snapchat Challenge",         
+  "mise-à-jour": "05/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que représente le logo de l'application mobile Snapchat ?",
+        "propositions": [
+          "Ours",
+          "Appareil photo",
+          "Singe",
+          "Fantôme"
+        ],
+        "réponse": "Fantôme",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Snapchat",
+        "anecdote": "Snapchat permet d'être visible par n'importe qui, pour ses amis uniquement ou pour personne (ce qu'on appelle le mode fantôme)."
+      },
+      {
+        "id": 2,
+        "question": "Qui est devenu milliardaire à l'âge de 24 ans grâce à Snapchat ?",
+        "propositions": [
+          "Jeff Bezos",
+          "Tom Golisano",
+          "Evan Spiegel",
+          "Paul Allen"
+        ],
+        "réponse": "Evan Spiegel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Evan_Spiegel",
+        "anecdote": "Evan Thomas Spiegel est en couple avec le mannequin Miranda Kerr depuis 2015, avec qui il a déjà deux enfants."
+      },
+      {
+        "id": 3,
+        "question": "Quelle couleur est généralement associée à Snapchat ?",
+        "propositions": [
+          "Jaune",
+          "Bleu",
+          "Vert",
+          "Rouge"
+        ],
+        "réponse": "Jaune",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Snapchat",
+        "anecdote": "Le fantôme sur fond jaune permet d'immédiatement identifier un utilisateur qui se connecte au réseau social Snapchat."
+      },
+      {
+        "id": 4,
+        "question": "Combien d'utilisateurs quotidiens Snapchat comptait-il en 2017 ?",
+        "propositions": [
+          "106 millions",
+          "146 millions",
+          "126 millions",
+          "178 millions"
+        ],
+        "réponse": "178 millions",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Snapchat",
+        "anecdote": "Les applications de réseaux sociaux sont souvent pointées du doigt du fait de l'exploitation commerciale de données personnelles."
+      }
+    ]
+}

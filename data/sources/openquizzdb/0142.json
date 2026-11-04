@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #12",         
+  "mise-à-jour": "26/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Un départ pour l'oie, mot de quatre lettres commençant par un C ?",
+        "propositions": [
+          "Coin",
+          "Case",
+          "Choc",
+          "Cane"
+        ],
+        "réponse": "Case",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Chevalier de la foi, mot de huit lettres commençant par un T ?",
+        "propositions": [
+          "Templier",
+          "Toucheur",
+          "Tamanoir",
+          "Terminal"
+        ],
+        "réponse": "Templier",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Elle reçoit du beau linge, mot de cinq lettres commençant par un C ?",
+        "propositions": [
+          "Craie",
+          "Cuvée",
+          "Corde",
+          "Canne"
+        ],
+        "réponse": "Corde",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Prise d'un ordinateur, mot de quatre lettres commençant par un P ?",
+        "propositions": [
+          "Puce",
+          "Pôle",
+          "Pont",
+          "Port"
+        ],
+        "réponse": "Port",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

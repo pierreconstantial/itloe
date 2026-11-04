@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Brad Pitt au cinéma",         
+  "mise-à-jour": "28/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel rôle interprète Brad Pitt dans le film « Snatch », de Guy Ritchie ?",
+        "propositions": [
+          "Braqueur",
+          "Commercial",
+          "Gitan",
+          "Dealer"
+        ],
+        "réponse": "Gitan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Snatch_:_Tu_braques_ou_tu_raques",
+        "anecdote": "Le film a été tourné dans le même esprit et avec une partie de la distribution du film de Guy Ritchie, « Arnaques, Crimes et Botanique »."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la particularité de Benjamin Button pour David Fincher ?",
+        "propositions": [
+          "Né vieux",
+          "Né aveugle",
+          "Né sourd",
+          "Né muet"
+        ],
+        "réponse": "Né vieux",
+        "wikipédia": "https://fr.wikipedia.org/wiki/L'Étrange_Histoire_de_Benjamin_Button_(film)",
+        "anecdote": "L'histoire d'Eric Roth et Robin Swicord est inspirée de la nouvelle du même nom datant de 1922 et écrite par F. Scott Fitzgerald."
+      },
+      {
+        "id": 3,
+        "question": "Quel film suit des soldats dans un char de la Seconde Guerre mondiale ?",
+        "propositions": [
+          "World War Z",
+          "Alliés",
+          "Inglorious Basterds",
+          "Fury"
+        ],
+        "réponse": "Fury",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fury_(film,_2014)",
+        "anecdote": "Le film retrace l'histoire de militaires américains s'opposant à l'armée allemande à bord d'un char surnommé Fury."
+      },
+      {
+        "id": 4,
+        "question": "À quel âge Brad Pitt est-il apparu dans le film « Thelma et Louise » ?",
+        "propositions": [
+          "18 ans",
+          "28 ans",
+          "25 ans",
+          "21 ans"
+        ],
+        "réponse": "28 ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Thelma_et_Louise",
+        "anecdote": "Écrit par Callie Khouri, ce film a failli ne jamais voir le jour devant la méfiance de bon nombre de producteurs et réalisateurs."
+      }
+    ]
+}

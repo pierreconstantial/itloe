@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #U",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quel groupe musical irlandais The Edge est-il le principal guitariste ?",
+        "propositions": [
+          "U2",
+          "Ugly Kid Joe",
+          "Uriah Heep",
+          "UB40"
+        ],
+        "réponse": "U2",
+        "wikipédia": "https://fr.wikipedia.org/wiki/The_Edge",
+        "anecdote": "The Edge n'utilise jamais de solos classiques au sens traditionnel, son approche se concentrant sur la texture et l'atmosphère."
+      },
+      {
+        "id": 2,
+        "question": "Quel homme imagina de construire le Cheval de Troie ?",
+        "propositions": [
+          "Urbanus",
+          "Uranus",
+          "Uther",
+          "Ulysse"
+        ],
+        "réponse": "Ulysse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cheval_de_Troie",
+        "anecdote": "En informatique, un cheval de Troie désigne un type de programme malveillant, invasif et parfois destructeur, porté par un logiciel."
+      },
+      {
+        "id": 3,
+        "question": "Quelle émission était surnommée « le magazine de l'extrême »  ?",
+        "propositions": [
+          "Unforgotten",
+          "Ugly Betty",
+          "Utopia",
+          "Ushuaïa"
+        ],
+        "réponse": "Ushuaïa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ushuaïa,_le_magazine_de_l'extrême",
+        "anecdote": "Présentée et produite par Nicolas Hulot, l'émission Ushuaïa fut diffusée sur TF1 entre le 17 septembre 1987 et le 31 janvier 1996."
+      },
+      {
+        "id": 4,
+        "question": "Quel instrument de musique est surnommé la « guitare hawaïenne » ?",
+        "propositions": [
+          "Udu",
+          "Upa",
+          "Ukulélé",
+          "Ugal"
+        ],
+        "réponse": "Ukulélé",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ukulélé",
+        "anecdote": "Le ukulélé a été popularisé à Hawaï au XIXe siècle, inspiré par de petits instruments à cordes portugais apportés par les immigrants."
+      }
+    ]
+}

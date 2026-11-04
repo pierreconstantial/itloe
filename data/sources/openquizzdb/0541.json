@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Ça se passe en ski",         
+  "mise-à-jour": "07/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En ski, quel est le niveau de difficulté associé à une piste verte ?",
+        "propositions": [
+          "Très facile",
+          "Moyen",
+          "Très difficile",
+          "Difficile"
+        ],
+        "réponse": "Très facile",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Piste_de_ski",
+        "anecdote": "Les couleurs des pistes sont attribuées en fonction de la pente, de la longueur, de la largeur et de l'exposition au soleil et au vent."
+      },
+      {
+        "id": 2,
+        "question": "Quel autre nom donne-t-on au téléski qui vous mène en haut des pistes ?",
+        "propositions": [
+          "Tire-fesses",
+          "Casse-tête",
+          "Porte-pieds",
+          "Attache-bras"
+        ],
+        "réponse": "Tire-fesses",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Téléski",
+        "anecdote": "Le principe du tire-fesses consiste à passer entre les jambes un agrès (perche ou enrouleur) généralement terminé par une rondelle."
+      },
+      {
+        "id": 3,
+        "question": "De quoi a-t-on besoin pour pouvoir utiliser des remontées mécaniques ?",
+        "propositions": [
+          "Forfait de ski",
+          "Bonnet",
+          "Carte d'identité",
+          "Empreinte"
+        ],
+        "réponse": "Forfait de ski",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Remontée_mécanique",
+        "anecdote": "Le prix englobe souvent un forfait commun allant d'un jour à une semaine dans les stations de sports d'hiver pour le ski alpin."
+      },
+      {
+        "id": 4,
+        "question": "Quel nom donne-t-on à la partie située à l'avant d'une fixation de ski ?",
+        "propositions": [
+          "Télémark",
+          "Butée",
+          "Spatule",
+          "Talonnière"
+        ],
+        "réponse": "Butée",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fixation_de_ski",
+        "anecdote": "La fixation est un composant capable de supporter les brusques secousses du ski tout en pouvant se relâcher en cas de chute."
+      }
+    ]
+}

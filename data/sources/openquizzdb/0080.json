@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #07",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle fut la première chaîne de télévision érotique officielle européenne ?",
+        "propositions": [
+          "Beate-Uhse.TV",
+          "Playboy TV",
+          "Canal+",
+          "Adult Chanel"
+        ],
+        "réponse": "Beate-Uhse.TV",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Beate_Uhse",
+        "anecdote": "Avant l'apparition de chaînes spécialisées, certains contenus érotiques étaient déjà diffusés via des paiements à la séance."
+      },
+      {
+        "id": 2,
+        "question": "Quel écrivain a dit : « Un baiser légal ne vaut jamais un baiser volé » ?",
+        "propositions": [
+          "Zola",
+          "Stendhal",
+          "Hugo",
+          "Maupassant"
+        ],
+        "réponse": "Maupassant",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Guy_de_Maupassant",
+        "anecdote": "Dans sa vision désenchantée de l'amour, la passion clandestine est souvent plus forte que les conventions sociales et le mariage."
+      },
+      {
+        "id": 3,
+        "question": "Que donnait-on autrefois pour calmer les ardeurs des religieuses ?",
+        "propositions": [
+          "Laitue",
+          "Vin rouge",
+          "Poivre noir",
+          "Café fort"
+        ],
+        "réponse": "Laitue",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Laitue",
+        "anecdote": "Certains textes anciens attribuaient à la sève de laitue sauvage des effets légèrement sédatifs, favorisant la sobriété émotionnelle."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel film apparaît le major-infirmière en chef « Lèvres en Feu » ?",
+        "propositions": [
+          "MASH",
+          "Platoon",
+          "Little Boy",
+          "Apocalypse Now"
+        ],
+        "réponse": "MASH",
+        "wikipédia": "https://fr.wikipedia.org/wiki/MASH_(film)",
+        "anecdote": "La série télévisée qui en découla fut l'une des séries télévisées favorites des téléspectateurs américains des années 1970 et 1980."
+      }
+    ]
+}

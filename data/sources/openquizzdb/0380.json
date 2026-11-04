@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Chimie",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment appelle-t-on un récipient sphérique en chimie ?",
+        "propositions": [
+          "Bécher",
+          "Burette",
+          "Ballon",
+          "Bocal"
+        ],
+        "réponse": "Ballon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ballon_(chimie)",
+        "anecdote": "Généralement en verre borosilicate, le ballon est très utilisé en chimie pour conduire des réactions chimiques en chimie organique."
+      },
+      {
+        "id": 2,
+        "question": "Quel métal brûle avec une flamme blanche aveuglante ?",
+        "propositions": [
+          "Radium",
+          "Baryum",
+          "Calcium",
+          "Magnésium"
+        ],
+        "réponse": "Magnésium",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Magnésium",
+        "anecdote": "Le magnésium est le huitième élément le plus abondant de la croûte terrestre."
+      },
+      {
+        "id": 3,
+        "question": "Quel paramètre indique si une solution est acide, neutre ou basique ?",
+        "propositions": [
+          "Le pH",
+          "La constante",
+          "La base",
+          "La puissance"
+        ],
+        "réponse": "Le pH",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Potentiel_hydrogène",
+        "anecdote": "Les produits plus acides que l'acide sulfurique à 100 % sont qualifiés de superacides."
+      },
+      {
+        "id": 4,
+        "question": "Quel métal en fusion pouvez-vous tenir dans le creux de la main ?",
+        "propositions": [
+          "Mercure",
+          "Iridium",
+          "Platine",
+          "Manganèse"
+        ],
+        "réponse": "Mercure",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mercure_(chimie)",
+        "anecdote": "Le mercure est le seul métal se présentant sous forme liquide dans les conditions normales de température et de pression."
+      }
+    ]
+}

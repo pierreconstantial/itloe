@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Grands lacs de la planète",         
+  "mise-à-jour": "07/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel autre nom porte le lac de Genève ?",
+        "propositions": [
+          "Lac de Côme",
+          "Lac de Lugano",
+          "Lac Léman",
+          "Lac Majeur"
+        ],
+        "réponse": "Lac Léman",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lac_Léman",
+        "anecdote": "Le rivage nord et les deux extrémités du lac de Genève sont suisses, le rivage sud est français."
+      },
+      {
+        "id": 2,
+        "question": "Quel lac représente la plus grande réserve en eau douce au monde ?",
+        "propositions": [
+          "Lac Titicaca",
+          "Lac Baïkal",
+          "Lac Érié",
+          "Lac Michigan"
+        ],
+        "réponse": "Lac Baïkal",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lac_Baïkal",
+        "anecdote": "La transparence du lac Baïkal est unique et la visibilité parfaite jusqu'à 40 mètres."
+      },
+      {
+        "id": 3,
+        "question": "Sur la rive nord de quel lac se situe la ville frontière de Toronto ?",
+        "propositions": [
+          "Lac Ontario",
+          "Lac Huron",
+          "Lac Érié",
+          "Lac Michigan"
+        ],
+        "réponse": "Lac Ontario",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Toronto",
+        "anecdote": "Avec ses 2,5 millions d'habitants, Toronto est la plus grande ville du Canada et la capitale de la province de l'Ontario."
+      },
+      {
+        "id": 4,
+        "question": "Le lac Titicaca sert entre autres de frontière à quels pays ?",
+        "propositions": [
+          "Pérou et Chili",
+          "Bolivie et Pérou",
+          "Brésil et Bolivie",
+          "Chili et Bolivie"
+        ],
+        "réponse": "Bolivie et Pérou",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lac_Titicaca",
+        "anecdote": "Situé dans la cordillère des Andes, le lac Titicaca est le plus grand lac d'eau douce d'Amérique du Sud en volume d'eau et en longueur."
+      }
+    ]
+}

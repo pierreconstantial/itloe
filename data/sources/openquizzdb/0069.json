@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Croquer dans la pomme",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle ville des États-Unis est surnommée la « grosse pomme » ?",
+        "propositions": [
+          "Miami",
+          "Las Vegas",
+          "Los Angeles",
+          "New York"
+        ],
+        "réponse": "New York",
+        "wikipédia": "https://fr.wikipedia.org/wiki/New_York",
+        "anecdote": "La commune s'étend sur cinq circonscriptions administratives appelées « boroughs »."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel verger poussent presque exclusivement des pommiers ?",
+        "propositions": [
+          "Pommeraie",
+          "Pommiseau",
+          "Vergepommes",
+          "Vergeture"
+        ],
+        "réponse": "Pommeraie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pomme",
+        "anecdote": "La pomme est le troisième fruit consommé dans le monde, après les agrumes et la banane."
+      },
+      {
+        "id": 3,
+        "question": "Quelle variété de pommes est principalement produite en France ?",
+        "propositions": [
+          "La Pink Lady",
+          "La Golden",
+          "La Gala",
+          "La Jonagold"
+        ],
+        "réponse": "La Golden",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Golden_Delicious",
+        "anecdote": "Elle représente en effet plus d'un tiers de la production nationale."
+      },
+      {
+        "id": 4,
+        "question": "Quel physicien anglais a été attentif à la chute des pommes ?",
+        "propositions": [
+          "Tycho Brahe",
+          "Isaac Newton",
+          "Peter Higgs",
+          "Nicolas Copernic"
+        ],
+        "réponse": "Isaac Newton",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Isaac_Newton",
+        "anecdote": "Isaac Newton est surtout reconnu pour sa théorie de la gravitation universelle."
+      }
+    ]
+}

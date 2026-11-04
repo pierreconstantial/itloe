@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #16",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment appelle-t-on l'abandon au péché de chair ?",
+        "propositions": [
+          "Pénitence",
+          "Luxure",
+          "Ascèse",
+          "Chasteté"
+        ],
+        "réponse": "Luxure",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Luxure",
+        "anecdote": "La luxure est l'un des sept péchés capitaux dans la tradition chrétienne médiévale. Elle ne désigne pas simplement la sexualité, mais plutôt l'idée d'un désir considéré comme excessif ou désordonné, détaché d'un cadre moral ou religieux."
+      },
+      {
+        "id": 2,
+        "question": "Quel roi privilégia les ressorts des serrures à ceux du plaisir ?",
+        "propositions": [
+          "Louis XIV",
+          "Henri IV",
+          "Louis XVI",
+          "François Ier"
+        ],
+        "réponse": "Louis XVI",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Louis_XVI",
+        "anecdote": "Louis XVI était passionné par les sciences appliquées et la mécanique. Il entretenait un véritable atelier au château de Versailles, où il fabriquait et réparait des serrures, des horloges et des mécanismes complexes."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel film Isabelle Adjani joue-t-elle une pin-up de village ?",
+        "propositions": [
+          "La Gifle",
+          "La Reine Margot",
+          "Possession",
+          "L'Eté meurtrier"
+        ],
+        "réponse": "L'Eté meurtrier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/L'Été_meurtrier_(film)",
+        "anecdote": "Le film explore des thèmes comme la mémoire, le désir, la violence et la manipulation psychologique, dans une atmosphère estivale lourde et tendue."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la couleur dominante du nu peint par Matisse en 1907 ?",
+        "propositions": [
+          "Bleu",
+          "Rouge",
+          "Noir",
+          "Vert"
+        ],
+        "réponse": "Bleu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nu_bleu_(Souvenir_de_Biskra)",
+        "anecdote": "Lors de sa première présentation, l'oeuvre a choqué une partie du public, car elle s'éloignait des codes traditionnels du nu réaliste."
+      }
+    ]
+}

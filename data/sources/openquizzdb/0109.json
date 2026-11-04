@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Animaux en chiffres",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de temps dure en moyenne la gestation d'une éléphante ?",
+        "propositions": [
+          "17 mois",
+          "21 mois",
+          "13 mois",
+          "9 mois"
+        ],
+        "réponse": "21 mois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Éléphant",
+        "anecdote": "Une éléphante peut être en gestation jusqu'à l'âge de cinquante ans, où un seul éléphant est porté dans la plupart des cas."
+      },
+      {
+        "id": 2,
+        "question": "À combien de pulsations bat le coeur d'un hérisson en hibernation ?",
+        "propositions": [
+          "18 par minute",
+          "38 par minute",
+          "28 par minute",
+          "8 par minute"
+        ],
+        "réponse": "18 par minute",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hérisson",
+        "anecdote": "Il ne faut pas confondre les hérissons avec d'autres mammifères porteurs de piquants, comme par exemple les porcs-épics."
+      },
+      {
+        "id": 3,
+        "question": "Jusqu'à quelle altitude vivent en général les bouquetins des Alpes ?",
+        "propositions": [
+          "3 500 m",
+          "4 600 m",
+          "1 900 m",
+          "2 300 m"
+        ],
+        "réponse": "3 500 m",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bouquetin_des_Alpes",
+        "anecdote": "Le milieu de prédilection du bouquetin des Alpes comprend des murailles abruptes, des falaises à pics ou des parois escarpées."
+      },
+      {
+        "id": 4,
+        "question": "Combien de minutes une otarie peut-elle nager sous l'eau sans respirer ?",
+        "propositions": [
+          "11 minutes",
+          "5 minutes",
+          "7 minutes",
+          "9 minutes"
+        ],
+        "réponse": "5 minutes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Otariidae",
+        "anecdote": "Contrairement aux phoques, les otaries pourvuent de nageoires se servent à terre de leurs postérieurs pour marcher."
+      }
+    ]
+}

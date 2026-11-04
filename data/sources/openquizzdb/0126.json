@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #21",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Sous quel nom le nitrate de potassium était-il connu au Moyen Âge ?",
+        "propositions": [
+          "Salpêtre",
+          "Salepètre",
+          "Salepêtre",
+          "Salpètre"
+        ],
+        "réponse": "Salpêtre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel instrument de musique consiste en un disque de métal percé ?",
+        "propositions": [
+          "Symbal",
+          "Cymbale",
+          "Cinbale",
+          "Sainballe"
+        ],
+        "réponse": "Cymbale",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle maladie infectieuse du côlon peut être grave, aiguë ou chronique ?",
+        "propositions": [
+          "Dissentrie",
+          "Dysenterie",
+          "Dycentrie",
+          "Dyssenterie"
+        ],
+        "réponse": "Dysenterie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel muscle circulaire est situé autour de notre tube digestif ?",
+        "propositions": [
+          "Sphinctère",
+          "Sphincter",
+          "Sphinctaire",
+          "Sphyncter"
+        ],
+        "réponse": "Sphincter",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

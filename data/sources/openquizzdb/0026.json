@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #03",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un C, il faut une mine, un lieu de course, une boisson et une horloge.",
+        "propositions": [
+          "Circuit",
+          "Cidre",
+          "Crayon",
+          "Carillon"
+        ],
+        "réponse": "Crayon",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un Z, il faut un matériau, un héros, une peau extérieure et un briquet.",
+        "propositions": [
+          "Zinc",
+          "Zeste",
+          "Zorro",
+          "Zippo"
+        ],
+        "réponse": "Zinc",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un K, il faut un chapeau, un animal, une embarcation et une sauce.",
+        "propositions": [
+          "Kayak",
+          "Koala",
+          "Képi",
+          "Ketchup"
+        ],
+        "réponse": "Képi",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un B, il faut un chapeau, un jeu d'enfant, un récipient et un animal.",
+        "propositions": [
+          "Béret",
+          "Bol",
+          "Balançoire",
+          "Bouc"
+        ],
+        "réponse": "Béret",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

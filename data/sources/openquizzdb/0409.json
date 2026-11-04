@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Romans de Maxime Chattam",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le prénom du héros du roman « La Promesse des ténèbres » ?",
+        "propositions": [
+          "David",
+          "Ronald",
+          "Brady",
+          "Kevin"
+        ],
+        "réponse": "Brady",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Promesse_des_ténèbres",
+        "anecdote": "Brady O'Donnel, journaliste, rencontre une femme qui va changer sa vie : à sa poursuite, il va plonger en enfer."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le titre du cinquième tome de la saga « Autre-Monde » ?",
+        "propositions": [
+          "Oz",
+          "Neverland",
+          "Entropia",
+          "Malronce"
+        ],
+        "réponse": "Oz",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Oz_(roman)",
+        "anecdote": "Matt, Tobias et Ambre se voient contraints d'aller chercher le second coeur de la Terre."
+      },
+      {
+        "id": 3,
+        "question": "Quelle histoire se déroule en partie au Mont Saint-Michel ?",
+        "propositions": [
+          "Le Sang du temps",
+          "Maléfices",
+          "Malronce",
+          "Entropia"
+        ],
+        "réponse": "Le Sang du temps",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Sang_du_temps",
+        "anecdote": "Dans « Le Sang du temps », on retrouve entre autres la Fraternité abbatiale ainsi que Ludwig, le gardien du Mont."
+      },
+      {
+        "id": 4,
+        "question": "Quelle saison le livre « In Tenebris » de Maxime Chattam représente-t-il ?",
+        "propositions": [
+          "Automne",
+          "Hiver",
+          "Été",
+          "Printemps"
+        ],
+        "réponse": "Hiver",
+        "wikipédia": "https://fr.wikipedia.org/wiki/In_Tenebris",
+        "anecdote": "L'histoire se déroule en janvier 2002 à New York et dans ses environs, pendant un hiver très enneigé."
+      }
+    ]
+}

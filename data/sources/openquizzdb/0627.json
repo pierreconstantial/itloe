@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Tours du monde",         
+  "mise-à-jour": "28/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle icône de Londres est reconnue pour son horloge illuminée ?",
+        "propositions": [
+          "Castle Club",
+          "Marble Arch",
+          "Tour Orbit",
+          "Big Ben"
+        ],
+        "réponse": "Big Ben",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Big_Ben",
+        "anecdote": "Construite en 1859, la tour fait partie intégrante du Palais de Westminster et est un symbole historique du Royaume-Uni."
+      },
+      {
+        "id": 2,
+        "question": "Quel campanile est un symbole de l'Italie et l'emblème de sa ville ?",
+        "propositions": [
+          "Tour d'Alma",
+          "Tour Hidalgo",
+          "Tour Trappola",
+          "Tour de Pise"
+        ],
+        "réponse": "Tour de Pise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tour_de_Pise",
+        "anecdote": "L'inclinaison de la tour est apparue très rapidement pendant sa construction, du fait qu'elle a été édifiée sur une plaine alluviale."
+      },
+      {
+        "id": 3,
+        "question": "Combien d'étages comporte le One World Trade Center de 2014 ?",
+        "propositions": [
+          "144 étages",
+          "84 étages",
+          "104 étages",
+          "124 étages"
+        ],
+        "réponse": "104 étages",
+        "wikipédia": "https://fr.wikipedia.org/wiki/One_World_Trade_Center",
+        "anecdote": "Son antenne lui permet d'atteindre la hauteur de 1 776 pieds, en référence à l'année de la Déclaration d'indépendance des États-Unis."
+      },
+      {
+        "id": 4,
+        "question": "Quel symbole de Paris est surnommé la Dame de fer ?",
+        "propositions": [
+          "Tour Eiffel",
+          "Tour Saint-Jacques",
+          "Tour du Temple",
+          "Tour du Coin"
+        ],
+        "réponse": "Tour Eiffel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tour_Eiffel",
+        "anecdote": "Construite en deux ans par Gustave Eiffel pour le centenaire de la Révolution française, elle fut d'abord nommée tour de 300 mètres."
+      }
+    ]
+}

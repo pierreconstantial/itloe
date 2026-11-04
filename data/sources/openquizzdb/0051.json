@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Actrices belges",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle actrice belge a eu « 20 ans d'écart » dans un de ses films ?",
+        "propositions": [
+          "Virginie Haro",
+          "Virginie Hocq",
+          "Virginie Efira",
+          "Virginie Wagon"
+        ],
+        "réponse": "Virginie Efira",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Virginie_Efira",
+        "anecdote": "Virginie Efira a une soeur joueuse de football américain, un premier frère peintre et un second qui construit des cabanes en Amérique."
+      },
+      {
+        "id": 2,
+        "question": "Quelle actrice belge adore les « poupées russes » ?",
+        "propositions": [
+          "Lubna Azabal",
+          "Cécile de France",
+          "Marie Gillain",
+          "Anne Coesens"
+        ],
+        "réponse": "Cécile de France",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cécile_de_France_(actrice)",
+        "anecdote": "Cécile de France est une des actrices les plus demandées avec plusieurs films par an."
+      },
+      {
+        "id": 3,
+        "question": "Quelle actrice belge a été révélée au grand public avec le film « Rosetta » ?",
+        "propositions": [
+          "Émilie Dequenne",
+          "Yolande Moreau",
+          "Marie Gillain",
+          "Lubna Azabal"
+        ],
+        "réponse": "Émilie Dequenne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Émilie_Dequenne",
+        "anecdote": "Le film reçut la Palme d'or à Cannes en 1999."
+      },
+      {
+        "id": 4,
+        "question": "Qui donne la réplique à Charles Bronson dans « Le Passager de la pluie » ?",
+        "propositions": [
+          "Laurence Bibot",
+          "Annie Cordy",
+          "Axelle Red",
+          "Lio"
+        ],
+        "réponse": "Annie Cordy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Passager_de_la_pluie",
+        "anecdote": "Dans le sud de la France, une jeune femme a été violée par un mystérieux assaillant."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #20",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Se perd avec des trous, mot de sept lettres commençant par un M ?",
+        "propositions": [
+          "Mémoire",
+          "Morsure",
+          "Malaria",
+          "Marteau"
+        ],
+        "réponse": "Mémoire",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Vierge, elle est sauvage, mot de cinq lettres commençant par un F ?",
+        "propositions": [
+          "Force",
+          "Fleur",
+          "Foule",
+          "Forêt"
+        ],
+        "réponse": "Forêt",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Pas un petit problème, mot de huit lettres commençant par un E ?",
+        "propositions": [
+          "Escapade",
+          "Eldorado",
+          "Entraide",
+          "Énormité"
+        ],
+        "réponse": "Énormité",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Espace dédié au salon, mot de cinq lettres commençant par un S ?",
+        "propositions": [
+          "Soute",
+          "Stand",
+          "Sauna",
+          "Sénat"
+        ],
+        "réponse": "Stand",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

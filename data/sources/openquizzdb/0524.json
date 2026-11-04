@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Variété française #2",         
+  "mise-à-jour": "23/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel auteur-compositeur-interprète est « Tombé pour la France » ?",
+        "propositions": [
+          "Francis Cabrel",
+          "Étienne Daho",
+          "Alain Bashung",
+          "Marc Lavoine"
+        ],
+        "réponse": "Étienne Daho",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Étienne_Daho",
+        "anecdote": "Né à Oran (Algérie) et figure de la pop française, Étienne Daho est issu de la vague du rock rennais du tout début des années 1980."
+      },
+      {
+        "id": 2,
+        "question": "Quel était le prénom du « Chanteur » de Daniel Balavoine ?",
+        "propositions": [
+          "Charlie",
+          "Henri",
+          "Johnny",
+          "Eddy"
+        ],
+        "réponse": "Henri",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Chanteur_(chanson)",
+        "anecdote": "Devenu un titre marquant du répertoire de Balavoine, « Le Chanteur » est également celui qui a véritablement lancé sa carrière."
+      },
+      {
+        "id": 3,
+        "question": "Quel groupe de gitans s'est imposé au Top 50 à partir de l'année 1987 ?",
+        "propositions": [
+          "Las Ketchup",
+          "Gipsy Kings",
+          "Pata Negra",
+          "Alabina"
+        ],
+        "réponse": "Gipsy Kings",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gipsy_Kings",
+        "anecdote": "Le groupe est composé de musiciens issus de deux familles, les Baliardo et les Reyes, originaires de Montpellier et d'Arles."
+      },
+      {
+        "id": 4,
+        "question": "Quel dessert l'abominable homme des neiges sert-il pour Lio ?",
+        "propositions": [
+          "Éclair",
+          "Merveilleux",
+          "Banana split",
+          "Dame blanche"
+        ],
+        "réponse": "Banana split",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lio",
+        "anecdote": "En 2012, la chanteuse Lio a prêté son image pour une campagne de la Croix-Rouge belge dont elle a été pour l'occasion la marraine."
+      }
+    ]
+}

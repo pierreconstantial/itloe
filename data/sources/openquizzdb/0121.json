@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Stades de Ligue 1",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel club évolue au stade Pierre-Mauroy de Villeneuve-d'Ascq ?",
+        "propositions": [
+          "RC Lens",
+          "LOSC Lille",
+          "Amiens SC",
+          "Valenciennes FC"
+        ],
+        "réponse": "LOSC Lille",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stade_Pierre-Mauroy",
+        "anecdote": "Le toit mobile de 7 600 tonnes peut être refermé en trente minutes et sa pelouse se soulève et se déplace sur sa moitié."
+      },
+      {
+        "id": 2,
+        "question": "Le stade du Moustoir accueille des festivals et quel club résident ?",
+        "propositions": [
+          "Vannes Olympique",
+          "FC Lorient",
+          "Stade Brestois 29",
+          "AJ Auxerre"
+        ],
+        "réponse": "FC Lorient",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stade_du_Moustoir",
+        "anecdote": "Le groupe Supertramp a également donné un concert exceptionnel dans le stade du Moustoir en 1983."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le véritable nom du stade de Furiani, utilisé par le FC Bastia ?",
+        "propositions": [
+          "Victor-Lorenzi",
+          "Jean-Bouin",
+          "Armand-Cesari",
+          "Claude-Papi"
+        ],
+        "réponse": "Armand-Cesari",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stade_Armand-Cesari",
+        "anecdote": "Furiani reste également dans les mémoires pour la catastrophe qui marqua la demi-finale de la coupe de France de 1992."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le surnom du stade Geoffroy-Guichard, situé à Saint-Étienne ?",
+        "propositions": [
+          "La Marmite",
+          "La Cuvette",
+          "Le Puits",
+          "Le Chaudron"
+        ],
+        "réponse": "Le Chaudron",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stade_Geoffroy-Guichard",
+        "anecdote": "À l'origine, il s'agit en fait d'un vaste terrain de 40 000 m2 acheté par Geoffroy Guichard, fondateur des magasins Casino."
+      }
+    ]
+}

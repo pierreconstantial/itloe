@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Chanteurs français",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel gagnant de le « Nouvelle Star » est surnommé « la Tortue » ?",
+        "propositions": [
+          "Julien Doré",
+          "Steeve Estatof",
+          "Christophe Willem",
+          "Amel Bent"
+        ],
+        "réponse": "Christophe Willem",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Christophe_Willem",
+        "anecdote": "Christophe est devenu Christophe Willem en référence au prénom William que ses parents avaient failli lui donner."
+      },
+      {
+        "id": 2,
+        "question": "En 1991, quel tube Yannick Noah a-t-il associé à la coupe Davis ?",
+        "propositions": [
+          "Les Lionnes",
+          "Saga Africa",
+          "Vagabond",
+          "Ose"
+        ],
+        "réponse": "Saga Africa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Saga_Africa",
+        "anecdote": "Yannick Noah signe lui-même les paroles, mélange de français et d'expressions camerounaises."
+      },
+      {
+        "id": 3,
+        "question": "Quel chanteur prénommé Mathieu est issu du groupe Linkup ?",
+        "propositions": [
+          "M. Pokora",
+          "Corneille",
+          "Raphaël",
+          "Keen'V"
+        ],
+        "réponse": "M. Pokora",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Linkup",
+        "anecdote": "Linkup est un boys band français, aujourd'hui dissous, vainqueur de la troisième saison de « Popstars »."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le style musical de l'album de Rohff, « La fierté des années » ?",
+        "propositions": [
+          "Tango",
+          "Disco",
+          "Rap",
+          "Techno"
+        ],
+        "réponse": "Rap",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rohff",
+        "anecdote": "Rohff est le rappeur français qui a vendu le plus d'album solo parmi les rappeurs toujours en activité."
+      }
+    ]
+}

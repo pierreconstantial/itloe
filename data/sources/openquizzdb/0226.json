@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #19",         
+  "mise-à-jour": "28/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Se lâche pour monter, mot de quatre lettres commençant par un L ?",
+        "propositions": [
+          "Lest",
+          "Lama",
+          "Lobe",
+          "Luxe"
+        ],
+        "réponse": "Lest",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Petit doigt, mot de cinq lettres commençant par un L ?",
+        "propositions": [
+          "Linge",
+          "Lange",
+          "Loupe",
+          "Larme"
+        ],
+        "réponse": "Larme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Perturbe le citadin, mot de six lettres commençant par un S ?",
+        "propositions": [
+          "Statue",
+          "Stress",
+          "Sachet",
+          "Spasme"
+        ],
+        "réponse": "Stress",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Réclamée au chien, mot de cinq lettres commençant par un P ?",
+        "propositions": [
+          "Photo",
+          "Plume",
+          "Patte",
+          "Poule"
+        ],
+        "réponse": "Patte",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

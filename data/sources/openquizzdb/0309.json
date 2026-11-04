@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Timbale et maracas",         
+  "mise-à-jour": "01/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quel instrument joue Lisa Simpson, créée par Matt Groening ?",
+        "propositions": [
+          "Flûte",
+          "Trompette",
+          "Saxophone",
+          "Piano"
+        ],
+        "réponse": "Saxophone",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lisa_Simpson",
+        "anecdote": "Les Simpson forment une famille américaine typique de classe moyenne qui vit dans la ville de Springfield."
+      },
+      {
+        "id": 2,
+        "question": "De quoi est faite la mèche d'un archet de violon ?",
+        "propositions": [
+          "Crin de cheval",
+          "Coton",
+          "Angora",
+          "Mohair"
+        ],
+        "réponse": "Crin de cheval",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Archet_(musique)",
+        "anecdote": "La mèche d'un archet est constituée de crins de cheval prélevés sur la queue de l'étalon car ceux de la jument sont abîmés par l'urine."
+      },
+      {
+        "id": 3,
+        "question": "Combien de cordes possède un violon de musique classique ?",
+        "propositions": [
+          "Trois",
+          "Six",
+          "Quatre",
+          "Cinq"
+        ],
+        "réponse": "Quatre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Violon",
+        "anecdote": "Les luthiers comme Antonio Stradivari font partie des nombreux artisans qui créent et entretiennent les instruments à cordes."
+      },
+      {
+        "id": 4,
+        "question": "De quel instrument jouait John Lennon au sein des Beatles ?",
+        "propositions": [
+          "Batterie",
+          "Guitare",
+          "Clavier",
+          "Saxophone"
+        ],
+        "réponse": "Guitare",
+        "wikipédia": "https://fr.wikipedia.org/wiki/John_Lennon",
+        "anecdote": "Lennon forme avec McCartney l'un des tandems d'auteurs-compositeurs les plus influents et prolifiques de l'histoire du rock."
+      }
+    ]
+}

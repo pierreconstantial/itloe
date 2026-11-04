@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #18",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Odeur de port, mot de quatre lettres commençant par un I ?",
+        "propositions": [
+          "Iode",
+          "Inox",
+          "Iris",
+          "Ibis"
+        ],
+        "réponse": "Iode",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Retape des caisses, mot de six lettres commençant par un M ?",
+        "propositions": [
+          "Mastic",
+          "Mouche",
+          "Maboul",
+          "Mécano"
+        ],
+        "réponse": "Mécano",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Bossu laineux, mot de cinq lettres commençant par un B ?",
+        "propositions": [
+          "Barbu",
+          "Bison",
+          "Brave",
+          "Bémol"
+        ],
+        "réponse": "Bison",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Soleil au jardin, mot de neuf lettres commençant par un T ?",
+        "propositions": [
+          "Téléphone",
+          "Turquoise",
+          "Tournesol",
+          "Technique"
+        ],
+        "réponse": "Tournesol",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

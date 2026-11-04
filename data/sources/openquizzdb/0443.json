@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Promenade à Nice",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel surfeur fut incarné sur les écrans par Jean Dujardin en 2005 ?",
+        "propositions": [
+          "Mathis",
+          "Brice",
+          "Loris",
+          "Joris"
+        ],
+        "réponse": "Brice",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Brice_de_Nice",
+        "anecdote": "Apparu tout d'abord dans les sketches de Jean Dujardin, le personnage est ensuite devenu un héros de films."
+      },
+      {
+        "id": 2,
+        "question": "Combien de lignes de tramway Nice comptait-elle en 2007 ?",
+        "propositions": [
+          "Cinq",
+          "Sept",
+          "Trois",
+          "Une seule"
+        ],
+        "réponse": "Une seule",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tramway_de_Nice",
+        "anecdote": "Dans les mois qui ont suivi le lancement du tramway, on comptabilisait entre 65 000 et 70 000 voyages quotidiens."
+      },
+      {
+        "id": 3,
+        "question": "Sur quelle baie de France se trouve la Promenade des Anglais ?",
+        "propositions": [
+          "Des Canards",
+          "Des Anges",
+          "Des Dieux",
+          "Des Requins"
+        ],
+        "réponse": "Des Anges",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Promenade_des_Anglais",
+        "anecdote": "Outre des manifestations nombreuses, la promenade était réputée pour ses « chaises bleues » et ses pergolas."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la couleur de la façade du Château de l'Anglais de Nice ?",
+        "propositions": [
+          "Bleue",
+          "Verte",
+          "Rose",
+          "Jaune"
+        ],
+        "réponse": "Rose",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Château_de_l'Anglais",
+        "anecdote": "De par sa couleur et sa forme, il demeure comme l'un des témoignages forts des folies qui sont érigées sur la Riviera."
+      }
+    ]
+}

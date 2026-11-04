@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Aya Nakamura",         
+  "mise-à-jour": "08/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est l'identité civile de la chanteuse Aya Nakamura ?",
+        "propositions": [
+          "Anna Diop",
+          "Aïcha Nakamura",
+          "Amel Nakamura",
+          "Aya Danioko"
+        ],
+        "réponse": "Aya Danioko",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Aya_Nakamura",
+        "anecdote": "Aya Nakamura est née Aya Danioko. Elle choisit le nom de scène Nakamura en référence au personnage Hiro Nakamura de la série « Heroes », qu'elle apprécie."
+      },
+      {
+        "id": 2,
+        "question": "Quel titre a révélé Aya Nakamura au grand public en 2018 ?",
+        "propositions": [
+          "Copines",
+          "La dot",
+          "Djadja",
+          "Pookie"
+        ],
+        "réponse": "Djadja",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Aya_Nakamura",
+        "anecdote": "La chanson raconte une situation de confrontation avec un homme qui ment sur leur relation, avec une attitude affirmée et détachée devenue emblématique du style d'Aya Nakamura."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le titre du tout premier album d'Aya Nakamura ?",
+        "propositions": [
+          "Aya",
+          "Nakamura",
+          "Journal intime",
+          "DNK"
+        ],
+        "réponse": "Journal intime",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Aya_Nakamura",
+        "anecdote": "À ce moment-là, elle est encore relativement peu connue du grand public, mais elle commence déjà à se faire remarquer grâce à des titres comme « Comportement »."
+      },
+      {
+        "id": 4,
+        "question": "Quel titre contient la phrase « j'suis trop djomb » ?",
+        "propositions": [
+          "Djadja",
+          "Pookie",
+          "Il veut",
+          "Copines"
+        ],
+        "réponse": "Il veut",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Aya_Nakamura",
+        "anecdote": "L'expression « j'suis trop djomb » reflète une attitude de confiance et d'auto-dérision, très présente dans ses textes."
+      }
+    ]
+}

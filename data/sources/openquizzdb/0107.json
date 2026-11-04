@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Dany Boon",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel film Dany Boon partage-t-il l'affiche avec Benoît Poelvoorde ?",
+        "propositions": [
+          "Raid dingue",
+          "Rien à déclarer",
+          "Pédale dure",
+          "Radin !"
+        ],
+        "réponse": "Rien à déclarer",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rien_à_déclarer",
+        "anecdote": "Le tournage a eu lieu au poste frontière franco-belge de Macquenoise et de Hirson, rebaptisé Courquain ou Koorkin."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle ville du nord de la France Dany Boon a-t-il vu le jour en 1966 ?",
+        "propositions": [
+          "Armentières",
+          "Ronchin",
+          "Comines",
+          "Warneton"
+        ],
+        "réponse": "Armentières",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Armentières",
+        "anecdote": "Son père, Ahmed Hamidou, est un ex-boxeur et chauffeur routier, et sa mère, Danièle Ducatel, catholique, est femme au foyer."
+      },
+      {
+        "id": 3,
+        "question": "Quel fromage a connu son heure de gloire suite à un film de Dany Boon ?",
+        "propositions": [
+          "Maroilles",
+          "Gruyère",
+          "Brie",
+          "Roquefort"
+        ],
+        "réponse": "Maroilles",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maroilles_(fromage)",
+        "anecdote": "Le film expose la pratique culinaire qu'auraient les habitants du Nord-Pas-de-Calais de tremper du maroilles dans leur café."
+      },
+      {
+        "id": 4,
+        "question": "Le véritable prénom de Dany Boon est Daniel, mais quel est son nom ?",
+        "propositions": [
+          "Nodier",
+          "Hamidou",
+          "Boonval",
+          "Boonaers"
+        ],
+        "réponse": "Hamidou",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dany_Boon",
+        "anecdote": "Dany Boon est devenu en 2008 l'acteur le mieux payé de l'histoire du cinéma européen."
+      }
+    ]
+}

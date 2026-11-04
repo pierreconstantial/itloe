@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #14",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Départ en piscine, mot de quatre lettres commençant par un P ?",
+        "propositions": [
+          "Porc",
+          "Punk",
+          "Pied",
+          "Plot"
+        ],
+        "réponse": "Plot",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Met le feu dans les fosses, mot de sept lettres commençant par un R ?",
+        "propositions": [
+          "Rhinite",
+          "Raccord",
+          "Roulade",
+          "Relance"
+        ],
+        "réponse": "Rhinite",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Arrêt de rame, mot de quatre lettres commençant par un G ?",
+        "propositions": [
+          "Goal",
+          "Gîte",
+          "Grue",
+          "Gare"
+        ],
+        "réponse": "Gare",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "De la drogue, mais pas noble, mot de cinq lettres commençant par un B ?",
+        "propositions": [
+          "Bière",
+          "Brave",
+          "Baron",
+          "Bonze"
+        ],
+        "réponse": "Baron",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

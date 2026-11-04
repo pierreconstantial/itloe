@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Variantes du Coca-Cola",         
+  "mise-à-jour": "26/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel Coca-Cola sans sucre vise un public plus masculin ?",
+        "propositions": [
+          "Coca Zoom",
+          "Coca Zen",
+          "Coca Zèbre",
+          "Coca Zero"
+        ],
+        "réponse": "Coca Zero",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coca-Cola_Zero",
+        "anecdote": "Tout comme le Coca Light, sa recette sortie en 2007 en France utilise de l'aspartame et de l'acésulfame-k à la place du sucre."
+      },
+      {
+        "id": 2,
+        "question": "Quelle boisson est aussi connue sous le nom de Diet Coke ?",
+        "propositions": [
+          "Coca Zero",
+          "Coca Life",
+          "Coca BlaK",
+          "Coca Light"
+        ],
+        "réponse": "Coca Light",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coca-Cola_Light",
+        "anecdote": "Introduite en France en 1988, la marque Diet Coke fut lancée aux États-Unis le Jour de l'Indépendance, en 1982."
+      },
+      {
+        "id": 3,
+        "question": "Quelle variation du Coca-Cola fut mise en vente après le Light ?",
+        "propositions": [
+          "BlaK",
+          "Zero",
+          "Life",
+          "Cherry"
+        ],
+        "réponse": "Cherry",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coca-Cola_Cherry",
+        "anecdote": "Coca-Cola a ensuite créé d'autres Coca-Cola aromatisés : Vanille, Lemon (citron), Lime (citron vert), BlaK (café) et Sango (l'orange)."
+      },
+      {
+        "id": 4,
+        "question": "Quelle version du Coca-Cola présente un goût enrichi au café ?",
+        "propositions": [
+          "Zero",
+          "BlaK",
+          "Life",
+          "Cherry"
+        ],
+        "réponse": "BlaK",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coca-Cola_BlaK",
+        "anecdote": "The Coca-Cola Company a lancé son Coca-Cola BlaK afin de concurrencer le Pepsi Max cappuccino, lancé par PepsiCo."
+      }
+    ]
+}

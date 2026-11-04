@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Tubes eighties français",         
+  "mise-à-jour": "04/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui interpréta le tube « Macumba », chanson sortie en février 1985 ?",
+        "propositions": [
+          "Dave",
+          "Renaud",
+          "Jean-Pierre Mader",
+          "Marc Lavoine"
+        ],
+        "réponse": "Jean-Pierre Mader",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Macumba_(chanson_de_Jean-Pierre_Mader)",
+        "anecdote": "Ce titre rencontra un succès commercial important, atteignant la troisième place du Top 50 et devenant le tube de l'été 1985."
+      },
+      {
+        "id": 2,
+        "question": "Quelle artiste a chanté « Africa », paru sur son album « Déraisonnable » ?",
+        "propositions": [
+          "Rose Laurens",
+          "Desireless",
+          "Julie Pietri",
+          "Zazie"
+        ],
+        "réponse": "Rose Laurens",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Africa_(chanson_de_Rose_Laurens)",
+        "anecdote": "Connue pour son single « Africa » sorti en 1982, Rose Laurens est également célèbre pour avoir incarné le personnage de Fantine."
+      },
+      {
+        "id": 3,
+        "question": "Quel groupe français nous a fait danser avec « Les Démons de minuit » ?",
+        "propositions": [
+          "Tableaux",
+          "Dessins",
+          "Photos",
+          "Images"
+        ],
+        "réponse": "Images",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Démons_de_minuit",
+        "anecdote": "En France, le titre « Les Démons de minuit » s'est vendu à plus de 1,5 million d'exemplaires et a été certifié disque de platine."
+      },
+      {
+        "id": 4,
+        "question": "Quel tube planétaire a permis à Patrick Hernandez de devenir rentier ?",
+        "propositions": [
+          "Born to Somebody",
+          "Born to Be Alive",
+          "Born to Sing",
+          "To be Three"
+        ],
+        "réponse": "Born to Be Alive",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Born_to_Be_Alive_(chanson)",
+        "anecdote": "Le single a rencontré un énorme succès en Europe ou il se classe numéro un en Autriche, en Suède, en Norvège et en France."
+      }
+    ]
+}

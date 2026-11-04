@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #04",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle partie du corps est parfois appelée « ticket de métro » ?",
+        "propositions": [
+          "Seins",
+          "Langue",
+          "Pubis",
+          "Fesses"
+        ],
+        "réponse": "Pubis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pubis",
+        "anecdote": "En anatomie humaine, le pubis est la branche antérieure de l'os coxal."
+      },
+      {
+        "id": 2,
+        "question": "Le nom Viagra vient de « Vigor » et de quel autre mot ?",
+        "propositions": [
+          "Girafe",
+          "Garage",
+          "Grappe",
+          "Niagara"
+        ],
+        "réponse": "Niagara",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sildénafil",
+        "anecdote": "Les créateurs de de nom ont trouvé que les chutes du Niagara étaient un symbole puissant."
+      },
+      {
+        "id": 3,
+        "question": "Comment appelle-t-on un espace dédié au BDSM ?",
+        "propositions": [
+          "Donjon",
+          "Cybersexe",
+          "Dortoir",
+          "Bunker"
+        ],
+        "réponse": "Donjon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sadomasochisme",
+        "anecdote": "Le sigle BDSM désigne une forme d'échange contractuel utilisant la douleur, la contrainte ou l'humiliation dans un but érogène."
+      },
+      {
+        "id": 4,
+        "question": "Au Moyen Âge, que désignait-on par l'expression « huile de rein » ?",
+        "propositions": [
+          "La cyprine",
+          "La salive",
+          "La sueur",
+          "Le sperme"
+        ],
+        "réponse": "Le sperme",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sperme",
+        "anecdote": "Cette expression, aujourd'hui disparue de notre langage quotidien, est aussi imagée qu'anatomiquement inexacte."
+      }
+    ]
+}

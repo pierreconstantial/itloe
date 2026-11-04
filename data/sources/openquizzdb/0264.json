@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #44",         
+  "mise-à-jour": "24/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans la mythologie, quelles divinités féminines sont liées à la nature ?",
+        "propositions": [
+          "Nymphe",
+          "Ninfe",
+          "Nainphe",
+          "Nymfe"
+        ],
+        "réponse": "Nymphe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel type d'environnement peut provoquer une forte angoisse ?",
+        "propositions": [
+          "Anxiogène",
+          "Anxiogaine",
+          "Anxiogenne",
+          "Anxiogeaine"
+        ],
+        "réponse": "Anxiogène",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle contraction des muscles du visage est associée à la fatigue ?",
+        "propositions": [
+          "Baillemment",
+          "Bâillement",
+          "Baîllement",
+          "Baillemant"
+        ],
+        "réponse": "Bâillement",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel cétacé était appelé « cochon de mer » mais aussi « dieu des mers » ?",
+        "propositions": [
+          "Marsuin",
+          "Marresoin",
+          "Marsouin",
+          "Marsoins"
+        ],
+        "réponse": "Marsouin",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

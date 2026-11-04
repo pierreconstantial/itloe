@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Patrick Sébastien",         
+  "mise-à-jour": "31/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quel sport Patrick Sébastien a-t-il été dirigeant de club ?",
+        "propositions": [
+          "Tennis",
+          "Football",
+          "Squash",
+          "Rugby"
+        ],
+        "réponse": "Rugby",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Patrick_Sébastien",
+        "anecdote": "Patrick Sébastien a pratiqué le rugby à XV au CA Brive, sport dont il souhaitait à l'époque faire son métier."
+      },
+      {
+        "id": 2,
+        "question": "Sous quel pseudonyme a-t-il écrit « La Cellule de Zarkane » ?",
+        "propositions": [
+          "Joseph Lubsky",
+          "Patrick Adler",
+          "Serge Boccara",
+          "Jean Valton"
+        ],
+        "réponse": "Joseph Lubsky",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Cellule_de_Zarkane",
+        "anecdote": "En 2008, Patrick Sébastien a préparé l'adaptation de son roman au cinéma, mais aucune date de sortie ne fut annoncée."
+      },
+      {
+        "id": 3,
+        "question": "Qui Patrick Sébastien a-t-il produit pour un one-man-show en 1990 ?",
+        "propositions": [
+          "Laurent Baffie",
+          "Franck Dubosc",
+          "Albert Dupontel",
+          "Laurent Gerra"
+        ],
+        "réponse": "Albert Dupontel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Patrick_Sébastien",
+        "anecdote": "Patrick Sébastien a également produit Dany Boon en 1993, Nicolas Canteloup en 2001 ainsi que Shirley et Dino."
+      },
+      {
+        "id": 4,
+        "question": "Quelle a été sa première grande émission animée sur TF1 ?",
+        "propositions": [
+          "Le Grand Bluff",
+          "Sens Interdit",
+          "Super nanas !",
+          "Carnaval !"
+        ],
+        "réponse": "Carnaval !",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Patrick Sébastien a invité des célébrités à se déguiser dans des émissions parodiques comme « Carnaval » et « Sébastien c'est fou »."
+      }
+    ]
+}

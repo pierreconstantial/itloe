@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Fromages enveloppés",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel fromage industriel est enrobé de paraffine teinte en rouge ?",
+        "propositions": [
+          "Époisses",
+          "Babybel",
+          "Chavroux",
+          "Saint-paulin"
+        ],
+        "réponse": "Babybel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Babybel",
+        "anecdote": "La version classique du fromage Babybel est composée de lait de vache (98 %), de sel, de ferments lactiques et de coagulant."
+      },
+      {
+        "id": 2,
+        "question": "Quel fromage est enveloppé dans un papier en aluminium gaufré ?",
+        "propositions": [
+          "Roquefort",
+          "Reblochon",
+          "Boursin",
+          "Emmental"
+        ],
+        "réponse": "Boursin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Boursin_(marque)",
+        "anecdote": "Créé par François Boursin, on ajoute aux laits de vache mélangés et pasteurisés de la crème et un mélange d'ail et de fines herbes."
+      },
+      {
+        "id": 3,
+        "question": "Lequel de ces fromages français est vendu dans une boîte en bois ?",
+        "propositions": [
+          "Roquefort",
+          "Cabécou",
+          "Petit-suisse",
+          "Époisses"
+        ],
+        "réponse": "Époisses",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Époisses_(fromage)",
+        "anecdote": "L'époisses est un fromage français renommé, apprécié par Napoléon Bonaparte pour sa saveur puissante et son odeur prononcée."
+      },
+      {
+        "id": 4,
+        "question": "Quel fromage est cerclé de trois à cinq bandelettes végétales ?",
+        "propositions": [
+          "Montbriac",
+          "Fédou",
+          "Livernon",
+          "Livarot"
+        ],
+        "réponse": "Livarot",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Livarot_(fromage)",
+        "anecdote": "Ces bandelettes, qui servaient à la bonne tenue du fromage lors de l'affinage, sont à l'origine du surnom de colonel du fromage."
+      }
+    ]
+}

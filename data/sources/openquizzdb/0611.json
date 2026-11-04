@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Franglais du net",         
+  "mise-à-jour": "15/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que faites-vous si vous regardez vos vidéos familiale en ligne ?",
+        "propositions": [
+          "Hacking",
+          "Phishing",
+          "Streaming",
+          "Spamming"
+        ],
+        "réponse": "Streaming",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Streaming",
+        "anecdote": "Très utilisé sur Internet, le streaming permet la lecture d'un flux audio ou vidéo (vidéo à la demande) à mesure qu'il est diffusé."
+      },
+      {
+        "id": 2,
+        "question": "Comment montrer que vous aimez quelque chose sur Facebook ?",
+        "propositions": [
+          "Fake",
+          "Push",
+          "Geek",
+          "Like"
+        ],
+        "réponse": "Like",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Like_(Facebook)",
+        "anecdote": "Ce bouton a souvent été comparé à un pixel espion, du fait du suivi de l'activité des utilisateurs, qui entraîne une publicité ciblée."
+      },
+      {
+        "id": 3,
+        "question": "Comment identifier une personne sur une photo en ligne ?",
+        "propositions": [
+          "Cloud",
+          "Rank",
+          "ActiveX",
+          "Tag"
+        ],
+        "réponse": "Tag",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tag_(métadonnée)",
+        "anecdote": "Les tags ne sont pas directement liés au web sémantique et peuvent ne pas avoir un effet positif sur l'émergence de celui-ci."
+      },
+      {
+        "id": 4,
+        "question": "Quel courrier indésirable est souvent utilisé à des fins publicitaires ?",
+        "propositions": [
+          "Spam",
+          "Baud",
+          "Bump",
+          "Favicon"
+        ],
+        "réponse": "Spam",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Spam",
+        "anecdote": "Le premier spam a été envoyé à environ 600 personnes le 3 mai 1978 par Gary Thuerk, marketeur travaillant à l'époque chez DEC."
+      }
+    ]
+}

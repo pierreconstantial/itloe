@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Slogans automobiles",         
+  "mise-à-jour": "04/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel constructeur automobile a pour slogan « le plaisir de conduire » ?",
+        "propositions": [
+          "Lotus",
+          "Lexus",
+          "BMW",
+          "Mercedes"
+        ],
+        "réponse": "BMW",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bayerische_Motoren_Werke",
+        "anecdote": "En 2016, le groupe BMW a vendu 2 117 965 véhicules automobiles (BMW, Mini, et Rolls-Royce) ainsi que 123 495 deux-roues."
+      },
+      {
+        "id": 2,
+        "question": "Quel constructeur a pour slogan « la puissance des rêves » ?",
+        "propositions": [
+          "Jaguar",
+          "Skoda",
+          "Honda",
+          "Land Rover"
+        ],
+        "réponse": "Honda",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Honda",
+        "anecdote": "En 2008, Honda a vendu plus de 17 millions de moteurs à quatre temps, ce qui en a fait le plus important producteur au monde."
+      },
+      {
+        "id": 3,
+        "question": "Quel constructeur a pour slogan « l'art de la performance » ?",
+        "propositions": [
+          "Mini Cooper",
+          "Chevrolet",
+          "Jaguar",
+          "Peugeot"
+        ],
+        "réponse": "Jaguar",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jaguar_(automobile)",
+        "anecdote": "Le 26 mars 2008, dans le cadre d'un démantèlement, Ford a vendu Jaguar à l'entreprise indienne Tata Motors."
+      },
+      {
+        "id": 4,
+        "question": "Quel constructeur a choisi pour slogan « innover autrement » ?",
+        "propositions": [
+          "Volkswagen",
+          "Nissan",
+          "Jaguar",
+          "Lexus"
+        ],
+        "réponse": "Nissan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nissan",
+        "anecdote": "Nissan Motor Company, Limited ou Nissan est un constructeur automobile japonais né en 1932 sous le nom de Datsun."
+      }
+    ]
+}

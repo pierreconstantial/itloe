@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Titres de Depeche Mode",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Laquelle de ces propositions désigne un titre de Depeche Mode ?",
+        "propositions": [
+          "Little 13",
+          "Little 21",
+          "Little 9",
+          "Little 15"
+        ],
+        "réponse": "Little 15",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Little_15",
+        "anecdote": "Le clip musical de « Little 15 » fut réalisé par Martyn Atkins, qui avait déjà travaillé pour le groupe en ce qui concerne le design."
+      },
+      {
+        "id": 2,
+        "question": "Quel morceau instrumental apparaît sur l'album « Sounds of the Universe » ?",
+        "propositions": [
+          "Introspectre",
+          "Jazz Thieves",
+          "Easy Tiger",
+          "Spacewalker"
+        ],
+        "réponse": "Spacewalker",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sounds_of_the_Universe",
+        "anecdote": "Si l'album contient treize titres, une édition Deluxe comporte des démos d'anciennes chansons et un DVD."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le premier morceau écrit par Martin Gore pour Depeche Mode ?",
+        "propositions": [
+          "See You",
+          "Shout",
+          "Leave in Silence",
+          "New Life"
+        ],
+        "réponse": "See You",
+        "wikipédia": "https://fr.wikipedia.org/wiki/See_You",
+        "anecdote": "Ce single a été l'occasion de lancer une tournée mondiale, avec le nouveau membre du groupe Alan Wilder."
+      },
+      {
+        "id": 4,
+        "question": "Qui a écrit le célébrissime morceau « Just Can't Get Enough » ?",
+        "propositions": [
+          "Alan Wilder",
+          "Martin Gore",
+          "Dave Gahan",
+          "Vince Clarke"
+        ],
+        "réponse": "Vince Clarke",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Just_Can't_Get_Enough_(chanson_de_Depeche_Mode)",
+        "anecdote": "« Just Can't Get Enough » est le dernier single composé par Vince Clarke avant son départ de Depeche Mode."
+      }
+    ]
+}

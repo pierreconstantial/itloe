@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #12",         
+  "mise-à-jour": "07/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel mot qualifie les premiers habitants de certains territoires ?",
+        "propositions": [
+          "Arborigène",
+          "Aborygène",
+          "Abaurigène",
+          "Aborigène"
+        ],
+        "réponse": "Aborigène",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel refus collectif empêche une entreprise d'acheter ou de vendre ?",
+        "propositions": [
+          "Boycot",
+          "Boycote",
+          "Boycott",
+          "Boycotte"
+        ],
+        "réponse": "Boycott",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel enduit à base de chaux est teinté dans la masse ?",
+        "propositions": [
+          "Stuc",
+          "Stuk",
+          "Stuque",
+          "Stucc"
+        ],
+        "réponse": "Stuc",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Comment qualifie-t-on une disposition en un arrangement de cinq unités ?",
+        "propositions": [
+          "Quinconsse",
+          "Quinquonce",
+          "Quinquonse",
+          "Quinconce"
+        ],
+        "réponse": "Quinconce",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

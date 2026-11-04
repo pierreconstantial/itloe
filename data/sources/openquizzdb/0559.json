@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Expéditions de Mike Horn",         
+  "mise-à-jour": "17/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel nom Mike Horn a-t-il donné à son tour du monde par l'équateur ?",
+        "propositions": [
+          "Cap Zero",
+          "Latitude Zéro",
+          "Land Zero",
+          "Ground Zero"
+        ],
+        "réponse": "Latitude Zéro",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mike_Horn",
+        "anecdote": "Sur une idée de Mick Régnier, Mike Horn va parcourir plus de 40 000 km de juin 1999 à octobre 2000 sans moyen de transport motorisé."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle expédition Mike Horn fit-il le tour du cercle polaire ?",
+        "propositions": [
+          "Free to Run",
+          "Taris",
+          "Arktos",
+          "Fabuloso"
+        ],
+        "réponse": "Arktos",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Arktos:_Le_voyage_intérieur_de_Mike_Horn",
+        "anecdote": "Lors d'une expédition préliminaire pour atteindre le pôle Nord, Mike Horn fut contraint à l'abandon pour cause de gelures aux mains."
+      },
+      {
+        "id": 3,
+        "question": "Combien d'années a duré l'expédition Pangaea, menée par Mike Horn ?",
+        "propositions": [
+          "Deux ans",
+          "Cinq ans",
+          "Trois ans",
+          "Quatre ans"
+        ],
+        "réponse": "Quatre ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mike_Horn",
+        "anecdote": "De 2008 à 2012, l'expédition Pangaea a fait le tour du monde avec une centaine de jeunes de 15 à 20 ans qui se sont succédés."
+      },
+      {
+        "id": 4,
+        "question": "En combien de jours Mike Horn a-t-il traversé le Groenland ?",
+        "propositions": [
+          "60 jours",
+          "45 jours",
+          "15 jours",
+          "30 jours"
+        ],
+        "réponse": "15 jours",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mike_Horn",
+        "anecdote": "L'expédition de 808 jours a donné lieu à un film, « Arktos : Le voyage intérieur de Mike Horn », réalisé et produit par Raphaël Blanc."
+      }
+    ]
+}

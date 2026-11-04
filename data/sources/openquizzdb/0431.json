@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Méditerranée côté Français",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle ville méditerranéenne accueille un Grand Prix de F1 depuis 1929 ?",
+        "propositions": [
+          "Split",
+          "Monaco",
+          "Marseille",
+          "Venise"
+        ],
+        "réponse": "Monaco",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Grand_Prix_automobile_de_Monaco",
+        "anecdote": "La course inaugurale fut remportée le 14 avril 1929 par William Grover-Williams, au volant d'une Bugatti."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle ville peut-on marcher sur la promenade des Anglais ?",
+        "propositions": [
+          "Monaco",
+          "Nice",
+          "Marseille",
+          "Cannes"
+        ],
+        "réponse": "Nice",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Promenade_des_Anglais",
+        "anecdote": "De nos jours, la promenade des Anglais est un des lieux de visite incontournables à Nice."
+      },
+      {
+        "id": 3,
+        "question": "Quelle série télévisée française a pour quartier fictif principal « Le Mistral » ?",
+        "propositions": [
+          "Plus belle la vie",
+          "Braquo",
+          "Julie Lescaut",
+          "Nerdz"
+        ],
+        "réponse": "Plus belle la vie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Plus_belle_la_vie",
+        "anecdote": "Le 11 juillet 2008, « Plus belle la vie » a atteint la barre du millième épisode, une première en France."
+      },
+      {
+        "id": 4,
+        "question": "Comment s'appelle le littoral méditerranéen autour de Nice et Monaco ?",
+        "propositions": [
+          "Côte Camarguaise",
+          "Côte d'Azur",
+          "Côte Vermeille",
+          "Côte Bleue"
+        ],
+        "réponse": "Côte d'Azur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Côte_d'Azur",
+        "anecdote": "L'adjectif correspondant à Côte d'Azur est « azuréen » et ses habitants sont appelés les Azuréens."
+      }
+    ]
+}

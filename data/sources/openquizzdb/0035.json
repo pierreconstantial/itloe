@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alain Delon",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel clan peut-on retrouver le trio Gabin-Ventura-Delon au cinéma ?",
+        "propositions": [
+          "Des Polonais",
+          "Des Siciliens",
+          "Des Indiens",
+          "Des Écossais"
+        ],
+        "réponse": "Des Siciliens",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Clan_des_Siciliens",
+        "anecdote": "Le clan tentera de voler une collection de bijoux transférée à New York par avion."
+      },
+      {
+        "id": 2,
+        "question": "Quel film, avec Alain Delon, a pour titre un nom de chapeau ?",
+        "propositions": [
+          "Borsalino",
+          "Casquette",
+          "Bicorne",
+          "Cagoule"
+        ],
+        "réponse": "Borsalino",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Borsalino_(chapeau)",
+        "anecdote": "Un Borsalino est un chapeau de luxe en feutre mou produit par la chapellerie Borsalino."
+      },
+      {
+        "id": 3,
+        "question": "Sur le tournage de quel film Mireille Darc a-t-elle rencontré Alain Delon ?",
+        "propositions": [
+          "La Blonde de Pékin",
+          "Jeff",
+          "Madly",
+          "Du rififi à Paname"
+        ],
+        "réponse": "Jeff",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mireille_Darc",
+        "anecdote": "En 2007, Mireille Darc a découvert que son père Marcel n'était pas son vrai géniteur."
+      },
+      {
+        "id": 4,
+        "question": "Avec qui Alain Delon a-t-il formé un couple dans « La Piscine » ?",
+        "propositions": [
+          "Romy Schneider",
+          "Brigitte Bardot",
+          "Mireille Darc",
+          "Sylvie Vartan"
+        ],
+        "réponse": "Romy Schneider",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Piscine_(film)",
+        "anecdote": "Une photo iconique d'Alain Delon, prise pendant le tournage du film, a été utilisée pour la publicité du parfum Eau sauvage, de Dior."
+      }
+    ]
+}

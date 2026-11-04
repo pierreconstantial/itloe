@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Les couleurs",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle couleur est associée à l'argent aux États-Unis ?",
+        "propositions": [
+          "Blanc",
+          "Vert",
+          "Bleu",
+          "Brun"
+        ],
+        "réponse": "Vert",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dollar_américain",
+        "anecdote": "Le dollar des États-Unis, aussi appelé « billet vert », est la monnaie la plus utilisée au monde pour les transactions."
+      },
+      {
+        "id": 2,
+        "question": "De quelle couleur est généralement habillé un ballon de basket-ball ?",
+        "propositions": [
+          "Orange",
+          "Noire",
+          "Grise",
+          "Jaune"
+        ],
+        "réponse": "Orange",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ballon_de_basket-ball",
+        "anecdote": "Originellement constitué de huit pièces de cuir cousues autour d'une chambre à air, la main le fait rebondir par un fouetté du poignet."
+      },
+      {
+        "id": 3,
+        "question": "Super Mario porte une casquette de quelle couleur ?",
+        "propositions": [
+          "Jaune",
+          "Rouge",
+          "Verte",
+          "Bleue"
+        ],
+        "réponse": "Rouge",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mario_(personnage)",
+        "anecdote": "Mario est apparu pour la première fois en 1981, dans le jeu vidéo « Donkey Kong », sous le nom de Jumpman."
+      },
+      {
+        "id": 4,
+        "question": "De quelle couleur est le « B » du logo du site eBay ?",
+        "propositions": [
+          "Noir",
+          "Jaune",
+          "Vert",
+          "Bleu"
+        ],
+        "réponse": "Bleu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/eBay",
+        "anecdote": "Créée en 1995 par Pierre Omidyar, la société eBay est devenue une référence mondiale dans son secteur et un phénomène de société."
+      }
+    ]
+}

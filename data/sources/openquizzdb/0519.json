@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Cuisine italienne",         
+  "mise-à-jour": "18/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle sauce est faite à base de boeuf haché, sauce tomate et oignons ?",
+        "propositions": [
+          "Bolognaise",
+          "Génoise",
+          "Béchamel",
+          "Tartare"
+        ],
+        "réponse": "Bolognaise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sauce_bolognaise",
+        "anecdote": "À Bologne, la sauce bolognaise est surtout utilisée avec des tagliatelles, lasagnes, cannellonis, pâtes au four, ou polenta."
+      },
+      {
+        "id": 2,
+        "question": "Quelle préparation propose du boeuf cru coupé en tranches très fines ?",
+        "propositions": [
+          "Risotto",
+          "Crostino",
+          "Frico",
+          "Carpaccio"
+        ],
+        "réponse": "Carpaccio",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Carpaccio",
+        "anecdote": "Cette recette d'origine a depuis été déclinée en de nombreuses variantes, à base d'autres viandes, mais aussi de poissons."
+      },
+      {
+        "id": 3,
+        "question": "Quelle spécialité de veau peut être préparée à la milanaise ?",
+        "propositions": [
+          "Escalope",
+          "Blanquette",
+          "Aiguillette",
+          "Osso buco"
+        ],
+        "réponse": "Escalope",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Escalope_à_la_milanaise",
+        "anecdote": "Les Milanais et les Viennois se disputent encore aujourd'hui la paternité de cette célèbre escalope panée, souvent comparée au schnitzel autrichien."
+      },
+      {
+        "id": 4,
+        "question": "Quelle spécialité des Pouilles est une pizza pliée et farcie ?",
+        "propositions": [
+          "Sicilienne",
+          "Panzerotti",
+          "Calzone",
+          "Stromboli"
+        ],
+        "réponse": "Calzone",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Calzone",
+        "anecdote": "Lors de la cuisson, la pâte gonfle légèrement et forme une poche croustillante qui enferme une garniture chaude et fondante, ce qui les rend particulièrement addictifs."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #50",         
+  "mise-à-jour": "18/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel paiement régulier est versé pour exploiter un droit ?",
+        "propositions": [
+          "Redevanse",
+          "Redevance",
+          "Redevence",
+          "Redevense"
+        ],
+        "réponse": "Redevance",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle raillerie sert à tourner en dérision une personne ou une situation ?",
+        "propositions": [
+          "Sarcasme",
+          "Sarcasthme",
+          "Sarecasme",
+          "Sarquasme"
+        ],
+        "réponse": "Sarcasme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle combinaison permet d'évoluer sous l'eau en milieu hostile ?",
+        "propositions": [
+          "Scaphandre",
+          "Scafendre",
+          "Scafandre",
+          "Scaffendre"
+        ],
+        "réponse": "Scaphandre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel bateau de plaisance symbolise souvent la richesse ?",
+        "propositions": [
+          "Yoht",
+          "Yacht",
+          "Yaute",
+          "Yaught"
+        ],
+        "réponse": "Yacht",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

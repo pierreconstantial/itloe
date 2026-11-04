@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Forêts de France",         
+  "mise-à-jour": "21/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la troisième forêt domaniale de France métropolitaine ?",
+        "propositions": [
+          "Cranou",
+          "Creuse",
+          "Compiègne",
+          "Tusson"
+        ],
+        "réponse": "Compiègne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Forêt_de_Compiègne",
+        "anecdote": "De manière géométrique, le contour de la forêt forme un cercle de 14 km de diamètre et de 43 km de périmètre."
+      },
+      {
+        "id": 2,
+        "question": "Quelle forêt a inspiré Victor Hugo pour sa ferme des Thénardier ?",
+        "propositions": [
+          "Cîteaux",
+          "Bondy",
+          "Vercors",
+          "Corsuet"
+        ],
+        "réponse": "Bondy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Forêt_de_Bondy",
+        "anecdote": "La forêt régionale de Bondy est un vestige de l'ancienne forêt de Bondy qui s'étendait sur une part importante du pays d'Aulnoye. À l'époque, cette forêt était réputée pour ses bandits et son atmosphère inquiétante."
+      },
+      {
+        "id": 3,
+        "question": "Quelle forêt de Corse occupe un majestueux cirque montagneux ?",
+        "propositions": [
+          "Bavella",
+          "Vizzavona",
+          "Tusson",
+          "Bonifatu"
+        ],
+        "réponse": "Bonifatu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Forêt_de_Bonifatu",
+        "anecdote": "Elle occupe les flancs aux pentes souvent très abruptes de tout le cirque de Bonifatu, s'étendant entre 300 et 2 000 mètres d'altitude. Composée notamment de pins laricio et de pins maritimes, elle offre un paysage sauvage très apprécié des randonneurs."
+      },
+      {
+        "id": 4,
+        "question": "Quelle forêt est parfois identifiée à la forêt de Brocéliande ?",
+        "propositions": [
+          "Bondy",
+          "Paimpont",
+          "Seillon",
+          "Thelle"
+        ],
+        "réponse": "Paimpont",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Forêt_de_Paimpont",
+        "anecdote": "La forêt de Paimpont possède un pouvoir d'attraction pour les adeptes du néopaganisme qui s'y réunissent périodiquement."
+      }
+    ]
+}

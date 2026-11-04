@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Vocabulaire du véliplanchiste",         
+  "mise-à-jour": "14/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle manoeuvre permet de changer de direction en planche à voile ?",
+        "propositions": [
+          "Tack",
+          "Jibe",
+          "Carve",
+          "Loop"
+        ],
+        "réponse": "Jibe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Planche_à_voile",
+        "anecdote": "Pratique alliant la vitesse, l'habileté et la stratégie dans les manoeuvres, le slalom se pratique sur un parcours en W."
+      },
+      {
+        "id": 2,
+        "question": "Quel virage coupé est pratiqué sur les vagues en planche à voile ?",
+        "propositions": [
+          "Slide",
+          "Spin",
+          "Jump",
+          "Carve"
+        ],
+        "réponse": "Carve",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Planche_à_voile",
+        "anecdote": "La Starboard Carve est une planche de freeride facile et accessible, disponible en quatre nouvelles tailles sur le modèle 2022."
+      },
+      {
+        "id": 3,
+        "question": "Quelle technique permet de remonter le vent en planche à voile ?",
+        "propositions": [
+          "Crosswind",
+          "Downwind",
+          "Sidewind",
+          "Upwind"
+        ],
+        "réponse": "Upwind",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Planche_à_voile",
+        "anecdote": "La planche à voile au vent est une technique de base qui permet aux planchistes de naviguer d'où vient le vent."
+      },
+      {
+        "id": 4,
+        "question": "Quel système de fixation relie la voile à la planche à voile ?",
+        "propositions": [
+          "Wishbone",
+          "Rudder",
+          "Mast",
+          "Boom"
+        ],
+        "réponse": "Wishbone",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Planche_à_voile",
+        "anecdote": "Appelé ainsi en référence à l'os de poulet, le wishbone est une double-bôme, qui se fixe sur le mât par une poignée automatique."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Allemagne",         
+  "mise-à-jour": "15/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la capitale de l'Allemagne ?",
+        "propositions": [
+          "Hambourg",
+          "Francfort",
+          "Munich",
+          "Berlin"
+        ],
+        "réponse": "Berlin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quelle grande chaîne de montagnes se situe en Allemagne ?",
+        "propositions": [
+          "Andes",
+          "Alpes",
+          "Himalaya",
+          "Rocheuses"
+        ],
+        "réponse": "Alpes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quelle fête attire des millions de visiteurs en Allemagne ?",
+        "propositions": [
+          "Oktoberfest",
+          "Thanksgiving",
+          "Carnaval",
+          "Halloween"
+        ],
+        "réponse": "Oktoberfest",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quelle industrie est très développée en Allemagne ?",
+        "propositions": [
+          "Culture du café",
+          "Pêche",
+          "Pétrolière",
+          "Automobile"
+        ],
+        "réponse": "Automobile",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

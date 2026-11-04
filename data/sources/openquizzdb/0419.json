@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Unités de mesure",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que mesure-t-on avec l'échelle Kelvin, du nom de Lord Kelvin ?",
+        "propositions": [
+          "Distance",
+          "Poids",
+          "Vitesse",
+          "Température"
+        ],
+        "réponse": "Température",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kelvin",
+        "anecdote": "À la différence du degré Celsius, le kelvin est une mesure absolue de la température."
+      },
+      {
+        "id": 2,
+        "question": "Qui a développé l'échelle de magnitude des séismes en 1935 ?",
+        "propositions": [
+          "Pauling",
+          "Rankine",
+          "Richter",
+          "Monoyer"
+        ],
+        "réponse": "Richter",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Charles_Francis_Richter",
+        "anecdote": "Richter a obtenu un doctorat en physique théorique du California Institute of Technology (Caltech) en 1928."
+      },
+      {
+        "id": 3,
+        "question": "Lequel de ces pays ou territoires n'utilise pas le degré Celsius ?",
+        "propositions": [
+          "Canada",
+          "Italie",
+          "États-Unis",
+          "Australie"
+        ],
+        "réponse": "États-Unis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Degré_Celsius",
+        "anecdote": "Les États-Unis, Belize et les Îles Caïman utilisent toujours l'échelle Fahrenheit."
+      },
+      {
+        "id": 4,
+        "question": "Quelle unité du Système international permet de mesurer une fréquence ?",
+        "propositions": [
+          "Joule",
+          "Becquerel",
+          "Katal",
+          "Hertz"
+        ],
+        "réponse": "Hertz",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hertz",
+        "anecdote": "La radio FM utilise la modulation de fréquence des ondes radios sur une bande allant de 87,5 MHz à 108 MHz."
+      }
+    ]
+}

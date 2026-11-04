@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Musée du Louvre",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En quelle matière est construite la Pyramide du Louvre ?",
+        "propositions": [
+          "Pierre",
+          "Bois",
+          "Verre",
+          "Carton"
+        ],
+        "réponse": "Verre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pyramide_du_Louvre",
+        "anecdote": "La Pyramide du Louvre est située au milieu de la cour Napoléon du musée du Louvre à Paris."
+      },
+      {
+        "id": 2,
+        "question": "Quelles oeuvres sont exposées dans les Cours Marly et Puget ?",
+        "propositions": [
+          "Momies",
+          "Sculptures",
+          "Tableaux",
+          "Croquis"
+        ],
+        "réponse": "Sculptures",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Département_des_sculptures_du_musée_du_Louvre",
+        "anecdote": "À ses débuts, le musée n'exposait que des sculptures antiques, à l'exception de deux statues de Michel-Ange."
+      },
+      {
+        "id": 3,
+        "question": "Combien peut-on environ gravir de marches dans les parcours publics ?",
+        "propositions": [
+          "5 000",
+          "20 000",
+          "10 000",
+          "15 000"
+        ],
+        "réponse": "10 000",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Musée_du_Louvre",
+        "anecdote": "Musée universaliste, le Louvre couvre une chronologie et une aire géographique étendues, depuis l'Antiquité jusqu'à 1848."
+      },
+      {
+        "id": 4,
+        "question": "Combien de tableaux majeurs de Léonard de Vinci sont au Louvre ?",
+        "propositions": [
+          "3",
+          "22",
+          "16",
+          "34"
+        ],
+        "réponse": "3",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Léonard_de_Vinci",
+        "anecdote": "Léonard de Vinci est souvent décrit comme l'archétype et le symbole de l'homme de la Renaissance."
+      }
+    ]
+}

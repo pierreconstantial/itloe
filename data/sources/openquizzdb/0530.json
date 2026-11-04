@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Maquillage",         
+  "mise-à-jour": "27/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel autre nom plus « branché » donne-t-on au brillant à lèvres ?",
+        "propositions": [
+          "Fard",
+          "Blush",
+          "Gloss",
+          "Correcteur"
+        ],
+        "réponse": "Gloss",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gloss_(cosmétique)",
+        "anecdote": "Le gloss existe en versions colorées ou non, irisées ou non. Teinté, il peut éventuellement remplacer le rouge à lèvres."
+      },
+      {
+        "id": 2,
+        "question": "Quel produit unifie le teint et couvre les défauts minimes de la peau ?",
+        "propositions": [
+          "Baume",
+          "Fond de teint",
+          "Correcteur",
+          "Khôl"
+        ],
+        "réponse": "Fond de teint",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Font_de_teint",
+        "anecdote": "La couleur du fond de teint doit être la plus proche de la couleur naturelle de la peau pour éviter le risque de démarcations."
+      },
+      {
+        "id": 3,
+        "question": "Quel produit de maquillage sert à tracer un trait le long des paupières ?",
+        "propositions": [
+          "Eye-liner",
+          "Lisseur",
+          "Correcteur",
+          "Protecteur"
+        ],
+        "réponse": "Eye-liner",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eye-liner",
+        "anecdote": "L'utilisation de l'eye-liner diffère un peu selon la texture : on tire un trait continu du coin interne de l'oeil jusqu'au coin externe."
+      },
+      {
+        "id": 4,
+        "question": "Avec quoi ouvre-t-on le regard en recourbant et en allongeant les cils ?",
+        "propositions": [
+          "Mascara",
+          "Fard",
+          "Gloss",
+          "Blush"
+        ],
+        "réponse": "Mascara",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mascara",
+        "anecdote": "Le mascara se pose en regardant vers le bas, en plaçant la brosse à la base des cils et en remontant le long des cils."
+      }
+    ]
+}

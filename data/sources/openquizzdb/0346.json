@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Eaux minérales",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À quel groupe agroalimentaire français appartient la marque Volvic ?",
+        "propositions": [
+          "Sodebo",
+          "Régilait",
+          "Danone",
+          "Lactalis"
+        ],
+        "réponse": "Danone",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Volvic_(eau_en_bouteille)",
+        "anecdote": "En Amérique du Nord, Volvic est considérée comme une eau de source, du fait de sa faible teneur en minéraux."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est l'eau minérale naturelle des Côtes-d'Armor, en Bretagne ?",
+        "propositions": [
+          "Aproz",
+          "Asperjoc",
+          "Edelvia",
+          "Plancoët"
+        ],
+        "réponse": "Plancoët",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Plancoët_(eau)",
+        "anecdote": "Depuis 2011, une eau finement gazeuse « Plancoët Fines Bulles » a été lancée pour la clientèle de l'hôtellerie et restauration."
+      },
+      {
+        "id": 3,
+        "question": "Quel pays européen est le plus gros consommateur d'eau en bouteille ?",
+        "propositions": [
+          "Allemagne",
+          "Espagne",
+          "Belgique",
+          "Italie"
+        ],
+        "réponse": "Italie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eau_en_bouteille",
+        "anecdote": "En 2004, la consommation mondiale d'eau en bouteille en plastique représentait 154 milliards de litres."
+      },
+      {
+        "id": 4,
+        "question": "L'eau Vichy Célestins est réputée pour sa forte teneur en quel métal ?",
+        "propositions": [
+          "Calcium",
+          "Sodium",
+          "Potassium",
+          "Magnésium"
+        ],
+        "réponse": "Sodium",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vichy_Célestins",
+        "anecdote": "Du fait de sa forte teneur en sodium, l'eau Vichy Célestins est déconseillée aux personnes faisant de l'hypertension artérielle."
+      }
+    ]
+}

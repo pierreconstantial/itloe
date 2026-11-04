@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Héros de « Toy Story »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment se prénomme le cow-boy héros de la saga « Toy Story » ?",
+        "propositions": [
+          "Randy",
+          "Pile-Poil",
+          "Woody",
+          "Jessy"
+        ],
+        "réponse": "Woody",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Toy_Story",
+        "anecdote": "Woody est loyal, toujours prêt à aider les autres et ferait n'importe quoi pour Andy."
+      },
+      {
+        "id": 2,
+        "question": "Qui est l'ennemi de Woody au début de « Toy Story » ?",
+        "propositions": [
+          "Buzz l'Éclair",
+          "Razmotte",
+          "Rex",
+          "Sid"
+        ],
+        "réponse": "Buzz l'Éclair",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Buzz_l'Éclair",
+        "anecdote": "Le plus grand défaut de Buzz l'Éclair est de se prendre continuellement pour un vrai ranger de l'espace."
+      },
+      {
+        "id": 3,
+        "question": "Quelle est la senteur de Lotso dans « Toy Story 3 » ?",
+        "propositions": [
+          "Framboise",
+          "Fraise",
+          "Pomme",
+          "Banane"
+        ],
+        "réponse": "Fraise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Toy_Story_3",
+        "anecdote": "Lotso est un gros nounours tout doux avec un corps en peluche rose et blanche et un nez en velours violet."
+      },
+      {
+        "id": 4,
+        "question": "Quel dessin retrouve-t-on sur le tee-shirt noir de Sid dans « Toy Story » ?",
+        "propositions": [
+          "Tête de mort",
+          "Nombre 95",
+          "Éclair",
+          "Smiley"
+        ],
+        "réponse": "Tête de mort",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sid_(homonymie)",
+        "anecdote": "Enfant solitaire, Sid passe la majeure partie de son temps à expérimenter ses idées diaboliques sur les jouets qu'il récupère."
+      }
+    ]
+}

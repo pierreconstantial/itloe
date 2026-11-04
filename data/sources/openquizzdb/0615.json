@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Dictionnaire du web",         
+  "mise-à-jour": "21/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel marqueur Internet utilise un croisillon ?",
+        "propositions": [
+          "Backup",
+          "Asset",
+          "Hashtag",
+          "Counter"
+        ],
+        "réponse": "Hashtag",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hashtag",
+        "anecdote": "À la suite de sa croissance, le mot hashtag est désormais intégré au Petit Larousse depuis juin 2013 et au Petit Robert depuis mai 2014."
+      },
+      {
+        "id": 2,
+        "question": "Quel outil permet de suivre une commande en temps réel ?",
+        "propositions": [
+          "Tracking",
+          "Permalink",
+          "Backlink",
+          "Cookie"
+        ],
+        "réponse": "Tracking",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Commande_(commerce)",
+        "anecdote": "Grâce à un numéro unique, vous pouvez suivre en temps réel l'envoi d'un colis destiné à transiter jusqu'à votre domicile."
+      },
+      {
+        "id": 3,
+        "question": "Quel défaut informatique peut provoquer un dysfonctionnement ?",
+        "propositions": [
+          "Alias",
+          "Bug",
+          "Java",
+          "Blacklist"
+        ],
+        "réponse": "Bug",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bug_(informatique)",
+        "anecdote": "La gravité peut aller de bénigne (défauts d'affichage mineurs) à majeure (crash système pouvant entraîner de graves accidents)."
+      },
+      {
+        "id": 4,
+        "question": "Quelle liste de morceaux peut être publiée sur le web ?",
+        "propositions": [
+          "Query",
+          "Playlist",
+          "Facticiel",
+          "Registrar"
+        ],
+        "réponse": "Playlist",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Liste_de_lecture",
+        "anecdote": "Les morceaux peuvent être joués séquentiellement, dans un ordre aléatoire ou selon une logique choisie par celui qui l'a composée."
+      }
+    ]
+}

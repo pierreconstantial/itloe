@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« X-Files » : la série",         
+  "mise-à-jour": "02/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de saisons compte la série télévisée « X-Files » ?",
+        "propositions": [
+          "Diz",
+          "Neuf",
+          "Onze",
+          "Huit"
+        ],
+        "réponse": "Onze",
+        "wikipédia": "https://fr.wikipedia.org/wiki/X-Files_:_Aux_frontières_du_réel",
+        "anecdote": "La série décrit les différentes enquêtes des agents spéciaux du FBI Fox Mulder et Dana Scully sur des dossiers classés X (X-Files)."
+      },
+      {
+        "id": 2,
+        "question": "Quel acteur a remplacé David Duchovny dans « X-Files » ?",
+        "propositions": [
+          "Gary Sinise",
+          "Robert Wagner",
+          "Robert Patrick",
+          "Bruce Willis"
+        ],
+        "réponse": "Robert Patrick",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Robert_Patrick",
+        "anecdote": "David Duchovny est revenu brièvement en fin de saison 8 et dans la saison 9, avant de jouer dans le film « X-Files : Régénération »."
+      },
+      {
+        "id": 3,
+        "question": "Quel réalisateur et producteur a créé la série « X-Files » ?",
+        "propositions": [
+          "J.J. Abrams",
+          "David Lynch",
+          "Chris Carter",
+          "Steven Spielberg"
+        ],
+        "réponse": "Chris Carter",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chris_Carter_(scénariste)",
+        "anecdote": "Chris Carter, ancien rédacteur en chef d'un magazine de surf, a eu l'idée de « X-Files » en s'inspirant de son intérêt pour le paranormal."
+      },
+      {
+        "id": 4,
+        "question": "Quel tueur en série de « X-Files » arrache les foies de ses victimes ?",
+        "propositions": [
+          "Hosteen",
+          "Burks",
+          "Tooms",
+          "Krycek"
+        ],
+        "réponse": "Tooms",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Personnages_de_X-Files_:_Aux_frontières_du_réel",
+        "anecdote": "Tous les 30 ans, Eugène Victor Tooms sort de son hibernation pour se nourrir du foie de ses victimes afin de prolonger son existence."
+      }
+    ]
+}

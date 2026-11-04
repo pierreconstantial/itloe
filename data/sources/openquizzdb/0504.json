@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Marques de boisson",         
+  "mise-à-jour": "29/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle célèbre marque britannique de thé propose le « Yellow Label » ?",
+        "propositions": [
+          "Twinnings",
+          "Lipton",
+          "Nestea",
+          "Éléphant"
+        ],
+        "réponse": "Lipton",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lipton",
+        "anecdote": "À Glasgow en 1871, le commerçant écossais Thomas Lipton fonda une chaîne d'épiceries dans toute la Grande-Bretagne."
+      },
+      {
+        "id": 2,
+        "question": "Quel yaourt à boire est commercialisé par le groupe Yoplait ?",
+        "propositions": [
+          "Yop",
+          "Chobani",
+          "Yakult",
+          "Sik"
+        ],
+        "réponse": "Yop",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Yop",
+        "anecdote": "Yop a utilisé de jeunes personnalités des campagnes publicitaires télévisuelles pour faire la promotion de sa marque."
+      },
+      {
+        "id": 3,
+        "question": "Quelle boisson fut la première boisson festive pour enfants ?",
+        "propositions": [
+          "Juicy Juice",
+          "Capri-Sun",
+          "Champomy",
+          "Honest Kids"
+        ],
+        "réponse": "Champomy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Champomy",
+        "anecdote": "La marque est ainsi parfois accusée d'encourager indirectement la consommation d'alcool auprès des jeunes consommateurs."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la plus ancienne des marques de soda américaines ?",
+        "propositions": [
+          "Dr Pepper",
+          "Red Bull",
+          "Pepsi",
+          "Coca-Cola"
+        ],
+        "réponse": "Dr Pepper",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dr_Pepper",
+        "anecdote": "Fabriquée artisanalement dans une pharmacie de Waco (Texas), la boisson fut mise en vente en 1885 (un an avant Coca-Cola)."
+      }
+    ]
+}

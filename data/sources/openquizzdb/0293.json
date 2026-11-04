@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Antoine Griezmann",         
+  "mise-à-jour": "24/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel club espagnol a-t-il été marquant à ses débuts ?",
+        "propositions": [
+          "Sevilla FC",
+          "FC Barcelone",
+          "Real Madrid",
+          "Atlético de Madrid"
+        ],
+        "réponse": "Atlético de Madrid",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Contre qui a-t-il perdu sa finale de l'Euro 2016 avec la France ?",
+        "propositions": [
+          "Italie",
+          "Portugal",
+          "Allemagne",
+          "Croatie"
+        ],
+        "réponse": "Portugal",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quel est le surnom que les fans donnent à Antoine Griezmann ?",
+        "propositions": [
+          "Grizmanito",
+          "Grizou",
+          "Grizmo",
+          "Griez"
+        ],
+        "réponse": "Grizou",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Antoine_Griezmann",
+        "anecdote": "Les supporters d'Antoine Griezmann l'appellent aussi parfois « Grizi », même si « Grizou » est également largement utilisé par ses proches, ses coéquipiers et les médias. Ces surnoms sont devenus des marques de son identité sportive."
+      },
+      {
+        "id": 4,
+        "question": "Quel est son numéro emblématique en sélection française ?",
+        "propositions": [
+          "11",
+          "7",
+          "9",
+          "10"
+        ],
+        "réponse": "7",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

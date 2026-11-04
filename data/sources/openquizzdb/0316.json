@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jeux de société",         
+  "mise-à-jour": "30/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel jeu de dessin et de devinettes a été créé en 1985 par Rob Angel ?",
+        "propositions": [
+          "Mastermind",
+          "Uno",
+          "Blokus",
+          "Pictionary"
+        ],
+        "réponse": "Pictionary",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pictionary",
+        "anecdote": "Au « Pictionary », on ne doit que dessiner, les chiffres, les lettres, les paroles et les gestes étant interdits."
+      },
+      {
+        "id": 2,
+        "question": "Quel jeu d'adresse consiste à retirer des baguettes une par une ?",
+        "propositions": [
+          "Samouraï",
+          "Mandarin",
+          "Mahjong",
+          "Mikado"
+        ],
+        "réponse": "Mikado",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mikado_(jeu)",
+        "anecdote": "Au Mikado, il est souvent possible de s'aider d'une baguette que l'on a déjà récupérée pour en retirer une autre."
+      },
+      {
+        "id": 3,
+        "question": "Quel jeu de société consiste à deviner une combinaison de couleurs ?",
+        "propositions": [
+          "Monopoly",
+          "Memory",
+          "Mastermind",
+          "Brain"
+        ],
+        "réponse": "Mastermind",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mastermind",
+        "anecdote": "Le « Mastermind » a été inventé par Mordecai Meirowitz dans les années 1970 alors qu'il travaillait comme expert en télécom."
+      },
+      {
+        "id": 4,
+        "question": "Avec quoi joue-t-on au « Boggle » ?",
+        "propositions": [
+          "Dés lettres",
+          "Cartes",
+          "Pions",
+          "Billes"
+        ],
+        "réponse": "Dés lettres",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Boggle",
+        "anecdote": "Contrairement au « Scrabble », les règles ne sont pas régies internationalement et il n'y a pas de tournois officiels."
+      }
+    ]
+}

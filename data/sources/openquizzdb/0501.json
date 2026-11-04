@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Superstitions",         
+  "mise-à-jour": "29/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que ne faut-il pas ouvrir à l'intérieur de sa maison ?",
+        "propositions": [
+          "Fenêtre",
+          "Coffre à bijoux",
+          "Tenture",
+          "Parapluie"
+        ],
+        "réponse": "Parapluie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Parapluie",
+        "anecdote": "Le mécanisme d'ouverture des parapluies à armature métallique était dangereux et pouvait blesser quelqu'un ou abîmer un objet."
+      },
+      {
+        "id": 2,
+        "question": "Quel nombre est à la base de nombreuses superstitions ?",
+        "propositions": [
+          "13",
+          "666",
+          "101",
+          "27"
+        ],
+        "réponse": "13",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Superstition",
+        "anecdote": "La superstition du vendredi 13 est parfois reliée au vendredi 13 octobre 1307, date où le roi Philippe le Bel fit tuer des citoyens."
+      },
+      {
+        "id": 3,
+        "question": "Sur quoi faut-il marcher du pied gauche pour favoriser la chance ?",
+        "propositions": [
+          "Crotte de chien",
+          "Caillou blanc",
+          "Chewing-gum",
+          "Fourmi rouge"
+        ],
+        "réponse": "Crotte de chien",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Superstition",
+        "anecdote": "Se promener en rue et marcher sur une crotte de chien n'est jamais agréable, mais du pied gauche, la chance sera au coin de la rue."
+      },
+      {
+        "id": 4,
+        "question": "Quelle plante protégerait contre les esprits maléfiques et les vampires ?",
+        "propositions": [
+          "Ail",
+          "Estragon",
+          "Origan",
+          "Romarin"
+        ],
+        "réponse": "Ail",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ail_cultivé",
+        "anecdote": "Une superstition persistante a investi l'ail de puissants pouvoirs, en particulier celui de chasser les mauvais esprits de la maison."
+      }
+    ]
+}

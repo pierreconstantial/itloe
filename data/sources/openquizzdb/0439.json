@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Les mamans dans l'art",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En quelle année Marcel Pagnol a-t-il publié « Le Château de ma mère » ?",
+        "propositions": [
+          "1957",
+          "1977",
+          "1917",
+          "1937"
+        ],
+        "réponse": "1957",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Château_de_ma_mère",
+        "anecdote": "« Le Château de ma mère » est précédé par « La Gloire de mon père » et suivi par « Le Temps des secrets »."
+      },
+      {
+        "id": 2,
+        "question": "Quel film de Jane Campion met en scène une mère muette pianiste ?",
+        "propositions": [
+          "In the cut",
+          "Bright Star",
+          "La leçon de piano",
+          "Sweetie"
+        ],
+        "réponse": "La leçon de piano",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Leçon_de_piano",
+        "anecdote": "Le film a remporté la Palme d'or du Festival de Cannes 1993, la première attribuée à une réalisatrice."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel roman de Jules Renard le héros affronte la haine de sa mère ?",
+        "propositions": [
+          "La Maîtresse",
+          "L'Écornifleur",
+          "Poil de Carotte",
+          "Bucoliques"
+        ],
+        "réponse": "Poil de Carotte",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Poil_de_carotte",
+        "anecdote": "François Lepic est surnommé Poil de carotte à cause de ses cheveux roux et ses taches de rousseur."
+      },
+      {
+        "id": 4,
+        "question": "Qui a peint « La Madone à la prairie » représentant Jésus et sa mère ?",
+        "propositions": [
+          "Auguste Renoir",
+          "Rembrandt",
+          "Michel-Ange",
+          "Raphaël"
+        ],
+        "réponse": "Raphaël",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Madone_à_la_prairie",
+        "anecdote": "Le tableau est l'une des oeuvres qui ouvrent la série des Madones de l'artiste lors de son séjour florentin."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Voyage en eaux souterraines",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment qualifie-t-on une eau minérale riche en fer ?",
+        "propositions": [
+          "Gazeuse",
+          "Ferrugineuse",
+          "Plate",
+          "Calcaire"
+        ],
+        "réponse": "Ferrugineuse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eau_ferrugineuse",
+        "anecdote": "On a longtemps attribué à ces eaux le mérite de prévenir ou de guérir l'alcoolisme."
+      },
+      {
+        "id": 2,
+        "question": "Quelle eau d'origine souterraine est naturellement conforme ?",
+        "propositions": [
+          "Eau déminéralisée",
+          "Eau usée",
+          "Eau gazeuse",
+          "Eau de source"
+        ],
+        "réponse": "Eau de source",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eau_minérale_naturelle",
+        "anecdote": "Une eau de source a bénéficié d'une protection contre la pollution et n'a subi ni traitement chimique ni adjonction."
+      },
+      {
+        "id": 3,
+        "question": "Quelle eau minérale vous a prodigué ces conseils : « Buvez, éliminez » ?",
+        "propositions": [
+          "Perrier",
+          "Badoit",
+          "Vittel",
+          "Evian"
+        ],
+        "réponse": "Vittel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vittel_(eau_minérale)",
+        "anecdote": "La marque a appartenu à la famille fondatrice, les Bouloumié, pendant 4 générations."
+      },
+      {
+        "id": 4,
+        "question": "Quelle marque d'eau minérale belge appartient au groupe Coca-Cola ?",
+        "propositions": [
+          "Spa",
+          "Chaudfontaine",
+          "Bru",
+          "Valvert"
+        ],
+        "réponse": "Chaudfontaine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chaudfontaine_(eau)",
+        "anecdote": "La source de Chaudfontaine se situe dans la commune belge éponyme de Chaudfontaine, en Région wallonne."
+      }
+    ]
+}

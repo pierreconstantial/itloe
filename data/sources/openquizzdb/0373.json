@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Istanbul",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quel pays Istanbul est-elle la plus grande ville et métropole ?",
+        "propositions": [
+          "Syrie",
+          "Yémen",
+          "Jordanie",
+          "Turquie"
+        ],
+        "réponse": "Turquie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Istanbul",
+        "anecdote": "La ville d'Istanbul est inscrite sur la liste du patrimoine mondial de l'Unesco depuis 1985."
+      },
+      {
+        "id": 2,
+        "question": "Quel nom la ville d'Istanbul a-t-elle porté au moment de sa fondation ?",
+        "propositions": [
+          "Daulis",
+          "Byzance",
+          "Paestum",
+          "Messène"
+        ],
+        "réponse": "Byzance",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Istanbul",
+        "anecdote": "Byzance est une ancienne cité grecque, capitale de la Thrace, située à l'entrée du Bosphore sur une partie de l'actuelle Istanbul."
+      },
+      {
+        "id": 3,
+        "question": "Comment appelle-t-on les habitants d'Istanbul ?",
+        "propositions": [
+          "Stambouliotes",
+          "Banbulistes",
+          "Stambulois",
+          "Istanbuliens"
+        ],
+        "réponse": "Stambouliotes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Istanbul",
+        "anecdote": "La population de l'ensemble de l'agglomération stambouliote était évaluée à 15 millions d'habitants en 2014."
+      },
+      {
+        "id": 4,
+        "question": "De quelle mosquée d'Istanbul partent les pèlerins vers La Mecque ?",
+        "propositions": [
+          "Verte",
+          "Bleue",
+          "Blanche",
+          "Rouge"
+        ],
+        "réponse": "Bleue",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mosquée_bleue",
+        "anecdote": "La Mosquée bleue fut construite entre 1609 et 1616, pendant le règne de sultan Ahmet Ier."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Petits mammifères",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment appelle-t-on la femelle du renard ?",
+        "propositions": [
+          "Renardine",
+          "Renardelle",
+          "Renardeaude",
+          "Renarde"
+        ],
+        "réponse": "Renarde",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Renard",
+        "anecdote": "Les caractéristiques générales des renards sont celles des Canidés, avec des nuances pour chaque espèce."
+      },
+      {
+        "id": 2,
+        "question": "Quelle vitesse maximale peut atteindre un lièvre ?",
+        "propositions": [
+          "110 km/h",
+          "90 km/h",
+          "50 km/h",
+          "70 km/h"
+        ],
+        "réponse": "70 km/h",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lièvre",
+        "anecdote": "Le lièvre, du haut de ses 60 cm, est avec le lapin des neiges le plus grand lièvre d'Europe."
+      },
+      {
+        "id": 3,
+        "question": "Quel animal est une sorte de « souris des champs » ?",
+        "propositions": [
+          "Mulet",
+          "Musaraigne",
+          "Muscardin",
+          "Mulot"
+        ],
+        "réponse": "Mulot",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mulot",
+        "anecdote": "Les musaraignes, ressemblant à une souris vues de loin, malgré leur nez pointu, sont aussi parfois qualifiées par erreur de mulots."
+      },
+      {
+        "id": 4,
+        "question": "Quelle partie du corps de la taupe lui permet de s'orienter sous terre ?",
+        "propositions": [
+          "Sa tête",
+          "Sa queue",
+          "Ses pattes",
+          "Son museau"
+        ],
+        "réponse": "Sa queue",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Taupe",
+        "anecdote": "Leurs caractéristiques générales sont celles des petits mammifères fouisseurs qui creusent et vivent dans des galeries souterraines."
+      }
+    ]
+}

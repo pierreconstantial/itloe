@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Secrets du web",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est l'encyclopédie collaborative la plus utilisée sur Internet ?",
+        "propositions": [
+          "Framasoft",
+          "Pandocréon",
+          "Netalya",
+          "Wikipédia"
+        ],
+        "réponse": "Wikipédia",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Wikipédia",
+        "anecdote": "Sur Wikipédia, n'importe qui pouvant accéder au site peut modifier la quasi-totalité de ses articles, sous réserve de modération."
+      },
+      {
+        "id": 2,
+        "question": "Que sont « Google Chrome », « Internet Explorer » et « Mozilla Firefox » ?",
+        "propositions": [
+          "Navigateurs",
+          "Moteurs",
+          "Encyclopédies",
+          "Routeurs"
+        ],
+        "réponse": "Navigateurs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Navigateur_web",
+        "anecdote": "Le terme « navigateur » est inspiré de Netscape Navigator, le navigateur phare principalement utilisé en 1995 et 1996."
+      },
+      {
+        "id": 3,
+        "question": "Que signifie le deuxième w du www des adresses de sites internet ?",
+        "propositions": [
+          "Wide",
+          "Web",
+          "Worse",
+          "World"
+        ],
+        "réponse": "Wide",
+        "wikipédia": "https://fr.wikipedia.org/wiki/World_Wide_Web",
+        "anecdote": "Le Web n'est qu'une des applications d'Internet, distincte du courriel, de la messagerie instantanée ou du partage de fichiers."
+      },
+      {
+        "id": 4,
+        "question": "Quel nom portait le navigateur Internet devenu « Microsoft Edge » ?",
+        "propositions": [
+          "Firefox",
+          "Internet Explorer",
+          "Chrome",
+          "Safari"
+        ],
+        "réponse": "Internet Explorer",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Internet_Explorer",
+        "anecdote": "La version 11 du navigateur Internet Explorer sera toujours présente dans Windows 10 avant le passage progressif à Microsoft Edge."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #16",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un K, il faut un marsupial, un vêtement, un pays et un art martial.",
+        "propositions": [
+          "Kenya",
+          "Kimono",
+          "Karaté",
+          "Koala"
+        ],
+        "réponse": "Koala",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un F, il faut un sport, un fruit, une arme et un instrument de musique.",
+        "propositions": [
+          "Flûte",
+          "Football",
+          "Fusil",
+          "Fraise"
+        ],
+        "réponse": "Football",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un D, il faut un fruit, un poisson, un support et un automate public.",
+        "propositions": [
+          "Datte",
+          "Disque",
+          "Distributeur",
+          "Dorade"
+        ],
+        "réponse": "Datte",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un L, il faut un instrument, un arbrisseau, un sport et un pays arabe.",
+        "propositions": [
+          "Luth",
+          "Lavande",
+          "Lutte",
+          "Liban"
+        ],
+        "réponse": "Luth",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

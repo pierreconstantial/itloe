@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #23",         
+  "mise-à-jour": "15/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un B, il faut un rameau, une guitare, une boisson et une émotion.",
+        "propositions": [
+          "Branche",
+          "Banjo",
+          "Bière",
+          "Bonheur"
+        ],
+        "réponse": "Branche",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un O, il faut une couleur, un animal, un métier et un genre musical.",
+        "propositions": [
+          "Opticien",
+          "Ours",
+          "Orange",
+          "Opéra"
+        ],
+        "réponse": "Orange",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un P, il faut un arbre, une forme de jeu, une chaussure et un conifère.",
+        "propositions": [
+          "Prunier",
+          "Pantoufle",
+          "Paris",
+          "Pin"
+        ],
+        "réponse": "Prunier",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un T, il faut un fracas, un outil à main, un animal et un réservoir.",
+        "propositions": [
+          "Tournevis",
+          "Tonnerre",
+          "Tank",
+          "Taupe"
+        ],
+        "réponse": "Tonnerre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

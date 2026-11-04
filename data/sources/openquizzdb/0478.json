@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Haltérophilie",         
+  "mise-à-jour": "08/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De combien d'essais dispose-t-on pour chaque mouvement ?",
+        "propositions": [
+          "Quatre",
+          "Trois",
+          "Six",
+          "Cinq"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Haltérophilie",
+        "anecdote": "L'haltérophilie est à l'heure actuelle l'unique sport de force inscrit au programme des Jeux olympiques."
+      },
+      {
+        "id": 2,
+        "question": "Quel produit un haltérophile utilise-t-il pour améliorer la prise de barre ?",
+        "propositions": [
+          "Farine",
+          "Craie",
+          "Vaseline",
+          "Magnésie"
+        ],
+        "réponse": "Magnésie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Carbonate_de_magnésium",
+        "anecdote": "Sous forme de poudre, le carbonate de magnésium est utilisé comme anti-transpirant dans de nombreux sports."
+      },
+      {
+        "id": 3,
+        "question": "Combien pèse la barre utilisée par les femmes en haltérophilie ?",
+        "propositions": [
+          "45 kg",
+          "25 kg",
+          "35 kg",
+          "15 kg"
+        ],
+        "réponse": "15 kg",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Haltérophilie",
+        "anecdote": "Sur la partie centrale de la barre, un moletage rend la barre rugueuse et facilite la prise."
+      },
+      {
+        "id": 4,
+        "question": "En haltérophilie, quel est le poids d'un grand disque rouge ?",
+        "propositions": [
+          "45 kg",
+          "25 kg",
+          "35 kg",
+          "15 kg"
+        ],
+        "réponse": "25 kg",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Haltérophilie",
+        "anecdote": "Les disques sont en métal et en caoutchouc (afin d'amortir les chocs) et respectent un code de couleur bien défini."
+      }
+    ]
+}

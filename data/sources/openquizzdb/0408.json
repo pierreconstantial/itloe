@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Héros de « Star Wars »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Sur quelle planète Anakin Skywalker est-il arrivé à l'âge de quatre ans ?",
+        "propositions": [
+          "Tatooine",
+          "Touareg",
+          "Tanghulu",
+          "Tikrit"
+        ],
+        "réponse": "Tatooine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tatooine",
+        "anecdote": "George Lucas a utilisé l'habitat traditionnel de Tataouine sans retouches pour la scène où Anakin retourne voir sa mère."
+      },
+      {
+        "id": 2,
+        "question": "Quel guerrier Wookiee est le compagnon d'Han Solo ?",
+        "propositions": [
+          "Jar Jar Binks",
+          "Palpatine",
+          "Watto",
+          "Chewbacca"
+        ],
+        "réponse": "Chewbacca",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chewbacca",
+        "anecdote": "Chewbacca possède un grand coeur et fait preuve d'une loyauté indéfectible envers ses amis."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le nom du vaisseau spatial du contrebandier Han Solo ?",
+        "propositions": [
+          "Faucon Millenium",
+          "B-Wing",
+          "Speeder",
+          "Aigle Solitaire"
+        ],
+        "réponse": "Faucon Millenium",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Faucon_Millenium",
+        "anecdote": "Le vaisseau fut appelé « Millenium Condor » dans la version française du premier épisode produit."
+      },
+      {
+        "id": 4,
+        "question": "Quel personnage de « Star Wars » ressemble à une limace géante ?",
+        "propositions": [
+          "Jabba le Hutt",
+          "Lando Calrissian",
+          "Dark Maul",
+          "Mace Windu"
+        ],
+        "réponse": "Jabba le Hutt",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jabba_le_Hutt",
+        "anecdote": "Le critique Roger Ebert considère que son apparence physique le rapproche d'un croisement entre un crapaud et le chat du Cheshire."
+      }
+    ]
+}

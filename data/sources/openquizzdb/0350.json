@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #33",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "On peut tourner autour, mot de trois lettres commençant par un P ?",
+        "propositions": [
+          "Pli",
+          "Pic",
+          "Pin",
+          "Pot"
+        ],
+        "réponse": "Pot",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Il tient à sa montre, mot de huit lettres commençant par un B ?",
+        "propositions": [
+          "Bananier",
+          "Baigneur",
+          "Bonhomme",
+          "Bracelet"
+        ],
+        "réponse": "Bracelet",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "C'est parfois du bouleau, mot de cinq lettres commençant par un A ?",
+        "propositions": [
+          "Algue",
+          "Appât",
+          "Arbre",
+          "Adieu"
+        ],
+        "réponse": "Arbre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Patate et pêche, mot de sept lettres commençant par un E ?",
+        "propositions": [
+          "Embolie",
+          "Entrave",
+          "Ellipse",
+          "Énergie"
+        ],
+        "réponse": "Énergie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

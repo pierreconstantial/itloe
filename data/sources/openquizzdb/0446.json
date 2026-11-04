@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Rongeurs de fiction",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel film de Pixar un rat se révèle-t-il excellent cuisinier ?",
+        "propositions": [
+          "Cars",
+          "Toy Story",
+          "Monstres et Cie",
+          "Ratatouille"
+        ],
+        "réponse": "Ratatouille",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quelle souris de dessin animé est la plus rapide du Mexique ?",
+        "propositions": [
+          "Speedy Gonzales",
+          "Stuart Little",
+          "Mickey Mouse",
+          "Jerry"
+        ],
+        "réponse": "Speedy Gonzales",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quels rongeurs sont les héros du film « Misson-G », sorti en 2009 ?",
+        "propositions": [
+          "Souris",
+          "Hamsters",
+          "Cochons d'Inde",
+          "Rats"
+        ],
+        "réponse": "Cochons d'Inde",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "À quelle série d'animation Eric et Ramzi ont-ils prêté leur voix ?",
+        "propositions": [
+          "South Park",
+          "Futurama",
+          "Les Griffin",
+          "Ratz"
+        ],
+        "réponse": "Ratz",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #14",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un F, il faut un oiseau, une couleur, une machine et un contenant.",
+        "propositions": [
+          "Flûte",
+          "Fraiseuse",
+          "Fuchsia",
+          "Faucon"
+        ],
+        "réponse": "Faucon",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un C, il faut un sport, un plat, un objet tranchant et une étendue.",
+        "propositions": [
+          "Couteau",
+          "Ciel",
+          "Chili",
+          "Cyclisme"
+        ],
+        "réponse": "Cyclisme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un R, il faut un rusé, un outil de cuisine, une couleur et un métier.",
+        "propositions": [
+          "Rouge",
+          "Râpe",
+          "Restaurateur",
+          "Renard"
+        ],
+        "réponse": "Renard",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un H, il faut un pays, une fenêtre, une plante et un légume vert.",
+        "propositions": [
+          "Haricot",
+          "Hublot",
+          "Hongrie",
+          "Houx"
+        ],
+        "réponse": "Hongrie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

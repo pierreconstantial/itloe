@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #21",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Place des chemises, mot de huit lettres commençant par un C ?",
+        "propositions": [
+          "Consonne",
+          "Classeur",
+          "Camarade",
+          "Chenille"
+        ],
+        "réponse": "Classeur",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Agent de transmission, mot de cinq lettres commençant par un A ?",
+        "propositions": [
+          "Appel",
+          "Avare",
+          "Audit",
+          "Arbre"
+        ],
+        "réponse": "Arbre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Se rend en partant, mot de trois lettre commençant par un A ?",
+        "propositions": [
+          "Air",
+          "Âme",
+          "Axe",
+          "Art"
+        ],
+        "réponse": "Âme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Esprit piquant, mot de trois lettres commençant par un S ?",
+        "propositions": [
+          "Sot",
+          "Son",
+          "Sac",
+          "Sel"
+        ],
+        "réponse": "Sel",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

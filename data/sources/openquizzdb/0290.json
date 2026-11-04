@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #28",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un B, il faut un légume, un outil, une boisson et une monstre.",
+        "propositions": [
+          "Betterave",
+          "Bière",
+          "Bêche",
+          "Baleine"
+        ],
+        "réponse": "Betterave",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un T, il faut une rame, un roi du barreau, un bois blanc et un animal.",
+        "propositions": [
+          "Tilleul",
+          "Tigre",
+          "Train",
+          "Ténor"
+        ],
+        "réponse": "Train",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un F, il faut un col, une profession, un cadre et un rapace.",
+        "propositions": [
+          "Fraise",
+          "Forgeron",
+          "Faucon",
+          "Fenêtre"
+        ],
+        "réponse": "Fraise",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un R, il faut une fleur, une clarté du vin, un sport et un animal.",
+        "propositions": [
+          "Robe",
+          "Rose",
+          "Rafting",
+          "Renard"
+        ],
+        "réponse": "Rose",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

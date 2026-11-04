@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Golf",         
+  "mise-à-jour": "29/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Au golf, quel objet utilise-t-on pour envoyer la balle dans le trou ?",
+        "propositions": [
+          "Club",
+          "Raquette",
+          "Crosse",
+          "Bâton"
+        ],
+        "réponse": "Club",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Club_(golf)",
+        "anecdote": "Chaque club est composé d'un manche, d'un grip où le golfeur va venir poser ses mains et d'une tête en contact avec la balle."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel alphabet le mot Golf est-il associé à la lettre G ?",
+        "propositions": [
+          "Phonétique",
+          "Gotique",
+          "Radio",
+          "Sémaphore"
+        ],
+        "réponse": "Radio",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alphabet_radio",
+        "anecdote": "Un alphabet radio est un code utilisé en radiotéléphonie, qui consiste à représenter chaque lettre de l'alphabet par un mot entier."
+      },
+      {
+        "id": 3,
+        "question": "Quel nombre de coups standard est fixé pour terminer un trou au golf ?",
+        "propositions": [
+          "Birdie",
+          "Par",
+          "Bogey",
+          "Eagle"
+        ],
+        "réponse": "Par",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vocabulaire_du_golf",
+        "anecdote": "Habituellement, sur un parcours de 18 trous, le par est de 72 : cette moyenne est calculée en fonction des par de chaque trou."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la langue officielle du golf, fixée en raison de ses origines ?",
+        "propositions": [
+          "Français",
+          "Allemand",
+          "Anglais",
+          "Espagnol"
+        ],
+        "réponse": "Anglais",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Golf",
+        "anecdote": "Dans les règles de golf, la Fédération française de golf utilise les termes anglais lorsque ceux-ci sont utilisés par les golfeurs."
+      }
+    ]
+}

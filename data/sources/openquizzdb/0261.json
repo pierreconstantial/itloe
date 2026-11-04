@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jeux olympiques",         
+  "mise-à-jour": "24/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien dénombre-t-on de couloirs dans une piscine olympique ?",
+        "propositions": [
+          "Douze",
+          "Quatorze",
+          "Dix",
+          "Six"
+        ],
+        "réponse": "Dix",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Piscine_olympique",
+        "anecdote": "Seules les piscines d'eau douce homologuées conviennent aux compétitions organisées dans ces grands bassins."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle ville se sont déroulés les Jeux olympiques de 2016 ?",
+        "propositions": [
+          "Tokyo",
+          "Londres",
+          "Rio de Janeiro",
+          "Pékin"
+        ],
+        "réponse": "Rio de Janeiro",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jeux_olympiques_d'été_de_2016",
+        "anecdote": "Ces Jeux olympiques seront les premiers à se dérouler en Amérique du Sud et les premiers à se dérouler dans un pays lusophone."
+      },
+      {
+        "id": 3,
+        "question": "Quelle épreuve olympique débute hors stade et finit dans le stade ?",
+        "propositions": [
+          "Cross-country",
+          "Marathon",
+          "Trail",
+          "10 000 m"
+        ],
+        "réponse": "Marathon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marathon_(sport)",
+        "anecdote": "Le marathon est une épreuve sportive de course à pied qui se dispute généralement sur une distance de 42 kilomètres."
+      },
+      {
+        "id": 4,
+        "question": "Quel anneau du drapeau olympique est le plus proche du mât ?",
+        "propositions": [
+          "Bleu",
+          "Vert",
+          "Rouge",
+          "Jaune"
+        ],
+        "réponse": "Bleu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Drapeau_olympique",
+        "anecdote": "Les cinq anneaux entrelacés représentent les cinq continents unis par l'olympisme, les six couleurs représentant toutes les nations."
+      }
+    ]
+}

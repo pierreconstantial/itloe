@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Anciennes séries télé #3",         
+  "mise-à-jour": "02/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le nom de la famille de Bobby et de JR dans « Dallas » ?",
+        "propositions": [
+          "Krebbs",
+          "Shepard",
+          "Barnes",
+          "Ewing"
+        ],
+        "réponse": "Ewing",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dallas_(série_télévisée,_1978)",
+        "anecdote": "Le succès de « Dallas » donnera naissance à un autre feuilleton, « Côte Ouest », se déroulant en Californie, près de Los Angeles."
+      },
+      {
+        "id": 2,
+        "question": "Quel ami du capitaine Kirk a les oreilles pointues ?",
+        "propositions": [
+          "Sulu",
+          "Spock",
+          "Sanders",
+          "Scotty"
+        ],
+        "réponse": "Spock",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Spock_(Star_Trek)",
+        "anecdote": "Mi-homme mi-vulcain, Spock est torturé entre la raison et la logique de sa moitié vulcaine et les émotions humaines."
+      },
+      {
+        "id": 3,
+        "question": "Comment se prénomme le fidèle serviteur du célèbre Zorro ?",
+        "propositions": [
+          "Garcia",
+          "Esteban",
+          "Galindo",
+          "Bernardo"
+        ],
+        "réponse": "Bernardo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Zorro_(série_télévisée,_1957)",
+        "anecdote": "Muet, Bernardo se fait passer pour sourd afin de laisser traîner ses oreilles un peu partout et d'ensuite rendre compte à son maître."
+      },
+      {
+        "id": 4,
+        "question": "Quelle marque de voiture est conduite par Thomas Magnum ?",
+        "propositions": [
+          "Ferrari",
+          "Porsche",
+          "Audi",
+          "BMW"
+        ],
+        "réponse": "Ferrari",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Magnum_(série_télévisée)",
+        "anecdote": "Initialement, les producteurs voulaient que Magnum conduise une Porsche 928 mais Porsche a refusé cette commande spéciale."
+      }
+    ]
+}

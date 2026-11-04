@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Breaking Bad »",         
+  "mise-à-jour": "29/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec quel objet Salamanca communique-t-il dans « Breaking Bad » ?",
+        "propositions": [
+          "Clavier",
+          "Sonnette",
+          "Marqueur",
+          "Trompette"
+        ],
+        "réponse": "Sonnette",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Breaking_Bad",
+        "anecdote": "Patriarche de la famille et ancien homme de main de Don Eladio Vuente, Hector était un membre de haut rang du cartel de Juarez."
+      },
+      {
+        "id": 2,
+        "question": "Qui est la dernière personne à mourir dans « Breaking Bad » ?",
+        "propositions": [
+          "Wilfried",
+          "William",
+          "Walter",
+          "Wade"
+        ],
+        "réponse": "Walter",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Saison_5_de_Breaking_Bad",
+        "anecdote": "Quand les forces de l'ordre débarquent chez Jack, elles ne trouvent que le corps sans vie de Walt étendu par terre."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel véhicule cuisinent Walter et Jesse au début de la série ?",
+        "propositions": [
+          "Taxi",
+          "Bus",
+          "Camion",
+          "Camping-car"
+        ],
+        "réponse": "Camping-car",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Breaking_Bad",
+        "anecdote": "« Breaking Bad » a reçu un large succès critique et est à présent considérée comme l'une des meilleures séries télé américaines."
+      },
+      {
+        "id": 4,
+        "question": "Quel alter-ego Walter White a-t-il créé pour ses activités criminelles ?",
+        "propositions": [
+          "Gutenberg",
+          "Heisenberg",
+          "Einstein",
+          "Iceberg"
+        ],
+        "réponse": "Heisenberg",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Walter_White_(personnage)",
+        "anecdote": "Walt se rend chez El Tuco sous le pseudonyme de « Heisenberg » et lui réclame 50 000 $ (pour sa drogue et pour Jesse)."
+      }
+    ]
+}

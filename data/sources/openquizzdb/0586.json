@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Prénoms du cinéma #1",         
+  "mise-à-jour": "02/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment se prénomme la brune de la saga de science-fiction « Matrix » ?",
+        "propositions": [
+          "Niobe",
+          "Taranis",
+          "Trinity",
+          "Tek"
+        ],
+        "réponse": "Trinity",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Trinity_(Matrix)",
+        "anecdote": "Cette hackeuse qui utilise le pseudonyme de Trinity (Trinité), qui n'est pas son véritable nom, est incarnée par Carrie-Anne Moss."
+      },
+      {
+        "id": 2,
+        "question": "Qui est incarné par Orlando Bloom dans « Le Seigneur des Anneaux » ?",
+        "propositions": [
+          "Faramir",
+          "Boromir",
+          "Legolas",
+          "Aragorn"
+        ],
+        "réponse": "Legolas",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Legolas",
+        "anecdote": "Fils de Thranduil, le roi des Elfes, Legolas Vertefeuille se fit connaître lors du Conseil d'Elrond en 3018 du Troisième Âge."
+      },
+      {
+        "id": 3,
+        "question": "Qui est la compagne de Thelma dans un film de Ridley Scott ?",
+        "propositions": [
+          "Geena",
+          "Louise",
+          "Susan",
+          "Bethy"
+        ],
+        "réponse": "Louise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Thelma_et_Louise",
+        "anecdote": "« Thelma et Louise » est un film américain réalisé par Ridley Scott en 1991 qui a reçu l'Oscar du meilleur scénario, écrit par Callie Khouri."
+      },
+      {
+        "id": 4,
+        "question": "Quel héros, créé par un inventeur, possède des mains d'argent ?",
+        "propositions": [
+          "Dylan",
+          "Edward",
+          "Kevin",
+          "Robert"
+        ],
+        "réponse": "Edward",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Edward_aux_mains_d'argent",
+        "anecdote": "Le projet sera fortement accéléré à la suite du succès commercial remporté par « Batman » (1989), le précédent film de Tim Burton."
+      }
+    ]
+}

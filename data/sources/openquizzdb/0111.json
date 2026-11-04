@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Les héros de l'Ironman",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la longueur totale de la course multi-disciplinaire Ironman ?",
+        "propositions": [
+          "184 km",
+          "142 km",
+          "226 km",
+          "98 km"
+        ],
+        "réponse": "226 km",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ironman",
+        "anecdote": "Cette appellation est associée au triathlon Ironman d'Hawaï originel créé en 1978 par John et Judy Collins."
+      },
+      {
+        "id": 2,
+        "question": "En combien de temps la course Ironman est-elle réalisée ?",
+        "propositions": [
+          "1 semaine",
+          "3 jours",
+          "Moins d'1 jour",
+          "1 mois"
+        ],
+        "réponse": "Moins d'1 jour",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ironman",
+        "anecdote": "Les vainqueurs de cette compétition mondiale arrivent à achever le circuit complet en un peu plus de huit heures."
+      },
+      {
+        "id": 3,
+        "question": "Combien de participants courent chaque année la finale de l'Ironman ?",
+        "propositions": [
+          "3 000",
+          "4 000",
+          "5 000",
+          "2 000"
+        ],
+        "réponse": "2 000",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ironman",
+        "anecdote": "La participation à la finale de la compétition moderne exige une qualification préalable de participation au championnat."
+      },
+      {
+        "id": 4,
+        "question": "Par quelle discipline débute le championnat du monde Ironman ?",
+        "propositions": [
+          "Course",
+          "Marathon",
+          "Cyclisme",
+          "Natation"
+        ],
+        "réponse": "Natation",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ironman",
+        "anecdote": "La première épreuve de natation se déroule dans la baie de Kailua (Kailua-Bay) en une boucle unique de 3.8 kilomètres."
+      }
+    ]
+}

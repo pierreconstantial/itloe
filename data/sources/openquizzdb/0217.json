@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Robots du cinéma",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle saga cinématographique met en avant les Decepticons ?",
+        "propositions": [
+          "Total Recall",
+          "Transformers",
+          "Real Steel",
+          "Blade Runner"
+        ],
+        "réponse": "Transformers",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Transformers_(film,_2007)",
+        "anecdote": "Optimus Prime est doublé dans les films par Peter Cullen, la même voix que dans la série animée, ce qui ravit les fans nostalgiques."
+      },
+      {
+        "id": 2,
+        "question": "Quel film met en scène Arnold Schwarzenegger dans le rôle d'un cyborg ?",
+        "propositions": [
+          "Real Steel",
+          "Terminator",
+          "Sucker Punch",
+          "Robots"
+        ],
+        "réponse": "Terminator",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Terminator",
+        "anecdote": "« Terminator » traite du voyage dans le temps et de la menace que pourraient faire naître l'IA et les robots intelligents."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel film rencontre-t-on un androïde scientifique prénommé Ash ?",
+        "propositions": [
+          "Robocop",
+          "Alien",
+          "Matrix",
+          "Total Recall"
+        ],
+        "réponse": "Alien",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alien_(film)",
+        "anecdote": "L'acteur Ian Holm, qui joue Ash, est également connu pour son rôle de Bilbo Baggins dans la trilogie « Le Seigneur des Anneaux »."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel film de 2003 voit-on des Sentinelles, robots insectoïdes ?",
+        "propositions": [
+          "Clones",
+          "Star Wars",
+          "H2G2",
+          "Matrix Revolutions"
+        ],
+        "réponse": "Matrix Revolutions",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Matrix_Revolutions",
+        "anecdote": "Les Sentinelles ont été conçues pour ressembler à des pieuvres mécaniques, avec une mobilité fluide et des tentacules meurtriers."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Des pâtes, oui !",         
+  "mise-à-jour": "23/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelles pâtes alimentaires se présentent en feuilles rectangulaires ?",
+        "propositions": [
+          "Lasagnes",
+          "Tortellini",
+          "Cannelloni",
+          "Fusilli"
+        ],
+        "réponse": "Lasagnes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lasagnes",
+        "anecdote": "Originaires du centre-sud italien, les lasagnes sont déclinées sous de multiples variantes dans le monde (épinard, aubergine, pesto)."
+      },
+      {
+        "id": 2,
+        "question": "Quelle pâte farcie pliée vient du nord-ouest de l'Italie ?",
+        "propositions": [
+          "Macaroni",
+          "Fusilli",
+          "Spaghetti",
+          "Ravioli"
+        ],
+        "réponse": "Ravioli",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ravioli",
+        "anecdote": "La farce des raviolis peut être composée de légumes, fromages, viandes, poissons, pomme de terre, herbes, biscuits ou des fruits."
+      },
+      {
+        "id": 3,
+        "question": "Quelle variété de pâtes longues est vendue sous forme de lanières ?",
+        "propositions": [
+          "Spaghetti",
+          "Fettuccine",
+          "Luinguine",
+          "Tagliatelles"
+        ],
+        "réponse": "Tagliatelles",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tagliatelle",
+        "anecdote": "Les tagliatelles sont souvent cuisinées avec une sauce bolognaise, ou à la sauce tomate napolitaine, ou à la carbonara."
+      },
+      {
+        "id": 4,
+        "question": "Quel plat de pâtes est jeté dans une poêle avec oeufs et lardons ?",
+        "propositions": [
+          "Lasagne",
+          "Tortellini",
+          "Carbonara",
+          "Ravioli"
+        ],
+        "réponse": "Carbonara",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pâtes_à_la_carbonara",
+        "anecdote": "La recette moderne des pâtes à la carbonara utilise des spaghettis, du guanciale, du pecorino, du jaune d'oeuf et du poivre."
+      }
+    ]
+}

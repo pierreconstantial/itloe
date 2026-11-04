@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Prénoms de séries télés",         
+  "mise-à-jour": "13/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle lycéenne de série télé s'est battu contre les vampires ?",
+        "propositions": [
+          "Joyce",
+          "Tara",
+          "Buffy",
+          "Angel"
+        ],
+        "réponse": "Buffy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Buffy_Summers",
+        "anecdote": "Figure centrale de la série, principal facteur de popularité du personnage, Buffy Summers est une lycéenne tueuse de vampires."
+      },
+      {
+        "id": 2,
+        "question": "Qui incarne la méchante dans « La petite maison dans la prairie » ?",
+        "propositions": [
+          "Stella",
+          "Nellie",
+          "Marie",
+          "Laura"
+        ],
+        "réponse": "Nellie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nellie_Oleson",
+        "anecdote": "Elle est interprétée dans la série par l'actrice américaine Alison Arngrim, qui reprendra ce rôle dans un spectacle humoristique."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le prénom du capitaine français de « Star trek:NextGen » ?",
+        "propositions": [
+          "Jean-Luc",
+          "Jean-Marc",
+          "Jean-Pierre",
+          "Jean-Charles"
+        ],
+        "réponse": "Jean-Luc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jean-Luc_Picard",
+        "anecdote": "Picard a commandé le Stargazer (2333-2355), l'Enterprise-D (2363-2371) et l'Enterprise-E (2372-) à la fin du XXIVe siècle."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le prénom du père de la famille Simpson ?",
+        "propositions": [
+          "Abraham",
+          "Homer",
+          "Bart",
+          "Herbert"
+        ],
+        "réponse": "Homer",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Homer_Simpson",
+        "anecdote": "Homer est apparu pour la première fois à la télévision avec sa famille dans le court métrage « Good Night », le 19 avril 1987."
+      }
+    ]
+}

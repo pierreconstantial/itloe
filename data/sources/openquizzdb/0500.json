@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Transport motorisé",         
+  "mise-à-jour": "29/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel véhicule à cabine circule sur les routes enneigées ?",
+        "propositions": [
+          "Autoneige",
+          "Téléphérique",
+          "Aéroglisseur",
+          "Chasse-neige"
+        ],
+        "réponse": "Autoneige",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Autoneige",
+        "anecdote": "Il ne faut pas confondre l'autoneige avec la motoneige, qui est un véhicule récréatif à un ou deux passagers sur une selle."
+      },
+      {
+        "id": 2,
+        "question": "Quel mot d'usage courant en France désigne un véhicule habitable ?",
+        "propositions": [
+          "Monocycle",
+          "Camping-car",
+          "Diligence",
+          "Caravane"
+        ],
+        "réponse": "Camping-car",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Camping-car",
+        "anecdote": "La pratique du camping-car étant en expansion, de plus en plus de communes créent des parkings réservés aux camping-cars."
+      },
+      {
+        "id": 3,
+        "question": "Quel avion possède la capacité de se poser ou de décoller sur l'eau ?",
+        "propositions": [
+          "Hydravion",
+          "Deltaplane",
+          "Planeur",
+          "ULM"
+        ],
+        "réponse": "Hydravion",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hydravion",
+        "anecdote": "Cet avion est décliné en divers types : hydravion à flotteurs, hydravion à coque, navion ou aéronef amphibie."
+      },
+      {
+        "id": 4,
+        "question": "Quelle motocyclette est pourvue d'une troisième roue et d'un panier ?",
+        "propositions": [
+          "Solex",
+          "Coccinelle",
+          "Tandem",
+          "Side-car"
+        ],
+        "réponse": "Side-car",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Side-car",
+        "anecdote": "Historiquement le side-car a d'abord été un véhicule utilitaire pour qui n'avait pas les moyens de s'offrir une voiture, même d'occasion."
+      }
+    ]
+}

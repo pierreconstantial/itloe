@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Maria Sharapova",         
+  "mise-à-jour": "14/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle médaille Maria Sharapova a-t-elle remportée aux JO de 2012 ?",
+        "propositions": [
+          "Bronze",
+          "Aucune",
+          "Or",
+          "Argent"
+        ],
+        "réponse": "Argent",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maria_Sharapova",
+        "anecdote": "Aux JO de Londres, où elle fut porte-drapeau de la délégation russe, Sharapova a perdu en finale contre la 4e mondiale, Serena Williams."
+      },
+      {
+        "id": 2,
+        "question": "Quel tournoi du Grand Chelem Sharapova a-t-elle deux fois remporté ?",
+        "propositions": [
+          "US Open",
+          "Wimbledon",
+          "Open d'Australie",
+          "Roland-Garros"
+        ],
+        "réponse": "Roland-Garros",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maria_Sharapova",
+        "anecdote": "C'est Monica Seles qui lui remettra son trophée après sa victoire face à Sara Errani à Roland-Garros en 2012."
+      },
+      {
+        "id": 3,
+        "question": "En quelle année Sharapova est-elle devenue numéro un mondiale ?",
+        "propositions": [
+          "2005",
+          "2002",
+          "2008",
+          "2011"
+        ],
+        "réponse": "2005",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maria_Sharapova",
+        "anecdote": "Le 22 août 2005, Maria Sharapova devient la 16e joueuse de l'histoire et la première Russe à devenir n°1 au classement WTA."
+      },
+      {
+        "id": 4,
+        "question": "Pour quel montant Maria Sharapova a-t-elle signé avec Nike en 2010 ?",
+        "propositions": [
+          "10 millions",
+          "50 millions",
+          "30 millions",
+          "70 millions"
+        ],
+        "réponse": "70 millions",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maria_Sharapova",
+        "anecdote": "Maria Sharapova a également tiré parti de son physique avantageux à de nombreuses reprises pour poser dans divers magazines."
+      }
+    ]
+}

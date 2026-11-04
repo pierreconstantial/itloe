@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #E",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la nationalité du légendaire monstre du Loch Ness ?",
+        "propositions": [
+          "Érythréenne",
+          "Espagnole",
+          "Éthiopienne",
+          "Écossaise"
+        ],
+        "réponse": "Écossaise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Monstre_du_Loch_Ness",
+        "anecdote": "Le monstre du Loch Ness désigne un hypothétique animal aquatique supposé vivre ou avoir vécu dans le lac des Highlands, en Écosse."
+      },
+      {
+        "id": 2,
+        "question": "Qui propose de la revoir « à la même heure dans deux ans » ?",
+        "propositions": [
+          "Emmanuelle",
+          "Elsa",
+          "Enzo Enzo",
+          "Élisa"
+        ],
+        "réponse": "Elsa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Elsa_Lunghini",
+        "anecdote": "Le succès d'Elsa, nièce de Marlène Jobert et cousine d'Eva Green, arrivèrent en même temps que ceux de Vanessa Paradis."
+      },
+      {
+        "id": 3,
+        "question": "Quel nom porte la bohémienne de « Notre-Dame de Paris » ?",
+        "propositions": [
+          "Evangelista",
+          "Eleonora",
+          "Esmeralda",
+          "Erika"
+        ],
+        "réponse": "Esmeralda",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Esmeralda_(personnage)",
+        "anecdote": "Jetée dans la cave où s'entassent les squelettes des suppliciés, Quasimodo l'y rejoindra, se laissant mourir en enlaçant ses restes."
+      },
+      {
+        "id": 4,
+        "question": "Qui cherchait des poux à Serge Gainsbourg dans une de ses chansons ?",
+        "propositions": [
+          "Émilie",
+          "Élodie",
+          "Emma",
+          "Élisa"
+        ],
+        "réponse": "Élisa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Serge_Gainsbourg",
+        "anecdote": "Serge Gainsbourg, qui s'inventa un alter ego appelé Gainsbarre, a eu une influence considérable sur de nombreux artistes."
+      }
+    ]
+}

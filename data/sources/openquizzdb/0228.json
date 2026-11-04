@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #38",         
+  "mise-à-jour": "28/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En physique, quelle collision est synonyme d'anéantissement ?",
+        "propositions": [
+          "Annihilation",
+          "Anihillation",
+          "Annihillation",
+          "Anihilation"
+        ],
+        "réponse": "Annihilation",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle étroite bande de terre réunit deux étendues plus grandes ?",
+        "propositions": [
+          "Isthme",
+          "Isme",
+          "Hysme",
+          "Ysme"
+        ],
+        "réponse": "Isthme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel organe relie l'oesophage au duodénum ?",
+        "propositions": [
+          "Esthomat",
+          "Estoma",
+          "Estomac",
+          "Hestoma"
+        ],
+        "réponse": "Estomac",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel petit rongeur devient souvent un animal de compagnie ?",
+        "propositions": [
+          "Amestère",
+          "Hamstair",
+          "Hamster",
+          "Amsterre"
+        ],
+        "réponse": "Hamster",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

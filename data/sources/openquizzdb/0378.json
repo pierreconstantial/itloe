@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Basket européen",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment s'appelle le championnat de France de basket depuis 1993 ?",
+        "propositions": [
+          "B Pro",
+          "CFA",
+          "Super G",
+          "Pro A"
+        ],
+        "réponse": "Pro A",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Championnat_de_France_de_basket-ball",
+        "anecdote": "31 équipes ont remporté au moins un titre de champion de France depuis la première édition du championnat en 1921."
+      },
+      {
+        "id": 2,
+        "question": "Quelle organisation regroupe les clubs pros de basket en France ?",
+        "propositions": [
+          "LNB",
+          "Pro A",
+          "B Pro",
+          "Super G"
+        ],
+        "réponse": "LNB",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ligue_nationale_de_basket-ball_(France)",
+        "anecdote": "La LNB est créée en 1987 bien que le premier championnat de France ait lieu en 1921."
+      },
+      {
+        "id": 3,
+        "question": "Quel pays est premier fournisseur de joueurs NBA non-américains ?",
+        "propositions": [
+          "Portugal",
+          "Belgique",
+          "France",
+          "Suisse"
+        ],
+        "réponse": "France",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Équipe_de_France_de_basket-ball",
+        "anecdote": "Douze français possédaient ainsi un contrat au début de la saison NBA 2010-2011, un record."
+      },
+      {
+        "id": 4,
+        "question": "Quelle fédération gère le basket-ball en Belgique ?",
+        "propositions": [
+          "LNB",
+          "MLB",
+          "FBBL",
+          "FLBB"
+        ],
+        "réponse": "FLBB",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fédération_royale_belge_de_basket-ball",
+        "anecdote": "Elle représente le basket-ball auprès des pouvoirs publics ainsi qu'auprès des organismes sportifs nationaux et internationaux."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sport féminin français",         
+  "mise-à-jour": "27/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En 2022, qui était directrice du tournoi de Roland-Garros ?",
+        "propositions": [
+          "Julie Halard",
+          "Mary Pierce",
+          "Nathalie Tauziat",
+          "Amélie Mauresmo"
+        ],
+        "réponse": "Amélie Mauresmo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Amélie_Mauresmo",
+        "anecdote": "Professionnelle de 1993 à 2009, elle a remporté vingt-cinq titres en simple sur le circuit WTA, dont trois tournois majeurs."
+      },
+      {
+        "id": 2,
+        "question": "Qui est la créatrice d'un mouvement sur la glace, le « salto arrière » ?",
+        "propositions": [
+          "Fanny Besson",
+          "Simone Poujade",
+          "Gaby Barbey",
+          "Surya Bonaly"
+        ],
+        "réponse": "Surya Bonaly",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Surya_Bonaly",
+        "anecdote": "Naturalisée américaine, Surya Bonaly a commencé sa carrière d'entraîneur à Las Vegas (où elle vit), puis à Minneapolis."
+      },
+      {
+        "id": 3,
+        "question": "Quelle spécialiste de l'épée est devenue femme politique française ?",
+        "propositions": [
+          "Laura Flessel",
+          "Timea Nagy",
+          "Britta Heidemann",
+          "Valérie Barlois"
+        ],
+        "réponse": "Laura Flessel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Laura_Flessel",
+        "anecdote": "Elle fut quintuple médaillée olympique et remporta les deux médailles d'or des débuts de l'épée féminine aux JO de 1996."
+      },
+      {
+        "id": 4,
+        "question": "Qui est la seule athlète française à être triple championne olympique ?",
+        "propositions": [
+          "Marie-José Pérec",
+          "Muriel Hurtis",
+          "Marita Koch",
+          "Sandra Myers"
+        ],
+        "réponse": "Marie-José Pérec",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marie-José_Pérec",
+        "anecdote": "En 1992 aux Jeux de Barcelone sur 400 mètres et deux fois aux Jeux d'Atlanta en 1996 sur 400 mètres et 200 mètres."
+      }
+    ]
+}

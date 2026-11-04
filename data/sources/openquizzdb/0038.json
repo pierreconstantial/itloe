@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #04",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un J, il faut un sport, un pays, une lance et un équidé.",
+        "propositions": [
+          "Jument",
+          "Judo",
+          "Javelot",
+          "Japon"
+        ],
+        "réponse": "Judo",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un R, il faut une fleur, un précipice, une descente et un rongeur.",
+        "propositions": [
+          "Ragondin",
+          "Rose",
+          "Ravin",
+          "Rapide"
+        ],
+        "réponse": "Rose",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un V, il faut une maladie, un poison, une prairie et un tourbillon.",
+        "propositions": [
+          "Verger",
+          "Vortex",
+          "Venin",
+          "Varicelle"
+        ],
+        "réponse": "Varicelle",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un R, il faut un livre, une pierre, un massif corallien et une plante.",
+        "propositions": [
+          "Roman",
+          "Radis",
+          "Récif",
+          "Rubis"
+        ],
+        "réponse": "Roman",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

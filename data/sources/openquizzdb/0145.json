@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Céramique et poterie",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle matière à base de silicates est fortement utilisée en céramique ?",
+        "propositions": [
+          "Argile",
+          "Céruse",
+          "Sable",
+          "Limon"
+        ],
+        "réponse": "Argile",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Argile",
+        "anecdote": "L'argile hydratée est malléable, peut être mise en forme, devient solide après séchage et le reste de manière permanente."
+      },
+      {
+        "id": 2,
+        "question": "Quel enduit vitrifiable durcit la céramique ?",
+        "propositions": [
+          "Pige",
+          "Biscuit",
+          "Émail",
+          "Ajour"
+        ],
+        "réponse": "Émail",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Glaçure",
+        "anecdote": "L'oxyde de fer produit les tons verts, rouges, jaunes, noirs ou marrons, l'oxyde de cobalt les bleus et l'oxyde de chrome les verts."
+      },
+      {
+        "id": 3,
+        "question": "Quelle civilisation est universellement connue pour sa porcelaine ?",
+        "propositions": [
+          "Grecque",
+          "Chinoise",
+          "Égyptienne",
+          "Péruvienne"
+        ],
+        "réponse": "Chinoise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Céramique_chinoise",
+        "anecdote": "Les grands vases bleu et blanc, qui sont apparus sous la dynastie mongole des Yuan, se développeront pleinement sous les Ming."
+      },
+      {
+        "id": 4,
+        "question": "Quelle couleur d'émaillage obtient-on avec l'oxyde de cobalt ?",
+        "propositions": [
+          "Rouge",
+          "Vert",
+          "Jaune",
+          "Bleu"
+        ],
+        "réponse": "Bleu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Glaçure",
+        "anecdote": "Le cobalt le plus pur venait à grand frais du Moyen-Orient via l'Espagne, celui d'Europe centrale donnant des bleus moins profonds."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Volcans en sommeil",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Au nord de quelle île se dresse la montagne Pelée, qui est un volcan ?",
+        "propositions": [
+          "Guadeloupe",
+          "Martinique",
+          "Nouvelle-Calédonie",
+          "Réunion"
+        ],
+        "réponse": "Martinique",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Montagne_Pelée",
+        "anecdote": "La montagne Pelée, connue pour son éruption de 1902, doit son nom à l'aspect désolé de ses flancs couverts de cendres."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le pays du Kilimandjaro, au trois volcans éteints ?",
+        "propositions": [
+          "Japon",
+          "Tanzanie",
+          "Tibet",
+          "Népal"
+        ],
+        "réponse": "Tanzanie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kilimandjaro",
+        "anecdote": "Le Kilimandjaro est connu pour sa calotte glaciaire sommitale en phase de retrait accéléré depuis le début du XXe siècle."
+      },
+      {
+        "id": 3,
+        "question": "Quel volcan des îles Éoliennes est situé au nord de la Sicile ?",
+        "propositions": [
+          "Pinatubo",
+          "Stromboli",
+          "Villarrica",
+          "Vésuve"
+        ],
+        "réponse": "Stromboli",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stromboli",
+        "anecdote": "La partie actuellement active du volcan s'est formée il y a moins de cinq mille ans et est en éruption quasi continue."
+      },
+      {
+        "id": 4,
+        "question": "Quelle marque spécialisée en eaux minérales a pour logo un volcan vert ?",
+        "propositions": [
+          "Vittel",
+          "Vichy",
+          "Volvic",
+          "Valvert"
+        ],
+        "réponse": "Volvic",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Volvic_(eau_minérale)",
+        "anecdote": "Cette eau minérale est filtrée naturellement à travers des roches volcaniques pendant plus de cinq ans avant d'être embouteillée."
+      }
+    ]
+}

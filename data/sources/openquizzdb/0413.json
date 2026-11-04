@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Héros imaginaires",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel animal utilise sa queue pour pêcher des piranhas ?",
+        "propositions": [
+          "Zorglub",
+          "Champignac",
+          "Marsupilami",
+          "Fantasio"
+        ],
+        "réponse": "Marsupilami",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marsupilami",
+        "anecdote": "Doté d'une force herculéenne, la fantaisie du marsupilami fascine autant qu'elle amuse."
+      },
+      {
+        "id": 2,
+        "question": "Quel marin imaginaire tire sa force des épinards en boîte ?",
+        "propositions": [
+          "Sappo",
+          "Grimmy",
+          "Popeye",
+          "Barnaby"
+        ],
+        "réponse": "Popeye",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Popeye",
+        "anecdote": "Depuis janvier 2009, le personnage de Popeye est entré dans le domaine public dans la plupart des pays du monde."
+      },
+      {
+        "id": 3,
+        "question": "Quelle marionnette en bois s'est un jour transformée en être humain ?",
+        "propositions": [
+          "Gnafron",
+          "Malvira",
+          "Pinocchio",
+          "Arlequin"
+        ],
+        "réponse": "Pinocchio",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pinocchio",
+        "anecdote": "« Les Aventures de Pinocchio » a été le deuxième livre le plus vendu en Italie au XXe siècle."
+      },
+      {
+        "id": 4,
+        "question": "Quel ami de Tintin a inventé un sous-marin en forme de requin ?",
+        "propositions": [
+          "Haddock",
+          "Professeur Tournesol",
+          "Arumbayas",
+          "Nestor"
+        ],
+        "réponse": "Professeur Tournesol",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Professeur_Tournesol",
+        "anecdote": "Tournesol a rejoint Tintin, Milou et le capitaine Haddock à partir de l'album « Le Trésor de Rackham le Rouge »."
+      }
+    ]
+}

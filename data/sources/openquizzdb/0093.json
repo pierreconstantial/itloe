@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Série « Breaking Bad »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le personnage principal de la série télévisée « Breaking Bad » ?",
+        "propositions": [
+          "Saul Goodman",
+          "Jesse Pinkman",
+          "Walter White",
+          "Hank Schrader"
+        ],
+        "réponse": "Walter White",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Walter_White_(personnage)",
+        "anecdote": "Walter White est interprété par Bryan Cranston et doublé en version française par Jean-Louis Faure."
+      },
+      {
+        "id": 2,
+        "question": "Quelle drogue est fabriquée et vendue par Walter White ?",
+        "propositions": [
+          "Cocaïne",
+          "Méthamphétamine",
+          "Kétamine",
+          "Héroïne"
+        ],
+        "réponse": "Méthamphétamine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Méthamphétamine",
+        "anecdote": "Pure, la méthamphétamine se présente sous une forme solide cristalline incolore et inodore, qui peut rappeler du verre pilé."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel véhicule cuisinent Walter et Jesse au début de la série ?",
+        "propositions": [
+          "Taxi",
+          "Camping-car",
+          "Bus",
+          "Camion"
+        ],
+        "réponse": "Camping-car",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Breaking_Bad",
+        "anecdote": "« Breaking Bad » a reçu un large succès critique et est à présent considérée comme l'une des meilleures séries télé américaines."
+      },
+      {
+        "id": 4,
+        "question": "De quel cancer est atteint Walter White dans la série « Breaking Bad » ?",
+        "propositions": [
+          "Du poumon",
+          "De la gorge",
+          "Du colon",
+          "De la peau"
+        ],
+        "réponse": "Du poumon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Walter_White_(personnage)",
+        "anecdote": "Considérant qu'il n'a plus rien à perdre, Walt pense pouvoir assurer l'avenir financier de sa famille en fabriquant de la meth."
+      }
+    ]
+}

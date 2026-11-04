@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Bulgarie",         
+  "mise-à-jour": "15/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la capitale de la Bulgarie ?",
+        "propositions": [
+          "Bucarest",
+          "Belgrade",
+          "Budapest",
+          "Sofia"
+        ],
+        "réponse": "Sofia",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quelle mer borde la Bulgarie ?",
+        "propositions": [
+          "Mer Méditerranée",
+          "Mer Rouge",
+          "Mer Baltique",
+          "Mer Noire"
+        ],
+        "réponse": "Mer Noire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quel animal est souvent associé à la Bulgarie dans les Balkans ?",
+        "propositions": [
+          "Koala",
+          "Lion",
+          "Panda",
+          "Ours brun"
+        ],
+        "réponse": "Ours brun",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quelle station balnéaire est réputée en Bulgarie ?",
+        "propositions": [
+          "Sofia",
+          "Plovdiv",
+          "Varna",
+          "Ruse"
+        ],
+        "réponse": "Varna",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

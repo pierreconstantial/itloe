@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Vers l'infini et au-delà",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle poupée cowboy tient le rôle principal dans « Toy Story » ?",
+        "propositions": [
+          "Buzz",
+          "Woody",
+          "Bayonne",
+          "Rex"
+        ],
+        "réponse": "Woody",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Shérif_Woody",
+        "anecdote": "En France, Woody est doublé par Jean-Philippe Puymartin."
+      },
+      {
+        "id": 2,
+        "question": "Quelle chaîne fictive de pizzerias est présente dans le film « Toy Story » ?",
+        "propositions": [
+          "Pizza Hollywood",
+          "Pizza Land",
+          "Pizza Planet",
+          "Pizza Toys"
+        ],
+        "réponse": "Pizza Planet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pizza_Planet",
+        "anecdote": "Les restaurants Pizza Planet prennent pour thème l'espace et la science fiction."
+      },
+      {
+        "id": 3,
+        "question": "Malgré son air méchant, à quoi est parfumé le gros ours de « Toy Story 3 » ?",
+        "propositions": [
+          "Chocolat",
+          "Miel",
+          "Fraise",
+          "Vanille"
+        ],
+        "réponse": "Fraise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Toy_Story_3",
+        "anecdote": "Bien que Lotso soit le méchant, son parfum sucré de fraises rappelle que c'était à l'origine un ours en peluche aimant et adorable."
+      },
+      {
+        "id": 4,
+        "question": "Quel effrayant voisin d'Andy torture les jouets dans « Toy Story » ?",
+        "propositions": [
+          "Zurg",
+          "Ted",
+          "Sid",
+          "Chuck"
+        ],
+        "réponse": "Sid",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sid_(homonymie)",
+        "anecdote": "Dans « Toy Story 3 », Sid est devenu éboueur et ramasse les poubelles dans le quartier d'Andy."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #29",         
+  "mise-à-jour": "08/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "On apprécie ses travers, mot de quatre lettres commençant par un P ?",
+        "propositions": [
+          "Peur",
+          "Porc",
+          "Punk",
+          "Pape"
+        ],
+        "réponse": "Porc",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Il a du chien, mot de cinq lettres commençant par un F ?",
+        "propositions": [
+          "Froid",
+          "Foyer",
+          "Fakir",
+          "Fusil"
+        ],
+        "réponse": "Fusil",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Il est disponible en rayon, mot de cinq lettres commençant par un L ?",
+        "propositions": [
+          "Laser",
+          "Lange",
+          "Loyer",
+          "Lasso"
+        ],
+        "réponse": "Laser",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Bonne quand elle est riche, mot de quatre lettres commençant par un I ?",
+        "propositions": [
+          "Iode",
+          "Iris",
+          "Idée",
+          "Ibis"
+        ],
+        "réponse": "Idée",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

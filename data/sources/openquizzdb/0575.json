@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Une larme de gin",         
+  "mise-à-jour": "26/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Le gin est une boisson spiritueuse proche de quel ancêtre alcoolisé ?",
+        "propositions": [
+          "Chartreuse",
+          "Triple sec",
+          "Schnaps",
+          "Genièvre"
+        ],
+        "réponse": "Genièvre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Genièvre_(boisson)",
+        "anecdote": "Le genièvre est une eau-de-vie de grains aromatisée de baies de genévrier typique du nord de l'Europe continentale."
+      },
+      {
+        "id": 2,
+        "question": "Que contient l'eau tonique qui est versée dans votre gin tonic ?",
+        "propositions": [
+          "Sulfadoxine",
+          "Nivaquine",
+          "Quinine",
+          "Ferroquine"
+        ],
+        "réponse": "Quinine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Quinine",
+        "anecdote": "Extraite d'un arbuste originaire d'Amérique du Sud, la quinine était autrefois surtout utilisée pour la prévention du paludisme, avant d'être mélangée avec du gin pour améliorer son goût amer."
+      },
+      {
+        "id": 3,
+        "question": "Quel homme d'État britannique était un buveur de gin d'exception ?",
+        "propositions": [
+          "W. Churchill",
+          "A. Eden",
+          "S. Baldwin",
+          "H. Wilson"
+        ],
+        "réponse": "W. Churchill",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Winston_Churchill",
+        "anecdote": "C'est Winston Churchill qui a dit : « Le gin et le tonic ont sauvé la vie à plus d'Anglais que tous les médecins de l'Empire »."
+      },
+      {
+        "id": 4,
+        "question": "Quelle grande marque de gin reste pionnière en la matière ?",
+        "propositions": [
+          "Bombay",
+          "Tanqueray",
+          "Hendrick's",
+          "Gordon"
+        ],
+        "réponse": "Hendrick's",
+        "wikipédia": "https://fr.wikipedia.org/wiki/William_Grant_et_Sons",
+        "anecdote": "Lancé en 1999 en Écosse, Hendrick's a révolutionné l'image du gin en proposant une recette originale associant des notes de concombre et de rose. La marque a contribué au renouveau du gin haut de gamme et à l'explosion des gins artisanaux."
+      }
+    ]
+}

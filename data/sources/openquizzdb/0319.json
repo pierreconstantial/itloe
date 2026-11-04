@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jeux de cartes",         
+  "mise-à-jour": "30/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De combien de cartes est généralement constitué un jeu de bataille ?",
+        "propositions": [
+          "65 cartes",
+          "36 cartes",
+          "52 cartes",
+          "43 cartes"
+        ],
+        "réponse": "52 cartes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bataille_(jeu)",
+        "anecdote": "Pratiquée par les enfants et les adultes, la bataille est d'une grande simplicité puisque à priori sous la conduite exclusive du hasard."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la meilleure main au poker ?",
+        "propositions": [
+          "Paire",
+          "Brelan",
+          "Quinte flush royale",
+          "Carré"
+        ],
+        "réponse": "Quinte flush royale",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Poker",
+        "anecdote": "Bertrand ElkY Grospellier est le joueur ayant le plus gros palmarès et le plus gros total de gains en tournois parmi les français."
+      },
+      {
+        "id": 3,
+        "question": "Quel jeu de cartes, créé en 1971 par Merle Robbins, est édité par Mattel ?",
+        "propositions": [
+          "Korsar",
+          "Dobble",
+          "Uno",
+          "1000 bornes"
+        ],
+        "réponse": "Uno",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Uno",
+        "anecdote": "Depuis peu, la version H2O Splash du « Uno » permet de jouer dans l'eau, le jeu comportant deux nouvelles cartes."
+      },
+      {
+        "id": 4,
+        "question": "Combien y a-t-il de couleurs dans un jeu de cartes standard ?",
+        "propositions": [
+          "Quatre",
+          "Six",
+          "Huit",
+          "Deux"
+        ],
+        "réponse": "Quatre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

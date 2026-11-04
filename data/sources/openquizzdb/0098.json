@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #09",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un L, il faut une position, une contre-mesure, une barre et un animal.",
+        "propositions": [
+          "Levier",
+          "Levrette",
+          "Leurre",
+          "Lapin"
+        ],
+        "réponse": "Levrette",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un E, il faut un ustensile, un spécialiste, un bandit et un terrain.",
+        "propositions": [
+          "Écumoire",
+          "Escroc",
+          "Enclos",
+          "Expert"
+        ],
+        "réponse": "Écumoire",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un P, il faut un félin, un dirigeant, un alcool et une protection.",
+        "propositions": [
+          "Pastis",
+          "Patron",
+          "Panthère",
+          "Parapluie"
+        ],
+        "réponse": "Panthère",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un T, il faut un bandeau, une fleur, un siège et un dessin.",
+        "propositions": [
+          "Tatouage",
+          "Tulipe",
+          "Trône",
+          "Turban"
+        ],
+        "réponse": "Turban",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

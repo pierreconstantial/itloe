@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Serge Gainsbourg",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui cherchait des poux à Serge Gainsbourg dans une de ses chansons ?",
+        "propositions": [
+          "Emma",
+          "Élisa",
+          "Élodie",
+          "Émilie"
+        ],
+        "réponse": "Élisa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Serge_Gainsbourg",
+        "anecdote": "Serge Gainsbourg, qui s'inventa un alter ego appelé Gainsbarre, a eu une influence considérable sur de nombreux artistes."
+      },
+      {
+        "id": 2,
+        "question": "Quel prénom Serge Gainsbourg écrit-il sur sa Remington portative ?",
+        "propositions": [
+          "Lola",
+          "Léa",
+          "Loane",
+          "Lætitia"
+        ],
+        "réponse": "Lætitia",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Serge_Gainsbourg",
+        "anecdote": "Jusqu'à l'âge de trente ans, Serge Gainsbourg vivra de petits boulots ici et là."
+      },
+      {
+        "id": 3,
+        "question": "Pour qui Serge Gainsbourg a-t-il écrit « Les petits papiers » ?",
+        "propositions": [
+          "Catherine Deneuve",
+          "Brigitte Bardot",
+          "Régine",
+          "Jane Birkin"
+        ],
+        "réponse": "Régine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Liste_des_chansons_de_Serge_Gainsbourg",
+        "anecdote": "Régine est aujourd'hui propriétaire de nombreuses discothèques dans le monde entier."
+      },
+      {
+        "id": 4,
+        "question": "En 1986, avec qui Serge Gainsbourg a-t-il créé un incident télévisé ?",
+        "propositions": [
+          "Sacha Distel",
+          "Jean Ferrat",
+          "Guy Béart",
+          "Adamo"
+        ],
+        "réponse": "Guy Béart",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Guy_Béart",
+        "anecdote": "En 1985, Guy Béart revient avec un titre plein d'espoir, « Demain je recommence »."
+      }
+    ]
+}

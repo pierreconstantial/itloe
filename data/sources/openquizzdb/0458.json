@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Folklore dans nos assiettes",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que mange-t-on traditionnellement à la Chandeleur ?",
+        "propositions": [
+          "Croissants",
+          "Crêpes",
+          "Brioches",
+          "Tartes"
+        ],
+        "réponse": "Crêpes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chandeleur",
+        "anecdote": "La tradition attribue cette coutume au pape Gélase Ier qui faisait distribuer des crêpes aux pèlerins qui arrivaient à Rome."
+      },
+      {
+        "id": 2,
+        "question": "Quel gâteau décore-t-on avec des sapins et des petits personnages ?",
+        "propositions": [
+          "Palet de dame",
+          "Forêt noire",
+          "Galette des Rois",
+          "Bûche de Noël"
+        ],
+        "réponse": "Bûche de Noël",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bûche_de_Noël",
+        "anecdote": "Au Moyen Âge, on avait l'habitude de brûler une véritable bûche de bois dans la cheminée pour symboliser la chaleur et la lumière."
+      },
+      {
+        "id": 3,
+        "question": "Maman est en haut, qui fait des gâteaux, papa est en bas, qui fait...",
+        "propositions": [
+          "Des dégâts",
+          "Du nougat",
+          "Du cinéma",
+          "Des rasta"
+        ],
+        "réponse": "Du nougat",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Berceuse",
+        "anecdote": "La berceuse, qui se retrouve dans toutes les sociétés du monde, est une chanson douce destinée à aider les enfants à s'endormir."
+      },
+      {
+        "id": 4,
+        "question": "Dans quelle région de France mange-t-on les treize desserts de Noël ?",
+        "propositions": [
+          "Alsace",
+          "Auvergne",
+          "Bretagne",
+          "Provence"
+        ],
+        "réponse": "Provence",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Treize_desserts",
+        "anecdote": "Les desserts peuvent être bus avec du vin cuit ou du vin muscat, tandis qu'à la fin apparaissent toutes les liqueurs maisons."
+      }
+    ]
+}

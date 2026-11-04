@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Jurassic Park »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le nom du PDG de l'entreprise InGen dans « Jurassic Park » ?",
+        "propositions": [
+          "John Hammond",
+          "Alan Grant",
+          "Ian Malcolm",
+          "Robert Muldoon"
+        ],
+        "réponse": "John Hammond",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jurassic_Park",
+        "anecdote": "John Hammond a travaillé à la création d'un parc d'attractions sur Isla Nublar, une île qu'il possède au large du Costa Rica."
+      },
+      {
+        "id": 2,
+        "question": "Qui a réalisé les deux premiers opus de la saga « Jurassic Park » ?",
+        "propositions": [
+          "Joe Johnston",
+          "Tim Burton",
+          "Steven Spielberg",
+          "Georges Lucas"
+        ],
+        "réponse": "Steven Spielberg",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jurassic_Park",
+        "anecdote": "Steven Spielberg est souvent cité comme le meilleur représentant de l'industrie cinématographique hollywoodienne."
+      },
+      {
+        "id": 3,
+        "question": "Qui est l'auteur du roman « Jurassic Park » dont s'est inspiré le film ?",
+        "propositions": [
+          "J. K. Rowling",
+          "Michael Crichton",
+          "Isaac Asimov",
+          "Stephen King"
+        ],
+        "réponse": "Michael Crichton",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jurassic_Park_(roman)",
+        "anecdote": "Le film reprend l'idée de base du roman tout en apportant des modifications significatives aux personnages et aux péripéties."
+      },
+      {
+        "id": 4,
+        "question": "Combien d'Oscars le film « Jurassic Park » a-t-il remporté ?",
+        "propositions": [
+          "Deux",
+          "Un",
+          "Aucun",
+          "Trois"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jurassic_Park",
+        "anecdote": "Les Oscars remportés sont : Oscar des meilleurs effets visuels, Oscar du meilleur son et Oscar du meilleur mixage de son."
+      }
+    ]
+}

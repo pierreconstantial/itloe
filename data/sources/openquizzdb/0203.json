@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Shakira",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que voit-on au verso de la pochette l'album « Laundry Service », de Shakira ?",
+        "propositions": [
+          "Machine à laver",
+          "Téléphone",
+          "Menottes",
+          "Radio"
+        ],
+        "réponse": "Machine à laver",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Laundry_Service",
+        "anecdote": "« Laundry Service » est le cinquième album studio de la chanteuse colombienne, et le premier contenant des chansons en anglais."
+      },
+      {
+        "id": 2,
+        "question": "De quel pays est originaire Shakira, la reine de la musique latine ?",
+        "propositions": [
+          "États-Unis",
+          "Colombie",
+          "Mexique",
+          "Bolivie"
+        ],
+        "réponse": "Colombie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Shakira",
+        "anecdote": "Shakira a connu un succès international à partir de 2002 grâce au titre « Whenever, Wherever » et à l'album « Laundry Service »."
+      },
+      {
+        "id": 3,
+        "question": "Comment se prénomme le premier fils de Shakira et de Gerard Piqué ?",
+        "propositions": [
+          "Donovan",
+          "Esteban",
+          "Ivan",
+          "Milan"
+        ],
+        "réponse": "Milan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Shakira",
+        "anecdote": "Durant l'été 2010, Shakira a rencontré le footballeur espagnol Gerard Piqué sur le tournage de son clip « Waka Waka »."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le titre du premier album où Shakira a écrit en anglais ?",
+        "propositions": [
+          "You And Me",
+          "Oral Fixation",
+          "Laundry Service",
+          "She Wolf"
+        ],
+        "réponse": "Laundry Service",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Laundry_Service",
+        "anecdote": "L'album Laundry Service (2001) est le premier album de Shakira principalement en anglais. Il marque un tournant majeur dans sa carrière, puisqu'elle passe d'une star latino-américaine à une artiste internationale."
+      }
+    ]
+}

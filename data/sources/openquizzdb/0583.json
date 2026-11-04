@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Grands noms du golf",         
+  "mise-à-jour": "02/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel sportif a dominé le golf masculin dans les années 2000 ?",
+        "propositions": [
+          "Payne Stewart",
+          "Curtis Strange",
+          "Tiger Woods",
+          "Raymond Floyd"
+        ],
+        "réponse": "Tiger Woods",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tiger_Woods",
+        "anecdote": "À la suite du scandale sur ses infidélités, il annoncera se retirer du circuit de golf professionnel pour une période indéterminée."
+      },
+      {
+        "id": 2,
+        "question": "Quel joueur surnommé « The King » a rendu le golf très populaire ?",
+        "propositions": [
+          "Jordan Spieth",
+          "Martin Kaymer",
+          "Justin Rose",
+          "Arnold Palmer"
+        ],
+        "réponse": "Arnold Palmer",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Arnold_Palmer",
+        "anecdote": "Il mit un terme à sa carrière sur le circuit professionnel à 75 ans par une cinquantième participation consécutive au Masters d'Augusta."
+      },
+      {
+        "id": 3,
+        "question": "Quel précurseur du golf moderne est surnommé « The Golden Bear » ?",
+        "propositions": [
+          "Lucas Glover",
+          "Gary Player",
+          "Jack Nicklaus",
+          "Webb Simpson"
+        ],
+        "réponse": "Jack Nicklaus",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jack_Nicklaus",
+        "anecdote": "C'est le développement de la rivalité entre Jack Nicklaus et Arnold Palmer qui développa un intérêt des téléspectateurs pour le golf."
+      },
+      {
+        "id": 4,
+        "question": "Quel espagnol a popularisé le golf en dehors de ses pays traditionnels ?",
+        "propositions": [
+          "Casper",
+          "Coody",
+          "Aaron",
+          "Ballesteros"
+        ],
+        "réponse": "Ballesteros",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Severiano_Ballesteros",
+        "anecdote": "Plusieurs fois numéro un mondial entre 1986 et 1989, il a été l'une des figures de proue de ce sport depuis le milieu des années 1970."
+      }
+    ]
+}

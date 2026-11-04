@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #34",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Sifflé avant de croquer, mot de cinq lettres commençant par un A ?",
+        "propositions": [
+          "Amour",
+          "Aïoli",
+          "Apéro",
+          "Arrêt"
+        ],
+        "réponse": "Apéro",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Aspect extérieur, mot de cinq lettres commençant par un F ?",
+        "propositions": [
+          "Flore",
+          "Foule",
+          "Forme",
+          "Faune"
+        ],
+        "réponse": "Forme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "On n'aime pas le recevoir, mot de quatre lettres commençant par un S ?",
+        "propositions": [
+          "Suif",
+          "Soin",
+          "Sage",
+          "Spam"
+        ],
+        "réponse": "Spam",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Une invitation à repasser, mot de trois lettres commençant par un P ?",
+        "propositions": [
+          "Pli",
+          "Pic",
+          "Pie",
+          "Pou"
+        ],
+        "réponse": "Pli",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

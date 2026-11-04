@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #30",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Le chant des sirènes, mot de six lettres commençant par un A ?",
+        "propositions": [
+          "Amende",
+          "Aplomb",
+          "Alerte",
+          "Avatar"
+        ],
+        "réponse": "Alerte",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Perdue dans l'affolement, mot de quatre lettres commençant par un T ?",
+        "propositions": [
+          "Toit",
+          "Tige",
+          "Talc",
+          "Tête"
+        ],
+        "réponse": "Tête",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "On écrit avec sa pointe, mot de six lettres commençant par un F ?",
+        "propositions": [
+          "Foudre",
+          "Feutre",
+          "Flamme",
+          "Fécule"
+        ],
+        "réponse": "Feutre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Il couvre le chef à Londres, mot de cinq lettres commençant par un M ?",
+        "propositions": [
+          "Mégot",
+          "Maton",
+          "Mardi",
+          "Melon"
+        ],
+        "réponse": "Melon",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

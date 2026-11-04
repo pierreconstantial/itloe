@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #21",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quel pays nous vient le traité antique du Kama-Sutra ?",
+        "propositions": [
+          "Thaïlande",
+          "Chine",
+          "Inde",
+          "Japon"
+        ],
+        "réponse": "Inde",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quel artiste et peintre a réalisé 347 gravures érotiques ?",
+        "propositions": [
+          "Picasso",
+          "Goya",
+          "Dali",
+          "Matisse"
+        ],
+        "réponse": "Picasso",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Dans la première pub Durex, où un couple faisait-il l'amour ?",
+        "propositions": [
+          "En montagne",
+          "Sur un bateau",
+          "À l'hôtel",
+          "Dans une 2CV"
+        ],
+        "réponse": "Dans une 2CV",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "À Angers, qu'allez-vous déguster si l'on vous propose des galipettes ?",
+        "propositions": [
+          "Poireaux",
+          "Courgettes",
+          "Champignons",
+          "Pommes de terre"
+        ],
+        "réponse": "Champignons",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Galipette_(cuisine)",
+        "anecdote": "On retire le pied de ces gros champignons pour les farcir avec un mélange de chair à saucisse, d'herbes et parfois d'échalotes."
+      }
+    ]
+}

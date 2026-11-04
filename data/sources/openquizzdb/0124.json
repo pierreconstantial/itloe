@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #K",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quelle planète fictive sont originaires Superman et Supergirl ?",
+        "propositions": [
+          "Krusty",
+          "Krypton",
+          "Kamini",
+          "Kirby"
+        ],
+        "réponse": "Krypton",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Superman",
+        "anecdote": "Le logo de Superman est un « S » rouge dans une figure géométrique jaune sur fond bleu."
+      },
+      {
+        "id": 2,
+        "question": "Quel groupe interpréta le titre à succès « I was made for loving you » ?",
+        "propositions": [
+          "Kodaline",
+          "Kiss",
+          "Korn",
+          "Kraftwerk"
+        ],
+        "réponse": "Kiss",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kiss",
+        "anecdote": "Kiss est devenu très populaire à travers le monde, notamment grâce à leurs maquillages."
+      },
+      {
+        "id": 3,
+        "question": "Que fait-on en chantant et en suivant les paroles sur un écran ?",
+        "propositions": [
+          "Krusty",
+          "Kaoma",
+          "Kojiki",
+          "Karaoké"
+        ],
+        "réponse": "Karaoké",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Karaoké",
+        "anecdote": "Ce terme est une combinaison des mots japonais karappo « vide » et okesutora « orchestre », ce qui peut signifier que le chanteur n'a pas besoin d'orchestre pour chanter."
+      },
+      {
+        "id": 4,
+        "question": "Quel avertisseur sonore retrouve-t-on dans la plupart des voitures ?",
+        "propositions": [
+          "K-way",
+          "Kilt",
+          "Kalachnikov",
+          "Klaxon"
+        ],
+        "réponse": "Klaxon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Avertisseur_sonore",
+        "anecdote": "Raymond Queneau a proposé l'orthographe claqueson (Zazie dans le métro)."
+      }
+    ]
+}

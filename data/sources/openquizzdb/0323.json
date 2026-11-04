@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Kylian Mbappé",         
+  "mise-à-jour": "08/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En quelle année le footballeur Kylian Mbappé a-t-il vu le jour ?",
+        "propositions": [
+          "1998",
+          "1999",
+          "1996",
+          "1997"
+        ],
+        "réponse": "1998",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kylian_Mbappé",
+        "anecdote": "Kylian Mbappé est né le 20 décembre 1998 à Bondy, en région parisienne. Il grandit dans un environnement très sportif : son père est entraîneur de football et sa mère ancienne handballeuse professionnelle."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel club professionnel Kylian Mbappé a-t-il débuté ?",
+        "propositions": [
+          "Lille OSC",
+          "AS Monaco",
+          "PSG",
+          "OM"
+        ],
+        "réponse": "AS Monaco",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kylian_Mbappé",
+        "anecdote": "Très vite, il impressionne par sa vitesse exceptionnelle, sa maturité sur le terrain et sa capacité à marquer dans des matchs importants."
+      },
+      {
+        "id": 3,
+        "question": "Quel rôle tactique Kylian Mbappé occupe-t-il principalement ?",
+        "propositions": [
+          "Attaquant",
+          "Gardien de but",
+          "Milieu de terrain",
+          "Défenseur"
+        ],
+        "réponse": "Attaquant",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kylian_Mbappé",
+        "anecdote": "Kylian Mbappé est principalement utilisé comme attaquant polyvalent, souvent aligné sur l'aile gauche ou en attaque centrale selon les systèmes de jeu."
+      },
+      {
+        "id": 4,
+        "question": "Quel numéro Kylian Mbappé porte-t-il en sélection nationale ?",
+        "propositions": [
+          "7",
+          "16",
+          "11",
+          "10"
+        ],
+        "réponse": "10",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kylian_Mbappé",
+        "anecdote": "Kylian Mbappé porte le numéro 10 en équipe de France, un numéro historiquement réservé aux joueurs créatifs et décisifs, souvent considérés comme les leaders techniques de l'équipe."
+      }
+    ]
+}

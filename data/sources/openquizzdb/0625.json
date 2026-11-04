@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Instagram",         
+  "mise-à-jour": "28/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel américain a cofondé et lancé l'application Instagram ?",
+        "propositions": [
+          "Bill Zeller",
+          "Fred Fish",
+          "Kevin Systrom",
+          "Bruce Horn"
+        ],
+        "réponse": "Kevin Systrom",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kevin_Systrom",
+        "anecdote": "Kevin Systrom est un entrepreneur et programmeur américain, surtout connu pour avoir cofondé Instagram avec Mike Krieger en 2010. Rachetée par Facebook, Instagram reste aujourd'hui l'application gratuite de partage de photos la plus populaire dans le mond"
+      },
+      {
+        "id": 2,
+        "question": "Combien d'utilisateurs Instagram revendiquait-il fin 2019 ?",
+        "propositions": [
+          "250 millions",
+          "1 milliard",
+          "500 millions",
+          "2 milliards"
+        ],
+        "réponse": "1 milliard",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Instagram",
+        "anecdote": "Cette croissance spectaculaire avait été favorisée par l'essor des Stories, lancées en 2016, ainsi que par le développement des vidéos et des outils destinés aux créateurs et aux entreprises. 75 % des utilisateurs d'Instagram sont positionnés en dehors de"
+      },
+      {
+        "id": 3,
+        "question": "En quelle année Facebook a-t-il acheté Instagram ?",
+        "propositions": [
+          "En 2010",
+          "En 2012",
+          "En 2016",
+          "En 2014"
+        ],
+        "réponse": "En 2012",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Instagram",
+        "anecdote": "Le montant d'un milliard de dollars américains déposé par Facebook a fait craindre l'éclatement d'une bulle spéculative internet."
+      },
+      {
+        "id": 4,
+        "question": "Quel outil Instagram permet de colorer ou décolorer une photo ?",
+        "propositions": [
+          "Crayon",
+          "Gomme",
+          "Pinceau",
+          "Brosse"
+        ],
+        "réponse": "Gomme",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Instagram",
+        "anecdote": "Cette nouveauté Instagram est intégrée aux nouvelles versions des applications mobiles (v10.12 sur iOS et Android). L'outil Gomme permet d'effacer certaines zones d'une image ou de révéler progressivement une partie de la photo sous-jacente, notamment lor"
+      }
+    ]
+}

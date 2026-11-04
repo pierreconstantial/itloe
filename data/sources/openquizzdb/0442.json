@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Culture mondiale",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la couleur du passeport de l'union européenne ?",
+        "propositions": [
+          "Bleue",
+          "Verte",
+          "Bordeaux",
+          "Grise"
+        ],
+        "réponse": "Bordeaux",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Passeport",
+        "anecdote": "Toute personne sollicitant l'entrée dans un pays autre que le sien doit remplir certaines formalités et solliciter une autorisation."
+      },
+      {
+        "id": 2,
+        "question": "Quelle ville belge est considérée comme le centre diamantaire mondial ?",
+        "propositions": [
+          "Bruxelles",
+          "Anvers",
+          "Liège",
+          "Mons"
+        ],
+        "réponse": "Anvers",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Anvers",
+        "anecdote": "La réputation des diamantaires anversois fait de cette ville la première place mondiale de taille et de négociation du diamant."
+      },
+      {
+        "id": 3,
+        "question": "Qu'est-ce qui est turc, né en Autriche et mangé en France ?",
+        "propositions": [
+          "Pistolet",
+          "Gaufre",
+          "Crêpe",
+          "Croissant"
+        ],
+        "réponse": "Croissant",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Croissant_(viennoiserie)",
+        "anecdote": "À Paris, les premiers croissants à déguster furent vendus à la rue de Richelieu entre 1837 et 1839."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le premier port des Pays-Bas ?",
+        "propositions": [
+          "Utrecht",
+          "Amsterdam",
+          "La Haye",
+          "Rotterdam"
+        ],
+        "réponse": "Rotterdam",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Port_de_Rotterdam",
+        "anecdote": "L'activité du port de Rotterdam lui a permis de s'affirmer comme le huitième port mondial en 2014, après Shanghaï et Singapour."
+      }
+    ]
+}

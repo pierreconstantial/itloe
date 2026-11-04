@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Pomme dans tous ses états",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que désigne le mot « pomme » dans le langage populaire ?",
+        "propositions": [
+          "Le visage",
+          "Les genoux",
+          "Le ventre",
+          "Les fesses"
+        ],
+        "réponse": "Le visage",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pomme",
+        "anecdote": "Il s'utilise aussi par extension pour désigner une personne serviable et un peu naïve : « c'est une bonne pomme »."
+      },
+      {
+        "id": 2,
+        "question": "Quelle boisson alcoolisée à base de pommes titre entre 2 % et 8 % ?",
+        "propositions": [
+          "Lambig",
+          "Pommeau",
+          "Cidre",
+          "Calvados"
+        ],
+        "réponse": "Cidre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cidre",
+        "anecdote": "Chez les producteurs, l'adjectif cidricole fait référence aussi bien à la boisson fermentée à base de pomme qu'à base de poire."
+      },
+      {
+        "id": 3,
+        "question": "Quelle princesse de contes a été empoisonnée par une pomme ?",
+        "propositions": [
+          "Cendrillon",
+          "Jasmine",
+          "Aurore",
+          "Blanche-Neige"
+        ],
+        "réponse": "Blanche-Neige",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Blanche-Neige",
+        "anecdote": "Le conte collecté par les frères Jacob et Wilhelm Grimm aurait été inspiré par un mythe germanique."
+      },
+      {
+        "id": 4,
+        "question": "Quelle multinationale américaine a pour logo une pomme ?",
+        "propositions": [
+          "Xerox",
+          "IBM",
+          "Microsoft",
+          "Apple"
+        ],
+        "réponse": "Apple",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Apple",
+        "anecdote": "En 2011, l'entreprise Apple employait 60 400 personnes pour un chiffre d'affaires annuel de plus de 170 milliards de dollars."
+      }
+    ]
+}

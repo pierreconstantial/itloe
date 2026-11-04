@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Portugal",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la capitale du Portugal ?",
+        "propositions": [
+          "Lisbonne",
+          "Faro",
+          "Porto",
+          "Coimbra"
+        ],
+        "réponse": "Lisbonne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quelle ville portugaise est célèbre pour ses caves à vin ?",
+        "propositions": [
+          "Lisbonne",
+          "Porto",
+          "Faro",
+          "Braga"
+        ],
+        "réponse": "Porto",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quelle région portugaise est célèbre pour ses falaises ?",
+        "propositions": [
+          "Lisbonne",
+          "Madère",
+          "Porto",
+          "Algarve"
+        ],
+        "réponse": "Algarve",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quel pays est le seul voisin terrestre du Portugal ?",
+        "propositions": [
+          "Espagne",
+          "Italie",
+          "Maroc",
+          "France"
+        ],
+        "réponse": "Espagne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

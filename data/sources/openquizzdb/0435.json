@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Méditerranée",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel pays se situe le canal de Suez ?",
+        "propositions": [
+          "Tunisie",
+          "Algérie",
+          "Égypte",
+          "Libye"
+        ],
+        "réponse": "Égypte",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Canal_de_Suez",
+        "anecdote": "Il permet aux navires d'aller d'Europe en Asie sans devoir contourner l'Afrique par le cap de Bonne-Espérance."
+      },
+      {
+        "id": 2,
+        "question": "À quel pays appartiennent les Cyclades, formées d'environ 250 îles ?",
+        "propositions": [
+          "Bulgarie",
+          "Grèce",
+          "Libye",
+          "Turquie"
+        ],
+        "réponse": "Grèce",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cyclades",
+        "anecdote": "On les appelle Cyclades car elles forment un cercle autour de l'île sacrée de Délos."
+      },
+      {
+        "id": 3,
+        "question": "À quel pays appartiennent les golfes de Messénie et de Corinthe ?",
+        "propositions": [
+          "Turquie",
+          "France",
+          "Italie",
+          "Grèce"
+        ],
+        "réponse": "Grèce",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Golfe_de_Corinthe",
+        "anecdote": "Le golfe de Corinthe est un profond bras de mer qui sépare le Péloponnèse de la Grèce continentale occidentale."
+      },
+      {
+        "id": 4,
+        "question": "Quel océan est relié à la mer Méditerranée par le détroit de Gibraltar ?",
+        "propositions": [
+          "Arctique",
+          "Pacifique",
+          "Atlantique",
+          "Indien"
+        ],
+        "réponse": "Atlantique",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Détroit_de_Gibraltar",
+        "anecdote": "Le détroit de Gibraltar est le seul passage maritime entre l'océan Atlantique et la mer Méditerranée."
+      }
+    ]
+}

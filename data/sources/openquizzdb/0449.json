@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sous les mers",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À qui appartient le Crabe Croustillant dans « Bob l'éponge » ?",
+        "propositions": [
+          "Monsieur Krabs",
+          "Carlo",
+          "Sandy",
+          "Bob l'éponge"
+        ],
+        "réponse": "Monsieur Krabs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quels personnages colorés vivent sous l'eau avec un tuba sur la tête ?",
+        "propositions": [
+          "Les Teletubbies",
+          "Les Bisounours",
+          "Les Snorky",
+          "Les Barbapapa"
+        ],
+        "réponse": "Les Snorky",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "De quel sous-marin Sean Connery a-t-il été le commandant ?",
+        "propositions": [
+          "K-19",
+          "Octobre Rouge",
+          "USS Dallas",
+          "HMS Vanguard"
+        ],
+        "réponse": "Octobre Rouge",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quel acteur a incarné « l'Homme de l'Atlantide » sur les écrans ?",
+        "propositions": [
+          "Lee Majors",
+          "Patrick Duffy",
+          "Mark Harmon",
+          "Mark Harris"
+        ],
+        "réponse": "Patrick Duffy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Les Visiteurs 2 »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui interprète Frénégonde de Pouille dans « Les Visiteurs 2 » ?",
+        "propositions": [
+          "Muriel Robin",
+          "Marie-Anne Chazel",
+          "Josiane Balasko",
+          "Miou-Miou"
+        ],
+        "réponse": "Muriel Robin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Couloirs_du_temps_:_Les_Visiteurs_2",
+        "anecdote": "À la fin du premier volet, Godefroy était assis sur son cheval derrière Frénégonde. Au début du second, leurs places se sont inversées."
+      },
+      {
+        "id": 2,
+        "question": "Où Jacquouille cache-t-il les cigares dans « Les Visiteurs 2 » ?",
+        "propositions": [
+          "Dans l'évier",
+          "Dans le congélateur",
+          "Dans le frigo",
+          "Dans le four"
+        ],
+        "réponse": "Dans l'évier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Couloirs_du_temps_:_Les_Visiteurs_2",
+        "anecdote": "Jean-Pierre Goulard, interprété par l'acteur Christian Bujeau, est dans le film dentiste de profession et surtout le mari de Béatrice."
+      },
+      {
+        "id": 3,
+        "question": "Quels uniformes les personnages du film « Les Visiteurs 2 » arborent-ils ?",
+        "propositions": [
+          "Policiers",
+          "Gendarmes",
+          "Pompiers",
+          "Militaires"
+        ],
+        "réponse": "Gendarmes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Couloirs_du_temps_:_Les_Visiteurs_2",
+        "anecdote": "C'est la rue Saint-Côme à Luzarches que traversent Godefroy et Jacquouille, habillés en gendarmes et accostant Mme Legueux."
+      },
+      {
+        "id": 4,
+        "question": "Qui incarne Dame Pétronille aux beaux tétons dans « Les Visiteurs 2 » ?",
+        "propositions": [
+          "Miou-Miou",
+          "Armelle Lesniak",
+          "Mathilde Seigner",
+          "Murielle Robin"
+        ],
+        "réponse": "Armelle Lesniak",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Armelle_(actrice)",
+        "anecdote": "Après des études en hypokhâgne et khâgne, Armelle Lesniak a travaillé un temps comme aide-costumière."
+      }
+    ]
+}

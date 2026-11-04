@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Géo pour tous",         
+  "mise-à-jour": "13/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la plus grande ville du Grand-Duché de Luxembourg ?",
+        "propositions": [
+          "Vianden",
+          "Diekirch",
+          "Luxembourg",
+          "Wiltz"
+        ],
+        "réponse": "Luxembourg",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Luxembourg_(ville)",
+        "anecdote": "Après avoir été surnommée « la Gibraltar du Nord » en raison de sa forteresse, elle est dite aujourd'hui le « Coeur vert de l'Europe »."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel pays se trouve Ankara, aux origines très anciennes ?",
+        "propositions": [
+          "Turquie",
+          "Inde",
+          "Birmanie",
+          "Pakistan"
+        ],
+        "réponse": "Turquie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ankara",
+        "anecdote": "Certains vestiges hittites découverts dans la citadelle attestent la présence d'une cité (Ankuva) du temps de l'Empire hittite."
+      },
+      {
+        "id": 3,
+        "question": "Quel fleuve d'Afrique occidentale borde le Sahel ?",
+        "propositions": [
+          "Niger",
+          "Zambèze",
+          "Congo",
+          "Sénégal"
+        ],
+        "réponse": "Niger",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Niger_(fleuve)",
+        "anecdote": "Le fleuve Niger fait partie de ces fleuves (tout comme le Sénégal) qui ont été fortement aménagés depuis les années 1980."
+      },
+      {
+        "id": 4,
+        "question": "Quelle mer est dépourvue de poissons et d'algues ?",
+        "propositions": [
+          "Mer Jaune",
+          "Mer Rouge",
+          "Mer Blanche",
+          "Mer Morte"
+        ],
+        "réponse": "Mer Morte",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mer_Morte",
+        "anecdote": "Alors que la salinité moyenne de l'eau de mer oscille entre 2 et 4 %, celle de la mer Morte est d'approximativement 27.5 %."
+      }
+    ]
+}

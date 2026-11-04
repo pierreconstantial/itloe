@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Donald Trump",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quelle émission télévisée Donald Trump a-t-il été l'animateur ?",
+        "propositions": [
+          "Spin City",
+          "The Apprentice",
+          "WWE Raw",
+          "The Job"
+        ],
+        "réponse": "The Apprentice",
+        "wikipédia": "https://fr.wikipedia.org/wiki/The_Apprentice",
+        "anecdote": "La 2 327ème étoile lui est décernée en 2007 sur le Hollywood Walk of Fame, au titre de son émission de téléréalité « The Apprentice »."
+      },
+      {
+        "id": 2,
+        "question": "Contre qui Donald Trump a-t-il gagné l'élection présidentielle de 2016 ?",
+        "propositions": [
+          "Barack Obama",
+          "Hillary Clinton",
+          "George W. Bush",
+          "Bill Clinton"
+        ],
+        "réponse": "Hillary Clinton",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hillary_Clinton",
+        "anecdote": "Sa campagne se caractérise par un positionnement populiste, nationaliste, isolationniste, protectionniste et climato-sceptique."
+      },
+      {
+        "id": 3,
+        "question": "Pour quel sport Donald Trump a-t-il acheté un terrain à Balmedie ?",
+        "propositions": [
+          "Ski",
+          "Golf",
+          "Rugby",
+          "Squash"
+        ],
+        "réponse": "Golf",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Donald_Trump",
+        "anecdote": "Malgré l'opposition de résidents, il crée un terrain de golf sur une zone pourtant déclarée « site d'intérêt scientifique particulier »."
+      },
+      {
+        "id": 4,
+        "question": "Pour quel personnage fictif Bob Gale s'est-il inspiré de Donald Trump ?",
+        "propositions": [
+          "Biff Tannen",
+          "Sam Baines",
+          "Emmett Brown",
+          "Marty McFly"
+        ],
+        "réponse": "Biff Tannen",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Donald_Trump",
+        "anecdote": "Biff Tannen est devenu milliardaire dans un futur alternatif dans le film à succès « Retour vers le futur 2 »."
+      }
+    ]
+}

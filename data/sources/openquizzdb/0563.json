@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Volcans en activité",         
+  "mise-à-jour": "17/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel volcan des îles Éoliennes est situé au nord de la Sicile ?",
+        "propositions": [
+          "Stromboli",
+          "Pinatubo",
+          "Villarrica",
+          "Vésuve"
+        ],
+        "réponse": "Stromboli",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stromboli",
+        "anecdote": "La partie actuellement active du volcan s'est formée il y a moins de cinq mille ans et est en éruption quasi continue."
+      },
+      {
+        "id": 2,
+        "question": "Quel volcan actif est le plus haut d'Europe, avec ses 3 330 mètres ?",
+        "propositions": [
+          "Etna",
+          "Mont Fuji",
+          "Olca",
+          "Ebeko"
+        ],
+        "réponse": "Etna",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Etna",
+        "anecdote": "Ses pentes relativement raides sont interrompues par plusieurs bouches éruptives, notamment sur ses flancs sud et ouest."
+      },
+      {
+        "id": 3,
+        "question": "Quel volcan, connu des touristes, est le point culminant du Japon ?",
+        "propositions": [
+          "Mont Longonot",
+          "Mont Ontake",
+          "Mont Spurr",
+          "Mont Fuji"
+        ],
+        "réponse": "Mont Fuji",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mont_Fuji",
+        "anecdote": "La montagne est un stratovolcan toujours considéré comme actif, sa dernière éruption s'étant produite fin 1707."
+      },
+      {
+        "id": 4,
+        "question": "Quel volcan a provoqué un refroidissement mondial de 0,6°C ?",
+        "propositions": [
+          "Pinatubo",
+          "Misti",
+          "Rasshua",
+          "Kurub"
+        ],
+        "réponse": "Pinatubo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pinatubo",
+        "anecdote": "Le bilan humain, qui s'élève à moins de 1 000 morts, fut relativement limité grâce à l'évacuation efficace des populations."
+      }
+    ]
+}

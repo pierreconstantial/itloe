@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Meghan Markle",         
+  "mise-à-jour": "06/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel était le métier de Meghan Markle avant de devenir duchesse ?",
+        "propositions": [
+          "Actrice",
+          "Juriste",
+          "Joueuse de tennis",
+          "Présentatrice télé"
+        ],
+        "réponse": "Actrice",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Suits_:_Avocats_sur_mesure",
+        "anecdote": "C'est dans la célèbre série télévisée américaine « Suits » que Meghan Markle a interprété Rachel Zane, une assistante juridique."
+      },
+      {
+        "id": 2,
+        "question": "À l'issue de quelle saison Meghan Markle a-t-elle quitté la série « Suits » ?",
+        "propositions": [
+          "Sixième",
+          "Septième",
+          "Cinquième",
+          "Huitième"
+        ],
+        "réponse": "Septième",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Meghan_Markle",
+        "anecdote": "En 2017, à la suite de ses fiançailles avec le Prince Harry, elle quitte la série « Suits » et prend la décision d'interrompre sa carrière d'actrice."
+      },
+      {
+        "id": 3,
+        "question": "De combien d'années Meghan Markle est-elle l'aînée du prince Harry ?",
+        "propositions": [
+          "Trois ans",
+          "Sept ans",
+          "Neuf ans",
+          "Cinq ans"
+        ],
+        "réponse": "Trois ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mariage_du_prince_Harry_et_de_Meghan_Markle",
+        "anecdote": "Le 8 novembre 2016, il fut officiellement annoncé que Meghan Markle était la compagne du prince Harry, et ce depuis juin 2016."
+      },
+      {
+        "id": 4,
+        "question": "Dans quelle série policière Meghan Markle a-t-elle incarné Amy Jessup ?",
+        "propositions": [
+          "Dark Angel",
+          "X-Files",
+          "Fringe",
+          "Beyond"
+        ],
+        "réponse": "Fringe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fringe_(série_télévisée)",
+        "anecdote": "Dans la série, l'équipe a recours à ce qu'on appelle en anglais la fringe science pour enquêter sur des phénomènes inexpliqués."
+      }
+    ]
+}

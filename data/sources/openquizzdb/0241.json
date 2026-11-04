@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Télé-réalité",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quelle télé-réalité Loana est-elle sortie gagnante en 2001 ?",
+        "propositions": [
+          "Nice People",
+          "Bachelor",
+          "Secret Story",
+          "Loft Story"
+        ],
+        "réponse": "Loft Story",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Loana_Petrucciani",
+        "anecdote": "La renommée de Loana lui a permis de s'essayer aux métiers de styliste, chanteuse et présentatrice de télévision française."
+      },
+      {
+        "id": 2,
+        "question": "Qui a remporté la toute première édition de la « Star Academy » sur TF1 ?",
+        "propositions": [
+          "Jenifer",
+          "Mario",
+          "Nolwenn",
+          "Emma"
+        ],
+        "réponse": "Jenifer",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jenifer",
+        "anecdote": "Jenifer est également connue pour avoir fait partie plus tard du jury français des quatre premières saisons de l'émission « The Voice »."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le point commun entre les L5, M. Pokora et Sheryfa Luna ?",
+        "propositions": [
+          "X-Factor",
+          "Popstars",
+          "Star Academy",
+          "Nouvelle Star"
+        ],
+        "réponse": "Popstars",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sheryfa_Luna",
+        "anecdote": "Sheryfa Luna, gagnante de la saison 3, est la seule artiste de RnB français à avoir obtenu deux numéro un consécutifs au top single."
+      },
+      {
+        "id": 4,
+        "question": "Quelle société française a produit l'émission « Secret Story » ?",
+        "propositions": [
+          "Sofina",
+          "Tele Atlas",
+          "Arcadis",
+          "Endemol"
+        ],
+        "réponse": "Endemol",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Secret_Story",
+        "anecdote": "Le concept de l'émission reposait sur un groupe de candidats ayant chacun un secret à protéger, tout en étant filmés en permanence."
+      }
+    ]
+}

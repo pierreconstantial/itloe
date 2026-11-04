@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Les géants de la Terre",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le régime alimentaire de l'éléphant ?",
+        "propositions": [
+          "Carnivore",
+          "Herbivore",
+          "Insectivore",
+          "Omnivore"
+        ],
+        "réponse": "Herbivore",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Combien de temps dure environ la gestation d'une éléphante ?",
+        "propositions": [
+          "3 mois",
+          "12 mois",
+          "6 mois",
+          "22 mois"
+        ],
+        "réponse": "22 mois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quelle est la principale menace pour les éléphants ?",
+        "propositions": [
+          "Prédation",
+          "Braconnage",
+          "Tempêtes",
+          "Froid"
+        ],
+        "réponse": "Braconnage",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Qu'est-ce qui distingue les éléphants d'Asie des éléphants d'Afrique ?",
+        "propositions": [
+          "Oreilles",
+          "Couleur",
+          "Trompe",
+          "Queue"
+        ],
+        "réponse": "Oreilles",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

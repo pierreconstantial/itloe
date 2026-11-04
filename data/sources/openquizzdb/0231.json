@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Univers Star Trek",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans « Star Trek », quelle flotte est liée à la Fédération des planètes unies ?",
+        "propositions": [
+          "FedCon",
+          "Starfleet",
+          "Cardassia",
+          "Klingon"
+        ],
+        "réponse": "Starfleet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Starfleet",
+        "anecdote": "La série a introduit des concepts d'exploration spatiale et de diplomatie avant même que le voyage spatial n'existe."
+      },
+      {
+        "id": 2,
+        "question": "Dans l'univers de « Star Trek », quel physicien est aussi un fin timonier ?",
+        "propositions": [
+          "Sulu",
+          "Uhura",
+          "Chekov",
+          "McCoy"
+        ],
+        "réponse": "Sulu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hikaru_Sulu",
+        "anecdote": "Il est fort probable que Hikaru Sulu soit une déformation de Hikari utsuru, évoquant le déplacement à la vitesse de la lumière."
+      },
+      {
+        "id": 3,
+        "question": "Quel dispositif technologique transporte les individus dans « Star Trek » ?",
+        "propositions": [
+          "Télécran",
+          "Cube cosmique",
+          "Téléporteur",
+          "Holodeck"
+        ],
+        "réponse": "Téléporteur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Téléporteur",
+        "anecdote": "Le téléporteur a été introduit pour éviter les coûts liés aux effets spéciaux de la mise en scène des déplacements de l'équipage."
+      },
+      {
+        "id": 4,
+        "question": "Qui a remplacé Leonard Nimoy dans les derniers films « Star Trek » ?",
+        "propositions": [
+          "Zachary Quinto",
+          "Chris Pine",
+          "Avery Brooks",
+          "Jonathan Frakes"
+        ],
+        "réponse": "Zachary Quinto",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Zachary_Quinto",
+        "anecdote": "Le 16 octobre 2011, l'acteur évoqua son homosexualité pour la première fois lors d'un entretien donné au « New York Magazine »."
+      }
+    ]
+}

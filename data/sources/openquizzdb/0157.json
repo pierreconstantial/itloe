@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Grandes vacances",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle destination estivale est surtout connue pour sa tour penchée ?",
+        "propositions": [
+          "Athènes",
+          "Pise",
+          "Barcelone",
+          "Paris"
+        ],
+        "réponse": "Pise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tour_de_Pise",
+        "anecdote": "Cette inclinaison est apparue très rapidement pendant sa construction (1173), car édifiée sur une plaine alluviale."
+      },
+      {
+        "id": 2,
+        "question": "Quelle île grecque affiche maisons blanches et dômes bleus ?",
+        "propositions": [
+          "Mykonos",
+          "Santorin",
+          "Rhodes",
+          "Crète"
+        ],
+        "réponse": "Santorin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Santorin",
+        "anecdote": "Le contraste des bâtiments avec les eaux azur de la mer Égée en fait l'une des destinations estivales les plus photographiées."
+      },
+      {
+        "id": 3,
+        "question": "Dans quelles îles caribéennes marchez-vous sur du sable rose ?",
+        "propositions": [
+          "Grenade",
+          "Bahamas",
+          "La Barbade",
+          "Sainte-Lucie"
+        ],
+        "réponse": "Bahamas",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bahamas",
+        "anecdote": "L'île est réputée pour ses plages de sable rose, créées par la combinaison de sable blanc et des fragments de corail rose."
+      },
+      {
+        "id": 4,
+        "question": "Quelle île européenne est réputée pour ses fjords et aurores boréales ?",
+        "propositions": [
+          "Norvège",
+          "Finlande",
+          "Suède",
+          "Islande"
+        ],
+        "réponse": "Islande",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Islande",
+        "anecdote": "L'Islande, située à la limite de l'Arctique, offre une expérience unique en été avec le phénomène du soleil de minuit."
+      }
+    ]
+}

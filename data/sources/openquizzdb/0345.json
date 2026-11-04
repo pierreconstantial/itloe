@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Le Roi Lion »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment s'appelle le héros du film d'animation « Le Roi Lion » ?",
+        "propositions": [
+          "Rafiki",
+          "Scar",
+          "Timon",
+          "Simba"
+        ],
+        "réponse": "Simba",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Roi_lion",
+        "anecdote": "Après avoir remporté la victoire contre Scar le tyran et ses hyènes, Simba devient roi de la Terre des Lions."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la particularité physique de Scar dans « Le Roi Lion » ?",
+        "propositions": [
+          "Cicatrice",
+          "Visage brûlé",
+          "Œil blanc",
+          "Pas de moustaches"
+        ],
+        "réponse": "Cicatrice",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Roi_lion",
+        "anecdote": "Frère cadet de Mufasa et oncle de Simba, « méchant » de l'histoire, Scar a un nom qui signifie « cicatrice » en anglais."
+      },
+      {
+        "id": 3,
+        "question": "Qui est le compagnon de Timon dans le film « Le Roi Lion » ?",
+        "propositions": [
+          "Scar",
+          "Pumbaa",
+          "Shenzi",
+          "Zazu"
+        ],
+        "réponse": "Pumbaa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Roi_lion",
+        "anecdote": "On en apprendra plus sur l'histoire de ces deux personnages dans le film « Le Roi lion 3 : Hakuna Matata »."
+      },
+      {
+        "id": 4,
+        "question": "En quoi se déguise Timon, le petit suricate du célèbre film « Le Roi Lion » ?",
+        "propositions": [
+          "En vahiné",
+          "En hyène",
+          "En lionceau",
+          "En brindille"
+        ],
+        "réponse": "En vahiné",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Roi_lion",
+        "anecdote": "Le suricate, parfois surnommé « sentinelle du désert », est un petit carnivore vivant dans le sud-ouest de l'Afrique."
+      }
+    ]
+}

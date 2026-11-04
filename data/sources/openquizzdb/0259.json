@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Animateurs télé",         
+  "mise-à-jour": "15/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel présentateur est un fin spécialiste des familles royales ?",
+        "propositions": [
+          "Denis Brogniart",
+          "Michel Drucker",
+          "Gérard Holtz",
+          "Stéphane Bern"
+        ],
+        "réponse": "Stéphane Bern",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stéphane_Bern",
+        "anecdote": "Stéphane Bern a fait son coming out dans le magazine « Têtu » en octobre 2009, puis chez Mireille Dumas la même année."
+      },
+      {
+        "id": 2,
+        "question": "Quel animateur télé est incontestablement associé à « Koh-Lanta » ?",
+        "propositions": [
+          "Nikos Aliagas",
+          "Stéphane Bern",
+          "Denis Brogniart",
+          "Michel Field"
+        ],
+        "réponse": "Denis Brogniart",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Denis_Brogniart",
+        "anecdote": "Marié en 2007, Denis Brogniart a quatre enfants (nés entre 2000 et 2007) dont trois avec son épouse Hortense."
+      },
+      {
+        "id": 3,
+        "question": "Qui a présenté jusque 2018 le « Grand Concours des Animateurs » ?",
+        "propositions": [
+          "Estelle Denis",
+          "Nathalie Simon",
+          "Carole Rousseau",
+          "Sophie Favier"
+        ],
+        "réponse": "Carole Rousseau",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Carole_Rousseau",
+        "anecdote": "Carole Rousseau a également présenté « Scrupules » ainsi que les trois premières saisons de l'émission « MasterChef »."
+      },
+      {
+        "id": 4,
+        "question": "Qui a dirigé depuis 2003 les candidats de « Fort Boyard » ?",
+        "propositions": [
+          "Michel Field",
+          "Florian Gazan",
+          "Frédéric Lopez",
+          "Olivier Minne"
+        ],
+        "réponse": "Olivier Minne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Olivier_Minne",
+        "anecdote": "Olivier Minne a fait des apparitions dans la série « Un gars, une fille », incarnant alors un des copains de Jean."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #22",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel muscle circulaire est situé autour de notre tube digestif ?",
+        "propositions": [
+          "Sphyncter",
+          "Sphincter",
+          "Sphinctère",
+          "Sphinctaire"
+        ],
+        "réponse": "Sphincter",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "De quelle matière sont faites les pantoufles de Cendrillon ?",
+        "propositions": [
+          "Vair",
+          "Vaire",
+          "Vert",
+          "Verre"
+        ],
+        "réponse": "Vair",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel modèle cohérent du monde repose sur un fondement défini ?",
+        "propositions": [
+          "Paradighme",
+          "Paradygmne",
+          "Paradigme",
+          "Parradigdme"
+        ],
+        "réponse": "Paradigme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel est le pigment assimilateur des végétaux photosynthétiques ?",
+        "propositions": [
+          "Clorofille",
+          "Chlorophile",
+          "Chlorophylle",
+          "Chlorophyle"
+        ],
+        "réponse": "Chlorophylle",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

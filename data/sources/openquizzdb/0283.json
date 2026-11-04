@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Bruxelles ma Belle",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À quel endroit du territoire belge est située la ville de Bruxelles ?",
+        "propositions": [
+          "Sud",
+          "Ouest",
+          "Centre",
+          "Nord"
+        ],
+        "réponse": "Centre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bruxelles",
+        "anecdote": "C'est à Bruxelles-Capitale que siègent la plupart des institutions de l'UE, ainsi que de nombreuses organisations internationales."
+      },
+      {
+        "id": 2,
+        "question": "Le Bois de la Cambre est une extension de quelle forêt historique ?",
+        "propositions": [
+          "Chaux",
+          "Soignes",
+          "Retz",
+          "Brotonne"
+        ],
+        "réponse": "Soignes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Forêt_de_Soignes",
+        "anecdote": "Aujourd'hui, la forêt de Soignes est un espace protégé classé au patrimoine mondial de l'UNESCO pour ses hêtres remarquables."
+      },
+      {
+        "id": 3,
+        "question": "Comment est couramment nommé l'aéroport de Bruxelles-National ?",
+        "propositions": [
+          "Zwevegem",
+          "Zandhoven",
+          "Zottegem",
+          "Zaventem"
+        ],
+        "réponse": "Zaventem",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Aéroport_de_Bruxelles",
+        "anecdote": "Le nom Brussels Airport a été adopté en 2006 pour renforcer l'image internationale, le nom Aéroport de Zaventem restant très utilisé."
+      },
+      {
+        "id": 4,
+        "question": "Quel style architectural est lié à Victor Horta et Henry Van de Velde ?",
+        "propositions": [
+          "Art déco",
+          "Art baroque",
+          "Art moderne",
+          "Art nouveau"
+        ],
+        "réponse": "Art nouveau",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Art_nouveau",
+        "anecdote": "Avant la Première Guerre mondiale, ce mouvement évolua vers un style plus géométrique, caractéristique du mouvement Art déco."
+      }
+    ]
+}

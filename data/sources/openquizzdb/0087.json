@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Coupe du monde de football",         
+  "mise-à-jour": "07/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que portent les silhouettes du trophée de la Coupe du monde ?",
+        "propositions": [
+          "Flamme",
+          "Sifflet",
+          "Chaussure",
+          "Globe terrestre"
+        ],
+        "réponse": "Globe terrestre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coupe_du_monde_de_football",
+        "anecdote": "Ce trophée a été créé par le sculpteur italien Silvio Gazzaniga."
+      },
+      {
+        "id": 2,
+        "question": "Qui a été expulsé en finale de la Coupe du monde de football en 1998 ?",
+        "propositions": [
+          "Thierry Henry",
+          "Marcel Desailly",
+          "Laurent Blanc",
+          "Franck Leboeuf"
+        ],
+        "réponse": "Marcel Desailly",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coupe_du_monde_de_la_FIFA",
+        "anecdote": "La première édition a lieu en 1930 en Uruguay, qui remporta la compétition à domicile."
+      },
+      {
+        "id": 3,
+        "question": "Quelle était la marque du ballon de la Coupe du monde de football 2002 ?",
+        "propositions": [
+          "Adidas",
+          "Reebok",
+          "Nike",
+          "Puma"
+        ],
+        "réponse": "Adidas",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Adidas",
+        "anecdote": "Adidas est une firme allemande qui fabrique et distribue des articles de sport."
+      },
+      {
+        "id": 4,
+        "question": "Quelles trompettes furent utilisées par les supporters en 2010 ?",
+        "propositions": [
+          "Vovomelas",
+          "Vivigalas",
+          "Vavadolas",
+          "Vuvuzelas"
+        ],
+        "réponse": "Vuvuzelas",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vuvuzela",
+        "anecdote": "P"
+      }
+    ]
+}

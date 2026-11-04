@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Gladiateurs",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel type d'édifice se déroulaient les combats de gladiateurs ?",
+        "propositions": [
+          "Temple",
+          "Gallodrome",
+          "Forum",
+          "Amphithéâtre"
+        ],
+        "réponse": "Amphithéâtre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Amphithéâtre_romain",
+        "anecdote": "À la différence des cirques et des théâtres de la Grèce antique, les amphithéâtres sont des monuments nés dans le monde romain."
+      },
+      {
+        "id": 2,
+        "question": "Quel marchand était entraîneur et propriétaire de gladiateurs ?",
+        "propositions": [
+          "Laniste",
+          "Étaleur",
+          "Gargotier",
+          "Centurion"
+        ],
+        "réponse": "Laniste",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Laniste",
+        "anecdote": "Le célèbre Cnaeus Lentulus Batiatus possédait un ludus à Capoue, d'où s'échappèrent Spartacus et ses compagnons."
+      },
+      {
+        "id": 3,
+        "question": "Qui est le plus populaire des gladiateurs d'origine thrace ?",
+        "propositions": [
+          "Crixus",
+          "Jugurtha",
+          "Spartacus",
+          "Maximus"
+        ],
+        "réponse": "Spartacus",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Spartacus",
+        "anecdote": "Spartacus fut le principal chef des révoltés lors de la Troisième Guerre servile en Italie entre 73 et 71 avant Jésus-Christ."
+      },
+      {
+        "id": 4,
+        "question": "Comment un gladiateur signalait-il qu'il abandonnait le combat ?",
+        "propositions": [
+          "Il hurle",
+          "Il lève le doigt",
+          "Il retire son casque",
+          "Il jette son épée"
+        ],
+        "réponse": "Il lève le doigt",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gladiateur",
+        "anecdote": "Si le combat dure trop longtemps, l'éditeur peut exiger que les gladiateurs continuent en se battant alors sans bouclier."
+      }
+    ]
+}

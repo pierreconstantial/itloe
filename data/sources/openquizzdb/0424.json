@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Appel du large",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel était l'ancien nom du Sri Lanka ?",
+        "propositions": [
+          "Ceylan",
+          "Formose",
+          "Batavia",
+          "Cipango"
+        ],
+        "réponse": "Ceylan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sri_Lanka",
+        "anecdote": "Le Sri Lanka possède deux langues officielles reconnues par la constitution du pays à parts égales, le cingalais et le tamoul."
+      },
+      {
+        "id": 2,
+        "question": "À quel pays est rattachée la Tasmanie et ses mille petites îles ?",
+        "propositions": [
+          "Royaume-Uni",
+          "Nouvelle-Zélande",
+          "Australie",
+          "France"
+        ],
+        "réponse": "Australie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tasmanie",
+        "anecdote": "La Tasmanie fut baptisée « Île de l'Inspiration » en référence à son environnement naturel riche et préservé."
+      },
+      {
+        "id": 3,
+        "question": "Avec quel pays la France partage-t-elle l'île de Saint-Martin ?",
+        "propositions": [
+          "Danemark",
+          "États-Unis",
+          "Pays-Bas",
+          "Royaume-Uni"
+        ],
+        "réponse": "Pays-Bas",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Saint-Martin_(île)",
+        "anecdote": "L'anglais, langue co-officielle avec le français et le néerlandais, est la principale langue utilisée sur l'île."
+      },
+      {
+        "id": 4,
+        "question": "En hawaïen, que signifie Honolulu, capitale de l'État d'Hawaï ?",
+        "propositions": [
+          "Deux mers",
+          "Soleil cruel",
+          "Baie abritée",
+          "Grand port"
+        ],
+        "réponse": "Baie abritée",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Honolulu",
+        "anecdote": "Honolulu est connue pour son quartier touristique sur la plage de Waikiki et pour le cratère volcanique Diamond Head."
+      }
+    ]
+}

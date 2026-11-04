@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #32",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dangereux quand il est blindé, mot de cinq lettres commençant par un E ?",
+        "propositions": [
+          "Envol",
+          "Enfer",
+          "Ergot",
+          "Engin"
+        ],
+        "réponse": "Engin",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Peut finir dans un bain, mot de quatre lettres commençant par un S ?",
+        "propositions": [
+          "Scie",
+          "Soda",
+          "Star",
+          "Sang"
+        ],
+        "réponse": "Sang",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Elle donne la frite, mot de six lettres commençant par un P ?",
+        "propositions": [
+          "Phrase",
+          "Pensée",
+          "Pédale",
+          "Patate"
+        ],
+        "réponse": "Patate",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Bouquet pour le nez, mot de cinq lettres commençant par un A ?",
+        "propositions": [
+          "Autel",
+          "Arôme",
+          "Agave",
+          "Azote"
+        ],
+        "réponse": "Arôme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

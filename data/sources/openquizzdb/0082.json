@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #07",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Penchant de petit clown, mot de six lettres commençant par un M ?",
+        "propositions": [
+          "Menhir",
+          "Magret",
+          "Malice",
+          "Marmot"
+        ],
+        "réponse": "Malice",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Première chambre de bébé, mot de six lettres commençant par un V ?",
+        "propositions": [
+          "Vidoir",
+          "Volcan",
+          "Valise",
+          "Ventre"
+        ],
+        "réponse": "Ventre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Mot doux pour être cher, mot de six lettres commençant par un T ?",
+        "propositions": [
+          "Trésor",
+          "Tortue",
+          "Tocade",
+          "Tampon"
+        ],
+        "réponse": "Trésor",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Fait chambre à part, mot de huit lettres commençant par un S ?",
+        "propositions": [
+          "Sénateur",
+          "Sicilien",
+          "Sabotier",
+          "Suzerain"
+        ],
+        "réponse": "Sénateur",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

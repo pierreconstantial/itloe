@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Coca-Cola Company",         
+  "mise-à-jour": "21/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel soda de Coca-Cola concurrence directement le 7 Up ?",
+        "propositions": [
+          "Fanta",
+          "Bonaqua",
+          "Sprite",
+          "Nalu"
+        ],
+        "réponse": "Sprite",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sprite_(soda)",
+        "anecdote": "Le Sprite contient : eau gazéifiée, sucre et acidifiants (acide citrique, citrate de sodium et arômes naturels de citron-citron vert)."
+      },
+      {
+        "id": 2,
+        "question": "Quelle marque d'eau minérale belge appartient au groupe Coca-Cola ?",
+        "propositions": [
+          "Bru",
+          "Chaudfontaine",
+          "Valvert",
+          "Spa"
+        ],
+        "réponse": "Chaudfontaine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chaudfontaine_(eau)",
+        "anecdote": "La source de Chaudfontaine se situe dans la commune belge éponyme de Chaudfontaine, en Région wallonne."
+      },
+      {
+        "id": 3,
+        "question": "Quel thé glacé est produit conjointement par Nestlé et Coca-Cola ?",
+        "propositions": [
+          "Nestea",
+          "Arizona",
+          "May Tea",
+          "Virgin"
+        ],
+        "réponse": "Nestea",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nestea",
+        "anecdote": "Lancé en 1993, Nestea est issu d'une collaboration entre Nestlé et The Coca-Cola Company via leur coentreprise Beverage Partners Worldwide. La marque propose principalement des boissons à base de thé noir infusé, souvent aromatisées au citron ou à la pêch"
+      },
+      {
+        "id": 4,
+        "question": "Dans quelle ville de Géorgie se situe le siège de la société Coca-Cola ?",
+        "propositions": [
+          "Dalton",
+          "Atlanta",
+          "Albany",
+          "Brunswick"
+        ],
+        "réponse": "Atlanta",
+        "wikipédia": "https://fr.wikipedia.org/wiki/The_Coca-Cola_Company",
+        "anecdote": "La société Coca-Cola était, au début de 2012, la troisième entreprise agroalimentaire du monde en termes de chiffre d'affaires."
+      }
+    ]
+}

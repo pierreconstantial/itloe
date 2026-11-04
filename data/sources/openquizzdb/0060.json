@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #10",         
+  "mise-à-jour": "07/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que vous vend un marchand ambulant avec des objets de peu de valeur ?",
+        "propositions": [
+          "Kaamelott",
+          "Camelote",
+          "Cammelote",
+          "Camelotte"
+        ],
+        "réponse": "Camelote",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle petite marmite individuelle peut-on servir un ragoût ?",
+        "propositions": [
+          "Casolète",
+          "Cassolette",
+          "Casolette",
+          "Cassolete"
+        ],
+        "réponse": "Cassolette",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle pâtisserie est confectionnée avec une pâte cuite dans un fer ?",
+        "propositions": [
+          "Gauffre",
+          "Gaufre",
+          "Gofre",
+          "Goffre"
+        ],
+        "réponse": "Gaufre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel mouvement de cheveux se dresse au-dessus du front de Tintin ?",
+        "propositions": [
+          "Houppète",
+          "Houpète",
+          "Houppette",
+          "Houpette"
+        ],
+        "réponse": "Houppette",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Villes de France",         
+  "mise-à-jour": "07/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À quelle ville de France le saucisson et Guignol vous font-ils penser ?",
+        "propositions": [
+          "Lyon",
+          "Cannes",
+          "Nice",
+          "Marseille"
+        ],
+        "réponse": "Lyon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lyon",
+        "anecdote": "Lyon est en situation de carrefour géographique, au nord du couloir naturel de la vallée du Rhône."
+      },
+      {
+        "id": 2,
+        "question": "De quelle ville du Sud-Ouest proviennent de célèbres pruneaux AOC ?",
+        "propositions": [
+          "Pau",
+          "Bergerac",
+          "Agen",
+          "Bayonne"
+        ],
+        "réponse": "Agen",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Agen",
+        "anecdote": "Le nom d'Agen est associé au pruneau, dont la zone de production principale est essentiellement située en Lot-et-Garonne."
+      },
+      {
+        "id": 3,
+        "question": "Combien y a-t-il de communes à Paris sur une boucle de la Seine ?",
+        "propositions": [
+          "22",
+          "13",
+          "9",
+          "Une seule"
+        ],
+        "réponse": "Une seule",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Paris",
+        "anecdote": "D'après le recensement de l'Insee, la commune de Paris comptait au 1er janvier 2012 plus de deux millions d'habitants."
+      },
+      {
+        "id": 4,
+        "question": "Quelle ville française est surnommée « la cité phocéenne » ?",
+        "propositions": [
+          "Nantes",
+          "Bordeaux",
+          "Nice",
+          "Marseille"
+        ],
+        "réponse": "Marseille",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

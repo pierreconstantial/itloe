@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #06",         
+  "mise-à-jour": "01/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De combien de fois le territoire des États-Unis dépasse-t-il la France ?",
+        "propositions": [
+          "Cinq fois",
+          "Vingt fois",
+          "Quinze fois",
+          "Dix fois"
+        ],
+        "réponse": "Quinze fois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/France",
+        "anecdote": "Cette différence de taille explique la diversité des paysages américains, allant des déserts de l'Arizona aux forêts de l'Alaska."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la hauteur de l'Atomium, monument bruxellois ?",
+        "propositions": [
+          "150 mètres",
+          "102 mètres",
+          "75 mètres",
+          "184 mètres"
+        ],
+        "réponse": "102 mètres",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Atomium",
+        "anecdote": "L'Atomium devait à l'origine être une structure temporaire pour l'Expo 58, mais son succès populaire en a fait un symbole de Bruxelles."
+      },
+      {
+        "id": 3,
+        "question": "Combien de passagers peuvent embarquer à bords de l'Airbus A380 ?",
+        "propositions": [
+          "Environ 250",
+          "Environ 1 000",
+          "Environ 850",
+          "Environ 400"
+        ],
+        "réponse": "Environ 850",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Airbus_A380",
+        "anecdote": "Sa taille imposante et ses deux ponts permettent même à certaines compagnies d'installer des bars, lounges ou cabines premium."
+      },
+      {
+        "id": 4,
+        "question": "Combien d'heures par jour un Américain passe-t-il devant la télévision ?",
+        "propositions": [
+          "Six heures",
+          "Une heure",
+          "Quatre heures",
+          "Deux heures"
+        ],
+        "réponse": "Quatre heures",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Télévision",
+        "anecdote": "La télévision reste un élément central du foyer américain, souvent regardée ensemble en soirée, malgré l'éclatement des plateformes."
+      }
+    ]
+}

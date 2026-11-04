@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Chocolatissimo",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À partir de la fève de quel arbre spécifique le chocolat est-il produit ?",
+        "propositions": [
+          "Palmier",
+          "Figuier",
+          "Pacanier",
+          "Cacaoyer"
+        ],
+        "réponse": "Cacaoyer",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fève_de_cacao",
+        "anecdote": "Les fèves de cacao sont en réalité des graines contenues dans les cabosses du cacaoyer, chacune pouvant contenir 20 à 50 fèves."
+      },
+      {
+        "id": 2,
+        "question": "Quel chocolat, riche en acides gras saturés, est le plus amer ?",
+        "propositions": [
+          "Au lait",
+          "Noir",
+          "Blanc",
+          "Praliné"
+        ],
+        "réponse": "Noir",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chocolat_noir",
+        "anecdote": "Riche en graisses saturées, le chocolat noir l'est également en magnésium, ce qui peut aider à améliorer la concentration."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le premier pays producteur de cacao, loin devant le Ghana ?",
+        "propositions": [
+          "Nigeria",
+          "Côte d'Ivoire",
+          "Brésil",
+          "Mexique"
+        ],
+        "réponse": "Côte d'Ivoire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cacao",
+        "anecdote": "En Côte d'Ivoire, les petites exploitations familiales dominent la production, le pays comptant plus de 700 000 producteurs de cacao."
+      },
+      {
+        "id": 4,
+        "question": "Que fait-on en torréfiant les fèves de cacao pour le chocolat ?",
+        "propositions": [
+          "On les écrase",
+          "On les épluche",
+          "On les grille",
+          "On les tord"
+        ],
+        "réponse": "On les grille",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fève_de_cacao",
+        "anecdote": "La torréfaction, c'est-à-dire un chauffage de 140 à 160°C pendant 20 à 30 minutes, permet le développement des arômes du cacao."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Le Père Noël est une ordure »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel gâteau du « Père Noël est une ordure » possède une double couche ?",
+        "propositions": [
+          "Ragoutchi",
+          "Klug",
+          "Schtonk",
+          "Doubitchou"
+        ],
+        "réponse": "Klug",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_père_Noël_est_une_ordure",
+        "anecdote": "« Le père Noël est une ordure » est un film réalisé par Jean-Marie Poiré et sorti au cinéma le 25 août 1982, interprété par la troupe du Splendid."
+      },
+      {
+        "id": 2,
+        "question": "Combien de doigts possède le gant tricoté par Thérèse ?",
+        "propositions": [
+          "Six",
+          "Cinq",
+          "Quatre",
+          "Trois"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Père_Noël_est_une_ordure",
+        "anecdote": "« Le père Noël est une ordure » est à l'origine (1979) une pièce de théâtre interprétée par la troupe du Splendid."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le prénom de Gérard Jugnot dans « Le Père Noël est une ordure » ?",
+        "propositions": [
+          "Pierre",
+          "Félix",
+          "Gérard",
+          "Roger"
+        ],
+        "réponse": "Félix",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Père_Noël_est_une_ordure",
+        "anecdote": "Jacques François, qui joue le pharmacien, a accepté de jouer gratuitement dans le film, la production ne pouvant le payer."
+      },
+      {
+        "id": 4,
+        "question": "À quel réalisateur français doit-on le film « Le père Noël est une ordure » ?",
+        "propositions": [
+          "Alain Terzian",
+          "Claude Zidi",
+          "Patrice Ledoux",
+          "Jean-Marie Poiré"
+        ],
+        "réponse": "Jean-Marie Poiré",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_père_Noël_est_une_ordure",
+        "anecdote": "À sa sortie en salles, le film fut boycotté par la RATP qui refusa de louer des panneaux publicitaires suite au titre jugé trop provocant."
+      }
+    ]
+}

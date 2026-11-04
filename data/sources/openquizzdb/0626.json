@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Ville de Paris",         
+  "mise-à-jour": "28/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui est devenue en 2014 la première femme maire de Paris ?",
+        "propositions": [
+          "Anne Hidalgo",
+          "Hélène Hardy",
+          "Gisèle Halimi",
+          "Christine Herzog"
+        ],
+        "réponse": "Anne Hidalgo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Anne_Hidalgo",
+        "anecdote": "Membre du PS, Anne Hidalgo possède la double nationalité franco-espagnole mais n'a pas d'activité politique en Espagne."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le plus grand cimetière parisien de Paris intra muros ?",
+        "propositions": [
+          "Père-Lachaise",
+          "Montparnasse",
+          "Belleville",
+          "Montmartre"
+        ],
+        "réponse": "Père-Lachaise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cimetière_du_Père-Lachaise",
+        "anecdote": "Il accueille chaque année plus de trois millions et demi de visiteurs, ce qui en fait le cimetière le plus visité au monde."
+      },
+      {
+        "id": 3,
+        "question": "Avec quelle unique autre ville d'Europe Paris est-elle jumelée ?",
+        "propositions": [
+          "Berlin",
+          "Rome",
+          "Athènes",
+          "Madrid"
+        ],
+        "réponse": "Rome",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Paris",
+        "anecdote": "Ce jumelage est valable dans l'autre sens, avec ce slogan : « Seul Paris est digne de Rome, seule Rome est digne de Paris »."
+      },
+      {
+        "id": 4,
+        "question": "En combien d'arrondissements Paris est-elle divisée ?",
+        "propositions": [
+          "Seize",
+          "Vingt",
+          "Douze",
+          "Huit"
+        ],
+        "réponse": "Vingt",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Arrondissements_de_Paris",
+        "anecdote": "Les arrondissements, dans leur état actuel, ont été délimités par la loi du 16 juin 1859, qui a porté leur nombre de douze à vingt."
+      }
+    ]
+}

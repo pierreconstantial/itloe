@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #46",         
+  "mise-à-jour": "31/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel appareil reproducteur femelle des fleurs est aussi appelé gynécée ?",
+        "propositions": [
+          "Pistille",
+          "Pissetil",
+          "Pistil",
+          "Pistile"
+        ],
+        "réponse": "Pistil",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel gastéropode à coquille est parfois confondu avec la limace ?",
+        "propositions": [
+          "Escargaut",
+          "Escargau",
+          "Escargeau",
+          "Escargot"
+        ],
+        "réponse": "Escargot",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel groupe de mammifères regroupe les animaux qui ruminent ?",
+        "propositions": [
+          "Ruminants",
+          "Ruminents",
+          "Rumminants",
+          "Ruminands"
+        ],
+        "réponse": "Ruminants",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Dans quel réservoir vivent des animaux ou plantes aquatiques ?",
+        "propositions": [
+          "Aquariumme",
+          "Aquariom",
+          "Aquarihomme",
+          "Aquarium"
+        ],
+        "réponse": "Aquarium",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

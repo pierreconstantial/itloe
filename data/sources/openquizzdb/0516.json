@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Ça se boit en Italie",         
+  "mise-à-jour": "08/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle liqueur de citron italienne est notamment produite à Capri ?",
+        "propositions": [
+          "Grappa",
+          "Sambuca",
+          "Amaretto",
+          "Limoncello"
+        ],
+        "réponse": "Limoncello",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Limoncello",
+        "anecdote": "Le limoncello est peu cher à produire, ne nécessitant que du sucre, de l'eau, des zestes de citron, de l'alcool et du temps de maturation."
+      },
+      {
+        "id": 2,
+        "question": "Quelle boisson alcoolisée douce présente une saveur d'amande amère ?",
+        "propositions": [
+          "Sambuca",
+          "Grappa",
+          "Amaretto",
+          "Negroni"
+        ],
+        "réponse": "Amaretto",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Amaretto",
+        "anecdote": "Titrant généralement à 28 degrés d'alcool, l'amaretto est l'une des liqueurs pouvant servir à aromatiser le tiramisu, un dessert italien."
+      },
+      {
+        "id": 3,
+        "question": "Quel long drink alcoolisé est composé de prosecco et d'eau de Seltz ?",
+        "propositions": [
+          "Hyprocas",
+          "Grappa",
+          "Spritz",
+          "Aquardiente"
+        ],
+        "réponse": "Spritz",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Spritz",
+        "anecdote": "Depuis 2015, la contre-étiquette de la bouteille d'Aperol indique le verre à pied comme idéal pour la préparation d'Aperol Spritz."
+      },
+      {
+        "id": 4,
+        "question": "Quelle eau-de-vie de marc de raisin est produite à Saint-Marin ?",
+        "propositions": [
+          "Sambuca",
+          "Negroni",
+          "Grappa",
+          "Amaretto"
+        ],
+        "réponse": "Grappa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Grappa",
+        "anecdote": "Produit pauvre par définition, cette boisson alcoolisée a été baptisée pour la première fois grappa à la fin du XIXe siècle."
+      }
+    ]
+}

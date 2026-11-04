@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Danemark",         
+  "mise-à-jour": "24/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la capitale du Danemark ?",
+        "propositions": [
+          "Helsinki",
+          "Copenhague",
+          "Oslo",
+          "Stockholm"
+        ],
+        "réponse": "Copenhague",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quelle monnaie est utilisée quotidiennement au Danemark ?",
+        "propositions": [
+          "Franc",
+          "Euro",
+          "Couronne danoise",
+          "Dollar"
+        ],
+        "réponse": "Couronne danoise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "De quelle région le Danemark fait-il partie ?",
+        "propositions": [
+          "Balkans",
+          "Maghreb",
+          "Andes",
+          "Scandinavie"
+        ],
+        "réponse": "Scandinavie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quel symbole est régulièrement associé au Danemark ?",
+        "propositions": [
+          "Big Ben",
+          "Statue de la Liberté",
+          "Tour Eiffel",
+          "Petite Sirène"
+        ],
+        "réponse": "Petite Sirène",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #26",         
+  "mise-à-jour": "30/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel élément chimique de symbole O nous permet de respirer ?",
+        "propositions": [
+          "Oxhygène",
+          "Occygène",
+          "Oxygène",
+          "Hoxygène"
+        ],
+        "réponse": "Oxygène",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Qu'utilise-t-on souvent pour refaire un joint dans une salle de bains ?",
+        "propositions": [
+          "Sillicone",
+          "Silliconne",
+          "Siliconne",
+          "Silicone"
+        ],
+        "réponse": "Silicone",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle pâtisserie salée traditionnelle est typique de l'Alsace ?",
+        "propositions": [
+          "Bretzelle",
+          "Braitzel",
+          "Breytzel",
+          "Bretzel"
+        ],
+        "réponse": "Bretzel",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel écoulement des eaux se propage à la surface de la terre ?",
+        "propositions": [
+          "Ruisèlement",
+          "Ruissellement",
+          "Ruisselement",
+          "Ruisèllement"
+        ],
+        "réponse": "Ruissellement",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

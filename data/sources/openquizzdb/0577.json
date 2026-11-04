@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Cocktails à base de gin",         
+  "mise-à-jour": "29/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel cocktail comporte du gin mélangé à de la crème de cacao ?",
+        "propositions": [
+          "Stinger",
+          "Bandista",
+          "Pink Love",
+          "Alexander"
+        ],
+        "réponse": "Alexander",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alexander_(cocktail)",
+        "anecdote": "La variante la plus courante à l'Alexander (ou Alexandre) est le Brandy Alexander, utilisant du cognac en lieu et place du gin."
+      },
+      {
+        "id": 2,
+        "question": "Quelle boisson alcoolisée contient du gin et de la liqueur d'abricot ?",
+        "propositions": [
+          "Angel Face",
+          "Manhattan",
+          "Trou noir",
+          "Cosmopolitan"
+        ],
+        "réponse": "Angel Face",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Angel_Face_(cocktail)",
+        "anecdote": "Attesté dans « The Savoy Cocktail Book », de Harry Craddock (1930), sa garniture officielle est un quartier de pomme. Son nom évoque une douceur apparente qui contraste avec la puissance des trois alcools qui le composent."
+      },
+      {
+        "id": 3,
+        "question": "Quel classique des bars se compose de Grand Marnier et de gin ?",
+        "propositions": [
+          "Negroni",
+          "Baltimore",
+          "Singapore sling",
+          "Perroquet"
+        ],
+        "réponse": "Baltimore",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Baltimore_(cocktail)",
+        "anecdote": "L'effet du Baltimore est décontractant, caractéristique des cocktails frappés contenant de la liqueur d'oranges du Grand Marnier."
+      },
+      {
+        "id": 4,
+        "question": "Quel cocktail à base de liqueur de cerise contient du gin ?",
+        "propositions": [
+          "Casino",
+          "Vesper",
+          "Macca",
+          "Baltimore"
+        ],
+        "réponse": "Casino",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Casino_(cocktail)",
+        "anecdote": "Cette liqueur est produite historiquement dans les zones de Zadar en Dalmatie, de Torreglia près de Padoue et dans le Frioul."
+      }
+    ]
+}

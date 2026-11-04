@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sculpture",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que représente la sculpture de Marcel Duchamp baptisée « Fontaine » ?",
+        "propositions": [
+          "Utérus",
+          "Ulcère",
+          "Urinoir",
+          "Urne"
+        ],
+        "réponse": "Urinoir",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fontaine_(Duchamp)",
+        "anecdote": "Oeuvre controversée de l'art du XXe siècle, « Fontaine » est un ready made, c'est-à-dire un objet tout fait."
+      },
+      {
+        "id": 2,
+        "question": "Quelle était la nationalité du sculpteur et peintre Alberto Giacometti ?",
+        "propositions": [
+          "Portugaise",
+          "Argentine",
+          "Suisse",
+          "Italienne"
+        ],
+        "réponse": "Suisse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alberto_Giacometti",
+        "anecdote": "À la fin de sa vie, Giacometti a dénié à ses objets la moindre valeur, pourtant vendus aujourd'hui à plusieurs millions d'euros."
+      },
+      {
+        "id": 3,
+        "question": "À quel sculpteur doit-on un désormais célèbre baiser ?",
+        "propositions": [
+          "Choppin",
+          "Rodin",
+          "Lenoir",
+          "Moreau"
+        ],
+        "réponse": "Rodin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Baiser_(Rodin)",
+        "anecdote": "« Le Baiser » de Rodin est une sculpture en marbre représentant un couple enlacé réalisée à l'échelle 1."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel type de sculpture le français Auguste Cain était-il spécialisé ?",
+        "propositions": [
+          "Monumentale",
+          "Architecturale",
+          "Funéraire",
+          "Animalière"
+        ],
+        "réponse": "Animalière",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Auguste_Cain",
+        "anecdote": "À partir des années 1860, Auguste Cain commencera à recevoir des commandes officielles."
+      }
+    ]
+}

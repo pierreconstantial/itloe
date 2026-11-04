@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Les Visiteurs »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment Jacquouille appelle-t-il le postier dans le film « Les Visiteurs » ?",
+        "propositions": [
+          "Noir",
+          "Sarrazin",
+          "Vilain",
+          "Gueux"
+        ],
+        "réponse": "Sarrazin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Visiteurs_(film,_1993)",
+        "anecdote": "Le film fut amorti par un important placement de produit : Email Diamant, Lacoste, Thonon, Hermès ou encore La Poste."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la réplique mythique de Jacquouille dans « Les Visiteurs » ?",
+        "propositions": [
+          "Voui",
+          "D'accord",
+          "Oui messire",
+          "Okay"
+        ],
+        "réponse": "Okay",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Visiteurs_(film,_1993)",
+        "anecdote": "Jean-Marie Poiré a rendu un hommage au personnage de Jacquouille en nommant sa société de production « Okay Films »."
+      },
+      {
+        "id": 3,
+        "question": "Où se dresse le château de Godefroy dans le film « Les Visiteurs » ?",
+        "propositions": [
+          "Mont-de-Marsan",
+          "Montmirail",
+          "Mont-Dore",
+          "Montargis"
+        ],
+        "réponse": "Montmirail",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Visiteurs_(film,_1993)",
+        "anecdote": "La devise des Montmirail est « Que trépasse si je faiblis », précédée du cri de guerre «  Montjoie. Saint-Denis. »."
+      },
+      {
+        "id": 4,
+        "question": "De qui Jacquouille tombe-t-il amoureux dans « Les Visiteurs » ?",
+        "propositions": [
+          "Dame Janette",
+          "Dame Josette",
+          "Dame Gilberte",
+          "Dame Ginette"
+        ],
+        "réponse": "Dame Ginette",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Visiteurs_(film,_1993)",
+        "anecdote": "Parmi les répliques cultes, on retiendra le célèbre « Merci la gueuse. Tu es un laideron mais tu es bien bonne »."
+      }
+    ]
+}

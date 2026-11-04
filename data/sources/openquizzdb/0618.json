@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Abeilles du rucher",         
+  "mise-à-jour": "21/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment appelle-t-on une personne qui élève des abeilles à miel ?",
+        "propositions": [
+          "Raniculteur",
+          "Apiculteur",
+          "Aviculteur",
+          "Ostréiculteur"
+        ],
+        "réponse": "Apiculteur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Apiculteur",
+        "anecdote": "Pratiquée sur tous les continents, cette activité diffère selon les variétés d'abeilles, le climat et le développement économique."
+      },
+      {
+        "id": 2,
+        "question": "Comment appelle-t-on un rassemblement important d'abeilles ?",
+        "propositions": [
+          "Essaim",
+          "Sac",
+          "Manteau",
+          "Grappe"
+        ],
+        "réponse": "Essaim",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Essaim",
+        "anecdote": "Le phénomène dit de nuée n'a pas d'origine météorologique directe mais est saisonnier et lié aux épisodes de sécheresse."
+      },
+      {
+        "id": 3,
+        "question": "Avec quel autre insecte plus agressif confond-on souvent l'abeille ?",
+        "propositions": [
+          "Bourdon",
+          "Taon",
+          "Guêpe",
+          "Frelon"
+        ],
+        "réponse": "Guêpe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Guêpe",
+        "anecdote": "La guêpe est un insecte ayant généralement un abdomen jaune rayé de noir et dont la femelle porte un dard venimeux."
+      },
+      {
+        "id": 4,
+        "question": "Quel phénomène important l'abeille assure-t-elle en butinant ?",
+        "propositions": [
+          "Sporulation",
+          "Pollinisation",
+          "Germination",
+          "Introgression"
+        ],
+        "réponse": "Pollinisation",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pollinisation",
+        "anecdote": "Les plantes contribuent quant à elle à l'alimentation des pollinisateurs en leur fournissant le pollen en excès ou nectar."
+      }
+    ]
+}

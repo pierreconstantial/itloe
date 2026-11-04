@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Filtres Instagram",         
+  "mise-à-jour": "25/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel filtre Instagram permet de donner un côté délavé à votre photo ?",
+        "propositions": [
+          "Valencia",
+          "Rise",
+          "Nashville",
+          "Earlybird"
+        ],
+        "réponse": "Rise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Instagram",
+        "anecdote": "Le filtre Rise est la combinaison d'une balance des couleurs tirant vers le rouge et d'une désaturation qui provoquent cette sensation."
+      },
+      {
+        "id": 2,
+        "question": "Quel filtre Instagram permet d'apporter un léger effet de vignettage ?",
+        "propositions": [
+          "Mayfair",
+          "Rise",
+          "X-Pro",
+          "Valencia"
+        ],
+        "réponse": "Mayfair",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Instagram",
+        "anecdote": "Le filtre Mayfair d'Instagram apporte une légère teinte rosée et un effet de vignettage subtil aux photos. Il éclaircit également le centre de l'image, ce qui peut attirer naturellement le regard vers le sujet principal."
+      },
+      {
+        "id": 3,
+        "question": "Quel filtre Instagram ajoute un effet années 1970 à vos photos ?",
+        "propositions": [
+          "Earlybird",
+          "Nashville",
+          "Rise",
+          "Valencia"
+        ],
+        "réponse": "Nashville",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Instagram",
+        "anecdote": "Grâce au filtre Nashville, vous obtiendrez sur Instagram un effet vieilli très marqué avec des tonalités jaunes pelliculées. Il réchauffe les couleurs, ajoute une dominante légèrement rosée et réduit les contrastes, créant un rendu doux et nostalgique."
+      },
+      {
+        "id": 4,
+        "question": "Quel filtre Instagram apporte un côté romantique à vos photos ?",
+        "propositions": [
+          "Mayfair",
+          "Hefe",
+          "Valencia",
+          "Nashville"
+        ],
+        "réponse": "Valencia",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Instagram",
+        "anecdote": "Sur Instagram, Valencia joue sur la désaturation globale, le rendu final tirant plutôt vers le jaune et le rouge. Ses teintes peuvent apporter une atmosphère romantique, particulièrement adaptée aux portraits et aux scènes de voyage."
+      }
+    ]
+}

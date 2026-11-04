@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Dates du XXe siècle",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En France, de quand datent les congés payés ?",
+        "propositions": [
+          "1936",
+          "1956",
+          "1946",
+          "1926"
+        ],
+        "réponse": "1936",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Congés_payés",
+        "anecdote": "Les congés payés sont une innovation sociale majeure dont certaines prémices étaient apparues en Allemagne."
+      },
+      {
+        "id": 2,
+        "question": "En quelle année JFK (John F. Kennedy) a-t-il été assassiné ?",
+        "propositions": [
+          "1953",
+          "1973",
+          "1983",
+          "1963"
+        ],
+        "réponse": "1963",
+        "wikipédia": "https://fr.wikipedia.org/wiki/John_Fitzgerald_Kennedy",
+        "anecdote": "Son assassinat reste à ce jour, pour beaucoup, non résolu, alimentant les rumeurs et les hypothèses les plus folles."
+      },
+      {
+        "id": 3,
+        "question": "En quelle année Charles De Gaulle a-t-il été élu au suffrage universel ?",
+        "propositions": [
+          "1965",
+          "1955",
+          "1945",
+          "1975"
+        ],
+        "réponse": "1965",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Charles_de_Gaulle",
+        "anecdote": "Sa vision du pouvoir l'oppose aux partis communiste, socialiste, centristes pro-européens et d'extrême droite."
+      },
+      {
+        "id": 4,
+        "question": "En quelle année a-t-on connu une crise économique mondiale ?",
+        "propositions": [
+          "1939",
+          "1929",
+          "1949",
+          "1919"
+        ],
+        "réponse": "1929",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Grande_Dépression",
+        "anecdote": "La Grande Dépression va du krach de 1929 aux États-Unis jusqu'à la Seconde Guerre mondiale."
+      }
+    ]
+}

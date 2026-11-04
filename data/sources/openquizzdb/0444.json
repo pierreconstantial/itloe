@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Culture sociale",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle ville Emmanuelle Aurélie Munos est-elle née en 1981 ?",
+        "propositions": [
+          "Lille",
+          "Reims",
+          "Marseille",
+          "Dijon"
+        ],
+        "réponse": "Marseille",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Clara_Morgane",
+        "anecdote": "Clara Morgane a quitté Marseille pour Paris en 2000 et se lança dans l'industrie du film pour adulte afin de « se trouver »."
+      },
+      {
+        "id": 2,
+        "question": "Quel ex-Beatle a joué sur la place Rouge le 24 mai 2003 ?",
+        "propositions": [
+          "George Harrison",
+          "Paul McCartney",
+          "Ringo Starr",
+          "John Lennon"
+        ],
+        "réponse": "Paul McCartney",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Paul_McCartney",
+        "anecdote": "L'événement très inhabituel dans ce pays rassembla 20 000 personnes dont le président russe Vladimir Poutine."
+      },
+      {
+        "id": 3,
+        "question": "Qui est l'auteur du « Da Vinci Code » publié à des millions d'exemplaires ?",
+        "propositions": [
+          "Robert Bloch",
+          "Kent Anderson",
+          "Dan Brown",
+          "David Baldacci"
+        ],
+        "réponse": "Dan Brown",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dan_Brown",
+        "anecdote": "L'auteur signe là un roman d'aventures ésotériques dont l'un des épisodes clés se situe dans l'église Saint-Sulpice à Paris."
+      },
+      {
+        "id": 4,
+        "question": "Qui a découvert Brel et Dalida et organisait des soirées à Saint-Tropez ?",
+        "propositions": [
+          "Tristan Duval",
+          "Eddie Barclay",
+          "Valéry Zeitoun",
+          "Johnny Stark"
+        ],
+        "réponse": "Eddie Barclay",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eddie_Barclay",
+        "anecdote": "Célèbre pour ses huit mariages, Eddie Barclay avait rapporté des États-Unis le microsillon."
+      }
+    ]
+}

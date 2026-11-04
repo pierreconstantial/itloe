@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Personnages de Bob l'éponge",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel personnage et ami de Bob l'éponge vit sous un rocher ?",
+        "propositions": [
+          "Sandy",
+          "Patrick",
+          "Eugène",
+          "Carlo"
+        ],
+        "réponse": "Patrick",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bob_l'éponge",
+        "anecdote": "Ses loisirs sont surtout : regarder la télévision, manger des pâtés de crabe, pêcher la méduse et dormir."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le prénom du maître nageur de Goo Lagoon dans « Bob l'éponge » ?",
+        "propositions": [
+          "Thomas",
+          "Larry",
+          "Ian",
+          "Benny"
+        ],
+        "réponse": "Larry",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bob_l'éponge",
+        "anecdote": "Aussi bizarre que cela puisse paraître, il y en effet un lagon (fait de pétrole) à Bikini Bottom, sous l'océan."
+      },
+      {
+        "id": 3,
+        "question": "Qui dirige l'école de conduite dans « Bob l'éponge » ?",
+        "propositions": [
+          "Madame Puff",
+          "Krabs",
+          "Sandy",
+          "Potty"
+        ],
+        "réponse": "Madame Puff",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bob_l'éponge",
+        "anecdote": "Madame Puff est plus ou moins condamnée à avoir Bob comme élève jusqu'à la fin de sa vie."
+      },
+      {
+        "id": 4,
+        "question": "Comment s'appelle le perroquet de Patchy le pirate ?",
+        "propositions": [
+          "Looney",
+          "Potty",
+          "Nutty",
+          "Marbles"
+        ],
+        "réponse": "Potty",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bob_l'éponge",
+        "anecdote": "Le pirate est là pour présenter, toujours de manière très drôle, les épisodes spéciaux de « Bob l'éponge »."
+      }
+    ]
+}

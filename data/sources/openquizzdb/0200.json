@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #17",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de muscles compte chacune de nos fesses ?",
+        "propositions": [
+          "Trois muscles",
+          "Douze muscles",
+          "Huit muscles",
+          "Cinq muscles"
+        ],
+        "réponse": "Trois muscles",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Muscles_fessiers",
+        "anecdote": "Le grand fessier est l'un des muscles les plus puissants du corps humain. Il joue un rôle clé dans la capacité à courir, sauter et se relever depuis une position assise."
+      },
+      {
+        "id": 2,
+        "question": "Quelle profession typique des Landes utilise une « braguète » ?",
+        "propositions": [
+          "Pêcheur",
+          "Moissonneur",
+          "Berger",
+          "Résinier"
+        ],
+        "réponse": "Résinier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Résine_des_Landes",
+        "anecdote": "Comme ce travail se faisait debout, en forêt, et souvent en manipulant des outils tranchants, les résiniers portaient des vêtements adaptés. La braguète faisait partie de cet équipement traditionnel : il s'agissait d'une protection robuste fixée à la cein"
+      },
+      {
+        "id": 3,
+        "question": "Quel leader des Doors fut condamné pour exhibitionnisme sur scène ?",
+        "propositions": [
+          "John Lennon",
+          "David Bowie",
+          "Mick Jagger",
+          "Jim Morrison"
+        ],
+        "réponse": "Jim Morrison",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jim_Morrison",
+        "anecdote": "Jim Morrison, figure charismatique et controversée du rock psychédélique, était connu pour ses performances scéniques imprévisibles et son attitude provocatrice."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la matière textile qui excite le plus les Français ?",
+        "propositions": [
+          "Dentelle",
+          "Soie",
+          "Cuir",
+          "Fourrure"
+        ],
+        "réponse": "Dentelle",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

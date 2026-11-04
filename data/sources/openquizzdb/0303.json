@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Linux",         
+  "mise-à-jour": "01/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui a créé et dirige encore le noyau Linux ?",
+        "propositions": [
+          "Bill Gates",
+          "Larry Ellison",
+          "Linus Torvalds",
+          "Steeve Jobs"
+        ],
+        "réponse": "Linus Torvalds",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Linus_Torvalds",
+        "anecdote": "Linus Torvalds a découvert l'informatique vers l'âge de 11 ans grâce à l'ordinateur de son grand-père, un Commodore VIC-20."
+      },
+      {
+        "id": 2,
+        "question": "En quelle année le noyau Linux a-t-il été publié pour la première fois ?",
+        "propositions": [
+          "1993",
+          "1997",
+          "1995",
+          "1991"
+        ],
+        "réponse": "1991",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Linux",
+        "anecdote": "En 1991, les compatibles PC dominent le marché des ordinateurs personnels et fonctionnent généralement sous MS-DOS ou Windows."
+      },
+      {
+        "id": 3,
+        "question": "Quel système mobile majeur repose sur le noyau Linux ?",
+        "propositions": [
+          "Windows Phone",
+          "BlackBerry 10",
+          "Android",
+          "iOS"
+        ],
+        "réponse": "Android",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Android",
+        "anecdote": "En 2015, Android était le système d'exploitation le plus utilisé dans le monde avec plus de 80 % de parts de marché."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le nom de la mascotte de Linux, connue des mordus ?",
+        "propositions": [
+          "Puffy",
+          "Gnu",
+          "Tux",
+          "Wilber"
+        ],
+        "réponse": "Tux",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tux",
+        "anecdote": "Le dessin du personnage a été choisi à l'issue d'un concours organisé en 1996, remporté par Larry Ewing."
+      }
+    ]
+}

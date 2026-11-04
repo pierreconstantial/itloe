@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Chansons de France Gall",         
+  "mise-à-jour": "17/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel titre de France Gall est célèbre pour ses deux niveaux de lecture ?",
+        "propositions": [
+          "La Cloche",
+          "La Petite",
+          "Les Sucettes",
+          "Il neige"
+        ],
+        "réponse": "Les Sucettes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Sucettes",
+        "anecdote": "Sortie en 1966, Les Sucettes est une chanson écrite par Serge Gainsbourg pour France Gall. Elle raconte en apparence l'histoire innocente d'une jeune fille qui aime les sucettes à l'anis, mais le texte possède un second sens plus suggestif, voulu par Gain"
+      },
+      {
+        "id": 2,
+        "question": "En hommage à quel artiste France Gall a-t-elle chanté « Évidemment » ?",
+        "propositions": [
+          "Sacha Distel",
+          "Daniel Balavoine",
+          "Coluche",
+          "Michel Berger"
+        ],
+        "réponse": "Daniel Balavoine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Évidemment_(chanson)",
+        "anecdote": "Lors de l'enregistrement de la chanson, France Gall dut s'y reprendre plusieurs fois tellement le texte la touchait."
+      },
+      {
+        "id": 3,
+        "question": "Quel titre France Gall a-t-elle sorti en hommage à Ella Fitzgerald ?",
+        "propositions": [
+          "Ella, elle l'a",
+          "Calypso",
+          "Résiste",
+          "Babacar"
+        ],
+        "réponse": "Ella, elle l'a",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ella,_elle_l'a",
+        "anecdote": "Il s'agit du plus grand succès musical de France Gall, qui s'est vendu à 1.5 million d'exemplaires dans le monde, dont 452 000 en France."
+      },
+      {
+        "id": 4,
+        "question": "Sur quel album retrouve-t-on « Hong-Kong Star » et « Cézanne peint » ?",
+        "propositions": [
+          "Dancing Disco",
+          "Débranche !",
+          "Babacar",
+          "Double Jeu"
+        ],
+        "réponse": "Débranche !",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Débranche_!",
+        "anecdote": "En exergue sur la pochette: « Je dédie ce disque à tous ceux qui ne m'entendent pas seulement mais qui m'écoutent »."
+      }
+    ]
+}

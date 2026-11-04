@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Parlons sexe",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel mot signifie scénario imaginaire représentant des désirs refoulés ?",
+        "propositions": [
+          "Ego",
+          "Ambivalence",
+          "Fantasme",
+          "Catharsis"
+        ],
+        "réponse": "Fantasme",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fantasme_(sexualité)",
+        "anecdote": "Un fantasme sexuel est un exemple de pensées par lequel des perceptions sexuelles sont créées ou mises en valeur."
+      },
+      {
+        "id": 2,
+        "question": "Quelle pratique érotique rend captif un corps par des liens ?",
+        "propositions": [
+          "Onanisme",
+          "Saphisme",
+          "Bondage",
+          "Fantasme"
+        ],
+        "réponse": "Bondage",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bondage",
+        "anecdote": "Bondage est un mot anglais qui signifie 'esclavage' mais aussi 'asservissement sexuel'."
+      },
+      {
+        "id": 3,
+        "question": "Quel homme est utilisé comme objet sexuel par des femmes plus âgées ?",
+        "propositions": [
+          "Felching",
+          "Cougar",
+          "Escort",
+          "Toy boy"
+        ],
+        "réponse": "Toy boy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cougar_(femme)",
+        "anecdote": "Ces hommes sont alors appelés « toy boys », en référence au film « Toy Boy », « lionceaux »."
+      },
+      {
+        "id": 4,
+        "question": "Quel acte sexuel appelle-t-on poétiquement une « feuille de rose » ?",
+        "propositions": [
+          "Cunnilingus",
+          "Anulingus",
+          "Branlette",
+          "Doigtage"
+        ],
+        "réponse": "Anulingus",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Anulingus",
+        "anecdote": "La région anale est une des zones érogènes du corps, mais l'anus n'est pas aussi spontanément érogène que les organes génitaux."
+      }
+    ]
+}

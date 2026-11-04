@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Arbres fruitiers",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quoi est issu le fruit issu de nos arbres fruitiers ?",
+        "propositions": [
+          "Racine",
+          "Fleur",
+          "Graine",
+          "Feuille"
+        ],
+        "réponse": "Fleur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Arbre_fruitier",
+        "anecdote": "La production de fruits est non seulement liée à la fleur, mais aussi au type de pollinisation, comme par exemple l'autopollinisation."
+      },
+      {
+        "id": 2,
+        "question": "Quel espace de terrain est dévolu à la culture d'arbres fruitiers ?",
+        "propositions": [
+          "Jardinière",
+          "Potager",
+          "Verger",
+          "Friche"
+        ],
+        "réponse": "Verger",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Verger",
+        "anecdote": "Il existe différents types de vergers : les vergers conservatoires, les prés-vergers, les vergers commerciaux et de jardin potager."
+      },
+      {
+        "id": 3,
+        "question": "Quel arbre fruitier propose une floraison spectaculaire au Japon ?",
+        "propositions": [
+          "Grenadier",
+          "Pêcher",
+          "Châtaignier",
+          "Cerisier"
+        ],
+        "réponse": "Cerisier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cerisier",
+        "anecdote": "Les cerisiers ornementaux sont aussi cultivés ailleurs dans le monde comme plantation d'alignement le long des rues."
+      },
+      {
+        "id": 4,
+        "question": "Quel arbre fruitier produit la reine-claude ou la mirabelle de Nancy ?",
+        "propositions": [
+          "Cerisier",
+          "Châtaignier",
+          "Figuier",
+          "Prunier"
+        ],
+        "réponse": "Prunier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Prunier",
+        "anecdote": "La reine-claude est apparue en France à la suite de la découverte d'une prune ronde et verte sur un arbre importé tout droit d'Asie."
+      }
+    ]
+}

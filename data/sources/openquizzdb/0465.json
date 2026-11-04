@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Instruments de mesure",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec quel appareil mesure-t-on la profondeur des océans ?",
+        "propositions": [
+          "Compteur Geiger",
+          "Radar",
+          "Sextant",
+          "Sonar"
+        ],
+        "réponse": "Sonar",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sonar",
+        "anecdote": "Un sonar est un appareil utilisant les propriétés de la propagation du son dans l'eau pour détecter et situer les objets sous l'eau."
+      },
+      {
+        "id": 2,
+        "question": "Quel autre nom est donné au détecteur de mensonges ?",
+        "propositions": [
+          "Détectographe",
+          "Tachigraphe",
+          "Mésographe",
+          "Polygraphe"
+        ],
+        "réponse": "Polygraphe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Détecteur_de_mensonge",
+        "anecdote": "Le stress engendré par le mensonge augmenterait sensiblement la transpiration et donc la conductance cutanée."
+      },
+      {
+        "id": 3,
+        "question": "Quel instrument de navigation mesure la vitesse des bateaux ?",
+        "propositions": [
+          "Compas",
+          "Loch",
+          "Sextant",
+          "Sonar"
+        ],
+        "réponse": "Loch",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Loch_(bateau)",
+        "anecdote": "La vitesse est simplement obtenue par division de la distance parcourue par le temps passé à effectuer la mesure."
+      },
+      {
+        "id": 4,
+        "question": "Quel outil philatélique compte les debts d'un timbre-poste ?",
+        "propositions": [
+          "Dentomètre",
+          "Odontomètre",
+          "Odontoscope",
+          "Dentoscope"
+        ],
+        "réponse": "Odontomètre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Odontomètre",
+        "anecdote": "Cet instrument philatélique donne avec précision le nombre exact de dents sur environ deux centimètres."
+      }
+    ]
+}

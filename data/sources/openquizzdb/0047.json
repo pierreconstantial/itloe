@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jean Reno",         
+  "mise-à-jour": "08/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle ville du Maroc Jean Reno a-t-il vu le jour ?",
+        "propositions": [
+          "Agadir",
+          "Marrakech",
+          "Casablanca",
+          "Tanger"
+        ],
+        "réponse": "Casablanca",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jean_Reno",
+        "anecdote": "P"
+      },
+      {
+        "id": 2,
+        "question": "Qui donne la réplique à Jean Reno dans le film « Les rivières pourpres » ?",
+        "propositions": [
+          "Samy Naceri",
+          "Vincent Cassel",
+          "Alain Delon",
+          "François Cluzet"
+        ],
+        "réponse": "Vincent Cassel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Rivières_pourpres_(film)",
+        "anecdote": "Adapté du roman de Jean-Christophe Grangé, le film, aux décors somptueux, a principalement été tourné en Isère et en Savoie."
+      },
+      {
+        "id": 3,
+        "question": "Quel film français Jean Réno et Patrick Bruel ont-ils tourné ensemble ?",
+        "propositions": [
+          "Le guépard",
+          "Le renard",
+          "Le léopard",
+          "Le jaguar"
+        ],
+        "réponse": "Le jaguar",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Jaguar_(film,_1996)",
+        "anecdote": "Après « La Chèvre », le réalisateur Francis Veber retrouve la jungle américaine."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel film de Luc Besson Jean Reno incarne-t-il Enzo ?",
+        "propositions": [
+          "Léon",
+          "Le Grand Bleu",
+          "Nikita",
+          "Le dernier combat"
+        ],
+        "réponse": "Le Grand Bleu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Grand_Bleu",
+        "anecdote": "Enzo Maiorca inspirera le réalisateur français Luc Besson pour son film."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Dans les murs du château",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment appelle-t-on la plus haute tour d'un château fort ?",
+        "propositions": [
+          "Donjon",
+          "Bastille",
+          "Tour flanquante",
+          "Guette"
+        ],
+        "réponse": "Donjon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Château_fort",
+        "anecdote": "Les premiers grands donjons à base rectangulaire en pierre sont apparus dans la vallée de la Loire."
+      },
+      {
+        "id": 2,
+        "question": "Comment s'appelle le fossé rempli d'eau autour d'un château fort  ?",
+        "propositions": [
+          "Contrescarpe",
+          "Latrines",
+          "Douves",
+          "Chemise"
+        ],
+        "réponse": "Douves",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Douve_(fossé)",
+        "anecdote": "L'usage des engins de siège, comme les tours et les béliers, était alors rendu difficile voire impossible."
+      },
+      {
+        "id": 3,
+        "question": "Quelle ouverture permettait d'observer l'ennemi dans un château fort ?",
+        "propositions": [
+          "Meurtrière",
+          "Criminelle",
+          "Bouchère",
+          "Egorgeuse"
+        ],
+        "réponse": "Meurtrière",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Meurtrière",
+        "anecdote": "Ces meurtrières, ou archères, permettaient aussi de lancer des traits d'arbalète ou des flèches."
+      },
+      {
+        "id": 4,
+        "question": "Que trouve-t-on en général derrière le pont-levis d'un château ?",
+        "propositions": [
+          "Meurtrières",
+          "Tourelle",
+          "Herse",
+          "Douves"
+        ],
+        "réponse": "Herse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Herse_(architecture)",
+        "anecdote": "Le bas de la herse est souvent garni de pointes pour décourager quiconque de tenter de passer en dessous alors qu'elle descend."
+      }
+    ]
+}

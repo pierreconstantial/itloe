@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #29",         
+  "mise-à-jour": "18/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un V, il faut un parfum, un métier, un meuble et un ruminant.",
+        "propositions": [
+          "Vache",
+          "Vaisselier",
+          "Vanille",
+          "Vétérinaire"
+        ],
+        "réponse": "Vanille",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un C, il faut un instrument, une maladie, un fruit et un animal.",
+        "propositions": [
+          "Chameau",
+          "Clarinette",
+          "Cirrhose",
+          "Cerise"
+        ],
+        "réponse": "Clarinette",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un L, il faut une salade, une boutique, un pays et un asticot.",
+        "propositions": [
+          "Laitue",
+          "Librairie",
+          "Luxembourg",
+          "Larve"
+        ],
+        "réponse": "Laitue",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un P, il faut une chemise, une drupe, une fleur ronde et un oiseau.",
+        "propositions": [
+          "Pêche",
+          "Polo",
+          "Pigeon",
+          "Pivoine"
+        ],
+        "réponse": "Polo",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

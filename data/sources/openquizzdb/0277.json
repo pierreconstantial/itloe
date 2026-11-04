@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Herbes et épices",         
+  "mise-à-jour": "31/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la couleur du paprika utilisé en cuisine ?",
+        "propositions": [
+          "Rouge",
+          "Jaune",
+          "Blanche",
+          "Verte"
+        ],
+        "réponse": "Rouge",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Paprika",
+        "anecdote": "Le paprika  est une épice en poudre obtenue à partir de la graine mûre, séchée et moulue du piment doux ou poivron."
+      },
+      {
+        "id": 2,
+        "question": "Le safran est une épice tirée de quelle variété de fleur ?",
+        "propositions": [
+          "Acacia",
+          "Crocus",
+          "Pavot",
+          "Tulipe"
+        ],
+        "réponse": "Crocus",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Safran_(épice)",
+        "anecdote": "Le safran, poétiquement appelé or rouge, est l'épice utilisée en cuisine la plus chère au monde."
+      },
+      {
+        "id": 3,
+        "question": "Quelle herbe est essentielle dans la sauce béarnaise ?",
+        "propositions": [
+          "Cerfeuil",
+          "Estragon",
+          "Sauge",
+          "Romarin"
+        ],
+        "réponse": "Estragon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sauce_béarnaise",
+        "anecdote": "La sauce béarnaise est une sauce émulsifiée chaude à base de beurre clarifié, de jaune d'oeuf, d'échalote, d'estragon et de cerfeuil."
+      },
+      {
+        "id": 4,
+        "question": "Quelle épice parfume le risotto à la milanaise ?",
+        "propositions": [
+          "Curcuma",
+          "Safran",
+          "Origan",
+          "Curry"
+        ],
+        "réponse": "Safran",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Risotto_à_la_milanaise",
+        "anecdote": "Selon certains chroniqueurs gastronomiques, le risotto à la milanaise descendrait directement d'une recette médiévale du riz au safran."
+      }
+    ]
+}

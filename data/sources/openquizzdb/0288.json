@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #48",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle coupe sert à recevoir une bougie en décoration ?",
+        "propositions": [
+          "Photophore",
+          "Photofore",
+          "Fotophore",
+          "Photofort"
+        ],
+        "réponse": "Photophore",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel dispositif rotatif transforme l'air en énergie mécanique ?",
+        "propositions": [
+          "Turbine",
+          "Turbinne",
+          "Turebine",
+          "Turrebine"
+        ],
+        "réponse": "Turbine",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Au poker, quel autre nom donne-t-on également à une suite ?",
+        "propositions": [
+          "Qinte",
+          "Kinte",
+          "Quainte",
+          "Quinte"
+        ],
+        "réponse": "Quinte",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle plante herbacée est parfois confondue avec la marjolaine ?",
+        "propositions": [
+          "Aurigan",
+          "Origant",
+          "Orrigan",
+          "Origan"
+        ],
+        "réponse": "Origan",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Élémentaire mon cher Watson",         
+  "mise-à-jour": "21/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle couleur peut être associée à une fièvre, un nain ou un rire ?",
+        "propositions": [
+          "Jaune",
+          "Bleue",
+          "Orange",
+          "Rouge"
+        ],
+        "réponse": "Jaune",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fièvre_jaune",
+        "anecdote": "La fièvre jaune est longtemps restée un obstacle à la colonisation de l'Amérique du Sud mais également de l'Afrique."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le point commun entre une tente, un gréviste et une punition ?",
+        "propositions": [
+          "Crochet",
+          "Piquet",
+          "Ficelle",
+          "Toile"
+        ],
+        "réponse": "Piquet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Piquet_de_grève",
+        "anecdote": "Un piquet de grève peut avoir plusieurs objets, mais c'est généralement dans le but de faire pression contre la direction."
+      },
+      {
+        "id": 3,
+        "question": "Quel récipient désigne aussi le ventre des enfants ?",
+        "propositions": [
+          "Bidon",
+          "Verre",
+          "Bol",
+          "Bouteille"
+        ],
+        "réponse": "Bidon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bidon_(récipient)",
+        "anecdote": "Le bidon s'apparente parfois à un tonneau ou à une bouteille, et dispose d'un goulot ou d'un couvercle de fermeture."
+      },
+      {
+        "id": 4,
+        "question": "Qu'est-ce qui peut être de laine, d'avoine ou de neige ?",
+        "propositions": [
+          "Flocon",
+          "Glaçon",
+          "Fil",
+          "Bas"
+        ],
+        "réponse": "Flocon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Flocon",
+        "anecdote": "Le flocon de laine de roche est parfois utilisé pour l'isolation des combles perdus par épandage manuel au râteau."
+      }
+    ]
+}

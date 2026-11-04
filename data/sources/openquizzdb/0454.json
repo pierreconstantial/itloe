@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Belgique",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel logement privé est loué à des étudiants en Belgique ?",
+        "propositions": [
+          "Bizut",
+          "Chalet",
+          "Kot",
+          "Souk"
+        ],
+        "réponse": "Kot",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kot",
+        "anecdote": "Le mot vient du flamand et signifie « petit abri », « niche », « cabane » ou même encore « taudis »."
+      },
+      {
+        "id": 2,
+        "question": "Combien de langues officielles parle-t-on en Belgique ?",
+        "propositions": [
+          "Deux",
+          "Quatre",
+          "Une",
+          "Trois"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Langues_en_Belgique",
+        "anecdote": "La Belgique totalise trois langues officielles source de problèmes communautaires : l'allemand, le français et le néerlandais."
+      },
+      {
+        "id": 3,
+        "question": "Combien de chiffres composent un code postal belge ?",
+        "propositions": [
+          "Six",
+          "Trois",
+          "Cinq",
+          "Quatre"
+        ],
+        "réponse": "Quatre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Code_postal",
+        "anecdote": "Dans sa structure, le code postal représente une ou plusieurs zones géographiques plus ou moins vastes."
+      },
+      {
+        "id": 4,
+        "question": "À quelle date célèbre-t-on chaque année la fête nationale en Belgique ?",
+        "propositions": [
+          "11 septembre",
+          "14 juillet",
+          "4 octobre",
+          "21 juillet"
+        ],
+        "réponse": "21 juillet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fête_nationale",
+        "anecdote": "La plupart des pays industrialisés ont adopté depuis un certain temps déjà la tradition d'une fête nationale, jour férié dans le pays."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Fromages de France",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel fromage est associé à la ville de Meaux, en France  ?",
+        "propositions": [
+          "Cantal",
+          "Roquefort",
+          "Gruyère",
+          "Brie"
+        ],
+        "réponse": "Brie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Brie_de_Meaux",
+        "anecdote": "Le nom du fromage vient de la région de Brie et de la commune de Meaux en France, remontant probablement à l'époque romaine."
+      },
+      {
+        "id": 2,
+        "question": "Quel fromage français est connu pour avoir une pâte criblée de trous ?",
+        "propositions": [
+          "Emmental",
+          "Camembert",
+          "Brie",
+          "Beaufort"
+        ],
+        "réponse": "Emmental",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Emmental_de_Savoie",
+        "anecdote": "L'Emmental (notamment l'Emmental de Savoie) est célèbre pour ses yeux, c'est-à-dire ses trous caractéristiques. Ces cavités se forment pendant l'affinage grâce à des bactéries qui produisent du dioxyde de carbone."
+      },
+      {
+        "id": 3,
+        "question": "Quel fromage a un nom qui signifie « traire une deuxième fois » ?",
+        "propositions": [
+          "Gruyère",
+          "Reblochon",
+          "Emmental",
+          "Roquefort"
+        ],
+        "réponse": "Reblochon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Reblochon",
+        "anecdote": "Jadis, les vaches étaient traitent une deuxième fois après passage leur chez le seigneur, pour ne pas payer d'impôts sur cette traite."
+      },
+      {
+        "id": 4,
+        "question": "Quel fromage à pâte persillée est fabriqué à partir de lait cru de brebis ?",
+        "propositions": [
+          "Beaufort",
+          "Munster",
+          "Roquefort",
+          "Brie"
+        ],
+        "réponse": "Roquefort",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Roquefort_(fromage)",
+        "anecdote": "De réputation internationale, le roquefort à pâte persillée est associé à l'excellence de l'agriculture française et à sa gastronomie."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Commentateurs sportifs",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui concluait ses émissions télés par un « Vive le sport » ?",
+        "propositions": [
+          "Roger Couderc",
+          "Gérard Holtz",
+          "Thierry Roland",
+          "Léon Zitrone"
+        ],
+        "réponse": "Gérard Holtz",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Avec qui Jean-Michel Larqué a-t-il formé un duo inoubliable ?",
+        "propositions": [
+          "Gérard Holtz",
+          "Thierry Rolland",
+          "Roger Zabel",
+          "Charles Biétry"
+        ],
+        "réponse": "Thierry Rolland",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quel commentateur sportif est à l'aise dans quatre langues ?",
+        "propositions": [
+          "Nelson Montfort",
+          "Gérard Holtz",
+          "Roger Couderc",
+          "Thierry Roland"
+        ],
+        "réponse": "Nelson Montfort",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Qui encourageait les rugbymans avec un « Allez les petits » ?",
+        "propositions": [
+          "Roger Couderc",
+          "Thierry Roland",
+          "Gérard Holtz",
+          "Nelson Monfort"
+        ],
+        "réponse": "Roger Couderc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

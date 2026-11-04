@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #31",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel fruit saisonnier est parfois aussi appelé cerise de Chine ?",
+        "propositions": [
+          "Litchit",
+          "Litchi",
+          "Leetchee",
+          "Litchee"
+        ],
+        "réponse": "Litchi",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel instrument de musique en laiton fait pourtant partie des bois ?",
+        "propositions": [
+          "Sacsophone",
+          "Saxophone",
+          "Saxofone",
+          "Saxophonne"
+        ],
+        "réponse": "Saxophone",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel caractère humain est de type non émotif, passif et primaire ?",
+        "propositions": [
+          "Hamorphe",
+          "Amorphe",
+          "Hamorfe",
+          "Amorfe"
+        ],
+        "réponse": "Amorphe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel prédicat est donné à un cardinal de l'Église catholique romaine ?",
+        "propositions": [
+          "Émminence",
+          "Émminance",
+          "Éminence",
+          "Éminance"
+        ],
+        "réponse": "Éminence",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

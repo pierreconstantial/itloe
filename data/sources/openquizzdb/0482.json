@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Vertus médicinales",         
+  "mise-à-jour": "14/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle infusion est utile pour les inflammations des muqueuses ?",
+        "propositions": [
+          "Basilic",
+          "Romarin",
+          "Sarriette",
+          "Sauge"
+        ],
+        "réponse": "Sauge",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sauge",
+        "anecdote": "La sauge est efficace contre les maux de gorge, la transpiration, les bouffées de chaleur et la stimulation de la digestion."
+      },
+      {
+        "id": 2,
+        "question": "Quelle infusion à forte qualité gustative apporte apaisement et calme ?",
+        "propositions": [
+          "Pin",
+          "Cèdre",
+          "Tilleul",
+          "Frêne"
+        ],
+        "réponse": "Tilleul",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tilia",
+        "anecdote": "Les tilleuls sont des arbres à croissance rapide, à cime ovoïde, très rameuse, pouvant atteindre 15 à 18 m de haut adultes."
+      },
+      {
+        "id": 3,
+        "question": "Quelle camomille est surtout recherchée pour ses vertus digestives ?",
+        "propositions": [
+          "Grecque",
+          "Romaine",
+          "Égyptien",
+          "Gauloise"
+        ],
+        "réponse": "Romaine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Camomille_romaine",
+        "anecdote": "Plus communément appelée camomille, la plante est employée en usage culinaire, médicinal (souvent en tisane), et cosmétique."
+      },
+      {
+        "id": 4,
+        "question": "Quelle infusion est reconnue pour ses propriétés anti-anémiques ?",
+        "propositions": [
+          "Coriandre",
+          "Ortie",
+          "Belladone",
+          "Jasmin"
+        ],
+        "réponse": "Ortie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ortie",
+        "anecdote": "Excellente amie de la femme enceinte, l'ortie aide également à retrouver l'énergie perdue et à accéder à notre pleine vitalité."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Abeilles de fiction",         
+  "mise-à-jour": "25/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle petite abeille a fait la joie des enfants des années 1980 ?",
+        "propositions": [
+          "Heidi",
+          "Maya",
+          "Tao Tao",
+          "Zigby"
+        ],
+        "réponse": "Maya",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maya_l'abeille_(série_télévisée)",
+        "anecdote": "Maya découvre le monde en compagnie de ses amis Willy l'abeille, Flip la sauterelle, Max le ver de terre et Alexandre la souris."
+      },
+      {
+        "id": 2,
+        "question": "Quel film raconte la vie d'une abeille fraîchement diplômée ?",
+        "propositions": [
+          "Bee Movie",
+          "Rosa",
+          "Le Lorax",
+          "Happy Feet"
+        ],
+        "réponse": "Bee Movie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bee_Movie_:_Drôle_d'abeille",
+        "anecdote": "Ce film d'animation en images de synthèse sorti en 2007 a été écrit et produit par Jerry Seinfeld pour DreamWorks SKG."
+      },
+      {
+        "id": 3,
+        "question": "Qui est le meilleur ami de Maya l'Abeille ?",
+        "propositions": [
+          "Willy",
+          "Nono",
+          "Sam",
+          "Flip"
+        ],
+        "réponse": "Willy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maya_l'abeille",
+        "anecdote": "Willy est le meilleur ami de Maya l'Abeille. Contrairement à Maya, qui est curieuse, intrépide et toujours prête à explorer la prairie, Willy est présenté comme plus gourmand, paresseux et craintif."
+      },
+      {
+        "id": 4,
+        "question": "Quelle humaine devient l'amie de Barry dans « Bee Movie » ?",
+        "propositions": [
+          "Jenny",
+          "Vanessa",
+          "Emma",
+          "Clara"
+        ],
+        "réponse": "Vanessa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bee_Movie",
+        "anecdote": "Vanessa Bloome est une fleuriste new-yorkaise qui rencontre Barry B. Benson après avoir sauvé l'abeille d'une situation dangereuse. Une amitié se développe entre eux, malgré leurs différences évidentes."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #06",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui a déclaré : « Avec mon instrument, on peut tout faire » ?",
+        "propositions": [
+          "Gérard Depardieu",
+          "Yvette Horner",
+          "Rocco Siffredi",
+          "Sharon Stone"
+        ],
+        "réponse": "Yvette Horner",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Yvette_Horner",
+        "anecdote": "Yvette Horner a été pendant plus de 10 ans la star musicale du Tour de France, où elle jouait sur le toit d'une voiture publicitaire."
+      },
+      {
+        "id": 2,
+        "question": "Qu'embrassent les habitants des Îles Marquises pour vous saluer ?",
+        "propositions": [
+          "Pieds",
+          "Sexe",
+          "Nombril",
+          "Bouche"
+        ],
+        "réponse": "Nombril",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Îles_Marquises",
+        "anecdote": "Le nombril y est symboliquement vu comme le point de transmission de la vie et de l'identité familiale, d'où son importance."
+      },
+      {
+        "id": 3,
+        "question": "Quelle princesse émancipée de BD a été créée par Claire Brétécher ?",
+        "propositions": [
+          "Madame X",
+          "Natacha",
+          "Clitoris",
+          "Cellulite"
+        ],
+        "réponse": "Cellulite",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cellulite_(bande_dessinée)",
+        "anecdote": "Cellulite est une jeune princesse peu amène et lasse d'attendre le Prince charmant, mais néanmoins « indépendante et libérée »."
+      },
+      {
+        "id": 4,
+        "question": "Avec combien de femmes John C. Holmes a-t-il fait l'amour à l'écran ?",
+        "propositions": [
+          "3 000",
+          "10 000",
+          "14 000",
+          "6 000"
+        ],
+        "réponse": "14 000",
+        "wikipédia": "https://fr.wikipedia.org/wiki/John_C._Holmes",
+        "anecdote": "Sa vie tumultueuse a été l'objet d'un documentaire ainsi que de deux films hollywoodiens : « Wonderland » et « Boogie Nights »."
+      }
+    ]
+}

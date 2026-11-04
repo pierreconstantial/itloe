@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Grandes randonnées",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel bâtiment situé en montagne acceuille les randonneurs ?",
+        "propositions": [
+          "Caserne",
+          "Bunker",
+          "Tenaille",
+          "Refuge"
+        ],
+        "réponse": "Refuge",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Refuge_de_montagne",
+        "anecdote": "Actuellement, le Club alpin français gère un tiers des refuges ouverts au public, soit 127, principalement dans les Alpes et les Pyrénées."
+      },
+      {
+        "id": 2,
+        "question": "Quelles couleurs indiquent les chemins de grande randonnée (GR) ?",
+        "propositions": [
+          "Vert et gris",
+          "Rouge et blanc",
+          "Jaune et rouge",
+          "Bleu et vert"
+        ],
+        "réponse": "Rouge et blanc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sentier_de_grande_randonnée",
+        "anecdote": "Les sentiers de grande randonnée sont en Europe des itinéraires pédestres balisés parfois sur plusieurs centaines de kilomètres."
+      },
+      {
+        "id": 3,
+        "question": "Quel campement rudimentaire permet de dormir en pleine nature ?",
+        "propositions": [
+          "Guitoune",
+          "Gîte",
+          "Colonie",
+          "Bivouac"
+        ],
+        "réponse": "Bivouac",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bivouac",
+        "anecdote": "Pour de nombreux peuples nomades dans le monde, le bivouac est encore un mode d'hébergement courant."
+      },
+      {
+        "id": 4,
+        "question": "Le trait rouge des GR est en fait la marque de quelle communauté ?",
+        "propositions": [
+          "Alpinistes",
+          "Montagnards",
+          "Bûcherons",
+          "Bergers"
+        ],
+        "réponse": "Bûcherons",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sentier_de_grande_randonnée",
+        "anecdote": "Ce choix peut être vu comme une réminiscence des deux couleurs prédominantes dans les peintures et les masques des Amérindiens."
+      }
+    ]
+}

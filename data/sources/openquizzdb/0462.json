@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #01",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est la masse réglementaire standard d'une balle de golf ?",
+        "propositions": [
+          "25 g",
+          "52 g",
+          "45 g",
+          "98 g"
+        ],
+        "réponse": "45 g",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Balle_de_golf",
+        "anecdote": "Les alvéoles d'une balle de golf ne sont pas décoratives : elles réduisent la résistance de l'air et permettent à la balle de voler beaucoup plus loin et plus stablement."
+      },
+      {
+        "id": 2,
+        "question": "À quelle période Léonard de Vinci a-t-il débuté « La Joconde » ?",
+        "propositions": [
+          "Vers 1525",
+          "Vers 1490",
+          "Vers 1503",
+          "Vers 1515"
+        ],
+        "réponse": "Vers 1503",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Joconde",
+        "anecdote": "Léonard de Vinci travaillait alors pour des mécènes florentins et aurait été sollicité pour peindre le portrait de Lisa Gherardini, épouse d'un marchand de soie nommé Francesco del Giocondo."
+      },
+      {
+        "id": 3,
+        "question": "Combien y a-t-il eu d'épisodes de la série télévisée « X-Files » ?",
+        "propositions": [
+          "230 épisodes",
+          "201 épisodes",
+          "218 épisodes",
+          "224 épisodes"
+        ],
+        "réponse": "218 épisodes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/X-Files_:_Aux_frontières_du_réel",
+        "anecdote": "La série a été interrompue en 2002 puis relancée deux fois : en 2016 (saison 10) et en 2018 (saison 11). Ces retours ont ajouté 16 épisodes supplémentaires aux 202 épisodes initiaux, portant le total à 218 épisodes."
+      },
+      {
+        "id": 4,
+        "question": "Combien de baguettes contient le jeu d'adresse traditionnel « Mikado » ?",
+        "propositions": [
+          "31 baguettes",
+          "51 baguettes",
+          "61 baguettes",
+          "41 baguettes"
+        ],
+        "réponse": "41 baguettes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mikado_(jeu)",
+        "anecdote": "Mikado est un jeu d'origine européenne inspiré de traditions asiatiques, malgré son nom japonais. Le jeu a été popularisé en Europe à la fin du XIXe siècle, notamment en Allemagne et en Hongrie, avant de devenir un classique des jeux de société familiaux."
+      }
+    ]
+}

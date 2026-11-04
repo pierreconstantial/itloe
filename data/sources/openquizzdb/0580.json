@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Cérémonie des César",         
+  "mise-à-jour": "29/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel sculpteur a créé le trophée des César ?",
+        "propositions": [
+          "Delfoly",
+          "César",
+          "Arman",
+          "Beppo"
+        ],
+        "réponse": "César",
+        "wikipédia": "https://fr.wikipedia.org/wiki/César_(sculpteur)",
+        "anecdote": "César Baldaccini, dit César, mort en 1998 à Paris, fait partie des membres des Nouveaux réalistes, mouvement né en 1960. Cette statuette en bronze reprend son célèbre procédé de « compression » d'objets métalliques."
+      },
+      {
+        "id": 2,
+        "question": "Avec quel équivalent américain les César sont-ils souvent cités ?",
+        "propositions": [
+          "Oscars",
+          "Owens",
+          "Ocatves",
+          "Oliviers"
+        ],
+        "réponse": "Oscars",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Oscars_du_cinéma",
+        "anecdote": "César est aussi un hommage indirect à Raimu, grand acteur français et interprète de la trilogie marseillaise de Marcel Pagnol."
+      },
+      {
+        "id": 3,
+        "question": "Combien de nommés sont retenus pour le César du meilleur film ?",
+        "propositions": [
+          "Sept",
+          "Quatre",
+          "Six",
+          "Cinq"
+        ],
+        "réponse": "Sept",
+        "wikipédia": "https://fr.wikipedia.org/wiki/César_du_cinéma",
+        "anecdote": "Ils sont cinq pour toutes les disciplines, sauf pour le meilleur film, film étranger, film d'animation, réalisateur, acteur et actrice."
+      },
+      {
+        "id": 4,
+        "question": "Quel journaliste et producteur de cinéma est à l'origine des César ?",
+        "propositions": [
+          "Georges Cravenne",
+          "Cyriac Auriol",
+          "Jean Chapot",
+          "Charles Delac"
+        ],
+        "réponse": "Georges Cravenne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Georges_Cravenne",
+        "anecdote": "L'un de ses fils, Charles Cravenne, dirige la promotion de Columbia (Sony Pictures releasing) depuis les années 1980."
+      }
+    ]
+}

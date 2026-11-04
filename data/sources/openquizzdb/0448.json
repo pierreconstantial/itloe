@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Grèce en télé",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel célèbre animateur de TF1 est franco-grec ?",
+        "propositions": [
+          "Nikos Aliagas",
+          "Nagui",
+          "Arthur",
+          "Cauet"
+        ],
+        "réponse": "Nikos Aliagas",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle série télé Telly Savalas incarnait-il un policier ?",
+        "propositions": [
+          "Kojak",
+          "Colombo",
+          "Starsjy et Hutch",
+          "Magnum"
+        ],
+        "réponse": "Kojak",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quel célèbre magazine de la mer portait un nom grec ?",
+        "propositions": [
+          "Neptune>/I>",
+          "Nereus",
+          "Poseidon",
+          "Thalassa"
+        ],
+        "réponse": "Thalassa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Sur quelle île grecque les Ch'tis ont-ils débarqué ?",
+        "propositions": [
+          "Mykonos",
+          "Rhodes",
+          "Santorin",
+          "Corfou"
+        ],
+        "réponse": "Mykonos",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Elon Musk",         
+  "mise-à-jour": "28/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Pour quel paiement en ligne Elon Musk a-t-il joué un rôlé clé ?",
+        "propositions": [
+          "PayPal",
+          "Tesla",
+          "Paccar",
+          "Micron"
+        ],
+        "réponse": "PayPal",
+        "wikipédia": "https://fr.wikipedia.org/wiki/PayPal",
+        "anecdote": "Établi en 1998 comme étant Confinity, PayPal entre en bourse en 2002 et deviendra plus tard une filiale à part entière pour eBay."
+      },
+      {
+        "id": 2,
+        "question": "De quelle société astronautique Elon Musk est-il cofondateur et PDG ?",
+        "propositions": [
+          "SpaceX",
+          "Flagship",
+          "Landstat",
+          "New Millennium"
+        ],
+        "réponse": "SpaceX",
+        "wikipédia": "https://fr.wikipedia.org/wiki/SpaceX",
+        "anecdote": "La Space Exploration Technologies Corporation, qui emploie aujourd'hui plus de 6 000 personnes, fut fondée le 6 mai 2002."
+      },
+      {
+        "id": 3,
+        "question": "Quel réseau social Elon Musk a-t-il racheté pour 44 milliards ?",
+        "propositions": [
+          "Twitter",
+          "Snapchat",
+          "TikTok",
+          "Facebook"
+        ],
+        "réponse": "Twitter",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Acquisition_de_Twitter_par_Elon_Musk",
+        "anecdote": "Concurrent direct de Tesla, General Motors a annoncé suite au rachat cesser temporairement de payer pour des pubs sur Twitter."
+      },
+      {
+        "id": 4,
+        "question": "De quel président américain Elon Musk est-il devenu le conseiller ?",
+        "propositions": [
+          "Donald Trump",
+          "Barrack Obama",
+          "Joe Biden",
+          "Bill Clinton"
+        ],
+        "réponse": "Donald Trump",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Elon_Musk",
+        "anecdote": "Il abandonnera son poste en juin 2017 lorsque Donald Trump annoncera son intention de quitter l'accord de Paris sur le climat."
+      }
+    ]
+}

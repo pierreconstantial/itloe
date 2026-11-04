@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Ça pique ou ça passe",         
+  "mise-à-jour": "06/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que stockent les cactus dans leurs tissus pour résister à la sécheresse ?",
+        "propositions": [
+          "Sucre",
+          "Amidon",
+          "Suc",
+          "Sel"
+        ],
+        "réponse": "Suc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cactaceae",
+        "anecdote": "Ce sont presque toutes des plantes grasses ou succulentes, c'est-à-dire des plantes xérophytes qui stockent des réserves de suc."
+      },
+      {
+        "id": 2,
+        "question": "Combien d'espèces environ comprend la famille des Cactaceae ?",
+        "propositions": [
+          "3 500",
+          "1 500",
+          "4 500",
+          "2 500"
+        ],
+        "réponse": "2 500",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cactaceae",
+        "anecdote": "Dans le langage courant, le mot cactus désigne souvent le figuier de Barbarie, plante commune sur les bords de la Méditerranée."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel pays le fait de ramasser des cactus est-il puni de prison ?",
+        "propositions": [
+          "Inde",
+          "Argentine",
+          "Mexique",
+          "Algérie"
+        ],
+        "réponse": "Mexique",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cactaceae",
+        "anecdote": "Certains pays ont une attitude contradictoire pour la protection des espèces, mais les extensions urbaines détruisent des sites de cactus."
+      },
+      {
+        "id": 4,
+        "question": "Dans quelles régions du globe les cactus poussent-ils le mieux ?",
+        "propositions": [
+          "Déserts",
+          "Prairies",
+          "Plaines",
+          "Montagnes"
+        ],
+        "réponse": "Déserts",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cactaceae",
+        "anecdote": "On retrouve principalement les cactus au Mexique, aux États-Unis, sur le pourtour méditerranéen ainsi qu'au Sahara et en Australie."
+      }
+    ]
+}

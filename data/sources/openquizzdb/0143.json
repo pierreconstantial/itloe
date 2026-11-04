@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jean-Pierre Foucault",         
+  "mise-à-jour": "26/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la ville natale de l'animateur Jean-Pierre Foucault ?",
+        "propositions": [
+          "Montpellier",
+          "Metz",
+          "Marseille",
+          "Menton"
+        ],
+        "réponse": "Marseille",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jean-Pierre_Foucault",
+        "anecdote": "Il partage sa vie avec Evelyne Jarre mais n'est pas marié avec cette dernière."
+      },
+      {
+        "id": 2,
+        "question": "Que vous proposait de passer Jean-Pierre Foucault à la télévision ?",
+        "propositions": [
+          "Sacrée soirée",
+          "Fameux défi",
+          "Bon moment",
+          "Unique voyage"
+        ],
+        "réponse": "Sacrée soirée",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sacrée_soirée",
+        "anecdote": "Elle était célèbre pour ses séquences émotion, où des anonymes retrouvaient un proche perdu de vue ou recevaient une surprise."
+      },
+      {
+        "id": 3,
+        "question": "Quelle académie Jean-Pierre Foucault a-t-il présenté jusqu'en 1987 ?",
+        "propositions": [
+          "Des onze",
+          "Des douze",
+          "Des neuf",
+          "Des cinq"
+        ],
+        "réponse": "Des neuf",
+        "wikipédia": "https://fr.wikipedia.org/wiki/L'Académie_des_neuf",
+        "anecdote": "Le concept était une adaptation du jeu américain Hollywood Squares, mais Jacques Antoine n'en avait pas acheté les droits à l'origine."
+      },
+      {
+        "id": 4,
+        "question": "Qui fut la première à animer « Disney Parade » avec Jean-Pierre Foucault ?",
+        "propositions": [
+          "Séverinne",
+          "Mélanie",
+          "Anne",
+          "Cécile"
+        ],
+        "réponse": "Anne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Anne_Meson",
+        "anecdote": "Anne Meso a été l'ambassadrice en France de Disney de 1989 à 1994."
+      }
+    ]
+}

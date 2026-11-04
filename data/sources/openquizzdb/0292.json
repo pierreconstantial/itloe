@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #Y",         
+  "mise-à-jour": "18/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle importante plate-forme de vidéos en ligne appartient à Google ?",
+        "propositions": [
+          "Yandex",
+          "Yahoo!",
+          "Yammer",
+          "YouTube"
+        ],
+        "réponse": "YouTube",
+        "wikipédia": "https://fr.wikipedia.org/wiki/YouTube",
+        "anecdote": "YouTube est un site web d'hébergement de vidéos sur lequel les utilisateurs peuvent envoyer, visualiser et partager des séquences vidéos. Il a été créé en février 2005 par trois anciens employés de PayPal."
+      },
+      {
+        "id": 2,
+        "question": "Quel constructeur de motos japonais fabrique également des pianos ?",
+        "propositions": [
+          "Yamaha",
+          "Yema",
+          "Yulon",
+          "Yutong"
+        ],
+        "réponse": "Yamaha",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Yamaha",
+        "anecdote": "La société Yamaha opère dans de nombreux domaines, parmi lesquels les motos, les instruments de musique et les appareils électroniques grand public."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel manga le lycéen Yugi Muto acquiert-il d'étranges pouvoirs ?",
+        "propositions": [
+          "Yamada",
+          "YuYu Hakusho",
+          "Yu-Gi-Oh!",
+          "Yona"
+        ],
+        "réponse": "Yu-Gi-Oh!",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Yu-Gi-Oh!",
+        "anecdote": "L'intégralité de la série a été publiée en français, soit trente-huit tomes au total."
+      },
+      {
+        "id": 4,
+        "question": "Quel petit bonhomme vert a enseigné à Luke comment utiliser la Force ?",
+        "propositions": [
+          "Youk",
+          "Yoni",
+          "Yazoo",
+          "Yoda"
+        ],
+        "réponse": "Yoda",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Yoda",
+        "anecdote": "Yoda est présent dans cinq épisodes sur ceux que compte actuellement la saga (I, II, III, V, VI)."
+      }
+    ]
+}

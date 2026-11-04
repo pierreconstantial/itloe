@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #F",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le symbole chimique du fluor, de numéro atomique 9 ?",
+        "propositions": [
+          "FR",
+          "FL",
+          "FN",
+          "F"
+        ],
+        "réponse": "F",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fluor",
+        "anecdote": "Mentionné au XVIe siècle, le fluor est le plus réactif des éléments chimiques, il est d'ailleurs généralement lié à d'autres éléments."
+      },
+      {
+        "id": 2,
+        "question": "Quel parfum complète la vanille et le chocolat dans un banana split ?",
+        "propositions": [
+          "Fruit de la passion",
+          "Figue",
+          "Framboise",
+          "Fraise"
+        ],
+        "réponse": "Fraise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Banana_split",
+        "anecdote": "Le choix de la fraise comme troisième parfum a été influencé par l'idée de l'équilibre des saveurs, en ajoutant une note fruitée."
+      },
+      {
+        "id": 3,
+        "question": "Avec quelle écurie courait Michael Schumacher en 2003 ?",
+        "propositions": [
+          "Fisker",
+          "Ferrari",
+          "Ford",
+          "Fiat"
+        ],
+        "réponse": "Ferrari",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Michael_Schumacher",
+        "anecdote": "Michael Schumacher a remporté 7 titres de champion du monde de Formule 1, 91 victoires en Grand Prix et 68 pole positions."
+      },
+      {
+        "id": 4,
+        "question": "Quel chat noir et blanc turbulent a fait son apparition dans « Pinocchio » ?",
+        "propositions": [
+          "Firmin",
+          "Fidélio",
+          "Félix",
+          "Figaro"
+        ],
+        "réponse": "Figaro",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pinocchio_(film,_1940)",
+        "anecdote": "Disney espérait renouveler le succès de « Blanche-Neige et les Sept Nains »."
+      }
+    ]
+}

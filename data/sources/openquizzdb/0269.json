@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Chypre",         
+  "mise-à-jour": "24/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la capitale de Chypre ?",
+        "propositions": [
+          "Ankara",
+          "Athènes",
+          "Nicosie",
+          "La Valette"
+        ],
+        "réponse": "Nicosie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quelle mer entoure Chypre ?",
+        "propositions": [
+          "Mer Noire",
+          "Mer Rouge",
+          "Mer du Nord",
+          "Mer Méditerranée"
+        ],
+        "réponse": "Mer Méditerranée",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quelle langue est officiellement parlée au sud de Chypre ?",
+        "propositions": [
+          "Grec",
+          "Italien",
+          "Arabe",
+          "Espagnol"
+        ],
+        "réponse": "Grec",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quelle civilisation antique est fortement liée à Chypre ?",
+        "propositions": [
+          "Grecque",
+          "Maya",
+          "Viking",
+          "Inca"
+        ],
+        "réponse": "Grecque",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Au royaume des Miss",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle place est obtenue par la première dauphine de Miss France ?",
+        "propositions": [
+          "Première",
+          "Troisième",
+          "Deuxième",
+          "Quatrième"
+        ],
+        "réponse": "Deuxième",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Miss_France",
+        "anecdote": "P"
+      },
+      {
+        "id": 2,
+        "question": "Quelle ancienne Miss France a participé à « La Ferme célébrités » sur TF1 ?",
+        "propositions": [
+          "Valérie Bègue",
+          "Élodie Gossuin",
+          "Chloé Mortaud",
+          "Malika Ménard"
+        ],
+        "réponse": "Élodie Gossuin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Élodie_Gossuin-Lacherie",
+        "anecdote": "Elle a été Miss Picardie 2000, Miss France 2001 puis Miss Europe 2001."
+      },
+      {
+        "id": 3,
+        "question": "Qui est devenu en 2011 président à vie du jury de Miss France ?",
+        "propositions": [
+          "Jacques Dutronc",
+          "Daniel Auteuil",
+          "Pierre Arditi",
+          "Alain Delon"
+        ],
+        "réponse": "Alain Delon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alain_Delon",
+        "anecdote": "De nationalité française, Alain Delon est également citoyen suisse depuis 1999."
+      },
+      {
+        "id": 4,
+        "question": "Quelle humoriste belge a incarné Miss Bricola à la télévision ?",
+        "propositions": [
+          "Marie Gillain",
+          "Laurence Bibot",
+          "Yolande Moreau",
+          "Virginie Hocq"
+        ],
+        "réponse": "Laurence Bibot",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Laurence_Bibot",
+        "anecdote": "De 1989 à 1993, elle effectua ses premiers pas sur scène à la ligue d'improvisation."
+      }
+    ]
+}

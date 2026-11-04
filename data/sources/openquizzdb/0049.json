@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Si j'étais président",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de temps dure le mandat du président des États-Unis ?",
+        "propositions": [
+          "6 ans",
+          "4 ans",
+          "7 ans",
+          "5 ans"
+        ],
+        "réponse": "4 ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Président_des_États-Unis",
+        "anecdote": "Le président des États-Unis est élu tous les quatre ans au suffrage universel indirect."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la résidence du président des États-Unis à Washington ?",
+        "propositions": [
+          "Maison-Blanche",
+          "Maison-Bleue",
+          "Maison-Rouge",
+          "Maison-Verte"
+        ],
+        "réponse": "Maison-Blanche",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maison-Blanche",
+        "anecdote": "La Maison-Blanche est le lieu de résidence, de travail et de réception de tous les présidents américains depuis John Adams."
+      },
+      {
+        "id": 3,
+        "question": "Combien de fois au maximum peut-on être élu président des États-Unis ?",
+        "propositions": [
+          "Deux fois",
+          "Quatre fois",
+          "Trois fois",
+          "Une fois"
+        ],
+        "réponse": "Deux fois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Président_des_États-Unis",
+        "anecdote": "Le président des États-Unis actuellement en fonction est Barack Obama."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le lieu de villégiature officiel du président des États-Unis ?",
+        "propositions": [
+          "Camp David",
+          "Camp Devon",
+          "Camp Damon",
+          "Camp Donald"
+        ],
+        "réponse": "Camp David",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Naval_Support_Facility_Thurmont",
+        "anecdote": "Cette résidence a accueilli des discussions diplomatiques internationales."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #Q",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À quel groupe doit-on la bande originale du film « Flash Gordon » ?",
+        "propositions": [
+          "Queen",
+          "Quantic",
+          "Quiet Riot",
+          "Quicksand"
+        ],
+        "réponse": "Queen",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Flash_Gordon_(album)",
+        "anecdote": "Après cet album, Queen se jurera de ne plus sortir une bande originale de façon brute."
+      },
+      {
+        "id": 2,
+        "question": "Quelle ville fut le berceau de la civilisation française en Amérique ?",
+        "propositions": [
+          "Quévy",
+          "Quiberville",
+          "Quito",
+          "Québec"
+        ],
+        "réponse": "Québec",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Samuel_de_Champlain",
+        "anecdote": "Il n'existe aucun portrait authentique de Samuel de Champlain, géographe, commandant et auteur de récits de voyage français."
+      },
+      {
+        "id": 3,
+        "question": "Quelle marque a proposé des cadeaux Koh-Lanta dans ses produits ?",
+        "propositions": [
+          "Quézac",
+          "Quick",
+          "Quiksilver",
+          "Quechua"
+        ],
+        "réponse": "Quick",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Quick_(restauration)",
+        "anecdote": "Concurrente de McDonald's, Quick est une chaîne de restauration rapide créée en Belgique en 1971, implantée en France en 1980."
+      },
+      {
+        "id": 4,
+        "question": "Quel personnage fictif, difforme et sourd, est sonneur de cloches ?",
+        "propositions": [
+          "Quark",
+          "Quasimodo",
+          "Qbert",
+          "Quorra"
+        ],
+        "réponse": "Quasimodo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Quasimodo_(personnage)",
+        "anecdote": "Depuis la parution du roman, Quasimodo est devenu l'archétype du monstre sympathique."
+      }
+    ]
+}

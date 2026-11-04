@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "La vie de château",         
+  "mise-à-jour": "15/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle partie du château contenait les appartements du seigneur ?",
+        "propositions": [
+          "Parapet",
+          "Donjon",
+          "Beffroi",
+          "Hourd"
+        ],
+        "réponse": "Donjon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Donjon",
+        "anecdote": "En temps de paix, le donjon renferme également les trésors, les armes et les archives de la famille."
+      },
+      {
+        "id": 2,
+        "question": "Quelle était la résidence favorite des Rois de France à la renaissance ?",
+        "propositions": [
+          "Blois",
+          "Fontainebleau",
+          "Amboise",
+          "Meudon"
+        ],
+        "réponse": "Blois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Château_de_Blois",
+        "anecdote": "Le château royal réunit autour d'une même cour un panorama de l'architecture française du Moyen Âge à l'époque classique."
+      },
+      {
+        "id": 3,
+        "question": "De quel château Hergé s'est-il inspiré pour créer Moulinsart ?",
+        "propositions": [
+          "Villandry",
+          "Chaumont",
+          "Cheverny",
+          "Langeais"
+        ],
+        "réponse": "Cheverny",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Château_de_Cheverny",
+        "anecdote": "Le château, élevé dans un style très classique, a été dessiné par Jacques Bougier, architecte d'une partie du château de Blois."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel château est présumé être enterré Léonard de Vinci ?",
+        "propositions": [
+          "Amboise",
+          "Sully-Sur-Loire",
+          "Saumur",
+          "Blois"
+        ],
+        "réponse": "Amboise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Léonard_de_Vinci",
+        "anecdote": "De Vinci développa des idées très en avance sur son temps, comme l'avion, l'hélicoptère, le sous-marin et l'automobile."
+      }
+    ]
+}

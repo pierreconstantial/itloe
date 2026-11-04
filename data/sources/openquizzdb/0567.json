@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Super-héroïnes",         
+  "mise-à-jour": "21/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui est la princesse Diana, issue d'une tribu d'Amazones ?",
+        "propositions": [
+          "Mega Mindy",
+          "Gwen Tennyson",
+          "Cipher",
+          "Wonder Woman"
+        ],
+        "réponse": "Wonder Woman",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Wonder_Woman",
+        "anecdote": "Le 4 décembre 2013, Gal Gadot fut choisie pour jouer Wonder Woman et signa un contrat de trois films avec les studios Marvel."
+      },
+      {
+        "id": 2,
+        "question": "Quelle super-héroïne peut se téléporter sur de grandes distances ?",
+        "propositions": [
+          "Nocturne",
+          "Cléa",
+          "Thundra",
+          "Blink"
+        ],
+        "réponse": "Blink",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Blink_(comics)",
+        "anecdote": "La popularité de ce personnage alternatif, mort après un an, a entraîné le retour en 2009 de la version d'origine."
+      },
+      {
+        "id": 3,
+        "question": "Quelle super-héroïne possède un esprit inaccessible aux télépathes ?",
+        "propositions": [
+          "Emma Frost",
+          "Cipher",
+          "Mantis",
+          "Andromeda"
+        ],
+        "réponse": "Cipher",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cipher_(comics)",
+        "anecdote": "Outre ses pouvoirs de blocage, Cipher est également capable de se rendre invisible et peut également piloter le X-Jet."
+      },
+      {
+        "id": 4,
+        "question": "Quelle super-héroïne possède une peau bleue recouverte d'un fin duvet ?",
+        "propositions": [
+          "Abigail Brand",
+          "Miss Hulk",
+          "Nocturne",
+          "Jessica Cruz"
+        ],
+        "réponse": "Nocturne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nocturne_(Talia_Wagner)",
+        "anecdote": "Outre sa physiologie, Nocturne possède le pouvoir d'entrer dans le corps d'une personne et de le contrôler pendant douze heures."
+      }
+    ]
+}

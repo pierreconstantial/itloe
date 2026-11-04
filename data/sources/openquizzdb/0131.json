@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sharon Stone",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel film incarne-t-elle une romancière « au pic à glace » ?",
+        "propositions": [
+          "Basic Instinct",
+          "Sliver",
+          "Mort ou vif",
+          "Diabolique"
+        ],
+        "réponse": "Basic Instinct",
+        "wikipédia": "https://fr.wikipedia.org/wiki/W",
+        "anecdote": "P"
+      },
+      {
+        "id": 2,
+        "question": "Pour quel film Sharon Stone a-t-elle reçu un Golden Globe en 1995 ?",
+        "propositions": [
+          "Casino",
+          "Intersection",
+          "Elle et lui",
+          "Diabolique"
+        ],
+        "réponse": "Casino",
+        "wikipédia": "https://fr.wikipedia.org/wiki/W",
+        "anecdote": "P"
+      },
+      {
+        "id": 3,
+        "question": "À qui Sharon Stone a-t-elle dû laisser sa place pour « Liaison fatale » ?",
+        "propositions": [
+          "Meryl Streep",
+          "Candice Bergen",
+          "Helen Hunt",
+          "Glenn Close"
+        ],
+        "réponse": "Glenn Close",
+        "wikipédia": "https://fr.wikipedia.org/wiki/W",
+        "anecdote": "P"
+      },
+      {
+        "id": 4,
+        "question": "Dans quel film incarne-t-elle une tueuse face à Arnold Schwarzenegger ?",
+        "propositions": [
+          "Total Recall",
+          "Le Contrat",
+          "Last Action Hero",
+          "La Fin des temps"
+        ],
+        "réponse": "Total Recall",
+        "wikipédia": "https://fr.wikipedia.org/wiki/W",
+        "anecdote": "P"
+      }
+    ]
+}

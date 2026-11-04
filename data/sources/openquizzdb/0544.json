@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "La musique de Johnny",         
+  "mise-à-jour": "07/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment s'intitule le premier double album studio de Johnny Hallyday ?",
+        "propositions": [
+          "La Peur",
+          "Gang",
+          "Hamlet",
+          "Insolitudes"
+        ],
+        "réponse": "Hamlet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hamlet_(album_de_Johnny_Hallyday)",
+        "anecdote": "« Hamlet », adaptation musicale du classique de William Shakespeare, est un projet vieux de six ans qui sera un échec."
+      },
+      {
+        "id": 2,
+        "question": "Combien de disques Johnny Hallyday a-t-il vendu de son vivant ?",
+        "propositions": [
+          "150 millions",
+          "90 millions",
+          "110 millions",
+          "130 millions"
+        ],
+        "réponse": "110 millions",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Johnny_Hallyday",
+        "anecdote": "Récompensé par 40 disques d'or, la discographie officielle de Johnny compte 50 albums studio et 29 albums live."
+      },
+      {
+        "id": 3,
+        "question": "Quel artiste a écrit, composé et réalisé l'album « Rock'n'Roll Attitude » ?",
+        "propositions": [
+          "Yodelice",
+          "Michel Berger",
+          "Matthieu Chedid",
+          "Pascal Obispo"
+        ],
+        "réponse": "Michel Berger",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rock'n'Roll_Attitude",
+        "anecdote": "Pour la première fois, un artiste de renom se vit confier la réalisation de tout un album pour Johnny Hallyday."
+      },
+      {
+        "id": 4,
+        "question": "Avec quel label Johnny Hallyday a-t-il signé son premier disque ?",
+        "propositions": [
+          "Philips",
+          "Warner",
+          "Vogue",
+          "Barclay"
+        ],
+        "réponse": "Vogue",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Johnny_Hallyday",
+        "anecdote": "Sur la pochette, son nom est, par erreur, orthographié avec deux « y », graphie qui sera alors définitivement adoptée."
+      }
+    ]
+}

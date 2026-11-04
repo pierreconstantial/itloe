@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #14",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel insecte symbolise la taille fine des femmes ?",
+        "propositions": [
+          "Fourmi",
+          "Papillon",
+          "Guêpe",
+          "Scarabée"
+        ],
+        "réponse": "Guêpe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Taille_de_guêpe",
+        "anecdote": "Au XIXe siècle, certaines femmes de la haute société européenne pratiquaient le tight-lacing, une technique consistant à serrer excessivement les corsets pour réduire la taille au maximum."
+      },
+      {
+        "id": 2,
+        "question": "Quel aphrodisiaque Casanova prenait-il au petit déjeuner ?",
+        "propositions": [
+          "Des huîtres",
+          "De l'absinthe",
+          "Du miel",
+          "Du café noir"
+        ],
+        "réponse": "Des huîtres",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Giacomo_Casanova",
+        "anecdote": "Les huîtres étaient extrêmement populaires dans les cercles aristocratiques européens du XVIIIe siècle. On les consommait en grande quantité dans les tavernes élégantes et les salons privés, souvent accompagnées de vin blanc ou de champagne."
+      },
+      {
+        "id": 3,
+        "question": "Quel objet symbolique offre-t-on aux mariés le soir de leurs noces ?",
+        "propositions": [
+          "Des oeufs",
+          "Une couverture",
+          "Une clé",
+          "Une bougie"
+        ],
+        "réponse": "Des oeufs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mariage",
+        "anecdote": "Dans plusieurs régions d'Europe, notamment en milieu rural, les oeufs étaient associés à la fertilité et à la vie nouvelle, en raison de leur forme et de leur capacité à donner naissance à un être vivant."
+      },
+      {
+        "id": 4,
+        "question": "Dans « Basic Instinct », avec quoi Sharon Stone tue-t-elle son amant ?",
+        "propositions": [
+          "Pic à glace",
+          "Arme à feu",
+          "Couteau de cuisine",
+          "Hache"
+        ],
+        "réponse": "Pic à glace",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Basic_Instinct",
+        "anecdote": ""
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #33",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment appelle-t-on le fait d'élever quelqu'un au rang de dieu ?",
+        "propositions": [
+          "Aphotéose",
+          "Apothéose",
+          "Apotéose",
+          "Aphothéose"
+        ],
+        "réponse": "Apothéose",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "En anatomie, quelle partie du cou est antérieure à la colonne vertébrale ?",
+        "propositions": [
+          "George",
+          "Guorge",
+          "Gorge",
+          "Gorje"
+        ],
+        "réponse": "Gorge",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel félin aux oreilles triangulaires possède une courte queue ?",
+        "propositions": [
+          "Lynxe",
+          "Lhynx",
+          "Linx",
+          "Lynx"
+        ],
+        "réponse": "Lynx",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel mot est synonyme des sons vocalisés qu'émettent les oiseaux ?",
+        "propositions": [
+          "Piaillement",
+          "Piaïllement",
+          "Piaillment",
+          "Piaïlement"
+        ],
+        "réponse": "Piaillement",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

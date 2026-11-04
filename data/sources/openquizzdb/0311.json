@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Stromae",         
+  "mise-à-jour": "30/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel style musical caractérise l'univers de Stromae ?",
+        "propositions": [
+          "Metal",
+          "Électro-pop",
+          "Rock",
+          "Jazz"
+        ],
+        "réponse": "Électro-pop",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stromae",
+        "anecdote": "Stromae, de son vrai nom Paul Van Haver, s'impose au début des années 2010 avec un style unique qui mélange musique électronique, house et chanson française."
+      },
+      {
+        "id": 2,
+        "question": "Quelle chanson a rendu Stromae célèbre en 2009 ?",
+        "propositions": [
+          "Formidable",
+          "Papaoutai",
+          "Tous les mêmes",
+          "Alors on danse"
+        ],
+        "réponse": "Alors on danse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stromae",
+        "anecdote": "La chanson « Alors on danse » est née presque par hasard dans la chambre de Stromae, à une période où il travaillait encore de manière indépendante."
+      },
+      {
+        "id": 3,
+        "question": "Quel album de Stromae contient le succès « Papaoutai » ?",
+        "propositions": [
+          "Cheese",
+          "Stromae Live",
+          "Multitude",
+          "Racine carrée"
+        ],
+        "réponse": "Racine carrée",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stromae",
+        "anecdote": "Le clip, très chorégraphié, met en scène une relation père-fils sous forme de mannequin animé, renforçant l'aspect symbolique de l'absence."
+      },
+      {
+        "id": 4,
+        "question": "Quelle chanson de Stromae aborde la rupture amoureuse avec ironie ?",
+        "propositions": [
+          "Santé",
+          "Papaoutai",
+          "Tous les mêmes",
+          "Formidable"
+        ],
+        "réponse": "Tous les mêmes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stromae",
+        "anecdote": "Stromae y met en scène une dispute de couple où il adopte volontairement une posture caricaturale, oscillant entre le point de vue masculin et féminin."
+      }
+    ]
+}

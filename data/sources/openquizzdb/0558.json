@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #09",         
+  "mise-à-jour": "13/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En France, quel numéro est attribué au département de Paris ?",
+        "propositions": [
+          "78",
+          "93",
+          "75",
+          "92"
+        ],
+        "réponse": "75",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Paris_(département)",
+        "anecdote": "Paris est à la fois une commune et un département. Son numéro administratif, le 75, a été conservé après la réorganisation de la région parisienne en 1968, malgré la création des départements de la petite couronne comme les Hauts-de-Seine (92), la Seine-S"
+      },
+      {
+        "id": 2,
+        "question": "Combien de paires de chromosomes possède une cellule humaine ?",
+        "propositions": [
+          "22 paires",
+          "46 paires",
+          "23 paires",
+          "24 paires"
+        ],
+        "réponse": "23 paires",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chromosome_humain",
+        "anecdote": "Parmi ces 23 paires, 22 sont des autosomes et la dernière correspond aux chromosomes sexuels (XX chez la plupart des femmes, XY chez la plupart des hommes). Les gamètes (ovules et spermatozoïdes), en revanche, ne possèdent que 23 chromosomes non appariés."
+      },
+      {
+        "id": 3,
+        "question": "Combien de pistons une trompette possède-t-elle généralement ?",
+        "propositions": [
+          "Trois",
+          "Quatre",
+          "Deux",
+          "Un seul"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Trompette",
+        "anecdote": "En les actionnant seuls ou en combinaison, le musicien modifie la longueur du tube de l'instrument, ce qui permet d'obtenir toutes les notes de la gamme chromatique."
+      },
+      {
+        "id": 4,
+        "question": "Au bout de combien d'années célèbre-t-on les noces de bois ?",
+        "propositions": [
+          "Quinze ans",
+          "Cinq ans",
+          "Vingt ans",
+          "Dix ans"
+        ],
+        "réponse": "Cinq ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Noces_(mariage)",
+        "anecdote": "Cette tradition remonte au Moyen Âge, où chaque anniversaire de mariage était associé à un matériau représentant la durabilité."
+      }
+    ]
+}

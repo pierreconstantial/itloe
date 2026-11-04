@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Films de guerre",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui a réalisé le film de guerre « Platoon », inspiré par sa propre vie ?",
+        "propositions": [
+          "Brian De Palma",
+          "Clint Eastwood",
+          "John Woo",
+          "Oliver Stone"
+        ],
+        "réponse": "Oliver Stone",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Platoon",
+        "anecdote": "Oliver Stone s'est lui-même engagé comme volontaire pour la guerre du Viêt Nam, durant laquelle il a été blessé à deux reprises."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel film de guerre Clint Eastwood incarne-t-il Tom Highway ?",
+        "propositions": [
+          "La Sanction",
+          "Platoon",
+          "Le Canardeur",
+          "Le Maître de guerre"
+        ],
+        "réponse": "Le Maître de guerre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Maître_de_guerre",
+        "anecdote": "Le titre en anglais fait référence à la bataille de Crèvecoeur (Battle of Heartbreak Ridge), pendant la guerre de Corée."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel film de guerre américain Jean Reno incarne-t-il un capitaine ?",
+        "propositions": [
+          "Le Premier Cercle",
+          "Blindés",
+          "Flyboys",
+          "Ronin"
+        ],
+        "réponse": "Flyboys",
+        "wikipédia": "https://fr.wikipedia.org/wiki/W",
+        "anecdote": "P"
+      },
+      {
+        "id": 4,
+        "question": "Quel film de guerre commence par une allocution du général Patton ?",
+        "propositions": [
+          "Full Metal Jacket",
+          "Platoon",
+          "Outrages",
+          "Patton"
+        ],
+        "réponse": "Patton",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Patton_(film)",
+        "anecdote": "Le film a obtenu sept Oscars en 1970."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Gastronomie belge",         
+  "mise-à-jour": "06/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle carbonade est composée de viande mijotée dans la bière ?",
+        "propositions": [
+          "Germanique",
+          "Flamande",
+          "Bruxelloise",
+          "Wallone"
+        ],
+        "réponse": "Flamande",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Carbonade_flamande",
+        "anecdote": "Le mot carbonnade est issu du mot charbon car ce plat était mijoté longuement sur les braises de charbon de bois."
+      },
+      {
+        "id": 2,
+        "question": "Quel pain brioché constellé de pépites de sucre est vendu en Belgique ?",
+        "propositions": [
+          "Merveilleux",
+          "Gosette",
+          "Craquelin",
+          "Croustillon"
+        ],
+        "réponse": "Craquelin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Craquelin_(Belgique)",
+        "anecdote": "À Grammont, les craquelins sont en forme d'anneaux et sont distribués lors de la fête du feu et du pain de la fin de l'hiver."
+      },
+      {
+        "id": 3,
+        "question": "Quelle saucisse panée et épicée est souvent servie dans les friteries ?",
+        "propositions": [
+          "Gandeuillot",
+          "Fricadelle",
+          "Rosette",
+          "Longeole"
+        ],
+        "réponse": "Fricadelle",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fricadelle",
+        "anecdote": "Cuites à l'huile dans une friteuse ou à la poêle, les fricadelles constituent un des ingrédients de base de la mitraillette."
+      },
+      {
+        "id": 4,
+        "question": "Quelle demi-baguette contient viande chaude, frites et sauce ?",
+        "propositions": [
+          "Mitraillette",
+          "Truffade",
+          "Rosti",
+          "Frico"
+        ],
+        "réponse": "Mitraillette",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mitraillette_(cuisine)",
+        "anecdote": "En France, un sandwich similaire est vendu sous le nom d'américain, dans le nord de la France et à la Réunion."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Leonardo DiCaprio",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel film Leonardo DiCaprio traque-t-il une île paradisiaque ?",
+        "propositions": [
+          "Aviator",
+          "Celebrity",
+          "La Plage",
+          "Blood Diamond"
+        ],
+        "réponse": "La Plage",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Plage_(film,_2000)",
+        "anecdote": "La plage du film existe réellement : il s'agit de Maya Bay en Thaïlande. Après le succès du film, le site est devenu extrêmement touristique."
+      },
+      {
+        "id": 2,
+        "question": "Qui joue le rôle de la bien-aimée de Leonardo DiCaprio dans « Titanic » ?",
+        "propositions": [
+          "Helen Hunt",
+          "Cameron Diaz",
+          "Kate Winslet",
+          "Julia Roberts"
+        ],
+        "réponse": "Kate Winslet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Titanic_(film,_1997)",
+        "anecdote": "La scène où Rose et Jack se tiennent à l'avant du navire est devenue l'une des images les plus iconiques de l'histoire du cinéma, souvent recréée et parodiée dans la culture populaire."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel film de Scorsese DiCaprio incarne-t-il Edward Daniels ?",
+        "propositions": [
+          "Casino",
+          "Shutter Island",
+          "Aviator",
+          "Hugo Cabret"
+        ],
+        "réponse": "Shutter Island",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Shutter_Island_(film)",
+        "anecdote": "Le tournage a été volontairement conçu pour renforcer la sensation de malaise : Scorsese a utilisé des décors naturels brumeux et des effets de lumière pour accentuer l'isolement de l'île. Le film joue constamment avec la perception du spectateur."
+      },
+      {
+        "id": 4,
+        "question": "Quelle actrice partage l'affiche avec Leonardo DiCaprio dans « Inception » ?",
+        "propositions": [
+          "Marion Cotillard",
+          "Léa Seydoux",
+          "Melanie Laurent",
+          "Camille Cottin"
+        ],
+        "réponse": "Marion Cotillard",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Inception",
+        "anecdote": "Le film de Nolan a rapporté plus de 800 millions de dollars, le classant dans les quarante plus gros succès au box-office mondial."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #15",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "As du circuit, mot de treize lettres commençant par un E ?",
+        "propositions": [
+          "Entrebâilleur",
+          "Électronicien",
+          "Entomologiste",
+          "Exterminateur"
+        ],
+        "réponse": "Électronicien",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Se pose avec désinvolture, mot de cinq lettres commençant par un L ?",
+        "propositions": [
+          "Livre",
+          "Lance",
+          "Laïus",
+          "Lapin"
+        ],
+        "réponse": "Lapin",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Contrôle de ballon, mot de neuf lettres commençant par un A ?",
+        "propositions": [
+          "Abduction",
+          "Accordeur",
+          "Alcootest",
+          "Aiguisoir"
+        ],
+        "réponse": "Alcootest",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Machine qui rend poli, mot de huit lettres commençant par un P ?",
+        "propositions": [
+          "Plantoir",
+          "Pressoir",
+          "Perceuse",
+          "Ponceuse"
+        ],
+        "réponse": "Ponceuse",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

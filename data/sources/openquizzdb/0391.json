@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mannequins sur les écrans",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle mannequin joue dans « Astérix et Obélix contre César » ?",
+        "propositions": [
+          "Karine Ferri",
+          "Bérénice Marlohe",
+          "Chloé Mortaud",
+          "Laetitia Casta"
+        ],
+        "réponse": "Laetitia Casta",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Laetitia_Casta",
+        "anecdote": "En 2016, Laetitia Casta sera nommée ambassadrice de l'UNICEF France, le fonds des Nations unies pour l'enfance."
+      },
+      {
+        "id": 2,
+        "question": "Qui est connue pour son rôle de Mélanie dans « Plus belle la vie » ?",
+        "propositions": [
+          "Laëtitia Milot",
+          "Hélène Médigue",
+          "Cécilia Hornus",
+          "Élodie Varlet"
+        ],
+        "réponse": "Laëtitia Milot",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Laëtitia_Milot",
+        "anecdote": "À l'automne 2013, elle participa à la quatrième saison de « Danse avec les stars » sur TF1, aux côtés du danseur Christophe Licata."
+      },
+      {
+        "id": 3,
+        "question": "Quelle ancienne « classe mannequin » a prêté ses traits à Lara Croft ?",
+        "propositions": [
+          "Isabelle Mège",
+          "Isabelle Caro",
+          "Alexa Davalos",
+          "Vanessa Demouy"
+        ],
+        "réponse": "Vanessa Demouy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vanessa_Demouy",
+        "anecdote": "En 1995, Vanessa Demouy a également sorti un album musical intitulé « Rêve de fille », puis un second en 2003, qui passa inaperçu."
+      },
+      {
+        "id": 4,
+        "question": "Quelle mannequin a incarné la James Bond girl de « Quantum of Solace » ?",
+        "propositions": [
+          "Olga Kurylenko",
+          "Naomie Harris",
+          "Eva Green",
+          "Naomi Watts"
+        ],
+        "réponse": "Olga Kurylenko",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Olga_Kurylenko",
+        "anecdote": "En 2013, on a pu l'apercevoir dans le film « Oblivion », écrit et réalisé par Joseph Kosinski, et porté par la méga-star Tom Cruise."
+      }
+    ]
+}

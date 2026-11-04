@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "De jeune padawan à maître Jedi",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans « Star Wars », quelle arme est utilisée par la plupart des Jedi ?",
+        "propositions": [
+          "Sabre laser",
+          "Speeder",
+          "X-wing",
+          "Blaster"
+        ],
+        "réponse": "Sabre laser",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sabre_laser",
+        "anecdote": "À l'intérieur, le cristal Kyber reflète la lumière d'une telle force qu'il crée un faisceau sachant trancher par brûlure instantanée."
+      },
+      {
+        "id": 2,
+        "question": "Qui est le padawan du chevalier et maître Jedi Obi-Wan Kenobi ?",
+        "propositions": [
+          "Yoda",
+          "Mace Windu",
+          "Leia",
+          "Anakin Skywalker"
+        ],
+        "réponse": "Anakin Skywalker",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Obi-Wan_Kenobi",
+        "anecdote": "Obi-Wan Kenobi est tout d'abord le padawan de Qui-Gon Jinn avant de devenir lui-même l'instructeur d'Anakin Skywalker."
+      },
+      {
+        "id": 3,
+        "question": "Sur quelle planète Luke est-il parti pour apprendre à devenir Jedi ?",
+        "propositions": [
+          "Naboo",
+          "Malastare",
+          "Utapau",
+          "Dagobah"
+        ],
+        "réponse": "Dagobah",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dagobah",
+        "anecdote": "Dagobah, dans le secteur Sluis, est un monde de sombres marais, de bayous putrides et de forêts d'arbres tortueux."
+      },
+      {
+        "id": 4,
+        "question": "Que contrôlent les Jedi, qui les rendent très puissants ?",
+        "propositions": [
+          "L'immortalité",
+          "Le langage droïde",
+          "La Force",
+          "La lumière"
+        ],
+        "réponse": "La Force",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jedi",
+        "anecdote": "Les chevaliers Jedi forment un ordre d'individus qui sont aptes à maîtriser la Force et qui l'utilisent uniquement pour faire le bien."
+      }
+    ]
+}

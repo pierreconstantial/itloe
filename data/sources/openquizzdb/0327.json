@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Belles de séries télé",         
+  "mise-à-jour": "19/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle actrice d'origine mexicaine joue dans « Desperate Housewives » ?",
+        "propositions": [
+          "Emma Watson",
+          "Eva Longoria",
+          "Halle Berry",
+          "Salma Hayek"
+        ],
+        "réponse": "Eva Longoria",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eva_Longoria",
+        "anecdote": "Eva Longoria a également joué dans « Les Feux de l'amour » de mars 2001 à août 2003 le rôle d'Isabella Brana."
+      },
+      {
+        "id": 2,
+        "question": "Qui a incarné Rachel Green dans la sitcom à succès mondial « Friends » ?",
+        "propositions": [
+          "Charlize Theron",
+          "Eva Longoria",
+          "Lisa Kudrow",
+          "Jennifer Aniston"
+        ],
+        "réponse": "Jennifer Aniston",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jennifer_Aniston",
+        "anecdote": "Jennifer Aniston a fait ses débuts au cinéma dans le film d'horreur « Leprechaun » qui est sorti en 1993."
+      },
+      {
+        "id": 3,
+        "question": "Quelle actrice brune joue dans « Vampire Diaries » ?",
+        "propositions": [
+          "Nina Dobrev",
+          "Eva Green",
+          "Julianne Moore",
+          "Kristen Stewart"
+        ],
+        "réponse": "Nina Dobrev",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nina_Dobrev",
+        "anecdote": "À la suite de sa rupture d'avec Ian Somerhalder, elle a brièvement fréquenté le danseur et chorégraphe américain Derek Hough."
+      },
+      {
+        "id": 4,
+        "question": "Qui a tenu le rôle de « Numéro 13 » dans la série « Dr House » ?",
+        "propositions": [
+          "Keira Knightley",
+          "Olivia Wilde",
+          "Kaley Cuoco",
+          "Salma Hayek"
+        ],
+        "réponse": "Olivia Wilde",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Olivia_Wilde",
+        "anecdote": "Ce pseudonyme a été choisi par Olivia Jane Cockburn en hommage à Oscar Wilde, célèbre écrivain irlandais."
+      }
+    ]
+}

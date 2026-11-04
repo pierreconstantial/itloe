@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jack Nicholson",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui a réalisé « The Pledge », avec Jack Nicholson et Robin Wright Penn ?",
+        "propositions": [
+          "Tom Hanks",
+          "Sean Penn",
+          "Sam Mendes",
+          "John Astin"
+        ],
+        "réponse": "Sean Penn",
+        "wikipédia": "https://fr.wikipedia.org/wiki/The_Pledge",
+        "anecdote": "Le film « The Pledge » sera un échec au box-office, ne récoltant qu'environ 29 millions de dollars pour un budget de 35 millions."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la profession de Jack Nicholson dans le film « Shining » ?",
+        "propositions": [
+          "Explorateur",
+          "Écrivain",
+          "Ensorceleur",
+          "Escrimeur"
+        ],
+        "réponse": "Écrivain",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Shining_(film)",
+        "anecdote": "Stephen King affirma à la fois adorer et détester l'adaptation faite par Kubrick, le scénario du film trahissant l'esprit de son livre."
+      },
+      {
+        "id": 3,
+        "question": "Qui est sa partenaire dans « Le facteur sonne toujours deux fois » ?",
+        "propositions": [
+          "Ava Gardner",
+          "Susan Sarandon",
+          "Jessica Lange",
+          "Holly Hunter"
+        ],
+        "réponse": "Jessica Lange",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_facteur_sonne_toujours_deux_fois_(film,_1981)",
+        "anecdote": "Contrairement à la version de 1946, l'histoire ici ne va pas jusqu'au bout du roman."
+      },
+      {
+        "id": 4,
+        "question": "Quel film a réuni Leonardo Di Caprio, Matt Damon et Jack Nicholson ?",
+        "propositions": [
+          "Aviator",
+          "Celebrity",
+          "Blood Diamond",
+          "Les Infiltrés"
+        ],
+        "réponse": "Les Infiltrés",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Infiltrés",
+        "anecdote": "Le film affiche les retrouvailles de Leonardo DiCaprio et de Martin Scorsese."
+      }
+    ]
+}

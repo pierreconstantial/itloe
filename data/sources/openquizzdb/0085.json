@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Romans de science-fiction",         
+  "mise-à-jour": "07/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À quel écrivain de la science-fiction doit-on la monumentale saga « Dune » ?",
+        "propositions": [
+          "Robert heinlein",
+          "Arthur C. Clarke",
+          "Isaac Asimov",
+          "Frank Herbert"
+        ],
+        "réponse": "Frank Herbert",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Frank_Herbert",
+        "anecdote": "Ses oeuvres connurent un succès commercial et furent acclamées par la critique."
+      },
+      {
+        "id": 2,
+        "question": "Qui a écrit le roman de science-fiction « L'Île du docteur Moreau » ?",
+        "propositions": [
+          "Aldous Huxley",
+          "George Orwell",
+          "H. G. Wells",
+          "Arthur C. Clarke"
+        ],
+        "réponse": "H. G. Wells",
+        "wikipédia": "https://fr.wikipedia.org/wiki/L'Île_du_docteur_Moreau",
+        "anecdote": "Le roman engage une réflexion sur des sujets comme la relation entre l'être humain et l'animal et la question de l'identité."
+      },
+      {
+        "id": 3,
+        "question": "Quel roman est le fondateur du mouvement Cyberpunk ?",
+        "propositions": [
+          "Code source",
+          "Comte zéro",
+          "Neuromancien",
+          "Idoru"
+        ],
+        "réponse": "Neuromancien",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Neuromancien",
+        "anecdote": "Une version cinématographique est prévue pour 2011, mettant en oeuvre Hayden Christensen."
+      },
+      {
+        "id": 4,
+        "question": "Quel célèbre auteur de science-fiction a été consultant pour OpenAI ?",
+        "propositions": [
+          "Isaac Asimov",
+          "Arthur C. Clarke",
+          "Philip K. Dick",
+          "Ray Bradbury"
+        ],
+        "réponse": "Isaac Asimov",
+        "wikipédia": "https://fr.wikipedia.org/wiki/OpenAI",
+        "anecdote": "L'auteur Isaac Asimov est connu pour ses idées sur l'intelligence artificielle et ses réflexions sur les implications éthiques de l'IA."
+      }
+    ]
+}

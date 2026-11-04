@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #40",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle enveloppe externe d'une planète est constituée de gaz neutre ?",
+        "propositions": [
+          "Atmosphaire",
+          "Atmosfère",
+          "Atmosphère",
+          "Atsopherre"
+        ],
+        "réponse": "Atmosphère",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quels rois de l'Égypte ancienne se sont succédé sur trois millénaires ?",
+        "propositions": [
+          "Pharraons",
+          "Pharaons",
+          "Faraons",
+          "Pharhaons"
+        ],
+        "réponse": "Pharaons",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel médicament est indiqué contre les troubles du sommeil ?",
+        "propositions": [
+          "Sommenifère",
+          "Somniferre",
+          "Somniphère",
+          "Somnifère"
+        ],
+        "réponse": "Somnifère",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle confiserie contient du sucre caramélisé et des amandes ?",
+        "propositions": [
+          "Nougatine",
+          "Nougattine",
+          "Nougatinne",
+          "Nougattinne"
+        ],
+        "réponse": "Nougatine",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Lapins de fiction",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle héroïne de Lewis Carroll voit passer un lapin blanc en retard ?",
+        "propositions": [
+          "Alice",
+          "Aurore",
+          "Camille",
+          "Cendrillon"
+        ],
+        "réponse": "Alice",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alice_au_pays_des_merveilles",
+        "anecdote": "Le livre de Lewis Carroll foisonne d'allusions satiriques aux amis de l'écrivain."
+      },
+      {
+        "id": 2,
+        "question": "Quel lapin est célèbre dans le monde des dessins animés ?",
+        "propositions": [
+          "Porky Pig",
+          "Elmer Fudd",
+          "Bugs Bunny",
+          "Speedy Gonzales"
+        ],
+        "réponse": "Bugs Bunny",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bugs_Bunny",
+        "anecdote": "En version française, c'était Guy Piérauld qui assurait la voix de Bugs Bunny."
+      },
+      {
+        "id": 3,
+        "question": "Quelle entreprise de conserverie a fait porter des lunettes aux lapins ?",
+        "propositions": [
+          "Géant Vert",
+          "Saupiquet",
+          "Bonduelle",
+          "Cassegrain"
+        ],
+        "réponse": "Cassegrain",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cassegrain_(entreprise)",
+        "anecdote": "L'usine Cassegrain de Saint-Sébastien-sur-Loire existe toujours, mais a été reprise par une entreprise de plats cuisinés."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la couleur du lapin Duracell, à l'énergie inépuisable ?",
+        "propositions": [
+          "Bleue",
+          "Rose",
+          "Jaune",
+          "Verte"
+        ],
+        "réponse": "Rose",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Duracell",
+        "anecdote": "Au début, le lapin se contentait de jouer au tambour. Grâce à ses piles alcalines et endurantes, il a pratiqué presque tous les sports."
+      }
+    ]
+}

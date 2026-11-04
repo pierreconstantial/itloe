@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Groupes new wave",         
+  "mise-à-jour": "07/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel groupe chante Robert Smith, avec sa coiffure arachnéenne ?",
+        "propositions": [
+          "Alphaville",
+          "Cocteau Twins",
+          "Indochine",
+          "The Cure"
+        ],
+        "réponse": "The Cure",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Robert_Smith_(musicien)",
+        "anecdote": "Robert Smith est l'auteur de la quasi-totalité des textes qu'il interprète et le principal compositeur des titres du groupe The Cure."
+      },
+      {
+        "id": 2,
+        "question": "Quel groupe a connu son premier succès avec « People Are People » ?",
+        "propositions": [
+          "Bauhaus",
+          "U2",
+          "Depeche Mode",
+          "The Chameleons"
+        ],
+        "réponse": "Depeche Mode",
+        "wikipédia": "https://fr.wikipedia.org/wiki/People_Are_People",
+        "anecdote": "« People Are People » est l'oeuvre de Martin Gore, l'air dansant de la chanson étant quant à elle à mettre au crédit d'Alan Wilder."
+      },
+      {
+        "id": 3,
+        "question": "Quel groupe anglais a obtenu son premier numéro un avec « Relax » ?",
+        "propositions": [
+          "OMD",
+          "A4D",
+          "FGTH",
+          "U2"
+        ],
+        "réponse": "FGTH",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Relax_(chanson_de_Frankie_Goes_to_Hollywood)",
+        "anecdote": "La chanson « Relax » a ensuite été incluse dans l'album « Welcome to the Pleasuredome » sorti un an plus tard."
+      },
+      {
+        "id": 4,
+        "question": "Quel groupe a été formé par les membres restants de Joy Division ?",
+        "propositions": [
+          "New World",
+          "Soft Cell",
+          "New Order",
+          "Kajagoogoo"
+        ],
+        "réponse": "New Order",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Joy_Division",
+        "anecdote": "Joy Division, considéré comme l'un des initiateurs de la cold wave, est l'un des groupes précurseurs et « parrains du rock gothique »."
+      }
+    ]
+}

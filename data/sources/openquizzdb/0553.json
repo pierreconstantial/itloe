@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sacré Bob",         
+  "mise-à-jour": "13/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quelle couleur est le corps de Bob l'éponge ?",
+        "propositions": [
+          "Jaune",
+          "Blanche",
+          "Rose",
+          "Grise"
+        ],
+        "réponse": "Jaune",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bob_l'éponge",
+        "anecdote": "La plupart du temps, on ne voit que ses deux dents de devant, mais il a en fait toutes ses dents bien en place."
+      },
+      {
+        "id": 2,
+        "question": "Sur quelle chaîne était originalement diffusée la série « Bob l'éponge » ?",
+        "propositions": [
+          "NTV",
+          "Nickelodeon",
+          "Netflix",
+          "NBC"
+        ],
+        "réponse": "Nickelodeon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bob_l'éponge",
+        "anecdote": "Première chaîne au monde spécialisée pour les enfants, Nickelodeon a émis en 1979 sous le nom de Pinwheel."
+      },
+      {
+        "id": 3,
+        "question": "Qu'est-ce Bob l'éponge aime faire avec Sandy pour passer le temps ?",
+        "propositions": [
+          "Du tennis",
+          "Du rugby",
+          "Du karaté",
+          "Du foot"
+        ],
+        "réponse": "Du karaté",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bob_l'éponge",
+        "anecdote": "Sandy est très gentille et souvent de bonne humeur, mais elle peut vite devenir agressive quand on se moque des écureuils."
+      },
+      {
+        "id": 4,
+        "question": "De quelle couleur sont les pantoufles de l'Homme Sirène ?",
+        "propositions": [
+          "Rose",
+          "Jaune",
+          "Rouge",
+          "Bleue"
+        ],
+        "réponse": "Rose",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bob_l'éponge",
+        "anecdote": "À cause de son âge, l'Homme Sirène perd un peu la tête et oublie tout, même ce qu'il a mangé au petit déjeuner."
+      }
+    ]
+}

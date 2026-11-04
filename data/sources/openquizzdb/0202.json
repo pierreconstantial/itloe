@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #17",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Gomme pour la tire, mot de quatre lettres commençant par un P ?",
+        "propositions": [
+          "Peau",
+          "Pneu",
+          "Pâte",
+          "Pape"
+        ],
+        "réponse": "Pneu",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Idiot de la bande, mot de six lettres commençant par un C ?",
+        "propositions": [
+          "Crétin",
+          "Crieur",
+          "Chèque",
+          "Cafard"
+        ],
+        "réponse": "Crétin",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Formation musicale, mot de quatre lettres commençant par un T ?",
+        "propositions": [
+          "Tuba",
+          "Test",
+          "Tour",
+          "Trio"
+        ],
+        "réponse": "Trio",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Carnet de timbres, mot de cinq lettres commençant par un A ?",
+        "propositions": [
+          "Amant",
+          "Album",
+          "Azote",
+          "Arène"
+        ],
+        "réponse": "Album",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

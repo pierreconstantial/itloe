@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Pièces de la maison",         
+  "mise-à-jour": "15/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle pièce de la maison place-t-on généralement un lave-linge ?",
+        "propositions": [
+          "Vestibule",
+          "Buanderie",
+          "Véranda",
+          "Mezzanine"
+        ],
+        "réponse": "Buanderie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Buanderie",
+        "anecdote": "En 1907, la première machine à laver électrique a été introduite, permettant aux ménages de laver efficacement leurs vêtements."
+      },
+      {
+        "id": 2,
+        "question": "Quelle pièce supplémentaire à la maison possède des parois vitrées ?",
+        "propositions": [
+          "Buanderie",
+          "Fumoir",
+          "Cellier",
+          "Véranda"
+        ],
+        "réponse": "Véranda",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Véranda",
+        "anecdote": "Dans les démarches d'habitation bioclimatique, les vérandas sont utilisées pour chauffer les habitations par apport solaire."
+      },
+      {
+        "id": 3,
+        "question": "Quelle pièce sert à conserver les provisions et les légumes ?",
+        "propositions": [
+          "Cellier",
+          "Garage",
+          "Buanderie",
+          "Dressing"
+        ],
+        "réponse": "Cellier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cellier_(architecture)",
+        "anecdote": "Aujourd'hui, quand il existe, ce local frais aux murs épais, et pas ou peu éclairé, est généralement proche de la cuisine."
+      },
+      {
+        "id": 4,
+        "question": "Quelle pièce comporte généralement une douche sans baignoire ?",
+        "propositions": [
+          "Suite parentale",
+          "Salle de bains",
+          "Boudoir",
+          "Salle d'eau"
+        ],
+        "réponse": "Salle d'eau",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Salle_d'eau",
+        "anecdote": "En France, un hôtel classifié de première catégorie doit avoir au moins 70 % de ses chambres équipé d'une salle d'eau."
+      }
+    ]
+}

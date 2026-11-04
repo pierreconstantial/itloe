@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #G",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel moteur de recherche demeure le plus populaire sur internet ?",
+        "propositions": [
+          "GitHub",
+          "Google",
+          "Gibiru",
+          "Giphy"
+        ],
+        "réponse": "Google",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Moteur_de_recherche",
+        "anecdote": "Un moteur de recherche permet de retrouver des ressources sur internet associées à des mots-clés."
+      },
+      {
+        "id": 2,
+        "question": "Chez les Schtroumpfs, à qui appartient le chat Azraël ?",
+        "propositions": [
+          "Gargantua",
+          "Geronimo",
+          "Gargamel",
+          "Gédéon"
+        ],
+        "réponse": "Gargamel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Azraël_(Schtroumpfs)",
+        "anecdote": "Azraël, appartenant à Gargamel, est un chat roux et blanc avec une truffe noire et une langue rouge."
+      },
+      {
+        "id": 3,
+        "question": "Quel petit animal porte parfois le nom vernaculaire de rainette ?",
+        "propositions": [
+          "Grenouille",
+          "Grillon",
+          "Gerbille",
+          "Gecko"
+        ],
+        "réponse": "Grenouille",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rainette",
+        "anecdote": "Les rainettes les plus connues en Europe sont la rainette verte (aux yeux d'or et arboricoles) et la rainette méridionale."
+      },
+      {
+        "id": 4,
+        "question": "Qui est devenu le premier artiste produit par des internautes en France ?",
+        "propositions": [
+          "Gabriel",
+          "Grégoire",
+          "Gaspard",
+          "Gautier"
+        ],
+        "réponse": "Grégoire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Grégoire_(chanteur)",
+        "anecdote": "Le premier album de Grégoire, sorti en 2008 et devenu disque de diamant, a été simultanément produit par 347 internautes."
+      }
+    ]
+}

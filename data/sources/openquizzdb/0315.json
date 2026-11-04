@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Six cordes en question",         
+  "mise-à-jour": "30/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel instrument à cordes pincées est utilisé en Inde ?",
+        "propositions": [
+          "Théorbe",
+          "Banjo",
+          "Sitar",
+          "Gling"
+        ],
+        "réponse": "Sitar",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sitar",
+        "anecdote": "En Inde, on en joue assis en tailleur par terre : l'instrument, calé sous le coude, repose par terre (parfois sur le pied)."
+      },
+      {
+        "id": 2,
+        "question": "Quel instrument à cordes pincées est souvent utilisé en country ?",
+        "propositions": [
+          "Balalaïka",
+          "Bouzouki",
+          "Basson",
+          "Banjo"
+        ],
+        "réponse": "Banjo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Banjo",
+        "anecdote": "Accompagnateur dans le style New Orleans, le banjo est également utilisé comme soliste dans la musique irlandaise."
+      },
+      {
+        "id": 3,
+        "question": "Combien de cordes au minimum dénombre-t-on sur une guitare basse ?",
+        "propositions": [
+          "Trois",
+          "Cinq",
+          "Six",
+          "Quatre"
+        ],
+        "réponse": "Quatre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Guitare_basse",
+        "anecdote": "Cet instrument a révolutionné la musique moderne en permettant aux bassistes de jouer plus facilement qu'avec la contrebasse."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la forme de la balalaïka, qui nous vient de Russie ?",
+        "propositions": [
+          "Rectangulaire",
+          "Carrée",
+          "Ronde",
+          "Triangulaire"
+        ],
+        "réponse": "Triangulaire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Balalaïka",
+        "anecdote": "La balalaïka se joue le plus souvent au doigt, parfois avec un plectre, et se décline en plusieurs tailles."
+      }
+    ]
+}

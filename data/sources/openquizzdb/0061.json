@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Héroïnes de séries télé",         
+  "mise-à-jour": "10/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui joua le rôle de Donna Martin dans la série « Beverly Hills 90210 » ?",
+        "propositions": [
+          "Tori Spelling",
+          "Carol Potter",
+          "Jenny Garth",
+          "Hillary Swank"
+        ],
+        "réponse": "Tori Spelling",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Beverly_Hills_90210",
+        "anecdote": "Le comportement rebelle de Shannen Doherty (Brenda) était si problématique qu'il a finalement mené à son renvoi en 1994."
+      },
+      {
+        "id": 2,
+        "question": "Qui détient le rôle principal dans la série « Joséphine, ange gardien » ?",
+        "propositions": [
+          "Sophie Barjac",
+          "Mimie Mathy",
+          "Florence Pernel",
+          "Isabelle Carré"
+        ],
+        "réponse": "Mimie Mathy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Joséphine,_ange_gardien",
+        "anecdote": "Joséphine Delamare est un ange gardien qui disparaît à la fin de ses missions."
+      },
+      {
+        "id": 3,
+        "question": "Qui détient le rôle principal dans la série télévisée « Julie Lescaut » ?",
+        "propositions": [
+          "Mimie Mathy",
+          "Véronique Genest",
+          "Astrid Veillon",
+          "Zoé Félix"
+        ],
+        "réponse": "Véronique Genest",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Julie_Lescaut",
+        "anecdote": "Cette série rencontre un beau succès, rassemblant près de 8 millions de téléspectateurs."
+      },
+      {
+        "id": 4,
+        "question": "Qui jouait le rôle de Lola dans la série télévisée « Le Miel et les Abeilles » ?",
+        "propositions": [
+          "Hélène Rolles",
+          "Claire Keim",
+          "Vanessa Demouy",
+          "Mallaury Nataf"
+        ],
+        "réponse": "Mallaury Nataf",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Miel_et_les_Abeilles",
+        "anecdote": "Mallaury Nataf a fait ensuite parler d'elle avec le fameux « scandale de la culotte »."
+      }
+    ]
+}

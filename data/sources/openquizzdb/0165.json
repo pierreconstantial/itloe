@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Rugby à XV",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de joueurs composent chaque équipe de rugby à XV ?",
+        "propositions": [
+          "Quinze",
+          "Onze",
+          "Dix",
+          "Douze"
+        ],
+        "réponse": "Quinze",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rugby_à_XV",
+        "anecdote": "L'objectif du rugby à XV est de marquer plus de points que l'adversaire par des essais donnant droit à des transformations."
+      },
+      {
+        "id": 2,
+        "question": "En rugby à XV, combien de points vaut un essai, s'il est transformé ?",
+        "propositions": [
+          "Six",
+          "Sept",
+          "Quatre",
+          "Cinq"
+        ],
+        "réponse": "Sept",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Essai_(rugby_à_XV)",
+        "anecdote": "Il n'est pas possible à la défense de marquer sur transformation, à l'inverse de ce que permet le football américain."
+      },
+      {
+        "id": 3,
+        "question": "Quel surnom est donné à l'équipe d'Afrique du Sud de rugby à XV ?",
+        "propositions": [
+          "Chardon",
+          "All Blacks",
+          "Springboks",
+          "Diables rouges"
+        ],
+        "réponse": "Springboks",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rugby_à_XV",
+        "anecdote": "La rivalité entre les All Blacks et les Springboks commença en 1921, suite à une tournée des Springboks en Nouvelle-Zélande."
+      },
+      {
+        "id": 4,
+        "question": "Quelle action sanctionne des remises en jeu incorrectes ?",
+        "propositions": [
+          "Transformation",
+          "Drop",
+          "Mêlée",
+          "Essai"
+        ],
+        "réponse": "Mêlée",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mêlée",
+        "anecdote": "La mêlée se forme à l'endroit de la faute ou de l'arrêt de jeu, ou aussi près que possible de ce point dans le champ de jeu."
+      }
+    ]
+}

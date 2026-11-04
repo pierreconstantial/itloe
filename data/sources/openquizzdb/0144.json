@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #24",         
+  "mise-à-jour": "26/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel terreau est riche en composés humiques et minéraux ?",
+        "propositions": [
+          "Compost",
+          "Conpost",
+          "Composte",
+          "Conposte"
+        ],
+        "réponse": "Compost",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle partie visible d'une lésion cutanée apparaît après cicatrisation ?",
+        "propositions": [
+          "Ciquatrice",
+          "Sicatrice",
+          "Cicatrisse",
+          "Cicatrice"
+        ],
+        "réponse": "Cicatrice",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle pédale faut-il utiliser pour changer de vitesse en voiture ?",
+        "propositions": [
+          "Ambrayâge",
+          "Embrayâge",
+          "Embrayage",
+          "Ambrayage"
+        ],
+        "réponse": "Embrayage",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle étude scientifique allie confort, sécurité et efficacité ?",
+        "propositions": [
+          "Ergonomie",
+          "Hergonomie",
+          "Ergonomye",
+          "Erghonomie"
+        ],
+        "réponse": "Ergonomie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

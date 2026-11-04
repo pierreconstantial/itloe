@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Johnny Depp en privé",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel acteur a fait rencontrer son agent à Johnny Depp, alors inconnu ?",
+        "propositions": [
+          "Nicolas Cage",
+          "Clint Eastwood",
+          "Tom Cruise",
+          "Bruce Willis"
+        ],
+        "réponse": "Nicolas Cage",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Johnny_Depp",
+        "anecdote": "Johnny Depp est devenu célèbre grâce à la série télévisée « 21 Jump Street » et surtout grâce à son rôle de Jack Sparrow."
+      },
+      {
+        "id": 2,
+        "question": "Avec quelle brindille l'acteur Johnny Depp a-t-il eu une liaison ?",
+        "propositions": [
+          "Kate Moss",
+          "Katie Price",
+          "Sienna Miller",
+          "Lauren Gold"
+        ],
+        "réponse": "Kate Moss",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kate_Moss",
+        "anecdote": "Avec sa petite taille d'un mètre soixante-dix environ, Kate Moss est le fer de lance du « waif look » (allure d'enfant abandonnée)."
+      },
+      {
+        "id": 3,
+        "question": "Qui est la mère des enfants de Johnny Depp ?",
+        "propositions": [
+          "Kim Basinger",
+          "Penélope Cruz",
+          "Angelina Jolie",
+          "Vanessa Paradis"
+        ],
+        "réponse": "Vanessa Paradis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Johnny_Depp",
+        "anecdote": "Les deux enfants de Johnny Depp, Lily-Rose et Jack, sont nés de sa relation avec la chanteuse et actrice française Vanessa Paradis. Le couple s'est rencontré en 1998 et a vécu ensemble pendant plus d'une décennie, principalement entre la France et les Éta"
+      },
+      {
+        "id": 4,
+        "question": "Quelle ex petite-amie de Johnny Depp a affirmé sa bisexualité en 2010 ?",
+        "propositions": [
+          "Vanessa Paradis",
+          "Jennifer Grey",
+          "Sherilyn Fenn",
+          "Amber Heard"
+        ],
+        "réponse": "Amber Heard",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Amber_Heard",
+        "anecdote": "En 2016, elle a tenu un rôle dans un projet ambitieux : le biopic « The Danish Girl », réalisé par le cinéaste australien oscarisé Tom Hooper."
+      }
+    ]
+}

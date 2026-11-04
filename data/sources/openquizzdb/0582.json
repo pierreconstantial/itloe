@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #13",         
+  "mise-à-jour": "29/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En quelle année la console portable Gameboy fut-elle lancée en France ?",
+        "propositions": [
+          "1991",
+          "1992",
+          "1990",
+          "1989"
+        ],
+        "réponse": "1990",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Game_Boy",
+        "anecdote": "Son lancement a été accompagné par Tetris, un jeu puzzle addictif qui a contribué à rendre la console culte auprès de tous les âges."
+      },
+      {
+        "id": 2,
+        "question": "Combien de roues retrouve-t-on sur la majorité des brouettes ?",
+        "propositions": [
+          "Une",
+          "Trois",
+          "Deux",
+          "Quatre"
+        ],
+        "réponse": "Une",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Brouette",
+        "anecdote": "Certaines versions modernes ou industrielles ont deux roues pour plus de stabilité, mais la conception à une roue reste la plus répandue."
+      },
+      {
+        "id": 3,
+        "question": "En zoologie, combien de pattes possède un hexapode ?",
+        "propositions": [
+          "Dix",
+          "Quatre",
+          "Six",
+          "Huit"
+        ],
+        "réponse": "Six",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hexapode_(biologie)",
+        "anecdote": "Chaque insecte possède six pattes articulées attachées au thorax, ce qui leur permet de marcher, sauter ou grimper avec efficacité."
+      },
+      {
+        "id": 4,
+        "question": "Combien y a-t-il de singes dans l'armée de Terry Gillian ?",
+        "propositions": [
+          "Six",
+          "Douze",
+          "Aucun",
+          "Onze"
+        ],
+        "réponse": "Douze",
+        "wikipédia": "https://fr.wikipedia.org/wiki/L'Armée_des_douze_singes",
+        "anecdote": "Le nom sert à désigner une organisation cryptique impliquée dans la propagation d'un virus qui décime presque toute l'humanité."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Héros de « Hunger Games »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui se porte volontaire pour remplacer Prim dans « Hunger Games » ?",
+        "propositions": [
+          "Katniss",
+          "Primrose",
+          "Peeta",
+          "Gale"
+        ],
+        "réponse": "Katniss",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Peeta est le fils du boulanger, ce qui le rend plus riche que la plupart des habitants du district Douze, le district minier."
+      },
+      {
+        "id": 2,
+        "question": "Qui chasse et croit avoir tiré sur quelqu'un dans « Hunger Games » ?",
+        "propositions": [
+          "Cinna",
+          "Gale",
+          "Katniss",
+          "Peeta"
+        ],
+        "réponse": "Katniss",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Katniss passait ses journées à chasser, c'est ainsi qu'elle rencontra son meilleur ami Gale Hawthorne."
+      },
+      {
+        "id": 3,
+        "question": "Qui donne à Katniss un instrument qui extrait du liquide des arbres ?",
+        "propositions": [
+          "Haymitch",
+          "Johanna",
+          "Gale",
+          "Peeta"
+        ],
+        "réponse": "Gale",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Haymitch était le seul tribut en vie du District 12 jusqu'à la 74ème édition des Hunger Games."
+      },
+      {
+        "id": 4,
+        "question": "Quel personnage important porte généralement une rose blanche ?",
+        "propositions": [
+          "Peeta",
+          "Cinna",
+          "Katniss",
+          "Snow"
+        ],
+        "réponse": "Snow",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Le président Coriolanus Snow a été le chef de Panem pendant au moins 25 ans."
+      }
+    ]
+}

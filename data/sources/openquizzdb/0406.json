@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Maxime Chattam",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le véritable nom du romancier français Maxime Chattam ?",
+        "propositions": [
+          "Maxime Ducrot",
+          "Paul Château",
+          "Luc Chattam",
+          "Maxime Drouot"
+        ],
+        "réponse": "Maxime Drouot",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maxime_Chattam",
+        "anecdote": "Maxime Chattam est membre du collectif d'artistes « La Ligue de l'Imaginaire »."
+      },
+      {
+        "id": 2,
+        "question": "Quel métier Maxime Chattam a-t-il exercé avant de devenir romancier ?",
+        "propositions": [
+          "Boucher",
+          "Avocat",
+          "Comptable",
+          "Libraire"
+        ],
+        "réponse": "Libraire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maxime_Chattam",
+        "anecdote": "Après des cours de comédie au Cours Simon à Paris, Maxime Chattam a obtenu des rôles pour la télévision et la publicité."
+      },
+      {
+        "id": 3,
+        "question": "Chez quel éditeur Maxime Chattam a-t-il publié « Les Arcanes du chaos » ?",
+        "propositions": [
+          "France Loisirs",
+          "Michel Lafon",
+          "Albin Michel",
+          "Gallimard"
+        ],
+        "réponse": "Albin Michel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Arcanes_du_chaos",
+        "anecdote": "Le roman « Les Arcanes du chaos » donne un aspect troublant du monde où tout n'est que manipulation, argent et pouvoir."
+      },
+      {
+        "id": 4,
+        "question": "Avec quelle animatrice de télévision Maxime Chattam fut-il marié ?",
+        "propositions": [
+          "Karine Ferri",
+          "Flavie Flament",
+          "Faustine Bollaert",
+          "Sophie Davant"
+        ],
+        "réponse": "Faustine Bollaert",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Faustine_Bollaert",
+        "anecdote": "Maxime et Faustine sont parents d'une fille, Abbie, née en juillet 2013 et d'un garçon, Peter né en juillet 2015."
+      }
+    ]
+}

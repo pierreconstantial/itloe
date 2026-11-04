@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "NBA",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel événement majeur en NBA est comparable à une bourse de joueurs ?",
+        "propositions": [
+          "Playoffs",
+          "Franchise",
+          "Ballotage",
+          "Draft"
+        ],
+        "réponse": "Draft",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Draft_NBA",
+        "anecdote": "Durant la draft, chaque équipe va sélectionner à tour de rôle un joueur issu de l'université, du lycée, ou de l'étranger."
+      },
+      {
+        "id": 2,
+        "question": "Quel dunk Dominique Wilkins a popularisé en NBA ?",
+        "propositions": [
+          "Tomahawk",
+          "Poster dunk",
+          "Rider",
+          "Windmill dunk"
+        ],
+        "réponse": "Windmill dunk",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dominique_Wilkins",
+        "anecdote": "Dominique Wilkins fait aujourd'hui partie de l'organisation des Hawks d'Atlanta où il est chargé des opérations basket."
+      },
+      {
+        "id": 3,
+        "question": "Quelle franchise fut en 2012 la pire équipe NBA en victoires ?",
+        "propositions": [
+          "Pistons",
+          "Pacers",
+          "Bobcats",
+          "Heat"
+        ],
+        "réponse": "Bobcats",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hornets_de_Charlotte_(NBA)",
+        "anecdote": "La franchise, évoluant dans la Division Sud-Est de la Conférence Est, appartient à Michael Jordan depuis 2010."
+      },
+      {
+        "id": 4,
+        "question": "Combien les Rockets ont-ils proposé à Jeremy Lin pour 3 ans en NBA ?",
+        "propositions": [
+          "5 millions",
+          "15 millions",
+          "25 millions",
+          "20 millions"
+        ],
+        "réponse": "25 millions",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jeremy_Lin",
+        "anecdote": "Jeremy Lin est le premier américain d'origine taïwanaise à évoluer dans la NBA."
+      }
+    ]
+}

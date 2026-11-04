@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Stars de la NBA",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel basketteur a été champion NBA en 1998 pour la sixième fois ?",
+        "propositions": [
+          "Karl Malone",
+          "Michael Jordan",
+          "Charles Barkley",
+          "Patrick Ewing"
+        ],
+        "réponse": "Michael Jordan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bulls_de_Chicago",
+        "anecdote": "Dans les années 1990, les Bulls ont acquis un des plus beaux palmarès de la Ligue."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle pays est né le joueur de basket-ball Tony Parker ?",
+        "propositions": [
+          "Pologne",
+          "Belgique",
+          "France",
+          "États-Unis"
+        ],
+        "réponse": "Belgique",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tony_Parker",
+        "anecdote": "Il évolue dans l'équipe des Spurs de San Antonio depuis son arrivée dans la NBA en 2001."
+      },
+      {
+        "id": 3,
+        "question": "Qui a été élu joueur NBA de la décennie 2000 ?",
+        "propositions": [
+          "Rick Fox",
+          "Derek Fisher",
+          "Ron Harper",
+          "Kobe Bryant"
+        ],
+        "réponse": "Kobe Bryant",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kobe_Bryant",
+        "anecdote": "Kobe Bryantest le seul joueur en activité en NBA à avoir inscrit plus de 30 000 points en carrière."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le dernier club NBA dans lequel a joué Michael Jordan ?",
+        "propositions": [
+          "Lakers",
+          "Bulls",
+          "Wizards",
+          "Spurs"
+        ],
+        "réponse": "Wizards",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Michael_Jordan",
+        "anecdote": "Michael Jordan a contribué à populariser la NBA dans les années 1980 et 1990."
+      }
+    ]
+}

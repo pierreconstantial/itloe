@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Isabelle Adjani",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Mademoiselle Julie a été interprétée par Isabelle Adjani puis par qui ?",
+        "propositions": [
+          "Sabine Azéma",
+          "Fanny Ardant",
+          "Juliette Binoche",
+          "Claire Keim"
+        ],
+        "réponse": "Fanny Ardant",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mademoiselle_Julie",
+        "anecdote": "« Mademoiselle Julie » est une pièce de théâtre représentée en Suède en 1888."
+      },
+      {
+        "id": 2,
+        "question": "Quel film a réuni sur les écrans Isabelle Adjani et Sharon Stone ?",
+        "propositions": [
+          "Diabolique",
+          "Ange et Démon",
+          "Les sorcières",
+          "Les ensorceleuses"
+        ],
+        "réponse": "Diabolique",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Diabolique_(film)",
+        "anecdote": "Dans le film « Diabolique », la femme et la maîtresse d'un professeur s'associent pour planifier son assassinat."
+      },
+      {
+        "id": 3,
+        "question": "Pour quel titre d'Isabelle Adjani Luc Besson a-t-il réalisé le clip en 1984 ?",
+        "propositions": [
+          "Je t'aime idiot",
+          "Ohio",
+          "Pull marine",
+          "Le Mal intérieur"
+        ],
+        "réponse": "Pull marine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pull_marine",
+        "anecdote": "Isabelle Adjani avait déjà chanté un texte de Gainsbourg, « Rocking chair », lors du « Distel show » des Carpentier en 1974."
+      },
+      {
+        "id": 4,
+        "question": "Quel film a réuni Pierre Niney, Isabelle Adjani et François Cluzet ?",
+        "propositions": [
+          "Goliath",
+          "Mascarade",
+          "Boîte noire",
+          "Amant"
+        ],
+        "réponse": "Mascarade",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mascarade_(film,_2022)",
+        "anecdote": "Le flm met en scène une pléiade de stars dans une satire rythmée qui vient railler les frasques liées à l'argent et à la luxure niçoise."
+      }
+    ]
+}

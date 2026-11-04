@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Voiture électrique",         
+  "mise-à-jour": "30/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel élément d'une voiture électrique permet d'en stocker l'énergie ?",
+        "propositions": [
+          "Batterie",
+          "Démarreur",
+          "Alternateur",
+          "Radiateur"
+        ],
+        "réponse": "Batterie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Porsche_Taycan",
+        "anecdote": "La batterie de la Porsche Taycan (premier modèle électrique Porsche) peut se recharger de 5 à 80 % en seulement 22,5 minutes."
+      },
+      {
+        "id": 2,
+        "question": "Quelle entreprise propose un réseau de Superchargeurs pour voitures ?",
+        "propositions": [
+          "Shell",
+          "ExxonMobil",
+          "BP",
+          "Tesla"
+        ],
+        "réponse": "Tesla",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tesla_Superchargeur",
+        "anecdote": "Tesla Superchargeur est un réseau de recharge rapide (322 km en 15 minutes) en courant continu de 480 volts, déployé depuis 2012."
+      },
+      {
+        "id": 3,
+        "question": "Où est le plus souvent placée la batterie dans un véhicule électrique ?",
+        "propositions": [
+          "Sous la voiture",
+          "Dans le coffre",
+          "Sur les ailes",
+          "À l'avant"
+        ],
+        "réponse": "Sous la voiture",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Voiture_électrique",
+        "anecdote": "La batterie, placée sous la voiture, autorise un plancher plat, le moteur y est plus compact et le réservoir à carburant est absent."
+      },
+      {
+        "id": 4,
+        "question": "Qui fut numéro un mondial de la voiture électrique en 2022 ?",
+        "propositions": [
+          "BYD",
+          "Tesla",
+          "Honda",
+          "Volvo"
+        ],
+        "réponse": "BYD",
+        "wikipédia": "https://fr.wikipedia.org/wiki/BYD",
+        "anecdote": "BYD Auto (Build Your Dreams) est à l'origine un fabricant chinois de batteries basé à Shenzhen, dans le Guangdong, en Chine."
+      }
+    ]
+}

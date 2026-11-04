@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Androïdes dans « Alien »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la couleur du fluide vital qui remplace le sang des androïdes ?",
+        "propositions": [
+          "Vert",
+          "Jaune",
+          "Blanc",
+          "Rouge"
+        ],
+        "réponse": "Blanc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Univers_d'Alien",
+        "anecdote": "Les androïdes jouent un rôle important dans « Alien », étant les seuls que les Aliens ne peuvent cibler pour pondre leurs oeufs."
+      },
+      {
+        "id": 2,
+        "question": "Quel androïde Weyland considère-t-il comme le fils qu'il n'aura jamais ?",
+        "propositions": [
+          "Call",
+          "David",
+          "Walter",
+          "Bishop"
+        ],
+        "réponse": "David",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Univers_d'Alien",
+        "anecdote": "David est responsable de la catastrophe de l'équipage du Prometheus après une contamination avec un pathogène."
+      },
+      {
+        "id": 3,
+        "question": "Qui sauve et répare David, le majordome androïde ?",
+        "propositions": [
+          "Daniel Branson",
+          "Elisabeth Shawn",
+          "Bishop",
+          "Ellen Ripley"
+        ],
+        "réponse": "Elisabeth Shawn",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Univers_d'Alien",
+        "anecdote": "Alors que Shaw est en hibernation, David, une fois réparée par celle-ci, a fait atterrir le Promotheus sur la planète des Ingénieurs."
+      },
+      {
+        "id": 4,
+        "question": "Quel acteur joue à la fois David et Walter dans « Alien » ?",
+        "propositions": [
+          "Idris Elba",
+          "Tom Hardy",
+          "Michael Fassbender",
+          "Ryan Gosling"
+        ],
+        "réponse": "Michael Fassbender",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

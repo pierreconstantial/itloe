@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #29",         
+  "mise-à-jour": "06/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel élément du pot d'échappement vise à réduire la nocivité des gaz ?",
+        "propositions": [
+          "Catalyseur",
+          "Cathaliseur",
+          "Cathalyseur",
+          "Cataliseur"
+        ],
+        "réponse": "Catalyseur",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel terme désigne couramment le caractère répétitif d'un phénomène ?",
+        "propositions": [
+          "Réccurance",
+          "Récurrence",
+          "Récurence",
+          "Récurance"
+        ],
+        "réponse": "Récurrence",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel dispositif maintient une température de cuisson constante ?",
+        "propositions": [
+          "Termosta",
+          "Thermostat",
+          "Thermosta",
+          "Termostat"
+        ],
+        "réponse": "Thermostat",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle personne est passionnée par des domaines précis ?",
+        "propositions": [
+          "Guicque",
+          "Guique",
+          "Geek",
+          "Guik"
+        ],
+        "réponse": "Geek",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

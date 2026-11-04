@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Les îles du Globe",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Située en mer Ionienne, de quel pays dépend l'île de Corfou ?",
+        "propositions": [
+          "Grèce",
+          "Italie",
+          "Croatie",
+          "Albanie"
+        ],
+        "réponse": "Grèce",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Corfou",
+        "anecdote": "L'île est connue dans l'histoire de la Grèce antique en tant que cité grecque sous le nom de Corcyre."
+      },
+      {
+        "id": 2,
+        "question": "Sur quelle île se sont réfugiés les mutins du Bounty, de la Royal Navy ?",
+        "propositions": [
+          "Pitcairn",
+          "Nauru",
+          "Cook",
+          "Moorea"
+        ],
+        "réponse": "Pitcairn",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mutinerie_de_la_Bounty",
+        "anecdote": "Le récit de la mutinerie du Bounty a fait l'objet de nombreuses oeuvres de fiction."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel océan se trouve l'île de Mayotte, dans l'archipel des Comores ?",
+        "propositions": [
+          "Pacifique",
+          "Atlantique",
+          "Arctique",
+          "Indien"
+        ],
+        "réponse": "Indien",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mayotte",
+        "anecdote": "Mayotte est constituée de deux îles principales, Grande-Terre et Petite-Terre, et de plusieurs autres petites îles."
+      },
+      {
+        "id": 4,
+        "question": "De quel pays dépendent les îles Galapagos, dans l'océan Pacifique ?",
+        "propositions": [
+          "Pérou",
+          "Colombie",
+          "Équateur",
+          "Vénézuéla"
+        ],
+        "réponse": "Équateur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Îles_Galapagos",
+        "anecdote": "De manière non officielle, elles sont aussi nommées les Enchantées, en espagnol Las Enchantas."
+      }
+    ]
+}

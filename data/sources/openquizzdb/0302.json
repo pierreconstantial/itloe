@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #30",         
+  "mise-à-jour": "07/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un T, il faut une toge, un support, une capitale et un animal lent.",
+        "propositions": [
+          "Tokyo",
+          "Tréteau",
+          "Tortue",
+          "Tunique"
+        ],
+        "réponse": "Tunique",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un S, il faut un sédiment, une douceur, un métier et un animal.",
+        "propositions": [
+          "Sucrerie",
+          "Singe",
+          "Sable",
+          "Sculpteur"
+        ],
+        "réponse": "Sable",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un M, il faut une fleur prénom, une guitare, un comble et un animal.",
+        "propositions": [
+          "Mandoline",
+          "Marmotte",
+          "Marguerite",
+          "Mansarde"
+        ],
+        "réponse": "Marguerite",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un C, il faut un témoin glaciaire, un métier, un meuble et un loup.",
+        "propositions": [
+          "Coyote",
+          "Charpentier",
+          "Commode",
+          "Carotte"
+        ],
+        "réponse": "Carotte",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #27",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un M, il faut une épice, un fruit, un vêtement et un oiseau.",
+        "propositions": [
+          "Mésange",
+          "Manteau",
+          "Muscade",
+          "Mirabelle"
+        ],
+        "réponse": "Muscade",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un P, il faut un fruit, un fourneau, un bâtiment royal et un félin.",
+        "propositions": [
+          "Pomme",
+          "Palais",
+          "Panthère",
+          "Piano"
+        ],
+        "réponse": "Pomme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un S, il faut un patin, un vêtement, une boisson et un animal.",
+        "propositions": [
+          "Salopette",
+          "Ski",
+          "Serpent",
+          "Soda"
+        ],
+        "réponse": "Ski",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un C, il faut un bleu-vert, un ouvrier, un meuble et un ami.",
+        "propositions": [
+          "Chien",
+          "Chaise",
+          "Charpentier",
+          "Cyan"
+        ],
+        "réponse": "Cyan",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

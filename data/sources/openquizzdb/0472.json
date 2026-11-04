@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Moyens de transport",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel moyen de transport est utilisé par les médecins en Australie ?",
+        "propositions": [
+          "Train",
+          "Montgolfière",
+          "Hélicoptère",
+          "Voiture"
+        ],
+        "réponse": "Hélicoptère",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Australie",
+        "anecdote": "L'Australie compte 7 686 850 km2 de superficie dont 34 218 km de côtes et 7 148 250 km2 de zone économique exclusive."
+      },
+      {
+        "id": 2,
+        "question": "Que portent aux mains de nombreux conducteurs de taxi au Japon ?",
+        "propositions": [
+          "Bagues",
+          "Baguettes",
+          "Gants blancs",
+          "Coups"
+        ],
+        "réponse": "Gants blancs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Taxi",
+        "anecdote": "Le mot taxi provient du taximètre, appareil destiné à mesurer le temps et la distance d'un trajet pour établir un montant à payer."
+      },
+      {
+        "id": 3,
+        "question": "Quelle est l'altitude de croisière d'un Airbus A320 ?",
+        "propositions": [
+          "13 000 m",
+          "10 000 m",
+          "7 000 m",
+          "4 000 m"
+        ],
+        "réponse": "10 000 m",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Airbus_A320",
+        "anecdote": "L'A320-200 est la version la plus répandue de l'A320, disposant de winglets et d'une capacité en kérosène supérieure."
+      },
+      {
+        "id": 4,
+        "question": "Quelles lettres apparaissent à l'arrière des voitures en Suisse ?",
+        "propositions": [
+          "DK",
+          "SU",
+          "SE",
+          "CH"
+        ],
+        "réponse": "CH",
+        "wikipédia": "https://fr.wikipedia.org/wiki/ISO_3166-1_alpha-2",
+        "anecdote": "Les codes ISO 3166-1 alpha-2 sont des codes pays de deux lettres définis dans la norme ISO 3166 (partie ISO 3166-1)."
+      }
+    ]
+}

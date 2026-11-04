@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #08",         
+  "mise-à-jour": "07/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de temps dure, en moyenne, l'acte sexuel chez le rat ?",
+        "propositions": [
+          "Un jour",
+          "Une heure",
+          "Une minute",
+          "Une seconde"
+        ],
+        "réponse": "Une seconde",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rat",
+        "anecdote": "Ce comportement reproductif est organisé en séries répétées, avec de nombreuses tentatives successives avant l'éjaculation."
+      },
+      {
+        "id": 2,
+        "question": "Selon vous, et votre culture générale, qu'est-ce qu'un zizyphus ?",
+        "propositions": [
+          "Gadget coquin",
+          "Maladie rare",
+          "Arbre fruitier",
+          "Position intime"
+        ],
+        "réponse": "Arbre fruitier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ziziphus",
+        "anecdote": "Le bois du ziziphus est particulièrement résistant à la sécheresse, ce qui lui permet de pousser dans des environnements arides."
+      },
+      {
+        "id": 3,
+        "question": "Quelle héroïne d'Hitchcock était surnommée « la blonde glacée » ?",
+        "propositions": [
+          "Kim Novak",
+          "Janet Leigh",
+          "Grace Kelly",
+          "Tippi Hedren"
+        ],
+        "réponse": "Grace Kelly",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Blonde_hitchcockienne",
+        "anecdote": "Le concept de « blonde hitchcockienne » vient directement de la vision du réalisateur Alfred Hitchcock, qui cherchait des actrices blondes à l'apparence impeccable mais cachant souvent une personnalité complexe ou ambiguë."
+      },
+      {
+        "id": 4,
+        "question": "Que fabriquait-on jadis avec des intestins de mouton séchés et huilés ?",
+        "propositions": [
+          "Gants",
+          "Préservatifs",
+          "Savon",
+          "Sacs"
+        ],
+        "réponse": "Préservatifs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Catgut",
+        "anecdote": "Les intestins de mouton, appelés traditionnellement « catgut », ont aussi été utilisés pendant des siècles pour fabriquer des cordes d'instruments de musique comme les violons."
+      }
+    ]
+}

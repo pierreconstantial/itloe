@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #16",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "On y étouffe par plaisir, mot de cinq lettres commençant par un S ?",
+        "propositions": [
+          "Salon",
+          "Sauna",
+          "Serre",
+          "Soute"
+        ],
+        "réponse": "Sauna",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Attache au bureau, mot de six lettres commençant par un A ?",
+        "propositions": [
+          "Agrafe",
+          "Armure",
+          "Amarre",
+          "Abruti"
+        ],
+        "réponse": "Agrafe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Mousse au café, mot de huit lettres commençant par un P ?",
+        "propositions": [
+          "Poussoir",
+          "Pression",
+          "Poudrier",
+          "Pandémie"
+        ],
+        "réponse": "Pression",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "A la peau glissante, mot de six lettres commençant par un B ?",
+        "propositions": [
+          "Bistro",
+          "Breton",
+          "Balcon",
+          "Banane"
+        ],
+        "réponse": "Banane",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

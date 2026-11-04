@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Animaux Disney",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel chien maladroit est un ami de Mickey et Pluto ?",
+        "propositions": [
+          "Félix",
+          "Donald",
+          "Mortimer",
+          "Dingo"
+        ],
+        "réponse": "Dingo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dingo_(Disney)",
+        "anecdote": "À partir des années 1990, Dingo est devenu papa dans une série télévisée dans laquelle son fils se prénomme Max."
+      },
+      {
+        "id": 2,
+        "question": "Quel renardeau est l'ami d'un chien de chasse dans un film Disney ?",
+        "propositions": [
+          "Simba",
+          "Figaro",
+          "Alex",
+          "Rox"
+        ],
+        "réponse": "Rox",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rox_et_Rouky",
+        "anecdote": "Rox et Rouky est le dernier dessin animé de Disney commençant par un générique complet et finissant par « The End »."
+      },
+      {
+        "id": 3,
+        "question": "Quelle race de chiens intéresse fortement Cruella d'Enfer ?",
+        "propositions": [
+          "Fox-terrier",
+          "Husky",
+          "Jack Russel",
+          "Dalmatien"
+        ],
+        "réponse": "Dalmatien",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cruella_d'Enfer",
+        "anecdote": "Le personnage de Cruella d'Enfer fut en partie inspiré par Tallulah Bankhead, dont certaines excentricités furent reprises dans le film."
+      },
+      {
+        "id": 4,
+        "question": "Dans « Robin des Bois », de Disney, quel animal est Robin ?",
+        "propositions": [
+          "Renard",
+          "Lion",
+          "Tigre",
+          "Ours"
+        ],
+        "réponse": "Renard",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Robin_des_Bois_(film,_1973)",
+        "anecdote": "La réalisation de « Robin des Bois » sera marquée par la réutilisation d'éléments d'animation des précédentes productions Disney."
+      }
+    ]
+}

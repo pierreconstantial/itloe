@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Animaux célèbres",         
+  "mise-à-jour": "13/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans « L'Âge de glace », qu'est-ce qui échappe à l'écureuil Scrat ?",
+        "propositions": [
+          "Un gland",
+          "Une bille",
+          "Un os",
+          "Une pierre"
+        ],
+        "réponse": "Un gland",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Scrat",
+        "anecdote": "À l'occasion de la sortie de « L'Âge de glace 4 », Scrat a eu son double de cire au Musée Grévin le 20 juin 2012."
+      },
+      {
+        "id": 2,
+        "question": "Comment se nomme l'orque à sauver dans une saga populaire ?",
+        "propositions": [
+          "Tom",
+          "Jennifer",
+          "Willy",
+          "Monica"
+        ],
+        "réponse": "Willy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sauvez_Willy_(série_de_films)",
+        "anecdote": "Si les deuxième et troisième films sont des suites du premier, le 4e n'a aucun lien avec le reste et est en quelque sorte un reboot."
+      },
+      {
+        "id": 3,
+        "question": "Qui le chat prénommé Tom poursuit-il sans cesse ?",
+        "propositions": [
+          "Joshua",
+          "Jason",
+          "James",
+          "Jerry"
+        ],
+        "réponse": "Jerry",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tom_et_Jerry",
+        "anecdote": "Malgré sa popularité très acclamée, les courts-métrages Tom et Jerry ont fait l'objet de nombreuses controverses."
+      },
+      {
+        "id": 4,
+        "question": "Dans les deux films « Babe », quel animal campe le personnage principal ?",
+        "propositions": [
+          "Chien",
+          "Mouton",
+          "Chèvre",
+          "Cochon"
+        ],
+        "réponse": "Cochon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Babe",
+        "anecdote": "Babe eut l'idée tout à fait farfelue de devenir chien de berger, ou plutôt « cochon de berger »."
+      }
+    ]
+}

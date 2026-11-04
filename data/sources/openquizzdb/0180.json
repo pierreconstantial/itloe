@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #30",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle maladie du système respiratoire touche notamment les bronches ?",
+        "propositions": [
+          "Azme",
+          "Azhme",
+          "Ashme",
+          "Asthme"
+        ],
+        "réponse": "Asthme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel terme s'utilise dans le cas d'une surabondance de quelque chose ?",
+        "propositions": [
+          "Pléthorre",
+          "Plétaure",
+          "Pléthore",
+          "Plétore"
+        ],
+        "réponse": "Pléthore",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel mot désigne les eaux de vie dans les régions germanophones ?",
+        "propositions": [
+          "Chnaps",
+          "Schnaps",
+          "Chnapse",
+          "Schnapse"
+        ],
+        "réponse": "Schnaps",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel fruit saisonnier est parfois aussi appelé cerise de Chine ?",
+        "propositions": [
+          "Litchi",
+          "Litchee",
+          "Leetchee",
+          "Litchit"
+        ],
+        "réponse": "Litchi",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

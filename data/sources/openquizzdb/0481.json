@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Animaux de séries télé",         
+  "mise-à-jour": "14/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel animal porte le nom de Flipper, de la série du même nom ?",
+        "propositions": [
+          "Ours",
+          "Dauphin",
+          "Lion",
+          "Chien"
+        ],
+        "réponse": "Dauphin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Flipper_le_dauphin",
+        "anecdote": "« Flipper le dauphin » est une série télévisée américaine en 88 épisodes de 25 minutes, créée par Ricou Browning et Jack Cowden."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la race de Lassie, le célèbre chien de la série télévisée ?",
+        "propositions": [
+          "Labrador",
+          "Colley",
+          "Golden Retriever",
+          "Berger allemand"
+        ],
+        "réponse": "Colley",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fidèle_Lassie",
+        "anecdote": "La production avait à l'origine engagé un colley femelle pour le rôle de Lassie, mais la chienne avait trop peur des cascades."
+      },
+      {
+        "id": 3,
+        "question": "Quel type d'animal est Ben, le héros de la série « Mon ami Ben » ?",
+        "propositions": [
+          "Ours",
+          "Éléphant",
+          "Panthère",
+          "Lion"
+        ],
+        "réponse": "Ours",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mon_ami_Ben",
+        "anecdote": "Au générique, le jeune héros est incarné par Clint Howard, qui n'est autre que le frère de l'acteur et réalisateur Ron Howard."
+      },
+      {
+        "id": 4,
+        "question": "Comme s'appelait le poney héros d'un ancien feuilleton télévisé ?",
+        "propositions": [
+          "Suzy",
+          "Doly",
+          "Poly",
+          "Harry"
+        ],
+        "réponse": "Poly",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Poly_(série_télévisée)",
+        "anecdote": "Mehdi El Glaoui, alors âgé de cinq ans au début du feuilleton « Poly », est le fils de l'actrice et réalisatrice française Cécile Aubry."
+      }
+    ]
+}

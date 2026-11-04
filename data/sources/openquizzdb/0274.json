@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #23",         
+  "mise-à-jour": "31/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dessous qu'on a dessus, mot de quatre lettres commençant par un S ?",
+        "propositions": [
+          "Sexe",
+          "Slip",
+          "Sein",
+          "Sofa"
+        ],
+        "réponse": "Slip",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Son registre est aigu, mot de cinq lettres commençant par un T ?",
+        "propositions": [
+          "Ténor",
+          "Tacot",
+          "Tante",
+          "Tuyau"
+        ],
+        "réponse": "Ténor",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Délicatesse et doigté, mot de quatre lettres commençant par un T ?",
+        "propositions": [
+          "Taxe",
+          "Tact",
+          "Trou",
+          "Toge"
+        ],
+        "réponse": "Tact",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Pompe des rues, mot de sept lettres commençant par un G ?",
+        "propositions": [
+          "Gourmet",
+          "Gravier",
+          "Godasse",
+          "Glucide"
+        ],
+        "réponse": "Godasse",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

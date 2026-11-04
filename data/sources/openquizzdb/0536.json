@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Petits animaux",         
+  "mise-à-jour": "01/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que mangent surtout les coccinelles ?",
+        "propositions": [
+          "Chenilles",
+          "Fourmis",
+          "Pucerons",
+          "Moustiques"
+        ],
+        "réponse": "Pucerons",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coccinellidae",
+        "anecdote": "La plupart des coccinelles sont de redoutables prédatrices de pucerons. Une seule coccinelle adulte peut en dévorer plusieurs dizaines par jour, tandis qu'une larve peut en consommer plusieurs centaines au cours de son développement."
+      },
+      {
+        "id": 2,
+        "question": "Quel environnement favorise les acariens ?",
+        "propositions": [
+          "Chaud et humide",
+          "Venteux",
+          "Glacé",
+          "Sec"
+        ],
+        "réponse": "Chaud et humide",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Acari",
+        "anecdote": "Les acariens prolifèrent dans les milieux chauds et humides, comme les matelas, oreillers, tapis ou canapés. Ils se nourrissent principalement de squames de peau humaine et sont une cause fréquente d'allergies respiratoires."
+      },
+      {
+        "id": 3,
+        "question": "Combien pèse environ la plus petite espèce de musaraigne connue ?",
+        "propositions": [
+          "130 grammes",
+          "70 grammes",
+          "2 grammes",
+          "20 grammes"
+        ],
+        "réponse": "2 grammes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Musaraigne",
+        "anecdote": "Notre musaraigne pygmée locale est, quant à elle, deux fois plus grande et plus lourde que ce pachyure étrusque."
+      },
+      {
+        "id": 4,
+        "question": "Comment les mille-pattes se protègent-ils de leurs prédateurs ?",
+        "propositions": [
+          "Par leurs sécrétions",
+          "En mordant",
+          "Par camouflage",
+          "En criant"
+        ],
+        "réponse": "Par leurs sécrétions",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Myriapoda",
+        "anecdote": "En cas de danger, les mille-pattes émettent une substance rouge caustique à l'odeur nauséabonde via des glandes sur leurs anneaux."
+      }
+    ]
+}

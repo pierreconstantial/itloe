@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Applications web",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quels logiciels permettent de naviguer sur Internet ?",
+        "propositions": [
+          "Tableurs",
+          "Émulateurs",
+          "Navigateurs",
+          "Éditeurs"
+        ],
+        "réponse": "Navigateurs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Navigateur_Web",
+        "anecdote": "Le premier navigateur fut Mosaic (1993), qui a ouvert la voie à Netscape Navigator, puis à Internet Explorer dans les années 2000."
+      },
+      {
+        "id": 2,
+        "question": "Quel logiciel protège un ordinateur des menaces en ligne ?",
+        "propositions": [
+          "Chat",
+          "Antivirus",
+          "Messagerie",
+          "Navigateur"
+        ],
+        "réponse": "Antivirus",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Logiciel_antivirus",
+        "anecdote": "Les antivirus peuvent balayer le contenu d'un disque dur ainsi que la mémoire vive pour protéger contre les ransomwares et les spywares."
+      },
+      {
+        "id": 3,
+        "question": "Quelle start-up a été rachetée pour un milliard par Facebook en 2012 ?",
+        "propositions": [
+          "Backelite",
+          "Instagram",
+          "Valve",
+          "Globalnet"
+        ],
+        "réponse": "Instagram",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Instagram",
+        "anecdote": "« Instagram » est une application  co-fondée et lancée par l'américain Kevin Systrom et le Brésilien Michel Mike Krieger en octobre 2010."
+      },
+      {
+        "id": 4,
+        "question": "Quel nom portait le navigateur Internet devenu « Microsoft Edge » ?",
+        "propositions": [
+          "Safari",
+          "Internet Explorer",
+          "Firefox",
+          "Chrome"
+        ],
+        "réponse": "Internet Explorer",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Internet_Explorer",
+        "anecdote": "La version 11 du navigateur Internet Explorer sera toujours présente dans Windows 10 avant le passage progressif à Microsoft Edge."
+      }
+    ]
+}

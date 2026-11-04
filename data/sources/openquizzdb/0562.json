@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "The Cure",         
+  "mise-à-jour": "17/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui est le seul membre présent depuis l'origine du groupe The Cure ?",
+        "propositions": [
+          "Reeves Gabrels",
+          "Roger O'Donnell",
+          "Robert Smith",
+          "Simon Gallup"
+        ],
+        "réponse": "Robert Smith",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Robert_Smith_(musicien)",
+        "anecdote": "Robert Smith a également été à plusieurs reprises membre du jury de l'International Songwriting Competition (ISC)."
+      },
+      {
+        "id": 2,
+        "question": "À quel mouvement musical le groupe The Cure est-il encore associé ?",
+        "propositions": [
+          "Rock",
+          "New wave",
+          "Pop",
+          "Dance"
+        ],
+        "réponse": "New wave",
+        "wikipédia": "https://fr.wikipedia.org/wiki/New_wave",
+        "anecdote": "Au début des années 1980, de nombreux groupes new wave importants ont émergé des villes provinciales du sud de l'Angleterre."
+      },
+      {
+        "id": 3,
+        "question": "Quel instrument d'accompagnement est mis en avant chez The Cure ?",
+        "propositions": [
+          "Piano",
+          "Saxophone",
+          "Basse",
+          "Trompette"
+        ],
+        "réponse": "Basse",
+        "wikipédia": "https://fr.wikipedia.org/wiki/The_Cure",
+        "anecdote": "La basse est, notamment en raison du jeu particulier de Simon Gallup, une composante essentielle de la musique de The Cure."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le titre du premier 45 tours de The Cure, sorti en 1978 ?",
+        "propositions": [
+          "Another Day",
+          "Killing an Arab",
+          "So What",
+          "Fire in Cairo"
+        ],
+        "réponse": "Killing an Arab",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Killing_an_Arab",
+        "anecdote": "Cette chanson, inspirée du roman « L'Étranger » de Camus, assure un début de notoriété grâce aux fanzines alternatifs."
+      }
+    ]
+}

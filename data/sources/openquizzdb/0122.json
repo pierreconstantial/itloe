@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #11",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un S, il faut une enquête, un militaire, une frappe et une période.",
+        "propositions": [
+          "Smash",
+          "Siècle",
+          "Soldat",
+          "Sondage"
+        ],
+        "réponse": "Sondage",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un M, il faut un vêtement, un artiste, une règle morale et une glace.",
+        "propositions": [
+          "Magicien",
+          "Magnum",
+          "Maxime",
+          "Manteau"
+        ],
+        "réponse": "Manteau",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un D, il faut une figure, un imbécile, un plateau et une faute.",
+        "propositions": [
+          "Damier",
+          "Demeuré",
+          "Délit",
+          "Diagramme"
+        ],
+        "réponse": "Diagramme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un R, il faut un arbuste, un bruit, une fixation et une facture.",
+        "propositions": [
+          "Recette",
+          "Rivet",
+          "Rosier",
+          "Ronflement"
+        ],
+        "réponse": "Rosier",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

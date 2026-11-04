@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #14",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel tracé sinueux est destiné à perdre celui qui cherche à s'y déplacer ?",
+        "propositions": [
+          "Labyrinte",
+          "Labirynthe",
+          "Labyrinthe",
+          "Labirynte"
+        ],
+        "réponse": "Labyrinthe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle lipoprotéine de notre organisme peut être bonne ou mauvaise ?",
+        "propositions": [
+          "Colesthérol",
+          "Cholestérol",
+          "Cholestérolle",
+          "Colestérole"
+        ],
+        "réponse": "Cholestérol",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel objet contient les affaires d'une personne en voyage ?",
+        "propositions": [
+          "Bagagge",
+          "Baggage",
+          "Baguage",
+          "Bagage"
+        ],
+        "réponse": "Bagage",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle plante aromatique est appelée farigoule dans le sud de la France ?",
+        "propositions": [
+          "Tein",
+          "Thym",
+          "Teint",
+          "Tain"
+        ],
+        "réponse": "Thym",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

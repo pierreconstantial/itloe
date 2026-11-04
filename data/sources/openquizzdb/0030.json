@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #05",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel soulèvement armé peut avoir lieu contre le pouvoir en place ?",
+        "propositions": [
+          "Insurrection",
+          "Inssurrection",
+          "Inssurection",
+          "Insurexion"
+        ],
+        "réponse": "Insurrection",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle maladie du foie résulte d'une consommation chronique d'alcool ?",
+        "propositions": [
+          "Cirrhose",
+          "Cyrrhose",
+          "Sirrose",
+          "Cyrose"
+        ],
+        "réponse": "Cirrhose",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quels organes de la gorge sont en partie visibles au fond de la bouche ?",
+        "propositions": [
+          "Ammidales",
+          "Amigdales",
+          "Ammydales",
+          "Amygdales"
+        ],
+        "réponse": "Amygdales",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle transmission d'un bien d'un défunt est faite à titre gratuit ?",
+        "propositions": [
+          "Leg",
+          "Lègue",
+          "Legg",
+          "Legs"
+        ],
+        "réponse": "Legs",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

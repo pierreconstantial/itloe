@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Italie",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À quoi compare-t-on souvent la forme de l'Italie vue du ciel ?",
+        "propositions": [
+          "Botte",
+          "Chariot",
+          "Fleur",
+          "Hexagone"
+        ],
+        "réponse": "Botte",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Italie",
+        "anecdote": "L'Italie est rattachée au reste du continent par le massif des Alpes recouvrant la frontière nord du pays."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la vitesse maximale autorisée sur les autoroutes en Italie ?",
+        "propositions": [
+          "130 km/h",
+          "110 km/h",
+          "100 km/h",
+          "120 km/h"
+        ],
+        "réponse": "130 km/h",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Autoroute",
+        "anecdote": "La première autoroute au monde, l'autoroute des Lacs longue de 77 kilomètres, a été créée en Italie en 1924."
+      },
+      {
+        "id": 3,
+        "question": "Comment appelle-t-on les membres de la mafia sicilienne ?",
+        "propositions": [
+          "Mafiosi",
+          "Marvoli",
+          "Tifosi",
+          "Barzotti"
+        ],
+        "réponse": "Mafiosi",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mafia",
+        "anecdote": "La mafia est une organisation criminelle qui repose sur une stratégie d'infiltration de la société civile et des institutions."
+      },
+      {
+        "id": 4,
+        "question": "Quelle ville italienne le « T » du  constructeur Fiat représente-t-il ?",
+        "propositions": [
+          "Trieste",
+          "Turin",
+          "Trévise",
+          "Tivoli"
+        ],
+        "réponse": "Turin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fiat",
+        "anecdote": "La nouvelle Fiat 500, suivant la tendance néorétro initiée par la New Beetle, est venue renforcer les positions de la marque."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #19",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un B, il faut un rorqual, une munition, un artisan et un sport d'équipe.",
+        "propositions": [
+          "Boulanger",
+          "Baleine",
+          "Basket-ball",
+          "Balle"
+        ],
+        "réponse": "Baleine",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un R, il faut une fente, une parcelle, un souverain et un métier.",
+        "propositions": [
+          "Ramoneur",
+          "Roi",
+          "Raie",
+          "Rizière"
+        ],
+        "réponse": "Raie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un L, il faut un balai, un arbre, un métier de vue et un projeteur.",
+        "propositions": [
+          "Lance",
+          "Loup",
+          "Lilas",
+          "Lunetier"
+        ],
+        "réponse": "Loup",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un C, il faut un invertébré, un légume, un outil et une discussion.",
+        "propositions": [
+          "Ciseau",
+          "Corail",
+          "Conversation",
+          "Carotte"
+        ],
+        "réponse": "Corail",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

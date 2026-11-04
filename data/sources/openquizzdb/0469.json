@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Personnages dans Tintin",         
+  "mise-à-jour": "02/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le prénom de Haddock, capitaine de marine marchande ?",
+        "propositions": [
+          "Anatole",
+          "Auguste",
+          "Archibald",
+          "Ambroise"
+        ],
+        "réponse": "Archibald",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Capitaine_Haddock",
+        "anecdote": "Le prénom du capitaine Haddock, meilleur ami de Tintin, fut mentionné pour la première fois dans l'album « Tintin et les Picaros »."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la profession de Séraphin Lampion dans Tintin ?",
+        "propositions": [
+          "Journaliste",
+          "Banquier",
+          "Policier",
+          "Assureur"
+        ],
+        "réponse": "Assureur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Liste_des_personnages_des_Aventures_de_Tintin",
+        "anecdote": "Lampion semble à l'aise dans tous les milieux, ne voyant pas qu'il exaspère son « public » et se croyant bienvenu partout."
+      },
+      {
+        "id": 3,
+        "question": "Dans Tintin, quelle est la différence visuelle entre Dupond et Dupont ?",
+        "propositions": [
+          "Chapeau",
+          "Nez",
+          "Costume",
+          "Moustache"
+        ],
+        "réponse": "Moustache",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dupond_et_Dupont",
+        "anecdote": "Celle de Dupond est droite ou en forme de D incliné, alors que celle de Dupont est en forme de T épais renversé."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le juron préféré du capitaine Haddock, meilleur ami de Tintin ?",
+        "propositions": [
+          "Boursicot",
+          "Nom de Zeus",
+          "Mille sabords",
+          "Tonnerre du diable"
+        ],
+        "réponse": "Mille sabords",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Capitaine_Haddock",
+        "anecdote": "Le capitaine Haddock est un impulsif qui se laisse souvent entraîner par son enthousiasme ou son découragement."
+      }
+    ]
+}

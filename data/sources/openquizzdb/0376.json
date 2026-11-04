@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Ponts en longueur",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle ville américaine se dresse le Golden Gate Bridge ?",
+        "propositions": [
+          "San Diego",
+          "New York",
+          "San Francisco",
+          "Los Angeles"
+        ],
+        "réponse": "San Francisco",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Golden_Gate_Bridge",
+        "anecdote": "Le « Golden Gate Bridge » a été jusqu'en 1964 le pont suspendu le plus long du monde."
+      },
+      {
+        "id": 2,
+        "question": "Quelle rivière aux crues redoutables est enjambée par le pont du Gard ?",
+        "propositions": [
+          "Bièvre",
+          "Garonne",
+          "Gardon",
+          "Rhône"
+        ],
+        "réponse": "Gardon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pont_du_Gard",
+        "anecdote": "Le pont du Gard est un pont-aqueduc romain à trois niveaux, situé à Vers-Pont-du-Gard entre Uzès et Nîmes, qui enjambe le Gardon."
+      },
+      {
+        "id": 3,
+        "question": "Quel est, malgré son nom, le plus ancien pont de Paris ?",
+        "propositions": [
+          "Pont du Roi",
+          "Pont Neuf",
+          "Pont Marie",
+          "Pont du Diable"
+        ],
+        "réponse": "Pont Neuf",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pont_Neuf",
+        "anecdote": "Toujours intact, le pont Neuf est classé monument historique depuis 1889."
+      },
+      {
+        "id": 4,
+        "question": "De combien d'arches est constitué le pont de Westminster ?",
+        "propositions": [
+          "Sept",
+          "Six",
+          "Neuf",
+          "Huit"
+        ],
+        "réponse": "Sept",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Westminster_Bridge",
+        "anecdote": "Le pont actuel est le second sur cet emplacement et a remplacé un pont qui avait tendance à se balancer de façon alarmante."
+      }
+    ]
+}

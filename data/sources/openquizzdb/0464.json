@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Albums de Tintin",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui est en lévitation sur la couverture des « Sept Boules de cristal » ?",
+        "propositions": [
+          "Thorgal",
+          "Tournesol",
+          "Tchang",
+          "Tintin"
+        ],
+        "réponse": "Tournesol",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Sept_Boules_de_cristal",
+        "anecdote": "L'allusion aux découvreurs de la tombe de Toutankhamon est clairement définie dans cet ouvrage grand public."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle ville Tintin se fait-il enlever dans « Tintin en Amérique » ?",
+        "propositions": [
+          "Charlotte",
+          "Cleveland",
+          "Chicago",
+          "Columbus"
+        ],
+        "réponse": "Chicago",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tintin_en_Amérique",
+        "anecdote": "La trame de l'histoire se déroule à Chicago, pendant la Prohibition, où Tintin et son chien Milou luttent contre les gangsters de la ville."
+      },
+      {
+        "id": 3,
+        "question": "Quel phénomène sauve Tintin et ses amis dans « Le temple du soleil » ?",
+        "propositions": [
+          "Ouragan",
+          "Éclipse de soleil",
+          "Séisme",
+          "Avalanche"
+        ],
+        "réponse": "Éclipse de soleil",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Temple_du_Soleil",
+        "anecdote": "L'intrigue de l'album est inspirée du roman sous forme de feuilleton de Gaston Leroux, « L'Épouse du soleil »."
+      },
+      {
+        "id": 4,
+        "question": "Que désigne le mot « coke » dans la bande dessinée « Coke en stock » ?",
+        "propositions": [
+          "Des esclaves",
+          "Du charbon",
+          "Des boissons",
+          "De la drogue"
+        ],
+        "réponse": "Des esclaves",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coke_en_stock",
+        "anecdote": "Le premier titre envisagé par Hergé pour cet album était d'abord « Les requins de la mer rouge »."
+      }
+    ]
+}

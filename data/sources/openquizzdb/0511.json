@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Tubes eighties anglais",         
+  "mise-à-jour": "08/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle chanteuse britannique a interprété le hit « Kids in America » ?",
+        "propositions": [
+          "Madonna",
+          "Bonnie Thyler",
+          "Kim Carnes",
+          "Kim Wilde"
+        ],
+        "réponse": "Kim Wilde",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kim_Wilde",
+        "anecdote": "« Kids in America » est sorti au Royaume-Uni en tant que premier single en janvier 1981, et aux États-Unis au printemps 1982."
+      },
+      {
+        "id": 2,
+        "question": "Quel groupe de rock suédois a chanté « The Final Countdown » ?",
+        "propositions": [
+          "ACDC",
+          "Trust",
+          "Europe",
+          "Scorpions"
+        ],
+        "réponse": "Europe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/The_Final_Countdown_(chanson)",
+        "anecdote": "Le clip de Nick Morris, réalisé pour promouvoir le single, a été visionné plus d'un milliard de fois sur la plateforme YouTube."
+      },
+      {
+        "id": 3,
+        "question": "Quel groupe musical a interprété « Sweet Dreams (Are Made of This) » ?",
+        "propositions": [
+          "Sweet Sensation",
+          "Sister Sledge",
+          "Eurythmics",
+          "Europe"
+        ],
+        "réponse": "Eurythmics",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sweet_Dreams_(Are_Made_of_This)",
+        "anecdote": "Ce titre est devenu particulièrement populaire et reste l'une des chansons les plus reconnaissables du groupe Eurythmics."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le titre du troisième single du groupe Alphaville ?",
+        "propositions": [
+          "Forever Young",
+          "Forever Blue",
+          "Forever Alive",
+          "Forever Love"
+        ],
+        "réponse": "Forever Young",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Forever_Young_(chanson_d'Alphaville)",
+        "anecdote": "Le single d'Alphaville a eu plus de succès aux États-Unis qu'au Royaume-Uni, mais n'a pas réussi à atteindre le top 40 américain."
+      }
+    ]
+}

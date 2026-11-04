@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #11",         
+  "mise-à-jour": "07/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que provoque le débordement d'un cours d'eau, en crue puis en décrue ?",
+        "propositions": [
+          "Inondation",
+          "Inondacion",
+          "Inondassion",
+          "Innondation"
+        ],
+        "réponse": "Inondation",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle attitude est portée par un idéal authentiquement altruiste ?",
+        "propositions": [
+          "Filantropie",
+          "Philantropie",
+          "Phylanthropie",
+          "Philanthropie"
+        ],
+        "réponse": "Philanthropie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Dans quelle friandise à mâcher ajoute-t-on des arômes alimentaires ?",
+        "propositions": [
+          "Chwing-gum",
+          "Chewingomme",
+          "Chewing-gomme",
+          "Chewing-gum"
+        ],
+        "réponse": "Chewing-gum",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle structure de jeu permet de descendre en glissant assis ?",
+        "propositions": [
+          "Toboggant",
+          "Tobbogan",
+          "Toboggan",
+          "Tobaugant"
+        ],
+        "réponse": "Toboggan",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

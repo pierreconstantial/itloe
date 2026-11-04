@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Omar Sy",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle série retrace les aventures d'Assane Diop, interprété par Omar Sy ?",
+        "propositions": [
+          "Lupin",
+          "Sweet Tooth",
+          "The Circle",
+          "You"
+        ],
+        "réponse": "Lupin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lupin_(série_télévisée,_2021)",
+        "anecdote": "La série est parvenue à intégrer le top 10 des contenus les plus regardés sur Netflix, quelques jours seulement après sa sortie."
+      },
+      {
+        "id": 2,
+        "question": "Quel film met en scène Virginie Efira, Omar Sy et Grégory Gadebois ?",
+        "propositions": [
+          "Police",
+          "Benedetta",
+          "Continuer",
+          "Sibyl"
+        ],
+        "réponse": "Police",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Police_(film,_2020)",
+        "anecdote": "La réalisatrice Anne Fontaine détourne ici le genre du film policier pour l'engager intelligemment dans une voie intime et humaniste."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel lieu Omar Sy exerce-t-il son talent dans « Le Chant du loup » ?",
+        "propositions": [
+          "Forêt",
+          "Église",
+          "Théâtre",
+          "Sous-marin"
+        ],
+        "réponse": "Sous-marin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Chant_du_loup_(film,_2019)",
+        "anecdote": "Omar Sy y incarne le premier maître Chanteraide, l'une des oreilles d'or de la Marine nationale, les spécialistes de la guerre acoustique."
+      },
+      {
+        "id": 4,
+        "question": "Pour quelle marque de boisson Omar Sy a-t-il fait plusieurs publicités ?",
+        "propositions": [
+          "Ricqlès",
+          "Ovomaltine",
+          "Get 27",
+          "Finley"
+        ],
+        "réponse": "Finley",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Finley_(boisson)",
+        "anecdote": "Finley est une ancienne marque de boisson gazeuse, à l'origine un tonic, distribuée par The Coca-Cola Company depuis 2014."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Joyeux Noël",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Pour qui Haddon Sundblom a-t-il dessiné le père Noël en rouge ?",
+        "propositions": [
+          "Walt Disney",
+          "Coca-Cola",
+          "IBM",
+          "McDonald's"
+        ],
+        "réponse": "Coca-Cola",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Haddon_Sundblom",
+        "anecdote": "Cet illustrateur américain est surtout connu pour ses pin-ups et ses publicités du père Noël réalisées pour The Coca-Cola Company."
+      },
+      {
+        "id": 2,
+        "question": "Que mange-t-on à Noël depuis une coutume instaurée par Charles VII ?",
+        "propositions": [
+          "Dinde",
+          "Coq au vin",
+          "Paupiettes",
+          "Bouillabaisse"
+        ],
+        "réponse": "Dinde",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dinde_de_Noël",
+        "anecdote": "En France, en Belgique et au Royaume-Uni, la dinde de Noël est traditionnellement farcie aux marrons."
+      },
+      {
+        "id": 3,
+        "question": "À quelle date les rois mages apparaissent-ils dans la crèche ?",
+        "propositions": [
+          "6 janvier",
+          "25 décembre",
+          "1er janvier",
+          "24 décembre"
+        ],
+        "réponse": "6 janvier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rois_mages",
+        "anecdote": "L'Occident médiéval vénère les rois mages comme saints, l'Église catholique leur reconnaissant des reliques conservées à Cologne."
+      },
+      {
+        "id": 4,
+        "question": "Comment appelle-t-on la scène représentée par la crèche de Noël ?",
+        "propositions": [
+          "Santon",
+          "Arlésienne",
+          "Nativité",
+          "Jourdan"
+        ],
+        "réponse": "Nativité",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nativité",
+        "anecdote": "En art religieux, une Nativité est une représentation de cette naissance sous forme de peintures, sculptures ou vitraux."
+      }
+    ]
+}

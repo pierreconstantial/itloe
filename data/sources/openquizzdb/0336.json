@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Le Cinquième Élément »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel animateur de radio déjanté apparaît dans « Le Cinquième Élément » ?",
+        "propositions": [
+          "Pacoli",
+          "Ruby Rhod",
+          "Vito Cornelius",
+          "Mangalore"
+        ],
+        "réponse": "Ruby Rhod",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Cinquième_Élément",
+        "anecdote": "C'est Prince et Lenny Kravitz qui ont inspiré Luc Besson et son équipe pour la concrétisation du personnage de Ruby Rhod."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le métier de Korben Dallas dans « Le Cinquième Élément » ?",
+        "propositions": [
+          "Tueur à gages",
+          "Militaire",
+          "Chauffeur de taxi",
+          "Policier"
+        ],
+        "réponse": "Chauffeur de taxi",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Cinquième_Élément",
+        "anecdote": "Manuel Dorne, blogueur français spécialisé dans la culture geek, a choisi comme pseudonyme Korben, en référence à Korben Dallas."
+      },
+      {
+        "id": 3,
+        "question": "Qui est en fait le cinquième élément dans le film du même nom ?",
+        "propositions": [
+          "Korben Dallas",
+          "Ruby Rhod",
+          "Leeloo",
+          "Cornelius"
+        ],
+        "réponse": "Leeloo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Cinquième_Élément",
+        "anecdote": "Le nom complet de Leeloo dans le film est Leeloominaï Lekatariba Lamina-Tchaï Ekbat De Sebat."
+      },
+      {
+        "id": 4,
+        "question": "Combien de pierres faut-il réunir dans « Le Cinquième Élément » ?",
+        "propositions": [
+          "Quatre",
+          "Cinq",
+          "Deux",
+          "Trois"
+        ],
+        "réponse": "Quatre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Cinquième_Élément",
+        "anecdote": "Zorg, sur commande de M. Shadow, est déterminé à voler les pierres représentant les 4 éléments et à détruire le 5ème Élément."
+      }
+    ]
+}

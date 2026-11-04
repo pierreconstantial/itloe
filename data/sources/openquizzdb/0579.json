@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Stars mondiales #1",         
+  "mise-à-jour": "29/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle chanteuse est la mère de René-Charles, Nelson et Eddy ?",
+        "propositions": [
+          "Katy Perry",
+          "Whitney Houston",
+          "Rihanna",
+          "Céline Dion"
+        ],
+        "réponse": "Céline Dion",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Céline_Dion",
+        "anecdote": "Céline Dion est la mère de trois garçons : René-Charles Angélil, né en 2001, et les jumeaux Nelson et Eddy, nés en 2010. Ils sont nés de son mariage avec le producteur canadien René Angélil, qui fut également son manager pendant plusieurs décennies."
+      },
+      {
+        "id": 2,
+        "question": "Quel acteur a perdu la vie sur la route de Santa Clarita ?",
+        "propositions": [
+          "Will Smith",
+          "Chris Pratt",
+          "Hugh Jackman",
+          "Paul Walker"
+        ],
+        "réponse": "Paul Walker",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Paul_Walker",
+        "anecdote": "Paul Walker habitait à Santa Barbara où de 2006 à 2011 il eut pour compagne Jasmine Pilchard-Gosnell, une étudiante de 23 ans."
+      },
+      {
+        "id": 3,
+        "question": "Quelle sulfureuse chanteuse est surnommée la « Black Barbie » du rap ?",
+        "propositions": [
+          "Foy Brown",
+          "Nicki Minaj",
+          "Christina Milian",
+          "Lauryn Hill"
+        ],
+        "réponse": "Nicki Minaj",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nicki_Minaj",
+        "anecdote": "En 2013, Nicki Minaj, Beyoncé et Michelle Obama furent reconnues comme les femmes noires les plus influentes par le New York Times."
+      },
+      {
+        "id": 4,
+        "question": "Quelle mannequin est souvent surnommée le garçon manqué ?",
+        "propositions": [
+          "Kate Moss",
+          "Cara Delevingne",
+          "Elizabeth Hurley",
+          "Kelly Brook"
+        ],
+        "réponse": "Cara Delevingne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cara_Delevingne",
+        "anecdote": "Très active sur les réseaux sociaux, elle est considérée comme une it girl et surtout comme un mannequin hyper médiatique."
+      }
+    ]
+}

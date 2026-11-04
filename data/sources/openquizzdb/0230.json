@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #20",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un S, il faut une boisson, un métier, une arme et un ami du porc.",
+        "propositions": [
+          "Sabre",
+          "Sculpteur",
+          "Soda",
+          "Sanglier"
+        ],
+        "réponse": "Soda",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un T, il faut un crâne, une boisson, un meuble et un animal.",
+        "propositions": [
+          "Thé",
+          "Table",
+          "Tigre",
+          "Tête"
+        ],
+        "réponse": "Tête",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un M, il faut une couleur, une plante, un matelot et un ustensile.",
+        "propositions": [
+          "Marin",
+          "Marron",
+          "Mandoline",
+          "Menthe"
+        ],
+        "réponse": "Marron",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un F, il faut un projectile, un métier, un fruit et un lieu de minage.",
+        "propositions": [
+          "Flèche",
+          "Ferme",
+          "Fermier",
+          "Figue"
+        ],
+        "réponse": "Flèche",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

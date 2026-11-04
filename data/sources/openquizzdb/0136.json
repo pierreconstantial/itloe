@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #L",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle ville Bernadette Soubirous aurait-elle vu la Vierge ?",
+        "propositions": [
+          "Lyon",
+          "Lille",
+          "Lourdes",
+          "Lisieux"
+        ],
+        "réponse": "Lourdes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bernadette_Soubirous",
+        "anecdote": "Au cours d'une de ces apparitions, elle a creusé le sol pour y prendre de l'eau, réputée par la suite source de guérisons."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le plus utilisé des systèmes informatiques dits libres ?",
+        "propositions": [
+          "Links",
+          "Lama",
+          "Lamento",
+          "Linux"
+        ],
+        "réponse": "Linux",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Linux",
+        "anecdote": "Linux est utilisé par des géants de la technologie comme Google, Facebook et Amazon, qui exploitent ce système pour leurs serveurs."
+      },
+      {
+        "id": 3,
+        "question": "Quel animal aurait nourri Romulus et Remus selon la légende de Rome ?",
+        "propositions": [
+          "Lionne",
+          "Lynx",
+          "Lama",
+          "Louve"
+        ],
+        "réponse": "Louve",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Romulus_et_Rémus",
+        "anecdote": "Romulus et Rémus furent découverts sous un figuier sauvage situé non loin de la grotte du Lupercal, au pied du Palatin."
+      },
+      {
+        "id": 4,
+        "question": "Quel prénom Serge Gainsbourg écrit-il sur sa Remington portative ?",
+        "propositions": [
+          "Léa",
+          "Loane",
+          "Lola",
+          "Lætitia"
+        ],
+        "réponse": "Lætitia",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Serge_Gainsbourg",
+        "anecdote": "Jusqu'à l'âge de trente ans, Serge Gainsbourg vivra de petits boulots ici et là."
+      }
+    ]
+}

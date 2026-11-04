@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Anciennes séries télé #4",         
+  "mise-à-jour": "02/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le métier de Jessica Fletcher dans la série « Arabesque » ?",
+        "propositions": [
+          "Écrivaine",
+          "Avocate",
+          "Journaliste",
+          "Peintre"
+        ],
+        "réponse": "Écrivaine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Arabesque_(série_télévisée)",
+        "anecdote": "Le succès d'« Arabesque » a permis la mise en chantier de la série dérivée « La Loi du privé », basée sur le personnage d'Harry McGraw."
+      },
+      {
+        "id": 2,
+        "question": "Quel policier est le chevalier servant de Dee Dee Mc Call à la télévision ?",
+        "propositions": [
+          "Matt Helm",
+          "Sam Spade",
+          "Jim Phelps",
+          "Rick Hunter"
+        ],
+        "réponse": "Rick Hunter",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rick_Hunter",
+        "anecdote": "Placé dans une case horaire le vendredi soir en concurrence avec « Dallas », la série aura des difficultés à trouver son public."
+      },
+      {
+        "id": 3,
+        "question": "Quel personnage de feuilleton conduit une Aston-Martin jaune ?",
+        "propositions": [
+          "Brett Sinclair",
+          "Jessica Fletcher",
+          "Arsène Lupin",
+          "Kojak"
+        ],
+        "réponse": "Brett Sinclair",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Amicalement_vôtre",
+        "anecdote": "L'exemplaire de la série, de couleur Bahama Yellow, a été racheté en 1995 par un fan qui l'a fait restaurer dans son état d'origine."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la profession de « l'Homme qui tombe à pic » ?",
+        "propositions": [
+          "Vendeur de voitures",
+          "Astronaute",
+          "Cascadeur",
+          "Banquier"
+        ],
+        "réponse": "Cascadeur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/L'Homme_qui_tombe_à_pic",
+        "anecdote": "Colt Seavers, un cascadeur d'Hollywood, devient chasseur de primes lorsque le cinéma ne lui fournit pas suffisamment de travail."
+      }
+    ]
+}

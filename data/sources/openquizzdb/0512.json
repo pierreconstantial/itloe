@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Constructeurs auto",         
+  "mise-à-jour": "08/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel constructeur a produit les modèles Diablo et Countach ?",
+        "propositions": [
+          "Ferrari",
+          "Porsche",
+          "Lamborghini",
+          "Maserati"
+        ],
+        "réponse": "Lamborghini",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lamborghini_Diablo",
+        "anecdote": "La Lamborghini Diablo succède à la légendaire Lamborghini Countach après seize ans de carrière et 2 200 exemplaires produits."
+      },
+      {
+        "id": 2,
+        "question": "Quel modèle de SUV fut commercialisé en 2007 par la marque Nissan ?",
+        "propositions": [
+          "Quantum",
+          "Quoris",
+          "Qashqai",
+          "Quattro"
+        ],
+        "réponse": "Qashqai",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nissan_Qashqai",
+        "anecdote": "En mai 2007, la Qashqai de chez Nissan a décroché la plus haute note possible aux crash tests Euro NCAP, à savoir cinq étoiles."
+      },
+      {
+        "id": 3,
+        "question": "Quel constructeur automobile a créé le modèle Cayenne ?",
+        "propositions": [
+          "Ferrari",
+          "Maserati",
+          "Lamborghini",
+          "Porsche"
+        ],
+        "réponse": "Porsche",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Porsche_Cayenne",
+        "anecdote": "Le Cayenne a été fabriqué en collaboration avec Volkswagen avec qui il partage la même plate-forme de son 4x4 Touareg."
+      },
+      {
+        "id": 4,
+        "question": "Dacia est un constructeur automobile originaire de quel pays ?",
+        "propositions": [
+          "Bulgarie",
+          "Grèce",
+          "Pologne",
+          "Roumanie"
+        ],
+        "réponse": "Roumanie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dacia",
+        "anecdote": "Les véhicules produits sont commercialisés sous la marque Dacia en Europe et sous la marque Renault dans le reste du monde."
+      }
+    ]
+}

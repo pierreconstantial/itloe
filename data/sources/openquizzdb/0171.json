@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Crypto-monnaies",         
+  "mise-à-jour": "06/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel portefeuille peuvent être stockés les Ethers ?",
+        "propositions": [
+          "Disket",
+          "Wallet",
+          "Magnet",
+          "Basket"
+        ],
+        "réponse": "Wallet",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ethereum",
+        "anecdote": "Ethereum est la deuxième plus importante monnaie cryptographique décentralisée avec une capitalisation supérieure à cent milliards."
+      },
+      {
+        "id": 2,
+        "question": "Qu'apporte la crypto-monnaie par rapport à d'autres solutions ?",
+        "propositions": [
+          "Identification",
+          "Anonymat",
+          "Frais de dossier",
+          "Traçabilité"
+        ],
+        "réponse": "Anonymat",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cryptomonnaie",
+        "anecdote": "De nouvelles directives européennes bientôt transposées en droit français vont donner priorité à la lutte contre le blanchiment."
+      },
+      {
+        "id": 3,
+        "question": "Quelle monnaie native est utilisée par le protocole de paiement Ripple ?",
+        "propositions": [
+          "XPP",
+          "XRP",
+          "XLE",
+          "XPL"
+        ],
+        "réponse": "XRP",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ripple_(protocole_de_paiement)",
+        "anecdote": "Lancé en 2012, le réseau Ripple vise à permettre des transactions financières mondiales sécurisées de toute taille sans rejets de débit."
+      },
+      {
+        "id": 4,
+        "question": "Quel investisseur est aussi le créateur du site bitcoin.com ?",
+        "propositions": [
+          "Roger Ver",
+          "Charlie Lee",
+          "Sunny King",
+          "Gavin Wood"
+        ],
+        "réponse": "Roger Ver",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bitcoin",
+        "anecdote": "À la fin de l'année 2013, Roger Ver a fait don en bitcoins de plus d'un million de dollars à la Fondation pour l'éducation économique."
+      }
+    ]
+}

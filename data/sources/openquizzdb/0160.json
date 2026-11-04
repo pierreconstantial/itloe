@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #N",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le prénom du valet de chambre du Capitaine Haddock ?",
+        "propositions": [
+          "Narcisse",
+          "Nestor",
+          "Nelson",
+          "Napoléon"
+        ],
+        "réponse": "Nestor",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nestor_(Tintin)",
+        "anecdote": "Avec son allure très soignée, portant une livrée, Nestor est apparu pour la première fois comme domestique des frères Loiseau."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle ville française circulez-vous sur la promenade des Anglais ?",
+        "propositions": [
+          "Nancy",
+          "Nanterre",
+          "Nantes",
+          "Nice"
+        ],
+        "réponse": "Nice",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Promenade_des_Anglais",
+        "anecdote": "Cette avenue bénéficie d'un travail architectural tout particulier, proposé en 1836 par Antoine Scoffier, architecte de la ville."
+      },
+      {
+        "id": 3,
+        "question": "Kurt Cobain a été le leader de quel groupe musical mythique ?",
+        "propositions": [
+          "Nickelback",
+          "Nine Inch Nails",
+          "New Order",
+          "Nirvana"
+        ],
+        "réponse": "Nirvana",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kurt_Cobain",
+        "anecdote": "En deux ans, le groupe est devenu un pilier de la scène grunge de Seattle."
+      },
+      {
+        "id": 4,
+        "question": "De quel groupe musical Muriel Moreno est-elle la fondatrice ?",
+        "propositions": [
+          "Niagara",
+          "Nouvelle Vague",
+          "Neg'Marrons",
+          "Noir Désir"
+        ],
+        "réponse": "Niagara",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Muriel_Moreno",
+        "anecdote": "Muriel est devenu amie avec Marc Collin, auteur de l'opus « Nouvelle Vague »."
+      }
+    ]
+}

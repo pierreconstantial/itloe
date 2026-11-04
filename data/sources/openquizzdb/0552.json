@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #08",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À quelle vitesse avance le lapin mécanique dans une course de lévriers ?",
+        "propositions": [
+          "100 km/h",
+          "10 km/h",
+          "70 km/h",
+          "30 km/h"
+        ],
+        "réponse": "70 km/h",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Course_de_lévriers",
+        "anecdote": "Ce lapin mécanique est conçu pour toujours garder une longueur d'avance sur les lévriers afin de stimuler leur instinct de chasse."
+      },
+      {
+        "id": 2,
+        "question": "Combien de zéros comptabilise-t-on dans le nombre 150 millions ?",
+        "propositions": [
+          "Neuf",
+          "Sept",
+          "Huit",
+          "Six"
+        ],
+        "réponse": "Sept",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Million",
+        "anecdote": "Dans le système anglo-saxon, le mot « billion » désigne 1 000 millions, soit un milliard, ce qui peut prêter à confusion selon les pays."
+      },
+      {
+        "id": 3,
+        "question": "Dans le langage du calendrier, combien de temps dure une décade ?",
+        "propositions": [
+          "Dix mois",
+          "Dix semaines",
+          "Dix jours",
+          "Dix ans"
+        ],
+        "réponse": "Dix jours",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Décade",
+        "anecdote": "En français courant, on confond fréquemment les termes décade et décennie, alors que ces deux termes sont bel et bien distincts."
+      },
+      {
+        "id": 4,
+        "question": "Combien de tentacules possède une pieuvre ?",
+        "propositions": [
+          "Quatre",
+          "Six",
+          "Dix",
+          "Huit"
+        ],
+        "réponse": "Huit",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pieuvre",
+        "anecdote": "Les pieuvres sont aussi reconnues pour leur intelligence étonnante et leur capacité à résoudre des problèmes complexes."
+      }
+    ]
+}

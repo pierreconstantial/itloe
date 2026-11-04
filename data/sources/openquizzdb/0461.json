@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alerte climat",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Le pétrole, le gaz et le charbon font partie de quelles énergies ?",
+        "propositions": [
+          "Renouvelables",
+          "Propres",
+          "Fossiles",
+          "Solaires"
+        ],
+        "réponse": "Fossiles",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Combustible_fossile",
+        "anecdote": "L'océan a absorbé environ 30 % des émissions  de dioxyde de carbone dues aux activités humaines."
+      },
+      {
+        "id": 2,
+        "question": "Quel pays est le plus grand émetteur de gaz à effet de serre ?",
+        "propositions": [
+          "États-Unis",
+          "Inde",
+          "Chine",
+          "Russie"
+        ],
+        "réponse": "Chine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Gaz_à_effet_de_serre",
+        "anecdote": "Hormis la vapeur d'eau évacuée en quelques jours, les gaz à effet de serre mettent très longtemps à s'éliminer de l'atmosphère."
+      },
+      {
+        "id": 3,
+        "question": "Quelle température y aurait-il sur Terre sans l'effet de serre ?",
+        "propositions": [
+          "98°C",
+          "-18°C",
+          "4°C",
+          "47°C"
+        ],
+        "réponse": "-18°C",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Effet_de_serre",
+        "anecdote": "L'effet de serre permet d'avoir une température régulée et moyenne agréable sur Terre d'environ 15°C."
+      },
+      {
+        "id": 4,
+        "question": "En quelle année est apparu le terme « effet de serre » ?",
+        "propositions": [
+          "1824",
+          "1934",
+          "1989",
+          "1956"
+        ],
+        "réponse": "1824",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Effet_de_serre",
+        "anecdote": "Joseph Fourier appela « effet de serre » le phénomène démontré par Horace Bénédicte De Saussure à la fin du XVIIIe siècle."
+      }
+    ]
+}

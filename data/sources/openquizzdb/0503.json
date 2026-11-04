@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Nikola Tesla",         
+  "mise-à-jour": "29/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec qui Nikola Tesla a-t-il travaillé après avoir émigré aux États-Unis ?",
+        "propositions": [
+          "James Cash Jr.",
+          "Nela Park",
+          "Thomas Edison",
+          "Bob Wright"
+        ],
+        "réponse": "Thomas Edison",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nikola_Tesla",
+        "anecdote": "Tesla proposa le courant alternatif, qui résoudrait de nombreux problèmes, tandis qu'Edison resta un défenseur du courant continu."
+      },
+      {
+        "id": 2,
+        "question": "Combien de brevets Nikola Tesla a-t-il déposé au cours de sa vie ?",
+        "propositions": [
+          "Environ 100",
+          "Environ 300",
+          "Environ 200",
+          "Environ 400"
+        ],
+        "réponse": "Environ 300",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nikola_Tesla",
+        "anecdote": "Beaucoup de ces brevets traitant de méthodes pour aborder la conversion de l'énergie sont attribués à tort à Thomas Edison."
+      },
+      {
+        "id": 3,
+        "question": "Devenu polyglotte, combien de langues parlait Nikola Tesla ?",
+        "propositions": [
+          "Huit",
+          "Cinq",
+          "Sept",
+          "Six"
+        ],
+        "réponse": "Huit",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nikola_Tesla",
+        "anecdote": "Tesla parlait le tchèque, l'anglais, le français, l'allemand, le hongrois, l'italien et le latin en plus de sa langue natale, le serbo-croate."
+      },
+      {
+        "id": 4,
+        "question": "Grâce à quel type de courant Nikola Tesla a-t-il révolutionné l'électricité ?",
+        "propositions": [
+          "Continu",
+          "Alternatif",
+          "Statique",
+          "Inductif"
+        ],
+        "réponse": "Alternatif",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Courant_alternatif",
+        "anecdote": "Le courant alternatif (qui peut être abrégé par CA) est un courant électrique périodique qui change de sens deux fois par période."
+      }
+    ]
+}

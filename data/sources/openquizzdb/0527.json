@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sport féminin international",         
+  "mise-à-jour": "23/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui fut la première joueuse de tennis Russe à remporter Wimbledon ?",
+        "propositions": [
+          "Sharapova",
+          "Bovina",
+          "Kirilenko",
+          "Panova"
+        ],
+        "réponse": "Sharapova",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Maria_Sharapova",
+        "anecdote": "Contrôlée positive au meldonium en 2016, Maria Sharapova sera suspendue pour deux ans par la Fédération internationale de tennis."
+      },
+      {
+        "id": 2,
+        "question": "Quelle gymnaste roumaine a obtenu la note de 10 aux JO ?",
+        "propositions": [
+          "Oana Ban",
+          "Nadia Comaneci",
+          "Catalina Ponor",
+          "Olga Korbut"
+        ],
+        "réponse": "Nadia Comaneci",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nadia_Com ?neci",
+        "anecdote": "Ses rapports avec l'État roumain dirigé par Nicolae Ceausescu, huit ans après la fin de sa carrière, elle quitta le pays pour le États-Unis."
+      },
+      {
+        "id": 3,
+        "question": "Qui fut la première femme à remporter une course dans un GP moto ?",
+        "propositions": [
+          "Gina Bovaird",
+          "Lucy Glockner",
+          "Maria Herrera",
+          "Ana Carrasco"
+        ],
+        "réponse": "Ana Carrasco",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ana_Carrasco",
+        "anecdote": "En 2018, Ana Carrasco s'imposera lors de deux courses, en Italie et au Royaume-Uni, et remportera le Supersport 300 de 2018."
+      },
+      {
+        "id": 4,
+        "question": "Qui fut la première femme enregistrée à courir le marathon de Boston ?",
+        "propositions": [
+          "Mary Decke",
+          "Shalane Flanagan",
+          "Kathrine Switzer",
+          "Molly Huddle"
+        ],
+        "réponse": "Kathrine Switzer",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kathrine_Switzer",
+        "anecdote": "Le 17 avril 2017, à 70 ans (50 ans après sa première participation), elle a couru le marathon avec le même dossard qu'en 1967."
+      }
+    ]
+}

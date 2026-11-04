@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Florence Foresti",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel spectacle de Florence Foresti parle de la maternité ?",
+        "propositions": [
+          "C'est dimanche",
+          "Mother Fucker",
+          "Toute entière",
+          "Baby Boom"
+        ],
+        "réponse": "Mother Fucker",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Florence_Foresti",
+        "anecdote": "Le spectacle est sacré « meilleur one-man-show » au Globes de Cristal 2010. Le DVD est sorti en novembre de la même année."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel film d'Olivier Van Hoofstadt Florence Foresti a-t-elle tourné ?",
+        "propositions": [
+          "Sketté",
+          "Dikkenek",
+          "Go Fast",
+          "Parabellum"
+        ],
+        "réponse": "Dikkenek",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dikkenek",
+        "anecdote": "Le film est bien noté par certains critiques mais reste plutôt mal noté et uniquement conseillé pour les amateurs du genre."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel film Florence Foresti joue-t-elle avec Jamel Debbouze ?",
+        "propositions": [
+          "Hollywoo",
+          "Human Zoo",
+          "Hold-up",
+          "Le Hérisson"
+        ],
+        "réponse": "Hollywoo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hollywoo",
+        "anecdote": "Le film, malgré des têtes d'affiches populaires et une Florence Foresti « bankable », sort fin 2011 et connaît un flop critique."
+      },
+      {
+        "id": 4,
+        "question": "Quel trio a-t-elle formé avec Céline Iannucci et Cécile Giroud ?",
+        "propositions": [
+          "Les Luthiers",
+          "Les Taupes Models",
+          "Les 3 Jeanne",
+          "Les Snuls"
+        ],
+        "réponse": "Les Taupes Models",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Taupes_Models",
+        "anecdote": "Le trio se fit remarquer et Florence Foresti est repérée par Chris Loung, alors auteur, productrice exécutive et directrice artistique."
+      }
+    ]
+}

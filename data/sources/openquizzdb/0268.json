@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #W",         
+  "mise-à-jour": "24/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À quel héros des studios Pixar Tom Hanks prête-t-il sa voix ?",
+        "propositions": [
+          "Woody",
+          "Wolverine",
+          "Wukong",
+          "Walter"
+        ],
+        "réponse": "Woody",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Shérif_Woody",
+        "anecdote": "C'est Jean-Philippe Puymartin qui incarne la voix française du plus célèbre des shériffs de fiction de films d'animation."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel château a eu lieu le mariage de Charles et Camilla ?",
+        "propositions": [
+          "Westerlo",
+          "Windsor",
+          "Wollaton Hall",
+          "Wervik"
+        ],
+        "réponse": "Windsor",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Château_de_Windsor",
+        "anecdote": "Le château de Windsor, dans le Berkshire, est le plus grand château habité au monde."
+      },
+      {
+        "id": 3,
+        "question": "Qui est Logan dans la bande dessinée de Marvel Comics « X-Men » ?",
+        "propositions": [
+          "Wyatt Earp",
+          "Wukong",
+          "Woody",
+          "Wolverine"
+        ],
+        "réponse": "Wolverine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Wolverine",
+        "anecdote": "Le véritable nom de Wolverine est James Howlett, mais ayant oublié son passé après différents traumatismes, il se fait appeler Logan."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la capitale de la Nouvelle-Zélande ?",
+        "propositions": [
+          "Winnipeg",
+          "Worcester",
+          "Wellington",
+          "Washington"
+        ],
+        "réponse": "Wellington",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nouvelle-Zélande",
+        "anecdote": "Troisième ville la plus peuplée du pays, Wellington fait partie des douze meilleures villes dans laquelle vivre."
+      }
+    ]
+}

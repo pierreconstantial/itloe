@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Monuments d'Italie",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Le Colisée de Rome représente quel type de bâtiment ?",
+        "propositions": [
+          "Temple",
+          "Musée",
+          "Amphithéâtre",
+          "Cinéma"
+        ],
+        "réponse": "Amphithéâtre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Colisée",
+        "anecdote": "Le Colisée de Rome est l'une des plus grandes oeuvres de l'architecture et de l'ingénierie romaines."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle ville italienne peut-on admirer le palais des Doges ?",
+        "propositions": [
+          "Milan",
+          "Venise",
+          "Rome",
+          "Florence"
+        ],
+        "réponse": "Venise",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Palais_des_Doges",
+        "anecdote": "Le palais des Doges fut la résidence officielle des doges ainsi que le lieu de représentation de ses institutions majeures."
+      },
+      {
+        "id": 3,
+        "question": "Dans quelle ville se trouve l'incontournable fontaine de Trevi ?",
+        "propositions": [
+          "Milan",
+          "Turin",
+          "Naples",
+          "Rome"
+        ],
+        "réponse": "Rome",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fontaine_de_Trévi",
+        "anecdote": "Adossée au palais Poli, cette oeuvre monumentale en forme d'arc de triomphe, écrase la minuscule place sur laquelle elle se trouve."
+      },
+      {
+        "id": 4,
+        "question": "Dans quelle ville italienne se trouve le Palazzo Vecchio ?",
+        "propositions": [
+          "Milan",
+          "Venise",
+          "Turin",
+          "Florence"
+        ],
+        "réponse": "Florence",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Palazzo_Vecchio",
+        "anecdote": "Ce palais-forteresse en forme de parallélépipède est situé sur la Piazza della Signoria, haut lieu de réunion publique."
+      }
+    ]
+}

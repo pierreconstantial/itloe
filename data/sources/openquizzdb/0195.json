@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Marilyn Monroe",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel prénom est inscrit sur le certificat de baptême de Marilyn Monroe ?",
+        "propositions": [
+          "Norma Jeane",
+          "Ruby Catherine",
+          "Lucy Fay",
+          "Louise Marie"
+        ],
+        "réponse": "Norma Jeane",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marilyn_Monroe",
+        "anecdote": "Marilyn Monroe est née Norma Jeane Mortenson, bien que sur son certificat de baptême soit inscrit Baker (du nom de sa mère)."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la couleur de sa robe dans « Sept ans de réflexion » ?",
+        "propositions": [
+          "Rouge",
+          "Bleue",
+          "Blanche",
+          "Noire"
+        ],
+        "réponse": "Blanche",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sept_ans_de_réflexion",
+        "anecdote": "Après ce grand succès populaire, Marilyn a obtenu plus de pouvoir face aux studios, notamment quant aux scripts et aux réalisateurs."
+      },
+      {
+        "id": 3,
+        "question": "Combien de fois Marilyn Monroe fut-elle mariée au cours de sa vie ?",
+        "propositions": [
+          "Trois fois",
+          "Une fois",
+          "Deux fois",
+          "Quatre fois"
+        ],
+        "réponse": "Trois fois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marilyn_Monroe",
+        "anecdote": "Marilyn Monroe a été mariée trois fois au cours de sa vie, à James Dougherty, Joe DiMaggio et enfin Arthur Miller."
+      },
+      {
+        "id": 4,
+        "question": "Qui a réalisé en 1964 une série de sérigraphies de Marilyn Monroe ?",
+        "propositions": [
+          "James Rizzi",
+          "Jasper Johns",
+          "Andy Warhol",
+          "Wayne Thiebaud"
+        ],
+        "réponse": "Andy Warhol",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marilyn_Monroe",
+        "anecdote": "C'est d'ailleurs l'une des oeuvres du mouvement Pop Art de l'artiste les plus reproduites à ce jour, en photos ou en cadres décoratifs."
+      }
+    ]
+}

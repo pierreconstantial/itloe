@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Charles Aznavour",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Pour quel pays Aznavour joua-t-il un rôle actif dans la collecte de fonds ?",
+        "propositions": [
+          "Arménie",
+          "Lituanie",
+          "Ukraine",
+          "Grèce"
+        ],
+        "réponse": "Arménie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Arménie",
+        "anecdote": "Le séisme de 1988 en Arménie est un séisme de 6,9 sur l'échelle de Richter qui dévasta la région de Spitak."
+      },
+      {
+        "id": 2,
+        "question": "Quelle saison est citée dans « La Bohème » de Charles Aznavour ?",
+        "propositions": [
+          "Hiver",
+          "Été",
+          "Printemps",
+          "Automne"
+        ],
+        "réponse": "Hiver",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Bohème_(chanson)",
+        "anecdote": "Cette chanson était prévue à l'origine pour être chantée par Georges Guétary dans l'opérette « Monsieur Carnaval », de Charles Aznavour."
+      },
+      {
+        "id": 3,
+        "question": "Quel était le véritable nom du chanteur français Charles Aznavour ?",
+        "propositions": [
+          "Aznavourian",
+          "Aznavourev",
+          "Aznavouriak",
+          "Aznavour"
+        ],
+        "réponse": "Aznavourian",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Charles_Aznavour",
+        "anecdote": "Né sous le nom de Shahnourh Vaghinag Aznavourian, Charles Aznavour est considéré comme l'un des grands de la chanson française."
+      },
+      {
+        "id": 4,
+        "question": "« La Mamma » a été écrite pour Aznavour par le père de quelle artiste ?",
+        "propositions": [
+          "Mireille Mathieu",
+          "Sheila",
+          "Dalida",
+          "France Gall"
+        ],
+        "réponse": "France Gall",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Mamma",
+        "anecdote": "« La Mamma » a été écrite par Paul Mauriat et André Pascal pour Charles Aznavour, et André Pascal est en effet le père de France Gall."
+      }
+    ]
+}

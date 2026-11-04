@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "François Damiens",         
+  "mise-à-jour": "01/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle spécialité humoristique l'a rendu célèbre à ses débuts ?",
+        "propositions": [
+          "Stand-Up",
+          "Mime",
+          "Clips musicaux",
+          "Caméras cachées"
+        ],
+        "réponse": "Caméras cachées",
+        "wikipédia": "https://fr.wikipedia.org/wiki/François_Damiens",
+        "anecdote": "Il crée alors son personnage culte François l'Embrouille, un faux technicien ou faux professionnel qui piège les passants dans des situations absurdes et inconfortables."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel film belge culte joue-t-il un rôle marquant ?",
+        "propositions": [
+          "JCVD",
+          "Mon Ket",
+          "Dikkenek",
+          "Intouchables"
+        ],
+        "réponse": "Dikkenek",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dikkenek",
+        "anecdote": "Le film repose sur une série de scènes comiques centrées sur des dialogues improvisés, où Damiens brille particulièrement grâce à son sens du timing et son humour basé sur le malaise."
+      },
+      {
+        "id": 3,
+        "question": "Quel rôle est tenu par François Damiens dans « La Famille Bélier » ?",
+        "propositions": [
+          "Le maire",
+          "Le prof",
+          "Le voisin",
+          "La père"
+        ],
+        "réponse": "La père",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Famille_Bélier",
+        "anecdote": "Son rôle est particulièrement marquant car il doit jouer un personnage qui ne peut ni entendre ni parler, ce qui représente un défi d'interprétation important pour un acteur."
+      },
+      {
+        "id": 4,
+        "question": "Quel film a été réalisé par François Damiens lui-même ?",
+        "propositions": [
+          "JCVD",
+          "Rundskop",
+          "Mon Ket",
+          "Dikkenek"
+        ],
+        "réponse": "Mon Ket",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mon_Ket",
+        "anecdote": "Certaines scènes utilisent des interactions avec des non-acteurs ou des situations semi-improvisées, ce qui donne un ton très brut, parfois imprévisible."
+      }
+    ]
+}

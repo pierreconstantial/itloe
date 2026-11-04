@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #19",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel terme désigne à la fois la science et l'art de l'action du discours ?",
+        "propositions": [
+          "Réthaurique",
+          "Rhéthorique",
+          "Rhétorique",
+          "Rétorique"
+        ],
+        "réponse": "Rhétorique",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel dispositif est l'élément principal du système bielle-manivelle ?",
+        "propositions": [
+          "Vilebrequin",
+          "Villebrequain",
+          "Villebrequint",
+          "Vilbrequin"
+        ],
+        "réponse": "Vilebrequin",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel rongeur grimpeur de taille moyenne peut parfois voler ?",
+        "propositions": [
+          "Écurreuil",
+          "Éccurreuil",
+          "Écureuil",
+          "Éccureuil"
+        ],
+        "réponse": "Écureuil",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel élément chimique de numéro atomique 25 possède le symbole Mn ?",
+        "propositions": [
+          "Menguanèse",
+          "Manganèse",
+          "Menganèse",
+          "Manguanèse"
+        ],
+        "réponse": "Manganèse",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

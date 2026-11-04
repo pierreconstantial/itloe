@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #03",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel pourcentage d'hommes jugent catastrophique leur première fois ?",
+        "propositions": [
+          "50 %",
+          "70 %",
+          "30 %",
+          "10 %"
+        ],
+        "réponse": "30 %",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rapport_sexuel",
+        "anecdote": "Les chiffres varient selon les pays et les méthodes d'enquête, mais on retrouve souvent un ordre de grandeur autour de 20 à 30 %."
+      },
+      {
+        "id": 2,
+        "question": "Quel événement augmenterait fortement le désir sexuel féminin ?",
+        "propositions": [
+          "Éclipse solaire",
+          "Solstice d'été",
+          "Pleine lune",
+          "Tempête de sable"
+        ],
+        "réponse": "Pleine lune",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pleine_lune",
+        "anecdote": "La Lune a longtemps été associée au cycle féminin, probablement en raison de la similarité entre le cycle lunaire et le cycle menstruel."
+      },
+      {
+        "id": 3,
+        "question": "À Rome, quelle déesse était liée à l'amour, à la beauté et à la sexualité ?",
+        "propositions": [
+          "Minerve",
+          "Junon",
+          "Diane",
+          "Vénus"
+        ],
+        "réponse": "Vénus",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vénus_(mythologie)",
+        "anecdote": "Elle est l'équivalent de la déesse grecque Aphrodite et symbolise l'amour et la beauté, mais aussi la séduction et la fécondité."
+      },
+      {
+        "id": 4,
+        "question": "Qu'inventa Gideon Sunback en voyant deux mille-pattes s'accoupler ?",
+        "propositions": [
+          "Bouton pression",
+          "Fermeture éclair",
+          "Velcro",
+          "Fermoir magnétique"
+        ],
+        "réponse": "Fermeture éclair",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fermeture_éclair",
+        "anecdote": "En réalité, Sundbäck a travaillé à améliorer un dispositif mécanique déjà existant pour le rendre plus robuste et facile à produire."
+      }
+    ]
+}

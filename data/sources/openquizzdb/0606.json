@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #17",         
+  "mise-à-jour": "13/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de joueurs composent une équipe de base-ball sur le terrain ?",
+        "propositions": [
+          "Treize",
+          "Neuf",
+          "Sept",
+          "Onze"
+        ],
+        "réponse": "Neuf",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Baseball",
+        "anecdote": "Le base-ball est l'un des rares sports où les positions défensives sont fixes, mais la composition offensive change selon l'ordre au bâton."
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la durée approximative de la gestation pour une chienne ?",
+        "propositions": [
+          "Six mois",
+          "Quatre mois",
+          "Deux mois",
+          "Huit mois"
+        ],
+        "réponse": "Deux mois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chien",
+        "anecdote": "La gestation canine est relativement rapide, ce qui permet aux races de chiens de se reproduire plus fréquemment."
+      },
+      {
+        "id": 3,
+        "question": "En quelle année a été célébré le mariage de Charles et Lady Diana ?",
+        "propositions": [
+          "2001",
+          "1971",
+          "1981",
+          "1991"
+        ],
+        "réponse": "1981",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mariage_de_Charles,_prince_de_Galles_et_de_Diana_Spencer",
+        "anecdote": "Le mariage du prince Charles, héritier du trône britannique, et de Lady Diana Spencer a été célébré le 29 juillet 1981 à la cathédrale Saint-Paul de Londres. La cérémonie fut suivie par des centaines de millions de téléspectateurs à travers le monde."
+      },
+      {
+        "id": 4,
+        "question": "À quel âge a été assassiné John Lennon en décembre 1980 ?",
+        "propositions": [
+          "Trente ans",
+          "Cinquante ans",
+          "Quarante ans",
+          "Vingt ans"
+        ],
+        "réponse": "Quarante ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

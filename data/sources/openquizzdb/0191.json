@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Steve Jobs",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En quelle année Steve Jobs a-t-il racheté le studio d'animation Pixar ?",
+        "propositions": [
+          "1979",
+          "1995",
+          "2001",
+          "1986"
+        ],
+        "réponse": "1986",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pixar_Animation_Studios",
+        "anecdote": "En 1986, Steve Jobs rachète Pixar pour environ 5 millions de dollars après avoir quitté Apple. À l'époque, Pixar n'est pas encore le studio à succès que l'on connaît aujourd'hui."
+      },
+      {
+        "id": 2,
+        "question": "Qui est officiellement devenu en 2011 le successeur de Steve Jobs ?",
+        "propositions": [
+          "Jony Ive",
+          "Elon Musk",
+          "Tim Cook",
+          "Steve Wozniak"
+        ],
+        "réponse": "Tim Cook",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tim_Cook",
+        "anecdote": "En 2011, après le décès de Steve Jobs, c'est Tim Cook qui devient officiellement PDG d'Apple. Il occupait déjà un rôle clé dans l'entreprise en tant que directeur des opérations (COO), responsable notamment de la chaîne logistique extrêmement efficace d'A"
+      },
+      {
+        "id": 3,
+        "question": "Quelle entreprise a-t-il créé dans le garage de sa maison d'enfance ?",
+        "propositions": [
+          "Microsoft",
+          "Apple",
+          "IBM",
+          "Google"
+        ],
+        "réponse": "Apple",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Apple",
+        "anecdote": "Selon un classement du magazine Fortune, Apple fut la société la plus admirée dans le monde consécutivement de 2006 à 2013."
+      },
+      {
+        "id": 4,
+        "question": "Quel symbole commun relie la ville de New York et Steve Jobs ?",
+        "propositions": [
+          "Pomme",
+          "Taxi",
+          "Gratte-ciel",
+          "Ordinateur"
+        ],
+        "réponse": "Pomme",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Big_Apple",
+        "anecdote": "Le surnom « Big Apple » remonte aux années 1920 et désignait à l'origine les plus gros prix dans les courses de chevaux de la ville."
+      }
+    ]
+}

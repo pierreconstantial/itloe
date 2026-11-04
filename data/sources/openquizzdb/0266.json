@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #24",         
+  "mise-à-jour": "24/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un G, il faut un minéral, un alcool, un instrument et un adjectif.",
+        "propositions": [
+          "Grenat",
+          "Gin",
+          "Grand",
+          "Guitare"
+        ],
+        "réponse": "Grenat",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un M, il faut un métal, une ville chaude, un membre et un fruit.",
+        "propositions": [
+          "Mercure",
+          "Madrid",
+          "Main",
+          "Mangue"
+        ],
+        "réponse": "Mercure",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un S, il faut une couleur, un reptile, une figurine et un lieu naturel.",
+        "propositions": [
+          "Santon",
+          "Savane",
+          "Serpent",
+          "Sable"
+        ],
+        "réponse": "Sable",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un V, il faut une plante, un manteau, une bécane et une réussite.",
+        "propositions": [
+          "Vigne",
+          "Vélo",
+          "Victoire",
+          "Veste"
+        ],
+        "réponse": "Vigne",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

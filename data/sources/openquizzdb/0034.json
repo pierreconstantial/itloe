@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #03",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Plante qui ne s'arrose pas, mot de cinq lettres commençant par un A ?",
+        "propositions": [
+          "Alèse",
+          "Anode",
+          "Algue",
+          "Agape"
+        ],
+        "réponse": "Algue",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Sale affaire, mot de huit lettres commençant par un S ?",
+        "propositions": [
+          "Surprise",
+          "Sabotage",
+          "Sarrasin",
+          "Scandale"
+        ],
+        "réponse": "Scandale",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Dans une pochette, mot de huit lettres commençant par un S ?",
+        "propositions": [
+          "Suiveuse",
+          "Silicone",
+          "Surprise",
+          "Solarium"
+        ],
+        "réponse": "Surprise",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Outil de levage, mot de quatre lettres commençant par un C ?",
+        "propositions": [
+          "Cric",
+          "Cage",
+          "Cure",
+          "Cale"
+        ],
+        "réponse": "Cric",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

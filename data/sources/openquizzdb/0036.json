@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #06",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qu'avez-vous probablement si vos selles sont fort liquides ?",
+        "propositions": [
+          "Diarée",
+          "Diarrée",
+          "Dhiarrée",
+          "Diarrhée"
+        ],
+        "réponse": "Diarrhée",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel os résulte de la soudure de quatre vertèbres atrophiées ?",
+        "propositions": [
+          "Coccyx",
+          "Coccis",
+          "Cocyx",
+          "Coxis"
+        ],
+        "réponse": "Coccyx",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle gomme est à peu près similaire au baume de La Mecque ?",
+        "propositions": [
+          "Mirre",
+          "Myrre",
+          "Myre",
+          "Myrrhe"
+        ],
+        "réponse": "Myrrhe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Qu'observe-t-on sur la peau lorsque du sang quitte les vaisseaux ?",
+        "propositions": [
+          "Eccymose",
+          "Ecchymose",
+          "Ecquimose",
+          "Equimose"
+        ],
+        "réponse": "Ecchymose",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

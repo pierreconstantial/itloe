@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Réseaux sociaux",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel informaticien et chef d'entreprise américain a inventé « Facebook » ?",
+        "propositions": [
+          "Steve Ballmer",
+          "Paul Allen",
+          "Larry Page",
+          "Mark Zuckeberg"
+        ],
+        "réponse": "Mark Zuckeberg",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Facebook",
+        "anecdote": "Mark Zuckeberg est aujourd'hui le plus jeune milliardaire du monde derrière son camarade Dustin Moskovitz."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le principal réseau social professionnel ?",
+        "propositions": [
+          "Friendster",
+          "LinkedIn",
+          "Heeloo",
+          "Movim"
+        ],
+        "réponse": "LinkedIn",
+        "wikipédia": "https://fr.wikipedia.org/wiki/LinkedIn",
+        "anecdote": "« LinkedIn » constitue aujourd'hui un moyen efficace pour construire, développer et enrichir son capital social."
+      },
+      {
+        "id": 3,
+        "question": "Que fait-on lors d'un « swap » avec une youtubeuse ?",
+        "propositions": [
+          "Des vidéos",
+          "Des messages",
+          "Des cadeaux",
+          "Des blagues"
+        ],
+        "réponse": "Des cadeaux",
+        "wikipédia": "https://fr.wikipedia.org/wiki/YouTube",
+        "anecdote": "La plupart des vidéos du site ou les chaînes YouTube peuvent être visualisées par tous les internautes."
+      },
+      {
+        "id": 4,
+        "question": "Combien « Facebook » a-t-il payé pour acheter « Whatsapp » ?",
+        "propositions": [
+          "650 000",
+          "19 milliards",
+          "220 millions",
+          "850 millions"
+        ],
+        "réponse": "19 milliards",
+        "wikipédia": "https://fr.wikipedia.org/wiki/WhatsApp",
+        "anecdote": "« Whatsapp » a été racheté par « Facebook » en février 2014 pour environ 19 milliards de dollars, dont 15 milliards en actions."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Depeche Mode",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel album de Depeche Mode propose une rose rouge sur sa pochette ?",
+        "propositions": [
+          "Violator",
+          "A Broken Frame",
+          "Ultra",
+          "Exciter"
+        ],
+        "réponse": "Violator",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Violator",
+        "anecdote": "« Violator » est considéré comme le meilleur album du groupe à ce jour pour ses qualités de production inventives et novatrices."
+      },
+      {
+        "id": 2,
+        "question": "Qui a dirigé la plupart des clips vidéos du groupe Depeche Mode ?",
+        "propositions": [
+          "Clive Richardson",
+          "Anton Corbijn",
+          "Julien Temple",
+          "John Hillcoat"
+        ],
+        "réponse": "Anton Corbijn",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Anton_Corbijn",
+        "anecdote": "Ce photographe et réalisateur néerlandais collabore fréquemment avec Depeche Mode depuis 1986."
+      },
+      {
+        "id": 3,
+        "question": "Avec quel label anglais le groupe Depeche Mode a-t-il géré sa carrière ?",
+        "propositions": [
+          "Warner",
+          "EMI",
+          "Mute Records",
+          "Mercury"
+        ],
+        "réponse": "Mute Records",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mute_Records",
+        "anecdote": "Dans un premier temps, le but de Daniel Miller (créateur de Mute) était simplement d'y publier sa propre musique."
+      },
+      {
+        "id": 4,
+        "question": "Qui est le chanteur principal du groupe Depeche Mode ?",
+        "propositions": [
+          "Vince Clarke",
+          "Andrew Fletcher",
+          "Dave Gahan",
+          "Alan Wilder"
+        ],
+        "réponse": "Dave Gahan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dave_Gahan",
+        "anecdote": "Ses prestations scéniques excentriques donnent au groupe un dynamisme que l'aspect figé des synthés ne permet pas."
+      }
+    ]
+}

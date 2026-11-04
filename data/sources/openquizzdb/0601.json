@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Intrusion #4",         
+  "mise-à-jour": "13/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel intrus se cache parmi ces chanteuses n'ayant pas eu le bac ?",
+        "propositions": [
+          "Chimène Badi",
+          "Jenifer",
+          "Ève Angeli",
+          "Vanessa Paradis"
+        ],
+        "réponse": "Ève Angeli",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ève_Angeli",
+        "anecdote": "Née en 1980, Ève Angeli fait ses premiers pas à la télévision dans le monde de la chanson lors de l'émission Graines de star en 1999."
+      },
+      {
+        "id": 2,
+        "question": "Quel intrus se cache parmi ces inventions créées par des femmes ?",
+        "propositions": [
+          "Soutien-gorge",
+          "Lave-vaisselle",
+          "Scie circulaire",
+          "Bas nylon"
+        ],
+        "réponse": "Bas nylon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bas",
+        "anecdote": "Le type de tissu utilisé pour les bas devient un critère de distinction et d'appellation, comme les bas résilles, les bas de soie, etc."
+      },
+      {
+        "id": 3,
+        "question": "Quel intrus se cache parmi ces variétés de pomme de terre ?",
+        "propositions": [
+          "Charlotte",
+          "Carentan",
+          "Monalisa",
+          "Roseval"
+        ],
+        "réponse": "Carentan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Carentan",
+        "anecdote": "Carentan est une ancienne commune française de 6 000 habitants, située dans le département de la Manche en région Normandie."
+      },
+      {
+        "id": 4,
+        "question": "Quel intrus se cache parmi ces mots provenant de la langue arabe ?",
+        "propositions": [
+          "Girafe",
+          "Magasin",
+          "Panoplie",
+          "Gazelle"
+        ],
+        "réponse": "Panoplie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ensemble",
+        "anecdote": "C'est un ensemble de possibilités, de moyens d'action dont on dispose dans une situation donnée (ex : une panoplie de sanctions)."
+      }
+    ]
+}

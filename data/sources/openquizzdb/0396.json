@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Boissons hors des frontières",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Autour de quelle ville italienne fabrique-t-on l'Asti Spumante ?",
+        "propositions": [
+          "Turin",
+          "Asti",
+          "Rivoli",
+          "Biella"
+        ],
+        "réponse": "Asti",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Asti_spumante_(DOCG)",
+        "anecdote": "Seuls ont droit à la DOCG les vins blancs récoltés à l'intérieur de l'aire de production définie par le décret."
+      },
+      {
+        "id": 2,
+        "question": "Les feuilles de quelle plante met-on dans le thé au Maroc ?",
+        "propositions": [
+          "Eucalyptus",
+          "Menthe",
+          "Sauge",
+          "Bleuet"
+        ],
+        "réponse": "Menthe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Thé_à_la_menthe",
+        "anecdote": "Le thé à la menthe est une spécialité traditionnelle de la cuisine des pays du Maghreb."
+      },
+      {
+        "id": 3,
+        "question": "Que vous offre votre hôte Chinois quand il vous propose du « cha » ?",
+        "propositions": [
+          "Du café",
+          "Du chocolat",
+          "Du whisky",
+          "Du thé"
+        ],
+        "réponse": "Du thé",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Thé",
+        "anecdote": "Le thé est d'origine chinoise, en provenance des montagnes du Yunnan où il est connu depuis l'Antiquité."
+      },
+      {
+        "id": 4,
+        "question": "Qu'est-ce qu'une bombilla glissée dans le thé en Argentine ?",
+        "propositions": [
+          "Cuillère plate",
+          "Pâte de fruit",
+          "Paille filtrante",
+          "Cerise confite"
+        ],
+        "réponse": "Paille filtrante",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Paille_(boisson)",
+        "anecdote": "L'utilisation de pailles minimise le contact de la boisson avec les dents et permet ainsi de réduire le risque de carie."
+      }
+    ]
+}

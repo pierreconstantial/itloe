@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #18",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un P, il faut un ara, un instrument lourd, une profession et un saut.",
+        "propositions": [
+          "Perroquet",
+          "Piano",
+          "Pompier",
+          "Plongeon"
+        ],
+        "réponse": "Perroquet",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un R, il faut un sport, un récepteur, un animal et une boisson.",
+        "propositions": [
+          "Rugby",
+          "Rhum",
+          "Radio",
+          "Rhinocéros"
+        ],
+        "réponse": "Rugby",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un T, il faut un oiseau, un cuivre, une profession et une ardoise.",
+        "propositions": [
+          "Technicien",
+          "Toucan",
+          "Tablette",
+          "Trompette"
+        ],
+        "réponse": "Toucan",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un M, il faut un pays, un animal, une glace et une pâtisserie lorraine.",
+        "propositions": [
+          "Madeleine",
+          "Mexique",
+          "Miroir",
+          "Mouton"
+        ],
+        "réponse": "Mexique",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

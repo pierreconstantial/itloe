@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #P",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment peut-on qualifier tous les nombres divisibles par deux ?",
+        "propositions": [
+          "Parallèles",
+          "Premiers",
+          "Pairs",
+          "Parfaits"
+        ],
+        "réponse": "Pairs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Parité_(arithmétique)",
+        "anecdote": "Un entier multiple de deux est un entier pair, les autres sont les entiers impairs."
+      },
+      {
+        "id": 2,
+        "question": "Avant de devenir chevalier, quel est le rang pour un apprenti Jedi ?",
+        "propositions": [
+          "Poltergeist",
+          "Padawan",
+          "Paddington",
+          "Palikir"
+        ],
+        "réponse": "Padawan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jedi",
+        "anecdote": "Les chevaliers Jedi du monde de la saga « Star Wars » forment un ordre d'individus qui maîtrisent la Force."
+      },
+      {
+        "id": 3,
+        "question": "Quel personnage de Disney voit son nez augmenter de volume ?",
+        "propositions": [
+          "Pinocchio",
+          "Pluto",
+          "Pumbaa",
+          "Pocahontas"
+        ],
+        "réponse": "Pinocchio",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pinocchio_(film,_1940)",
+        "anecdote": "Le film, sorti des studios Disney en 1940, est inspiré du conte de Carlo Collodi."
+      },
+      {
+        "id": 4,
+        "question": "Quel animal utilise-t-on le plus souvent pour trouver des truffes ?",
+        "propositions": [
+          "Porc",
+          "Pélican",
+          "Panda",
+          "Poney"
+        ],
+        "réponse": "Porc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Truffe_(champignon)",
+        "anecdote": "La truffe noire du Périgord, du Tricastin ou truffe de Provence, est la reine des truffes, au parfum et à la saveur très recherchés."
+      }
+    ]
+}

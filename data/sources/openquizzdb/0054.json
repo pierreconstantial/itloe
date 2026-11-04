@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #09",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment la vergeoise est-elle appelée en Belgique et en Suisse ?",
+        "propositions": [
+          "Casonnade",
+          "Cassonnade",
+          "Casonade",
+          "Cassonade"
+        ],
+        "réponse": "Cassonade",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel rêve est souvent la cause d'une forte émotion négative ?",
+        "propositions": [
+          "Cauchemarre",
+          "Cauchmar",
+          "Cauchemard",
+          "Cauchemar"
+        ],
+        "réponse": "Cauchemar",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel art est apparu après l'invention de la peinture aérosol en bombe ?",
+        "propositions": [
+          "Graffitti",
+          "Graffiti",
+          "Grafitti",
+          "Graphiti"
+        ],
+        "réponse": "Graffiti",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle discipline peut être comparée à la science du son ?",
+        "propositions": [
+          "Aquoustique",
+          "Achoustique",
+          "Accoustique",
+          "Acoustique"
+        ],
+        "réponse": "Acoustique",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

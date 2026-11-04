@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Idées brillantes",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Laquelle de ces inventions ne porte pas le nom de son inventeur ?",
+        "propositions": [
+          "Poubelle",
+          "Colt",
+          "Macadam",
+          "Laser"
+        ],
+        "réponse": "Laser",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Laser",
+        "anecdote": "En 1950, Alfred Kastler proposa un procédé de pompage optique qu'il valida expérimentalement deux ans plus tard."
+      },
+      {
+        "id": 2,
+        "question": "Quel concours prime les meilleures inventions françaises ?",
+        "propositions": [
+          "Lépine",
+          "Novastar",
+          "Edison",
+          "Thomas"
+        ],
+        "réponse": "Lépine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Concours_Lépine",
+        "anecdote": "Ce concours-exposition de jouets était principalement destiné à sortir les petits fabricants du marasme économique ambiant."
+      },
+      {
+        "id": 3,
+        "question": "Quel mot a été inventé en 1955 par le philologue Jacques Perret ?",
+        "propositions": [
+          "Imprimante",
+          "Transistor",
+          "Ampoule",
+          "Ordinateur"
+        ],
+        "réponse": "Ordinateur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jacques_Perret_(philologue)",
+        "anecdote": "Le terme « Ordinateur » voulait dire, selon les intentions du docteur en lettres, « Dieu mettant de l'ordre dans le monde »."
+      },
+      {
+        "id": 4,
+        "question": "Quel savant italien a découvert le principe de la pile électrique ?",
+        "propositions": [
+          "Bugatti",
+          "Volta",
+          "Turriano",
+          "Marconi"
+        ],
+        "réponse": "Volta",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pile_électrique",
+        "anecdote": "À l'origine, le terme « pile » désignait un dispositif inventé par Alessandro Volta, composé d'un empilement de rondelles."
+      }
+    ]
+}

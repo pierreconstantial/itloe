@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #D",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle ville française est la capitale de la moutarde ?",
+        "propositions": [
+          "Douai",
+          "Dijon",
+          "Dunkerque",
+          "Drancy"
+        ],
+        "réponse": "Dijon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Moutarde_de_Dijon",
+        "anecdote": "La moutarde de Dijon est faite à partir de graines de moutarde brune, de vinaigre, de sel et d'acide citrique, sans compter de l'eau."
+      },
+      {
+        "id": 2,
+        "question": "Quel peintre excentrique a été élu homme le plus élégant de France ?",
+        "propositions": [
+          "Degas",
+          "Dali",
+          "Delacroix",
+          "David"
+        ],
+        "réponse": "Dali",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Salvador_Dali",
+        "anecdote": "Les thèmes que Salvador Dali aborda le plus fréquemment furent le rêve, la sexualité, la nourriture, son épouse Gala et la religion."
+      },
+      {
+        "id": 3,
+        "question": "Quelles sont les deux lettres qui symbolisent le mot décimètre ?",
+        "propositions": [
+          "de",
+          "dm",
+          "dt",
+          "dc"
+        ],
+        "réponse": "dm",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Décimètre",
+        "anecdote": "Le décimètre est très peu utilisé, mise à part dans l'expression double-décimètre, qui désigne aussi une règle graduée sur 2 dm."
+      },
+      {
+        "id": 4,
+        "question": "Quelle première console 128 bits fut commercialisée par Sega ?",
+        "propositions": [
+          "DSi",
+          "Dreamcast",
+          "DS",
+          "DS Lite"
+        ],
+        "réponse": "Dreamcast",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dreamcast",
+        "anecdote": "La Dreamcast est la première console livrée en standard avec un modem, ce qui permettait entre autres de se connecter à Internet."
+      }
+    ]
+}

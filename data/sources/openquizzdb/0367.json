@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Exploration de l'amandier",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel nutriment est particulièrement présent dans les amandes ?",
+        "propositions": [
+          "Fer",
+          "Vitamine C",
+          "Vitamine E",
+          "Protéines"
+        ],
+        "réponse": "Vitamine E",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quelle est la couleur la plus fréquente de la fleur de l'amandier ?",
+        "propositions": [
+          "Bleue",
+          "Rouge",
+          "Blanche",
+          "Jaune citron"
+        ],
+        "réponse": "Blanche",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quelle utilisation culinaire est courante pour les amandes ?",
+        "propositions": [
+          "Pain sans farine",
+          "Fromage",
+          "Vinaigre",
+          "Lait végétal"
+        ],
+        "réponse": "Lait végétal",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quel pays est aujourd'hui le plus grand producteur d'amandes ?",
+        "propositions": [
+          "États-Unis",
+          "Espagne",
+          "Maroc",
+          "Italie"
+        ],
+        "réponse": "États-Unis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

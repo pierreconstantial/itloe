@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Anciennes séries télé #2",         
+  "mise-à-jour": "10/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle série raconte les aventures d'un centre vétérinaire en Afrique ?",
+        "propositions": [
+          "Lassie",
+          "Mon ami Ben",
+          "Woobinda",
+          "Daktari"
+        ],
+        "réponse": "Daktari",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Daktari",
+        "anecdote": "La série « Daktari » ne fut pas tournée en Afrique mais plutôt  à 43 km au nord de Los Angeles, à Africa USA, en Californie."
+      },
+      {
+        "id": 2,
+        "question": "À quoi reconnaît-on « Les envahisseurs » dans la série du même nom ?",
+        "propositions": [
+          "Au petit doigt",
+          "Aux pieds",
+          "Au langage",
+          "Aux yeux"
+        ],
+        "réponse": "Au petit doigt",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Envahisseurs",
+        "anecdote": "La série s'inscrit dans la mode de la science-fiction qui avait elle-même supplanté les innombrables films noirs en vogue."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le prénom de Kojak, élégant policier au crâne rasé ?",
+        "propositions": [
+          "Walter",
+          "Roger",
+          "Theo",
+          "Denis"
+        ],
+        "réponse": "Theo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kojak_(série_télévisée,_1973)",
+        "anecdote": "C'est au cours du huitième épisode (saison 1) que Theo Kojak apparaît pour la première fois avec une sucette à la bouche."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le grade de Steve Austin, « l'homme bionique » des années 80 ?",
+        "propositions": [
+          "Commandant",
+          "Colonel",
+          "Lieutenant",
+          "Capitaine"
+        ],
+        "réponse": "Colonel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/L'Homme_qui_valait_trois_milliards",
+        "anecdote": "Le crash d'avion pendant le générique utilise le film du crash réel d'un prototype, le 10 mai 1967 sur la Edwards Air Force Base."
+      }
+    ]
+}

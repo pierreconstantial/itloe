@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Clint Eastwood",         
+  "mise-à-jour": "07/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel film de Clint Eastwood est une biographie de Charlie Parker ?",
+        "propositions": [
+          "Dizzy",
+          "Parker",
+          "Charlie",
+          "Bird"
+        ],
+        "réponse": "Bird",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bird_(film)",
+        "anecdote": "Le film d'une grande qualité est l'un des très rares consacrés au jazz et émane d'un réalisateur lui-même musicien."
+      },
+      {
+        "id": 2,
+        "question": "Qui a réalisé en 1993 le film « Un monde parfait », avec Clint Eastwood ?",
+        "propositions": [
+          "Oliver Stone",
+          "Clint Eastwood",
+          "Martin Scorsese",
+          "Brian de Palma"
+        ],
+        "réponse": "Clint Eastwood",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Un_monde_parfait_(film)",
+        "anecdote": "« Un monde parfait » a été inspiré par son propre film, « Le Ricain », réalisé en 1977."
+      },
+      {
+        "id": 3,
+        "question": "Quel réalisateur a embauché Clint Eastwood pour la « Trilogie du dollar » ?",
+        "propositions": [
+          "Sergio Corbucci",
+          "Tonino Valerii",
+          "Giorgio Ferroni",
+          "Sergio Leone"
+        ],
+        "réponse": "Sergio Leone",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Trilogie_du_dollar",
+        "anecdote": "Les films ont été réunis sous ce nom commun pour des raisons promotionnelles postérieures à leur réalisation et diffusion."
+      },
+      {
+        "id": 4,
+        "question": "Avec quelle société Clint Eastwood est-il devenu producteur en 1968 ?",
+        "propositions": [
+          "TriStar",
+          "Brooksfilms",
+          "Newsreel",
+          "Malpaso"
+        ],
+        "réponse": "Malpaso",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Malpaso_Productions",
+        "anecdote": "Irving Leonard a été le président de la compagnie Malpaso jusqu'à son décès en décembre 1969 à l'âge de 53 ans."
+      }
+    ]
+}

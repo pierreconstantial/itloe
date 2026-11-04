@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Tranchées à Hollywood",         
+  "mise-à-jour": "21/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quelle guerre le film britanno-américain « Full Metal Jacket » traite-t-il ?",
+        "propositions": [
+          "Koweit",
+          "Corée",
+          "Viêt Nam",
+          "Irak"
+        ],
+        "réponse": "Viêt Nam",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Full_Metal_Jacket",
+        "anecdote": "Le titre du film fait référence à un type de munition standard utilisé par les armées."
+      },
+      {
+        "id": 2,
+        "question": "Qui a réalisé le film de guerre « Platoon », inspiré par sa propre vie ?",
+        "propositions": [
+          "Oliver Stone",
+          "John Woo",
+          "Brian De Palma",
+          "Clint Eastwood"
+        ],
+        "réponse": "Oliver Stone",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Platoon",
+        "anecdote": "Oliver Stone s'est lui-même engagé comme volontaire pour la guerre du Viêt Nam, durant laquelle il a été blessé à deux reprises."
+      },
+      {
+        "id": 3,
+        "question": "Quel réalisateur a dirigé « Apocalypse Now » ?",
+        "propositions": [
+          "Oliver Stone",
+          "Francis Ford Coppola",
+          "David Lynch",
+          "Ridley Scott"
+        ],
+        "réponse": "Francis Ford Coppola",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quel film de Sam Mendes semble être tourné en un seul plan ?",
+        "propositions": [
+          "Fury",
+          "1917",
+          "Platoon",
+          "War Machine"
+        ],
+        "réponse": "1917",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

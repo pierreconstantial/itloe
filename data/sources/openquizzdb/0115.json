@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Dessins animés",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui n'en finit plus de mourir dans les premières saisons de South Park ?",
+        "propositions": [
+          "Stan",
+          "Kenny",
+          "Eric",
+          "Kyle"
+        ],
+        "réponse": "Kenny",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kenny_McCormick",
+        "anecdote": "Le petit garçon à la capuche orange est la risée de Cartman, l'un des quatre héros du dessin animé de Trey Parker et Matt Stone."
+      },
+      {
+        "id": 2,
+        "question": "Avec lequel des garçons de sa bande fait souvent équipe Scoubidou ?",
+        "propositions": [
+          "Logan",
+          "Sammy",
+          "Fred",
+          "Roger"
+        ],
+        "réponse": "Sammy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Scooby-Doo_(personnage)",
+        "anecdote": "Le chien détective a rapidement été de retour, accompagné de guest-stars comme Batman et Robin ou Laurel et Hardy."
+      },
+      {
+        "id": 3,
+        "question": "Qui est le plus âgé des enfants de la famille Simpson ?",
+        "propositions": [
+          "Maggie",
+          "Lisa",
+          "Marge",
+          "Bart"
+        ],
+        "réponse": "Bart",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Simpson",
+        "anecdote": "Depuis sa création en 1989, le dessin animé de Matt Groenig rencontre un succès mondial, traduit sur grand écran en 2007."
+      },
+      {
+        "id": 4,
+        "question": "Quel animal est Capucin, le petit compagnon de Candy ?",
+        "propositions": [
+          "Lapin",
+          "Raton laveur",
+          "Chat",
+          "Hamster"
+        ],
+        "réponse": "Raton laveur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Candy_(manga)",
+        "anecdote": "La jeune fille se retrouve à l'orphelinat tenu par Mademoiselle Pony, et Candy tombe amoureuse du prince des collines."
+      }
+    ]
+}

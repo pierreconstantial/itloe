@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Eminem",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel alter ego Eminem utilise-t-il parfois dans ses chansons ?",
+        "propositions": [
+          "Posh",
+          "Slim Shady",
+          "Love symbol",
+          "Fat Man"
+        ],
+        "réponse": "Slim Shady",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eminem",
+        "anecdote": "Eminem est l'artiste qui a vendu le plus d'albums aux États-Unis durant les années 2000."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel film Eminem interprète-t-il un jeune rappeur blanc ?",
+        "propositions": [
+          "Wonder Boys",
+          "Crazy Heart",
+          "8 Mile",
+          "Once"
+        ],
+        "réponse": "8 Mile",
+        "wikipédia": "https://fr.wikipedia.org/wiki/8_Mile",
+        "anecdote": "Dans 8 Mile (2002, sorti en 2003 en France), Eminem joue Jimmy Smith Jr., surnommé B-Rabbit, un jeune ouvrier de Detroit qui tente de percer dans le milieu du battle rap."
+      },
+      {
+        "id": 3,
+        "question": "Quel prénom masculin est l'un des titres du rappeur Eminem ?",
+        "propositions": [
+          "Bran",
+          "Sam",
+          "Stan",
+          "Dan"
+        ],
+        "réponse": "Stan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eminem",
+        "anecdote": "Elle raconte l'histoire fictive d'un fan obsessionnel nommé Stan, qui écrit des lettres de plus en plus inquiétantes à Eminem, illustrant les dérives possibles de la célébrité et de l'idolâtrie."
+      },
+      {
+        "id": 4,
+        "question": "Quelle jeune chanteuseest la petite protégée du rappeur Eminem ?",
+        "propositions": [
+          "Marie Osmond",
+          "Bella Thorne",
+          "Lisa Germano",
+          "Skylar Grey"
+        ],
+        "réponse": "Skylar Grey",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Skylar_Grey",
+        "anecdote": "Skylar Grey a fait ses débuts professionnels dans un groupe de folk composé avec sa mère, appelé Generations."
+      }
+    ]
+}

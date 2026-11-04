@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #R",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le prénom du personnage de Kate Winslet dans le film « Titanic » ?",
+        "propositions": [
+          "Rebecca",
+          "Rose",
+          "Rosalie",
+          "Rachel"
+        ],
+        "réponse": "Rose",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Titanic_(film,_1997)",
+        "anecdote": "« Titanic » est le second plus grand succès de l'histoire du cinéma après « Avatar » (également réalisé par James Cameron)."
+      },
+      {
+        "id": 2,
+        "question": "Quelle marque de montres a pour logo une couronne à cinq branches ?",
+        "propositions": [
+          "Rolls-Royce",
+          "Rozana",
+          "Rolex",
+          "Revlon"
+        ],
+        "réponse": "Rolex",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rolex",
+        "anecdote": "Le chiffre d'affaires de Rolex est estimé à environ 30 % du total des ventes des 50 premières sociétés horlogères en Suisse."
+      },
+      {
+        "id": 3,
+        "question": "La tartiflette est faite avec quel fromage ?",
+        "propositions": [
+          "Ricotta",
+          "Roquefort",
+          "Reblochon",
+          "Romano"
+        ],
+        "réponse": "Reblochon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tartiflette",
+        "anecdote": "On coupe des reblochons en deux par la tranche et on les dispose croûte vers le bas ou croûte vers le haut, selon les écoles."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le nom du chien peu malin dans les albums de « Lucky Luke » ?",
+        "propositions": [
+          "Rocky",
+          "Rubeus",
+          "Rambo",
+          "Rantanplan"
+        ],
+        "réponse": "Rantanplan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rantanplan",
+        "anecdote": "Rantanplan, également écrit Ran-Tan-Plan dans certaines langues, a pour principale caractéristique d'être complètement stupide."
+      }
+    ]
+}

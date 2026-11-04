@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #47",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le nom donné au dernier livre du Nouveau Testament ?",
+        "propositions": [
+          "Appocalypse",
+          "Apocallypse",
+          "Apocalypse",
+          "Apocalipse"
+        ],
+        "réponse": "Apocalypse",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel piège est destiné à attraper les souris ?",
+        "propositions": [
+          "Souricière",
+          "Souriciaire",
+          "Sourissière",
+          "Souriscière"
+        ],
+        "réponse": "Souricière",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel revêtement du tronc n'existe pas chez les jeunes arbres ?",
+        "propositions": [
+          "Écorsce",
+          "Éccorce",
+          "Écorce",
+          "Écorse"
+        ],
+        "réponse": "Écorce",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle figurine articulée est manipulée par une ou plusieurs personnes ?",
+        "propositions": [
+          "Marionnete",
+          "Marionnète",
+          "Marionette",
+          "Marionnette"
+        ],
+        "réponse": "Marionnette",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

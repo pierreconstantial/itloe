@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alan Turing",         
+  "mise-à-jour": "26/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qu'est censée imiter une machine faisant le test de Turing ?",
+        "propositions": [
+          "Mouvement",
+          "Silhouette",
+          "Conversation",
+          "Dessin"
+        ],
+        "réponse": "Conversation",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Test_de_Turing",
+        "anecdote": "Le test de Turing est une proposition de test d'IA fondée sur la faculté d'une machine à imiter la conversation humaine."
+      },
+      {
+        "id": 2,
+        "question": "Quelle machine Alan Turing a-t-il décryptée pendant la guerre ?",
+        "propositions": [
+          "Deep Blue",
+          "Delilah",
+          "Enigma",
+          "ENIAC"
+        ],
+        "réponse": "Enigma",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Enigma_(machine)",
+        "anecdote": "Enigma est une machine électromécanique portable servant au chiffrement et au déchiffrement de l'information."
+      },
+      {
+        "id": 3,
+        "question": "Quel programme Turing a-t-il écrit en 1952 pour réaliser son test ?",
+        "propositions": [
+          "Dames",
+          "Jeu d'échecs",
+          "Jeu de l'oie",
+          "OXO"
+        ],
+        "réponse": "Jeu d'échecs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alan_Turing",
+        "anecdote": "Ne disposant pas d'un ordinateur assez puissant pour l'exécuter, Alan Turing a simulé les calculs de la machine."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel système informatique Enigma a-t-il été implémenté ?",
+        "propositions": [
+          "Android",
+          "Mac OS",
+          "Windows",
+          "UNIX"
+        ],
+        "réponse": "UNIX",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Enigma_(machine)",
+        "anecdote": "Cette commande intégrée a été utilisée par des laboratoires civils et militaires qui croyaient protéger ainsi leurs communications."
+      }
+    ]
+}

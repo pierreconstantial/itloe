@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #45",         
+  "mise-à-jour": "24/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment qualifier une femme en recherche continu du plaisir sexuel ?",
+        "propositions": [
+          "Nimphomane",
+          "Nymfomane",
+          "Nymphomanne",
+          "Nymphomane"
+        ],
+        "réponse": "Nymphomane",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle maladie inflammatoire de l'épiderme ne se guérit pas ?",
+        "propositions": [
+          "Psauriasys",
+          "Psoriasis",
+          "Psoryasis",
+          "Psorhéasis"
+        ],
+        "réponse": "Psoriasis",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel sanctuaire gréco-égyptien existait dans l'Antiquité ?",
+        "propositions": [
+          "Cérrapéum",
+          "Serrapeum",
+          "Sérapéum",
+          "Ceyrapéum"
+        ],
+        "réponse": "Sérapéum",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel appareil reproducteur femelle des fleurs est aussi appelé gynécée ?",
+        "propositions": [
+          "Pistil",
+          "Pistile",
+          "Pissetil",
+          "Pistille"
+        ],
+        "réponse": "Pistil",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

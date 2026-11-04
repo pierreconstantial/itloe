@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #15",         
+  "mise-à-jour": "06/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un A, il faut un sport, un légume, un règlement et un métier.",
+        "propositions": [
+          "Argent",
+          "Artichaut",
+          "Architecte",
+          "Athlétisme"
+        ],
+        "réponse": "Athlétisme",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un C, il faut une zone intime, un lieu, un bateau et une couleur.",
+        "propositions": [
+          "Café",
+          "Chatte",
+          "Catamaran",
+          "Cyan"
+        ],
+        "réponse": "Chatte",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un J, il faut un liquide, une couleur, un métier et un sport de combat.",
+        "propositions": [
+          "Judo",
+          "Jaune",
+          "Jus",
+          "Journaliste"
+        ],
+        "réponse": "Jus",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un T, il faut un revêtement, une rotation, une couleur et un félin.",
+        "propositions": [
+          "Tourbillon",
+          "Tigre",
+          "Tatami",
+          "Turquoise"
+        ],
+        "réponse": "Tatami",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

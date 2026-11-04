@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "FC Barcelone",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel stade le FC Barcelone joue-t-il ses matchs à domicile ?",
+        "propositions": [
+          "Maracana",
+          "Camp Nou",
+          "Wembley",
+          "Bernableu"
+        ],
+        "réponse": "Camp Nou",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Camp_Nou",
+        "anecdote": "Avec une capacité de 99 354 places, le Camp Nou, qui signifie « terrain nouveau », est le plus grand stade d'Europe."
+      },
+      {
+        "id": 2,
+        "question": "À quel club Zlatan Ibrahimovic a-t-il été acheté par le Barça en 2009 ?",
+        "propositions": [
+          "Göteborg",
+          "Leeds United",
+          "Bayern Munich",
+          "Inter Milan"
+        ],
+        "réponse": "Inter Milan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Zlatan_Ibrahimovic",
+        "anecdote": "Zlatan Ibrahimovic est considéré comme l'un des avants-centres les plus complets au monde."
+      },
+      {
+        "id": 3,
+        "question": "Qui a succédé à Pep Guardiola au Barça B en 2008 ?",
+        "propositions": [
+          "Luis Figo",
+          "Patrick Kluivert",
+          "Luis Enrique",
+          "Andoni Zubizarreta"
+        ],
+        "réponse": "Luis Enrique",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Luis_Enrique",
+        "anecdote": "C'est la première victoire d'une équipe qui n'aurait pas été qualifiée selon les anciennes règles."
+      },
+      {
+        "id": 4,
+        "question": "Quelle croix apparaît sur l'emblème du FC Barcelone ?",
+        "propositions": [
+          "Saint-Patrick",
+          "Saint-Simon",
+          "Saint-George",
+          "Saint-Andrew"
+        ],
+        "réponse": "Saint-George",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Croix_de_saint_Georges",
+        "anecdote": "La croix de saint Georges est utilisée comme drapeau de l'Angleterre, dont le saint est également le patron."
+      }
+    ]
+}

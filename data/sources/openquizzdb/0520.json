@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Magazine Playboy",         
+  "mise-à-jour": "18/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui a fondé le magazine masculin de charme américain « Playboy » ?",
+        "propositions": [
+          "Larry Flynt",
+          "Marc Dorcel",
+          "Phil Harvey",
+          "Hugh Hefner"
+        ],
+        "réponse": "Hugh Hefner",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hugh_Hefner",
+        "anecdote": "Son magazine, comme sa vie, font partie des mythes populaires du monde occidental de la seconde moitié du XXe siècle."
+      },
+      {
+        "id": 2,
+        "question": "Quelle était la périodicité initiale du magazine masculin « Playboy » ?",
+        "propositions": [
+          "Trimestrielle",
+          "Hebdomadaire",
+          "Mensuelle",
+          "Bimestrielle"
+        ],
+        "réponse": "Mensuelle",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Playboy",
+        "anecdote": "À partir de 2009, au vu d'un déficit de près de 8 millions de dollars, sa périodicité devient bimestrielle et ses numéros sont thématiques."
+      },
+      {
+        "id": 3,
+        "question": "En combien de volets se déplie le centre du magazine « Playboy » ?",
+        "propositions": [
+          "Cinq volets",
+          "Six volets",
+          "Trois volets",
+          "Quatre volets"
+        ],
+        "réponse": "Trois volets",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Playboy",
+        "anecdote": "Le contenu des émissions de « Playboy TV », chaîne payante américaine, est plus explicite que celui des magazines « Playboy »."
+      },
+      {
+        "id": 4,
+        "question": "Qui a créé le logo stylisé du lapin de « Playboy », avec son noeud papillon ?",
+        "propositions": [
+          "Gary Grimshaw",
+          "Art Paul",
+          "Ben Blank",
+          "John Fulbrook"
+        ],
+        "réponse": "Art Paul",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Playboy",
+        "anecdote": "Hugh Hefner a dit qu'il avait choisi le lapin comme mascotte (au lieu du cerf à bois) pour sa connotation sexuelle humoristique."
+      }
+    ]
+}

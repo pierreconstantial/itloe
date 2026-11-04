@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Symboles chimiques",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Parmi les métaux alcalins, quel est le symbole chimique du sodium ?",
+        "propositions": [
+          "Na",
+          "So",
+          "Sd",
+          "Um"
+        ],
+        "réponse": "Na",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sodium",
+        "anecdote": "On ne trouve pas le sodium à l'état de corps pur dans la nature, mais il est très abondant sous forme de composés."
+      },
+      {
+        "id": 2,
+        "question": "Quel élément a pour symbole Na et pour numéro atomique 11 ?",
+        "propositions": [
+          "Sodium",
+          "Sélénium",
+          "Soufre",
+          "Silicium"
+        ],
+        "réponse": "Sodium",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sodium",
+        "anecdote": "Le sodium est un métal mou et argenté, qui appartient aux métaux alcalins."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le symbole chimique du potassium, d'aspect blanc métallique ?",
+        "propositions": [
+          "T",
+          "K",
+          "P",
+          "O"
+        ],
+        "réponse": "K",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Potassium",
+        "anecdote": "Le potassium s'oxyde rapidement au contact de l'air et réagit violemment avec l'eau."
+      },
+      {
+        "id": 4,
+        "question": "Quel élément chimique est représenté par le symbole B ?",
+        "propositions": [
+          "Bismuth",
+          "Bore",
+          "Benzène",
+          "Brome"
+        ],
+        "réponse": "Bore",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bore",
+        "anecdote": "Le bore, plutôt rare dans l'écorce terrestre, possède la résistance à la traction la plus élevée de tous les éléments connus."
+      }
+    ]
+}

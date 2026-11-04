@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #H",         
+  "mise-à-jour": "07/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel format de codage est couramment utilisé dans les pages internet ?",
+        "propositions": [
+          "HDMI",
+          "HERTZ",
+          "HTML",
+          "HTTP"
+        ],
+        "réponse": "HTML",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hypertext_Markup_Language",
+        "anecdote": "Les pages web peuvent être rédigées dans toutes sortes de langues."
+      },
+      {
+        "id": 2,
+        "question": "Dans la série « Les Simpson », quel est le prénom du mari de Marge ?",
+        "propositions": [
+          "Harvey",
+          "Horace",
+          "Homer",
+          "Herbert"
+        ],
+        "réponse": "Homer",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Homer_Simpson",
+        "anecdote": "Son expression agacée, D'oh!, a été incluse dans l'Oxford English Dictionary en 2001."
+      },
+      {
+        "id": 3,
+        "question": "Quelle ville est également la capitale de la Finlande ?",
+        "propositions": [
+          "Helsinki",
+          "Hanovre",
+          "Huelva",
+          "Halifax"
+        ],
+        "réponse": "Helsinki",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Helsinki",
+        "anecdote": "Helsinki a la plus forte population immigrée de tout le pays."
+      },
+      {
+        "id": 4,
+        "question": "Qui a réalisé le film « La Mort aux trousses », inspiré d'une histoire vraie ?",
+        "propositions": [
+          "Hitchcock",
+          "Hamer",
+          "Hicks",
+          "Hawkins"
+        ],
+        "réponse": "Hitchcock",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Mort_aux_trousses",
+        "anecdote": "Le scénario est en partie inspiré d'une histoire vraie : l'affaire dite Galindez."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Romans de Stephen King",         
+  "mise-à-jour": "07/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel roman met en scène une ado dotée de pouvoirs paranormaux ?",
+        "propositions": [
+          "Christine",
+          "Misery",
+          "Carrie",
+          "Cujo"
+        ],
+        "réponse": "Carrie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Carrie_(roman)",
+        "anecdote": "Ce roman paranormal est le tout premier écrit par Stephen King en 1974."
+      },
+      {
+        "id": 2,
+        "question": "Qui représente le méchant dans le roman de Stephen King « Ça » ?",
+        "propositions": [
+          "Un clown",
+          "Un monstre",
+          "Une ombre",
+          "Un fantôme"
+        ],
+        "réponse": "Un clown",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ça_(roman)",
+        "anecdote": "Cette histoire raconte la lutte entre sept enfants terrorisés et une entité maléfique."
+      },
+      {
+        "id": 3,
+        "question": "Qui est Christine dans l'univers de Stephen King ?",
+        "propositions": [
+          "Une tombe",
+          "Une voiture",
+          "Une demeure",
+          "Une poupée"
+        ],
+        "réponse": "Une voiture",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Christine_(fiction)",
+        "anecdote": "Cette Plymouth Fury modèle 1958 fait une réapparition dans « Ça »."
+      },
+      {
+        "id": 4,
+        "question": "Quel roman d'horreur de Stephen King est sous-titré « L'enfant lumière » ?",
+        "propositions": [
+          "Shining",
+          "Dreamcatcher",
+          "Colorado Kid",
+          "Territoires"
+        ],
+        "réponse": "Shining",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Shining,_l'enfant_lumière",
+        "anecdote": "Stanley Kubrick réalisera en 1980 une adaptation cinématographique de ce roman avec Jack Nicholson pour acteur principal."
+      }
+    ]
+}

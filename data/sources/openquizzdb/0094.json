@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #08",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Pompe à la ferme, mot de cinq lettres commençant par un S ?",
+        "propositions": [
+          "Sabot",
+          "Semis",
+          "Salon",
+          "Sauge"
+        ],
+        "réponse": "Sabot",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Noble serviteur, mot de quatre lettres commençant par un P ?",
+        "propositions": [
+          "Paon",
+          "Père",
+          "Pion",
+          "Page"
+        ],
+        "réponse": "Page",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Chien de chasse, mot de sept lettres commençant par un T ?",
+        "propositions": [
+          "Tilleul",
+          "Tondeur",
+          "Terrier",
+          "Tanneur"
+        ],
+        "réponse": "Terrier",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Fraise de dentiste, mot de huit lettres commençant par un R ?",
+        "propositions": [
+          "Remblais",
+          "Roulette",
+          "Rehausse",
+          "Rigolade"
+        ],
+        "réponse": "Roulette",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

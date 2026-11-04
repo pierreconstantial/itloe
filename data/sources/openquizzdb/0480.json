@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #04",         
+  "mise-à-jour": "08/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À quel « trou » se trouve le bar dans un parcours de golf ?",
+        "propositions": [
+          "Trou 19",
+          "Trou 18",
+          "Trou 12",
+          "Trou 9"
+        ],
+        "réponse": "Trou 19",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quel est le poids standard d'une balle de tennis ?",
+        "propositions": [
+          "65 g",
+          "50 g",
+          "45 g",
+          "57 g"
+        ],
+        "réponse": "57 g",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Combien d'années Robinson Crusoé est-il resté sur son île ?",
+        "propositions": [
+          "18 ans",
+          "20 ans",
+          "35 ans",
+          "28 ans"
+        ],
+        "réponse": "28 ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Combien de ponts traversent la Seine à Paris ?",
+        "propositions": [
+          "30",
+          "25",
+          "37",
+          "45"
+        ],
+        "réponse": "37",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

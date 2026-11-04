@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Folklore",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle plante fleurit traditionnellement les tombes à la Toussaint ?",
+        "propositions": [
+          "Cosmos",
+          "Chrysanthème",
+          "Crocus",
+          "Camélia"
+        ],
+        "réponse": "Chrysanthème",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chrysanthème",
+        "anecdote": "Les plus connus des chrysanthèmes sont les chrysanthèmes d'automne, ou chrysanthèmes des fleuristes (pomponette)."
+      },
+      {
+        "id": 2,
+        "question": "Quel objet est souvent considéré comme porte-bonheur ?",
+        "propositions": [
+          "Fer à repasser",
+          "Fer à friser",
+          "Fer à cheval",
+          "Fer à dorer"
+        ],
+        "réponse": "Fer à cheval",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fer_à_cheval",
+        "anecdote": "Cette vertu viendrait du fait qu'un fer à cheval égaré était revendu au forgeron et permettait ainsi d'en récolter quelques espèces."
+      },
+      {
+        "id": 3,
+        "question": "Quel personnage porte un costume à losanges multicolores ?",
+        "propositions": [
+          "Beltrame",
+          "Pierrot",
+          "Arlequin",
+          "Colombine"
+        ],
+        "réponse": "Arlequin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Arlequin",
+        "anecdote": "Les losanges de ce personnage de la commedia dell'arte représenteraient les multiples facettes d'Arlequin et sa pauvreté."
+      },
+      {
+        "id": 4,
+        "question": "Quel animal est symbole de malheur pour les marins superstitieux ?",
+        "propositions": [
+          "Castor brun",
+          "Dauphin bleu",
+          "Lapin blanc",
+          "Chat noir"
+        ],
+        "réponse": "Chat noir",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marin_(profession)",
+        "anecdote": "En France, les marins sont regroupés au Comité national des pêches maritimes et des élevages marins (CNPMEM)."
+      }
+    ]
+}

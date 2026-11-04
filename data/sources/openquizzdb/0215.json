@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Johnny Depp au cinéma",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel film Johnny Depp transfère-t-il sa conscience après sa mort ?",
+        "propositions": [
+          "Renaissance",
+          "Transcendance",
+          "Aeon Flux",
+          "The Island"
+        ],
+        "réponse": "Transcendance",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Transcendance_(film)",
+        "anecdote": "« Transcendance » est à l'origine un scénario de Jack Paglen qu'il a développé en discutant longuement avec sa femme informaticienne."
+      },
+      {
+        "id": 2,
+        "question": "Quel pirate des Caraïbes est interprété par Johnny Depp ?",
+        "propositions": [
+          "Jack Sparrow",
+          "Barbe-Rouge",
+          "Will Turner",
+          "Capitaine Flint"
+        ],
+        "réponse": "Jack Sparrow",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jack_Sparrow",
+        "anecdote": "Jack Sparrow apprécie la liberté que lui apporte sa vie de boucanier, buvant du rhum et séduisant des femmes en cherchant des trésors."
+      },
+      {
+        "id": 3,
+        "question": "Quel chapeau porte Johnny Depp dans « Charlie et la chocolaterie » ?",
+        "propositions": [
+          "Haut-de-forme",
+          "Béret",
+          "Chapeau melon",
+          "Canotier"
+        ],
+        "réponse": "Haut-de-forme",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Haut-de-forme",
+        "anecdote": "Le haut-de-forme est passé d'une simple nouveauté de la mode à un symbole fort de la condition sociale de l'homme bourgeois."
+      },
+      {
+        "id": 4,
+        "question": "Quel adepte du fantastique a souvent collaboré avec Johnny Depp ?",
+        "propositions": [
+          "Gus Van Sant",
+          "David Lynch",
+          "John Boorman",
+          "Tim Burton"
+        ],
+        "réponse": "Tim Burton",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tim_Burton",
+        "anecdote": "Son cinéma se caractérise par un défilé de monstres et de créatures, ainsi que par un mélange d'humour noir, d'ironie et de macabre."
+      }
+    ]
+}

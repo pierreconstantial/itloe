@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "La Durance",         
+  "mise-à-jour": "13/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelles constructions ont été érigées le long du cours de la Durance ?",
+        "propositions": [
+          "Musées",
+          "Barrages",
+          "Hôpitaux",
+          "Écoles"
+        ],
+        "réponse": "Barrages",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Durance",
+        "anecdote": "Ce sont plutôt des prises d'eau dont le but principal est de dévier la plus grande partie du débit de la rivière dans le canal EDF."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel type de catégorie de cours d'eau peut-on classer la Durance ?",
+        "propositions": [
+          "Ruisseau",
+          "Fleuve",
+          "Rivière",
+          "Canal"
+        ],
+        "réponse": "Rivière",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Durance",
+        "anecdote": "La Durance, difficilement franchissable, reste sur la moitié de son parcours une frontière entre départements."
+      },
+      {
+        "id": 3,
+        "question": "Quel écrivain s'être fortement inspiré de la Durance pour son oeuvre ?",
+        "propositions": [
+          "Pierre Martel",
+          "Jean Proal",
+          "Jean Giono",
+          "Pierre Magnan"
+        ],
+        "réponse": "Jean Giono",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jean_Giono",
+        "anecdote": "Il s'en est servi dans sa géographie imaginaire de la Provence, la transformant en fleuve (il en parle au masculin)."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel fleuve la Durance se jette-t-elle ?",
+        "propositions": [
+          "Garonne",
+          "Rhône",
+          "Seine",
+          "Meuse"
+        ],
+        "réponse": "Rhône",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Durance",
+        "anecdote": "La Durance rejoint le Rhône près d'Avignon, après un parcours de 323 km à travers les Alpes et la Provence. Elle est le deuxième affluent du Rhône par son débit, après la Saône."
+      }
+    ]
+}

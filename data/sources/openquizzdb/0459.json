@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Tintin",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De qui est amoureuse la cantatrice italienne Bianca Castafiore ?",
+        "propositions": [
+          "Nestor",
+          "Haddock",
+          "Tournesol",
+          "Tintin"
+        ],
+        "réponse": "Haddock",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bianca_Castafiore",
+        "anecdote": "Très rarement mise en valeur, la Castafiore est le seul personnage féminin de premier plan de la série « Tintin »."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le prénom du Professeur Tournesol ?",
+        "propositions": [
+          "Tryphon",
+          "Archibald",
+          "Séraphin",
+          "Hyppolite"
+        ],
+        "réponse": "Tryphon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Professeur_Tournesol",
+        "anecdote": "Le Professeur Tournesol est un scientifique assez âgé, dur d'oreille, portant une barbichette et des lunettes rondes."
+      },
+      {
+        "id": 3,
+        "question": "Qui a volé les Bijoux de la Castafiore ?",
+        "propositions": [
+          "Une pie",
+          "Nestor",
+          "Tournesol",
+          "Des bohémiens"
+        ],
+        "réponse": "Une pie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bianca_Castafiore",
+        "anecdote": "La Castafiore (le Rossignol milanais) est une cantatrice italienne de renommée internationale imaginée par Hergé."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la marque de whisky préférée du Capitaine Haddock ?",
+        "propositions": [
+          "Loch Fields",
+          "Loch Lomond",
+          "Loch Ness",
+          "Loch Mahouss"
+        ],
+        "réponse": "Loch Lomond",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Loch_Lomond_(distillerie)",
+        "anecdote": "Aujourd'hui, cette marque de whisky qui existe réellement est plus connue par les tintinophiles que par les amateurs de cet alcool."
+      }
+    ]
+}

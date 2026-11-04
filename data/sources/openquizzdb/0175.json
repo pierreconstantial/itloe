@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Marques et slogans",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quelle filiale du groupe Nestlé George Clooney est-il ambassadeur ?",
+        "propositions": [
+          "Nespresso",
+          "Ricoré",
+          "Carte Noire",
+          "Jacques Vabre"
+        ],
+        "réponse": "Nespresso",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nespresso",
+        "anecdote": "Éric Favre s'est inspiré d'un bar très prisé de Rome où il remarqua que le barista pompait l'air pour créer une mousse crémeuse."
+      },
+      {
+        "id": 2,
+        "question": "Quelle marque de jeans mondialement connue fabrique le célèbre 501 ?",
+        "propositions": [
+          "Lee Cooper",
+          "Levis",
+          "Lacoste",
+          "Lindex"
+        ],
+        "réponse": "Levis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Levi_Strauss_and_Co.",
+        "anecdote": "Levi Strauss, un émigrant bavarois aux États-Unis, avait d'abord pour idée de vendre de la toile de tente pour les chercheurs d'or."
+      },
+      {
+        "id": 3,
+        "question": "Quelle marque vous invite à savourer « un café nommé désir » ?",
+        "propositions": [
+          "Carte Noire",
+          "Nespresso",
+          "Ricoré",
+          "Jacques Vabre"
+        ],
+        "réponse": "Carte Noire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Carte_Noire",
+        "anecdote": "Ancienne marque du groupe américain Mondelez, Carte Noire appartient désormais au groupe italien Lavazza depuis février 2016."
+      },
+      {
+        "id": 4,
+        "question": "Quelle marque vous garantit « le goût des choses simples » ?",
+        "propositions": [
+          "Purina",
+          "Maggi",
+          "Buitoni",
+          "Herta"
+        ],
+        "réponse": "Herta",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Herta",
+        "anecdote": "La marque a aussi innové en lançant le knacki, une saucisse prête à consommer, qui devint vite un produit phare de l'entreprise."
+      }
+    ]
+}

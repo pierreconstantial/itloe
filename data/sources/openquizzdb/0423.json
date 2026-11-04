@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Boissons sans alcool",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la saveur du Champomy ?",
+        "propositions": [
+          "Ananas",
+          "Citron",
+          "Orange",
+          "Pomme"
+        ],
+        "réponse": "Pomme",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Orangina_Schweppes",
+        "anecdote": "En 2013, Orangina Schweppes se hisse à la seconde place du marché des boissons non-alcoolisées en France."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel secteur Tropicana est-elle un leader mondial ?",
+        "propositions": [
+          "Thé",
+          "Limonade",
+          "Jus de fruits",
+          "Bières sans alcool"
+        ],
+        "réponse": "Jus de fruits",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tropicana",
+        "anecdote": "L'entreprise a été fondée en 1947 par Anthony T. Rossi, un immigrant italien, avec à l'origine 50 employés."
+      },
+      {
+        "id": 3,
+        "question": "Quelle boisson énergisante possède un logo à trois griffes vertes ?",
+        "propositions": [
+          "Monster Energy",
+          "Rockstar",
+          "Red Bull",
+          "Dark Dog"
+        ],
+        "réponse": "Monster Energy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Monster_Energy",
+        "anecdote": "La gamme comporte des boissons gazeuses énergétiques aux divers arômes fruités et des boissons non gazeuses à base de thé."
+      },
+      {
+        "id": 4,
+        "question": "Quelle boisson est connue pour contenir du ginger ale ?",
+        "propositions": [
+          "Canada Dry",
+          "7 Up",
+          "Gini",
+          "Fanta"
+        ],
+        "réponse": "Canada Dry",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Canada_Dry",
+        "anecdote": "Bien que Canada Dry soit originaire du Canada, ses quartiers généraux industriels sont actuellement situés au Texas."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Métiers artistiques",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui sait fabriquer un couteau à la main, de la lame jusqu'au manche ?",
+        "propositions": [
+          "Archetier",
+          "Moireur",
+          "Canneur",
+          "Coutelier"
+        ],
+        "réponse": "Coutelier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coutellerie",
+        "anecdote": "Actuellement, le marché de la coutellerie reste dynamique grâce aux collectionneurs, sensibles à la qualité de l'acier utilisé."
+      },
+      {
+        "id": 2,
+        "question": "Quel artisan transforme des bois pour créer du mobilier décoratif ?",
+        "propositions": [
+          "Vannier",
+          "Vernisseur",
+          "Ébéniste",
+          "Dinandier"
+        ],
+        "réponse": "Ébéniste",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ébéniste",
+        "anecdote": "Les bureaux et meubles recouverts d'écailles, de marqueterie, de laque, de vernis, de porcelaine sont des meubles d'ébénisterie."
+      },
+      {
+        "id": 3,
+        "question": "Quel artisan confectionne des objets à l'aide d'osier ou de paille ?",
+        "propositions": [
+          "Vannier",
+          "Canneur",
+          "Laqueur",
+          "Campaniste"
+        ],
+        "réponse": "Vannier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vannier_(métier)",
+        "anecdote": "Les savoir-faire vanniers en Bretagne du Carbasson sont inscrits à l'Inventaire du patrimoine culturel immatériel français depuis 2015."
+      },
+      {
+        "id": 4,
+        "question": "Qui est chargé de conseiller les clients pour des accessoires de tête ?",
+        "propositions": [
+          "Gantier",
+          "Chapelier",
+          "Coutelier",
+          "Cirier"
+        ],
+        "réponse": "Chapelier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chapelier",
+        "anecdote": "Exerçant dans une chapellerie, son travail d'atelier consiste à mettre à la taille, assortir et garnir les chapeaux, rafraîchir et réparer."
+      }
+    ]
+}

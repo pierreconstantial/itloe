@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #18",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel insecte allongé est doté de deux paires d'ailes transparentes ?",
+        "propositions": [
+          "Libellhule",
+          "Libelulle",
+          "Libellulle",
+          "Libellule"
+        ],
+        "réponse": "Libellule",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle boisson alcoolisée fermentée est faite d'eau et de miel ?",
+        "propositions": [
+          "Hydromail",
+          "Idromèle",
+          "Hydromel",
+          "Hidromelle"
+        ],
+        "réponse": "Hydromel",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel trait d'esprit humoristique apporte ironie sur un sujet donné ?",
+        "propositions": [
+          "Calambours",
+          "Calembourt",
+          "Calembour",
+          "Calembourg"
+        ],
+        "réponse": "Calembour",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel véhicule hippomobile issu du coche possède quatre roues ?",
+        "propositions": [
+          "Carrosse",
+          "Charrosse",
+          "Carosse",
+          "Carrose"
+        ],
+        "réponse": "Carrosse",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

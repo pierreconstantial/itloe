@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Jul",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En plus des lunettes, que porte souvent Jul dans ses clips ?",
+        "propositions": [
+          "Cravate",
+          "Chapeau",
+          "Casquette",
+          "Masque"
+        ],
+        "réponse": "Casquette",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jul_(rappeur)",
+        "anecdote": "Jul est reconnaissable à son style vestimentaire très décontracté, dans lequel les casquettes et les lunettes occupent une place importante. Ces accessoires sont devenus associés à son image publique et apparaissent régulièrement dans ses clips et ses app"
+      },
+      {
+        "id": 2,
+        "question": "Quel est le véritable nom du rappeur Jul ?",
+        "propositions": [
+          "Julien Dupont",
+          "Jean-Marie Lopez",
+          "Julien Mari",
+          "Jules Martin"
+        ],
+        "réponse": "Julien Mari",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jul_(rappeur)",
+        "anecdote": "Jul est le nom de scène de Julien Mari, né le 14 janvier 1990 à Marseille. Le rappeur a grandi dans les quartiers nord de la cité phocéenne, un environnement qui a fortement marqué son parcours et son univers artistique."
+      },
+      {
+        "id": 3,
+        "question": "Quelle ville est très associée à l'univers musical de Jul ?",
+        "propositions": [
+          "Bordeaux",
+          "Marseille",
+          "Nice",
+          "Toulouse"
+        ],
+        "réponse": "Marseille",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jul_(rappeur)",
+        "anecdote": "Marseille occupe une place centrale dans l'univers de Jul. Né et élevé dans cette ville, le rappeur fait régulièrement référence à Marseille dans ses chansons, ses clips et son image, contribuant à associer son parcours à la cité phocéenne."
+      },
+      {
+        "id": 4,
+        "question": "Quelle caractéristique décrit le mieux Jul ?",
+        "propositions": [
+          "Peu de sorties",
+          "Instrumentaux",
+          "Très productif",
+          "Pas d'albums"
+        ],
+        "réponse": "Très productif",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jul_(rappeur)",
+        "anecdote": "Jul est connu pour son rythme de production particulièrement élevé. Depuis ses débuts, il a publié un très grand nombre d'albums et de projets, auxquels s'ajoutent de nombreux titres et collaborations. Cette productivité est devenue l'une des caractéristi"
+      }
+    ]
+}

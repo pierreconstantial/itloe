@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mannequins français",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui a été élue Miss Albigeois Midi-Pyrénées 2008 puis Miss France ?",
+        "propositions": [
+          "Valérie Bègue",
+          "Diane Leyre",
+          "Chloé Mortaud",
+          "Malika Ménard"
+        ],
+        "réponse": "Chloé Mortaud",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chloé_Mortaud",
+        "anecdote": "Cette reine de beauté fut également la cinquième dauphine de Miss Univers 2009 et la troisième dauphine de Miss Monde 2009."
+      },
+      {
+        "id": 2,
+        "question": "Qui a été Miss Paris 2009 et a participé à Miss France ?",
+        "propositions": [
+          "Maëva Coucke",
+          "Mélody Vibert",
+          "Sonia Rolland",
+          "Kelly Bochenko"
+        ],
+        "réponse": "Kelly Bochenko",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eva_Herzigová",
+        "anecdote": "Eva Herzigova fait partie de la seconde génération de top-models, élevés au rang de star après le groupe de supermodels Big Six."
+      },
+      {
+        "id": 3,
+        "question": "Quelle mannequin française fut la compagne de Grégory Lemarchal ?",
+        "propositions": [
+          "Karine Ferri",
+          "Tatiana Silva",
+          "Victoria Silvstedt",
+          "Élodie Gossuin"
+        ],
+        "réponse": "Karine Ferri",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Karine_Ferri",
+        "anecdote": "En hommage permanent à Grégory, Karine Ferri s'est fait tatouer GK (Grégory Karine) sur le poignet gauche."
+      },
+      {
+        "id": 4,
+        "question": "Quelle mannequin franco-algérienne était anciennement escort-girl ?",
+        "propositions": [
+          "Farida Khelfa",
+          "Zahia Dehar",
+          "Imen Noël",
+          "Rym Amari"
+        ],
+        "réponse": "Zahia Dehar",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Zahia_Dehar",
+        "anecdote": "Dans un hôtel de Munich, Zahia Dehar aurait été envoyée rejoindre le footballeur Franck Ribéry en guise de cadeau d'anniversaire."
+      }
+    ]
+}

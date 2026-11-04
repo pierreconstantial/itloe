@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Girafe au long cou",         
+  "mise-à-jour": "30/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est l'espérance de vie moyenne d'une girafe ?",
+        "propositions": [
+          "25 ans",
+          "55 ans",
+          "75 ans",
+          "15 ans"
+        ],
+        "réponse": "25 ans",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Girafe",
+        "anecdote": "Les Grecs pensaient que la girafe résultait de l'union du chameau et du léopard, d'où le nom scientifique « camelopardalis »."
+      },
+      {
+        "id": 2,
+        "question": "Quelle girafe en caoutchouc pour bébés est apparue en 1961 ?",
+        "propositions": [
+          "Barbie",
+          "Mimie",
+          "Sophie",
+          "Noémie"
+        ],
+        "réponse": "Sophie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sophie_la_girafe",
+        "anecdote": "La girafe Sophie connaît encore un fort succès dans l'hexagone avec déjà plus de 816 000 exemplaires vendus en France."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le nom du petit de la girafe ?",
+        "propositions": [
+          "Girofet",
+          "Giraflet",
+          "Girafau",
+          "Girafon"
+        ],
+        "réponse": "Girafon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Girafe",
+        "anecdote": "La girafe peut commencer à mettre bas dès l'âge de 5 ans."
+      },
+      {
+        "id": 4,
+        "question": "Quelle taille environ peut atteindre une girafe ?",
+        "propositions": [
+          "4 mètres",
+          "3 mètres",
+          "8 mètres",
+          "6 mètres"
+        ],
+        "réponse": "6 mètres",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Girafe",
+        "anecdote": "L'expression « peigner la girafe » signifie ne rien faire ou perdre son temps."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Présentateurs du JT",         
+  "mise-à-jour": "24/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui présentait le journal de 20 heures de TF1 entre 2008 et 2012 ?",
+        "propositions": [
+          "Marie Drucker",
+          "Claire Chazal",
+          "Florence Schaal",
+          "Laurence Ferrari"
+        ],
+        "réponse": "Laurence Ferrari",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Laurence_Ferrari",
+        "anecdote": "Laurence Ferrari entend désormais « dépoussiérer l'actualité » en traitant toutes sortes de sujets."
+      },
+      {
+        "id": 2,
+        "question": "Qui a remplacé Claude Sérillon au journal de 20 heures de France 2 ?",
+        "propositions": [
+          "Bruno Masure",
+          "Paul Amar",
+          "David Pujadas",
+          "Daniel Bilalian"
+        ],
+        "réponse": "David Pujadas",
+        "wikipédia": "https://fr.wikipedia.org/wiki/David_Pujadas",
+        "anecdote": "David Pujadas a remporté en 2007 le prix Roland-Dorgelès pour son « attachement à la qualité de la langue française »."
+      },
+      {
+        "id": 3,
+        "question": "Qui a été une figure historique du JT de France 3 ?",
+        "propositions": [
+          "Cyril Féraud",
+          "Michel Cymes",
+          "David Pujadas",
+          "Henri Sannier"
+        ],
+        "réponse": "Henri Sannier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quel journaliste a présenté le JT avant Anne-Sophie Lapix ?",
+        "propositions": [
+          "David Pujadas",
+          "Henri Sannier",
+          "Michel Cymes",
+          "Stéphane Bern"
+        ],
+        "réponse": "David Pujadas",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

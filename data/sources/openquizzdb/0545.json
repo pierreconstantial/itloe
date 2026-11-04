@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Animaux de la savane",         
+  "mise-à-jour": "07/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quelle fonction vitale le fennec peut-il étonnamment se passer ?",
+        "propositions": [
+          "Voir",
+          "Boire",
+          "Dormir",
+          "Manger"
+        ],
+        "réponse": "Boire",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fennec",
+        "anecdote": "Le liquide que le fennec absorbe grâce à son alimentation lui suffit et est donc admirablement adapté à la vie dans le désert."
+      },
+      {
+        "id": 2,
+        "question": "De quelle manière le lynx a-t-il l'habitude de marquer son territoire ?",
+        "propositions": [
+          "Excréments",
+          "Éraflures",
+          "Souris mortes",
+          "Poils"
+        ],
+        "réponse": "Éraflures",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lynx",
+        "anecdote": "Outre des éraflures, les lynx utilisent parfois également leur urine comme marque odorante afin de délimiter leur domaine."
+      },
+      {
+        "id": 3,
+        "question": "Taillé pour la course, jusqu'à quelle vitesse un guépard peut-il courir ?",
+        "propositions": [
+          "120 km/h",
+          "90 km/h",
+          "60 km/h",
+          "150 km/h"
+        ],
+        "réponse": "120 km/h",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Guépard",
+        "anecdote": "Le plus rapide des animaux ne peut maintenir cette vitesse que sur quelques centaines de mètres, laissant une chance aux gazelles."
+      },
+      {
+        "id": 4,
+        "question": "À quel âge un tigreau commence-t-il à manger de la viande ?",
+        "propositions": [
+          "Un an",
+          "Deux mois",
+          "Deux ans",
+          "Six mois"
+        ],
+        "réponse": "Deux mois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tigre",
+        "anecdote": "Au cours des six premiers mois, les bébés tigres qui ne connaissent pas leur père sont allaités par leur mère."
+      }
+    ]
+}

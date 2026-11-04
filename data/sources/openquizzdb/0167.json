@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "George Clooney",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel médecin Georges Clooney incarnait-il dans la série « Urgences » ?",
+        "propositions": [
+          "John Carter",
+          "Douglas Ross",
+          "Mark Green",
+          "Dylan Creed"
+        ],
+        "réponse": "Douglas Ross",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Urgences_(série_télévisée)",
+        "anecdote": "Le pilote de la série a été filmé dans un vieil hôpital abandonné, suite au manque de temps et d'argent pour construire un plateau."
+      },
+      {
+        "id": 2,
+        "question": "Quel était le nom du cochon de compagnie de George Clooney ?",
+        "propositions": [
+          "Fred",
+          "Kyle",
+          "Max",
+          "Tom"
+        ],
+        "réponse": "Max",
+        "wikipédia": "https://fr.wikipedia.org/wiki/George_Clooney",
+        "anecdote": "D'après George, ce cochon était son meilleur ami jusqu'à son décès à l'âge de 19 ans."
+      },
+      {
+        "id": 3,
+        "question": "Pour quelle région du Soudan George Clooney est-il fortement mobilisé ?",
+        "propositions": [
+          "Kassala",
+          "Darfour",
+          "Sannar",
+          "Atbara"
+        ],
+        "réponse": "Darfour",
+        "wikipédia": "https://fr.wikipedia.org/wiki/W",
+        "anecdote": "P"
+      },
+      {
+        "id": 4,
+        "question": "Pour quelle marque de vermouth George Clooney a-t-il fait de la pub ?",
+        "propositions": [
+          "Dubonnet",
+          "Cinzano",
+          "Martini",
+          "Noilly Prat"
+        ],
+        "réponse": "Martini",
+        "wikipédia": "https://fr.wikipedia.org/wiki/W",
+        "anecdote": "P"
+      }
+    ]
+}

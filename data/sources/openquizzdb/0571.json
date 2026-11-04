@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Albums du groupe The Cure",         
+  "mise-à-jour": "26/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel album est considéré comme le plus noir du groupe The Cure ?",
+        "propositions": [
+          "Wish",
+          "Disintegration",
+          "Bloodflowers",
+          "Pornography"
+        ],
+        "réponse": "Pornography",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pornography",
+        "anecdote": "Malgré son atmosphère oppressante et gothique, cet album atteindra le Top 10 en Angleterre ainsi qu'en Nouvelle-Zélande."
+      },
+      {
+        "id": 2,
+        "question": "Quel deuxième album de The Cure est plus sombre que le premier ?",
+        "propositions": [
+          "Pornography",
+          "The Top",
+          "Seventeen Seconds",
+          "Faith"
+        ],
+        "réponse": "Seventeen Seconds",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Seventeen_Seconds",
+        "anecdote": "En 2000, le magazine Q a placé « Seventeen Seconds » au n° 65 dans sa liste des 100 meilleurs albums britanniques."
+      },
+      {
+        "id": 3,
+        "question": "Laquelle de ces propositions ne désigne pas un album live de The Cure ?",
+        "propositions": [
+          "Entreat",
+          "Dublin",
+          "Paris",
+          "Concert"
+        ],
+        "réponse": "Dublin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Discographie_de_The_Cure",
+        "anecdote": "En 2018, The Cure a officiellement sorti 5 albums live, 12 albums studios et 11 VHS/DVD, sans compter de nombreuses compilations."
+      },
+      {
+        "id": 4,
+        "question": "Combien d'albums The Cure avait-il vendu dans le monde fin 2018 ?",
+        "propositions": [
+          "20 millions",
+          "30 millions",
+          "10 millions",
+          "40 millions"
+        ],
+        "réponse": "30 millions",
+        "wikipédia": "https://fr.wikipedia.org/wiki/The_Cure",
+        "anecdote": "Outre les enregistrements officiels, sur disque ou en vidéo, il existe un nombre important de bootlegs recherchés par les fans."
+      }
+    ]
+}

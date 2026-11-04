@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mots croisés #31",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Accumule les tuiles, mot de quatre lettres commençant par un T ?",
+        "propositions": [
+          "Toit",
+          "Thon",
+          "Trou",
+          "Tube"
+        ],
+        "réponse": "Toit",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "On y stocke des mails, mot de cinq lettres commençant par un B ?",
+        "propositions": [
+          "Benne",
+          "Bâche",
+          "Boîte",
+          "Bocal"
+        ],
+        "réponse": "Boîte",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Chasseur dans l'armée, mot de cinq lettres commençant par un A ?",
+        "propositions": [
+          "Atome",
+          "Avion",
+          "Acide",
+          "Aigle"
+        ],
+        "réponse": "Avion",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Ne manque pas de chien, mot de quatre lettres commençant par un R ?",
+        "propositions": [
+          "Roux",
+          "Rhum",
+          "Rose",
+          "Race"
+        ],
+        "réponse": "Race",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

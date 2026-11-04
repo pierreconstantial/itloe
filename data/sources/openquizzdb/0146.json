@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #13",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un T, il faut un animal, un fruit charnu, un pays magrébin et un sport.",
+        "propositions": [
+          "Tigre",
+          "Tomate",
+          "Tennis",
+          "Tunisie"
+        ],
+        "réponse": "Tigre",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un D, il faut une pièce d'étoffe, un pays, une baie et une profession.",
+        "propositions": [
+          "Drapeau",
+          "Datte",
+          "Dentiste",
+          "Danemark"
+        ],
+        "réponse": "Drapeau",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un H, il faut un pays, une fleur, un instrument et un balai-brosse.",
+        "propositions": [
+          "Hibiscus",
+          "Honduras",
+          "Hérisson",
+          "Harmonica"
+        ],
+        "réponse": "Honduras",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un V, il faut un pays, un récipient, une danseuse et un potage.",
+        "propositions": [
+          "Valseuse",
+          "Vietnam",
+          "Velouté",
+          "Vase"
+        ],
+        "réponse": "Vietnam",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

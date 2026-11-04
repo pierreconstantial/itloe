@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Clara Morgane",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle ville Emmanuelle Aurélie Munos est-elle née en 1981 ?",
+        "propositions": [
+          "Dijon",
+          "Reims",
+          "Lille",
+          "Marseille"
+        ],
+        "réponse": "Marseille",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Clara_Morgane",
+        "anecdote": "Clara Morgane a quitté Marseille pour Paris en 2000 et se lança dans l'industrie du film pour adulte afin de « se trouver »."
+      },
+      {
+        "id": 2,
+        "question": "Qui fut son partenaire en privé et à l'écran, de 1997 à 2002 ?",
+        "propositions": [
+          "Fred Coppula",
+          "Christophe Clark",
+          "Greg Centauro",
+          "Claude Mulot"
+        ],
+        "réponse": "Greg Centauro",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Greg_Centauro",
+        "anecdote": "Ils ont notamment tourné ensemble « La Cambrioleuse » et « La Candidate », parmi les plus connus."
+      },
+      {
+        "id": 3,
+        "question": "Quelle émission Clara Morgane a-t-elle animé sept ans sur Canal+ ?",
+        "propositions": [
+          "Pop Com",
+          "En aparté",
+          "Le Journal du Hard",
+          "Sex Star"
+        ],
+        "réponse": "Le Journal du Hard",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Journal_du_Hard",
+        "anecdote": "Elle donne ainsi rendez-vous à jusqu'à parfois plus de 2 millions de téléspectateurs tous les premiers samedis du mois."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le titre du premier album de Clara Morgane, sorti en 2007 ?",
+        "propositions": [
+          "Sexy Girl",
+          "So Excited",
+          "DéClaraTions",
+          "Nuits Blanches"
+        ],
+        "réponse": "DéClaraTions",
+        "wikipédia": "https://fr.wikipedia.org/wiki/DéCLARAtions",
+        "anecdote": "Au niveau de la musique, les productions sont signées Madizm et Sec undo, Franck Rougier, Busta funck, Humphrey et Niroshima."
+      }
+    ]
+}

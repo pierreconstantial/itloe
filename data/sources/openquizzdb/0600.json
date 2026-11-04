@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #16",         
+  "mise-à-jour": "09/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans le jeu du même nom, quelle carte représente le Nain jaune ?",
+        "propositions": [
+          "8 de trèfle",
+          "10 de pique",
+          "7 de carreau",
+          "9 de coeur"
+        ],
+        "réponse": "7 de carreau",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nain_jaune",
+        "anecdote": "Cette carte occupe une place centrale dans le plateau de jeu et représente la plupart du temps le gain le plus important de la partie."
+      },
+      {
+        "id": 2,
+        "question": "Dans un film produit de nos jours, combien y a-t-il d'images par seconde ?",
+        "propositions": [
+          "24",
+          "36",
+          "16",
+          "8"
+        ],
+        "réponse": "24",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Image_par_seconde",
+        "anecdote": "Avec le temps, 24 fps est devenu le standard mondial car il constituait un compromis entre fluidité et coût de production."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le diamètre officiel d'un disque compact standard ?",
+        "propositions": [
+          "8 cm",
+          "14 cm",
+          "10 cm",
+          "12 cm"
+        ],
+        "réponse": "12 cm",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Compact_disc",
+        "anecdote": "Le CD a été développé conjointement par Philips et Sony dans les années 1980 pour remplacer le vinyle et la cassette audio."
+      },
+      {
+        "id": 4,
+        "question": "Combien d'étoiles figurent sur le drapeau de l'Union Européenne ?",
+        "propositions": [
+          "Quinze",
+          "Douze",
+          "Neuf",
+          "Vingt"
+        ],
+        "réponse": "Douze",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Drapeau_de_l'Union_européenne",
+        "anecdote": "Les douze étoiles du drapeau ne représentent pas les États membres, mais symbolisent plutôt la perfection, la plénitude et l'unité."
+      }
+    ]
+}

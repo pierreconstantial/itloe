@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Marques de jus de fruits",         
+  "mise-à-jour": "04/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle marque est identifiée par une ribambelle de fruits déjantés ?",
+        "propositions": [
+          "Capri-Sun",
+          "Oasis",
+          "Calypso",
+          "Lemonade"
+        ],
+        "réponse": "Oasis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Oasis_(marque_de_boisson)",
+        "anecdote": "Dans les années 1980, le chanteur Carlos devint ambassadeur de la marque avec sa chanson « Rosalie » aux paroles détournées."
+      },
+      {
+        "id": 2,
+        "question": "Quel jus de fruit est vendu dans une poche résistante ?",
+        "propositions": [
+          "Tropicana",
+          "Casino",
+          "Capri-Sun",
+          "Andros"
+        ],
+        "réponse": "Capri-Sun",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Capri-Sun",
+        "anecdote": "Le succès de Capri-Sun repose aussi sur son emballage : la poche est résistante et peut par conséquent être emportée partout."
+      },
+      {
+        "id": 3,
+        "question": "Quelle boisson contient beaucoup de jus et de pulpe d'orange ?",
+        "propositions": [
+          "Pressade",
+          "Orangina",
+          "Joker",
+          "Jafaden"
+        ],
+        "réponse": "Orangina",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Orangina",
+        "anecdote": "La célébrité de la marque Orangina vient en partie de l'originalité de sa bouteille, en forme d'orange avec une surface granulée."
+      },
+      {
+        "id": 4,
+        "question": "Quels jus de fruits sont transformés dans l'usine historique de Mâcon ?",
+        "propositions": [
+          "Minute Maid",
+          "Tropicana",
+          "Pampryl",
+          "Joker"
+        ],
+        "réponse": "Joker",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Joker_(marque_de_boisson)",
+        "anecdote": "Cette boisson, qui fut créée à Mâcon (Saône-et-Loire) en 1936 par Henri Malvoisin, a reçu en 1988 l'oscar de l'emballage."
+      }
+    ]
+}

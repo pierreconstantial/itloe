@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #15",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel médicament est utilisé dans le traitement de la douleur ?",
+        "propositions": [
+          "Entalgique",
+          "Enthalgique",
+          "Anthalgique",
+          "Antalgique"
+        ],
+        "réponse": "Antalgique",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Au Canada, quelle embarcation est utilisée pour la pêche sportive ?",
+        "propositions": [
+          "Challoupe",
+          "Chalouppe",
+          "Challouppe",
+          "Chaloupe"
+        ],
+        "réponse": "Chaloupe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel chausson d'intérieur ne possède ni tige ni talon ?",
+        "propositions": [
+          "Pentoufle",
+          "Pentouffle",
+          "Pantoufle",
+          "Pantouffle"
+        ],
+        "réponse": "Pantoufle",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle plante, principalement produite au Maroc, sert pour le thé ?",
+        "propositions": [
+          "Mente",
+          "Manthe",
+          "Menthe",
+          "Mante"
+        ],
+        "réponse": "Menthe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

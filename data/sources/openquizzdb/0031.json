@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Frites pas toujours belges",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Que vous fournira-t-on pour mettre sur vos frites aux États-Unis ?",
+        "propositions": [
+          "Pickles",
+          "Ketchup",
+          "Mayonnaise",
+          "Tartare"
+        ],
+        "réponse": "Ketchup",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ketchup",
+        "anecdote": "Le ketchup est un condiment populaire, habituellement élaboré à partir de sauce tomate, de vinaigre et de sucre."
+      },
+      {
+        "id": 2,
+        "question": "Que vous fournira-t-on avec le sel pour vos frites en Angleterre ?",
+        "propositions": [
+          "Vinaigre",
+          "Lait",
+          "Sucre",
+          "Sirop"
+        ],
+        "réponse": "Vinaigre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Frite",
+        "anecdote": "La plupart des frites consommées dans le monde sont des frites surgelées produites industriellement."
+      },
+      {
+        "id": 3,
+        "question": "Quel mets québécois est constitué de frites et de cheddar frais ?",
+        "propositions": [
+          "Poutine",
+          "Cipaille",
+          "Tourtière",
+          "Gibelotte"
+        ],
+        "réponse": "Poutine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Poutine_(plat)",
+        "anecdote": "La poutine trouve son origine dans le Québec  rural des années 1950."
+      },
+      {
+        "id": 4,
+        "question": "Quelle entreprise est fournisseur historique de frites chez McDonald's ?",
+        "propositions": [
+          "Flodor",
+          "Lutosa",
+          "McCain",
+          "Intersnack"
+        ],
+        "réponse": "McCain",
+        "wikipédia": "https://fr.wikipedia.org/wiki/McCain_Foods",
+        "anecdote": "La société McCain Foods, entreprise privée au Canada, emploie 20 000 personnes dans ses 55 usines à travers le monde."
+      }
+    ]
+}

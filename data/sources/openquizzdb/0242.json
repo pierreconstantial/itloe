@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Quadriquizz #21",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Avec un P, il faut un lieu vert, un sport, un animal et un objet à dents.",
+        "propositions": [
+          "Peigne",
+          "Panda",
+          "Parc",
+          "Pétanque"
+        ],
+        "réponse": "Parc",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Avec un R, il faut un plat italien, un faisceau, un cercle et une plante.",
+        "propositions": [
+          "Romarin",
+          "Risotto",
+          "Rond",
+          "Rayon"
+        ],
+        "réponse": "Risotto",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Avec un V, il faut une partie du corps, une plante, un métier et un véhicule.",
+        "propositions": [
+          "Voiture",
+          "Vétérinaire",
+          "Visage",
+          "Vigne"
+        ],
+        "réponse": "Visage",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Avec un B, il faut un fruit, un artisan, un lieu de travail et un animal.",
+        "propositions": [
+          "Bureau",
+          "Baleine",
+          "Banane",
+          "Boulanger"
+        ],
+        "réponse": "Banane",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

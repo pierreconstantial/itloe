@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Peeta dans « Hunger Games »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le métier du père de Peeta dans « Hunger Games » ?",
+        "propositions": [
+          "Coiffeur",
+          "Avocat",
+          "Pharmacien",
+          "Boulanger"
+        ],
+        "réponse": "Boulanger",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Son père était gentil mais sa mère, connue en tant que « sorcière », était réputée pour battre Peeta."
+      },
+      {
+        "id": 2,
+        "question": "Que dit Peeta la première fois qu'il découvre le Capitole ?",
+        "propositions": [
+          "C'est fabuleux",
+          "Incroyable",
+          "Le voici",
+          "On y est"
+        ],
+        "réponse": "Le voici",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Le Capitole de Panem est une ville technologiquement avancée où vivent les personnes les plus riches et les plus puissantes."
+      },
+      {
+        "id": 3,
+        "question": "Quel objet blesse la jambe de Peeta dans « Hunger Games » ?",
+        "propositions": [
+          "Boule de feu",
+          "Épée",
+          "Bougie",
+          "Flèche"
+        ],
+        "réponse": "Flèche",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Peeta ayant sauvé Katniss d'une tentative d'assassinat de Cato, ce dernier se vengea en lui plantant son épée dans la jambe."
+      },
+      {
+        "id": 4,
+        "question": "Quel camouflage Peeta a-t-il dessiné sur sa main ?",
+        "propositions": [
+          "Une écorce",
+          "Une roche",
+          "Une rivière",
+          "Une herbe"
+        ],
+        "réponse": "Une écorce",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "Peeta est extrêmement doué pour le camouflage car il décorait les gâteaux à la boulangerie."
+      }
+    ]
+}

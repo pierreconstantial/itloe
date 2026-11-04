@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sports collectifs",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de temps a-t-on pour tirer au basket-ball ?",
+        "propositions": [
+          "30 secondes",
+          "10 secondes",
+          "45 secondes",
+          "24 secondes"
+        ],
+        "réponse": "24 secondes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Basket-ball",
+        "anecdote": "Le basket-ball se pratique exclusivement à la main, et les joueurs ne peuvent se déplacer balle en main qu'en la dribblant au sol."
+      },
+      {
+        "id": 2,
+        "question": "En France, dans quel sport collectif gagne-t-on le Bouclier de Brennus ?",
+        "propositions": [
+          "Basket-ball",
+          "Football",
+          "Handball",
+          "Rugby"
+        ],
+        "réponse": "Rugby",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bouclier_de_Brennus",
+        "anecdote": "Conçu d'après un dessin initial du baron Pierre de Coubertin, ce trophée doit son nom à son artiste créateur Charles Brennus."
+      },
+      {
+        "id": 3,
+        "question": "Combien de joueurs compte-t-on dans une équipe de hockey sur gazon ?",
+        "propositions": [
+          "Onze joueurs",
+          "Huit joueurs",
+          "Cinq joueurs",
+          "Six joueurs"
+        ],
+        "réponse": "Onze joueurs",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hockey_sur_gazon",
+        "anecdote": "Le hockey sur gazon est le plus ancien jeu de balle avec crosse connu qu'on ait pu trouver parmi les premières civilisations."
+      },
+      {
+        "id": 4,
+        "question": "Combien de cercles sont dessinés sur une patinoire de hockey sur glace ?",
+        "propositions": [
+          "Cinq",
+          "Sept",
+          "Trois",
+          "Neuf"
+        ],
+        "réponse": "Cinq",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Patinoire_de_hockey_sur_glace",
+        "anecdote": "Le hockey se joue sur une surface de glace rectangulaire, d'une soixantaine de mètres de long avec des coins arrondis."
+      }
+    ]
+}

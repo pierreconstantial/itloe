@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "C'est bon, c'est belge !",         
+  "mise-à-jour": "19/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle friandise belge sucrée est aussi appelée « chapeau de curé » ?",
+        "propositions": [
+          "Cuberdon",
+          "Calisson",
+          "Rigolette",
+          "Speculoos"
+        ],
+        "réponse": "Cuberdon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cuberdon",
+        "anecdote": "Le cuberdon est une friandise (ou bonbon) belge faite en sucre et farcie de sirop à la saveur principalement framboisée."
+      },
+      {
+        "id": 2,
+        "question": "Quel biscuit au miel très dur fait la fierté de la ville de Dinant ?",
+        "propositions": [
+          "Tuile",
+          "Rocher",
+          "Couque",
+          "Palette"
+        ],
+        "réponse": "Couque",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Couque_de_Dinant",
+        "anecdote": "En refroidissant, la couque moulée dans des moules en bois durcit, ce qui lui permet de se conserver indéfiniment."
+      },
+      {
+        "id": 3,
+        "question": "Quelle bière a pour symbole une truite avec un anneau dans la bouche ?",
+        "propositions": [
+          "Omega",
+          "Orval",
+          "Orezza",
+          "Omer"
+        ],
+        "réponse": "Orval",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Orval_(bière)",
+        "anecdote": "L'Orval est une bière trappiste belge qui se caractérise par une amertume assez forte et qui gagne à mûrir en cave."
+      },
+      {
+        "id": 4,
+        "question": "Quel plat belge peut être fait avec volaille, poisson ou crustacés ?",
+        "propositions": [
+          "Godverdom",
+          "Waterzooï",
+          "Potferdeke",
+          "Smerlap"
+        ],
+        "réponse": "Waterzooï",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Waterzooï",
+        "anecdote": "Le waterzooï, plat originaire de Gand servi accompagné de ses petits légumes, signifie « eau qui bout » en flamand."
+      }
+    ]
+}

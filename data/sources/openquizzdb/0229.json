@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Plaisirs sucrés",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "De quel composé chimique est principalement constitué le sucre ?",
+        "propositions": [
+          "Saccharose",
+          "Fructose",
+          "Glucose",
+          "Maltose"
+        ],
+        "réponse": "Saccharose",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Saccharose",
+        "anecdote": "Il se distingue par sa capacité à être facilement absorbé par notre corps, ce qui le rend rapidement disponible pour fournir de l'énergie."
+      },
+      {
+        "id": 2,
+        "question": "Comment appelle-t-on le sucre naturel présent dans les fruits ?",
+        "propositions": [
+          "Glucose",
+          "Fructose",
+          "Lactose",
+          "Saccharose"
+        ],
+        "réponse": "Fructose",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fructose",
+        "anecdote": "Le fructose est principalement traité par le foie, ce qui peut entraîner la production de graisses lorsque consommé en grande quantité."
+      },
+      {
+        "id": 3,
+        "question": "Combien de morceaux de sucre contient une canette de cola 33 cl  ?",
+        "propositions": [
+          "Environ sept",
+          "Environ trois",
+          "Environ quinze",
+          "Environ onze"
+        ],
+        "réponse": "Environ sept",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coca-Cola",
+        "anecdote": "La consommation de boissons sucrées, si non compensée par une heure de sport par canette, est dommageable sur la durée de vie."
+      },
+      {
+        "id": 4,
+        "question": "En quelle année est né le sucre en morceaux, par procédé artisanal ?",
+        "propositions": [
+          "1949",
+          "1843",
+          "1742",
+          "1644"
+        ],
+        "réponse": "1843",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sucre_en_morceaux",
+        "anecdote": "Avant l'invention du sucre en morceaux, le sucre était vendu en gros pains qu'il fallait difficilement couper avec des outils spécifiques."
+      }
+    ]
+}

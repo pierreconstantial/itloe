@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Des pays à visiter",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le pays parfumé des jardins royaux de Shalimar ?",
+        "propositions": [
+          "Bangladesh",
+          "Bhoutan",
+          "Afghanistan",
+          "Pakistan"
+        ],
+        "réponse": "Pakistan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jardins_de_Shalimar_(Lahore)",
+        "anecdote": "L'origine du mot « Shalimar » reste inconnue, mais certains savants pensent que le mot viendrait du persan ou de l'arabe."
+      },
+      {
+        "id": 2,
+        "question": "Quelle direction faut-il prendre pour aller bronzer à Rimini ?",
+        "propositions": [
+          "Espagne",
+          "Grèce",
+          "Portugal",
+          "Italie"
+        ],
+        "réponse": "Italie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rimini",
+        "anecdote": "Grâce à la plage très étendue et de sable fin, Rimini est une station balnéaire réputée, les touristes venant de toute l'Europe."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le pays du Kilimandjaro, au trois volcans éteints ?",
+        "propositions": [
+          "Tanzanie",
+          "Népal",
+          "Japon",
+          "Tibet"
+        ],
+        "réponse": "Tanzanie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kilimandjaro",
+        "anecdote": "Le Kilimandjaro est connu pour sa calotte glaciaire sommitale en phase de retrait accéléré depuis le début du XXe siècle."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel pays visiterez-vous les ruines de Carthage ?",
+        "propositions": [
+          "Hongrie",
+          "Tunisie",
+          "Turquie",
+          "Égypte"
+        ],
+        "réponse": "Tunisie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Carthage",
+        "anecdote": "Carthage regroupe aujourd'hui de nombreuses résidences d'ambassadeurs ou de richissimes fortunes tunisiennes."
+      }
+    ]
+}

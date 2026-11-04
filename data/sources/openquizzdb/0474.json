@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #03",         
+  "mise-à-jour": "02/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de toiles Van Gogh a-t-il vendus de son vivant ?",
+        "propositions": [
+          "Une seule",
+          "Seize",
+          "Trente",
+          "Vingt"
+        ],
+        "réponse": "Une seule",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vincent_van_Gogh",
+        "anecdote": "Bien que Vincent van Gogh ait réalisé plus de 2 000 oeuvres, dont environ 900 peintures, il n'aurait vendu qu'un seul tableau de son vivant, « La Vigne rouge », acheté en 1890 par la peintre Anna Boch. Aujourd'hui, ses oeuvres comptent parmi les plus cél"
+      },
+      {
+        "id": 2,
+        "question": "Combien de sommets de plus de 8 000 m compte l'Himalaya ?",
+        "propositions": [
+          "12",
+          "14",
+          "18",
+          "10"
+        ],
+        "réponse": "14",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Huit-mille",
+        "anecdote": "Les quatorze « huit-mille » sont les seuls sommets de la planète dépassant 8 000 mètres d'altitude. Ils se situent tous dans les chaînes de l'Himalaya et du Karakoram, en Asie. Gravir les 14 constitue l'un des plus grands défis de l'alpinisme mondial en r"
+      },
+      {
+        "id": 3,
+        "question": "En combien de jours éclot un oeuf d'autruche ?",
+        "propositions": [
+          "21 jours",
+          "14 jours",
+          "90 jours",
+          "42 jours"
+        ],
+        "réponse": "42 jours",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Autruche_d'Afrique",
+        "anecdote": "L'autruche d'Afrique pond les plus gros oeufs de tous les oiseaux. Leur incubation dure environ 42 jours, assurée principalement par la femelle le jour et par le mâle la nuit, dont le plumage sombre le rend plus discret face aux prédateurs."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le poids le plus courant d'un Petit Suisse ?",
+        "propositions": [
+          "20 g",
+          "100 g",
+          "60 g",
+          "30 g"
+        ],
+        "réponse": "60 g",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Petit-suisse",
+        "anecdote": "Le Petit Suisse est un fromage frais traditionnellement vendu en portions de 60 g, même si des formats de 30 g existent également, notamment pour les enfants. Malgré son nom, il est né en Normandie au XIX ? siècle, où un employé d'origine suisse adapta une"
+      }
+    ]
+}

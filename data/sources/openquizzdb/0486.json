@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #05",         
+  "mise-à-jour": "14/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la hauteur des lettres du célèbre panneau « Hollywood » ?",
+        "propositions": [
+          "6 m",
+          "10 m",
+          "18 m",
+          "14 m"
+        ],
+        "réponse": "14 m",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Combien d'os compose le squelette humain adulte ?",
+        "propositions": [
+          "226 os",
+          "216 os",
+          "206 os",
+          "186 os"
+        ],
+        "réponse": "206 os",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Combien y a-t-il de moutons par habitant en Nouvelle-Zélande ?",
+        "propositions": [
+          "Trois",
+          "Six",
+          "Quatre",
+          "Cinq"
+        ],
+        "réponse": "Cinq",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Combien de litres de sang le coeur humain pompe-t-il en une journée ?",
+        "propositions": [
+          "2 000 litres",
+          "10 000 litres",
+          "5 000 litres",
+          "7 000 litres"
+        ],
+        "réponse": "7 000 litres",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

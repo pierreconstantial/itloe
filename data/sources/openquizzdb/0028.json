@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #C",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "La peau de quel reptile africain prend la couleur du milieu où il évolue ?",
+        "propositions": [
+          "Crocodile",
+          "Caméléon",
+          "Crotale",
+          "Cobra"
+        ],
+        "réponse": "Caméléon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Chamaeleonidae",
+        "anecdote": "Avec plus de 200 espèces, les plus anciens fossiles de caméléons connus datent d'il y a environ 65 millions d'années."
+      },
+      {
+        "id": 2,
+        "question": "Quel grade est usurpé par Pithivier dans « La 7ème compagnie » ?",
+        "propositions": [
+          "Commandant",
+          "Caporal",
+          "Colonel",
+          "Capitaine"
+        ],
+        "réponse": "Commandant",
+        "wikipédia": "https://fr.wikipedia.org/wiki/On_a_retrouvé_la_septième_compagnie",
+        "anecdote": "Henri Guybet, qui obtint ainsi son premier rôle important, a remplacé Aldo Maccione, trop gourmand concernant son cachet."
+      },
+      {
+        "id": 3,
+        "question": "Fondée le 6 août 1538, de quel pays Bogota est-elle la capitale ?",
+        "propositions": [
+          "Colombie",
+          "Cuba",
+          "Costa Rica",
+          "Chili"
+        ],
+        "réponse": "Colombie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bogota",
+        "anecdote": "Située au centre de la Colombie, Bogota est la plus grande ville de Colombie et la troisième plus haute capitale du monde."
+      },
+      {
+        "id": 4,
+        "question": "Quel oiseau de couleur blanche est un des symboles de la paix ?",
+        "propositions": [
+          "Cigogne",
+          "Colombe",
+          "Colibri",
+          "Canard"
+        ],
+        "réponse": "Colombe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Colombe",
+        "anecdote": "Pour la plupart des francophones, la colombe désigne la forme blanche d'un pigeon biset ou d'une tourterelle domestique."
+      }
+    ]
+}

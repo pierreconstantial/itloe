@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Gastronomie italienne",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelles pâtes italiennes farcies ont une forme de petites couronnes ?",
+        "propositions": [
+          "Fusilli",
+          "Tortellini",
+          "Gnocchi",
+          "Capellini"
+        ],
+        "réponse": "Tortellini",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tortellini",
+        "anecdote": "Les tortellini sont des pâtes alimentaires annulaires farcies avec un mélange de viande et de parmesan."
+      },
+      {
+        "id": 2,
+        "question": "Que mangerez-vous en commandant un « grana padano », protégé par AOP ?",
+        "propositions": [
+          "Potage",
+          "Ragoût",
+          "Gâteau",
+          "Fromage"
+        ],
+        "réponse": "Fromage",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Grana_Padano",
+        "anecdote": "De forme cylindrique à la surface lisse, le « grana padano » est le fromage italien le plus vendu au monde."
+      },
+      {
+        "id": 3,
+        "question": "Quel plat italien est fait à base de semoule de maïs bouillie ?",
+        "propositions": [
+          "Padano",
+          "Pecorino",
+          "Polenta",
+          "Panzerotti"
+        ],
+        "réponse": "Polenta",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Polenta",
+        "anecdote": "La polenta se présente sous forme de galette à base de semoule ou de farine de maïs et peut être servie chaude."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la couleur des truffes du Piémont ?",
+        "propositions": [
+          "Verte",
+          "Noire",
+          "Blanche",
+          "Rouge"
+        ],
+        "réponse": "Blanche",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Truffe_(champignon)",
+        "anecdote": "La truffe en Italie a une histoire de 2000 ans, citée par le naturaliste Pline l'Ancien et de nombreux écrivains latins."
+      }
+    ]
+}

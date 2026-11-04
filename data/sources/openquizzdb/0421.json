@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Géographie du Japon",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel vaste océan le Japon se trouve-t-il ?",
+        "propositions": [
+          "Arctique",
+          "Indien",
+          "Pacifique",
+          "Atlantique"
+        ],
+        "réponse": "Pacifique",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Japon",
+        "anecdote": "Le Japon forme un archipel de 6 852 îles de plus de 100 m2, dont les quatre plus grandes sont Honshu, Hokkaido, Kyushu et Shikok."
+      },
+      {
+        "id": 2,
+        "question": "Quelle ville est la capitale et la plus grande ville du Japon ?",
+        "propositions": [
+          "Séoul",
+          "Tokyo",
+          "Pékin",
+          "Bangkok"
+        ],
+        "réponse": "Tokyo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tokyo",
+        "anecdote": "Principal centre économique et financier du Japon, Tokyo est l'une des principales places financières asiatiques et mondiales."
+      },
+      {
+        "id": 3,
+        "question": "Quel pourcentage des volcans actifs dans le monde se trouve au Japon ?",
+        "propositions": [
+          "20 %",
+          "10 %",
+          "30 %",
+          "40 %"
+        ],
+        "réponse": "10 %",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Japon",
+        "anecdote": "Des milliers de secousses telluriques d'intensité variable sont ressenties dans le Japon tout entier chaque année."
+      },
+      {
+        "id": 4,
+        "question": "Quelle est la plus grande des îles du Japon, abritant Tokyo ?",
+        "propositions": [
+          "Shikoku",
+          "Hokkaido",
+          "Honshu",
+          "Kyushu"
+        ],
+        "réponse": "Honshu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Honshu",
+        "anecdote": "Avec une taille approchant celle de la Roumanie, Honshu représente environ 60 % de la surface totale du Japon."
+      }
+    ]
+}

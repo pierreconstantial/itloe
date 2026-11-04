@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Anciennes séries télé #1",         
+  "mise-à-jour": "10/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la couleur du maillot des sauveteurs dans « Alerte à Malibu » ?",
+        "propositions": [
+          "Rouge",
+          "Bleue",
+          "Verte",
+          "Jaune"
+        ],
+        "réponse": "Rouge",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alerte_à_Malibu",
+        "anecdote": "En 1990, « Alerte à Malibu » est entrée dans le Guinness Book des records comme la série télévisée la plus regardée au monde."
+      },
+      {
+        "id": 2,
+        "question": "Quelle héroïne de « Ma sorcière bien aimée » est mariée à Jean-Pierre ?",
+        "propositions": [
+          "Endora",
+          "Serena",
+          "Tabatha",
+          "Samantha"
+        ],
+        "réponse": "Samantha",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ma_sorcière_bien-aimée",
+        "anecdote": "Ce couple modèle à l'américaine a également deux enfants : une fille, Tabatha, et un fils, Adam, né lors de la sixième saison."
+      },
+      {
+        "id": 3,
+        "question": "Pour qui travaillent les « Drôles de dames » ?",
+        "propositions": [
+          "Charlie",
+          "Clayton",
+          "Calvin",
+          "Chester"
+        ],
+        "réponse": "Charlie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Drôles_de_dames",
+        "anecdote": "Le visage de Charlie Townsend, propriétaire de l'agence, n'est jamais dévoilé car il communique principalement via un haut-parleur."
+      },
+      {
+        "id": 4,
+        "question": "Qui est le plus costaud des héros de l' « Agence tous risques » ?",
+        "propositions": [
+          "Looping",
+          "Futé",
+          "Hannibal",
+          "Barracuda"
+        ],
+        "réponse": "Barracuda",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Agence_tous_risques",
+        "anecdote": "Après six années (1983-1987), la série « Agence tous risques » s'est brutalement arrêtée, devenant de plus en plus chère à produire."
+      }
+    ]
+}

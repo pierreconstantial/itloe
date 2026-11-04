@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Traci Lords sur les écrans",         
+  "mise-à-jour": "21/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Aux côtés de quel acteur Traci Lords joue-t-elle dans « Cry-Baby » ?",
+        "propositions": [
+          "Johnny Depp",
+          "Nicolas Cage",
+          "Alice Cooper",
+          "Alec Baldwin"
+        ],
+        "réponse": "Johnny Depp",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Cry-Baby",
+        "anecdote": "Le film « Cry-Baby » reprend sur le mode parodique le thème de « Roméo et Juliette », de « West Side Story » et de « Grease »."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle série Traci Lords joue-t-elle une psychopathe ?",
+        "propositions": [
+          "Melrose Place",
+          "Mike Hammer",
+          "Love Therapy",
+          "Charmed"
+        ],
+        "réponse": "Melrose Place",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Melrose_Place",
+        "anecdote": "C'est durant la saison 3 de la série que Traci Lords interprétera le rôle de Rikki Abbott, doublé en français par Sophie Gormezzano."
+      },
+      {
+        "id": 3,
+        "question": "Dans quel film Traci Lords incarne-t-elle Racquel ?",
+        "propositions": [
+          "Pour une nuit",
+          "The Detonator",
+          "Blade",
+          "US Marshals"
+        ],
+        "réponse": "Blade",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Blade_(film,_1998)",
+        "anecdote": "Racquel est une vampire qui est montrée couverte de sang dans une scène notable pendant la scène d'ouverture du film « Blade »."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel film Traci Lords joue-t-elle une chanteuse ?",
+        "propositions": [
+          "Training Day",
+          "Programmé pour tuer",
+          "Ricochet",
+          "Couvre-feu"
+        ],
+        "réponse": "Programmé pour tuer",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Programmé_pour_tuer",
+        "anecdote": "SID 6.7 est conçu d'après les personnalités de 183 tueurs ou personnages célèbres dont on peut voir rapidement défiler les noms."
+      }
+    ]
+}

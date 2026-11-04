@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Bruce Willis en privé",         
+  "mise-à-jour": "01/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de filles Bruce Willis a-t-il eu avec l'actrice Demi Moore ?",
+        "propositions": [
+          "Cinq",
+          "Trois",
+          "Quatre",
+          "Deux"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bruce_Willis",
+        "anecdote": "Après s'être mariés sous les projecteurs, leur divorce fut prononcé en 2000, 13 ans plus tard."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel pays Bruce Willis, fils de David Willis, a-t-il vu le jour ?",
+        "propositions": [
+          "Albanie",
+          "Allemagne",
+          "Brésil",
+          "Portugal"
+        ],
+        "réponse": "Allemagne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bruce_Willis",
+        "anecdote": "À sa naissance, son père était soldat américain et sa mère une Allemande travaillant dans une banque."
+      },
+      {
+        "id": 3,
+        "question": "Quelle seconde langue Bruce Willis parle-t-il couramment ?",
+        "propositions": [
+          "Le grec",
+          "L'allemand",
+          "Le français",
+          "L'espagnol"
+        ],
+        "réponse": "L'allemand",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bruce_Willis",
+        "anecdote": "Bruce Willis a d'ailleurs été nommé ambassadeur de sa ville natale le jour de son cinquantième anniversaire."
+      },
+      {
+        "id": 4,
+        "question": "Pour quel groupe musical Bruce Willis est-il apparu dans le clip « Stylo » ?",
+        "propositions": [
+          "Terranova",
+          "Gorillaz",
+          "Morcheeba",
+          "Dubphonic"
+        ],
+        "réponse": "Gorillaz",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Stylo_(chanson)",
+        "anecdote": "Dans une scène du clip, Bruce Willis arrive dans une Chevrolet El Camino rouge et prend en chasse le groupe."
+      }
+    ]
+}

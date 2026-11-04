@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Marques de café",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle star a popularisé le slogan Nespresso « What esle » ?",
+        "propositions": [
+          "George Clooney",
+          "Bard Pitt",
+          "John Travolta",
+          "Tom Hanks"
+        ],
+        "réponse": "George Clooney",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nespresso",
+        "anecdote": "En 2009, l'entreprise a réalisé un chiffre d'affaires de 1,94 milliard d'euros (2,77 milliards de francs suisses)."
+      },
+      {
+        "id": 2,
+        "question": "Qelle marque de café utilise dans ses pubs un expert nommé Gringo ?",
+        "propositions": [
+          "Necafé",
+          "Jacques Vabre",
+          "Senseo",
+          "Café Grand'Mère"
+        ],
+        "réponse": "Jacques Vabre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jacques_Vabre",
+        "anecdote": "Le café Jacques Vabre doit son nom à un ex-enseignant entré en 1946 dans le commerce de son beau-père."
+      },
+      {
+        "id": 3,
+        "question": "Quelle couleur complète le noir et l'or de la marque de café Carte Noire ?",
+        "propositions": [
+          "Le blanc",
+          "Le vert",
+          "Le rouge",
+          "Le bleu"
+        ],
+        "réponse": "Le blanc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Carte_Noire",
+        "anecdote": "Le café est torréfié en France au sein d'une usine qui produit également les cafés Jacques Vabre et Café Grand'Mère."
+      },
+      {
+        "id": 4,
+        "question": "Quelle société a créé la marque de café soluble Ricoré ?",
+        "propositions": [
+          "Starbucks",
+          "Carrefour",
+          "Nestlé",
+          "Danone"
+        ],
+        "réponse": "Nestlé",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ricoré",
+        "anecdote": "La marque est principalement présente en France et dans une moindre mesure en Belgique et en Pologne."
+      }
+    ]
+}

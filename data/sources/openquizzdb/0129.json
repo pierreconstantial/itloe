@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "François Vandergucht",
+  "thème": "Zombies",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment fait-on pour venir à bout d'un zombie ?",
+        "propositions": [
+          "Le brûler",
+          "Le nourrir",
+          "L'étouffer",
+          "Viser la tête"
+        ],
+        "réponse": "Viser la tête",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Zombie",
+        "anecdote": "Bien que la pandémie virale soit fréquemment utilisée, il n'existe aucune règle concernant l'apparition du phénomène des zombies."
+      },
+      {
+        "id": 2,
+        "question": "Avec quelle arme Michonne se bat-t-elle dans « The Walking Dead » ?",
+        "propositions": [
+          "Hache",
+          "Arbalète",
+          "Machette",
+          "Katana"
+        ],
+        "réponse": "Katana",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Michonne",
+        "anecdote": "Michonne a tué le huitième plus grand nombre de personnages vivants avec un total minimum de quarante-trois victimes."
+      },
+      {
+        "id": 3,
+        "question": "Quelle société de recherches a mis au point le virus T dans « Resident Evil » ?",
+        "propositions": [
+          "Vault-Tec",
+          "Umbrella",
+          "Biotechnica",
+          "Aperture Science"
+        ],
+        "réponse": "Umbrella",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Umbrella_Corporation",
+        "anecdote": "Umbrella est créée en 1968 par les trois découvreurs du virus Progenitor : Oswell E. Spencer, James Marcus, et Edward Ashford."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel bâtiment les héros de « L'Armée des morts » se barricadent-ils  ?",
+        "propositions": [
+          "Centre commercial",
+          "Ferme",
+          "Bar",
+          "Église"
+        ],
+        "réponse": "Centre commercial",
+        "wikipédia": "https://fr.wikipedia.org/wiki/L'Armée_des_morts",
+        "anecdote": "Dans le film original de Romero, les zombies se déplacent très lentement et sont plus menaçants quand ils sont en grands groupes."
+      }
+    ]
+}

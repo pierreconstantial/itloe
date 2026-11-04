@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Compagnons de fiction",         
+  "mise-à-jour": "06/06/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui devient le compagnon de Tom Hanks dans le film « Seul au monde » ?",
+        "propositions": [
+          "Une chaussure",
+          "Un ballon",
+          "Une photo",
+          "Une peluche"
+        ],
+        "réponse": "Un ballon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Seul_au_monde",
+        "anecdote": "Le tournage de cette robinsonnade réalisée par Robert Zemeckis a eu lieu au nord-ouest des Fidji, sur l'île volcanique de Monuriki."
+      },
+      {
+        "id": 2,
+        "question": "Comment se prénomme le compagnon de Zorro à la télévision ?",
+        "propositions": [
+          "Bonifacio",
+          "Bruno",
+          "Bartolo",
+          "Bernardo"
+        ],
+        "réponse": "Bernardo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Zorro",
+        "anecdote": "Zorro (surnom qui signifie renard en espagnol) est un personnage de fiction créé en 1919 par Johnston McCulley (1883-1958)."
+      },
+      {
+        "id": 3,
+        "question": "Sur console, qui est le compagnon champignon de Mario ?",
+        "propositions": [
+          "Peach",
+          "Toop",
+          "Luigi",
+          "Toad"
+        ],
+        "réponse": "Toad",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mario_(personnage)",
+        "anecdote": "Les Toad des jeux vidéo Nintendo, serviteurs de la Princesse Peach, ont la forme de champignons anthropomorphiques."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le nom du fidèle compagnon de Don Quichotte ?",
+        "propositions": [
+          "Sancho Pança",
+          "Sancho Taka",
+          "Sancho Nifroid",
+          "Sancho Mancha"
+        ],
+        "réponse": "Sancho Pança",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Don_Quichotte",
+        "anecdote": "« L'Ingénieux Hidalgo Don Quichotte de la Manche  » a créé le type du Don Quichotte."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Garçon un café",         
+  "mise-à-jour": "01/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle boisson caféinée froide ajoute-t-on de la crème glacée ?",
+        "propositions": [
+          "Café liégeois",
+          "Café bruxellois",
+          "Café tournaisien",
+          "Café montois"
+        ],
+        "réponse": "Café liégeois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Café_liégeois",
+        "anecdote": "Le café liégeois n'est pas une spécialité de la ville belge de Liège mais bien un hommage à la résistance liégeoise de 1914."
+      },
+      {
+        "id": 2,
+        "question": "Quelle boisson alcoolisée est préparée avec du whisky et du café ?",
+        "propositions": [
+          "Irish coffee",
+          "French coffee",
+          "Café viennois",
+          "Café normand"
+        ],
+        "réponse": "Irish coffee",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Irish_coffee",
+        "anecdote": "La difficulté d'un irish coffee bien réussi est d'arriver à ce que la crème légèrement battue flotte sur le liquide encore chaud."
+      },
+      {
+        "id": 3,
+        "question": "Avec quoi les cafetières de la marque Senseo fonctionnent-elles ?",
+        "propositions": [
+          "Sachets",
+          "Capsules",
+          "Filtres",
+          "Dosettes"
+        ],
+        "réponse": "Dosettes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Senseo",
+        "anecdote": "Lancée en 2001 par Philips et Douwe Egberts, la machine Senseo a popularisé le concept de la cafetière à dosettes souples en permettant de préparer rapidement une ou deux tasses de café avec une mousse caractéristique. Son système repose sur une dosette r"
+      },
+      {
+        "id": 4,
+        "question": "Quelle variété de café est généralement la plus corsée ?",
+        "propositions": [
+          "Robusta",
+          "Arabica",
+          "Manille",
+          "Liberica"
+        ],
+        "réponse": "Robusta",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coffea_canephora",
+        "anecdote": "Originaire d'Afrique, le robusta nécessite moins d'entretien que le Coffea arabica et est donc moins cher à produire."
+      }
+    ]
+}

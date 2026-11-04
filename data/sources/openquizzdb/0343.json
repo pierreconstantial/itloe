@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Le Grand Bleu »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui tient le rôle de Jacques Mayol dans le film « Le Grand Bleu » ?",
+        "propositions": [
+          "Jean-Marc Barr",
+          "Paul Shenar",
+          "Marc Duret",
+          "Jean Reno"
+        ],
+        "réponse": "Jean-Marc Barr",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jean-Marc_Barr",
+        "anecdote": "Jean-Marc Barr marque ensuite un tournant dans sa carrière lors de sa rencontre avec Lars von Trier."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel pays se déroule la première scène du film « Le Grand Bleu » ?",
+        "propositions": [
+          "France",
+          "Grèce",
+          "Sicile",
+          "Espagne"
+        ],
+        "réponse": "Grèce",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Grand_Bleu",
+        "anecdote": "Quelques scènes du film ont été tournées en 1987 à Chora et au pied du monastère de Chozoviotissa, sur l'île grecque d'Amorgos."
+      },
+      {
+        "id": 3,
+        "question": "Quel est le plat favori de Johanna Baker dans le film « Le Grand Bleu » ?",
+        "propositions": [
+          "Les pâtes",
+          "Les pizzas",
+          "Le tiramisu",
+          "Les lasagnes"
+        ],
+        "réponse": "Les pâtes",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Grand_Bleu",
+        "anecdote": "L'exploitation en France du film rencontra un des plus gros succès de l'histoire du cinéma français."
+      },
+      {
+        "id": 4,
+        "question": "Dans quelle langue le film « Le Grand Bleu » a-t-il été tourné ?",
+        "propositions": [
+          "En anglais",
+          "En grec",
+          "En français",
+          "En espagnol"
+        ],
+        "réponse": "En anglais",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Grand_Bleu",
+        "anecdote": "Le choix de l'anglais, justifié par l'importance du budget du film, a été adopté en cours de tournage."
+      }
+    ]
+}

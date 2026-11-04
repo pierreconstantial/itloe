@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Bières belges",         
+  "mise-à-jour": "09/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle bière belge est fabriquée en ajoutant des cerises au lambic ?",
+        "propositions": [
+          "Kwak",
+          "Kronenbourg",
+          "Kriek",
+          "Keystone"
+        ],
+        "réponse": "Kriek",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kriek",
+        "anecdote": "Le nom Kriek provient du mot néerlandais kersen, qui signifie cerise, car cette bière est en effet brassée avec des cerises griottes."
+      },
+      {
+        "id": 2,
+        "question": "Quelle bière belge, produit phare de la brasserie Dubuisson, titre 12 % ?",
+        "propositions": [
+          "Bush",
+          "Chimay Bleue",
+          "Mort Subite",
+          "Tongerlo"
+        ],
+        "réponse": "Bush",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bush_(bière)",
+        "anecdote": "Bière ambrée forte (12 % ABV), la Bush 12 est particulièrement appréciée pour sa richesse, sa complexité et son caractère puissant."
+      },
+      {
+        "id": 3,
+        "question": "Quel système de bouchon est utilisé sur les bouteilles de Quintine ?",
+        "propositions": [
+          "À capsule",
+          "De liège",
+          "À visser",
+          "Mécanique"
+        ],
+        "réponse": "Mécanique",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Brasserie_Ellezelloise",
+        "anecdote": "La Quintine est une bière artisanale de style Belgian Strong Ale, caractérisée par son goût assez puissant et ses arômes diversifiés."
+      },
+      {
+        "id": 4,
+        "question": "Quelle bière belge reste la référence au pays des blanches ?",
+        "propositions": [
+          "Corsendonk",
+          "Hoegaarden",
+          "Bacchus",
+          "Floreffe"
+        ],
+        "réponse": "Hoegaarden",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hoegaarden_(bière)",
+        "anecdote": "Selon une certaine croyance populaire forte, la bière Hoegaarden est souvent citée comme étant la première des bières blanches."
+      }
+    ]
+}

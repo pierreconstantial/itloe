@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Défi chiffré #12",         
+  "mise-à-jour": "26/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "À quel indice fait référence l'essence sans plomb 95 ?",
+        "propositions": [
+          "Plomb",
+          "Bioéthanol",
+          "Pétrole",
+          "Octane"
+        ],
+        "réponse": "Octane",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Essence_(hydrocarbure)",
+        "anecdote": "L'essence sans plomb 95 fait référence à un indice qui indique sa résistance à l'auto-inflammation sous pression dans le moteur."
+      },
+      {
+        "id": 2,
+        "question": "Durant combien de mois la France observe-t-elle l'heure d'hiver ?",
+        "propositions": [
+          "Huit mois",
+          "Sept mois",
+          "Cinq mois",
+          "Six mois"
+        ],
+        "réponse": "Cinq mois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Heure_d'été",
+        "anecdote": "En France, l'heure d'hiver commence le dernier dimanche d'octobre et se termine le dernier dimanche de mars, ce qui fait 5 mois."
+      },
+      {
+        "id": 3,
+        "question": "Quelle année représente le futur dans le film « Retour vers le futur » ?",
+        "propositions": [
+          "2020",
+          "2050",
+          "2005",
+          "2015"
+        ],
+        "réponse": "2015",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Retour_vers_le_futur",
+        "anecdote": "La date exacte du futur dans le film est devenue un point culte pour les fans, qui ont organisé des événements le 21 octobre 2015."
+      },
+      {
+        "id": 4,
+        "question": "Combien de cordes possède un ukulélé standard, au son caractéristique ?",
+        "propositions": [
+          "Douze",
+          "Six",
+          "Quatre",
+          "Huit"
+        ],
+        "réponse": "Quatre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ukulélé",
+        "anecdote": "Il a été popularisé dans la culture mondiale par des artistes comme Israel Kamakawiwo'ole et son « Somewhere Over the Rainbow »."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Champions de Formule 1",         
+  "mise-à-jour": "08/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui a remporté en 2019 le titre de champion du monde de Formule 1 ?",
+        "propositions": [
+          "Lewis Hamilton",
+          "Lando Norris",
+          "Pierre Gasly",
+          "Sebastian Vettel"
+        ],
+        "réponse": "Lewis Hamilton",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lewis_Hamilton",
+        "anecdote": "Champion du monde de F1 en 2008, 2014, 2015, 2017, 2018 et 2019, il est aussi recordman du nombre de pole positions."
+      },
+      {
+        "id": 2,
+        "question": "Qui fut le premier français champion du monde de Formule 1 ?",
+        "propositions": [
+          "Didier Pironi",
+          "Jean Alesi",
+          "Alain Prost",
+          "Guy Ligier"
+        ],
+        "réponse": "Alain Prost",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Alain_Prost",
+        "anecdote": "Alain Porst est souvent surnommé « Le Professeur »."
+      },
+      {
+        "id": 3,
+        "question": "Combien de titres mondiaux Michael Schumacher a-t-il décrochés ?",
+        "propositions": [
+          "Sept",
+          "Huit",
+          "Neuf",
+          "Six"
+        ],
+        "réponse": "Sept",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Michael_Schumacher",
+        "anecdote": "À ce jour, Michael Schumacher détient la plupart des records de la Formule 1."
+      },
+      {
+        "id": 4,
+        "question": "Quel était le prénom du père de Jacques Villeneuve, pilote de F1 ?",
+        "propositions": [
+          "Steve",
+          "Charles",
+          "Gilles",
+          "Christian"
+        ],
+        "réponse": "Gilles",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jacques_Villeneuve",
+        "anecdote": "Gilles Villeneuve est décédé lors des qualifications du GP de Zolder, en 1982. Sa femme Joann emportera ses cendres à Monaco."
+      }
+    ]
+}

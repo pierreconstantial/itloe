@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Valérie Lemercier",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Sur quelle chanson Valérie Lemercier a-t-elle ouvert les Césars 2007 ?",
+        "propositions": [
+          "Maldon",
+          "Allumer le feu",
+          "Aimer",
+          "Tout nu et tout bronzé"
+        ],
+        "réponse": "Maldon",
+        "wikipédia": "https://fr.wikipedia.org/wiki/César_du_cinéma_2007",
+        "anecdote": "P"
+      },
+      {
+        "id": 2,
+        "question": "Dans lequel de ses films se fait-elle passer pour un garçon ?",
+        "propositions": [
+          "Quadrille",
+          "100% cachemire",
+          "Palais Royal",
+          "Le Derrière"
+        ],
+        "réponse": "Le Derrière",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Derrière",
+        "anecdote": "Valérie Lemercier a adapté au cinéma la pièce de Sacha Guitry, « Quadrille », et a réalisé une quinzaine de films publicitaires."
+      },
+      {
+        "id": 3,
+        "question": "Quelle comédie réunit Denis Podalydès et Valérie Lemercier ?",
+        "propositions": [
+          "Dieu seul me voit",
+          "Adieu Berthe",
+          "Liberté-Oléron",
+          "La Magie"
+        ],
+        "réponse": "Adieu Berthe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Adieu_Berthe_(film)",
+        "anecdote": "Pour Isabelle Regnier du Monde, « Adieu Berthe » est le film le plus accompli, le plus totalement enthousiasmant de son auteur."
+      },
+      {
+        "id": 4,
+        "question": "Dans quelle comédie est-elle DRH dans une compagnie maritime ?",
+        "propositions": [
+          "Adieu Berthe",
+          "Bienvenue à bord",
+          "Beur sur la ville",
+          "Monte Carlo"
+        ],
+        "réponse": "Bienvenue à bord",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bienvenue_à_bord_(film,_2011)",
+        "anecdote": "P"
+      }
+    ]
+}

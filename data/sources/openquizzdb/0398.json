@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Peuples du monde",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel pays vit principalement le peuple kabyle ?",
+        "propositions": [
+          "Tunisie",
+          "Algérie",
+          "Libye",
+          "Maroc"
+        ],
+        "réponse": "Algérie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kabyles",
+        "anecdote": "Les Kabyles ont constitué le milieu le plus favorable au développement de la revendication identitaire berbère."
+      },
+      {
+        "id": 2,
+        "question": "Le mot « lusitanien » désigne un peuple originaire de quel pays ?",
+        "propositions": [
+          "Espagne",
+          "Portugal",
+          "Italie",
+          "Maroc"
+        ],
+        "réponse": "Portugal",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Lusitaniens",
+        "anecdote": "Les historiens et les archéologues sont indécis sur les origines ethniques des Lusitaniens."
+      },
+      {
+        "id": 3,
+        "question": "Comment les Roms nomment-ils un étranger à leur population ?",
+        "propositions": [
+          "Sind",
+          "Djodjo",
+          "Minouche",
+          "Gadjo"
+        ],
+        "réponse": "Gadjo",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Roms",
+        "anecdote": "Les Roms sont aussi désignés en France comme des Bohémiens, Gitans, Manouches ou Romanichels."
+      },
+      {
+        "id": 4,
+        "question": "Quel signe trouve-t-on sur le drapeau du peuple Acadien ?",
+        "propositions": [
+          "Cercle rouge",
+          "Étoile jaune",
+          "Lion bleu",
+          "Dragon vert"
+        ],
+        "réponse": "Étoile jaune",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Acadiens",
+        "anecdote": "Les Acadiens sont descendants des premiers colons français et européens établis en Acadie à l'époque de la Nouvelle-France."
+      }
+    ]
+}

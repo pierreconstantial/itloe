@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Haut en couleur",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Le curaçao est une liqueur d'orange présentée sous quelle couleur ?",
+        "propositions": [
+          "Bleue",
+          "Rouge",
+          "Orange",
+          "Verte"
+        ],
+        "réponse": "Bleue",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Curaçao_(liqueur)",
+        "anecdote": "Le curaçao est une liqueur d'orange titrant entre 20 et 40 degrés, utilisée pour confectionner de nombreux cocktails."
+      },
+      {
+        "id": 2,
+        "question": "Quelles couleurs faut-il associer pour obtenir du vert ?",
+        "propositions": [
+          "Jaune et bleu",
+          "Orange et gris",
+          "Rouge et noir",
+          "Marron et beige"
+        ],
+        "réponse": "Jaune et bleu",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Vert",
+        "anecdote": "Contrairement à d'autres couleurs, le vert conserve son nom, vert pâle ou vert foncé, vert vif ou vert grisâtre."
+      },
+      {
+        "id": 3,
+        "question": "Quel petit vin se boit sous les tonnelles du côté de Nogent ?",
+        "propositions": [
+          "Vin rosé",
+          "Vin gris",
+          "Vin blanc",
+          "Vin rouge"
+        ],
+        "réponse": "Vin blanc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ah_!_Le_petit_vin_blanc",
+        "anecdote": "Cette chanson, écrite en 1943, a été composée par Charles Borel-Clerc et chantée par Lina Margy."
+      },
+      {
+        "id": 4,
+        "question": "Comment est la souris dans une célèbre comptine pour enfants ?",
+        "propositions": [
+          "Noire",
+          "Rose",
+          "Blanche",
+          "Verte"
+        ],
+        "réponse": "Verte",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Une_souris_verte_(chanson)",
+        "anecdote": "Cette chanson anonyme et très connue paraît remonter de la fin du XVIIe siècle ou au commencement du XVIIIe siècle."
+      }
+    ]
+}

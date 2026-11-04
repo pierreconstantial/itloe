@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sports hivernaux",         
+  "mise-à-jour": "09/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qu'allez-vous chausser pour faire une randonnée sur de la neige molle ?",
+        "propositions": [
+          "Patins à glace",
+          "Raquettes à neige",
+          "Bottes",
+          "Palmes"
+        ],
+        "réponse": "Raquettes à neige",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Raquette_à_neige",
+        "anecdote": "La raquette, fixée sous la chaussure de marche, augmente la surface de contact avec la neige et permet souvent de ne pas s'enfoncer."
+      },
+      {
+        "id": 2,
+        "question": "À quoi procède-t-on sur les pistes de ski entre 17h et 9h du matin ?",
+        "propositions": [
+          "Séchage",
+          "Arrosage",
+          "Damage",
+          "Mouillage"
+        ],
+        "réponse": "Damage",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dameuse",
+        "anecdote": "Une dameuse est un véhicule sur chenilles conçu pour améliorer la qualité de la neige pour la pratique des sports de glisse."
+      },
+      {
+        "id": 3,
+        "question": "Quelle substance utilise-t-on pour obtenir une glisse optimale ?",
+        "propositions": [
+          "Huile",
+          "Résine",
+          "Fart",
+          "Cire"
+        ],
+        "réponse": "Fart",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fart",
+        "anecdote": "Globalement, il existe deux grandes catégories de ce revêtement spécifique : le fart de glisse et le fart de retenue."
+      },
+      {
+        "id": 4,
+        "question": "Dans quel pays se situe la station skiable très prisée d'Innsbruck ?",
+        "propositions": [
+          "Allemagne",
+          "Autriche",
+          "Italie",
+          "Suisse"
+        ],
+        "réponse": "Autriche",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Innsbruck",
+        "anecdote": "Innsbruck a un niveau de vie très élevé, comme le reste des alpes autrichiennes, avec un PIB de 75 000 dollars par an et par habitant."
+      }
+    ]
+}

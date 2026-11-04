@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Christophe Dechavanne",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui a présenté à ses côtés la série télévisée des « 100 plus grands » ?",
+        "propositions": [
+          "Sandrine Quétier",
+          "Claire Keim",
+          "Marina Carrère",
+          "Karine Ferri"
+        ],
+        "réponse": "Sandrine Quétier",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_100_plus_grands...",
+        "anecdote": "Suite au décès de Jean-Paul II en 2005, la suite de l'émission ne fut jamais diffusée."
+      },
+      {
+        "id": 2,
+        "question": "Quelle émission, avec Christophe Dechavanne, était diffusée le mardi ?",
+        "propositions": [
+          "Zone Interdite",
+          "Quotidien",
+          "Ciel mon mardi !",
+          "The Voice"
+        ],
+        "réponse": "Ciel mon mardi !",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Ciel,_mon_mardi_!",
+        "anecdote": "L'émission se composait typiquement d'un débat sérieux, d'un bloc-notes avec chroniqueurs, et d'un second débat plus léger."
+      },
+      {
+        "id": 3,
+        "question": "Quelle société de production appartient à Christophe Dechavanne ?",
+        "propositions": [
+          "Crotale",
+          "Caméléon",
+          "Coyote",
+          "Cobra"
+        ],
+        "réponse": "Coyote",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coyote_(télévision)",
+        "anecdote": "Le Groupe Coyote fut durant un temps l'un des producteurs indépendants les plus importants du paysage audiovisuel français."
+      },
+      {
+        "id": 4,
+        "question": "De quel magazine le montrant nu a-t-il obtenu un retrait en 2006 ?",
+        "propositions": [
+          "Le Figaro",
+          "VSD",
+          "Paris Match",
+          "Choc"
+        ],
+        "réponse": "Choc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Christophe_Dechavanne",
+        "anecdote": "Les photos auraient été prises le 2 janvier, au Huvafen Fushi, un luxueux hôtel des îles Maldives où l'animateur était en vacances."
+      }
+    ]
+}

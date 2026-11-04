@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "OpenAI",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En quelle année fut fondée l'entreprise à but lucratif plafonné OpenAI ?",
+        "propositions": [
+          "2019",
+          "2017",
+          "2021",
+          "2015"
+        ],
+        "réponse": "2015",
+        "wikipédia": "https://fr.wikipedia.org/wiki/OpenAI",
+        "anecdote": "En mars 2019, l'association à but non lucratif est devenue une entreprise à but lucratif plafonné, en vue d'attirer des capitaux."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle ville des États-Unis se situe le siège social d'OpenAI ?",
+        "propositions": [
+          "San Francisco",
+          "Miami",
+          "Los Angeles",
+          "Chicago"
+        ],
+        "réponse": "San Francisco",
+        "wikipédia": "https://fr.wikipedia.org/wiki/OpenAI",
+        "anecdote": "L'objectif de cette société est de développer un raisonnement artificiel à visage humain qui profitera à toute l'humanité."
+      },
+      {
+        "id": 3,
+        "question": "Qui a quitté OpenAI en 2018 à la suite d'un conflit de direction ?",
+        "propositions": [
+          "Ilya Sutskever",
+          "Elon Musk",
+          "Greg Brockman",
+          "Sam Altman"
+        ],
+        "réponse": "Elon Musk",
+        "wikipédia": "https://fr.wikipedia.org/wiki/OpenAI",
+        "anecdote": "Elon Musk voit dans l'absence de publication du code source une trahison de la mission que s'était fixée l'organisation à sa fondation."
+      },
+      {
+        "id": 4,
+        "question": "Quel outil d'OpenAI peut générer du texte de manière autonome ?",
+        "propositions": [
+          "OpenChat",
+          "AlphaGo",
+          "DALL-E",
+          "ChatGPT"
+        ],
+        "réponse": "ChatGPT",
+        "wikipédia": "https://fr.wikipedia.org/wiki/OpenAI",
+        "anecdote": "ChatGPT peut aussi être utilisé pour améliorer les systèmes de dialogue en leur fournissant des réponses naturelles et pertinentes."
+      }
+    ]
+}

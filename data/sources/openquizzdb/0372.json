@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Pommes à savourer",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle confiserie est constituée d'une pomme enrobée de sucre cuit ?",
+        "propositions": [
+          "Pomme d'amour",
+          "Tarte Tatin",
+          "Le crumble",
+          "Apfelstrudel"
+        ],
+        "réponse": "Pomme d'amour",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pomme_d'amour",
+        "anecdote": "La pomme d'amour peut aussi être trempée dans le chocolat noir ou au lait et durci, comme est la variante habituelle en Irlande."
+      },
+      {
+        "id": 2,
+        "question": "Quel dessert consiste en des pommes en pâte frites dans l'huile ?",
+        "propositions": [
+          "Clafoutis",
+          "Beignet de pomme",
+          "Tarte Tatin",
+          "Crumble"
+        ],
+        "réponse": "Beignet de pomme",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Beignet_aux_pommes",
+        "anecdote": "Le beignet est ainsi servi chaud avec du sucre en poudre et peut être également flambé, par exemple au calvados."
+      },
+      {
+        "id": 3,
+        "question": "Quel gâteau traditionnel autrichien est cuisiné à base de pommes ?",
+        "propositions": [
+          "Tarte Tatin",
+          "Croustade",
+          "Crumble",
+          "Apfelstrudel"
+        ],
+        "réponse": "Apfelstrudel",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Apfelstrudel",
+        "anecdote": "Les communautés juives ashkénazes l'ont également introduit en Israël, mais aussi aux États-Unis et en Argentine."
+      },
+      {
+        "id": 4,
+        "question": "Dans quelle tarte les pommes renversée sont-elles caramélisées ?",
+        "propositions": [
+          "Tarte Tatin",
+          "Tarte au riz",
+          "Tarte normande",
+          "Tarte au maton"
+        ],
+        "réponse": "Tarte Tatin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tarte_Tatin",
+        "anecdote": "C'est le restaurateur auvergnat Louis Vaudable, propriétaire de Maxim's, qui le premier la découvre chez les soeurs Tatin."
+      }
+    ]
+}

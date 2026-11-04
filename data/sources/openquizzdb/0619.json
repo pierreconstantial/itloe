@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Génération Z",         
+  "mise-à-jour": "25/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le total des points d'un dé à six faces ?",
+        "propositions": [
+          "21",
+          "15",
+          "30",
+          "18"
+        ],
+        "réponse": "21",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dé",
+        "anecdote": "Les dés les plus courants sont des petits cubes de 1 à 2 cm de côté (souvent 16 mm), possédant donc 6 faces numérotées de 1 à 6."
+      },
+      {
+        "id": 2,
+        "question": "Quelle catégorie d'animaux nourrissent leurs petits avec leur lait ?",
+        "propositions": [
+          "Rongeurs",
+          "Mammifères",
+          "Primates",
+          "Carnivores"
+        ],
+        "réponse": "Mammifères",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mammifère",
+        "anecdote": "Les nouveau-nés nécessitent systématiquement des soins parentaux du fait de leur appareil digestif immature à la naissance."
+      },
+      {
+        "id": 3,
+        "question": "Quelle partie de la plante s'enfonce profondément dans la terre ?",
+        "propositions": [
+          "Épine",
+          "Tige",
+          "Pétale",
+          "Racine"
+        ],
+        "réponse": "Racine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Racine_(botanique)",
+        "anecdote": "La racine est un organe vital de la plante, qui se forme très tôt lors du développement de la plante, dès le début de la germination."
+      },
+      {
+        "id": 4,
+        "question": "De quelle matière sont principalement faits les pneus des voitures ?",
+        "propositions": [
+          "Caoutchouc",
+          "Liège",
+          "Carbone",
+          "Plastique"
+        ],
+        "réponse": "Caoutchouc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pneumatique_(véhicule)",
+        "anecdote": "Un pneu est conçu pour être monté sur la jante d'une roue et gonflé avec un gaz sous pression, habituellement de l'air ou de l'azote."
+      }
+    ]
+}

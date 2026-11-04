@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #T",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui est en lévitation sur la couverture des « Sept Boules de cristal » ?",
+        "propositions": [
+          "Tintin",
+          "Thorgal",
+          "Tournesol",
+          "Tchang"
+        ],
+        "réponse": "Tournesol",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Les_Sept_Boules_de_cristal",
+        "anecdote": "L'allusion aux découvreurs de la tombe de Toutankhamon est clairement définie dans cet ouvrage grand public."
+      },
+      {
+        "id": 2,
+        "question": "De quelle ville française les Tourquennois sont-ils les habitants ?",
+        "propositions": [
+          "Toulouse",
+          "Tournus",
+          "Tours",
+          "Tourcoing"
+        ],
+        "réponse": "Tourcoing",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tourcoing",
+        "anecdote": "P"
+      },
+      {
+        "id": 3,
+        "question": "Quel personnage des Looney Tunes dévore tout sur son passage ?",
+        "propositions": [
+          "Tee",
+          "Tag",
+          "Taz",
+          "Tux"
+        ],
+        "réponse": "Taz",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Taz_(Looney_Tunes)",
+        "anecdote": "Parlant peu mais émettant des grognements bizarres, Taz est un diable de Tasmanie qui devient une véritable tornade en bougeant."
+      },
+      {
+        "id": 4,
+        "question": "Quel site de micro blogging fut symbolisé par un oiseau bleu ?",
+        "propositions": [
+          "Tinder",
+          "Twitter",
+          "Tumblr",
+          "Telegram"
+        ],
+        "réponse": "Twitter",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Twitter",
+        "anecdote": "Le réseau social Twitter a été lancé en 2006 et s'est rapidement distingué par son format unique de messages courts, limités à l'origine à 140 caractères."
+      }
+    ]
+}

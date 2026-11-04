@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Oiseaux",         
+  "mise-à-jour": "19/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel oiseau de couleur blanche est un des symboles de la paix ?",
+        "propositions": [
+          "Colibri",
+          "Colombe",
+          "Cigogne",
+          "Canard"
+        ],
+        "réponse": "Colombe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Colombe",
+        "anecdote": "Pour la plupart des francophones, la colombe désigne la forme blanche d'un pigeon biset ou d'une tourterelle domestique."
+      },
+      {
+        "id": 2,
+        "question": "Quel oiseau fournit le duvet servant à la fabrication des édredons ?",
+        "propositions": [
+          "Eider",
+          "Sarcelle",
+          "Perruche",
+          "Colvert"
+        ],
+        "réponse": "Eider",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eider_(oiseau)",
+        "anecdote": "Les plumes de l'eider étaient naguère cueillies en Islande ou au Groenland et recherchées comme rembourrage de vêtements."
+      },
+      {
+        "id": 3,
+        "question": "Quel oiseau pond ses oeufs dans le nid des autres espèces ?",
+        "propositions": [
+          "Mésange",
+          "Coucou",
+          "Merle",
+          "Faisan"
+        ],
+        "réponse": "Coucou",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Coucou",
+        "anecdote": "Le terme « coucou » est une onomatopée issue du chant du coucou gris dont les francophones font souvent référence."
+      },
+      {
+        "id": 4,
+        "question": "À quel oiseau ressemble un marabout ?",
+        "propositions": [
+          "Moineau",
+          "Cigogne",
+          "Goëland",
+          "Mouette"
+        ],
+        "réponse": "Cigogne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marabout_(oiseau)",
+        "anecdote": "Les marabouts sont de très grands échassiers des latitudes tropicales."
+      }
+    ]
+}

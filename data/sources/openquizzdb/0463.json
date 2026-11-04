@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sport en Belgique",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel surnom est donné aux joueurs de football du Standard de Liège ?",
+        "propositions": [
+          "Les Chônes",
+          "Les Ferts",
+          "Les Bleusses",
+          "Les Rouches"
+        ],
+        "réponse": "Les Rouches",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Standard_de_Liège",
+        "anecdote": "Fondé en 1898, le Standard et Liège est avec Anderlecht et le club de Bruges l'un des clubs les plus populaires de Belgique."
+      },
+      {
+        "id": 2,
+        "question": "Quel pongiste belge a disputé ses septièmes JO à 42 ans ?",
+        "propositions": [
+          "Yan Vostes",
+          "Greg Obert",
+          "Jean-Michel Saive",
+          "Martin Bratanov"
+        ],
+        "réponse": "Jean-Michel Saive",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jean-Michel_Saive",
+        "anecdote": "Jean-Michel Saive a également porté le drapeau de la délégation belge lors des Jeux olympiques de 1996 et 2004."
+      },
+      {
+        "id": 3,
+        "question": "En quelle année Eddy Merckx a-t-il remporté son premier Tour de France ?",
+        "propositions": [
+          "1967",
+          "1971",
+          "1965",
+          "1969"
+        ],
+        "réponse": "1969",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Eddy_Merckx",
+        "anecdote": "Professionnel de 1965 à 1978, Eddy Merckx est le seul athlète belge à avoir été nommé sportif mondial de l'année."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le sport le plus populaire en Belgique ?",
+        "propositions": [
+          "Football",
+          "Hockey",
+          "Tennis",
+          "Cyclisme"
+        ],
+        "réponse": "Football",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

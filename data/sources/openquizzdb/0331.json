@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Modèles de voiture",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "En quelle année est sorti le Dacia Duster ?",
+        "propositions": [
+          "2012",
+          "2006",
+          "2008",
+          "2010"
+        ],
+        "réponse": "2010",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dacia_Duster",
+        "anecdote": "Disponible en version 4×2 et 4×4, le Renault Duster est le véhicule de la marque le plus produit en 2014."
+      },
+      {
+        "id": 2,
+        "question": "Quelle voiture jaune Tintin conduit-il dans « Tintin au Congo » ?",
+        "propositions": [
+          "Jeep",
+          "Citroën Traction",
+          "Corvette",
+          "Ford T"
+        ],
+        "réponse": "Ford T",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tintin_au_Congo",
+        "anecdote": "Des éditions pirates de « Tintin au Congo » ont été diffusées en réaction à son indisponibilité en librairie."
+      },
+      {
+        "id": 3,
+        "question": "Quelle marque automobile disparue est connue pour ses roadsters ?",
+        "propositions": [
+          "Triumph",
+          "Innocenti",
+          "DeLorean",
+          "Hotchkiss"
+        ],
+        "réponse": "Triumph",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Triumph_Motor_Company",
+        "anecdote": "La maison Triumph a été fondée à Coventry en tant que fabricant de cycles par Moritz Schulte et Siegfried Bettmann en 1890."
+      },
+      {
+        "id": 4,
+        "question": "Quel constructeur a créé la Firebird, la GTO et la LeMans ?",
+        "propositions": [
+          "Pontiac",
+          "AMC",
+          "Oldsmobile",
+          "Mercury"
+        ],
+        "réponse": "Pontiac",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pontiac_(automobile)",
+        "anecdote": "Le nom choisi par le constructeur fait référence à Pontiac, un grand chef amérindien de la tribu des Outaouais."
+      }
+    ]
+}

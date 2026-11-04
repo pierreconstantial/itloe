@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sports de raquette",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Comment est aussi appelé le tennis de table ?",
+        "propositions": [
+          "Ping-pong",
+          "Padel",
+          "Pelote basque",
+          "Jokari"
+        ],
+        "réponse": "Ping-pong",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Tennis_de_table",
+        "anecdote": "Le mot ping-pong proviendrait de la marque commerciale sous laquelle le jeu fut produit aux États-Unis au début du XXe siècle."
+      },
+      {
+        "id": 2,
+        "question": "Dans quel jeu un chistera est-il fixé à la main du joueur via un gant ?",
+        "propositions": [
+          "Pelote basque",
+          "Tennis",
+          "Padel",
+          "Jokari"
+        ],
+        "réponse": "Pelote basque",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pelote_basque",
+        "anecdote": "Le chistera fut inventé en 1857 par Jean Dithurbide à Saint-Pée-sur-Nivelle, pour remplacer les lourds gants de cuir d'origine."
+      },
+      {
+        "id": 3,
+        "question": "Quel sport de raquette se joue sur un terrain de jeu entouré de murs ?",
+        "propositions": [
+          "Tennis",
+          "Crosse",
+          "Badminton",
+          "Squash"
+        ],
+        "réponse": "Squash",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Squash",
+        "anecdote": "Ce sport consiste à frapper une petite balle noire en caoutchouc, de telle sorte que son adversaire ne puisse pas la reprendre."
+      },
+      {
+        "id": 4,
+        "question": "Quel jeu utilise une balle en caoutchouc attachée à un socle ?",
+        "propositions": [
+          "Footbag",
+          "Jokari",
+          "Smolball",
+          "Chuiwan"
+        ],
+        "réponse": "Jokari",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jokari",
+        "anecdote": "La balle, après avoir été frappée avec une raquette en bois, revient vers les joueurs comme si elle avait rebondi contre un fronton."
+      }
+    ]
+}

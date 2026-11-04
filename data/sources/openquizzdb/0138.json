@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #23",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel type de comprimé est conçu pour se dissoudre dans l'eau ?",
+        "propositions": [
+          "Effervescant",
+          "Effervescent",
+          "Efervessant",
+          "Effervessent"
+        ],
+        "réponse": "Effervescent",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle est à ce jour la seule langue iroquoienne du Sud encore parlée ?",
+        "propositions": [
+          "Chairokie",
+          "Cherokye",
+          "Cherokhie",
+          "Cherokee"
+        ],
+        "réponse": "Cherokee",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle professionnelle est spécialiste des cosmétiques et des soins ?",
+        "propositions": [
+          "Estéthicienne",
+          "Estéticienne",
+          "Esthéticienne",
+          "Esthéticiène"
+        ],
+        "réponse": "Esthéticienne",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quelle ver de terre peut excréter 600 tonnes de turricules par an ?",
+        "propositions": [
+          "Lonbric",
+          "Lonbrique",
+          "Lombric",
+          "Lombrique"
+        ],
+        "réponse": "Lombric",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

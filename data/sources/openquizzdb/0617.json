@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Que du disco",         
+  "mise-à-jour": "21/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel est le single disco le plus vendu du label Atlantic ?",
+        "propositions": [
+          "Ten Percent",
+          "Dancin'",
+          "Sweet dynamite",
+          "Le Freak"
+        ],
+        "réponse": "Le Freak",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Le_Freak",
+        "anecdote": "Le groupe Chic a composé cette chanson, à l'origine « Fuck off » (Allez vous faire foutre), après s'être fait refouler du Studio 54."
+      },
+      {
+        "id": 2,
+        "question": "Quel tube de Diana Ross a été écrit par les membres du groupe Chic ?",
+        "propositions": [
+          "Surrender",
+          "Love Child",
+          "Upside Down",
+          "Remember Me"
+        ],
+        "réponse": "Upside Down",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Upside_Down",
+        "anecdote": "Il a été échantillonné par Salt-n-Pepa, Kid Rock, Missy Elliott, Destiny's Child, Alcazar, Puff Daddy, Risquée, Collette et MC Lyte."
+      },
+      {
+        "id": 3,
+        "question": "Qui se demande s'il est sexy dans un tube disco sorti en 1978 ?",
+        "propositions": [
+          "Elton John",
+          "Rod Stewart",
+          "Barry White",
+          "Walter Murphy"
+        ],
+        "réponse": "Rod Stewart",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Da_Ya_Think_I'm_Sexy  ?",
+        "anecdote": "Après avoir été condamné pour plagiat contre Jorge Ben, Rod Stewart a accepté de verser les royalties de ce disque à l'Unicef."
+      },
+      {
+        "id": 4,
+        "question": "Qui a enregistré « You Make Me Feel » avant Jimmy Somerville ?",
+        "propositions": [
+          "Sylvester",
+          "Randy Jones",
+          "Bobby Farrell",
+          "Dan Hartman"
+        ],
+        "réponse": "Sylvester",
+        "wikipédia": "https://fr.wikipedia.org/wiki/You_Make_Me_Feel_(Mighty_Real)",
+        "anecdote": "Séropositif, Sylvetser s'engage dans la prévention et continuera à enregistrer des albums destinés aux pistes des boîtes de nuit."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Nintendo",         
+  "mise-à-jour": "18/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Sur quelle console Nintendo sont sortis les premiers jeux « Pokémon » ?",
+        "propositions": [
+          "Game Cube",
+          "Game Boy",
+          "Nintendo DS",
+          "Super Nintendo"
+        ],
+        "réponse": "Game Boy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Pokémon_Rouge_et_Bleu",
+        "anecdote": "Le joueur contrôle le personnage principal via une vue aérienne et le dirige dans l'ensemble de la région fictive de Kanto."
+      },
+      {
+        "id": 2,
+        "question": "Quel gorille est un des premiers personnages célèbres de Nintendo ?",
+        "propositions": [
+          "Abu",
+          "Donkey Kong",
+          "Mookie",
+          "King Kong"
+        ],
+        "réponse": "Donkey Kong",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Donkey_Kong_(personnage)",
+        "anecdote": "Créé par Shigeru Miyamoto, ce gorille est à l'origine l'ennemi de Jumpman, son maître, dont il a enlevé la fiancée."
+      },
+      {
+        "id": 3,
+        "question": "Que signifie le sigle DS de la Nintendo DS ?",
+        "propositions": [
+          "Detect System",
+          "Data Super",
+          "Direct Shot",
+          "Dual Screen"
+        ],
+        "réponse": "Dual Screen",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nintendo_DS",
+        "anecdote": "La Nintendo DS est devenue la console la plus vendue de tous les temps au cours du mois de décembre 2012."
+      },
+      {
+        "id": 4,
+        "question": "Quel personnage rose de Nintendo vit à Dream Land ?",
+        "propositions": [
+          "Kirby",
+          "Kirin",
+          "Kulfi",
+          "Kheer"
+        ],
+        "réponse": "Kirby",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kirby_(personnage)",
+        "anecdote": "La particularité de Kirby est qu'il peut aspirer tout ce qu'il voit, que ce soit des objets ou des ennemis."
+      }
+    ]
+}

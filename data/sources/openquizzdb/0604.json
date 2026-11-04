@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Dans la maison",         
+  "mise-à-jour": "13/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel objet imposant est un incontournable de la cuisine moderne ?",
+        "propositions": [
+          "Radiateur",
+          "Réfrigérateur",
+          "Aspirateur",
+          "Surgélateur"
+        ],
+        "réponse": "Réfrigérateur",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Réfrigérateur",
+        "anecdote": "Inventé en 1927 par l'ingénieur Nathaniel B. Wales, le premier modèle commercial avait un compartiment de refroidissement."
+      },
+      {
+        "id": 2,
+        "question": "Quel objet, aussi appelé sofa ou divan, fait partie de la salle de séjour ?",
+        "propositions": [
+          "Chaise",
+          "Fauteuil",
+          "Tabouret",
+          "Canapé"
+        ],
+        "réponse": "Canapé",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Canapé",
+        "anecdote": "L'origine du canapé remonte à l'Antiquité égyptienne, où les gens utilisaient des bancs recouverts de coussins pour se reposer."
+      },
+      {
+        "id": 3,
+        "question": "Quel passage en surplomb dessert les pièces du niveau supérieur ?",
+        "propositions": [
+          "Balcon",
+          "Mezzanine",
+          "Carport",
+          "Véranda"
+        ],
+        "réponse": "Mezzanine",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mezzanine_(architecture)",
+        "anecdote": "De nos jours, le terme désigne également un passage en surplomb desservant les pièces du niveau supérieur d'un logement."
+      },
+      {
+        "id": 4,
+        "question": "Quelle alternative au garage classique est ouverte sur les côtés ?",
+        "propositions": [
+          "Véranda",
+          "Cellier",
+          "Comble",
+          "Carport"
+        ],
+        "réponse": "Carport",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Carport",
+        "anecdote": "Le carport peut être simple ou double, selon qu'il accueille deux véhicules, adapté aux camping-cars, ou complété d'un débarras."
+      }
+    ]
+}

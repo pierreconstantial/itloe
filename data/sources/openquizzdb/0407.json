@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Toy Story »",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien d'yeux ont les extraterrestres de Pizza Planet dans « Toy Story » ?",
+        "propositions": [
+          "Quatre",
+          "Deux",
+          "Trois",
+          "Un seul"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Toy_Story",
+        "anecdote": "Les aliens sont tous identiques : de couleur verte, costume bleu, une antenne et trois yeux."
+      },
+      {
+        "id": 2,
+        "question": "Quel effrayant voisin d'Andy torture les jouets dans « Toy Story » ?",
+        "propositions": [
+          "Ted",
+          "Sid",
+          "Chuck",
+          "Zurg"
+        ],
+        "réponse": "Sid",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Sid_(homonymie)",
+        "anecdote": "Dans « Toy Story 3 », Sid est devenu éboueur et ramasse les poubelles dans le quartier d'Andy."
+      },
+      {
+        "id": 3,
+        "question": "Comment s'appelle le chien d'Andy dans la saga « Toy Story » ?",
+        "propositions": [
+          "Razmotte",
+          "Lotso",
+          "Pile-Poil",
+          "Scud"
+        ],
+        "réponse": "Razmotte",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Toy_Story_2",
+        "anecdote": "Contrairement à leurs craintes initiales, Razmotte est devenu, pour les jouets de la chambre d'Andy, un compagnon de jeu."
+      },
+      {
+        "id": 4,
+        "question": "À qui appartiennent les jouets dont font partie Woody et ses amis ?",
+        "propositions": [
+          "Andy",
+          "Lisa",
+          "Sid",
+          "Daisy"
+        ],
+        "réponse": "Andy",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Toy_Story",
+        "anecdote": "Andy tient énormément à tous ses jouets, et certains plus que d'autres, au point de les garder jusque dans son adolescence."
+      }
+    ]
+}

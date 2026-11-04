@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Acid jazz",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel groupe de musique anglais est mené par le chanteur Jay Kay ?",
+        "propositions": [
+          "Jamiroquai",
+          "Jethro Tull",
+          "Joy Division",
+          "Judas Priest"
+        ],
+        "réponse": "Jamiroquai",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jamiroquai",
+        "anecdote": "Aujourd'hui, le groupe a acquis une renommée mondiale, tout en ayant su faire évoluer sa musique."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le surnom de Jean-Paul Maunick, fondateur d'Incognito ?",
+        "propositions": [
+          "Bluey",
+          "Greeny",
+          "Redest",
+          "Yellow"
+        ],
+        "réponse": "Bluey",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Incognito_(groupe)",
+        "anecdote": "Leur premier album, « Jazz Funk », sera le seul enregistré dans les années 1980."
+      },
+      {
+        "id": 3,
+        "question": "Quel quartet acid jazz est renommé pour ses performances live ?",
+        "propositions": [
+          "MJQ",
+          "DSQ",
+          "JTQ",
+          "FJQ"
+        ],
+        "réponse": "JTQ",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": "James Taylor Quartet a contribué à la bande originale du film « Austin Powers »."
+      },
+      {
+        "id": 4,
+        "question": "Quel sigle retrouve-t-on sur tous les albums de Brand New Heavies ?",
+        "propositions": [
+          "Une girafe",
+          "Une tortue",
+          "Un lion",
+          "Un éléphant"
+        ],
+        "réponse": "Un éléphant",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Brand_New_Heavies",
+        "anecdote": "Les membres principaux du groupe sont Jan Kincaid, Simon Bartholomew et Andrew Levy."
+      }
+    ]
+}

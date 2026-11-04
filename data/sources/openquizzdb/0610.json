@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Citations courtes",         
+  "mise-à-jour": "15/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui a dit : « La beauté est dans les yeux de celui qui regarde » ?",
+        "propositions": [
+          "Confucius",
+          "Stendhal",
+          "Guy de Maupassant",
+          "Oscar Wilde"
+        ],
+        "réponse": "Oscar Wilde",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Oscar_Wilde",
+        "anecdote": "Oscar Wilde incarne une nouvelle sensibilité qui apparaît en réaction contre le positivisme et le naturalisme."
+      },
+      {
+        "id": 2,
+        "question": "Qui a dit : « La chance est bien souvent un hasard qui se provoque » ?",
+        "propositions": [
+          "Bob Marley",
+          "Guy de Maupassant",
+          "Confucius",
+          "Oscar Wilde"
+        ],
+        "réponse": "Confucius",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Confucius",
+        "anecdote": "Personnage historique ayant le plus marqué la civilisation chinoise, Confucius est considéré comme le premier éducateur de la Chine."
+      },
+      {
+        "id": 3,
+        "question": "Qui a dit : « Une vie ne vaut rien, mais rien ne vaut une vie » ?",
+        "propositions": [
+          "Albert Camus",
+          "Oscar Wilde",
+          "André Malraux",
+          "Jules Renard"
+        ],
+        "réponse": "André Malraux",
+        "wikipédia": "https://fr.wikipedia.org/wiki/André_Malraux",
+        "anecdote": "Malraux a obtenu le prix Goncourt avec « La Condition humaine », roman qui s'inspire des soubresauts révolutionnaires de la Chine."
+      },
+      {
+        "id": 4,
+        "question": "Qui a dit : « L'imagination est plus importante que le savoir » ?",
+        "propositions": [
+          "Guy de Maupassant",
+          "Albert Einstein",
+          "Oscar Wilde",
+          "Confucius"
+        ],
+        "réponse": "Albert Einstein",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Albert_Einstein",
+        "anecdote": "Albert Einstein a publié sa théorie de la relativité restreinte en 1905 et sa théorie de la gravitation dite relativité générale en 1915."
+      }
+    ]
+}

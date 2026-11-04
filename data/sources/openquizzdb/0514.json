@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Vins du monde",         
+  "mise-à-jour": "08/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle île grecque produit un muscat très réputé ?",
+        "propositions": [
+          "Samos",
+          "Ikaria",
+          "Lesbos",
+          "Rhodes"
+        ],
+        "réponse": "Samos",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Muscat_de_Samos",
+        "anecdote": "Les vendanges commencent à la mi-août, au niveau de la mer, et se poursuivent fin octobre dans les régions montagneuses."
+      },
+      {
+        "id": 2,
+        "question": "De quel pays assez riche en soleil provient le Muscat de Patras ?",
+        "propositions": [
+          "Grèce",
+          "Espagne",
+          "Chypre",
+          "Turquie"
+        ],
+        "réponse": "Grèce",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Viticulture_en_Grèce",
+        "anecdote": "Les premiers vins grecs ont été datés de 6 500 ans, leur élaboration correspondant aux besoins de familles ou communautés."
+      },
+      {
+        "id": 3,
+        "question": "Quel pays européen produit le vin blanc Aphrodite ?",
+        "propositions": [
+          "Espagne",
+          "Grèce",
+          "Chypre",
+          "France"
+        ],
+        "réponse": "Chypre",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Viticulture_à_Chypre",
+        "anecdote": "Le vin produit sur l'île entra très tôt dans la mythologie grâce à Aphrodite, native de Chypre, et à Dionysos, dieu du vin."
+      },
+      {
+        "id": 4,
+        "question": "Quel est le cépage de cuve blanc le plus répandu en Allemagne ?",
+        "propositions": [
+          "Sylvaner",
+          "Riesling",
+          "Müller-Thurgau",
+          "Mauzac"
+        ],
+        "réponse": "Müller-Thurgau",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Müller-thurgau",
+        "anecdote": "Avec 24 % de la superficie totale, le müller-thurgau a longtemps été considéré comme un croisement des cépages riesling et sylvaner."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Mamans de fiction",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Lequel de ces personnages n'est pas un des enfants de Marge Simpson ?",
+        "propositions": [
+          "Abe",
+          "Lisa",
+          "Bart",
+          "Maggie"
+        ],
+        "réponse": "Abe",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marge_Simpson",
+        "anecdote": "Marge est la force moralisatrice de sa famille et essaie souvent de maintenir l'ordre dans la maison des Simpson."
+      },
+      {
+        "id": 2,
+        "question": "Comment se prénomme la mère de la Famille Addams ?",
+        "propositions": [
+          "Aurora",
+          "Eva",
+          "Elvira",
+          "Morticia"
+        ],
+        "réponse": "Morticia",
+        "wikipédia": "https://fr.wikipedia.org/wiki/La_Famille_Addams",
+        "anecdote": "Cette série est directement inspirée des personnages que dessinait Charles Addams à la fin des années trente."
+      },
+      {
+        "id": 3,
+        "question": "De quel héros de fiction Lily, tuée par Lord Voldemort, est-elle la mère ?",
+        "propositions": [
+          "Mowgli",
+          "Harry Potter",
+          "Luke Skywalker",
+          "Frodon Sacquet"
+        ],
+        "réponse": "Harry Potter",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Harry_Potter",
+        "anecdote": "Lily Evans est née de parents moldus le 30 janvier 1960 et a une soeur, Pétunia Dursley."
+      },
+      {
+        "id": 4,
+        "question": "Dans « Breaking Bad », quel est le prénom de la mère de la famille White ?",
+        "propositions": [
+          "Jayne",
+          "Angela",
+          "Rhona",
+          "Skyler"
+        ],
+        "réponse": "Skyler",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Breaking_Bad",
+        "anecdote": "Skyler est très amoureuse de Walter, au point de prendre toutes les décisions importantes dans sa vie."
+      }
+    ]
+}

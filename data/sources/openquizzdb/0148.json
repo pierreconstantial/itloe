@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Alphaquizz #M",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel nom Franquin a-t-il donné à son animal jaune à longue queue ?",
+        "propositions": [
+          "Mowgli",
+          "Molosse",
+          "Marsupilami",
+          "Maximus"
+        ],
+        "réponse": "Marsupilami",
+        "wikipédia": "https://fr.wikipedia.org/wiki/André_Franquin",
+        "anecdote": "Franquin fut l'un des piliers de la bande dessinée belge des années 1950 aux années 1970."
+      },
+      {
+        "id": 2,
+        "question": "Quel est le nom du chien de Tintin, accompagnant le jeune reporter ?",
+        "propositions": [
+          "Milou",
+          "Molosse",
+          "Médor",
+          "Minou"
+        ],
+        "réponse": "Milou",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Milou",
+        "anecdote": "Milou possède un flair aigu contre les situations dangereuses et une grande intuition."
+      },
+      {
+        "id": 3,
+        "question": "À la pêche, quel terme désigne un appât artificiel léger ?",
+        "propositions": [
+          "Moustique",
+          "Monarque",
+          "Mouche",
+          "Morio"
+        ],
+        "réponse": "Mouche",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mouche_de_pêche",
+        "anecdote": "On appelle mouche toute imitation, généralement d'insectes, souvent aquatiques, utilisée par les pêcheurs à la mouche."
+      },
+      {
+        "id": 4,
+        "question": "Qui vit toujours dévêtue dans une chanson de Julien Clerc ?",
+        "propositions": [
+          "Mélissa",
+          "Marisa",
+          "Melina",
+          "Mathilda"
+        ],
+        "réponse": "Mélissa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Julien_Clerc",
+        "anecdote": "Julien Clerc a été le parrain du Téléthon 2008."
+      }
+    ]
+}

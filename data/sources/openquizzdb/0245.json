@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Finlande",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle est la capitale de la Finlande ?",
+        "propositions": [
+          "Copenhague",
+          "Oslo",
+          "Helsinki",
+          "Stockholm"
+        ],
+        "réponse": "Helsinki",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quelle langue est principalement parlée en Finlande ?",
+        "propositions": [
+          "Norvégien",
+          "Finnois",
+          "Russe",
+          "Suédois"
+        ],
+        "réponse": "Finnois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 3,
+        "question": "Quel animal est souvent associé à la Finlande ?",
+        "propositions": [
+          "Panda",
+          "Renne",
+          "Kangourou",
+          "Lion"
+        ],
+        "réponse": "Renne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Avec quel pays la Finlande partage-t-elle sa plus grande frontière ?",
+        "propositions": [
+          "Estonie",
+          "Suède",
+          "Norvège",
+          "Russie"
+        ],
+        "réponse": "Russie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

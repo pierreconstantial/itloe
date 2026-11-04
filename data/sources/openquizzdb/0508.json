@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Vins de France",         
+  "mise-à-jour": "04/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quelle région naturelle se trouve le Château Latour Premier Cru ?",
+        "propositions": [
+          "Libournais",
+          "Fronsac",
+          "Médoc",
+          "Graves"
+        ],
+        "réponse": "Médoc",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Château_Latour",
+        "anecdote": "Château Latour est devenu en 1993 la copropriété de la holding Artémis de François Pinault, qui détient 149 parts sur 155."
+      },
+      {
+        "id": 2,
+        "question": "Dans quelle région viticole est produit le Monbazillac AOC ?",
+        "propositions": [
+          "Champagne",
+          "Bergerac",
+          "Cahors",
+          "Béarn"
+        ],
+        "réponse": "Bergerac",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Monbazillac_(AOC)",
+        "anecdote": "De couleur paille, liquoreux ou moelleux, riches en glycérol et autres corps sucrés, les monbazillacs sont puissants et corsés."
+      },
+      {
+        "id": 3,
+        "question": "La Clairette de Die est produite le long de quelle rivière ?",
+        "propositions": [
+          "Vienne",
+          "Ardèche",
+          "Drôme",
+          "Isère"
+        ],
+        "réponse": "Drôme",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Clairette_de_Die",
+        "anecdote": "Le sol argilo-crayeux a la particularité de conserver les eaux de pluie pour maintenir un approvisionnement hydrique constant."
+      },
+      {
+        "id": 4,
+        "question": "Le Marignan est un cru de quelle région de France ?",
+        "propositions": [
+          "Béarn",
+          "Jura",
+          "Savoie",
+          "Tarn"
+        ],
+        "réponse": "Jura",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Marignan",
+        "anecdote": "Situé au pied des pentes du mont de Boisy, le vignoble remonte à la création de l'abbaye de Filly fondée en 930."
+      }
+    ]
+}

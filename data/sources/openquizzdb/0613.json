@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Pour les jeunes malins",         
+  "mise-à-jour": "21/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelles chaussures porte-t-on au judo ?",
+        "propositions": [
+          "Sabots",
+          "Baskets",
+          "Aucune",
+          "Bottes"
+        ],
+        "réponse": "Aucune",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Judo",
+        "anecdote": "Le lieu où l'on pratique le judo s'appelle le dojo, les pratiquants les judokas, la tenue en coton renforcée le judogi ou kimono."
+      },
+      {
+        "id": 2,
+        "question": "Combien de feuilles possède généralement un trèfle de jardin ?",
+        "propositions": [
+          "Deux",
+          "Quatre",
+          "Cinq",
+          "Trois"
+        ],
+        "réponse": "Trois",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Trèfle_blanc",
+        "anecdote": "C'est une plante très basse à tige rampante, reconnaissable à ses inflorescences blanches, parfois rosées, au parfum assez agréable."
+      },
+      {
+        "id": 3,
+        "question": "Dans un jeu de cartes classique, de quelle couleur sont les carreaux ?",
+        "propositions": [
+          "Bleu",
+          "Noir",
+          "Vert",
+          "Rouge"
+        ],
+        "réponse": "Rouge",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jeu_de_cartes_français",
+        "anecdote": "Un jeu français comprend 52 cartes à jouer, réparties suivant treize valeurs sur quatre enseignes : pique, coeur, carreau et trèfle."
+      },
+      {
+        "id": 4,
+        "question": "Comment appelle-t-on la ligne imaginaire qui sépare deux pays ?",
+        "propositions": [
+          "Tangente",
+          "Section",
+          "Médiane",
+          "Frontière"
+        ],
+        "réponse": "Frontière",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Frontière",
+        "anecdote": "Le sens attribué au mot frontière a évolué tout au long de l'histoire, et il n'a pas été le même d'une époque à l'autre."
+      }
+    ]
+}

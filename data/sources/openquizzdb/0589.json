@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sur un parcours de golf",         
+  "mise-à-jour": "06/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de trous compte généralement un parcours de golf ?",
+        "propositions": [
+          "16",
+          "12",
+          "14",
+          "18"
+        ],
+        "réponse": "18",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Terrain_de_golf",
+        "anecdote": "Sur un parcours de 9 trous, il s'agit parfois de réaliser 9 trous dans un sens (aller) puis dans l'autre (retour), soit un total de 18 trous."
+      },
+      {
+        "id": 2,
+        "question": "Quelle pièce de sable pimente le jeu au golf ?",
+        "propositions": [
+          "Grip",
+          "Bunker",
+          "Fairway",
+          "Rough"
+        ],
+        "réponse": "Bunker",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Terrain_de_golf",
+        "anecdote": "Un parcours de golf fait l'objet de soins très attentifs tout au long de l'année et plus particulièrement durant la saison golfique."
+      },
+      {
+        "id": 3,
+        "question": "Quel nom donne-t-on à la zone d'herbe située autour du trou au golf ?",
+        "propositions": [
+          "Green",
+          "Rough",
+          "Fairway",
+          "Bunker"
+        ],
+        "réponse": "Green",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Terrain_de_golf",
+        "anecdote": "Des zones en réparation, délimitées par des piquets de couleur bleue, peuvent se rencontrer sur le parcours sans en faire partie."
+      },
+      {
+        "id": 4,
+        "question": "Qui peut conseiller un joueur sur le parcours de golf ?",
+        "propositions": [
+          "Caddie",
+          "Arbitre",
+          "Practice",
+          "Capitaine"
+        ],
+        "réponse": "Caddie",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Caddie_(golf)",
+        "anecdote": "Un caddie est présent pour permettre au joueur de se concentrer uniquement sur son jeu en lui évitant la plupart des corvées."
+      }
+    ]
+}

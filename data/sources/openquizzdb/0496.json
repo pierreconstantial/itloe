@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Week-end à Rome",         
+  "mise-à-jour": "25/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle fontaine de Rome est l'une des plus célèbres au monde ?",
+        "propositions": [
+          "Neptune",
+          "Barcaccia",
+          "Trevi",
+          "Triton"
+        ],
+        "réponse": "Trevi",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Fontaine_de_Trevi",
+        "anecdote": "Il est de coutume d'y jeter une pièce de monnaie par le bras droit en tournant le dos à la fontaine avant de quitter Rome."
+      },
+      {
+        "id": 2,
+        "question": "Sur les côtes de quelle mer la ville de Rome est-elle située ?",
+        "propositions": [
+          "Tyrrhénienne",
+          "Égée",
+          "Adriatique",
+          "Ionienne"
+        ],
+        "réponse": "Tyrrhénienne",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mer_Tyrrhénienne",
+        "anecdote": "Elle forme un triangle limité à l'ouest par la Corse et la Sardaigne, à l'est par la péninsule italienne et au sud par la Sicile."
+      },
+      {
+        "id": 3,
+        "question": "Par combien d'aéroports principaux la ville de Rome est-elle desservie ?",
+        "propositions": [
+          "Deux",
+          "Trois",
+          "Cinq",
+          "Quatre"
+        ],
+        "réponse": "Deux",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rome",
+        "anecdote": "Les deux principaux, Léonard-de-Vinci de Rome Fiumicino et Ciampino, sont administrés par Aeroporti di Roma."
+      },
+      {
+        "id": 4,
+        "question": "Sur quelle pièce de monnaie italienne le Colisée est-il représenté ?",
+        "propositions": [
+          "20 centimes d'euro",
+          "1 euro",
+          "2 euros",
+          "5 centimes d'euro"
+        ],
+        "réponse": "5 centimes d'euro",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Colisée",
+        "anecdote": "Le Colisée est un géant malade : chaque année, 500 000 euros lui sont alloués par l'État italien pour parer au plus urgent."
+      }
+    ]
+}

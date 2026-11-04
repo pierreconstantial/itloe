@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "« Dragon Ball »",         
+  "mise-à-jour": "02/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Combien de boules faut-il rassembler pour qu'un voeu soit réalisé ?",
+        "propositions": [
+          "Cinq",
+          "Quatre",
+          "Sept",
+          "Six"
+        ],
+        "réponse": "Sept",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Dragon_Ball",
+        "anecdote": "Bulma, jeune fille intelligente et impulsive, est à la recherche des sept boules de cristal légendaires appelées Dragon Balls."
+      },
+      {
+        "id": 2,
+        "question": "En quoi se transforme le petit Son Gohan lors de la pleine Lune ?",
+        "propositions": [
+          "Loup-garou",
+          "Fantôme",
+          "Dragon",
+          "Singe géant"
+        ],
+        "réponse": "Singe géant",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Son_Gohan",
+        "anecdote": "Baptisé ainsi en souvenir du grand-père adoptif de Son Goku, il est le fils de Chichi et de Son Goku et le frère aîné de Son Goten."
+      },
+      {
+        "id": 3,
+        "question": "Quel est l'ancien nom autrefois donné à la planète Vegeta ?",
+        "propositions": [
+          "Beerus",
+          "Plant",
+          "Namek",
+          "Melmac"
+        ],
+        "réponse": "Plant",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Planètes_de_Dragon_Ball",
+        "anecdote": "Après la destruction de la planète Sadara, les Saiyans ont pris possession de Plant et l'ont rebaptisée du nom de leur roi, Vegeta."
+      },
+      {
+        "id": 4,
+        "question": "Qui a aidé à éteindre le château en feu du père de Chi-Chi ?",
+        "propositions": [
+          "Tortue Géniale",
+          "Goku",
+          "Bulma",
+          "Drum"
+        ],
+        "réponse": "Tortue Géniale",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Kamé_Sennin",
+        "anecdote": "Kamé Sennin est également connu sous le nom de Muten Roshi, de Tortue Géniale et aussi sous le pseudonyme de Jackie Chun."
+      }
+    ]
+}

@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #27",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel contrôleur tient-on à deux mains sur une console de jeu ?",
+        "propositions": [
+          "Mannette",
+          "Mannete",
+          "Manette",
+          "Manète"
+        ],
+        "réponse": "Manette",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quel médecin hospitalier exerce au sein d'un établissement public ?",
+        "propositions": [
+          "Pratisien",
+          "Practicien",
+          "Pratissien",
+          "Praticien"
+        ],
+        "réponse": "Praticien",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quelle est la principale matière première utilisée par l'industrie nucléaire ?",
+        "propositions": [
+          "Uranihomme",
+          "Uranium",
+          "Uraniôme",
+          "Urannium"
+        ],
+        "réponse": "Uranium",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel écoulement du sang se fait en dehors de son circuit naturel ?",
+        "propositions": [
+          "Émoragie",
+          "Hémoragie",
+          "Émmoragie",
+          "Hémorragie"
+        ],
+        "réponse": "Hémorragie",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

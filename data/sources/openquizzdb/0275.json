@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Irlande",         
+  "mise-à-jour": "24/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle ville est la capitale de la République d'Irlande ?",
+        "propositions": [
+          "Cork",
+          "Galway",
+          "Belfast",
+          "Dublin"
+        ],
+        "réponse": "Dublin",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 2,
+        "question": "Quel symbole est traditionnellement associé à l'Irlande ?",
+        "propositions": [
+          "Lion",
+          "Étoile",
+          "Aigle",
+          "Trèfle"
+        ],
+        "réponse": "Trèfle",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Trèfle_(symbole)",
+        "anecdote": "Le trèfle (shamrock) est le symbole le plus emblématique de l'Irlande. Selon la tradition, saint Patrick s'en serait servi pour expliquer le concept de la Sainte Trinité aux Irlandais au Ve siècle. Aujourd'hui, il est omniprésent lors de la fête de la Sai"
+      },
+      {
+        "id": 3,
+        "question": "Quelle boisson emblématique est consommée en Irlande ?",
+        "propositions": [
+          "Guinness",
+          "Tequila",
+          "Champagne",
+          "Saké"
+        ],
+        "réponse": "Guinness",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      },
+      {
+        "id": 4,
+        "question": "Quelle célébration populaire trouve ses origines en Irlande ?",
+        "propositions": [
+          "Pâques",
+          "Halloween",
+          "Noël",
+          "Saint-Patrick"
+        ],
+        "réponse": "Saint-Patrick",
+        "wikipédia": "https://fr.wikipedia.org/wiki/",
+        "anecdote": ""
+      }
+    ]
+}

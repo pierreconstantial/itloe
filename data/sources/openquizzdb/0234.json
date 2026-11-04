@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Orthoquizz #39",         
+  "mise-à-jour": "13/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quelle pierre érodée fut utilisée comme instrument de calcul ?",
+        "propositions": [
+          "Caillou",
+          "Kaïou",
+          "Caïllehoux",
+          "Caillous"
+        ],
+        "réponse": "Caillou",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 2,
+        "question": "Quelle sorte de pâte plastique est employée pour calfeutrer ou masquer ?",
+        "propositions": [
+          "Massetique",
+          "Masstic",
+          "Massetic",
+          "Mastic"
+        ],
+        "réponse": "Mastic",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 3,
+        "question": "Quel intervenant du web est sollicité par les marques pour marketing ?",
+        "propositions": [
+          "Influensceur",
+          "Influenceur",
+          "Influenseur",
+          "Influanceur"
+        ],
+        "réponse": "Influenceur",
+        "wikipédia": "-",
+        "anecdote": "-"
+      },
+      {
+        "id": 4,
+        "question": "Quel mammifère au long cou a le corps recouvert de taches ?",
+        "propositions": [
+          "Giraffe",
+          "Gyraffe",
+          "Girafe",
+          "Gyrafe"
+        ],
+        "réponse": "Girafe",
+        "wikipédia": "-",
+        "anecdote": "-"
+      }
+    ]
+}

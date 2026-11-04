@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Steven Spielberg",         
+  "mise-à-jour": "28/07/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui est le compositeur attitré des films de Steven Spielberg ?",
+        "propositions": [
+          "Giorgio Moroder",
+          "James Horner",
+          "John Barry",
+          "John Williams"
+        ],
+        "réponse": "John Williams",
+        "wikipédia": "https://fr.wikipedia.org/wiki/John_Williams_(compositeur)",
+        "anecdote": "Pour « E.T. l'extra-terrestre », Steven Spielberg a même ajusté le montage final pour s'aligner sur la musique composée par Williams."
+      },
+      {
+        "id": 2,
+        "question": "De quelle actrice du film « E.T. », Steven Spielberg est-il le parrain ?",
+        "propositions": [
+          "Dee Wallace",
+          "Drew Barrymore",
+          "Téa Leoni",
+          "Dakota Fanning"
+        ],
+        "réponse": "Drew Barrymore",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Drew_Barrymore",
+        "anecdote": "Après avoir tourné des films de série B, Drew Barrymore a fait un retour fracassant dans les années 1990, notamment avec « Scream »."
+      },
+      {
+        "id": 3,
+        "question": "Quel soldat faut-il sauver dans un film de Steven Spielberg ?",
+        "propositions": [
+          "Soldat Moore",
+          "Soldat Garner",
+          "Soldat Adams",
+          "Soldat Ryan"
+        ],
+        "réponse": "Soldat Ryan",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Il_faut_sauver_le_soldat_Ryan",
+        "anecdote": "Pour rendre les scènes de guerre réalistes, Spielberg a demandé aux acteurs principaux de suivre un entraînement militaire intensif."
+      },
+      {
+        "id": 4,
+        "question": "Quel film de Steven Spielberg réinvente l'histoire de Peter Pan ?",
+        "propositions": [
+          "Hook",
+          "Amistad",
+          "Munich",
+          "Sugarland Express"
+        ],
+        "réponse": "Hook",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Hook_ou_la_Revanche_du_capitaine_Crochet",
+        "anecdote": "La majorité des scènes de Julia Roberts ont été tournées seule, sur un fond bleu, en raison de la petite taille de son personnage."
+      }
+    ]
+}

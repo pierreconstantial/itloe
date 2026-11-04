@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Love Academy #05",         
+  "mise-à-jour": "-",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel pourcentage d'hommes pousseraient des cris en jouissant ?",
+        "propositions": [
+          "40 %",
+          "10 %",
+          "20 %",
+          "30 %"
+        ],
+        "réponse": "30 %",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Orgasme",
+        "anecdote": "Les études montrent que les sons pendant l'activité sexuelle peuvent aussi être des signaux de communication inconscients."
+      },
+      {
+        "id": 2,
+        "question": "Dans la Chine impériale, qu'appelait-on un « boudoir vert » ?",
+        "propositions": [
+          "Jardin impérial",
+          "École de judo",
+          "Maison close",
+          "Salle de thé"
+        ],
+        "réponse": "Maison close",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Bordel",
+        "anecdote": "Les courtisanes y recevaient des lettrés, des fonctionnaires ou des marchands fortunés, et étaient souvent formées aux arts."
+      },
+      {
+        "id": 3,
+        "question": "En Espagne, que désigne-t-on par le terme « baiser français » ?",
+        "propositions": [
+          "Caresse",
+          "Massage",
+          "Fellation",
+          "Suçon"
+        ],
+        "réponse": "Fellation",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Baiser",
+        "anecdote": "L'expression « French kiss » est quant à elle apparue dans les dictionnaires anglais après la Première Guerre mondiale."
+      },
+      {
+        "id": 4,
+        "question": "De quelle maladie sont morts Charles Baudelaire et Al Capone ?",
+        "propositions": [
+          "Scorbut",
+          "Tuberculose",
+          "Cancer",
+          "Syphilis"
+        ],
+        "réponse": "Syphilis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Syphilis",
+        "anecdote": "La syphilis est une infection sexuellement transmissible qui, avant l'ère des antibiotiques, pouvait évoluer sur plusieurs décennies."
+      }
+    ]
+}

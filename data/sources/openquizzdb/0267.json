@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Sportifs aux Jeux olympiques",         
+  "mise-à-jour": "24/08/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Quel pongiste belge a disputé ses septièmes JO à 42 ans ?",
+        "propositions": [
+          "Martin Bratanov",
+          "Yan Vostes",
+          "Greg Obert",
+          "Jean-Michel Saive"
+        ],
+        "réponse": "Jean-Michel Saive",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jean-Michel_Saive",
+        "anecdote": "Jean-Michel Saive a également porté le drapeau de la délégation belge lors des Jeux olympiques de 1996 et 2004."
+      },
+      {
+        "id": 2,
+        "question": "Quelle gymnaste à obtenu le premier 10 aux Jeux olympiques ?",
+        "propositions": [
+          "Diana Mocanu",
+          "Nadia Comaneci",
+          "Doina Ignat",
+          "Tatiana Gutsu"
+        ],
+        "réponse": "Nadia Comaneci",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Nadia_Comaneci",
+        "anecdote": "Nadia Comaneci, qui possède aujourd'hui une double nationalité, a donné une dimension populaire et médiatique inégalée à ce sport."
+      },
+      {
+        "id": 3,
+        "question": "Quel athlète Jamaïcain a marqué les Jeux olympiques de 2008 ?",
+        "propositions": [
+          "Dexter Lee",
+          "Lerone Clarke",
+          "Ray Stewart",
+          "Usain Bolt"
+        ],
+        "réponse": "Usain Bolt",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Usain_Bolt",
+        "anecdote": "Spécialiste des épreuves de sprint, Usain Bolt est également l'athlète le plus décoré des championnats du monde d'athlétisme."
+      },
+      {
+        "id": 4,
+        "question": "Qui a remporté le saut en longueur à Atlanta en 1996 ?",
+        "propositions": [
+          "Michael Johnson",
+          "Dwight Phillips",
+          "Carl Lewis",
+          "Linford Christie"
+        ],
+        "réponse": "Carl Lewis",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Carl_Lewis",
+        "anecdote": "Sa carrière, plusieurs fois interrompue, a duré de 1979 à 1996, année durant laquelle il a conquis son dernier titre olympique."
+      }
+    ]
+}

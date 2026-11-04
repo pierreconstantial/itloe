@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Auroville",         
+  "mise-à-jour": "26/09/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Dans quel pays est située la ville expérimentale Auroville ?",
+        "propositions": [
+          "Inde",
+          "Bangladesh",
+          "Canada",
+          "Pakistan"
+        ],
+        "réponse": "Inde",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Auroville",
+        "anecdote": "Auroville est une ville expérimentale située à une dizaine de kilomètres au nord de Pondichéry dans l'État du Tamil Nadu en Inde."
+      },
+      {
+        "id": 2,
+        "question": "Quelle française est à l'origine de la création de la cité d'Auroville ?",
+        "propositions": [
+          "Ellam Onru",
+          "Mirra Alfassa",
+          "Julie Dreyfus",
+          "Maïna Kataki"
+        ],
+        "réponse": "Mirra Alfassa",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Mirra_Alfassa",
+        "anecdote": "Soutenue par l'UNESCO, Mirra Alfassa a créé une communauté internationale dont la vocation est de réaliser l'unité humaine."
+      },
+      {
+        "id": 3,
+        "question": "Comment appelle-t-on les habitants de la cité expérimentale Auroville ?",
+        "propositions": [
+          "Aurovilliens",
+          "Aurovilliers",
+          "Auréliens",
+          "Auvrilliens"
+        ],
+        "réponse": "Aurovilliens",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Auroville",
+        "anecdote": "Aujourd'hui, les Aurovilliens, issus d'une trentaine de pays différents, sont organisés en 35 unités de travail parfaitement viables."
+      },
+      {
+        "id": 4,
+        "question": "Quel bâtiment est considéré comme l'âme d'Auroville ?",
+        "propositions": [
+          "Pooram",
+          "Bharat Niwas",
+          "Charaka",
+          "Matrimandir"
+        ],
+        "réponse": "Matrimandir",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Matrimandir",
+        "anecdote": "Situé au centre d'Auroville, le Matrimandir est considéré comme l'âme de la cité expérimentale. Cette imposante structure dorée, conçue comme un lieu de méditation, symbolise la recherche de la conscience intérieure et de l'unité humaine."
+      }
+    ]
+}

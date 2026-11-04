@@ -1,0 +1,61 @@
+{                                     
+  "fournisseur": "OpenQuizzDB - Fournisseur de contenu libre (https://www.openquizzdb.org)",
+  "licence": "CC BY-SA",
+  "rédacteur": "Philippe Bresoux",
+  "thème": "Stars mondiales #2",         
+  "mise-à-jour": "02/10/2026",
+  "quizz": [
+      {
+        "id": 1,
+        "question": "Qui a annoncé que son mari, Orlando Bloom, était fétichiste des pieds ?",
+        "propositions": [
+          "Jessica Clarke",
+          "Hannah Davis",
+          "Rhea Durham",
+          "Miranda Kerr"
+        ],
+        "réponse": "Miranda Kerr",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Miranda_Kerr",
+        "anecdote": "En 2007, Miranda Kerr fu le premier mannequin australien à rejoindre la prestigieuse équipe des Anges de Victoria's Secret."
+      },
+      {
+        "id": 2,
+        "question": "Quelle chanteuse et actrice est surnommée « la bomba latina » ?",
+        "propositions": [
+          "Selena Gomez",
+          "Shakira",
+          "Mariah Carey",
+          "Jennifer Lopez"
+        ],
+        "réponse": "Jennifer Lopez",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jennifer_Lopez",
+        "anecdote": "Avec une fortune de 400 millions de dollars, elle fut récompensée en 2013 pour sa carrière et a reçu la 2 500e étoile du Walk of Fame."
+      },
+      {
+        "id": 3,
+        "question": "Quel chanteur est père de huit enfants nés de cinq mères différentes ?",
+        "propositions": [
+          "Lionel Richie",
+          "Phil Collins",
+          "Mick Jagger",
+          "Rod Stewart"
+        ],
+        "réponse": "Rod Stewart",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Rod_Stewart",
+        "anecdote": "Le 11 octobre 2016, Rod Stewart a été anobli par le Prince William, duc de Cambridge, devenant ainsi Sir Roderick David Stewart."
+      },
+      {
+        "id": 4,
+        "question": "À quel chanteur Justin Bieber voue-t-il un culte tout particulier ?",
+        "propositions": [
+          "Otis Rush",
+          "Luther Johnson",
+          "Jimi Hendrix",
+          "Elmore James"
+        ],
+        "réponse": "Jimi Hendrix",
+        "wikipédia": "https://fr.wikipedia.org/wiki/Jimi_Hendrix",
+        "anecdote": "Hendrix avait non seulement la particularité d'être un guitariste gaucher, mais aussi de jouer sur une guitare de droitier."
+      }
+    ]
+}
