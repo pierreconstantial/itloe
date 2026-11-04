@@ -375,9 +375,12 @@ function handleMessage(ws: WebSocket, m: any): void {
       return;
 
     case 'gm': {
-      // game master: host only; the engine validates the op (a host's no-op is not an error)
+      // game master: host only; the engine validates the op. A host's no-op is silent, EXCEPT a refused
+      // give/take (Contract F: unknown item or character, or taking more than held) → 'refused'
       if (!isPlainObject(m.op)) return;
-      if (!apply({ t: 'gm', id, op: m.op as GmOp }) && id !== party().hostId) sendErr(ws, 'not-host');
+      if (apply({ t: 'gm', id, op: m.op as GmOp })) return;
+      if (id !== party().hostId) sendErr(ws, 'not-host');
+      else if (m.op.op === 'give' || m.op.op === 'take') sendErr(ws, 'refused');
       return;
     }
 

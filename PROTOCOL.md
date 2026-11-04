@@ -64,7 +64,10 @@ injected by the server (socket → playerId; screens: `"screen"`), never taken f
 { "t": "gm", "op": { "op": "unlock", "node": "teens" } }
                                         // host only (game master), ops: goto / unlock / lock / setFlag / count /
                                         // reset-node (shapes: shared/campaign/types.js GmOp). Non-host → err
-                                        // "not-host"; a host's no-op is silent.
+                                        // "not-host"; a host's no-op is silent, except give/take (Contract F:
+                                        // { op:'give', item, to, count? } / { op:'take', item, from, count? }):
+                                        // unknown item or character, or taking more than held → err "refused"
+                                        // (no partial take).
 { "t": "ack", "upTo": 3 }               // SCREENS only: the TV finished the cutscenes of every news entry with
                                         // seq <= upTo; they leave `campaign.news`. upTo is required. Two TVs, or a
                                         // TV reconnecting mid-cutscene, never drop a cutscene they did not play.

@@ -176,9 +176,11 @@ try {
   // ---------- the unlock: reward + two worlds AT ONCE, queued as news ----------
   k = camp(T1);
   const kinds = k.news.map((n: any) => (n.t === 'unlocked' ? `unlocked:${n.node}` : `${n.t}:${n.item}`));
-  check(k.facts.done.includes('hub.false-start') && k.facts.items.includes('reward-1') && k.facts.flags.includes('false-start-over'), 'false start done → reward item + flag');
+  check(k.facts.done.includes('hub.false-start') && k.facts.inventory.elodie?.['old-key'] === 1 && k.facts.flags.includes('false-start-over'),
+    "false start done → the old key in the CHOOSER's inventory (Élodie) + flag");
+  check(!k.facts.inventory.pierre?.['old-key'], '…and nobody else got it (the host is not the chooser)');
   check(k.facts.unlocked.includes('childhood') && k.facts.unlocked.includes('teens') && !k.facts.unlocked.includes('adult'), 'childhood AND teens unlocked at once; adult still locked');
-  check(kinds.includes('unlocked:childhood') && kinds.includes('unlocked:teens') && kinds.includes('item:reward-1'), `news queued: ${kinds.join(', ')}`);
+  check(kinds.includes('unlocked:childhood') && kinds.includes('unlocked:teens') && kinds.includes('item:old-key'), `news queued: ${kinds.join(', ')}`);
   check(k.news.every((n: any, j: number) => n.seq === j + 1) && k.newsSeq === k.news.length, 'news seq = 1, 2, 3… (newsSeq = last handed out)');
   await restartSame('on podium 3 with news pending');
   check(core(camp(T2)) === core(camp(T1)), 'both TVs see the same news');
