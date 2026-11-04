@@ -5,26 +5,16 @@
 // Its buttons are inserted as direct children of the sheet panel, just before the #host-controls
 // marker, so they get the panel's button styles.
 import { $ } from './dom.js';
+import { createConfirm } from './confirm.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 
-const CONFIRM_MS = 4000;
-
 /** @param {{ send: (msg: unknown) => void }} io */
 export function createHostControls(io) {
-  /** Armed action key ('end' or a playerId) waiting for its confirming tap. @type {string | null} */
-  let armed = null;
-  /** @type {ReturnType<typeof setTimeout> | undefined} */ let disarmTimer;
-  /** @type {{ v: State, online: readonly string[], meId: string } | null} */ let last = null;
-
-  /** @param {string} key @param {() => void} act */
-  function tap(key, act) {
-    clearTimeout(disarmTimer);
-    if (armed === key) { armed = null; act(); redraw(); return; }
-    armed = key;
-    disarmTimer = setTimeout(() => { armed = null; redraw(); }, CONFIRM_MS);
-    redraw();
-  }
+  /** @type {{ v: State | null, online: readonly string[], meId: string } | null} */ let last = null;
+  // armed key: 'end' or a playerId
+  const confirm = createConfirm(() => redraw());
+  const tap = confirm.tap;
 
   /** @param {string} cls @param {string} text @param {() => void} onClick */
   function button(cls, text, onClick) {
@@ -52,9 +42,9 @@ export function createHostControls(io) {
 
   function redraw() {
     const ctx = last;
-    const show = ctx !== null && ctx.v.phase === 'playing' && ctx.v.hostId === ctx.meId;
-    if (!show || !ctx) { place([]); armed = null; return; }
-    const { v, online } = ctx;
+    const v = ctx?.v ?? null;
+    if (!ctx || !v || v.phase !== 'playing' || v.hostId !== ctx.meId) { place([]); confirm.disarm(); return; }
+    const { online } = ctx;
     const live = new Set(online);
     const playing = v.order.filter((id) => !v.players[id].done);
     // offline first: they are the ones blocking the podium
@@ -66,20 +56,20 @@ export function createHostControls(io) {
     const rows = playing.map((id) => {
       const p = v.players[id];
       const off = !live.has(id);
-      const text = armed === id ? `Tap again: take ${p.name} out`
+      const text = confirm.isArmed(id) ? `Tap again: take ${p.name} out`
         : `${off ? '📴 ' : ''}Take ${p.name} out${off ? ' (offline)' : ''}`;
       const b = button(off ? 'danger' : '', text, () => tap(id, () => io.send({ t: 'retire', target: id })));
       b.dataset.retire = id;
       return b;
     });
-    const end = button('danger', armed === 'end' ? 'Tap again to end the game' : 'End game now',
+    const end = button('danger', confirm.isArmed('end') ? 'Tap again to end the game' : 'End game now',
       () => tap('end', () => io.send({ t: 'endGame' })));
     end.id = 'btn-end-game';
     place([title, ...rows, end]);
   }
 
   return {
-    /** @param {State} v @param {readonly string[]} online @param {string} meId */
+    /** @param {State | null} v the block game, null when none @param {readonly string[]} online @param {string} meId */
     render(v, online, meId) {
       last = { v, online, meId };
       redraw();

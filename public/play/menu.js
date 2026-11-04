@@ -5,11 +5,11 @@ import { $, pieceEl } from './dom.js';
 import * as haptics from './haptics.js';
 import { RULES } from './rules.js';
 
-const SHEETS = ['menu', 'rules', 'invite', 'settings'];
+const SHEETS = ['menu', 'rules', 'invite', 'settings', 'gm'];
 const RULE_CELL = 10; // px per cell for rule illustrations
 
 /**
- * @param {{ canLeave: () => boolean, onLeave: () => void }} hooks
+ * @param {{ canLeave: () => boolean, onLeave: () => void, isGameMaster: () => boolean }} hooks
  * @returns {{ refresh: () => void, close: (name?: string) => void, isOpen: () => boolean }}
  */
 export function initMenu(hooks) {
@@ -22,6 +22,7 @@ export function initMenu(hooks) {
       ? 'Vibration: not on this phone'
       : `Vibration: ${haptics.isEnabled() ? 'on' : 'off'}`;
     $('btn-leave').hidden = !hooks.canLeave();
+    $('btn-gm').hidden = !hooks.isGameMaster();
     leaveArmed = false;
     $('btn-leave').textContent = 'Leave game';
   }

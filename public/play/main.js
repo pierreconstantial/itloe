@@ -19,9 +19,13 @@ import { posFromEcho } from './movement.js';
 import { createConnection } from './connection.js';
 import { installBackGuard } from './back-guard.js';
 import { createHostControls } from './host-controls.js';
+import { createGmPanel } from './gm-panel.js';
+import { childMarks, content, onContentChange, syncContent, titleOf } from './campaign-view.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('../../shared/game.js').Player} Player */
+/** @typedef {import('../../shared/campaign/types.js').Campaign} Campaign */
+/** @typedef {import('../../shared/campaign/types.js').PartyMember} PartyMember */
 /** @typedef {import('../../shared/pieces.js').PieceId} PieceId */
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
 /** @typedef {import('./movement.js').Pos} Pos */
@@ -84,7 +88,12 @@ function outcome(prev, next, id) {
 
 // ---------- client state ----------
 
-/** @type {State | null} */ let lastView = null;
+/** The block game (the view's `state`): null on the hub / in a world, or before the first view. @type {State | null} */
+let lastView = null;
+/** The whole evening (slice 3), null from a pre-campaign server. @type {Campaign | null} */
+let campaign = null;
+/** At least one view arrived. */
+let viewed = false;
 /** Solo record for the current (size, mode), sent with views in solo games. @type {Best | null} */
 let lastBest = null;
 /** @type {string | null} */ let playerId = load(KEYS.id);
@@ -183,20 +192,28 @@ function receive(raw) {
   } else if (m.t === 'view') {
     syncClock(m.now);
     const prev = lastView;
-    lastView = m.state;
+    const prevNode = campaign?.at.node ?? null;
+    lastView = m.state ?? null;
+    campaign = m.campaign ?? null;
+    viewed = true;
+    syncContent(m.contentVersion); // fetches the content on the first view and whenever it changed
     lastBest = m.best ?? null;
     online = Array.isArray(m.online) ? m.online.filter((/** @type {unknown} */ x) => typeof x === 'string') : [];
     pending = null;
-    const event = prev && playerId ? outcome(prev, m.state, playerId) : null;
+    const next = lastView;
+    const event = prev && next && playerId ? outcome(prev, next, playerId) : null;
     if (event) haptics.buzz(event);
-    const turn = prev && playerId && m.state.players[playerId] ? PHASE_TOASTS[`${prev.phase}>${m.state.phase}`] : undefined;
-    if (turn) { menu.close(); toast(turn); }
+    const turn = prev && next && playerId && next.players[playerId] ? PHASE_TOASTS[`${prev.phase}>${next.phase}`] : undefined;
+    // the party moved (a door, the host): say where we are now
+    const moved = prevNode !== null && campaign !== null && campaign.at.node !== prevNode && member() ? `→ ${titleOf(campaign.at.node)}` : undefined;
+    if (turn || moved) { menu.close(); toast(/** @type {string} */ (moved ?? turn)); }
     render();
   } else if (m.t === 'err') {
     pending = null;
     const refusedPick = pendingPick;
     pendingPick = null;
-    if (m.code === 'full' && lastView?.phase !== 'lobby') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} is back online on another phone.`);
+    if (m.code === 'refused') toast("That can't be done right now.");
+    else if (m.code === 'full' && lastView && lastView.phase !== 'lobby') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} is back online on another phone.`);
     else if (m.code === 'full') showPickError('Sorry, the game is full (4 players max).');
     else if (m.code === 'taken') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} was just picked. Choose someone else!`);
     else if (m.code === 'bad-room') roomPrompt = { character: wantedCharacter, retried: roomPrompt !== null };
@@ -228,17 +245,33 @@ function leaveGame() {
   render();
 }
 
+/** Our party member (slice 3: the evening's roster), or without a campaign our block-game player. @returns {PartyMember | Player | null} */
+function member() {
+  if (!playerId) return null;
+  if (campaign) {
+    const m = campaign.party.players[playerId];
+    return m && !m.left ? m : null;
+  }
+  return lastView?.players[playerId] ?? null;
+}
+
+/** The party host steers the evening (game-master panel). */
+const isGameMaster = () => campaign !== null && playerId !== null && campaign.party.hostId === playerId && !!member();
+
+/** Walking: a member, on the hub / in a world, or in an open block lobby. */
+const canWalk = () => member() !== null && (!lastView || lastView.phase === 'lobby');
+
 /** First back press: close a sheet, or say how to get around (back-guard.js). */
 function onBack() {
   if (menu.isOpen()) { menu.close(); return; }
-  toast(playerId && lastView?.players[playerId]
+  toast(member()
     ? "You're still in the game. Press back again to leave this page."
     : 'Press back again to leave Bloko.');
 }
 
 // ---------- rendering ----------
 
-const VIEWS = ['loading', 'pick', 'room', 'replaced', 'waiting', 'lobby', 'game', 'over', 'podium'];
+const VIEWS = ['loading', 'pick', 'room', 'replaced', 'waiting', 'place', 'lobby', 'game', 'over', 'podium'];
 
 /** @param {string} name */
 function show(name) {
@@ -248,35 +281,45 @@ function show(name) {
 function render() {
   menu.refresh();
   if (replaced) { show('replaced'); return; }
+  if (!viewed) { show('loading'); return; }
   const v = lastView;
-  if (!v) { show('loading'); return; }
-  const me = playerId ? v.players[playerId] ?? null : null;
-  const isHost = me !== null && me.id === v.hostId;
-  const configurable = v.phase !== 'playing';
+  const me = v && playerId ? v.players[playerId] ?? null : null;
+  const mem = member();
+  const isHost = me !== null && v !== null && me.id === v.hostId;
+  const configurable = v !== null && v.phase !== 'playing';
 
-  settingsSheet.render(v.settings, isHost && configurable);
+  if (v) settingsSheet.render(v.settings, isHost && configurable);
   hostControls.render(v, online, me?.id ?? '');
   if (!isHost || !configurable) menu.close('settings');
+  if (campaign && isGameMaster()) gmPanel.render(campaign);
+  else menu.close('gm');
   updateClock();
 
   // the piece being dragged left our hand → the drag is stale
   if (drag && (!me || me.hand[drag.index] !== drag.pieceId)) endDrag();
-  // walking is a lobby thing: leaving the lobby lets go of the stick (final moving:false)
-  if (!me || v.phase !== 'lobby') joystick.cancel();
+  // walking stops where it is not allowed (a game under way): final moving:false
+  if (!canWalk()) joystick.cancel();
 
-  if (!me) {
+  if (!mem) {
     if (roomPrompt) { show('room'); renderRoomPrompt(roomPrompt); return; }
-    // the picker shows whenever there is something to tap: a free seat in the lobby, or (any phase)
-    // a character whose phone is offline, to continue as
-    const states = pickStates(v, online);
-    if (!anyPickable(states) && pendingPick === null) {
+    // the picker shows whenever there is something to tap: a free character while no block game is
+    // under way, or (anytime) a character whose phone is offline, to continue as
+    const roster = campaign ? campaign.party : v;
+    const states = roster ? pickStates(roster, !v || v.phase === 'lobby', online) : null;
+    if (!states || (!anyPickable(states) && pendingPick === null)) {
       show('waiting');
-      $('waiting-text').textContent = v.phase === 'finished' ? 'A game just ended.' : 'A game is already running.';
+      $('waiting-text').textContent = v?.phase === 'finished' ? 'A game just ended.' : 'A game is already running.';
       return;
     }
     show('pick');
     const last = load(KEYS.character);
     picker.render(states, pendingPick, isCharacterId(last) ? last : null);
+    return;
+  }
+  if (!v) { show('place'); if (campaign) renderPlace(campaign, mem); return; }
+  if (!me) { // in the evening, but this game started before we joined: we play the next one
+    show('waiting');
+    $('waiting-text').textContent = "A game is on. You'll play the next one!";
     return;
   }
   if (v.phase === 'lobby') { show('lobby'); renderLobby(v, me, isHost); return; }
@@ -297,17 +340,75 @@ function characterOf(p) {
   return /** @type {CharacterId} */ (Object.values(CHARACTERS).find((c) => c.color === p.color)?.id ?? 'pierre');
 }
 
-/** The avatar's current position: joystick while held, else the echoed/spawn position. @param {Player} me @returns {Pos} */
-function currentPos(me) {
-  if (!myPos) myPos = { ...spawnPoint(characterOf(me)), moving: false };
+/** Our character: from the party (slice 3), else from our block-game player. @returns {CharacterId | null} */
+function myCharacter() {
+  const m = member();
+  if (!m) return null;
+  if (isCharacterId(m.character)) return m.character;
+  return 'board' in m ? characterOf(m) : null;
+}
+
+/** The avatar's current position: joystick while held, else the echoed/spawn position. @param {CharacterId} character @returns {Pos} */
+function currentPos(character) {
+  if (!myPos) myPos = { ...spawnPoint(character), moving: false };
   return joystick.current() ?? myPos;
+}
+
+/** The stick lives in whichever walking screen is showing (lobby or place): move it there. @param {string} view */
+function dockStick(view) {
+  const pad = $('stick-pad');
+  const host = $(`view-${view}`);
+  if (pad.parentElement !== host) host.append(pad);
+}
+
+/** Hub, world or a scene tableau: where the party is, what is open from here, how to go on.
+ *  @param {Campaign} c @param {PartyMember | Player} mem */
+function renderPlace(c, mem) {
+  const here = content().nodes[c.at.node];
+  $('place-kind').textContent = here?.kind === 'hub' ? 'The hub' : here?.kind === 'world' ? 'A world' : '';
+  $('place-title').textContent = titleOf(c.at.node);
+  const intro = $('place-intro');
+  intro.hidden = !here?.intro;
+  intro.textContent = here?.intro ?? '';
+
+  // open places only (no spoilers): done ✓, never entered ✨; the locked ones are just counted
+  const marks = childMarks(c);
+  const open = marks.filter((m) => m.unlocked);
+  const ul = $('place-children');
+  ul.replaceChildren(...open.map((m) => {
+    const li = document.createElement('li');
+    li.dataset.node = m.node.id;
+    li.className = m.fresh ? 'fresh' : '';
+    li.textContent = `${m.node.title}${m.done ? ' ✓' : ''}${m.fresh ? ' ✨' : ''}`;
+    return li;
+  }));
+  const locked = marks.length - open.length;
+  if (locked > 0) {
+    const li = document.createElement('li');
+    li.className = 'locked';
+    li.textContent = `🔒 ${locked} more to discover`;
+    ul.append(li);
+  }
+  ul.hidden = marks.length === 0;
+
+  const chooser = CHARACTERS[content().chooser];
+  const isChooser = mem.character === content().chooser;
+  const doors = open.length > 0;
+  $('place-hint').hidden = !(isChooser && doors);
+  $('place-wait').textContent = !doors
+    ? (here?.kind === 'tableau' ? 'Eyes on the big screen!' : '')
+    : isChooser ? ''
+      : isGameMaster() ? `${chooser.name} walks into a door, or you pick one from ☰ 🎲 Game master.`
+        : `${chooser.name} chooses where we go next.`;
+  dockStick('place');
 }
 
 /** @param {State} v @param {Player} me @param {boolean} isHost */
 function renderLobby(v, me, isHost) {
+  dockStick('lobby');
   const header = $('lobby-me');
   header.replaceChildren(
-    avatarCanvas(characterOf(me), LOBBY_ME_SCALE, currentPos(me).dir),
+    avatarCanvas(characterOf(me), LOBBY_ME_SCALE, currentPos(characterOf(me)).dir),
     Object.assign(document.createElement('span'), {
       className: 'lobby-me-name',
       textContent: `You're ${me.name}${me.id === v.hostId ? ' 👑' : ''}`,
@@ -587,11 +688,13 @@ function endDrag() {
 // ---------- wiring ----------
 
 const menu = initMenu({
-  canLeave: () => playerId !== null && lastView !== null && lastView.players[playerId] !== undefined,
+  canLeave: () => member() !== null,
   onLeave: leaveGame,
+  isGameMaster,
 });
 const settingsSheet = createSettingsSheet({ send });
 const hostControls = createHostControls({ send });
+const gmPanel = createGmPanel({ send });
 const picker = createPicker({ onPick: join });
 
 const joystick = createJoystick({
@@ -599,8 +702,8 @@ const joystick = createJoystick({
   base: $('stick-base'),
   knob: $('stick-knob'),
   start: () => {
-    const me = lastView && playerId ? lastView.players[playerId] : undefined;
-    return me && lastView?.phase === 'lobby' ? currentPos(me) : null;
+    const character = myCharacter();
+    return character && canWalk() ? currentPos(character) : null;
   },
   send: (pos) => {
     const turned = myPos?.dir !== pos.dir;
@@ -648,6 +751,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 installBackGuard({ onBack });
+onContentChange(render); // titles, doors and the tree come with the content
 setInterval(updateClock, CLOCK_TICK_MS);
 show('loading');
 conn.start();

@@ -3,20 +3,24 @@
 // server this script kills, freezes and restarts. Checks the session is never lost (reload, back/forward,
 // bfcache, QR re-scan, locked phone, server restart, silent dead link), the picker only shows when the
 // server does not know us (then preselects "Continue as …"), the podium choices, reclaim from another
-// device with no tug of war, and the host controls during a game (take a player out, end the game).
+// device with no tug of war, the host controls during a game (take a player out, end the game), and the
+// campaign screens (hub/world "where we are", game-master panel, the chooser walking into a door).
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3182 CDP=9222 [LOCK_MS=300000] node scripts/e2e-phone.mts    (never PORT 3131: the live server)
 // LOCK_MS is how long the "phone locked" case freezes the page (default 5 min, as in the acceptance list).
+// ONLY=3 runs just part 3 (campaign screens), for quick iteration; a full run is the acceptance.
+// SHOTS=<dir> saves screenshots of the campaign screens.
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, finish, HTTP, sleep } from './e2e-lib.mts';
+import { check, Client, finish, HTTP, sleep } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const CDP = process.env.CDP ?? '9222';
 const LOCK_MS = Number(process.env.LOCK_MS ?? 5 * 60_000);
+const SHOTS = process.env.SHOTS; // a folder: screenshots of the campaign screens land there
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-phone-'));
 const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 
@@ -168,7 +172,32 @@ async function phone(label: string) {
   const continueButton = (): Promise<{ shown: boolean, text: string }> =>
     ev(`(() => { const b = document.getElementById('btn-continue'); return { shown: !b.hidden, text: b.textContent }; })()`);
   const hostButtons = (): Promise<string[]> => ev(`[...document.querySelectorAll('.host-control')].map((e) => e.textContent)`);
-  return { label, ev, snap, waitFor, tap, placeOne, watch, navigate, history, lifecycle, board, card, continueButton, hostButtons };
+  /** Holds the joystick and steers it, closed loop, until `done(pos)` (pos = the server's relay of our avatar). */
+  const steer = async (target: { x: number, y: number }, done: () => boolean, where: () => { x: number, y: number } | null, ms = 20_000) => {
+    await cmd('Page.bringToFront', {}, s);
+    const pad = await ev(`(() => { const r = document.getElementById('stick-pad').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+    await cmd('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: pad.x, y: pad.y }] }, s);
+    const end = Date.now() + ms;
+    while (Date.now() < end && !done()) {
+      const at = where() ?? { x: 8, y: 4.5 };
+      const dx = target.x - at.x, dy = target.y - at.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const push = Math.min(56, 20 + len * 12); // slow down near the target
+      await cmd('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: pad.x + (dx / len) * push, y: pad.y + (dy / len) * push }] }, s);
+      await sleep(80);
+    }
+    await cmd('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }, s);
+  };
+  const text = (id: string): Promise<string> => ev(`document.getElementById(${JSON.stringify(id)})?.textContent ?? ''`);
+  const visible = (id: string): Promise<boolean> => ev(`(() => { const e = document.getElementById(${JSON.stringify(id)}); return !!e && !e.hidden && e.offsetParent !== null; })()`);
+  const shot = async (name: string) => {
+    if (!SHOTS) return;
+    mkdirSync(SHOTS, { recursive: true });
+    await cmd('Page.bringToFront', {}, s);
+    const { data } = await cmd('Page.captureScreenshot', { format: 'png' }, s);
+    writeFileSync(join(SHOTS, `${name}.png`), Buffer.from(data, 'base64'));
+  };
+  return { label, ev, snap, waitFor, tap, placeOne, watch, navigate, history, lifecycle, board, card, continueButton, hostButtons, steer, text, visible, shot };
 }
 type Phone = Awaited<ReturnType<typeof phone>>;
 
@@ -194,8 +223,11 @@ async function joinAs(p: Phone, character: string): Promise<string | null> {
 const setMode = (p: Phone, mode: 'Timed' | 'Marathon') =>
   p.ev(`document.querySelectorAll('#settings-body .seg button').forEach((b) => { if (b.textContent === '${mode}') b.click(); })`);
 
+const ONLY = process.env.ONLY; // e.g. ONLY=3: just the campaign part (quick iteration)
+
 try {
   await boot(true);
+  if (!ONLY || ONLY === '1' || ONLY === '2') {
 
   // ================= part 1: the session is never lost =================
   console.log('\n— part 1: session continuity —');
@@ -418,6 +450,88 @@ try {
   expect((await H.hostButtons()).length === 0, 'podium: no in-game host controls left');
   const ranks: string[] = await H.ev(`[...document.querySelectorAll('#podium-list li')].map((e) => e.textContent)`);
   expect(ranks.length === 3 && ranks.some((t) => t.includes('Anna')), 'podium ranks all 3, Anna included', JSON.stringify(ranks));
+
+  } // parts 1–2
+
+  // ================= part 3: the campaign on the phone =================
+  console.log('\n— part 3: campaign (hub, game master, doors) —');
+  await kill9();
+  await boot(true);
+  const content = await (await fetch(`${HTTP}/api/content`)).json();
+  const title = (id: string): string => content.nodes[id].title;
+  const childOf = (parent: string) => Object.values<any>(content.nodes).filter((n) => n.parent === parent);
+  // a world below the hub, locked at the start, with a door: the one we unlock and walk into
+  const world = childOf('hub').find((n) => n.kind === 'world' && n.door)!;
+  const P3 = await phone('P3'), E3 = await phone('E3');
+  await joinAs(P3, 'pierre'); // first in: the party host (game master)
+  await joinAs(E3, content.chooser); // the chooser walks into doors
+  // a screen socket watches the relayed avatar positions (closed-loop steering)
+  const tv = new Client('tv'); await tv.open(); tv.send({ t: 'hello', role: 'screen' });
+  await tv.waitFor((m) => m.t === 'view');
+  const idE3 = (await E3.snap())?.id;
+  const lastPos = () => { const m = [...tv.msgs].reverse().find((x) => x.t === 'pos' && x.playerId === idE3); return m ? { x: m.x, y: m.y } : null; };
+  const node = () => [...tv.msgs].reverse().find((m) => m.t === 'view')?.campaign?.at.node;
+
+  await E3.tap('#btn-menu');
+  expect(!(await E3.visible('btn-gm')), 'only the party host has the Game master entry');
+  await E3.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+  await P3.tap('#btn-menu');
+  expect(await P3.visible('btn-gm'), 'host menu: 🎲 Game master entry');
+  await P3.tap('#btn-gm');
+  expect(await P3.visible('gm-back') && /Back to/.test(await P3.text('gm-back')), 'game master: Back is offered from the false start', await P3.text('gm-back'));
+  await P3.tap('#gm-back');
+  const hubP = await P3.waitFor((x) => x.view === 'view-place', 5000);
+  const hubE = await E3.waitFor((x) => x.view === 'view-place', 5000);
+  expect(hubP?.view === 'view-place' && hubE?.view === 'view-place' && (await E3.text('place-title')) === title('hub'),
+    'Back → both phones show the hub screen (never "Connecting…")', await E3.text('place-title'));
+  const list0 = await E3.text('place-children');
+  expect(list0.includes(title(content.start)) && /more to discover/.test(list0) && !list0.includes(world.title),
+    'hub screen: open places listed, locked ones only counted (no spoilers)', list0);
+  expect(await E3.visible('place-hint') && !(await P3.visible('place-hint')), 'chooser sees "Walk into a door to enter"; the host does not');
+  expect(await E3.visible('stick-pad') && await P3.visible('stick-pad'), 'joystick available on the hub');
+  await E3.shot('phone-hub-chooser');
+  await P3.shot('phone-hub-host');
+
+  await P3.tap('#btn-menu');
+  await P3.tap('#btn-gm');
+  await P3.ev(`(() => { const s = document.getElementById('gm-node'); s.value = ${JSON.stringify(world.id)}; s.dispatchEvent(new Event('input')); })()`);
+  const why: string = await P3.text('gm-node-why');
+  expect(/locked/.test(why) && /✗/.test(why), 'progress: why the world is locked (condition with ✗)', why);
+  await P3.tap('[data-gm="unlock"]');
+  const armedUnlock: string = await P3.ev(`document.querySelector('[data-gm="unlock"]').textContent`);
+  expect(/Tap again/.test(armedUnlock) && !(await E3.text('place-children')).includes(world.title), 'gm unlock: first tap only arms', armedUnlock);
+  await P3.tap('[data-gm="unlock"]');
+  let unlockedSeen = false;
+  for (let k = 0; k < 30 && !unlockedSeen; k++) { unlockedSeen = (await E3.text('place-children')).includes(world.title); if (!unlockedSeen) await sleep(100); }
+  expect(unlockedSeen && (await E3.text('place-children')).includes('✨'), 'gm unlock reflected on the phones (new ✨)', await E3.text('place-children'));
+  expect(/flags:|counters:/.test(await P3.text('gm-progress')), 'progress readout shows counters and flags');
+  await P3.shot('phone-gm-panel');
+  await P3.ev(`document.querySelector('#sheet-gm .sheet-panel').scrollTop = 9999`);
+  await P3.shot('phone-gm-panel-bottom');
+
+  await P3.tap(`#gm-enter [data-enter="${world.id}"]`);
+  for (let k = 0; k < 30 && node() !== world.id; k++) await sleep(100);
+  await sleep(300);
+  expect(node() === world.id && (await E3.text('place-title')) === world.title && (await P3.text('place-title')) === world.title,
+    'host enters the world from the panel → everyone is there', await E3.text('place-title'));
+  await P3.tap('#btn-menu');
+  await P3.tap('#btn-gm');
+  await P3.tap('#gm-back');
+  for (let k = 0; k < 30 && node() !== 'hub'; k++) await sleep(100);
+  await P3.ev(`document.querySelector('#sheet-gm [data-close]').click()`);
+  expect(node() === 'hub', 'host Back → hub again');
+
+  // Élodie walks into the world's door (relayed pos → steer until inside; the server's edge enters)
+  const door = world.door;
+  const target = { x: door.x + door.w / 2, y: door.y + door.h / 2 };
+  await E3.steer({ x: 8, y: 7.5 }, () => { const p = lastPos(); return !!p && Math.hypot(p.x - 8, p.y - 7.5) < 0.6; }, lastPos, 8000); // open floor first
+  await E3.steer(target, () => node() === world.id, lastPos);
+  await sleep(400);
+  expect(node() === world.id && (await P3.text('place-title')) === world.title && (await E3.text('place-title')) === world.title,
+    'the chooser walks into the door → everyone moves into the world', `at ${node()}, last pos ${JSON.stringify(lastPos())}`);
+  const toast: string = await P3.ev(`document.getElementById('toast').textContent`);
+  expect(toast.includes(world.title), 'the other phones get a "→ <world>" toast', toast);
+  tv.ws.close();
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}`);
   if (log) console.log(`--- server log ---\n${log}`);

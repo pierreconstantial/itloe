@@ -1,0 +1,90 @@
+/* Phone, campaign screens (slice 3): "where we are" on the hub / in a world, and the game-master sheet.
+   Builds on /commun/play-base.css tokens (--bg, --bg-2, --fg, --fg-dim, --accent). */
+
+#view-place {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: calc(12px + env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom));
+}
+.place-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+.place-top p, .place-top h2 { margin: 0; }
+#place-title { font-size: 26px; }
+#place-children {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+#place-children li {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  font-size: 15px;
+}
+#place-children li.locked { color: var(--fg-dim); }
+#place-children li.fresh { outline: 2px solid var(--accent); }
+.place-hint {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* game-master sheet: rows of small controls (the panel's own rules style only direct buttons) */
+.gm-panel { text-align: left; }
+.gm-panel > * { flex-shrink: 0; } /* the sheet scrolls; its parts never get squeezed */
+.gm-panel h2 { text-align: center; }
+.gm-h {
+  margin-top: 6px !important;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-dim);
+}
+.gm-list, .gm-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.gm-list button, .gm-row button {
+  flex: 1 1 auto;
+  padding: 0.6em 0.8em;
+  font-size: 15px;
+  background: var(--bg);
+  touch-action: manipulation;
+}
+.gm-row button.armed, .gm-list button.armed { background: var(--accent); color: #201a08; }
+.gm-panel select, .gm-panel input {
+  font: inherit;
+  font-size: 16px; /* ≥ 16 px: no zoom on focus in iOS Safari */
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--fg-dim);
+  border-radius: 10px;
+  padding: 0.5em 0.6em;
+  min-width: 0;
+}
+.gm-panel select { width: 100%; }
+.gm-row input { flex: 2 1 8em; }
+.gm-row input[type="number"] { flex: 1 1 4em; }
+.gm-why { font-size: 13px; }
+.gm-progress {
+  margin: 0;
+  padding: 8px 10px;
+  max-height: 30dvh;
+  overflow: auto;
+  background: var(--bg);
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}

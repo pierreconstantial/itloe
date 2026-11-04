@@ -9,22 +9,29 @@ import { $ } from './dom.js';
 import { avatarCanvas } from './avatar.js';
 
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
-/** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {'free' | 'continue' | 'taken'} PickState */
 
 const PICKER_SCALE = 5; // 16 px sprites → 80 px
 
 /**
- * The state of every character for a phone that is not (or no longer) a player.
- * @param {State} state @param {readonly string[]} online playerIds with a live socket
+ * Who holds which character: the campaign party (slice 3, exists on the hub too) or, without a
+ * campaign, the block State's players. Both have this shape.
+ * @typedef {{ order: string[], players: Record<string, { character?: string | null, left?: boolean }> }} Roster
+ */
+
+/**
+ * The state of every character for a phone that is not (or no longer) a member.
+ * @param {Roster} roster
+ * @param {boolean} joinable newcomers can join now (no block game under way)
+ * @param {readonly string[]} online member ids with a live socket
  * @returns {Map<CharacterId, PickState>}
  */
-export function pickStates(state, online) {
+export function pickStates(roster, joinable, online) {
   const live = new Set(online);
-  /** @type {Map<string, string>} character → holding playerId (left players hold nothing) */
+  /** @type {Map<string, string>} character → holding id (left members hold nothing) */
   const holders = new Map();
-  for (const id of state.order) {
-    const p = state.players[id];
+  for (const id of roster.order) {
+    const p = roster.players[id];
     if (p && !p.left && p.character) holders.set(p.character, id);
   }
   /** @type {Map<CharacterId, PickState>} */
@@ -32,7 +39,7 @@ export function pickStates(state, online) {
   for (const c of Object.values(CHARACTERS)) {
     const holder = holders.get(c.id);
     if (holder) states.set(c.id, live.has(holder) ? 'taken' : 'continue');
-    else states.set(c.id, state.phase === 'lobby' ? 'free' : 'taken'); // newcomers only join in the lobby
+    else states.set(c.id, joinable ? 'free' : 'taken');
   }
   return states;
 }
