@@ -35,41 +35,54 @@ body { overflow: hidden; }
 }
 body.offline #offline-banner { display: flex; }
 
-/* ---- lobby ---- */
-.lobby {
-  flex: 1;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: calc(40 * var(--u));
-  text-align: center;
+/* ---- lobby = party room (M3): a top band over the scene; guests are avatars below ---- */
+#party-bg, #party-fg {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
 }
-.lobby .title { font-size: calc(80 * var(--u)); }
+#party-bg { z-index: 0; }
+#app { position: relative; z-index: 1; }
+#party-fg { z-index: 2; }
+#party-bg[hidden], #party-fg[hidden] { display: none; }
+
+.lobby {
+  display: flex; align-items: stretch; justify-content: center;
+  gap: calc(48 * var(--u));
+  padding: calc(104 * var(--u)) calc(60 * var(--u)) 0;
+}
+.join, .lobby-side {
+  background: rgba(14, 16, 22, 0.86);
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  border-radius: calc(24 * var(--u));
+  padding: calc(24 * var(--u)) calc(32 * var(--u));
+}
 .join {
   display: flex; align-items: center;
-  gap: calc(64 * var(--u));
+  gap: calc(40 * var(--u));
 }
 .join-qr {
-  width: calc(440 * var(--u)); height: calc(440 * var(--u));
+  width: calc(340 * var(--u)); height: calc(340 * var(--u));
   image-rendering: pixelated;
-  border-radius: calc(18 * var(--u));
-  border: calc(10 * var(--u)) solid #fff;
+  border-radius: calc(14 * var(--u));
+  border: calc(8 * var(--u)) solid #fff;
   background: #fff;
 }
 .join-info {
   display: flex; flex-direction: column; align-items: flex-start;
   text-align: left;
 }
-.lobby-invite { margin: 0 0 calc(18 * var(--u)); font-size: calc(48 * var(--u)); font-weight: 800; }
+.lobby-invite { margin: 0 0 calc(10 * var(--u)); font-size: calc(42 * var(--u)); font-weight: 800; }
 .join-label {
-  margin: calc(14 * var(--u)) 0 calc(4 * var(--u));
-  font-size: calc(30 * var(--u));
+  margin: calc(10 * var(--u)) 0 calc(2 * var(--u));
+  font-size: calc(26 * var(--u));
   color: var(--fg-dim);
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
 .room-code {
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
-  font-size: calc(150 * var(--u));
+  font-size: calc(124 * var(--u));
   line-height: 1;
   font-weight: 800;
   letter-spacing: 0.18em;
@@ -77,40 +90,26 @@ body.offline #offline-banner { display: flex; }
 }
 .join-url {
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
-  font-size: calc(48 * var(--u));
+  font-size: calc(34 * var(--u));
   font-weight: 700;
-  padding: calc(14 * var(--u)) calc(28 * var(--u));
-  border-radius: calc(16 * var(--u));
+  padding: calc(10 * var(--u)) calc(20 * var(--u));
+  border-radius: calc(14 * var(--u));
   background: var(--bg-2);
   border: 3px solid var(--accent);
 }
-.slots { display: flex; gap: calc(26 * var(--u)); }
-.slot {
-  width: calc(320 * var(--u));
-  padding: calc(24 * var(--u)) calc(28 * var(--u));
-  border-radius: calc(16 * var(--u));
-  font-size: calc(38 * var(--u));
-  display: flex; align-items: center; justify-content: center; gap: calc(16 * var(--u));
+.lobby-side {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: calc(22 * var(--u));
+  text-align: center;
+  max-width: calc(760 * var(--u));
 }
-.slot-taken { background: var(--bg-2); font-weight: 700; }
-.slot-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.host-badge {
-  font-size: calc(22 * var(--u)); font-weight: 400;
-  color: var(--bg);
-  background: var(--accent);
-  border-radius: calc(999 * var(--u));
-  padding: 2px calc(12 * var(--u));
-}
-.slot-empty {
-  border: 3px dashed #39424d;
+.lobby .title { font-size: calc(96 * var(--u)); }
+.lobby-count {
+  margin: 0;
+  font-size: calc(32 * var(--u));
   color: var(--fg-dim);
-  animation: breathe 2.2s ease-in-out infinite;
+  display: flex; align-items: center; gap: calc(10 * var(--u));
 }
-@keyframes breathe {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 0.9; }
-}
-.lobby-count { margin: 0; font-size: calc(36 * var(--u)); color: var(--fg-dim); }
 
 /* ---- game: layout 1 / 2 / 2×2 ---- */
 .arena {
@@ -280,8 +279,6 @@ body.offline #offline-banner { display: flex; }
    Nothing here takes pointer events; the page stays a pure render of the state.
    ====================================================================== */
 
-/* lobby: a new player's slot pops in */
-.slot.just-joined { animation: pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
 @keyframes pop-in {
   0% { transform: scale(0.6); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }

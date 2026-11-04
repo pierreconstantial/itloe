@@ -106,30 +106,23 @@ function renderJoin(join) {
 }
 
 /**
+ * Party-room lobby: a top band (join box + title, next-game settings, status); the guests
+ * themselves are the avatars walking below it (party-room.js), so there are no slot cards.
  * @param {State} s
- * @param {State | null} prev  previous view: slots of players not in it pop in
+ * @param {State | null} _prev
  * @param {JoinInfo} join
  */
-export function renderLobby(s, prev, join) {
-  const known = new Set(prev?.phase === 'lobby' ? prev.order : s.order);
-  const root = h('section', 'lobby', [h('h1', 'title', ['BLOKO']), renderJoin(join)]);
-
-  const slots = h('div', 'slots');
-  for (let i = 0; i < MAX_PLAYERS; i++) {
-    const id = s.order[i];
-    const p = id ? s.players[id] : undefined;
-    if (p) {
-      const slot = h('div', 'slot slot-taken' + (known.has(id) ? '' : ' just-joined'), [colorDot(p.color), h('span', 'slot-name', [p.name])]);
-      if (id === s.hostId) slot.append(h('span', 'host-badge', ['host']));
-      slots.append(slot);
-    } else {
-      slots.append(h('div', 'slot slot-empty', ['Waiting…']));
-    }
-  }
-  root.append(h('p', 'settings-line', [settingsSummary(s.settings)]), slots);
-
+export function renderLobby(s, _prev, join) {
   const n = s.order.length;
-  root.append(h('p', 'lobby-count', [`${n}/${MAX_PLAYERS} player${n === 1 ? '' : 's'}`
-    + (n > 0 ? ' · the host starts the game from their phone' : '')]));
-  return root;
+  const host = s.hostId ? s.players[s.hostId] : undefined;
+  const status = n === 0
+    ? 'Waiting for the first guest…'
+    : `${n}/${MAX_PLAYERS} guest${n === 1 ? '' : 's'}${host ? ` · ${host.name} starts the game from their phone` : ''}`;
+  const side = h('div', 'lobby-side', [
+    h('h1', 'title', ['BLOKO']),
+    h('p', 'settings-line', [settingsSummary(s.settings)]),
+    h('p', 'lobby-count', [status]),
+  ]);
+  if (host) side.querySelector('.lobby-count')?.prepend(colorDot(host.color), ' ');
+  return h('section', 'lobby', [renderJoin(join), side]);
 }

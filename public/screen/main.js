@@ -11,6 +11,7 @@ import * as fx from './fx.js';
 import { syncClock } from '../commun/clock.js';
 import { updateCountdown } from './countdown.js';
 import { legalPlacementCount } from '../../shared/board.js';
+import { createPartyRoom } from './party-room.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('./events.js').ScreenEvent} ScreenEvent */
@@ -20,6 +21,10 @@ const RECONNECT_MS = 1000;
 const TIMES_UP_MS = 2600;
 
 const app = /** @type {HTMLElement} */ (document.getElementById('app'));
+const party = createPartyRoom(
+  /** @type {HTMLCanvasElement} */ (document.getElementById('party-bg')),
+  /** @type {HTMLCanvasElement} */ (document.getElementById('party-fg')),
+);
 const soundHint = /** @type {HTMLElement} */ (document.getElementById('sound-hint'));
 
 /** @type {State | null} */
@@ -68,6 +73,9 @@ function show(next) {
   if (next.phase === 'lobby') fx.clearAll();
 
   app.replaceChildren(VIEWS[next.phase](next, prev));
+  party.setPlayers(next);
+  party.setVisible(next.phase === 'lobby');
+  document.body.classList.toggle('party', next.phase === 'lobby');
   updateCountdown(next);
   for (const e of events) react(e, next);
 }
@@ -125,6 +133,17 @@ function podiumSequence(s) {
   }, championAt);
 }
 
+/** Server → screen messages; any other `t` is ignored (forward-compatibility rule, PROTOCOL.md). */
+/** @type {Record<string, (msg: any) => void>} */
+const HANDLERS = {
+  view: (msg) => {
+    if (!msg.state) return;
+    syncClock(msg.now);
+    show(msg.state);
+  },
+  pos: (msg) => party.onPos(msg),
+};
+
 function connect() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const sock = new WebSocket(`${proto}://${location.host}/ws`);
@@ -134,12 +153,10 @@ function connect() {
     sock.send(JSON.stringify({ t: 'hello', role: 'screen' }));
   });
   sock.addEventListener('message', (ev) => {
-    /** @type {{ t?: string, state?: State, now?: number }} */
+    /** @type {{ t?: string }} */
     let msg;
     try { msg = JSON.parse(String(ev.data)); } catch { return; }
-    if (msg.t !== 'view' || !msg.state) return;
-    syncClock(msg.now);
-    show(msg.state);
+    HANDLERS[String(msg.t)]?.(msg);
   });
   sock.addEventListener('close', () => {
     document.body.classList.add('offline');
@@ -165,4 +182,7 @@ fetchJoinInfo().then((info) => {
   state: () => current,
   /** @param {State} s */
   render: (s) => show(s),
+  /** Feed a fake `pos` (self-tests before the server relays them). @param {object} m */
+  pos: (m) => party.onPos(m),
+  avatars: () => party.snapshot(),
 };
