@@ -10,7 +10,7 @@
  * @typedef {{
  *   upTo: number,
  *   unlocked: { id: string, title: string, kind: string }[],  // a world's own tableaux are folded into it
- *   items: string[],
+ *   items: { item: string, icon: string, name: string, to: string[] }[],   // to: display names
  *   headline: string,
  * }} Moment
  */
@@ -19,15 +19,21 @@
  * Builds the combined moment for some news entries.
  * @param {News[]} entries  in seq order
  * @param {Content} content
+ * @param {(character: string) => string} [nameOf]  CharacterId → display name
  * @returns {Moment}
  */
-export function composeMoment(entries, content) {
+export function composeMoment(entries, content, nameOf = (c) => c) {
   const ids = entries.flatMap((e) => (e.t === 'unlocked' ? [e.node] : []));
   const batch = new Set(ids);
   const unlocked = ids
     .filter((id) => !batch.has(content.nodes[id]?.parent ?? ''))   // the world says it for its tableaux
     .map((id) => ({ id, title: content.nodes[id]?.title ?? id, kind: content.nodes[id]?.kind ?? 'tableau' }));
-  const items = entries.flatMap((e) => (e.t === 'item' ? [e.item] : []));
+  const items = entries.flatMap((e) => (e.t === 'item' ? [{
+    item: e.item,
+    icon: content.items?.[e.item]?.icon ?? '🎁',
+    name: content.items?.[e.item]?.name ?? e.item,
+    to: (Array.isArray(e.to) ? e.to : []).map(nameOf),
+  }] : []));
   const worlds = unlocked.filter((u) => u.kind === 'world').length;
   const headline = worlds > 1 ? 'New worlds unlocked!' : worlds === 1 ? 'New world unlocked!'
     : unlocked.length ? 'Unlocked!' : items.length ? 'Reward!' : '';
@@ -40,10 +46,11 @@ export function composeMoment(entries, content) {
  *   ack: (upTo: number) => void,
  *   canPlay: () => boolean,                                     // e.g. not mid-game, podium settled
  *   content: () => Content,
+ *   nameOf?: (character: string) => string,
  *   ackDelay?: () => number,   // ms before acking; random per TV, so a second TV usually sees the first ack land
  * }} deps
  */
-export function createCutscenes({ play, ack, canPlay, content, ackDelay = () => 0 }) {
+export function createCutscenes({ play, ack, canPlay, content, nameOf, ackDelay = () => 0 }) {
   /** @type {News[]} */
   let news = [];
   let maxShown = 0;
@@ -58,7 +65,7 @@ export function createCutscenes({ play, ack, canPlay, content, ackDelay = () => 
     if (current || !canPlay()) return;
     const pending = news.filter((n) => n.seq > maxShown);
     if (!pending.length) return;
-    const m = composeMoment(pending, content());
+    const m = composeMoment(pending, content(), nameOf);
     const ctl = new AbortController();
     current = { upTo: m.upTo, from: maxShown, ctl, interrupted: false };
     try {

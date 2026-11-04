@@ -12,12 +12,15 @@
 }
 .map-title { margin: 0; font-size: calc(54 * var(--u)); font-weight: 900; color: var(--accent, #ffd166); letter-spacing: 0.04em; }
 .map-hint { margin: 0; font-size: calc(24 * var(--u)); color: var(--fg-dim, #aab); }
-.map-items { margin: 0; display: flex; gap: calc(10 * var(--u)); flex-wrap: wrap; justify-content: center; }
-.map-item {
-  font-size: calc(22 * var(--u)); font-weight: 800;
+.map-bags { margin: 0; display: flex; gap: calc(12 * var(--u)); flex-wrap: wrap; justify-content: center; }
+.map-bag {
+  display: inline-flex; align-items: center; gap: calc(8 * var(--u));
   padding: calc(4 * var(--u)) calc(14 * var(--u)); border-radius: 999px;
-  background: rgba(255, 209, 102, 0.14); color: #ffe7a8;
+  background: rgba(255, 209, 102, 0.12); border: calc(2 * var(--u)) solid var(--pc, #ffd166);
+  font-size: calc(22 * var(--u)); font-weight: 800; color: #ffe7a8;
 }
+.map-bag-item { font-size: calc(28 * var(--u)); }
+.map-bag-item sub { font-size: 0.55em; color: #ffe7a8; }
 
 .cutscene {
   position: fixed; left: 50%; top: 50%; z-index: 20;
@@ -53,3 +56,4 @@
 @keyframes cutscene-out { to { opacity: 0; transform: translate(-50%, -46%) scale(0.95); } }
 @keyframes cutscene-line { from { opacity: 0; transform: translateY(calc(16 * var(--u))); } to { opacity: 1; transform: none; } }
 @keyframes gift-pop { 0% { transform: scale(0) rotate(-30deg); } 70% { transform: scale(1.5) rotate(8deg); } 100% { transform: scale(1) rotate(0); } }
+.cutscene-item-icon { display: inline-block; font-size: 1.15em; animation: gift-pop 0.9s 1.4s cubic-bezier(0.2, 1.6, 0.4, 1) both; }

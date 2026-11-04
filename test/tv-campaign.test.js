@@ -26,14 +26,16 @@ test('doorStates: locked / new / open / done from the facts', () => {
   assert.equal(doorStates(c, C).find((d) => d.id === 'childhood')?.state, 'open', 'entered once → no longer new');
   assert.equal(mapCopy(c, C).title, C.nodes.hub.title);
   assert.ok(mapCopy(c, C).hint.startsWith('Élodie'));
-  assert.deepEqual(mapCopy(c, C).items, ['reward-1']);
+  const bags = mapCopy(c, C).bags;
+  assert.deepEqual(bags.map((b) => [b.name, b.items.map((i) => `${i.icon} ${i.id} ×${i.count}`)]), [['Élodie', ['🗝️ old-key ×1']]],
+    'each present player with items: icon + count (an empty bag is not shown)');
 });
 
 test('composeMoment: worlds fold their own tableaux; items listed; headline', () => {
   const c = threeGames();
-  const m = composeMoment(c.news, C);
+  const m = composeMoment(c.news, C, (ch) => (ch === 'elodie' ? 'Élodie' : ch));
   assert.deepEqual(m.unlocked.map((u) => u.id), ['childhood', 'teens']);
-  assert.deepEqual(m.items, ['reward-1']);
+  assert.deepEqual(m.items, [{ item: 'old-key', icon: '🗝️', name: C.items['old-key'].name, to: ['Élodie'] }], 'who gets what');
   assert.equal(m.headline, 'New worlds unlocked!');
   assert.equal(m.upTo, c.newsSeq);
 });
@@ -102,7 +104,7 @@ test('cutscenes: deferred while a game runs; later news make a second moment; a 
   assert.deepEqual(plays[1].m.unlocked.map((/** @type {any} */ u) => u.id), ['adult']);
   plays[1].done(); await tickOut();
   assert.deepEqual(acks, [7, 8]);
-  cs.update([{ seq: 1, t: 'item', item: 'x' }], 1); // server restarted with a NEW campaign
+  cs.update([{ seq: 1, t: 'item', item: 'photo', to: ['sol'] }], 1); // server restarted with a NEW campaign
   assert.equal(plays.length, 3);
 });
 

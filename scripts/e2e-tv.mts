@@ -368,7 +368,7 @@ try {
   check(await tv.until(`window.bloko.cutscene().playing && /New worlds unlocked/.test(window.bloko.cutscene().text)`, 'cutscene', 12000),
     'podium settled → ONE combined moment: "New worlds unlocked!"');
   const csText = await tv.js('window.bloko.cutscene().text');
-  check(csText.includes(C_TITLE('childhood')) && csText.includes(C_TITLE('teens')) && csText.includes('Reward'), `…naming both worlds and the reward (${csText})`);
+  check(csText.includes(C_TITLE('childhood')) && csText.includes(C_TITLE('teens')) && csText.includes(`Élodie gets ${SAMPLE_CONTENT.items['old-key'].icon} ${SAMPLE_CONTENT.items['old-key'].name}`), `…naming both worlds and who got what (${csText})`);
   await sleep(1500);
   await tv.shot('cutscene');
   for (let k = 0; k < 150 && (cv()?.news ?? []).length; k++) await sleep(100);
@@ -386,13 +386,15 @@ try {
   await A2.waitFor((m) => m.t === 'view' && m.state === null, i);
   check(await tv.until(`${doorsJs} === ${JSON.stringify(JSON.stringify({ 'hub.false-start': 'done', childhood: 'new', teens: 'new', adult: 'locked' }))}`, 'doors after unlock'),
     'hub doors: false start done ★, both worlds NEW (glowing), the third still locked');
-  check(await tv.js(`document.querySelector('.map-items')?.textContent.includes('reward-1')`), 'the reward shows in the map band');
+  check(await tv.js(`!document.querySelector('.map-bags')`), "the key is Élodie's, and she isn't here yet: no bag in the band");
   await sleep(600);
   await tv.shot('hub-map-new');
 
   // the chooser (Élodie) joins and walks into the childhood door → the TV switches to that world
   const E = await device('E'); await tap(E, 'elodie');
   await tv.until('window.bloko.avatars().length === 4', 'elodie avatar');
+  check(await tv.until(`[...document.querySelectorAll('.map-bag')].some((b) => b.textContent.includes('Élodie') && b.querySelector('[data-item="old-key"]'))`, 'bag'),
+    "Élodie joins → the band shows her item icons (🗝️), the inventory hung on her character");
   E.send({ t: 'pos', x: 8, y: 8, dir: 'up', moving: true });
   await sleep(150);
   const cd = SAMPLE_CONTENT.nodes.childhood.door!;

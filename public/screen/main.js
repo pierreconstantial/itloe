@@ -16,7 +16,7 @@ import { createPresence } from './presence.js';
 import { createLiveness } from '../commun/liveness.js';
 import { h } from './dom.js';
 import { createContentSource } from '../commun/content.js';
-import { doorStates, mapCopy } from './doors.js';
+import { doorStates, mapCopy, nameOf } from './doors.js';
 import { createCutscenes } from './cutscenes.js';
 import { renderQuiz } from './quiz-view.js';
 
@@ -157,7 +157,20 @@ function showMap(c) {
   app.replaceChildren(h('section', 'map-band', [
     h('h1', 'map-title', [copy.title]),
     h('p', 'map-hint', [copy.hint]),
-    ...(copy.items.length ? [h('p', 'map-items', copy.items.map((it) => h('span', 'map-item', [`🎁 ${it}`])))] : []),
+    ...(copy.bags.length ? [h('div', 'map-bags', copy.bags.map((b) => {
+      const el = h('span', 'map-bag', [
+        h('span', 'map-bag-name', [b.name]),
+        ...b.items.map((it) => {
+          const i = h('span', 'map-bag-item', [it.icon, ...(it.count > 1 ? [h('sub', '', [`×${it.count}`])] : [])]);
+          i.title = it.name;
+          i.dataset.item = it.id;
+          return i;
+        }),
+      ]);
+      el.dataset.id = b.id;
+      el.style.setProperty('--pc', `var(--p${b.color})`);
+      return el;
+    }))] : []),
   ]));
 }
 
@@ -251,7 +264,11 @@ function playMoment(m, signal) {
   const box = h('div', 'cutscene', [
     h('p', 'cutscene-headline', [m.headline]),
     ...m.unlocked.map((u) => h('p', `cutscene-line is-${u.kind}`, [`🚪 ${u.title}`])),
-    ...m.items.map((it) => h('p', 'cutscene-line is-item', [h('span', 'cutscene-gift', ['🎁']), ` Reward: ${it}`])),
+    ...m.items.map((it) => h('p', 'cutscene-line is-item', [
+      h('span', 'cutscene-gift', ['🎁']),
+      ` ${it.to.length ? it.to.join(', ') : 'Someone'} ${it.to.length > 1 ? 'get' : 'gets'} `,
+      h('span', 'cutscene-item-icon', [it.icon]), ` ${it.name}`,
+    ])),
   ]);
   box.dataset.upTo = String(m.upTo);
   document.body.append(box);
@@ -273,6 +290,7 @@ const cutscenes = createCutscenes({
   },
   canPlay: canPlayCutscene,
   content: () => content.get(),
+  nameOf: (ch) => nameOf(ch, campaign ?? undefined),
   ackDelay: () => 200 + Math.random() * 1300,
 });
 setInterval(() => cutscenes.poke(), 500); // a deferred moment starts once the podium settles
