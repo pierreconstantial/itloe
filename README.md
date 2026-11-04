@@ -48,7 +48,7 @@ Set them in front of `npm start`, e.g. `PORT=8080 npm start`.
 | Variable | What it does |
 |---|---|
 | `PORT` | Port to use (default `3131`). |
-| `BLOKO_BIND` | Listen address. Use `127.0.0.1` for a local tunnel, or the guest's private IP in production. Default: all interfaces. |
+| `BLOKO_BIND` | Listen address. Use `127.0.0.1` for a local tunnel, or the guest's private IP in production. Default: all interfaces. `npm run start:local` sets this and `BLOKO_HOST` to `127.0.0.1` on Linux/macOS. |
 | `BLOKO_HOST` | The address phones should use: an interface name (`wlan0`) or an IP address. Use it when the printed address is wrong. |
 | `BLOKO_PUBLIC_ORIGIN` | Public HTTPS origin, e.g. `https://itloe.kputnik.com`. Requires `BLOKO_ACCESS_TOKEN`; replaces LAN address detection for invitations. |
 | `BLOKO_ACCESS_TOKEN` | Shared invitation secret, at least 32 characters. Requires `BLOKO_PUBLIC_ORIGIN`. Never put it in Git, release files or logs. |
@@ -165,3 +165,38 @@ A bank file is `{ "dataset": { "name", "licence", "attribution" }, "questions": 
 
 - **Docs:** [`SPEC-BLOCKS.md`](SPEC-BLOCKS.md) (game design), [`PROTOCOL.md`](PROTOCOL.md) (WebSocket protocol and HTTP API), [`BUILD-PLAN.md`](BUILD-PLAN.md) (milestones and work packages).
 - **Layout:** `server/` (Node server, TypeScript), `shared/` (pure logic used by server and browsers: the block game, `campaign/` the evening, `quiz/` the quiz), `public/` (`/screen`, `/play`, `/sim` pages; `commun/` shared by them), `data/quiz/` (question bank), `test/`, `scripts/` (e2e suites, simulator, OpenQuizzDB fetch + import).
+
+### Konstantin's devbox setup
+
+This section documents Konstantin's personal setup for testing from a home PC and running agents on devbox. It is optional and specific to that environment; Pierre's local development and LAN play use the Quick start above.
+
+On devbox, install dependencies with `npm ci`, then run:
+
+```sh
+npm run start:local
+```
+
+This runs the real server on **127.0.0.1:3131**, accessible only from that machine or through a tunnel. Pages and WebSockets share this port; there is no build step or external database. Saved games stay in the ignored `var/` folder. Source changes require a server restart; refresh the browser for client changes.
+
+From Konstantin's home PC, open the tunnel and leave SSH running (use the usual SSH destination if different):
+
+```sh
+ssh -N -L 127.0.0.1:3131:127.0.0.1:3131 kputnik@devbox
+```
+
+Open **http://127.0.0.1:3131/sim/** for the shared screen and four player panels together, or **http://127.0.0.1:3131/** for the screen alone. `/api/join` gives the player URL and room code. The join URL/QR points at loopback, so it works on the computer with the tunnel; a separate phone needs its own connection.
+
+On devbox, the shared server can be kept running in a detached terminal:
+
+```sh
+tmux new-session -d -s itloe -c /home/kputnik/itloe 'npm run start:local'
+tmux attach -t itloe   # detach with Ctrl-b, then d; stop with Ctrl-c
+```
+
+Agents on devbox can use the same loopback URLs. For tests or changes that alter game state, start a separate instance on a free port with its own save directory:
+
+```sh
+BLOKO_VAR="$(mktemp -d /tmp/itloe-agent.XXXXXX)" PORT=3199 npm run start:local -- --new
+```
+
+That instance is at `http://127.0.0.1:3199/sim/`. Keep port 3131 and its saved game for interactive testing. Run the existing checks with `npm run check` and `npm test`; the end-to-end scripts are described above.
