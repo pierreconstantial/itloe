@@ -6,13 +6,14 @@ import {
   newCampaign, fromLegacyState, loadCampaign, reduceCampaign, activityOf, isUnlocked,
   validateContent, zoneAt, SAMPLE_CONTENT,
 } from '../shared/campaign/index.js';
+import { STORY_CONTENT } from '../shared/campaign/story.js';
 import type { Campaign, CampaignAction, CampaignEvent, Content, GmOp } from '../shared/campaign/types.js';
 
 export { newCampaign, fromLegacyState, loadCampaign, reduceCampaign, activityOf, isUnlocked, validateContent, zoneAt };
 export type { Campaign, CampaignAction, CampaignEvent, Content, GmOp };
 
-/** The evening's content (placeholder until the user writes the story). */
-export const CONTENT: Content = SAMPLE_CONTENT;
+/** The birthday campaign; SAMPLE_CONTENT remains an isolated engine fixture. */
+export const CONTENT: Content = process.env.ITLOE_CONTENT === 'sample' ? SAMPLE_CONTENT : STORY_CONTENT;
 
 /** Short hash of the content, computed once at boot: views carry it as `contentVersion`, GET /api/content
  *  serves it (body + ETag), so clients re-fetch the content only when it changed (an edit + restart). */

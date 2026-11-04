@@ -20,6 +20,7 @@ import { doorStates, mapCopy, nameOf } from './doors.js';
 import { createCutscenes } from './cutscenes.js';
 import { renderQuiz } from './quiz-view.js';
 import { applyJoinQr, joinQrState } from './join-qr.js';
+import { INTRO_KEY, OPENING_PLAYERS, REUNIONS } from '../../shared/campaign/story.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('./events.js').ScreenEvent} ScreenEvent */
@@ -80,7 +81,10 @@ function applyPresence() {
 
 /** @type {Record<State['phase'], (s: State, prev: State | null) => HTMLElement>} */
 const VIEWS = {
-  lobby: (s, prev) => renderLobby(s, prev, joinInfo),
+  lobby: (s, prev) => renderLobby(s, prev, joinInfo, {
+    required: campaign?.facts.flags.includes('story.elo-50') && campaign.at.node === 'hub.false-start'
+      && !campaign.facts.flags.includes('portal.ready') ? OPENING_PLAYERS.length : undefined,
+  }),
   playing: (s, prev) => renderGame(s, prev, { danger: playersInDanger(s) }),
   finished: (s) => renderPodium(s, performance.now() - finishedAt),
 };
@@ -117,6 +121,9 @@ function show(next) {
   if (next.phase === 'lobby') fx.clearAll();
 
   app.replaceChildren(VIEWS[next.phase](next, prev));
+  party.setMode('lobby');
+  party.setPortal(!!campaign?.facts.flags.includes('story.elo-50') && campaign.facts.flags.includes('portal.ready') && campaign.at.node === 'hub.false-start');
+  party.setKey(false);
   party.setPlayers(next);
   party.setVisible(next.phase === 'lobby');
   document.body.classList.toggle('party', next.phase === 'lobby');
@@ -150,7 +157,21 @@ function showMap(c) {
   }
   stale = true;
   updateCountdown(null);
-  party.setPlayers(c.party);
+  const storyScene = c.facts.flags.includes('story.elo-50') && c.facts.flags.includes('portal.entered');
+  const inApartment = storyScene && c.at.node === 'hub';
+  const visibleIds = !storyScene ? c.party.order : c.party.order.filter((id) => {
+    const member = c.party.players[id];
+    return member?.character === 'elodie' || c.facts.flags.includes(`person.${member?.character}.unlocked`);
+  });
+  party.setPlayers({ ...c.party, order: visibleIds });
+  party.setMode(!storyScene ? 'lobby' : inApartment ? 'apartment' : 'second-room');
+  party.setPortal(false);
+  party.setKey(inApartment && c.facts.flags.includes('apparition.seen') && !(c.facts.inventory.elodie?.[INTRO_KEY] > 0));
+  party.setHubPeople(inApartment ? REUNIONS.filter((person) => c.facts.flags.includes(person.flag)
+    && !['pierre', 'sol', 'anna'].includes(person.id)).map((person) => person.id) : []);
+  party.setDecorations(inApartment ? Object.entries(c.facts.inventory.elodie ?? {})
+    .filter(([id, count]) => count > 0 && !id.startsWith('memory-key-') && content.get().items[id])
+    .map(([id]) => ({ id, icon: content.get().items[id].icon })) : []);
   party.setDoors(doorStates(c, content.get()));
   party.setVisible(true);
   document.body.classList.add('party');
@@ -306,6 +327,7 @@ function canPlayCutscene() {
  */
 function playMoment(m, signal) {
   momentsPlayed++;
+  if (m.apparition) return playApparition(signal);
   const box = h('div', 'cutscene', [
     h('p', 'cutscene-headline', [m.headline]),
     ...m.unlocked.map((u) => h('p', `cutscene-line is-${u.kind}`, [`🚪 ${u.title}`])),
@@ -323,6 +345,41 @@ function playMoment(m, signal) {
     const end = () => { box.classList.add('is-leaving'); setTimeout(() => box.remove(), 400); resolve(undefined); };
     const timer = setTimeout(end, CUTSCENE_MS);
     signal.addEventListener('abort', () => { clearTimeout(timer); end(); }, { once: true });
+  });
+}
+
+/** A one-time scripted reveal; the server releases the key only after the TV acknowledges it. */
+/** @param {AbortSignal} signal */
+function playApparition(signal) {
+  const box = h('div', 'apparition', [
+    h('div', 'apparition-light'),
+    h('div', 'apparition-figure', [
+      h('div', 'apparition-hair'), h('div', 'apparition-face'), h('div', 'apparition-beard'),
+      h('div', 'apparition-robe'), h('div', 'apparition-guitar', ['🎸']),
+    ]),
+    h('div', 'apparition-speech', [
+      h('p', '', ['Fifty years… You turn fifty today, and you have travelled through space and time.']),
+      h('p', '', ['But can you gather the keys of memory? Only they will open the path to your future.']),
+      h('p', '', ['There are seven keys to find. It is up to you to seek them.']),
+    ]),
+    h('div', 'apparition-smoke', ['☁️ ☁️ ☁️']),
+  ]);
+  document.body.append(box);
+  /** @type {Set<ReturnType<typeof setTimeout>>} */
+  const timers = new Set();
+  /** @param {() => void} fn @param {number} ms */
+  const later = (fn, ms) => { const id = setTimeout(() => { timers.delete(id); if (!signal.aborted) fn(); }, ms); timers.add(id); };
+  later(() => box.classList.add('speaking'), 1600);
+  later(() => { box.classList.add('riffing'); sfx.guitarRiff(); }, 10700);
+  later(() => box.classList.add('vanishing'), 15000);
+  return new Promise((resolve) => {
+    const end = () => {
+      for (const timer of timers) clearTimeout(timer);
+      box.remove();
+      resolve(undefined);
+    };
+    later(end, 17000);
+    signal.addEventListener('abort', end, { once: true });
   });
 }
 
@@ -512,7 +569,7 @@ onAudioState((st) => {
 connect();
 fetchJoinInfo().then((info) => {
   joinInfo = info;
-  if (current?.phase === 'lobby') app.replaceChildren(renderLobby(current, current, joinInfo));
+  if (current?.phase === 'lobby') app.replaceChildren(VIEWS.lobby(current, current));
 });
 
 /** @type {any} */ (window).bloko = {

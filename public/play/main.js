@@ -12,8 +12,9 @@ import { syncClock, secondsLeft, mmss } from '../commun/clock.js';
 import { createSettingsSheet, summarize } from './settings-ui.js';
 import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.js';
 import { spawnPoint } from '../../shared/world.js';
-import { PARTY_ROOM } from '../../shared/scene.js';
+import { PARTY_ROOM, APARTMENT_ROOM, DOOR_FOUR_ROOM } from '../../shared/scene.js';
 import { nearbyObject, OBJECT_ACTIONS } from '../../shared/interactions.js';
+import { INTRO_KEY, INTRO_KEY_SPOT, OPENING_PLAYERS } from '../../shared/campaign/story.js';
 import { createPicker, pickStates, anyPickable } from './picker.js';
 import { createJoystick } from './joystick.js';
 import { avatarCanvas, paintAvatar } from './avatar.js';
@@ -276,10 +277,13 @@ function member() {
 }
 
 /** The party host steers the evening (game-master panel). */
-const isGameMaster = () => campaign !== null && playerId !== null && campaign.party.hostId === playerId && !!member();
+const isStory = () => campaign?.facts.flags.includes('story.elo-50') ?? false;
+const isGameMaster = () => campaign !== null && playerId !== null && campaign.party.hostId === playerId
+  && !!member() && (!isStory() || campaign.facts.flags.includes('portal.entered'));
 
 /** Walking: a member, on the hub / in a world, or in an open block lobby. */
-const canWalk = () => member() !== null && !quizView && (!lastView || lastView.phase === 'lobby');
+const canWalk = () => member() !== null && !quizView && (!lastView || lastView.phase === 'lobby')
+  && !(isStory() && campaign?.at.node === 'hub' && myCharacter() === 'elodie' && !campaign.facts.flags.includes('apparition.seen'));
 
 /** The latest accepted window from this phone. The server decides whether a request succeeded. */
 let joinShownUntil = 0;
@@ -357,7 +361,7 @@ function onBack() {
 
 // ---------- rendering ----------
 
-const VIEWS = ['loading', 'pick', 'room', 'replaced', 'waiting', 'place', 'quiz', 'lobby', 'game', 'over', 'podium'];
+const VIEWS = ['loading', 'pick', 'room', 'replaced', 'waiting', 'wait-lobby', 'place', 'quiz', 'lobby', 'game', 'over', 'podium'];
 
 /** @param {string} name */
 function show(name) {
@@ -403,6 +407,9 @@ function render() {
     const roster = campaign ? campaign.party : v;
     const joinable = (!v || v.phase === 'lobby') && (!q || q.phase === 'lobby');
     const states = roster ? pickStates(roster, joinable, online) : null;
+    if (states && isStory() && campaign && !campaign.facts.flags.includes('portal.ready')) {
+      for (const id of states.keys()) if (!OPENING_PLAYERS.includes(id)) states.set(id, 'taken');
+    }
     if (!states || (!anyPickable(states) && pendingPick === null)) {
       show('waiting');
       $('waiting-text').textContent = v?.phase === 'finished' ? 'A game just ended.' : 'A game is already running.';
@@ -411,6 +418,8 @@ function render() {
     show('pick');
     const last = load(KEYS.character);
     picker.render(states, pendingPick, isCharacterId(last) ? last : null);
+    const extra = /** @type {HTMLElement | null} */ (document.querySelector('#picker-grid [data-id="konz"]'));
+    if (extra) extra.hidden = isStory() && !!campaign && !campaign.facts.flags.includes('portal.ready');
     return;
   }
   if (q) {
@@ -423,7 +432,13 @@ function render() {
     quizUi.render(q, playerId);
     return;
   }
-  if (!v) { show('place'); if (campaign) renderPlace(campaign, mem); return; }
+  if (!v) {
+    if (isStory() && campaign?.at.node === 'hub' && mem.character !== 'elodie'
+      && !campaign.facts.flags.includes(`person.${mem.character}.unlocked`)) {
+      show('wait-lobby'); dockStick('wait-lobby'); return;
+    }
+    show('place'); if (campaign) renderPlace(campaign, mem); return;
+  }
   if (!me) { // in the evening, but this game started before we joined: we play the next one
     show('waiting');
     $('waiting-text').textContent = "A game is on. You'll play the next one!";
@@ -489,11 +504,18 @@ function dockStick(view) {
 /** Keep one contextual button in step with the avatar's feet, including while the stick is held. */
 function updateInteraction() {
   const character = myCharacter();
-  const object = character && canWalk() ? nearbyObject(PARTY_ROOM, currentPos(character)) : null;
+  const inHub = isStory() && campaign?.at.node === 'hub';
+  const pos = character && canWalk() ? currentPos(character) : null;
+  const canCollect = inHub && character === 'elodie' && pos && campaign?.facts.flags.includes('apparition.seen')
+    && !campaign.facts.inventory.elodie?.[INTRO_KEY]
+    && Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius;
+  const object = pos && (!inHub || character === 'elodie')
+    ? nearbyObject(inHub ? APARTMENT_ROOM : PARTY_ROOM, pos) : null;
   const button = /** @type {HTMLButtonElement} */ ($('btn-interact'));
-  button.dataset.object = object?.id ?? '';
-  button.disabled = !object || !conn.isOnline();
-  button.textContent = object ? OBJECT_ACTIONS[/** @type {keyof typeof OBJECT_ACTIONS} */ (object.id)].label : 'Walk to an object';
+  button.dataset.object = canCollect ? INTRO_KEY : object?.id ?? '';
+  button.disabled = !(canCollect || object) || !conn.isOnline();
+  button.textContent = canCollect ? '🗝️ Pick up key'
+    : object ? OBJECT_ACTIONS[/** @type {keyof typeof OBJECT_ACTIONS} */ (object.id)].label : 'Walk to an object';
 }
 
 /** Hub, world or a scene tableau: where the party is, what is open from here, how to go on.
@@ -507,7 +529,7 @@ function renderPlace(c, mem) {
   intro.textContent = here?.intro ?? '';
 
   // open places only (no spoilers): done ✓, never entered ✨; the locked ones are just counted
-  const marks = childMarks(c);
+  const marks = childMarks(c).filter((m) => m.node.door);
   const open = marks.filter((m) => m.unlocked);
   const ul = $('place-children');
   ul.replaceChildren(...open.map((m) => {
@@ -529,7 +551,18 @@ function renderPlace(c, mem) {
   const chooser = CHARACTERS[content().chooser];
   const isChooser = mem.character === content().chooser;
   const doors = open.length > 0;
+  $('btn-place-back').hidden = !(isStory() && c.at.node === 'hub.door4' && isChooser);
   $('place-hint').hidden = !(isChooser && doors);
+  if (isStory() && c.at.node === 'hub' && !c.facts.flags.includes('apparition.seen')) {
+    $('place-wait').textContent = 'Watch the TV—the visitor is speaking.';
+    dockStick('place');
+    return;
+  }
+  if (isStory() && c.at.node === 'hub' && !c.facts.inventory.elodie?.[INTRO_KEY]) {
+    $('place-wait').textContent = 'Walk to the glowing key and pick it up.';
+    dockStick('place');
+    return;
+  }
   $('place-wait').textContent = !doors
     ? (here?.kind === 'tableau' ? 'Eyes on the big screen!' : '')
     : isChooser ? ''
@@ -562,11 +595,15 @@ function renderLobby(v, me, isHost) {
   }
   ul.hidden = ul.childElementCount === 0;
   $('lobby-settings').textContent = summarize(v.settings);
-  $('btn-settings-lobby').hidden = !isHost;
-  $('btn-start').hidden = !isHost;
-  $('lobby-hint').textContent = isHost
-    ? (v.order.length === 1 ? 'Play solo, or wait for friends to join.' : 'Everyone in? Hit start!')
-    : 'Waiting for the host to start…';
+  const opening = isStory() && campaign?.at.node === content().start && !campaign.facts.flags.includes('portal.ready');
+  const portalReady = isStory() && campaign?.at.node === content().start && campaign.facts.flags.includes('portal.ready');
+  const quartetReady = OPENING_PLAYERS.every((character) => v.order.some((id) => !v.players[id].left && v.players[id].character === character));
+  $('btn-settings-lobby').hidden = !isHost || !!portalReady;
+  $('btn-start').hidden = !isHost || !!portalReady;
+  /** @type {HTMLButtonElement} */ ($('btn-start')).disabled = !!opening && !quartetReady;
+  $('lobby-hint').textContent = portalReady ? 'A portal has appeared. Élodie, walk into it!'
+    : opening && !quartetReady ? 'Wait for all four players.'
+      : isHost ? 'Everyone in? Hit start!' : 'Waiting for the host to start…';
 }
 
 /** @param {State} v @param {Player} me */
@@ -667,6 +704,7 @@ function isNewBest(me) {
 
 /** @param {State} v @param {Player} me @param {boolean} isHost */
 function renderPodium(v, me, isHost) {
+  const portalReady = isStory() && campaign?.at.node === content().start && campaign.facts.flags.includes('portal.ready');
   const kicker = v.endReason === 'time' ? "⏰ Time's up!" : v.endReason === 'host' ? 'The host ended the game.' : '';
   $('podium-kicker').hidden = kicker === '';
   $('podium-kicker').textContent = kicker;
@@ -689,8 +727,11 @@ function renderPodium(v, me, isHost) {
     );
     ol.append(li);
   }
-  $('podium-settings').textContent = `Next game: ${summarize(v.settings)}`;
-  $('btn-settings-podium').hidden = !isHost;
+  $('podium-settings').textContent = portalReady ? 'Return to the room together.' : `Next game: ${summarize(v.settings)}`;
+  $('btn-settings-podium').hidden = !isHost || !!portalReady;
+  $('btn-again').hidden = !!portalReady;
+  $('podium-hint').textContent = portalReady ? 'Waiting for the host to return to the room…'
+    : 'Waiting for the host: rematch or back to the room…';
   $('podium-actions').hidden = !isHost;
   $('podium-hint').hidden = isHost;
 }
@@ -853,7 +894,8 @@ const joystick = createJoystick({
     return character && canWalk() ? currentPos(character) : null;
   },
   // one room so far; when there are several, this is where the current one is chosen
-  scene: () => PARTY_ROOM,
+  scene: () => campaign?.at.node === 'hub.door4' ? DOOR_FOUR_ROOM
+    : isStory() && campaign?.at.node === 'hub' && myCharacter() === 'elodie' ? APARTMENT_ROOM : PARTY_ROOM,
   send: (pos) => {
     const turned = myPos?.dir !== pos.dir;
     myPos = pos;
@@ -888,11 +930,21 @@ $('room-form').addEventListener('submit', (e) => {
 });
 
 $('btn-start').addEventListener('click', () => send({ t: 'start' }));
+$('btn-place-back').addEventListener('click', () => send({ t: 'back' }));
 $('btn-interact').addEventListener('click', () => {
   if (!canWalk() || !conn.isOnline()) return;
   joystick.cancel(); // flush the exact position before the interaction on the same socket
   const character = myCharacter();
-  const object = character ? nearbyObject(PARTY_ROOM, currentPos(character)) : null;
+  if (isStory() && character === 'elodie' && campaign?.at.node === 'hub'
+    && !campaign.facts.inventory.elodie?.[INTRO_KEY]
+    && campaign.facts.flags.includes('apparition.seen')) {
+    const pos = currentPos(character);
+    if (Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius) {
+      send({ t: 'interact', object: INTRO_KEY }); return;
+    }
+  }
+  const object = character ? nearbyObject(isStory() && campaign?.at.node === 'hub' ? APARTMENT_ROOM : PARTY_ROOM,
+    currentPos(character)) : null;
   if (object) send({ t: 'interact', object: object.id });
   updateInteraction();
 });

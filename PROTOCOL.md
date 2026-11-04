@@ -90,6 +90,25 @@ injected by the server (socket → playerId; screens: `"screen"`), never taken f
   the engine in the SAME step, and the server saves once per step: a kill -9 persists both or neither, so
   a restart on the podium never counts a game twice.
 
+### Birthday opening (`story.elo-50`)
+
+The first match requires Pierre, Élodie, Sol and Anna. After it finishes, `campaign.facts.flags` contains
+`portal.ready`; the host sends `{ "t": "newGame" }` to return everyone to the lobby. A portal is then drawn
+at the room centre. Elo walks into it with the ordinary `pos` message; the server applies the portal
+transition only for her and queues `{ "seq": 1, "t": "apparition" }` in `campaign.news`. The other phones
+continue to show the lobby. The screen plays the apparition and sends the ordinary `ack` when it ends.
+That acknowledgement adds `apparition.seen` to the persisted facts and reveals the key.
+
+```jsonc
+{ "t": "interact", "object": "memory-key-intro" }  // Elo, near the key after the apparition
+{ "t": "enter", "node": "hub.door4" }          // normally triggered by Elo walking into door #4
+{ "t": "back" }                               // Elo returns from the second room to the apartment
+```
+
+The key is stored in `campaign.facts.inventory.elodie`, and door #4 unlocks from that fact. The six
+memory-world entrances and reunion mini-games are not wired yet; their story specification is in
+`GameStory.md`.
+
 ### Quiz (Contract E + addendum E1): a tableau `activity: { kind: 'quiz', settings }`
 
 The bank (`data/quiz/*.json`) stays on the server and is never served. While a quiz runs, `start`, `endGame`,

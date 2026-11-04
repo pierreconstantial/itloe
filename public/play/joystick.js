@@ -108,6 +108,6 @@ export function createJoystick(o) {
   return {
     cancel,
     /** Current position while held (null when idle). */
-    current: () => pos,
+    current: () => pointerId === null ? null : pos,
   };
 }

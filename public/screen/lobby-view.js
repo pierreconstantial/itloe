@@ -95,13 +95,15 @@ function renderJoin(join) {
  * @param {State} s
  * @param {State | null} _prev
  * @param {JoinInfo} join
+ * @param {{required?: number}} [options]
  */
-export function renderLobby(s, _prev, join) {
+export function renderLobby(s, _prev, join, options = {}) {
   const n = s.order.length;
+  const max = options.required ?? MAX_PLAYERS;
   const host = s.hostId ? s.players[s.hostId] : undefined;
   const status = n === 0
     ? 'Waiting for the first guest…'
-    : `${n}/${MAX_PLAYERS} guest${n === 1 ? '' : 's'}${host ? ` · ${host.name} starts the game from their phone` : ''}`;
+    : `${n}/${max} guest${n === 1 ? '' : 's'}${host ? ` · ${host.name} starts the game from their phone` : ''}`;
   const side = h('div', 'lobby-side', [
     h('h1', 'title', ['ITLOE']),
     h('p', 'settings-line', [summarizeSettings(s.settings)]),
