@@ -14,7 +14,7 @@ export function h(tag, className = '', children = []) {
 }
 
 /**
- * CSS colour of a player colour index (1..4 → --p1..--p4 in base.css).
+ * CSS colour of a player colour index (1..N → --p1..--pN in base.css, one per character).
  * @param {number} color
  */
 export function playerColor(color) {

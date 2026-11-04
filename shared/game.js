@@ -23,7 +23,7 @@ import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
  * @typedef {{
  *   id: string,
  *   name: string,               // copied from CHARACTERS[character] at join
- *   color: number,              // 1..4, maps to CSS var --p1..--p4; = CHARACTERS[character].color
+ *   color: number,              // 1..N, maps to CSS var --p1..--pN; = CHARACTERS[character].color
  *   character: CharacterId | null,  // null only for saves from before M3 and the mock server
  *   board: number[],            // see board.js
  *   handIndex: number,          // n of the hand currently held (0-based)

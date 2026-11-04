@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyBoard, canPlace, place, findClears, applyClears, anyFit, legalPlacementCount } from '../shared/board.js';
 import { PIECES, PIECE_SETS, handAt } from '../shared/pieces.js';
-import { CHARACTERS, freeCharacters } from '../shared/characters.js';
+import { CHARACTERS, ROSTER_SIZE, freeCharacters } from '../shared/characters.js';
 import { WORLD, WALK_SPEED, spawnPoint, clampToWorld } from '../shared/world.js';
 import {
   DEFAULT_SETTINGS, SETTINGS_SCHEMA, initState, newPlayer, normalizeSettings, placementScore, ranking, reduce,
@@ -151,6 +151,8 @@ test('join by character: first is host, name + colour from the character, guards
 
   s = reduce(s, { t: 'join', id: 'c', character: 'pierre' });
   s = reduce(s, { t: 'join', id: 'd', character: 'anna' });
+  // fill whatever the roster still has, so this stays true as the roster grows
+  for (const c of freeCharacters(s)) s = reduce(s, { t: 'join', id: `fill-${c}`, character: c });
   assert.deepEqual(freeCharacters(s), []);
   for (const c of Object.keys(CHARACTERS)) {
     assert.equal(reduce(s, { t: 'join', id: 'e', character: /** @type {any} */ (c) }), s); // roster exhausted
@@ -158,15 +160,18 @@ test('join by character: first is host, name + colour from the character, guards
 });
 
 test('characters: roster data and freeCharacters', () => {
-  assert.deepEqual(Object.keys(CHARACTERS), ['pierre', 'elodie', 'sol', 'anna']); // display order
-  assert.deepEqual(Object.values(CHARACTERS).map((c) => c.color), [1, 2, 3, 4]);
+  const ids = Object.keys(CHARACTERS);
+  assert.deepEqual(ids, ['pierre', 'elodie', 'sol', 'anna', 'konz']); // display order
+  assert.equal(ROSTER_SIZE, ids.length);
+  assert.deepEqual(Object.values(CHARACTERS).map((c) => c.color), [1, 2, 3, 4, 5]);
   assert.equal(CHARACTERS.elodie.name, 'Élodie');
+  assert.equal(CHARACTERS.konz.name, 'Konz');
   for (const [id, c] of Object.entries(CHARACTERS)) assert.equal(c.id, id);
-  assert.deepEqual(freeCharacters(initState(1)), ['pierre', 'elodie', 'sol', 'anna']);
+  assert.deepEqual(freeCharacters(initState(1)), ids);
   let s = reduce(initState(1), { t: 'join', id: 'a', character: 'sol' });
-  assert.deepEqual(freeCharacters(s), ['pierre', 'elodie', 'anna']); // order kept
+  assert.deepEqual(freeCharacters(s), ids.filter((c) => c !== 'sol')); // order kept
   s = reduce(s, { t: 'leave', id: 'a' });
-  assert.deepEqual(freeCharacters(s), ['pierre', 'elodie', 'sol', 'anna']);
+  assert.deepEqual(freeCharacters(s), ids);
 });
 
 test('old saves without character stay loadable and hold their colour slot', () => {
@@ -174,7 +179,7 @@ test('old saves without character stay loadable and hold their colour slot', () 
   const { character: _drop, ...legacy } = newPlayer('old', 'Ana', 2, SIZE);
   /** @type {State} */
   const s = { ...initState(42), hostId: 'old', order: ['old'], players: { old: /** @type {Player} */ (legacy) } };
-  assert.deepEqual(freeCharacters(s), ['pierre', 'sol', 'anna']); // colour 2 = Élodie's slot
+  assert.deepEqual(freeCharacters(s), ['pierre', 'sol', 'anna', 'konz']); // colour 2 = Élodie's slot
   assert.equal(reduce(s, { t: 'join', id: 'n', character: 'elodie' }), s); // no colour clash
   const s2 = reduce(s, { t: 'join', id: 'n', character: 'anna' });
   assert.equal(s2.players.n.color, 4);
@@ -674,19 +679,19 @@ test('a lobby leave frees the character for the next joiner', () => {
   s = reduce(s, { t: 'leave', id: 'b' });
   assert.deepEqual(s.order, ['a', 'c']);
   assert.equal(s.players.b, undefined);
-  assert.deepEqual(freeCharacters(s), ['elodie', 'anna']);
+  assert.deepEqual(freeCharacters(s), ['elodie', 'anna', 'konz']);
   s = reduce(s, { t: 'join', id: 'd', character: 'elodie' });
   assert.deepEqual([s.players.d.character, s.players.d.color], ['elodie', 2]); // b's freed slot
   s = reduce(s, { t: 'join', id: 'e', character: 'anna' });
   assert.deepEqual(new Set(s.order.map((id) => s.players[id].color)).size, 4);
-  assert.equal(reduce(s, { t: 'join', id: 'f', character: 'pierre' }), s); // roster exhausted
+  assert.equal(reduce(s, { t: 'join', id: 'f', character: 'pierre' }), s); // taken by a
 });
 
 test('mid-game: a left player does not block its character; rematch keeps characters', () => {
   let s = reduce(lobby3(), { t: 'start', id: 'a' });
-  assert.deepEqual(freeCharacters(s), ['anna']);
+  assert.deepEqual(freeCharacters(s), ['anna', 'konz']);
   s = reduce(s, { t: 'leave', id: 'b' });
-  assert.deepEqual(freeCharacters(s), ['elodie', 'anna']); // b left: Élodie shows as free
+  assert.deepEqual(freeCharacters(s), ['elodie', 'anna', 'konz']); // b left: Élodie shows as free
   assert.equal(reduce(s, { t: 'join', id: 'd', character: 'elodie' }), s); // but join is lobby-only
   /** @type {State} */
   const fin = { ...s, phase: 'finished', players: { ...s.players, a: { ...s.players.a, done: true }, c: { ...s.players.c, done: true } } };
@@ -932,7 +937,7 @@ test('newGame: players who left mid-game are dropped, characters and colours kep
   assert.deepEqual(lobby.order.map((id) => [lobby.players[id].character, lobby.players[id].name, lobby.players[id].color]),
     [['pierre', 'Pierre', 1], ['sol', 'Sol', 3]]);
   for (const id of lobby.order) assert.deepEqual([lobby.players[id].left, lobby.players[id].done], [false, false]);
-  assert.deepEqual(freeCharacters(lobby), ['elodie', 'anna']);
+  assert.deepEqual(freeCharacters(lobby), ['elodie', 'anna', 'konz']);
 });
 
 test('newGame: a newcomer can join the new lobby, then start works', () => {
@@ -975,18 +980,24 @@ test('newGame: no remaining player → refused when hostless, empty lobby if the
 test('world: spawnPoint is deterministic, distinct per character, inside the world', () => {
   assert.deepEqual(WORLD, { w: 16, h: 9 });
   assert.equal(WALK_SPEED, 4);
+  /** @type {number[]} */
   const xs = [];
   for (const c of /** @type {import('../shared/characters.js').CharacterId[]} */ (Object.keys(CHARACTERS))) {
     const p = spawnPoint(c);
     assert.deepEqual(p, spawnPoint(c)); // deterministic
-    assert.equal(p.x, 3 + 3.33 * (CHARACTERS[c].color - 1));
-    assert.deepEqual([p.y, p.dir], [7, 'down']);
+    assert.deepEqual([p.y, p.dir], [7.6, 'down']);
     assert.ok(p.x >= 0 && p.x <= WORLD.w && p.y >= 0 && p.y <= WORLD.h);
     xs.push(p.x);
   }
   assert.equal(new Set(xs).size, xs.length);
-  assert.deepEqual(spawnPoint('pierre'), { x: 3, y: 7, dir: 'down' });
-  assert.deepEqual(spawnPoint(null), { x: 8, y: 7, dir: 'down' }); // pre-M3 player: centre fallback
+  // the row is spread evenly over the roster, in colour order, and re-spaces itself when it grows
+  assert.deepEqual(xs, [...xs].sort((a, b) => a - b));
+  const gaps = xs.slice(1).map((x, i) => Math.round((x - xs[i]) * 100) / 100);
+  assert.equal(new Set(gaps).size, 1, 'evenly spaced');
+  assert.equal(xs.length, ROSTER_SIZE);
+  assert.deepEqual(spawnPoint('pierre'), { x: 2.8, y: 7.6, dir: 'down' });
+  assert.deepEqual(spawnPoint('konz'), { x: 13.2, y: 7.6, dir: 'down' });
+  assert.deepEqual(spawnPoint(null), { x: 8, y: 7.6, dir: 'down' }); // pre-M3 player: centre of the row
   assert.deepEqual(clampToWorld(-1, 20), { x: 0, y: 9 });
   assert.deepEqual(clampToWorld(7.5, 4.25), { x: 7.5, y: 4.25 });
   assert.deepEqual(clampToWorld(NaN, Infinity), { x: 0, y: 0 });

@@ -268,6 +268,61 @@ const DESIGNS = {
       '...oCCkCCkCCo...',
     ],
   },
+
+  // Konz — the grown-up of the room: light blond hair, a short blond beard and a big smile,
+  // open green shirt over a cream tee, khaki trousers, brown shoes. No hat, no glasses: the
+  // beard is what reads at 16 px, and nothing else in the roster is blond or green.
+  konz: {
+    palette: {
+      o: '#2a2119', h: '#edca6e', H: '#ab7f33', s: '#f3c69a', e: '#2a2119', m: '#a8584e',
+      c: '#5e9e5e', C: '#43773f', w: '#f8f0d8', p: '#8a7a5e', b: '#5a4733',
+    },
+    down: [
+      '................',
+      '....oooooooo....',
+      '...ohhhhhhhho...',
+      '...ohhhhhhhho...',
+      '...ohssssssho...',
+      '...osesssseso...',
+      '...oHssssssHo...',
+      '...oHssmmssHo...',
+      '...oHHHHHHHHo...',
+      '....oooooooo....',
+      '..osccwwwwccso..',
+      '..occcccccccco..',
+      '..oCCCCCCCCCCo..',
+    ],
+    up: [
+      '................',
+      '....oooooooo....',
+      '...ohhhhhhhho...',
+      '...ohhhhhhhho...',
+      '...ohhhhhhhho...',
+      '...ohhhhhhhho...',
+      '...ohhhhhhhho...',
+      '...oHhhhhhhHo...',
+      '...ohHHHHHHho...',
+      '....oossssoo....',
+      '..osccwwwwccso..',
+      '..occcccccccco..',
+      '..oCCCCCCCCCCo..',
+    ],
+    right: [
+      '................',
+      '....oooooooo....',
+      '...ohhhhhhhho...',
+      '...ohhhhhhhhho..',
+      '...ohhhhhssso...',
+      '...ohhhssesso...',
+      '...ohhhsssssso..',
+      '...ohHHsssmso...',
+      '...ohHHHHHHo....',
+      '....oooooo......',
+      '....occwwccso...',
+      '....occccccco...',
+      '...oCCCCCCCCo...',
+    ],
+  },
 };
 
 // ---- assembly ----------------------------------------------------------------------

@@ -1,9 +1,12 @@
-// Lobby: join QR + room code + URL, and 4 player slots filling live.
+// Lobby: join QR + room code + URL, and the guest count filling live.
 
 import { h, colorDot } from './dom.js';
+import { ROSTER_SIZE } from '../../shared/characters.js';
 import { summarizeSettings } from '../commun/settings-text.js';
 
-const MAX_PLAYERS = 4;
+/** The game holds one player per character: the roster is the cap (the server refuses a join
+ *  only once every character is held). */
+const MAX_PLAYERS = ROSTER_SIZE;
 const QR_SRC = '/api/join-qr.svg';
 
 /** @typedef {import('../../shared/game.js').State} State */

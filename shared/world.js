@@ -1,7 +1,7 @@
 // Contract C amendment (M3, 2026-11-04) — the single source of movement geometry:
 // the server clamps with it, the phone integrates with it, the TV spawns/interpolates with it.
 
-import { CHARACTERS, isCharacterId } from './characters.js';
+import { CHARACTERS, ROSTER_SIZE, isCharacterId } from './characters.js';
 
 /**
  * @typedef {import('./characters.js').CharacterId} CharacterId
@@ -16,15 +16,27 @@ export const WORLD = Object.freeze({ w: 16, h: 9 });
 export const WALK_SPEED = 4;
 
 /**
- * Deterministic spawn point of a character: x = 3 + 3.33·(color − 1), y = 7, facing down.
- * Anything that is not a known character (pre-M3 players have character null) spawns at the
- * centre of that row, so a client never crashes on old state.
+ * The spawn row. y sits below the party room's furniture (its table reaches y = 7.15, see
+ * PARTY_ROOM in shared/scene.js) so that no character ever starts inside a prop; the margin keeps
+ * the whole row inside that room's walkable floor (x 0.5 … 15.5).
+ */
+const SPAWN_Y = 7.6;
+const SPAWN_MARGIN = 1.5;
+
+/**
+ * Deterministic spawn point of a character: the roster is spread evenly along the spawn row, in
+ * colour order, each character on the centre of its own band — so the row re-spaces itself when the
+ * roster grows instead of running off the end of the world. Anything that is not a known character
+ * (pre-M3 players have character null) spawns at the centre of the row, so a client never crashes
+ * on old state.
  * @param {CharacterId | null | undefined} characterId
  * @returns {Spawn}
  */
 export function spawnPoint(characterId) {
-  const x = isCharacterId(characterId) ? 3 + 3.33 * (CHARACTERS[characterId].color - 1) : WORLD.w / 2;
-  return { x, y: 7, dir: 'down' };
+  const slot = isCharacterId(characterId) ? CHARACTERS[characterId].color - 1 : (ROSTER_SIZE - 1) / 2;
+  const span = WORLD.w - 2 * SPAWN_MARGIN;
+  const x = SPAWN_MARGIN + (span * (slot + 0.5)) / ROSTER_SIZE;
+  return { x: Math.round(x * 100) / 100, y: SPAWN_Y, dir: 'down' };
 }
 
 /**

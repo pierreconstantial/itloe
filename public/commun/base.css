@@ -6,11 +6,15 @@
   --fg-dim: #9aa4ad;
   --cell: #272e36;       /* empty board cell */
   --accent: #ffd166;
-  /* player colours (colour-blind-safe-ish) — color index 1..4 */
+  /* player colours (colour-blind-safe-ish) — color index 1..N, one per character in the roster.
+     --p5 is a magenta pink: green was the other free hue, but player dots are drawn ON the quiz
+     choice tiles at the reveal and green would have sat on the green tile (and next to --ok).
+     Chosen over a redder pink because it keeps its distance from the amber tile under protanopia. */
   --p1: #e4572e;
   --p2: #3b8ea5;
   --p3: #f3a712;
   --p4: #9b5de5;
+  --p5: #e0479f;
   --ok: #4caf50;
   --bad: #e53935;
 }
