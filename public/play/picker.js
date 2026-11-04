@@ -1,13 +1,49 @@
-// Character picker (M3, replaces name entry). Built from the shared roster, so a new character
-// appears with no change here; taken characters are greyed live from each view.
-import { CHARACTERS, freeCharacters } from '../../shared/characters.js';
+// Character picker (M3; slice 2b: the character IS the identity). Built from the shared roster, so a
+// new character appears with no change here. Each card is in one of three states, live from each view:
+//  - free: nobody holds it and the lobby is open → a new player;
+//  - continue: held by a player whose phone is offline → tapping takes that player back (same board,
+//    score, hand, host role), from any device and in any phase;
+//  - taken: held by an online player (or free while a game is on) → greyed.
+import { CHARACTERS } from '../../shared/characters.js';
 import { $ } from './dom.js';
 import { avatarCanvas } from './avatar.js';
 
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
 /** @typedef {import('../../shared/game.js').State} State */
+/** @typedef {'free' | 'continue' | 'taken'} PickState */
 
 const PICKER_SCALE = 5; // 16 px sprites → 80 px
+
+/**
+ * The state of every character for a phone that is not (or no longer) a player.
+ * @param {State} state @param {readonly string[]} online playerIds with a live socket
+ * @returns {Map<CharacterId, PickState>}
+ */
+export function pickStates(state, online) {
+  const live = new Set(online);
+  /** @type {Map<string, string>} character → holding playerId (left players hold nothing) */
+  const holders = new Map();
+  for (const id of state.order) {
+    const p = state.players[id];
+    if (p && !p.left && p.character) holders.set(p.character, id);
+  }
+  /** @type {Map<CharacterId, PickState>} */
+  const states = new Map();
+  for (const c of Object.values(CHARACTERS)) {
+    const holder = holders.get(c.id);
+    if (holder) states.set(c.id, live.has(holder) ? 'taken' : 'continue');
+    else states.set(c.id, state.phase === 'lobby' ? 'free' : 'taken'); // newcomers only join in the lobby
+  }
+  return states;
+}
+
+/** Is there anything this phone can tap? @param {Map<CharacterId, PickState>} states */
+export function anyPickable(states) {
+  return [...states.values()].some((s) => s !== 'taken');
+}
+
+/** @type {Record<PickState, string>} */
+const BADGES = { free: '', continue: 'Continue', taken: 'Taken' };
 
 /** @param {{ onPick: (id: CharacterId) => void }} hooks */
 export function createPicker(hooks) {
@@ -36,24 +72,31 @@ export function createPicker(hooks) {
   }
 
   build();
+  const cont = /** @type {HTMLButtonElement} */ ($('btn-continue'));
+  /** @type {CharacterId | null} */ let offered = null;
+  cont.addEventListener('click', () => { if (offered && !cont.disabled) hooks.onPick(offered); });
 
   return {
     /**
-     * @param {State} state
+     * @param {Map<CharacterId, PickState>} states from pickStates()
      * @param {CharacterId | null} pending a pick sent and not answered yet (all cards wait)
-     * @param {CharacterId | null} last this phone's previous character, highlighted
+     * @param {CharacterId | null} last this phone's previous character: offered first when pickable
      */
-    render(state, pending, last) {
-      const free = new Set(freeCharacters(state));
+    render(states, pending, last) {
+      offered = last !== null && states.get(last) !== 'taken' ? last : null;
+      cont.hidden = offered === null;
+      cont.disabled = pending !== null;
+      if (offered) cont.textContent = pending === offered ? 'Joining…' : `Continue as ${CHARACTERS[offered].name}`;
+      $('pick-prompt').textContent = offered ? 'Or pick someone else:' : 'Who are you tonight?';
       for (const [id, card] of cards) {
-        const taken = !free.has(id);
-        card.disabled = taken || pending !== null;
-        card.classList.toggle('taken', taken);
+        const st = states.get(id) ?? 'taken';
+        card.disabled = st === 'taken' || pending !== null;
+        card.classList.toggle('taken', st === 'taken');
         card.classList.toggle('pending', id === pending);
-        card.classList.toggle('last', id === last && !taken);
+        card.classList.toggle('last', id === last && st !== 'taken');
         /** @type {HTMLElement} */ (card.querySelector('.pick-badge')).textContent =
-          taken ? 'Taken' : id === pending ? 'Joining…' : id === last ? 'Last time' : '';
-        card.setAttribute('aria-label', `${CHARACTERS[id].name}${taken ? ' (taken)' : ''}`);
+          id === pending ? 'Joining…' : BADGES[st];
+        card.setAttribute('aria-label', `${st === 'continue' ? 'Continue as ' : ''}${CHARACTERS[id].name}${st === 'taken' ? ' (taken)' : ''}`);
       }
     },
   };

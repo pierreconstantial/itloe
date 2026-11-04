@@ -10,7 +10,7 @@ const RULE_CELL = 10; // px per cell for rule illustrations
 
 /**
  * @param {{ canLeave: () => boolean, onLeave: () => void }} hooks
- * @returns {{ refresh: () => void, close: (name?: string) => void }}
+ * @returns {{ refresh: () => void, close: (name?: string) => void, isOpen: () => boolean }}
  */
 export function initMenu(hooks) {
   let leaveArmed = false;
@@ -67,8 +67,10 @@ export function initMenu(hooks) {
     hooks.onLeave();
   });
 
+  const isOpen = () => SHEETS.some((s) => !$(`sheet-${s}`).hidden);
+
   refresh();
-  return { refresh, close };
+  return { refresh, close, isOpen };
 }
 
 /** Join URL + room code + QR from the server (GET /api/join); plain page URL if that fails. */

@@ -17,7 +17,8 @@
 
     <section id="view-pick" class="menu" hidden>
       <h1 class="logo">Bloko</h1>
-      <p>Who are you tonight?</p>
+      <button id="btn-continue" type="button" class="primary" hidden></button>
+      <p id="pick-prompt">Who are you tonight?</p>
       <div id="picker-grid"></div>
       <p id="pick-error" class="error" hidden></p>
       <button type="button" class="link" data-open="rules">How to play</button>
@@ -33,10 +34,17 @@
       </form>
     </section>
 
+    <section id="view-replaced" class="menu" hidden>
+      <h1 class="logo">Bloko</h1>
+      <p>Continued on another device.</p>
+      <p class="dim">Your character is being played from another phone or tab. Nothing is lost.</p>
+      <button id="btn-play-here" type="button" class="primary">Play here</button>
+    </section>
+
     <section id="view-waiting" class="menu" hidden>
       <h1 class="logo">Bloko</h1>
-      <p>A game is already running.</p>
-      <p class="dim">Watch it on the big screen!</p>
+      <p id="waiting-text">A game is already running.</p>
+      <p class="dim">Watch it on the big screen! You can join when the host goes back to the room.</p>
     </section>
 
     <section id="view-lobby" hidden>
@@ -74,8 +82,8 @@
     </section>
 
     <section id="view-over" class="menu" hidden>
-      <p class="skull">💀</p>
-      <h2>Out of moves!</h2>
+      <p id="over-icon" class="skull">💀</p>
+      <h2 id="over-title">Out of moves!</h2>
       <p>Final score <strong id="final-score"></strong></p>
       <p id="final-rank"></p>
       <p id="over-clock-line" hidden>The others have <strong class="clock"></strong> left.</p>
@@ -84,14 +92,17 @@
     </section>
 
     <section id="view-podium" class="menu" hidden>
-      <p id="podium-kicker" class="kicker" hidden>⏰ Time's up!</p>
+      <p id="podium-kicker" class="kicker" hidden></p>
       <h2 id="podium-title">Podium</h2>
       <p id="podium-best" class="dim" hidden></p>
       <ol id="podium-list"></ol>
       <p id="podium-settings" class="settings-summary"></p>
       <button id="btn-settings-podium" type="button" data-open="settings" hidden>⚙ Settings</button>
-      <button id="btn-again" class="primary" hidden>Play again</button>
-      <p id="podium-hint" class="dim">Waiting for the host to start a rematch…</p>
+      <div id="podium-actions" class="lobby-actions" hidden>
+        <button id="btn-again" type="button" class="primary">Play again</button>
+        <button id="btn-new-game" type="button">Back to the room</button>
+      </div>
+      <p id="podium-hint" class="dim">Waiting for the host: rematch or back to the room…</p>
     </section>
 
   </main>
@@ -103,6 +114,7 @@
       <button type="button" data-open="rules">How to play</button>
       <button type="button" data-open="invite">Invite friends</button>
       <button type="button" id="btn-vibrate">Vibration: on</button>
+      <span id="host-controls" hidden></span>
       <button type="button" id="btn-leave" class="danger">Leave game</button>
       <button type="button" class="link" data-close>Close</button>
     </div>

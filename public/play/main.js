@@ -12,10 +12,13 @@ import { syncClock, secondsLeft, mmss } from '../commun/clock.js';
 import { createSettingsSheet, summarize } from './settings-ui.js';
 import { CHARACTERS, isCharacterId } from '../../shared/characters.js';
 import { spawnPoint } from '../../shared/world.js';
-import { createPicker } from './picker.js';
+import { createPicker, pickStates, anyPickable } from './picker.js';
 import { createJoystick } from './joystick.js';
 import { avatarCanvas, paintAvatar } from './avatar.js';
 import { posFromEcho } from './movement.js';
+import { createConnection } from './connection.js';
+import { installBackGuard } from './back-guard.js';
+import { createHostControls } from './host-controls.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('../../shared/game.js').Player} Player */
@@ -38,6 +41,12 @@ const LOBBY_CHIP_SCALE = 2; // other players' avatars: 32 px
 const ERR_TOASTS = {
   locked: 'Settings are locked while a game is on.',
   'not-host': 'Only the host can do that.',
+};
+
+/** What the podium's choice became, told to everyone (the host picks, guests follow). @type {Record<string, string>} */
+const PHASE_TOASTS = {
+  'finished>lobby': 'Back to the room!',
+  'finished>playing': 'Rematch! Go go go!',
 };
 
 // ---------- pure helpers ----------
@@ -79,7 +88,10 @@ function outcome(prev, next, id) {
 /** Solo record for the current (size, mode), sent with views in solo games. @type {Best | null} */
 let lastBest = null;
 /** @type {string | null} */ let playerId = load(KEYS.id);
-/** @type {WebSocket | null} */ let ws = null;
+/** playerIds with a live socket, from the last view (slice 2b presence). @type {string[]} */
+let online = [];
+/** Another device took our player (`replaced`): this phone stays offline until "Play here". */
+let replaced = false;
 /** Placement sent but not yet confirmed: simulated board + tray slot hidden.
  * @type {{ index: number, board: number[] } | null} */
 let pending = null;
@@ -117,33 +129,38 @@ function helloMsg() {
   };
 }
 
-function connect() {
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const sock = new WebSocket(`${proto}://${location.host}/ws`);
-  ws = sock;
-  sock.addEventListener('open', () => {
-    $('conn-banner').hidden = true;
-    send(helloMsg());
-  });
-  sock.addEventListener('message', (ev) => receive(String(ev.data)));
-  sock.addEventListener('close', () => {
-    if (ws !== sock) return;
-    $('conn-banner').hidden = false;
-    setTimeout(connect, 1000);
-  });
-}
+// The link heals itself (reconnect, liveness probe on unlock/bfcache); the phone keeps showing
+// its last view meanwhile, under a banner — a dropped socket never sends anyone back to a menu.
+const conn = createConnection({
+  url: () => `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`,
+  hello: helloMsg,
+  onMessage: receive,
+  onStatus: (up) => {
+    $('conn-banner').hidden = up;
+    if (!up && drag) { endDrag(); render(); } // a drop can't be sent while offline
+  },
+  onReplaced,
+});
 
-/** Drop the socket on purpose (no reconnect banner) and open a fresh one. */
-function reconnect() {
-  const old = ws;
-  ws = null;
-  old?.close();
-  connect();
+/** Another device continues as our player. Let go of the id for good: a reload or a probe here must
+ *  not take it back (no tug of war); the character stays stored, so "Play here" offers it again. */
+function onReplaced() {
+  replaced = true;
+  forget(KEYS.id);
+  playerId = null;
+  myPos = null;
+  pending = null;
+  pendingPick = null;
+  joystick.cancel();
+  if (drag) endDrag();
+  menu.close();
+  $('conn-banner').hidden = true;
+  render();
 }
 
 /** @param {unknown} msg */
 function send(msg) {
-  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
+  conn.send(msg);
 }
 
 /** Unknown message types are ignored (PROTOCOL.md forward-compatibility rule). @param {string} raw */
@@ -157,6 +174,8 @@ function receive(raw) {
     pendingPick = null;
     save(KEYS.id, m.playerId);
     render();
+  } else if (m.t === 'tick') {
+    syncClock(m.now); // keep-alive (fed to the watchdog in connection.js); keeps the countdown honest
   } else if (m.t === 'pos') {
     // the one pos a phone receives: our own last position, echoed right after welcome
     const echoed = m.playerId === playerId ? posFromEcho(m) : null;
@@ -166,15 +185,19 @@ function receive(raw) {
     const prev = lastView;
     lastView = m.state;
     lastBest = m.best ?? null;
+    online = Array.isArray(m.online) ? m.online.filter((/** @type {unknown} */ x) => typeof x === 'string') : [];
     pending = null;
     const event = prev && playerId ? outcome(prev, m.state, playerId) : null;
     if (event) haptics.buzz(event);
+    const turn = prev && playerId && m.state.players[playerId] ? PHASE_TOASTS[`${prev.phase}>${m.state.phase}`] : undefined;
+    if (turn) { menu.close(); toast(turn); }
     render();
   } else if (m.t === 'err') {
     pending = null;
     const refusedPick = pendingPick;
     pendingPick = null;
-    if (m.code === 'full') showPickError('Sorry, the game is full (4 players max).');
+    if (m.code === 'full' && lastView?.phase !== 'lobby') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} is back online on another phone.`);
+    else if (m.code === 'full') showPickError('Sorry, the game is full (4 players max).');
     else if (m.code === 'taken') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} was just picked. Choose someone else!`);
     else if (m.code === 'bad-room') roomPrompt = { character: wantedCharacter, retried: roomPrompt !== null };
     else if (ERR_TOASTS[m.code]) toast(ERR_TOASTS[m.code]);
@@ -201,13 +224,21 @@ function leaveGame() {
   joystick.cancel();
   if (drag) endDrag();
   pending = null;
-  reconnect();
+  conn.restart(); // a fresh socket: the old one stays bound to the removed id on the server
   render();
+}
+
+/** First back press: close a sheet, or say how to get around (back-guard.js). */
+function onBack() {
+  if (menu.isOpen()) { menu.close(); return; }
+  toast(playerId && lastView?.players[playerId]
+    ? "You're still in the game. Press back again to leave this page."
+    : 'Press back again to leave Bloko.');
 }
 
 // ---------- rendering ----------
 
-const VIEWS = ['loading', 'pick', 'room', 'waiting', 'lobby', 'game', 'over', 'podium'];
+const VIEWS = ['loading', 'pick', 'room', 'replaced', 'waiting', 'lobby', 'game', 'over', 'podium'];
 
 /** @param {string} name */
 function show(name) {
@@ -216,6 +247,7 @@ function show(name) {
 
 function render() {
   menu.refresh();
+  if (replaced) { show('replaced'); return; }
   const v = lastView;
   if (!v) { show('loading'); return; }
   const me = playerId ? v.players[playerId] ?? null : null;
@@ -223,6 +255,7 @@ function render() {
   const configurable = v.phase !== 'playing';
 
   settingsSheet.render(v.settings, isHost && configurable);
+  hostControls.render(v, online, me?.id ?? '');
   if (!isHost || !configurable) menu.close('settings');
   updateClock();
 
@@ -233,10 +266,17 @@ function render() {
 
   if (!me) {
     if (roomPrompt) { show('room'); renderRoomPrompt(roomPrompt); return; }
-    if (v.phase !== 'lobby') { show('waiting'); return; }
+    // the picker shows whenever there is something to tap: a free seat in the lobby, or (any phase)
+    // a character whose phone is offline, to continue as
+    const states = pickStates(v, online);
+    if (!anyPickable(states) && pendingPick === null) {
+      show('waiting');
+      $('waiting-text').textContent = v.phase === 'finished' ? 'A game just ended.' : 'A game is already running.';
+      return;
+    }
     show('pick');
     const last = load(KEYS.character);
-    picker.render(v, pendingPick, isCharacterId(last) ? last : null);
+    picker.render(states, pendingPick, isCharacterId(last) ? last : null);
     return;
   }
   if (v.phase === 'lobby') { show('lobby'); renderLobby(v, me, isHost); return; }
@@ -305,7 +345,10 @@ function renderGame(v, me) {
     const p = v.players[id];
     const chip = document.createElement('span');
     chip.className = 'opp';
-    chip.append(dotEl(p.color), document.createTextNode(`${p.name} ${p.done ? '💀' : p.score}`));
+    const off = !p.done && !online.includes(id);
+    chip.append(dotEl(p.color), document.createTextNode(`${p.name} ${p.done ? (p.retired ? '👋' : '💀') : p.score}${off ? ' 📴' : ''}`));
+    // the host can act on an offline player right from the bar: the chip opens the host menu
+    if (off && v.hostId === me.id) { chip.dataset.open = 'menu'; chip.classList.add('offline'); }
     opp.append(chip);
   }
 
@@ -342,6 +385,9 @@ function renderTray(me) {
 
 /** @param {State} v @param {Player} me */
 function renderGameOver(v, me) {
+  // taken out by the host (slice 2b): calm, the run still counts
+  $('over-icon').textContent = me.retired ? '👋' : '💀';
+  $('over-title').textContent = me.retired ? 'The host took you out — your score counts' : 'Out of moves!';
   $('final-score').textContent = String(me.score);
   $('final-rank').textContent = v.order.length > 1
     ? `You're ${ordinal(rankOf(v, me.id))} of ${v.order.length} so far.`
@@ -385,7 +431,9 @@ function isNewBest(me) {
 
 /** @param {State} v @param {Player} me @param {boolean} isHost */
 function renderPodium(v, me, isHost) {
-  $('podium-kicker').hidden = v.endReason !== 'time';
+  const kicker = v.endReason === 'time' ? "⏰ Time's up!" : v.endReason === 'host' ? 'The host ended the game.' : '';
+  $('podium-kicker').hidden = kicker === '';
+  $('podium-kicker').textContent = kicker;
   $('podium-title').textContent = podiumTitle(v, me);
   const best = $('podium-best');
   best.hidden = v.order.length !== 1 || lastBest === null || isNewBest(me);
@@ -407,7 +455,7 @@ function renderPodium(v, me, isHost) {
   }
   $('podium-settings').textContent = `Next game: ${summarize(v.settings)}`;
   $('btn-settings-podium').hidden = !isHost;
-  $('btn-again').hidden = !isHost;
+  $('podium-actions').hidden = !isHost;
   $('podium-hint').hidden = isHost;
 }
 
@@ -422,7 +470,7 @@ function showPickError(text) {
 
 /** @param {PointerEvent} e @param {number} index */
 function startDrag(e, index) {
-  if (drag || pending || !lastView || !playerId) return;
+  if (drag || pending || !lastView || !playerId || !conn.isOnline()) return;
   const me = lastView.players[playerId];
   if (!me || lastView.phase !== 'playing' || me.done) return;
   const pieceId = me.hand[index];
@@ -543,6 +591,7 @@ const menu = initMenu({
   onLeave: leaveGame,
 });
 const settingsSheet = createSettingsSheet({ send });
+const hostControls = createHostControls({ send });
 const picker = createPicker({ onPick: join });
 
 const joystick = createJoystick({
@@ -587,11 +636,18 @@ $('room-form').addEventListener('submit', (e) => {
 
 $('btn-start').addEventListener('click', () => send({ t: 'start' }));
 $('btn-again').addEventListener('click', () => send({ t: 'again' }));
+$('btn-new-game').addEventListener('click', () => send({ t: 'newGame' }));
+$('btn-play-here').addEventListener('click', () => {
+  replaced = false;
+  conn.restart(); // a hello without our old id: the picker shows who can be continued
+  render();
+});
 
 for (let i = 0; i < 3; i++) {
   $(`slot-${i}`).addEventListener('pointerdown', (e) => startDrag(e, i));
 }
 
+installBackGuard({ onBack });
 setInterval(updateClock, CLOCK_TICK_MS);
 show('loading');
-connect();
+conn.start();
