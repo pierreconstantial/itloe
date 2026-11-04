@@ -13,6 +13,7 @@ import { updateCountdown } from './countdown.js';
 import { legalPlacementCount } from '../../shared/board.js';
 import { createPartyRoom } from './party-room.js';
 import { createPresence } from './presence.js';
+import { createLiveness } from '../commun/liveness.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('./events.js').ScreenEvent} ScreenEvent */
@@ -177,15 +178,19 @@ const HANDLERS = {
     presence.update(Array.isArray(msg.online) ? msg.online : undefined, seated(msg.state));
   },
   pos: (msg) => party.onPos(msg),
+  tick: (msg) => syncClock(msg.now), // liveness (any message feeds the watchdog) + clock skew
 };
 
 function connect() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const sock = new WebSocket(`${proto}://${location.host}/ws`);
   ws = sock;
+  // silent for 25 s (no tick, no view) → half-open: abandon it like after a sleep
+  const live = createLiveness({ onDead: () => { if (ws === sock) reconnectNow('no message for 25 s'); } });
   // every listener checks `ws === sock`: an abandoned socket (see reconnectNow) can never act again
   sock.addEventListener('open', () => {
-    if (ws !== sock) return;
+    if (ws !== sock) { live.stop(); return; }
+    live.start();
     document.body.classList.remove('offline');
     // Positions are server memory: after a reconnect its pos snapshot (or, after a server restart,
     // each phone's spawn point) is the truth — not where this TV last drew the avatars.
@@ -193,13 +198,15 @@ function connect() {
     sock.send(JSON.stringify({ t: 'hello', role: 'screen' }));
   });
   sock.addEventListener('message', (ev) => {
-    if (ws !== sock) return;
+    if (ws !== sock) { live.stop(); return; }
+    live.feed();
     /** @type {{ t?: string }} */
     let msg;
     try { msg = JSON.parse(String(ev.data)); } catch { return; }
     HANDLERS[String(msg.t)]?.(msg); // a screen is never bumped: `replaced` is not for it and is ignored
   });
   sock.addEventListener('close', () => {
+    live.stop();
     if (ws !== sock) return;
     document.body.classList.add('offline');
     stale = true;
@@ -214,6 +221,9 @@ function connect() {
  * @param {string} why
  */
 function reconnectNow(why) {
+  // wake and liveness can both fire on the same wake-up: keep a reconnect already under way
+  if (ws?.readyState === WebSocket.CONNECTING && Date.now() - lastReconnectAt < 3000) return;
+  lastReconnectAt = Date.now();
   const old = ws;
   ws = null;
   console.info(`[bloko] reconnecting (${why})`);
@@ -222,6 +232,8 @@ function reconnectNow(why) {
   try { old?.close(); } catch { /* already closing */ }
   connect();
 }
+
+let lastReconnectAt = 0;
 
 // Wake detection: timers do not run while the laptop sleeps (or the tab is frozen), wall time does.
 // Hidden tabs are skipped (Chrome throttles their timers to ~1/min, which is not a sleep);

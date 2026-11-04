@@ -26,6 +26,12 @@ function broadcast(): void {
   for (const c of wss.clients) if (c.readyState === WebSocket.OPEN) c.send(msg);
 }
 
+// liveness tick, as the real server (PROTOCOL.md): clients reconnect after 25 s of silence
+setInterval(() => {
+  const msg = JSON.stringify({ t: 'tick', now: Date.now() });
+  for (const c of wss.clients) if (c.readyState === WebSocket.OPEN) c.send(msg);
+}, 10_000).unref();
+
 function send(ws: WebSocket, data: unknown): void {
   ws.send(JSON.stringify(data));
 }

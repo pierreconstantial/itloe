@@ -219,6 +219,27 @@ try {
   const sc = A2.lastView().players[idA].score;
   check(await tv.until(`${tvState}.players['${idA}'].score === ${sc}`, 'live after wake'), 'a move after the wake reaches the TV');
 
+  // ---------- silent socket (half-open): SIGSTOP the server, TCP stays up but nothing arrives ----------
+  const t0 = A2.ticks.length;
+  for (let k = 0; k < 120 && A2.ticks.length === t0; k++) await sleep(100);
+  const tk = A2.ticks.at(-1);
+  check(A2.ticks.length > t0 && typeof tk?.now === 'number' && Math.abs(tk.now - Date.now()) < 2000, "server sends {t:'tick', now} to every socket, at least every 10 s");
+  tv.console.length = 0;
+  const stoppedAt = Date.now();
+  server!.kill('SIGSTOP');
+  const silentHit = await (async () => {
+    const end = Date.now() + 36_000;
+    while (Date.now() < end) { if (tv!.console.some((l) => l.includes('no message for 25 s'))) return true; await sleep(100); }
+    return false;
+  })();
+  const silentAfter = Date.now() - stoppedAt;
+  check(silentHit && silentAfter <= 26_000, `silent socket → TV gives up on it by itself (${Math.round(silentAfter / 1000)} s after the server froze; ≤ 25 s of silence)`);
+  server!.kill('SIGCONT');
+  check(await tv.until(`!${tvOnlineBanner}`, 'back after SIGCONT', 8000), '…server back → TV live again');
+  i = B.mark(); A2.send({ t: 'place', ...legalMoves(A2.lastView(), idA)[0] }); await B.waitFor((m) => m.t === 'view', i);
+  const sc2 = A2.lastView().players[idA].score;
+  check(await tv.until(`${tvState}.players['${idA}'].score === ${sc2}`, 'live after silence'), '…and the next move reaches it');
+
   // ---------- finished: kill -9 on the podium ----------
   await playToDone(A2, idA, B, rnd);
   await playToDone(B, idB, A2, rnd);

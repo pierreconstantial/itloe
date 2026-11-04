@@ -48,6 +48,11 @@ Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `dead
 // "online" (slice 2b): playerIds with a live socket, in seat order. EPHEMERAL: never in State or on
 // disk, empty after a server restart until phones reconnect. The view is re-broadcast whenever a
 // player socket attaches or closes. Dead sockets are detected by ping/pong within ~10 s.
+{ "t": "tick", "now": 1730700000000 }
+// liveness (slice 2b): sent to EVERY open socket every 10 s. A client that receives NO message at all
+// for 25 s treats its socket as dead (half-open after a silent Wi-Fi drop: no close event, and ping
+// frames are invisible to JS), abandons it and reconnects — public/commun/liveness.js. "now" also
+// refreshes the clock skew. Old clients ignore it (forward-compatibility rule).
 { "t": "replaced" }
 // slice 2b: another socket attached this player's id (reclaim on another device, or a second tab):
 // newest socket wins. Sent to the OLD socket, which the server then closes (code 4001). The client

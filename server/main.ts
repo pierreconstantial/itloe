@@ -299,6 +299,15 @@ setInterval(() => {
   }
 }, PING_MS).unref();
 
+// Liveness tick: every open socket hears from the server at least every TICK_MS, so a client
+// that hears NOTHING for 25 s knows its socket is half-open and reconnects (public/commun/liveness.js).
+// It carries `now`, refreshing every client's clock skew for free.
+const TICK_MS = 10_000;
+setInterval(() => {
+  const msg = JSON.stringify({ t: 'tick', now: Date.now() });
+  for (const c of wss.clients) send(c, msg);
+}, TICK_MS).unref();
+
 wss.on('connection', (ws) => {
   alive.add(ws);
   ws.on('pong', () => alive.add(ws));

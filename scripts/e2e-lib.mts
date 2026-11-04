@@ -19,12 +19,17 @@ export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export class Client {
   ws!: WebSocket;
   msgs: any[] = [];
+  /** liveness ticks, kept apart so "no broadcast" checks never trip on one */
+  ticks: any[] = [];
   closed = false;
   label: string;
   constructor(label: string) { this.label = label; }
   open(): Promise<void> {
     this.ws = new WebSocket(URL_WS);
-    this.ws.onmessage = (e) => this.msgs.push(JSON.parse(String(e.data)));
+    this.ws.onmessage = (e) => {
+      const m = JSON.parse(String(e.data));
+      (m.t === 'tick' ? this.ticks : this.msgs).push(m);
+    };
     this.ws.onclose = () => { this.closed = true; };
     return new Promise((res, rej) => { this.ws.onopen = () => res(); this.ws.onerror = rej; });
   }
