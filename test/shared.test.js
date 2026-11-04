@@ -866,6 +866,110 @@ test('leave on the podium by a host skips players who left mid-game', () => {
   assert.deepEqual(reduce(after, { t: 'again', id: 'c' }).order, ['c']);
 });
 
+// ---------- newGame: podium → lobby ----------
+
+/**
+ * lobby3 started, a and b placed once, then forced to the podium.
+ * @returns {State}
+ */
+function podium3() {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  s = reduce(s, { t: 'place', id: 'a', piece: 0, x: 0, y: 0 });
+  s = reduce(s, { t: 'place', id: 'b', piece: 0, x: 0, y: 0 });
+  /** @type {State} */
+  const fin = { ...s, phase: 'finished', endReason: 'stuck' };
+  return fin;
+}
+
+test('newGame: host on the podium → fresh lobby, same players, new seed, settings live', () => {
+  const fin = podium3();
+  const s = reduce(fin, { t: 'newGame', id: 'a' });
+  assert.equal(s.phase, 'lobby');
+  assert.deepEqual(s.order, ['a', 'b', 'c']);
+  assert.equal(s.hostId, 'a');
+  assert.notEqual(s.seed, fin.seed);
+  assert.equal(s.seed, reduce(fin, { t: 'again', id: 'a' }).seed); // same derivation as «Replay»
+  assert.deepEqual([s.deadline, s.endReason], [null, null]);
+  assert.deepEqual(s.rules, s.settings);
+  assert.equal(s.size, s.rules.size);
+  for (const id of s.order) {
+    const p = s.players[id];
+    assert.deepEqual(p, newPlayer(id, fin.players[id].name, fin.players[id].color, SIZE, s.rules.grace, fin.players[id].character));
+    assert.deepEqual(p.hand, [null, null, null]); // lobby players hold no hand, like after a join
+  }
+  // config is live again in that lobby and rebuilds boards
+  const cfg = reduce(s, { t: 'config', id: 'a', patch: { size: 10 } });
+  assert.deepEqual([cfg.rules.size, cfg.players.c.board.length], [10, 100]);
+});
+
+test('newGame: settings changed on the podium become the lobby rules', () => {
+  const fin = reduce(podium3(), { t: 'config', id: 'a', patch: { size: 9, grace: 2 } });
+  assert.equal(fin.rules.size, 8); // podium keeps showing the old game
+  const s = reduce(fin, { t: 'newGame', id: 'a' });
+  assert.deepEqual([s.rules.size, s.size, s.rules.grace], [9, 9, 2]);
+  assert.equal(s.players.a.board.length, 81);
+  assert.equal(s.players.a.graceLeft, 2);
+});
+
+test('newGame: non-host and wrong phase refused (same ref)', () => {
+  const fin = podium3();
+  assert.equal(reduce(fin, { t: 'newGame', id: 'b' }), fin);
+  assert.equal(reduce(fin, { t: 'newGame', id: 'nobody' }), fin);
+  const lobby = lobby3();
+  assert.equal(reduce(lobby, { t: 'newGame', id: 'a' }), lobby);
+  const play = reduce(lobby, { t: 'start', id: 'a' });
+  assert.equal(reduce(play, { t: 'newGame', id: 'a' }), play);
+});
+
+test('newGame: players who left mid-game are dropped, characters and colours kept', () => {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  s = reduce(s, { t: 'leave', id: 'b' });
+  /** @type {State} */
+  const fin = { ...s, phase: 'finished' };
+  const lobby = reduce(fin, { t: 'newGame', id: 'a' });
+  assert.deepEqual(lobby.order, ['a', 'c']);
+  assert.equal(lobby.players.b, undefined);
+  assert.deepEqual(lobby.order.map((id) => [lobby.players[id].character, lobby.players[id].name, lobby.players[id].color]),
+    [['pierre', 'Pierre', 1], ['sol', 'Sol', 3]]);
+  for (const id of lobby.order) assert.deepEqual([lobby.players[id].left, lobby.players[id].done], [false, false]);
+  assert.deepEqual(freeCharacters(lobby), ['elodie', 'anna']);
+});
+
+test('newGame: a newcomer can join the new lobby, then start works', () => {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  s = reduce(s, { t: 'leave', id: 'b' });
+  /** @type {State} */
+  const fin = { ...s, phase: 'finished' };
+  assert.equal(reduce(fin, { t: 'join', id: 'd', character: 'anna' }), fin); // podium: no joins
+  let lobby = reduce(fin, { t: 'newGame', id: 'a' });
+  assert.equal(reduce(lobby, { t: 'join', id: 'd', character: 'sol' }), lobby); // still held by c
+  lobby = reduce(lobby, { t: 'join', id: 'd', character: 'elodie' }); // b's freed character
+  lobby = reduce(lobby, { t: 'join', id: 'e', character: 'anna' });
+  assert.deepEqual(lobby.order, ['a', 'c', 'd', 'e']);
+  assert.equal(lobby.players.d.color, 2);
+  const play = reduce(lobby, { t: 'start', id: 'a' });
+  assert.equal(play.phase, 'playing');
+  assert.equal(play.seed, lobby.seed); // start deals from the seed newGame derived
+  assert.deepEqual(play.order, ['a', 'c', 'd', 'e']);
+  for (const id of play.order) assert.deepEqual(play.players[id].hand, handAt(lobby.seed, 0));
+});
+
+test('newGame: no remaining player → refused when hostless, empty lobby if the host is a ghost', () => {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  for (const id of ['a', 'b', 'c']) s = reduce(s, { t: 'leave', id });
+  assert.equal(s.phase, 'finished');
+  assert.equal(s.hostId, null);
+  assert.equal(reduce(s, { t: 'newGame', id: 'a' }), s); // unreachable in practice: nobody is host
+  // defensive: a stale host id pointing at a left player
+  /** @type {State} */
+  const ghost = { ...s, hostId: 'a' };
+  const empty = reduce(ghost, { t: 'newGame', id: 'a' });
+  assert.equal(empty.phase, 'lobby');
+  assert.deepEqual([empty.order, empty.players, empty.hostId], [[], {}, null]);
+  const joined = reduce(empty, { t: 'join', id: 'z', character: 'anna' });
+  assert.equal(joined.hostId, 'z'); // the next joiner hosts
+});
+
 // ---------- world geometry ----------
 
 test('world: spawnPoint is deterministic, distinct per character, inside the world', () => {

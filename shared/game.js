@@ -60,6 +60,7 @@ import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
  * @typedef {{ t: 'join', id: string, character: CharacterId }
  *   | { t: 'start', id: string, now?: number }
  *   | { t: 'again', id: string, now?: number }
+ *   | { t: 'newGame', id: string }
  *   | { t: 'config', id: string, patch: Partial<Settings> }
  *   | { t: 'timeUp', deadline: number }
  *   | { t: 'leave', id: string }
@@ -339,6 +340,25 @@ export function reduce(state, action) {
       if (action.id !== state.hostId || state.hostId === null) return state;
       if (state.order.length < 1) return state;
       return beginPlay(state, nextSeed(state.seed), action.now);
+    }
+
+    case 'newGame': {
+      // Podium → lobby: same players minus those who left, fresh, joins/config/start open again.
+      if (state.phase !== 'finished') return state;
+      if (action.id !== state.hostId || state.hostId === null) return state;
+      const rules = { ...state.settings };
+      const order = state.order.filter((id) => !state.players[id].left);
+      /** @type {Record<string, Player>} */
+      const players = {};
+      for (const id of order) {
+        const old = state.players[id];
+        players[id] = newPlayer(id, old.name, old.color, rules.size, rules.grace, old.character ?? null);
+      }
+      const hostId = order.includes(state.hostId) ? state.hostId : (order[0] ?? null);
+      return {
+        ...state, phase: 'lobby', seed: nextSeed(state.seed), hostId, order, players,
+        rules, size: rules.size, deadline: null, endReason: null,
+      };
     }
 
     default:
