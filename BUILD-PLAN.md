@@ -422,6 +422,30 @@ datasets, bundled locally (research pending; licence and attribution must be kep
   per character, exactly once (same derivation as blocks).
 - **Timed fairness:** the round deadline shifts on resume like the blocks deadline.
 
+**Addendum E1 (orchestrator, 2026-11-04, from P2's questions; all of P2's proposals accepted):**
+1. **The reducer never sees the bank.** The server judges each answer on arrival and injects its verdict
+   ('right' | 'wrong' | 'uncertain') into the rebuilt `answer` action. An uncertain verdict is settled later
+   by `{t:'verdict'}`.
+2. **Projection in both places:** `view.quiz` and `campaign.at.activity` on the wire carry the public quiz view.
+   During `question`: no verdicts and no other players' texts, only "answered ✓". `view.state` stays block-only.
+3. **Selection:** the server injects the candidates into `start`, and the reducer does a seeded pick. Fewer
+   candidates than `count`: play with what there is. None: err 'refused'.
+4. **Modes:** a question with choices can be asked as choice OR text; one without choices is text-only.
+   Choices are shuffled per round by a seeded permutation, and `choice` is the displayed index.
+5. **Close:** the deadline (with a stale-timer guard) or everyone answered → reveal. Pending judgements show
+   "judging…"; judge timeout 4 s → wrong; `next` with judgements pending → wrong. On resume, an unjudged
+   uncertain answer → wrong (never re-judged); the host can override.
+6. **Override:** host, on the reveal, ANY answer (a disputed choice question too), both ways, re-scored.
+7. **Scoring** as proposed (+100, speed bonus ≤ +50, linear), credited at close or when the verdict lands.
+8. **Engine:** a quiz lobby on enter; nested dispatch by `kind`; `quiz.finished` derived in the same step
+   with `asked`; counters quiz.played / node.<id>.finished / quiz.won.<char> / quiz.correct.<char>; totals;
+   `facts.asked` (deduped, kept by loadCampaign). `quiz.answered` is DROPPED from the event union.
+   P2 implements these in shared/campaign (P1 is on the TV); P1 reviews.
+9. **Wire** as proposed; `config` edits the quiz settings in its lobby, host only.
+10. **judge-local** rules as proposed (one leading article dropped, years exact, length thresholds,
+    token-subset → uncertain).
+11. The bank lives in data/quiz/, never served (a 404 test), and is validated at boot.
+
 ### Scene direction (user, 2026-11-04): the party room is **an Altbau apartment in Vienna** — herringbone
 (Fischgrät) parquet floor, high pale stucco walls with mouldings, tall casement double windows (evening
 sky), tall white double door, warm light (chandelier); the birthday bunting and balloons live INSIDE
