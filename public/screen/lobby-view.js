@@ -1,14 +1,12 @@
 // Lobby: join QR + room code + URL, and 4 player slots filling live.
 
-import { DEFAULT_SETTINGS } from '../../shared/game.js';
 import { h, colorDot } from './dom.js';
-import { mmss } from '../commun/clock.js';
+import { summarizeSettings } from '../commun/settings-text.js';
 
 const MAX_PLAYERS = 4;
 const QR_SRC = '/api/join-qr.svg';
 
 /** @typedef {import('../../shared/game.js').State} State */
-/** @typedef {import('../../shared/game.js').Settings} Settings */
 
 /**
  * How phones join. `code` / `qr` are null/false when the server has no join API (e.g. the mock).
@@ -47,23 +45,6 @@ export function typedUrl(url) {
   } catch {
     return url;
   }
-}
-
-/**
- * One line describing the next game, e.g. "9×9 · timed 3:00 · simple set".
- * Size and mode always; the rest only when they differ from the defaults.
- * @param {Settings} st
- * @returns {string}
- */
-export function settingsSummary(st) {
-  const parts = [
-    `${st.size}×${st.size}`,
-    st.mode === 'timed' ? `timed ${mmss(st.timedSeconds)}` : 'marathon',
-  ];
-  if (st.pieceSet !== DEFAULT_SETTINGS.pieceSet) parts.push(`${st.pieceSet} set`);
-  if (st.grace !== DEFAULT_SETTINGS.grace) parts.push(st.grace === 0 ? 'no combo grace' : `combo grace ${st.grace}`);
-  if (st.cleanBoardBonus !== DEFAULT_SETTINGS.cleanBoardBonus) parts.push(`clean board +${st.cleanBoardBonus}`);
-  return parts.join(' · ');
 }
 
 /** @type {HTMLImageElement | null} */
@@ -120,7 +101,7 @@ export function renderLobby(s, _prev, join) {
     : `${n}/${MAX_PLAYERS} guest${n === 1 ? '' : 's'}${host ? ` · ${host.name} starts the game from their phone` : ''}`;
   const side = h('div', 'lobby-side', [
     h('h1', 'title', ['BLOKO']),
-    h('p', 'settings-line', [settingsSummary(s.settings)]),
+    h('p', 'settings-line', [summarizeSettings(s.settings)]),
     h('p', 'lobby-count', [status]),
   ]);
   if (host) side.querySelector('.lobby-count')?.prepend(colorDot(host.color), ' ');

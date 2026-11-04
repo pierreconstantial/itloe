@@ -4,6 +4,7 @@
 
 import { ranking } from '../../shared/game.js';
 import { h, colorDot, playerColor, formatScore } from './dom.js';
+import { summarizeSettings } from '../commun/settings-text.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 
@@ -63,5 +64,7 @@ export function renderPodium(s, elapsedMs = Infinity) {
   for (const el of sub) delay(el, 0);
   const hint = h('p', 'podium-hint reveal', ["Play again on the host's phone"]);
   delay(hint, lastAt + 1200);
-  return h('section', 'podium', [title, ...sub, list, hint]);
+  const next = h('p', 'settings-line reveal', [`Next game: ${summarizeSettings(s.settings)}`]);
+  delay(next, lastAt + 1200);
+  return h('section', 'podium', [title, ...sub, list, hint, next]);
 }

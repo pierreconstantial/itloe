@@ -1,65 +1,14 @@
-// Host settings sheet + one-line summary, both generated from shared SETTINGS_SCHEMA.
-// A new schema entry gets a control and a summary slot with no change here: META only
-// adds nicer wording, and unknown keys fall back to the key name and String(value).
-import { SETTINGS_SCHEMA, DEFAULT_SETTINGS } from '../../shared/game.js';
+// Host settings sheet, generated from shared SETTINGS_SCHEMA; labels, values and the one-line
+// summary come from public/commun/settings-text.js (the same text as the TV).
+import { SETTINGS_SCHEMA } from '../../shared/game.js';
 import { $ } from './dom.js';
-import { mmss } from '../commun/clock.js';
+import { formatSetting as format, settingText as describe, summarizeSettings } from '../commun/settings-text.js';
 
 /** @typedef {import('../../shared/game.js').Settings} Settings */
 /** @typedef {Record<string, unknown>} AnySettings */
 
-/**
- * @typedef {{
- *   label: string,
- *   format?: (v: any) => string,
- *   summary?: (v: any, s: AnySettings) => string,  // '' leaves the key out of the summary
- *   showIf?: (s: AnySettings) => boolean,           // hide the control (and summary) when false
- * }} Meta
- * Without `summary`, a key shows in the summary only when it differs from DEFAULT_SETTINGS.
- */
-
-/** @type {Record<string, Meta>} */
-const META = {
-  size: { label: 'Board', format: (v) => `${v}×${v}`, summary: (v) => `${v}×${v}` },
-  mode: {
-    label: 'Mode',
-    format: (v) => (v === 'timed' ? 'Timed' : 'Marathon'),
-    summary: (v, s) => (v === 'timed' ? `timed ${mmss(Number(s.timedSeconds))}` : 'marathon'),
-  },
-  timedSeconds: { label: 'Time limit', format: (v) => mmss(v), showIf: (s) => s.mode === 'timed', summary: () => '' },
-  pieceSet: { label: 'Pieces', format: (v) => (v === 'simple' ? 'Simple' : 'Full'), summary: (v) => `${v} set` },
-  grace: { label: 'Combo grace', format: (v) => String(v) },
-  cleanBoardBonus: { label: 'Clean-board bonus', format: (v) => `+${v}` },
-};
-
-const DEFAULTS = /** @type {AnySettings} */ (/** @type {unknown} */ (DEFAULT_SETTINGS));
-
-/** @param {string} key @returns {Meta} */
-function describe(key) {
-  return META[key] ?? { label: key };
-}
-
-/** @param {string} key @param {unknown} value */
-function format(key, value) {
-  const f = describe(key).format;
-  return f ? f(value) : String(value);
-}
-
-/** "9×9 · timed 3:00 · simple set". @param {Settings} settings @returns {string} */
-export function summarize(settings) {
-  const s = /** @type {AnySettings} */ (/** @type {unknown} */ (settings));
-  const parts = [];
-  for (const key of Object.keys(SETTINGS_SCHEMA)) {
-    const meta = describe(key);
-    if (meta.showIf && !meta.showIf(s)) continue;
-    const v = s[key];
-    const text = meta.summary
-      ? meta.summary(v, s)
-      : v === DEFAULTS[key] ? '' : `${meta.label.toLowerCase()} ${format(key, v)}`;
-    if (text) parts.push(text);
-  }
-  return parts.join(' · ');
-}
+/** "9×9 · timed 3:00 · simple set" — the shared summary (kept as this module's export). */
+export const summarize = summarizeSettings;
 
 /**
  * Fills #settings-body. Every tap sends one `config` patch; the controls show
