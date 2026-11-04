@@ -18,10 +18,13 @@ import { loadBank, makeQuizClock, nullJudge, withTimeout } from './quiz.ts';
 import { candidatesFor, judgeAnswer, projectQuiz } from '../shared/quiz/bank.js';
 import { MAX_TEXT, type QuizAction, type QuizState } from '../shared/quiz/index.js';
 import { JOIN_QR_GAP_MS, JOIN_QR_MS } from '../shared/join-qr.js';
+import { cleanSpeech, isEmote } from '../shared/social.js';
 import { makeBests } from './bests.ts';
 import { CHARACTERS, isCharacterId } from '../shared/characters.js';
 import type { CharacterId } from '../shared/campaign/types.js';
 import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
+import { PARTY_ROOM, spawnAt } from '../shared/scene.js';
+import { nearbyObject } from '../shared/interactions.js';
 import { loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import type { ServerAction, Settings, State } from './rules.ts';
 import {
@@ -164,6 +167,10 @@ const sockets = new Map<string, WebSocket>();
 const roomOk = new WeakSet<WebSocket>();
 /** sockets that said hello as a screen: the only receivers of pos */
 const screens = new Set<WebSocket>();
+/** Recent speech is kept only in memory; reconnecting phones can recover the conversation. */
+const chat: { t: 'say'; playerId: string; text: string; at: number }[] = [];
+const socialAt = new WeakMap<WebSocket, number>();
+const interactionAt = new WeakMap<WebSocket, number>();
 
 /** The join QR on the TVs (showJoin / hideJoin): until when, in epoch ms; until ≤ now = closed.
  *  Ephemeral, like presence and pos. */
@@ -305,6 +312,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     else roomOk.delete(ws);
     // screen and fresh player get the current view; a rejoin changes presence, so everyone gets it
     if (rejoin) broadcast(); else send(ws, viewMsg());
+    send(ws, { t: 'chatHistory', messages: chat });
     if (m.role === 'screen') {
       screens.add(ws);
       if (joinQrUntil > Date.now()) send(ws, joinQrMsg()); // a TV (re)connecting mid-window shows it too
@@ -324,6 +332,42 @@ function handleMessage(ws: WebSocket, m: any): void {
     positions.set(id, pos);
     relayPos(id, pos);
     walk(id, pos);
+    return;
+  }
+
+  if (m.t === 'say' || m.t === 'emote') {
+    const id = who.get(ws);
+    if (!id || !isMember(id)) return;
+    const now = Date.now();
+    if (now - (socialAt.get(ws) ?? 0) < 650) return;
+    if (m.t === 'say') {
+      const text = cleanSpeech(m.text);
+      if (!text) return;
+      socialAt.set(ws, now);
+      const event = { t: 'say' as const, playerId: id, text, at: now };
+      chat.push(event);
+      if (chat.length > 30) chat.shift();
+      for (const c of wss.clients) send(c, event);
+    } else if (isEmote(m.kind)) {
+      socialAt.set(ws, now);
+      const event = { t: 'emote', playerId: id, kind: m.kind, at: now };
+      for (const c of wss.clients) send(c, event);
+    }
+    return;
+  }
+
+  if (m.t === 'interact') {
+    const id = who.get(ws);
+    if (!id || !isMember(id) || quiz() || (blocks() && blocks()?.phase !== 'lobby')) return;
+    const now = Date.now();
+    if (now - (interactionAt.get(ws) ?? 0) < 700) return;
+    const member = party().players[id];
+    const position = positions.get(id) ?? spawnAt(PARTY_ROOM, member.character);
+    const object = nearbyObject(PARTY_ROOM, position);
+    if (!object || object.id !== m.object) return;
+    interactionAt.set(ws, now);
+    const event = { t: 'interact', playerId: id, object: object.id, at: now };
+    for (const c of wss.clients) send(c, event);
     return;
   }
 

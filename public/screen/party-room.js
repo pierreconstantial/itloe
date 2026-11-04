@@ -15,6 +15,7 @@ import { drawSprite, SPRITE_SIZE, WALK_FRAMES, WALK_FPS } from '../../shared/spr
 import { WORLD } from '../../shared/world.js';
 import { PARTY_ROOM, spawnAt } from '../../shared/scene.js';
 import { CHARACTERS } from '../../shared/characters.js';
+import { OBJECT_ACTIONS } from '../../shared/interactions.js';
 import { makeView, renderScene, drawOrder, createLoop, lerp, py as snapY } from './scene-render.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
@@ -179,6 +180,8 @@ export function createPartyRoom(bg, fg) {
   const avatars = new Map();
   /** Last pos per player, kept even before the player shows up in a view. @type {Map<string, PosMsg & { at: number }>} */
   const lastPos = new Map();
+  /** @type {Map<string, {text?: string, kind?: string, until: number, started: number}>} */
+  const expressions = new Map();
   let geo = makeView(1, 1, 1, WORLD, AVATAR_UNITS, SPRITE_SIZE);
   let visible = false;
   let frameNow = 0;                    // the timestamp of the frame being drawn (walk cycle, door sparkles)
@@ -404,10 +407,40 @@ export function createPartyRoom(bg, fg) {
     }
   }
 
+  /** @type {Map<string, {started: number, until: number}>} */
+  const objectEffects = new Map();
+
   /** One prop's art from a pixel grid. @param {string[]} grid @param {Record<string, string>} pal */
   const pixelProp = (grid, pal) =>
-    /** @type {import('./scene-render.js').DrawProp} */ ((g, prop, v) =>
-      paintGrid(g, grid, pal, geo.ox + (prop.box.x + prop.box.w / 2) * v.unit, snapY(v, prop.anchorY), v.scale));
+    /** @type {import('./scene-render.js').DrawProp} */ ((g, prop, v) => {
+      const effect = objectEffects.get(prop.id);
+      const active = effect && effect.until > frameNow ? effect : null;
+      if (effect && !active) objectEffects.delete(prop.id);
+      const cx = geo.ox + (prop.box.x + prop.box.w / 2) * v.unit;
+      const bottom = snapY(v, prop.anchorY);
+      const elapsed = active ? frameNow - active.started : 0;
+      g.save();
+      if (active && prop.id === 'plant') {
+        g.translate(cx, bottom);
+        g.rotate(Math.sin(elapsed / 65) * 0.13 * Math.max(0, 1 - elapsed / 2500));
+        g.translate(-cx, -bottom);
+      } else if (active && prop.id === 'sofa') {
+        g.translate(0, Math.abs(Math.sin(elapsed / 110)) * v.scale * 1.5);
+      }
+      // The birthday candles go dark for a moment when blown out.
+      paintGrid(g, grid, active && prop.id === 'table' ? { ...pal, A: '' } : pal, cx, bottom, v.scale);
+      g.restore();
+      if (active) {
+        g.save();
+        g.font = `${Math.round(v.unit * 0.55)}px system-ui, sans-serif`;
+        g.textAlign = 'center';
+        g.textBaseline = 'middle';
+        const glyph = prop.id === 'table' ? '💨' : prop.id === 'plant' ? '🍃' : '✨';
+        g.fillText(glyph, cx + Math.sin(elapsed / 160) * v.scale * 2,
+          bottom - prop.box.h * v.unit - v.scale * 3 - Math.min(elapsed * 0.025, v.unit * 0.4));
+        g.restore();
+      }
+    });
 
   /** prop.kind → art. The only place this room's furniture is named. @type {import('./scene-render.js').PropArt} */
   const PROP_ART = {
@@ -480,6 +513,28 @@ export function createPartyRoom(bg, fg) {
     a.tx = p.x; a.ty = p.y; a.dir = p.dir; a.moving = p.moving; a.lastPosAt = now;
   }
 
+  /** @param {any} m short lived speech or reaction, shown by the avatar */
+  function onSocial(m) {
+    if (typeof m.playerId !== 'string') return;
+    const now = performance.now();
+    if (m.t === 'say' && typeof m.text === 'string') {
+      expressions.set(m.playerId, { text: m.text, started: now, until: now + 5500 });
+    } else if (m.t === 'emote' && ['victory', 'fart', 'annoy'].includes(m.kind)) {
+      expressions.set(m.playerId, { kind: m.kind, started: now, until: now + 2200 });
+    }
+  }
+
+  /** @param {any} m a server-validated action at an object */
+  function onInteract(m) {
+    if (typeof m.playerId !== 'string' || typeof m.object !== 'string' || !Object.hasOwn(OBJECT_ACTIONS, m.object)) return;
+    const now = performance.now();
+    objectEffects.set(m.object, { started: now, until: now + 2800 });
+    expressions.set(m.playerId, {
+      text: OBJECT_ACTIONS[/** @type {keyof typeof OBJECT_ACTIONS} */ (m.object)].feedback,
+      started: now, until: now + 2000,
+    });
+  }
+
   // ---- animation: fixed-step simulation, interpolated drawing ----
 
   /** One simulation step: every avatar eases towards its last reported position. @param {number} dt */
@@ -536,10 +591,92 @@ export function createPartyRoom(bg, fg) {
     g.ellipse(sx, sy - scale, size * 0.32, scale * 1.6, 0, 0, Math.PI * 2);
     g.fill();
     const off = offline.has(a.id);
+    const expression = expressions.get(a.id);
+    const active = expression && expression.until > frameNow ? expression : null;
+    if (expression && !active) expressions.delete(a.id);
     if (off) g.globalAlpha = OFFLINE_ALPHA;
+    const elapsed = active ? frameNow - active.started : 0;
+    g.save();
+    if (active?.kind === 'victory') {
+      g.translate(0, -Math.abs(Math.sin(elapsed / 100)) * scale * 2);
+    } else if (active?.kind === 'annoy') {
+      g.translate(Math.sin(elapsed / 35) * scale, 0);
+    }
     drawSprite(g, a.character, a.dir, spriteFrame, left, top, scale);
+    g.restore();
     g.globalAlpha = 1;
+    if (active) drawExpression(g, active, sx, top, size, scale, elapsed);
     label(g, a, sx, Math.min(geo.h - unit * 0.3, sy + scale * 2), off);
+  }
+
+  /** Comic style accents and speech, anchored to the avatar rather than a screen corner. */
+  /** @param {CanvasRenderingContext2D} g @param {{text?: string, kind?: string}} expression
+   * @param {number} sx @param {number} top @param {number} size @param {number} scale @param {number} elapsed */
+  function drawExpression(g, expression, sx, top, size, scale, elapsed) {
+    if (expression.text) {
+      const font = Math.max(18, Math.round(geo.unit * 0.25));
+      g.font = `800 ${font}px system-ui, sans-serif`;
+      const maxWidth = Math.min(geo.w * 0.26, geo.unit * 3.8);
+      const words = expression.text.split(' ').flatMap((word) => {
+        if (g.measureText(word).width <= maxWidth) return [word];
+        const chunks = [];
+        let chunk = '';
+        for (const char of word) {
+          if (chunk && g.measureText(chunk + char).width > maxWidth) { chunks.push(chunk); chunk = char; }
+          else chunk += char;
+        }
+        if (chunk) chunks.push(chunk);
+        return chunks;
+      });
+      const lines = [''];
+      for (const word of words) {
+        const last = lines.length - 1;
+        const proposed = lines[last] ? `${lines[last]} ${word}` : word;
+        if (lines[last] && g.measureText(proposed).width > maxWidth) lines.push(word);
+        else lines[last] = proposed;
+      }
+      const pad = font * 0.65;
+      const lineH = font * 1.22;
+      const width = Math.min(geo.w - 16, Math.max(...lines.map((line) => g.measureText(line).width)) + pad * 2);
+      const height = lines.length * lineH + pad * 1.4;
+      const x = Math.max(8, Math.min(geo.w - width - 8, sx + size * 0.24));
+      const y = Math.max(8, top - height - scale * 2);
+      g.fillStyle = '#fff9ee';
+      g.strokeStyle = '#24202b';
+      g.lineWidth = Math.max(3, scale);
+      g.beginPath();
+      g.roundRect(x, y, width, height, font * 0.55);
+      g.fill(); g.stroke();
+      g.beginPath();
+      g.moveTo(Math.max(x + 14, Math.min(x + width - 14, sx + size * 0.3)), y + height);
+      g.lineTo(sx + size * 0.15, top - scale);
+      g.stroke();
+      g.fillStyle = '#201b29';
+      g.textBaseline = 'top';
+      lines.forEach((line, i) => g.fillText(line, x + pad, y + pad * 0.55 + i * lineH));
+      return;
+    }
+    const kind = expression.kind;
+    const font = Math.max(26, Math.round(geo.unit * 0.55));
+    g.font = `900 ${font}px system-ui, sans-serif`;
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.lineWidth = Math.max(3, scale);
+    g.strokeStyle = '#201b29';
+    const glyph = kind === 'victory' ? '✌' : kind === 'annoy' ? '💢' : '💨';
+    const gx = kind === 'fart' ? sx - size * 0.58 - elapsed * 0.02 : sx + size * 0.44;
+    const gy = kind === 'fart' ? top + size * 0.75 - elapsed * 0.035 : top - font * 0.2 - Math.sin(elapsed / 120) * scale;
+    g.strokeText(glyph, gx, gy);
+    g.fillText(glyph, gx, gy);
+    if (kind === 'annoy') {
+      g.strokeStyle = '#ee4058';
+      for (const side of [-1, 1]) {
+        g.beginPath();
+        g.moveTo(sx + side * size * 0.7, top + size * 0.12);
+        g.lineTo(sx + side * size * 0.95, top - size * 0.1);
+        g.stroke();
+      }
+    }
   }
 
   /** @param {CanvasRenderingContext2D} g @param {Avatar} a @param {number} cx @param {number} top @param {boolean} off */
@@ -694,12 +831,14 @@ export function createPartyRoom(bg, fg) {
   function reset() {
     avatars.clear();
     lastPos.clear();
+    expressions.clear();
+    objectEffects.clear();
   }
 
   addEventListener('resize', () => { if (visible) layout(); });
 
   return {
-    setPlayers, setOffline, setDoors, onPos, setVisible, reset,
+    setPlayers, setOffline, setDoors, onPos, onSocial, onInteract, setVisible, reset,
     /** Debug / tests: the doors drawn. */
     doors: () => doors.map((d) => ({ id: d.id, state: d.state, title: d.title })),
     /** Debug / tests: the drawn state of every avatar. */

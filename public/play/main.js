@@ -13,6 +13,7 @@ import { createSettingsSheet, summarize } from './settings-ui.js';
 import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.js';
 import { spawnPoint } from '../../shared/world.js';
 import { PARTY_ROOM } from '../../shared/scene.js';
+import { nearbyObject, OBJECT_ACTIONS } from '../../shared/interactions.js';
 import { createPicker, pickStates, anyPickable } from './picker.js';
 import { createJoystick } from './joystick.js';
 import { avatarCanvas, paintAvatar } from './avatar.js';
@@ -23,6 +24,7 @@ import { createHostControls } from './host-controls.js';
 import { createGmPanel } from './gm-panel.js';
 import { createQuizUi } from './quiz-ui.js';
 import { createBag } from './bag.js';
+import { createSocial } from './social.js';
 import { JOIN_QR_MS } from '../../shared/join-qr.js';
 import { QUIZ_SETTINGS } from './quiz-text.js';
 import { childMarks, content, onContentChange, syncContent, titleOf } from './campaign-view.js';
@@ -155,6 +157,7 @@ const conn = createConnection({
   onMessage: receive,
   onStatus: (up) => {
     $('conn-banner').hidden = up;
+    updateInteraction();
     if (!up) resetJoinRequest();
     if (!up && drag) { endDrag(); render(); } // a drop can't be sent while offline
   },
@@ -201,6 +204,10 @@ function receive(raw) {
     // the one pos a phone receives: our own last position, echoed right after welcome
     const echoed = m.playerId === playerId ? posFromEcho(m) : null;
     if (echoed) { myPos = echoed; render(); }
+  } else if (m.t === 'say' || m.t === 'chatHistory') {
+    social.onMessage(m);
+  } else if (m.t === 'interact' && m.playerId === playerId && typeof m.object === 'string' && Object.hasOwn(OBJECT_ACTIONS, m.object)) {
+    toast(OBJECT_ACTIONS[/** @type {keyof typeof OBJECT_ACTIONS} */ (m.object)].feedback);
   } else if (m.t === 'view') {
     syncClock(m.now);
     const prev = lastView;
@@ -359,6 +366,8 @@ function show(name) {
 
 function render() {
   menu.refresh();
+  social.render();
+  if (!member()) menu.close('chat');
   if (replaced) { show('replaced'); return; }
   if (!viewed) { show('loading'); return; }
   const v = lastView;
@@ -471,8 +480,20 @@ function currentPos(character) {
 /** The stick lives in whichever walking screen is showing (lobby or place): move it there. @param {string} view */
 function dockStick(view) {
   const pad = $('stick-pad');
+  const actions = $('object-actions');
   const host = $(`view-${view}`);
-  if (pad.parentElement !== host) host.append(pad);
+  if (pad.parentElement !== host) host.append(actions, pad);
+  updateInteraction();
+}
+
+/** Keep one contextual button in step with the avatar's feet, including while the stick is held. */
+function updateInteraction() {
+  const character = myCharacter();
+  const object = character && canWalk() ? nearbyObject(PARTY_ROOM, currentPos(character)) : null;
+  const button = /** @type {HTMLButtonElement} */ ($('btn-interact'));
+  button.dataset.object = object?.id ?? '';
+  button.disabled = !object || !conn.isOnline();
+  button.textContent = object ? OBJECT_ACTIONS[/** @type {keyof typeof OBJECT_ACTIONS} */ (object.id)].label : 'Walk to an object';
 }
 
 /** Hub, world or a scene tableau: where the party is, what is open from here, how to go on.
@@ -815,6 +836,12 @@ const hostControls = createHostControls({ send });
 const gmPanel = createGmPanel({ send });
 const quizUi = createQuizUi({ send });
 const bag = createBag();
+const social = createSocial({
+  send,
+  canSend: () => member() !== null && conn.isOnline(),
+  me: () => playerId,
+  name: (id) => campaign?.party.players[id]?.name ?? lastView?.players[id]?.name ?? 'Guest',
+});
 const picker = createPicker({ onPick: join });
 
 const joystick = createJoystick({
@@ -832,6 +859,7 @@ const joystick = createJoystick({
     myPos = pos;
     send({ t: 'pos', ...pos });
     if (turned) repaintMyAvatar(pos);
+    updateInteraction();
   },
   onGrab: () => haptics.buzz('pickup'),
 });
@@ -860,6 +888,14 @@ $('room-form').addEventListener('submit', (e) => {
 });
 
 $('btn-start').addEventListener('click', () => send({ t: 'start' }));
+$('btn-interact').addEventListener('click', () => {
+  if (!canWalk() || !conn.isOnline()) return;
+  joystick.cancel(); // flush the exact position before the interaction on the same socket
+  const character = myCharacter();
+  const object = character ? nearbyObject(PARTY_ROOM, currentPos(character)) : null;
+  if (object) send({ t: 'interact', object: object.id });
+  updateInteraction();
+});
 $('btn-again').addEventListener('click', () => send({ t: 'again' }));
 $('btn-new-game').addEventListener('click', () => send({ t: 'newGame' }));
 $('btn-play-here').addEventListener('click', () => {

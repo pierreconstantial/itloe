@@ -1,0 +1,26 @@
+#btn-chat {
+  position: fixed;
+  right: calc(12px + env(safe-area-inset-right));
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  z-index: 5;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: var(--bg-2);
+  box-shadow: 0 5px 18px #0008;
+  font-size: 27px;
+  touch-action: manipulation;
+}
+.chat-panel { max-height: min(78dvh, 640px); display: flex; flex-direction: column; gap: 12px; }
+.chat-panel h2 { margin: 0; }
+.chat-list { list-style: none; overflow-y: auto; min-height: 70px; margin: 0; padding: 4px; display: flex; flex-direction: column; gap: 8px; }
+.chat-list li { background: var(--bg-2); border-radius: 12px; padding: 8px 11px; overflow-wrap: anywhere; }
+.chat-list li.mine { border-right: 3px solid var(--accent); }
+.chat-list strong { display: block; color: var(--accent); font-size: 13px; }
+.chat-form { display: flex; gap: 7px; }
+.chat-form input { min-width: 0; flex: 1; border: 1px solid var(--fg-dim); border-radius: 9px; padding: 10px; background: var(--bg-2); color: var(--fg); font: inherit; font-size: 16px; }
+.chat-form button { padding: 10px 12px; font-size: 16px; }
+.emote-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.emote-actions button { flex: 1; padding: 9px 5px; font-size: 13px; white-space: nowrap; }

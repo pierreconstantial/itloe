@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/commun/play-base.css">
   <link rel="stylesheet" href="./campaign.css">
   <link rel="stylesheet" href="./quiz.css">
+  <link rel="stylesheet" href="./social.css">
 </head>
 <body>
   <main id="app">
@@ -59,6 +60,9 @@
           <button id="btn-start" class="primary" hidden>Start game</button>
         </div>
         <p id="lobby-hint" class="dim"></p>
+      </div>
+      <div id="object-actions" class="object-actions">
+        <button id="btn-interact" type="button" disabled>Walk to an object</button>
       </div>
       <div id="stick-pad">
         <p class="stick-hint">Touch and drag here to walk on the TV</p>
@@ -176,6 +180,25 @@
   </main>
 
   <button id="btn-menu" type="button" aria-label="Menu" data-open="menu">☰</button>
+  <button id="btn-chat" type="button" aria-label="Messages and reactions" data-open="chat" hidden>💬</button>
+
+  <div id="sheet-chat" class="sheet" hidden>
+    <div class="sheet-panel chat-panel">
+      <h2>Messages</h2>
+      <ol id="chat-list" class="chat-list" aria-live="polite"></ol>
+      <p id="chat-empty" class="dim">Say hello to the room!</p>
+      <form id="chat-form" class="chat-form">
+        <input id="chat-input" type="text" maxlength="100" placeholder="Type a message" aria-label="Message" autocomplete="off" enterkeyhint="send">
+        <button type="submit" class="primary">Send</button>
+      </form>
+      <div class="emote-actions" aria-label="Reactions">
+        <button type="button" data-emote="victory">✌ Victory</button>
+        <button type="button" data-emote="fart">💨 Fart</button>
+        <button type="button" data-emote="annoy">💢 Annoyed</button>
+      </div>
+      <button type="button" class="link" data-close>Close</button>
+    </div>
+  </div>
 
   <div id="sheet-menu" class="sheet" hidden>
     <div class="sheet-panel">

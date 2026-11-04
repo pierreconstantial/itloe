@@ -40,6 +40,15 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 // something changed). World coordinates: x ∈ [0,16], y ∈ [0,9] (16:9 units, avatar ≈ 1.2 units
 // tall); dir ∈ up|down|left|right. Server clamps to bounds, drops malformed or non-joined
 // senders silently, and accepts pos in ANY phase (screens decide when to render avatars).
+{ "t": "say", "text": "Hello!" }                         // joined player; 1–100 printable characters
+{ "t": "emote", "kind": "victory" }                      // joined player; victory | fart | annoy
+{ "t": "interact", "object": "table" }                    // near the sofa | table | plant in the party room
+// Speech and emotes are short lived, server relayed events, limited to one per 650 ms per socket.
+// A reconnecting client receives { t: "chatHistory", messages: [...] } with up to 30 recent
+// speech events. The history is in memory only and is cleared by a server restart.
+// Interaction is available while avatars are visible (hub/world or block lobby). The server
+// checks the sender's latest position against the closest object and relays an `interact` event
+// with playerId, object and at. It is limited to one per 700 ms per socket.
 ```
 
 Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `deadline`) are NEVER accepted from the wire: the server injects them itself and strips them from client messages.

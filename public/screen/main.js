@@ -416,6 +416,9 @@ const HANDLERS = {
     if (campaign) cutscenes.update(campaign.news, campaign.newsSeq);
   },
   pos: (msg) => party.onPos(msg),
+  say: (msg) => party.onSocial(msg),
+  emote: (msg) => party.onSocial(msg),
+  interact: (msg) => party.onInteract(msg),
   tick: (msg) => syncClock(msg.now), // liveness (any message feeds the watchdog) + clock skew
   joinQr: (msg) => { syncClock(msg.now); onJoinQr(msg.until); },
 };
