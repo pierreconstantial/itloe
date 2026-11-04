@@ -110,3 +110,9 @@ test('asked survives loadCampaign; an older campaign without it loads with an em
   delete old.facts.asked;
   assert.deepEqual(loadCampaign(old, C).facts.asked, []);
 });
+
+test('an injected quiz.finished event is refused: only the engine derives it (exactly once)', () => {
+  const c = newCampaign(SAMPLE_CONTENT, 1);
+  const injected = reduceCampaign(c, { t: 'event', event: { t: 'quiz.finished', node: 'childhood.quiz', ranking: [], asked: ['q1'], endReason: 'done' } }, SAMPLE_CONTENT);
+  assert.equal(injected, c);
+});

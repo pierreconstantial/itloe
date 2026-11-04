@@ -72,6 +72,7 @@ const quietSettle = (facts, content) => settle(facts, content, 0).facts;
  *   reduce: (s: any, action: any) => ActivityState,
  *   running: (s: any) => boolean,
  *   finished: (s: any, node: string) => CampaignEvent,
+ *   finishedEvent: CampaignEvent['t'],   // its t: derived by the engine ONLY, refused from outside
  * }} ActivityKind
  */
 /** @type {Record<'blocks' | 'quiz', ActivityKind>} */
@@ -81,14 +82,19 @@ const ACTIVITIES = {
     reduce: (s, a) => reduce(s, a),
     running: (s) => s.phase === 'playing',
     finished: (s, node) => finishedEvent(s, node),
+    finishedEvent: 'game.finished',
   },
   quiz: {
     init: (seed, settings) => initQuiz(seed, settings),
     reduce: (s, a) => reduceQuiz(s, a),
     running: (s) => quizRunning(s),
     finished: (s, node) => quizFinishedEvent(s, node),
+    finishedEvent: 'quiz.finished',
   },
 };
+
+/** Events only the engine may produce (an activity's end): an external copy could count a game twice. */
+const DERIVED_EVENTS = new Set(Object.values(ACTIVITIES).map((k) => k.finishedEvent));
 
 /** @param {ActivityState} s @returns {ActivityKind} */
 const kindOf = (s) => ACTIVITIES['kind' in s && s.kind === 'quiz' ? 'quiz' : 'blocks'];
@@ -319,8 +325,8 @@ export function reduceCampaign(c, a, content) {
     }
 
     case 'event': {
-      // external events only: game.finished is derived by the engine (exactly once)
-      if (a.event.t === 'game.finished') return c;
+      // external events only: every activity's finished event is derived by the engine (exactly once)
+      if (DERIVED_EVENTS.has(a.event.t)) return c;
       return withFacts(c, record(c.facts, a.event), content);
     }
 
