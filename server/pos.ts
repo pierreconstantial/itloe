@@ -1,8 +1,11 @@
 // M3 — avatar positions: ephemeral, client-authoritative, relayed to screens (plus a player's own
 // pos right after its welcome). Never enters the reducer State or the save file; reset on restart.
+// Walking belongs to the evening, not to a block game: whoever is in the party (and has not left) moves.
 
 import { clampToWorld } from '../shared/world.js';
-import type { State } from './rules.ts';
+import type { Campaign } from './campaign.ts';
+
+type Party = Campaign['party'];
 
 const DIRS = ['up', 'down', 'left', 'right'] as const;
 export type Dir = (typeof DIRS)[number];
@@ -17,9 +20,9 @@ export function parsePos(m: any): Pos | null {
   return { ...clampToWorld(m.x, m.y), dir: m.dir, moving: m.moving };
 }
 
-/** A player whose avatar may move: still in the game and has not left it. */
-export const canMove = (s: State, playerId: string): boolean => {
-  const p = s.players[playerId];
+/** A player whose avatar may move: in the party and has not left the evening. */
+export const canMove = (party: Party, playerId: string): boolean => {
+  const p = party.players[playerId];
   return !!p && !p.left;
 };
 
@@ -43,9 +46,9 @@ export function makePositions<S extends object>() {
 
     get(playerId: string): Pos | undefined { return last.get(playerId); },
 
-    /** Change hook: forget players who were removed or left. */
-    prune(s: State): void {
-      for (const id of last.keys()) if (!canMove(s, id)) last.delete(id);
+    /** Change hook: forget players who left the evening. */
+    prune(party: Party): void {
+      for (const id of last.keys()) if (!canMove(party, id)) last.delete(id);
     },
 
     entries(): [string, Pos][] { return [...last.entries()]; },

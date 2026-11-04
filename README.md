@@ -52,11 +52,10 @@ Either way, allow the port through the Windows firewall when asked.
 
 ## If the server stops
 
-The game is saved after every move. Just run `npm start` again:
+The whole evening is saved after every move. Just run `npm start` again:
 
-- a game **in progress or finished is resumed**: phones reconnect on their own and everyone carries on where they were;
-- a game that was **still in the lobby** is dropped: players simply join again;
-- `npm start -- --new` always starts fresh.
+- **everything is resumed**: where the party is, who is playing, a game in progress (a timed game keeps its remaining time), the podium, what has been unlocked so far. Phones and the TV reconnect on their own;
+- `npm start -- --new` always starts a fresh evening.
 
 A phone that goes to sleep or reloads also comes back to its own board automatically.
 
@@ -74,8 +73,8 @@ Everything lives in `var/` (or `BLOKO_VAR`):
 
 | File | Contents |
 |---|---|
-| `bloko.state.json` | The current game, for resuming |
-| `settings.json` | The host's last settings, reused for the next new game |
+| `bloko.state.json` | The evening (party, where you are, the game in progress, what is unlocked), for resuming |
+| `bloko.state.json.v1-….json` | Only after an upgrade: the save from before the campaign, kept untouched |
 | `bests.json` | Solo best scores, per board size and mode |
 
 Delete `bests.json` to reset the best scores, or the whole `var/` folder to reset everything (with the server stopped).
@@ -98,6 +97,12 @@ Delete `bests.json` to reset the best scores, or the whole `var/` folder to rese
   BLOKO_VAR=/tmp/bloko-e2e PORT=3199 npm start -- --new
   PORT=3199 node scripts/e2e.mts     # in a second terminal; exit code 0 = all pass
   ```
+
+  The other e2e scripts start their OWN server (scratch data folder) on `PORT`, never 3131:
+  `e2e-resume.mts` (kill -9 in every phase, v1 save migration), `e2e-presence.mts` (reclaim, bump, host controls),
+  `e2e-campaign.mts` (false start → unlocks → news acks with two TVs → doors, kill -9 at each step).
+  The browser ones also need Chrome with `--remote-debugging-port=<CDP>`: `e2e-tv.mts` (TV) and
+  `e2e-phone.mts` (phones: session never lost, reclaim, host controls; `LOCK_MS` = locked-phone time, default 5 min).
 
 - **Docs:** [`SPEC-BLOCKS.md`](SPEC-BLOCKS.md) (game design), [`PROTOCOL.md`](PROTOCOL.md) (WebSocket protocol and HTTP API), [`BUILD-PLAN.md`](BUILD-PLAN.md) (milestones and work packages).
 - **Layout:** `server/` (Node server, TypeScript), `shared/` (pure game logic used by both server and browsers), `public/` (`/screen`, `/play`, `/sim` pages), `test/`, `scripts/`.

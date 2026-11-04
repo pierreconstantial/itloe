@@ -44,11 +44,48 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 
 Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `deadline`) are NEVER accepted from the wire: the server injects them itself and strips them from client messages.
 
+### Campaign (slice 3, Contract D v2 + A1): the evening around the block game
+
+The server runs the campaign engine (`shared/campaign/`). The party (who is in the evening, their characters,
+the host) lives in `campaign.party`; the block game is `campaign.at.activity`, nested in a blocks tableau.
+`join` and `leave` act on the EVENING: `join` adds a party member (seated at once in an open block lobby;
+mid-game they watch until the next lobby), `leave` leaves the evening (forwarded to a live game: dropped
+from a lobby, marked done in a game; the stored id stops rejoining; the host passes on). All block-game
+messages above go to the nested game; with no block game there → `err "not-playing"`. Every id is
+injected by the server (socket → playerId; screens: `"screen"`), never taken from the wire.
+
+```jsonc
+{ "t": "enter", "node": "childhood" }   // host, or the content's chooser (Élodie), into an UNLOCKED child of where
+                                        // the party is; refused while a game is played, or on a done one-shot
+                                        // tableau → err "refused". Entering a blocks tableau opens its block lobby
+                                        // with the whole party seated (host starts).
+{ "t": "back" }                         // host only: up one level (tableau → world → hub). Refused while a game is
+                                        // played (endGame first) → err "refused"; non-host → err "not-host".
+{ "t": "gm", "op": { "op": "unlock", "node": "teens" } }
+                                        // host only (game master), ops: goto / unlock / lock / setFlag / count /
+                                        // reset-node (shapes: shared/campaign/types.js GmOp). Non-host → err
+                                        // "not-host"; a host's no-op is silent.
+{ "t": "ack", "upTo": 3 }               // SCREENS only: the TV finished the cutscenes of every news entry with
+                                        // seq <= upTo; they leave `campaign.news`. upTo is required. Two TVs, or a
+                                        // TV reconnecting mid-cutscene, never drop a cutscene they did not play.
+```
+
+- **Doors:** `pos` stays ephemeral, but the server reads it against the current node's doors (`zoneAt`):
+  stepping INTO a door (edge, not standing in it) records `zone.entered` for that character, and for the
+  content's chooser on an unlocked door applies `enter`. After the party moves, standing where a door
+  now is does not fire it: only a fresh step in does.
+- **Exactly once:** a block game's playing → finished (stuck, time, host) is recorded as `game.finished` by
+  the engine in the SAME step, and the server saves once per step: a kill -9 persists both or neither, so
+  a restart on the podium never counts a game twice.
+
 ## Server → client
 
 ```jsonc
 { "t": "welcome", "playerId": "p-abc123" }   // to a player client after join or successful rejoin
-{ "t": "view", "state": { /* full State, see shared/game.js */ }, "online": ["p-abc123"], "now": 1730700000000 }
+{ "t": "view", "state": { /* full State, see shared/game.js */ }, "campaign": { /* Campaign, see shared/campaign/types.js */ },
+  "online": ["p-abc123"], "now": 1730700000000 }
+// slice 3: "campaign" = the whole evening (at.node, party, facts, news, …); "state" = campaign.at.activity
+// (the block game), null on the hub or in a world. "online" lists party members.
 // broadcast to ALL after every change; "now" = server epoch ms (M2 Q4): clients compute
 // clock skew = now - Date.now() on receive and render timed-mode countdowns from state.deadline - (Date.now() + skew)
 // "online" (slice 2b): playerIds with a live socket, in seat order. EPHEMERAL: never in State or on
@@ -63,7 +100,8 @@ Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `dead
 // slice 2b: another socket attached this player's id (reclaim on another device, or a second tab):
 // newest socket wins. Sent to the OLD socket, which the server then closes (code 4001). The client
 // must NOT auto-reconnect; it shows "Continued on another device" and offers the picker.
-{ "t": "err", "code": "full" | "bad-place" | "not-host" | "not-playing" | "unknown-player" | "locked" | "bad-room" | "taken" }
+{ "t": "err", "code": "full" | "bad-place" | "not-host" | "not-playing" | "unknown-player" | "locked" | "bad-room" | "taken" | "refused" }
+// "refused" (slice 3): enter/back not allowed here (locked node, game being played, one-shot already done)
 // "locked": config refused because a game is in progress
 // "bad-room": join refused — wrong or missing room code (phone shows "ask for the code on the TV")
 // "taken": join refused — that character is already picked by an active player (M3)

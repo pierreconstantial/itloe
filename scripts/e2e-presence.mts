@@ -162,16 +162,20 @@ try {
   await A4.waitFor((m) => m.t === 'view' && m.state.players[idB]?.left, i);
   await closed(Bold);
   const E = await device('E');
-  check((await tap(E, 'sol')).err === 'full', 'mid-game: a LEFT player\'s character is never reclaimed (full while playing)');
+  // A1: a left member's character is free: E joins the evening as a NEW member (watches the game)
+  const eSol = await tap(E, 'sol');
+  check(!!eSol.id && eSol.id !== idB && !E.lastView().players[eSol.id], 'mid-game: a LEFT player\'s character is never reclaimed (E is a new member, watching)');
+  i = E.mark(); E.send({ t: 'leave' });
+  await E.waitFor((m) => m.t === 'view' && m.campaign.party.players[eSol.id!].left, i);
   await playToDone(A4, idA, screen, rnd);
   await A4.waitFor((m) => m.t === 'view' && m.state.phase === 'finished');
   await closed(A4);
   await onlineIs(screen, [], 'podium: host offline');
-  check((await tap(E, 'sol')).err === 'full', 'podium: left player\'s character still not reclaimable');
-  check((await tap(E, 'anna')).id === idA, 'podium: offline host reclaimed by character');
-  check(E.lastView().hostId === idA && E.lastView().phase === 'finished', '…still host, still on the podium');
-  i = E.mark(); E.send({ t: 'newGame' });
-  const lob = (await E.waitFor((m) => m.t === 'view' && m.state.phase === 'lobby', i)).state;
+  const Ehost = await device('Ehost');
+  check((await tap(Ehost, 'anna')).id === idA, 'podium: offline host reclaimed by character');
+  check(Ehost.lastView().hostId === idA && Ehost.lastView().phase === 'finished', '…still host, still on the podium');
+  i = Ehost.mark(); Ehost.send({ t: 'newGame' });
+  const lob = (await Ehost.waitFor((m) => m.t === 'view' && m.state.phase === 'lobby', i)).state;
   check(!lob.players[idB], 'newGame drops the left player');
   const F = await device('F');
   const idF = (await tap(F, 'sol')).id ?? '';

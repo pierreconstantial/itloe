@@ -2,7 +2,7 @@
 // Runs its OWN server (a child process on PORT, scratch BLOKO_VAR) so it can SIGKILL it.
 // Usage: PORT=3178 node scripts/e2e-resume.mts      (never 3131: that's the live server)
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { check, Client, finish, HTTP, legalMoves, playToDone, sleep } from './e2e-lib.mts';
@@ -79,7 +79,7 @@ try {
   check(core(A.lastView()) === core(lobby) && A.lastView().phase === 'lobby' && A.lastView().hostId === idA,
     'lobby kill -9 → same players, host and settings; stored ids rejoin');
   check(!A.msgs.some((m) => m.t === 'pos'), 'positions are ephemeral: none replayed after a restart');
-  check(/RESUMED .* phase lobby/.test(log), 'server log says it resumed the lobby');
+  check(/RESUMED .* block game lobby/.test(log), 'server log says it resumed the lobby');
 
   // ---------- playing (marathon) ----------
   i = A.mark(); A.send({ t: 'start' });
@@ -166,14 +166,14 @@ try {
     await boot();
     A = await rejoin('A', idA);
     const v = A.lastView();
-    check(v.phase === 'playing' && v.players[idA].score === env.state.players[idA].score && (await roomCode()) === room,
+    check(v.phase === 'playing' && v.players[idA].score === env.campaign.at.activity.players[idA].score && (await roomCode()) === room,
       `envelope with ${label} still resumes`);
   }
   // ---------- the bell falls due DURING a suspend: wake must pause the clock, not end the game ----------
   await kill9();
   const env = JSON.parse(readFileSync(FILE, 'utf8'));
   env.savedAt = Date.now();
-  env.state.deadline = Date.now() + 2500;
+  env.campaign.at.activity.deadline = Date.now() + 2500;
   writeFileSync(FILE, JSON.stringify(env));
   await boot();
   A = await rejoin('A', idA);
@@ -188,6 +188,24 @@ try {
     `overdue bell on wake → ignored, clock paused (${Math.round((woke.deadline - Date.now()) / 100) / 10} s left)`);
   const ended = await A.waitFor((m) => m.t === 'view' && m.state.phase === 'finished', i, 6000);
   check(ended.state.endReason === 'time', `…and the bell still rings at the shifted deadline (endReason ${ended.state.endReason})`);
+
+  // ---------- a pre-campaign (v1) save: migrated into the campaign, never lost ----------
+  await kill9();
+  const v2 = JSON.parse(readFileSync(FILE, 'utf8'));
+  check(v2.v === 2 && !!v2.campaign && typeof v2.savedAt === 'number', 'the save is an envelope v2 { v:2, campaign, room, savedAt }');
+  const legacy = { v: 1, savedAt: Date.now(), state: v2.campaign.at.activity, room: v2.room, bestPrevious: null };
+  writeFileSync(FILE, JSON.stringify(legacy));
+  await boot();
+  check(/MIGRATED a v1 save/.test(log), 'v1 save → migrated (server log says so)');
+  A = await rejoin('A', idA);
+  check(core(A.lastView()) === core(legacy.state) && A.lastView().phase === legacy.state.phase && (await roomCode()) === room,
+    'v1 save → same block game, same room; stored ids rejoin');
+  const migrated = A.msgs.findLast((m) => m.t === 'view').campaign;
+  check(migrated.party.order.join() === legacy.state.order.join() && migrated.party.hostId === legacy.state.hostId,
+    'v1 save → the party is rebuilt from its players (same ids, same host)');
+  const kept = readdirSync(VAR).filter((f) => f.startsWith('bloko.state.json.v1-'));
+  check(kept.length === 1 && JSON.parse(readFileSync(join(VAR, kept[0]), 'utf8')).v === 1, 'the original v1 file is kept next to the save');
+  check(JSON.parse(readFileSync(FILE, 'utf8')).v === 2, 'and the live save is v2 from the first write on');
 
   for (const c of [A, B]) c.ws.close();
 } catch (e) {

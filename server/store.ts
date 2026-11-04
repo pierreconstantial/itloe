@@ -1,26 +1,30 @@
-// Q3 — what the server keeps on disk:
-//   bloko.state.json  the current game (State + server metadata), rewritten after every change
-//   settings.json     the host's last settings, used to boot fresh games
+// What the server keeps on disk:
+//   bloko.state.json  the evening: envelope v2 { v:2, campaign, room, savedAt, bestPrevious }, rewritten
+//                     after every change (atomic). A v1 envelope (bare block State, before the campaign)
+//                     is migrated on load; the original file is kept next to it, never lost.
 //   bests.json        solo best scores, keyed "<size>:<mode>"
 
+import { copyFileSync, existsSync } from 'node:fs';
 import { randomInt } from 'node:crypto';
 import { quarantine, readJson, varPath, writeJsonAtomic } from './persist.ts';
-import { initState, type Settings, type State } from './rules.ts';
+import type { State } from './rules.ts';
 import { savedAtMs, shiftDeadline } from './resume.ts';
+import { fromLegacyState, loadCampaign, newCampaign, type Campaign, type Content } from './campaign.ts';
 
 export const STATE_FILE = varPath('bloko.state.json');
-export const SETTINGS_FILE = varPath('settings.json');
 export const BESTS_FILE = varPath('bests.json');
 
-/** On-disk envelope: the pure game State plus server-only metadata.
- *  `savedAt`: epoch ms of the write (older envelopes: ISO string, or absent); drives the timed-pause shift. */
-type SavedGame = { v: 1, savedAt?: number | string } & Game;
+/** The live evening plus server metadata. `bestPrevious`: solo record before the game on show, kept so
+ *  "New best!" survives a restart. */
+export type Game = { campaign: Campaign, room: string, bestPrevious?: number | null };
 
-/** `bestPrevious`: solo record before the game on show, kept so "New best!" survives a restart. */
-export type Game = { state: State, room: string, bestPrevious?: number | null };
+/** On-disk envelope v2. `savedAt`: epoch ms of the write; drives the timed-pause shift. */
+type SavedV2 = { v: 2, campaign: Campaign, room: string, savedAt: number, bestPrevious?: number | null };
+/** Pre-campaign envelope (M2..slice 2): the bare block State. `savedAt` may be an ISO string or absent. */
+type SavedV1 = { v: 1, savedAt?: number | string, state: State, room: string, bestPrevious?: number | null };
 
-function isSavedGame(x: unknown): x is SavedGame {
-  const g = x as SavedGame;
+function isV1(x: unknown): x is SavedV1 {
+  const g = x as SavedV1;
   if (!g || g.v !== 1 || typeof g.room !== 'string' || !g.state) return false;
   const s = g.state;
   return ['lobby', 'playing', 'finished'].includes(s.phase)
@@ -30,7 +34,15 @@ function isSavedGame(x: unknown): x is SavedGame {
     && s.order.every((id) => !!s.players[id] && Array.isArray(s.players[id].board));
 }
 
-const isSettings = (x: unknown): x is Partial<Settings> => !!x && typeof x === 'object' && !Array.isArray(x);
+/** Shape guard only; loadCampaign then makes the content safe (unknown ids dropped, re-settled). */
+function isV2(x: unknown): x is SavedV2 {
+  const g = x as SavedV2;
+  const c = g?.campaign;
+  return !!g && g.v === 2 && typeof g.room === 'string' && !!c && typeof c === 'object'
+    && !!c.at && typeof c.at.node === 'string' && !!c.party && Array.isArray(c.party.order);
+}
+
+const isEnvelope = (x: unknown): x is SavedV1 | SavedV2 => isV2(x) || isV1(x);
 
 /** Room code: 4 letters, no I/O (read aloud off a TV). Stops stray devices, not security. */
 export function newRoomCode(): string {
@@ -38,57 +50,83 @@ export function newRoomCode(): string {
   return Array.from({ length: 4 }, () => A[randomInt(A.length)]).join('');
 }
 
-function loadSettings(): { settings?: Partial<Settings>, note: string } {
-  const r = readJson(SETTINGS_FILE, isSettings);
-  if (r.kind === 'ok') return { settings: r.data, note: 'settings from settings.json' };
-  if (r.kind === 'corrupt') return { note: `default settings (settings.json unreadable: ${r.error}; moved to ${quarantine(SETTINGS_FILE)})` };
-  return { note: 'default settings' };
+export function freshGame(content: Content): Game {
+  return { campaign: newCampaign(content, Date.now() >>> 0), room: newRoomCode(), bestPrevious: null };
 }
 
-export function freshGame(): Game & { note: string } {
-  const { settings, note } = loadSettings();
-  return { state: initState(Date.now() >>> 0, settings), room: newRoomCode(), note };
+/** The live block game keeps its REMAINING time across the downtime (no-op outside a timed game). */
+function shiftActivity(c: Campaign, since: number | null, now: number): Campaign {
+  const s = c.at.activity;
+  if (!s) return c;
+  const shifted = shiftDeadline(s, since, now);
+  return shifted === s ? c : { ...c, at: { ...c.at, activity: shifted } };
 }
 
-/** Saved game in any phase → resume it (room code, host, players kept); missing/corrupt/--new → fresh game.
- *  A timed game keeps its remaining time: its deadline moves forward by the downtime since savedAt. */
-export function loadGame(forceNew: boolean, now = Date.now()): Game & { how: string } {
+/** One line for the boot log. */
+function describe(c: Campaign, room: string): string {
+  const s = c.at.activity;
+  const party = c.party.order.filter((id) => !c.party.players[id].left).map((id) => c.party.players[id].name).join(', ') || 'nobody yet';
+  const game = s ? `, block game ${s.phase}${s.order.length ? ` (${s.order.map((id) => `${s.players[id].name} ${s.players[id].score}`).join(', ')})` : ''}` : '';
+  return `at ${c.at.node}${game}, room ${room}, party: ${party}, unlocked ${c.facts.unlocked.length}, news ${c.news.length}`;
+}
+
+/** Copies a pre-migration save aside, once per migration (a timestamped name never overwrites). */
+function keepV1(): string {
+  const dest = `${STATE_FILE}.v1-${Date.now()}.json`;
+  try { if (!existsSync(dest)) copyFileSync(STATE_FILE, dest); } catch (e) { console.error('[bloko] could not keep the v1 save:', e); }
+  return dest;
+}
+
+/**
+ * The saved evening in any state → resume it (room code, party, host, nested game, facts, news kept);
+ * missing/corrupt/--new → a fresh campaign at content.start. A timed game keeps its remaining time.
+ * A corrupt save is quarantined (kept for inspection), never deleted.
+ */
+export function loadGame(forceNew: boolean, content: Content, now = Date.now()): Game & { how: string } {
   const fresh = (why: string) => {
-    const g = freshGame();
-    return { ...g, how: `new game (${why}), ${g.note}` };
+    const g = freshGame(content);
+    return { ...g, how: `new evening (${why}): ${describe(g.campaign, g.room)}` };
   };
   if (forceNew) return fresh('--new / BLOKO_NEW=1');
-  const r = readJson(STATE_FILE, isSavedGame);
-  if (r.kind === 'missing') return fresh('no saved game');
-  if (r.kind === 'corrupt') return fresh(`saved game unreadable: ${r.error}; moved to ${quarantine(STATE_FILE)}`);
-  const { room, bestPrevious } = r.data;
-  const since = savedAtMs(r.data.savedAt);
-  const state = shiftDeadline(r.data.state, since, now);
-  const names = state.order.map((id) => `${state.players[id].name} ${state.players[id].score}`).join(', ') || 'no players';
-  const at = since === null ? 'at an unknown time' : new Date(since).toISOString();
-  const shifted = state !== r.data.state
-    ? `, timed clock paused ${Math.round((now - (since as number)) / 1000)} s while down (${Math.round(((state.deadline as number) - now) / 1000)} s left)`
+  const r = readJson(STATE_FILE, isEnvelope);
+  if (r.kind === 'missing') return fresh('no saved evening');
+  if (r.kind === 'corrupt') return fresh(`save unreadable: ${r.error}; moved to ${quarantine(STATE_FILE)}`);
+
+  const env = r.data;
+  let campaign: Campaign;
+  let how: string;
+  try {
+    if (env.v === 2) {
+      campaign = loadCampaign(env.campaign, content);
+      how = 'RESUMED';
+    } else {
+      campaign = fromLegacyState(env.state, content);
+      how = `MIGRATED a v1 save (original kept as ${keepV1()}) and resumed`;
+    }
+  } catch (e: any) {
+    return fresh(`save could not be loaded: ${e?.message ?? e}; moved to ${quarantine(STATE_FILE)}`);
+  }
+
+  const since = savedAtMs(env.savedAt);
+  const shiftedCampaign = shiftActivity(campaign, since, now);
+  const deadline = shiftedCampaign.at.activity?.deadline;
+  const shifted = shiftedCampaign !== campaign && typeof deadline === 'number'
+    ? `, timed clock paused ${Math.round((now - (since as number)) / 1000)} s while down (${Math.round((deadline - now) / 1000)} s left)`
     : '';
+  const at = since === null ? 'at an unknown time' : new Date(since).toISOString();
   return {
-    state, room, bestPrevious,
-    how: `RESUMED game saved ${at} — phase ${state.phase}, room ${room}, ${names}${shifted}`
-      + ' (if piece weights changed since, upcoming hands differ from the original run; the game stays consistent)',
+    campaign: shiftedCampaign, room: env.room, bestPrevious: env.bestPrevious ?? null,
+    how: `${how} evening saved ${at}: ${describe(shiftedCampaign, env.room)}${shifted}`,
   };
 }
 
 export function saveGame(game: Game): void {
   try {
-    writeJsonAtomic(STATE_FILE, { v: 1, savedAt: Date.now(), ...game } satisfies SavedGame);
+    writeJsonAtomic(STATE_FILE, {
+      v: 2, campaign: game.campaign, room: game.room, savedAt: Date.now(), bestPrevious: game.bestPrevious ?? null,
+    } satisfies SavedV2);
   } catch (e) {
-    console.error('[bloko] could not save the game:', e); // keep playing; the next change retries
-  }
-}
-
-export function saveSettings(settings: Settings): void {
-  try {
-    writeJsonAtomic(SETTINGS_FILE, settings);
-  } catch (e) {
-    console.error('[bloko] could not save settings:', e);
+    console.error('[bloko] could not save the evening:', e); // keep playing; the next change retries
   }
 }
 

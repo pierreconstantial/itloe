@@ -189,7 +189,12 @@ i = X.mark(); X.send({ t: 'hello', role: 'player', room, playerId: 'p-nope' });
 await X.waitFor((m) => m.t === 'view', i); await sleep(150);
 check(!X.since(i).some((m) => m.t === 'welcome'), 'unknown playerId → no welcome (fresh client)');
 i = X.mark(); X.send({ t: 'join', character: 'pierre' });
-check((await X.waitFor((m) => m.t === 'err', i)).code === 'full', 'join during playing → err (full)');
+// A1: a newcomer joins the EVENING mid-game and watches: welcomed, in the party, not seated in the game
+const xw = await X.waitFor((m) => m.t === 'welcome' || m.t === 'err', i);
+const xv = await X.waitFor((m) => m.t === 'view' && m.campaign?.party.players[xw.playerId], i);
+check(xw.t === 'welcome' && !xv.state.players[xw.playerId], 'join during playing → joins the evening as a watcher (not seated)');
+i = X.mark(); X.send({ t: 'leave' });
+await X.waitFor((m) => m.t === 'view' && m.campaign.party.players[xw.playerId].left, i);
 X.ws.close();
 
 // --- play both to done ---

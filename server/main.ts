@@ -1,7 +1,8 @@
-// Bloko server: HTTP static + WebSocket on one port, PROTOCOL.md over the shared pure reducer.
-// Every state change goes through apply() → solo best, save to disk, remember settings, arm the timed-mode clock, broadcast.
-// Run: npm start          (resumes the saved game in any phase; a timed clock keeps its remaining time)
-//      npm start -- --new (or BLOKO_NEW=1: always a fresh game)
+// Bloko server: HTTP static + WebSocket on one port, PROTOCOL.md over the shared pure campaign engine
+// (the evening: party, hub/worlds/tableaux, facts, news) with the block game nested as its activity.
+// Every change goes through apply() → solo best, save to disk, arm the timed-mode clock, doors, broadcast.
+// Run: npm start          (resumes the saved evening in any state; a timed clock keeps its remaining time)
+//      npm start -- --new (or BLOKO_NEW=1: always a fresh evening)
 // Env: PORT (3131), BLOKO_HOST (LAN interface or address), BLOKO_VAR (data dir, default var/)
 
 import { createServer } from 'node:http';
@@ -14,50 +15,71 @@ import { pickLan } from './lan.ts';
 import { makeClock } from './clock.ts';
 import { shiftDeadline } from './resume.ts';
 import { makeBests } from './bests.ts';
-import { freeCharacters, isCharacterId } from '../shared/characters.js';
+import { CHARACTERS, isCharacterId } from '../shared/characters.js';
+import type { CharacterId } from '../shared/campaign/types.js';
 import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
-import { loadGame, saveGame, saveSettings, STATE_FILE, type Game } from './store.ts';
-import { reduce, type ServerAction, type Settings, type State } from './rules.ts';
+import { loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
+import type { ServerAction, Settings, State } from './rules.ts';
+import {
+  CONTENT, assertContent, reduceCampaign, isUnlocked, zoneAt,
+  type Campaign, type CampaignAction, type GmOp,
+} from './campaign.ts';
 
-type ErrCode = 'full' | 'bad-place' | 'not-host' | 'not-playing' | 'unknown-player' | 'locked' | 'bad-room' | 'taken';
+type ErrCode = 'full' | 'bad-place' | 'not-host' | 'not-playing' | 'unknown-player' | 'locked' | 'bad-room' | 'taken' | 'refused';
 
 const PORT = Number(process.env.PORT ?? 3131);
 const ROOT = new URL('..', import.meta.url).pathname;
 const FORCE_NEW = process.argv.includes('--new') || process.env.BLOKO_NEW === '1';
 
-// ---------- game state + change hooks (wrap reduce, never inside it) ----------
+// ---------- the evening + change hooks (wrap the engine, never inside it) ----------
 
-const loaded = loadGame(FORCE_NEW);
-const game: Game = { state: loaded.state, room: loaded.room, bestPrevious: loaded.bestPrevious ?? null };
+assertContent(CONTENT); // broken content: refuse to boot, with every problem listed
+const loaded = loadGame(FORCE_NEW, CONTENT);
+const game: Game = { campaign: loaded.campaign, room: loaded.room, bestPrevious: loaded.bestPrevious ?? null };
+
+/** The live block game (the campaign's nested activity), or null on the hub / in a world. */
+const activity = (): State | null => game.campaign.at.activity;
+const party = () => game.campaign.party;
 
 const bests = makeBests(game);
 
 // beat() first: after a suspend, the overdue bell may run before the heartbeat; the beat shifts the
 // deadline, so this timeUp no longer matches it and the reducer ignores it (the new one is armed).
-const clock = makeClock((deadline) => { beat(); apply({ t: 'timeUp', deadline }); });
+const clock = makeClock((deadline) => { beat(); applyGame({ t: 'timeUp', deadline }); });
 
 /** Avatar positions: in memory only, outside the reducer (see pos.ts). */
 const positions = makePositions<WebSocket>();
+/** Door each walker currently stands in (edge trigger: entering a door fires once). In memory only. */
+const zones = new Map<string, string | null>();
 
-const onChange: ((prev: State, next: State) => void)[] = [
-  (prev, next) => bests.onChange(prev, next), // before saveGame: it sets game.bestPrevious
-  () => saveGame(game),
-  (prev, next) => { if (next.settings && next.settings !== prev?.settings) saveSettings(next.settings); },
-  (prev, next) => clock.onChange(prev, next),
-  (_prev, next) => positions.prune(next),
+const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
+  (prev, next) => { // before saveGame: it sets game.bestPrevious
+    const a = prev.at.activity, b = next.at.activity;
+    if (a && b) bests.onChange(a, b);
+    else if (!b) game.bestPrevious = null;
+  },
+  () => saveGame(game), // ONE atomic save per step: a finished game and its recorded facts land together
+  (prev, next) => { if (next.at.activity) clock.onChange(prev.at.activity, next.at.activity); },
+  (_prev, next) => positions.prune(next.party),
+  (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
   () => broadcast(),
 ];
 
-/** Runs an action through the reducer; returns false when it was refused (state unchanged). */
-function apply(action: ServerAction): boolean {
-  return commit(reduce(game.state, action));
+/** Runs an action through the campaign engine; returns false when it was refused (state unchanged). */
+function apply(action: CampaignAction): boolean {
+  return commit(reduceCampaign(game.campaign, action, CONTENT));
 }
 
-/** Installs a new state and runs every change hook; false when nothing changed. */
-function commit(next: State): boolean {
-  const prev = game.state;
+/** A block-game action, already rebuilt field by field, into the nested activity. */
+function applyGame(action: ServerAction): boolean {
+  return apply({ t: 'activity', action });
+}
+
+/** Installs a new campaign and runs every change hook; false when nothing changed. */
+function commit(next: Campaign): boolean {
+  const prev = game.campaign;
   if (next === prev) return false;
-  game.state = next;
+  game.campaign = next;
   for (const hook of onChange) hook(prev, next);
   return true;
 }
@@ -74,9 +96,12 @@ function beat(): void {
   const now = Date.now();
   const gap = now - lastBeat;
   lastBeat = now;
-  const s = game.state;
-  if (s.phase !== 'playing' || s.deadline === null) return;
-  if (gap > SUSPEND_GAP_MS && commit(shiftDeadline(s, now - gap + BEAT_MS, now))) {
+  const c = game.campaign;
+  const s = c.at.activity;
+  if (!s || s.phase !== 'playing' || s.deadline === null) return;
+  const shifted = gap > SUSPEND_GAP_MS ? shiftDeadline(s, now - gap + BEAT_MS, now) : s;
+  // a server-owned input moved: installed directly (not an engine transition), like the resume shift
+  if (shifted !== s && commit({ ...c, at: { ...c.at, activity: shifted } })) {
     console.log(`[bloko] process was suspended ${Math.round(gap / 1000)} s — timed clock paused for that long`);
     return; // commit saved + broadcast
   }
@@ -116,10 +141,15 @@ const roomOk = new WeakSet<WebSocket>();
 /** sockets that said hello as a screen: the only receivers of pos */
 const screens = new Set<WebSocket>();
 
-/** Presence (ephemeral, never in State or on disk): players with a live socket, in seat order. */
-const online = (): string[] => game.state.order.filter((id) => sockets.get(id)?.readyState === WebSocket.OPEN);
+/** Presence (ephemeral, never in State or on disk): party members with a live socket, in party order. */
+const online = (): string[] => party().order.filter((id) => sockets.get(id)?.readyState === WebSocket.OPEN);
 
-const viewMsg = () => JSON.stringify({ t: 'view', state: game.state, online: online(), now: Date.now(), best: bests.view(game.state) });
+/** `state` = the nested block game (null outside one), kept for clients that read it directly;
+ *  `campaign` = the whole evening (TV hub/cutscenes, phone host panel). */
+const viewMsg = () => {
+  const s = activity();
+  return JSON.stringify({ t: 'view', state: s, campaign: game.campaign, online: online(), now: Date.now(), best: s ? bests.view(s) : undefined });
+};
 
 function send(ws: WebSocket, data: string | object): void {
   if (ws.readyState === WebSocket.OPEN) ws.send(typeof data === 'string' ? data : JSON.stringify(data));
@@ -174,26 +204,55 @@ function attach(ws: WebSocket, playerId: string): void {
   who.set(ws, playerId);
 }
 
-/** The non-left player holding a character, if any (left players' characters are free, never reclaimable). */
+/** The party member (not left) holding a character, if any. Left members' characters are free, never reclaimable. */
 function holderOf(character: string): string | undefined {
-  const s = game.state;
-  return s.order.find((id) => !s.players[id].left && s.players[id].character === character);
+  const p = party();
+  return p.order.find((id) => !p.players[id].left && p.players[id].character === character);
 }
+
+/** In the evening's party and has not left it: a stored id that may rejoin. */
+const isMember = (id: unknown): id is string => typeof id === 'string' && !!party().players[id] && !party().players[id].left;
 
 const isOnline = (playerId: string): boolean => sockets.get(playerId)?.readyState === WebSocket.OPEN;
 
-/** Why a (non-reclaim) join was refused, unchanged by reclaim: game under way or roster exhausted → full;
- *  otherwise the pick itself (held by an online player, or not a character) → taken. */
+/** Why a (non-reclaim) join was refused: every character held → full; held by an online member → taken
+ *  while a block lobby (or no game) is open, full while a game is under way; not a character → taken. */
 function joinRefusal(): ErrCode {
-  const s = game.state;
-  return s.phase !== 'lobby' || freeCharacters(s).length === 0 ? 'full' : 'taken';
+  const held = new Set(party().order.filter((id) => !party().players[id].left).map((id) => party().players[id].character));
+  if (Object.keys(CHARACTERS).every((c) => held.has(c as CharacterId))) return 'full';
+  const s = activity();
+  return s && s.phase !== 'lobby' ? 'full' : 'taken';
 }
 
-const isPlainObject = (x: unknown): x is Settings => !!x && typeof x === 'object' && !Array.isArray(x);
+const isPlainObject = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
+
+/** Edge-triggered doors: entering one fires `zone.entered` (any member) and, for the chooser on an
+ *  unlocked door, `enter` (A1: Élodie walks into a door; the host can always enter directly). */
+function walk(id: string, pos: Pos): void {
+  const c = game.campaign;
+  const zone = zoneAt(CONTENT, c.at.node, pos.x, pos.y);
+  // a walker's first known position (new phone, or after a restart wiped this memory) only sets the
+  // baseline: standing in a door is not stepping into it
+  const known = zones.has(id);
+  const before = zones.get(id) ?? null;
+  zones.set(id, zone);
+  if (!known || !zone || zone === before) return;
+  const character = c.party.players[id]?.character;
+  if (!character) return;
+  apply({ t: 'event', event: { t: 'zone.entered', zone, character } });
+  if (character === CONTENT.chooser && isUnlocked(game.campaign, zone)) apply({ t: 'enter', id, node: zone });
+}
+
+/** The party moved to another node: every walker's door is re-read on the new map, so standing where
+ *  a door now is does not fire it — only a fresh step in does. */
+function resetZones(): void {
+  zones.clear();
+  for (const [id, pos] of positions.entries()) zones.set(id, zoneAt(CONTENT, game.campaign.at.node, pos.x, pos.y));
+}
 
 function handleMessage(ws: WebSocket, m: any): void {
   if (m.t === 'hello') {
-    const rejoin = m.role === 'player' && typeof m.playerId === 'string' && !!game.state.players[m.playerId];
+    const rejoin = m.role === 'player' && isMember(m.playerId);
     if (rejoin) {
       attach(ws, m.playerId); // rejoin: re-attach, welcome + view (no room check: stored ids outlive a code)
       welcome(ws, m.playerId);
@@ -212,21 +271,28 @@ function handleMessage(ws: WebSocket, m: any): void {
   }
 
   if (m.t === 'pos') {
-    // ephemeral avatar movement: bypasses the reducer; malformed, unjoined or flooding senders dropped silently
+    // ephemeral avatar movement: bypasses the engine (doors aside); malformed, unjoined or flooding senders dropped silently
     const id = who.get(ws);
-    if (!id || !canMove(game.state, id) || !positions.allow(ws)) return;
+    if (!id || !canMove(party(), id) || !positions.allow(ws)) return;
     const pos = parsePos(m);
     if (!pos) return;
     positions.set(id, pos);
     relayPos(id, pos);
+    walk(id, pos);
+    return;
+  }
+
+  if (m.t === 'ack') {
+    // a TV finished the cutscenes up to `upTo` (screens only; the id is injected, never from the wire)
+    if (screens.has(ws) && Number.isFinite(m.upTo)) apply({ t: 'ack', id: 'screen', upTo: m.upTo });
     return;
   }
 
   if (m.t === 'join') {
     if (!roomOk.has(ws)) { sendErr(ws, 'bad-room'); return; }
     const character = m.character;
-    // reclaim ("tap your character"): a character held by an OFFLINE player is taken back by this
-    // socket, in any phase — same playerId, so board, score, hand and host role come along
+    // reclaim ("tap your character"): a character held by an OFFLINE member is taken back by this
+    // socket, in any state — same playerId, so board, score, hand, facts and host role come along
     const holder = isCharacterId(character) ? holderOf(character) : undefined;
     if (holder && !isOnline(holder)) {
       attach(ws, holder);
@@ -242,34 +308,64 @@ function handleMessage(ws: WebSocket, m: any): void {
     return;
   }
 
-  // everything below needs an identified player; actions are rebuilt field by field,
-  // so server-only inputs (now, deadline, timeUp) can never come from the wire
-  if (!['start', 'again', 'newGame', 'endGame', 'retire', 'place', 'config', 'leave'].includes(m.t)) return;
+  // everything below needs an identified member; actions are rebuilt field by field,
+  // so server-only inputs (now, deadline, timeUp) and ids can never come from the wire
+  if (!['start', 'again', 'newGame', 'endGame', 'retire', 'place', 'config', 'leave', 'enter', 'back', 'gm'].includes(m.t)) return;
   const id = who.get(ws);
   if (!id) { sendErr(ws, 'unknown-player'); return; }
-  const phase = game.state.phase;
+  const s = activity();
+  const hostOfGame = s !== null && id === s.hostId;
+  const phase = s?.phase ?? null;
 
   switch (m.t) {
+    // ---- the evening ----
+    case 'leave':
+      // leaving the EVENING (forwarded to a live game: a lobby drops them, a game marks them done);
+      // the stored id must not rejoin, so the socket goes back to being a stranger
+      if (apply({ t: 'leave', id })) detach(id);
+      return;
+
+    case 'enter':
+      // host, or the chooser, into an unlocked child of where the party is; refused → 'refused'
+      if (typeof m.node !== 'string' || !apply({ t: 'enter', id, node: m.node })) sendErr(ws, 'refused');
+      return;
+
+    case 'back':
+      // host only, up one level; refused while a game is being played (endGame first) → 'refused'
+      if (!apply({ t: 'back', id })) sendErr(ws, id === party().hostId ? 'refused' : 'not-host');
+      return;
+
+    case 'gm': {
+      // game master: host only; the engine validates the op (a host's no-op is not an error)
+      if (!isPlainObject(m.op)) return;
+      if (!apply({ t: 'gm', id, op: m.op as GmOp }) && id !== party().hostId) sendErr(ws, 'not-host');
+      return;
+    }
+
+    // ---- the nested block game (no game here → not-playing) ----
     case 'start':
     case 'again':
-      if (!apply({ t: m.t, id, now: Date.now() })) sendErr(ws, 'not-host');
+      if (!s) { sendErr(ws, 'not-playing'); return; }
+      if (!applyGame({ t: m.t, id, now: Date.now() })) sendErr(ws, 'not-host');
       return;
 
     case 'endGame':
       // host stops the game (someone dropped while not stuck); refused (non-host / not playing) → not-host, like again
-      if (!apply({ t: 'endGame', id })) sendErr(ws, 'not-host');
+      if (!s) { sendErr(ws, 'not-playing'); return; }
+      if (!applyGame({ t: 'endGame', id })) sendErr(ws, 'not-host');
       return;
 
     case 'retire':
       // host takes one player out (done, still ranked, keeps seat + character). Non-host or not playing →
       // not-host; a host's no-op (unknown / already done / left target) is not an error, like config
       if (typeof m.target !== 'string') return;
-      if (!apply({ t: 'retire', id, target: m.target }) && (id !== game.state.hostId || phase !== 'playing')) sendErr(ws, 'not-host');
+      if (!applyGame({ t: 'retire', id, target: m.target }) && (!hostOfGame || phase !== 'playing')) sendErr(ws, 'not-host');
       return;
 
     case 'newGame':
-      // podium → lobby (same players, room code kept); refused (non-host or not finished) → not-host, like again
-      if (!apply({ t: 'newGame', id })) sendErr(ws, 'not-host');
+      // podium → block lobby inside the same tableau; refused (non-host or not finished) → not-host, like again
+      if (!s) { sendErr(ws, 'not-playing'); return; }
+      if (!applyGame({ t: 'newGame', id })) sendErr(ws, 'not-host');
       return;
 
     case 'place':
@@ -277,23 +373,18 @@ function handleMessage(ws: WebSocket, m: any): void {
         sendErr(ws, 'bad-place');
         return;
       }
-      if (!apply({ t: 'place', id, piece: m.piece, x: m.x, y: m.y })) {
+      if (!applyGame({ t: 'place', id, piece: m.piece, x: m.x, y: m.y })) {
         sendErr(ws, phase === 'playing' ? 'bad-place' : 'not-playing');
       }
       return;
 
     case 'config':
-      if (!isPlainObject(m.patch)) return;
-      if (!apply({ t: 'config', id, patch: m.patch })) {
+      if (!isPlainObject(m.patch) || !s) return;
+      if (!applyGame({ t: 'config', id, patch: m.patch as Partial<Settings> })) {
         // a host's no-op patch (unknown keys/values, same settings) is not an error
-        if (id !== game.state.hostId) sendErr(ws, 'not-host');
+        if (!hostOfGame) sendErr(ws, 'not-host');
         else if (phase === 'playing') sendErr(ws, 'locked');
       }
-      return;
-
-    case 'leave':
-      // lobby/finished: the player is removed, so its stored id must not rejoin; playing: marked done, stays bound
-      if (apply({ t: 'leave', id }) && !game.state.players[id]) detach(id);
       return;
   }
 }
@@ -358,8 +449,9 @@ wss.on('connection', (ws) => {
 
 // ---------- start ----------
 
-saveGame(game); // a --new start must not let the next plain start resume the old game
-clock.onChange(null, game.state); // resumed timed game: re-arm (fires at once if the deadline passed while down)
+saveGame(game); // a --new start must not let the next plain start resume the old game (and a v1 save is now v2)
+const resumed = activity();
+if (resumed) clock.onChange(null, resumed); // resumed timed game: re-arm (fires at once if the deadline passed while down)
 
 httpServer.listen(PORT, () => {
   console.log(`[bloko] ${loaded.how}`);
