@@ -45,36 +45,40 @@ const LEGS_SIDE = [
 
 // ---- characters (upper 13 rows per view) -----------------------------------------
 // Common letters: o outline · h/H hair · s skin · e eyes · m mouth · c/C clothes · p pants · b shoes
-// · a/A accents · w white · g glasses.
+// · a/A accents · w white · g glasses · k a second garment (jacket) or its woven detail (pleats).
+// Detail drawn inside a garment takes k or that garment's own shade, never the outline colour — a
+// dark line inside a garment reads as a hole punched through it, not as fabric.
 
 /** @type {Record<string, { palette: Record<string, string>, down: string[], up: string[], right: string[] }>} */
 const DESIGNS = {
-  // Pierre — brown hair, glasses, blue hoodie.
+  // Pierre — brown hair under a charcoal snapback (white front panel, brim out front), glasses,
+  // oversized blue hoodie with a silver chain, baggy jeans, chunky white sneakers.
   pierre: {
     palette: {
       o: '#1b1d24', h: '#6b4226', H: '#4a2c18', s: '#f1c48f', e: '#1b1d24', m: '#b5544c',
-      g: '#2c2f38', c: '#3d73c4', C: '#2b538f', p: '#3a3f4e', b: '#1e1f25',
+      g: '#2c2f38', c: '#3d73c4', C: '#2b538f', p: '#4b5572', b: '#e9ecf2',
+      a: '#5b6478', A: '#31374a', w: '#eef1f5',
     },
     down: [
-      '................',
-      '................',
       '....oooooooo....',
-      '...ohhhhhhhho...',
+      '...oaaaaaaaao...',
+      '..oaaawwwwaaao..',
+      '.oAAAAAAAAAAAAo.',
       '...ohhhhhhhho...',
       '...ohssssssho...',
       '...ogegssgego...',
       '...osssssssso...',
       '...osssmmssso...',
       '....oooooooo....',
-      '..osccccccccso..',
-      '..occcccccccco..',
-      '...oCCCCCCCCo...',
+      '..oscwccccwcso..',
+      '..occcwwwwccco..',
+      '..oCCCCCCCCCCo..',
     ],
     up: [
-      '................',
-      '................',
       '....oooooooo....',
-      '...ohhhhhhhho...',
+      '...oaaaaaaaao...',
+      '..oaaaaaaaaaao..',
+      '..oaahhhhhhaao..',
       '...ohhhhhhhho...',
       '...ohhhhhhhho...',
       '...ohhhhhhhho...',
@@ -83,31 +87,32 @@ const DESIGNS = {
       '....oossssoo....',
       '..osccccccccso..',
       '..occcccccccco..',
-      '...oCCCCCCCCo...',
+      '..oCCCCCCCCCCo..',
     ],
     right: [
-      '................',
-      '................',
       '....oooooooo....',
+      '...oaaaaaaaao...',
+      '...oaaaaawwwao..',
+      '...oaaaaAAAAAAo.',
       '...ohhhhhhhho...',
-      '...ohhhhhhhhho..',
       '...ohhhhhssso...',
       '...ohhhsgegso...',
       '...ohhhsssssso..',
       '...ohhssssmo....',
       '....oooooo......',
-      '....occccccso...',
-      '....occccccco...',
-      '....oCCCCCCo....',
+      '....occccwwso...',
+      '....occcwwcco...',
+      '...oCCCCCCCCo...',
     ],
   },
 
-  // Élodie — the birthday star: striped party hat with a pompom, long golden hair,
-  // pink party dress with a star.
+  // Élodie — the birthday star, with a punk edge: striped party hat with a pompom, long brown hair,
+  // studded dark leather jacket open over a pink dress, dark tights and black boots.
   elodie: {
     palette: {
-      o: '#2a1c24', h: '#d99a3e', H: '#a86c24', s: '#f6cfa4', e: '#2a1c24', m: '#c2485a',
-      a: '#ff5fa2', A: '#ffd23f', w: '#ffffff', c: '#ff7eb9', C: '#d94f92', p: '#f6cfa4', b: '#c2185b',
+      o: '#2a1c24', h: '#8a5a30', H: '#5c3a1c', s: '#f6cfa4', e: '#2a1c24', m: '#c2485a',
+      a: '#ff5fa2', A: '#ffd23f', w: '#ffffff', c: '#ff7eb9', C: '#d94f92', k: '#3b2f3d',
+      p: '#4a3b4a', b: '#241a20',
     },
     down: [
       '.......ww.......',
@@ -120,8 +125,8 @@ const DESIGNS = {
       '..ohsessssesho..',
       '..ohsasmmsasho..',
       '..ohhoooooohho..',
-      '..ohhccAAcchho..',
-      '..ohccccccccho..',
+      '..ohkwkcckwkho..',
+      '..ohkkcccckkho..',
       '..oCCCCCCCCCCo..',
     ],
     up: [
@@ -136,7 +141,7 @@ const DESIGNS = {
       '..ohhhhhhhhhho..',
       '..ohhhhhhhhhho..',
       '..ohHhhhhhhHho..',
-      '..oHccccccccHo..',
+      '..oHwkkkkkkwHo..',
       '..oCCCCCCCCCCo..',
     ],
     right: [
@@ -150,8 +155,8 @@ const DESIGNS = {
       '..ohhhhhhsesso..',
       '..ohhhhhhsmso...',
       '..ohhhhhooo.....',
-      '..ohhhccccAso...',
-      '..ohhhcccccco...',
+      '..ohhhwkkccso...',
+      '..ohhhkkkccco...',
       '...oCCCCCCCCo...',
     ],
   },
@@ -210,11 +215,12 @@ const DESIGNS = {
   },
 
   // Anna — 14, K-pop style: long black hair with a lilac streak and full fringe, pink heart clip,
-  // oversized lilac jacket over a white top, white sneakers.
+  // oversized lilac jacket open over a white top, pleated lilac skirt, black tights,
+  // chunky white sneakers.
   anna: {
     palette: {
       o: '#1c1726', h: '#1f1b2b', A: '#b48cff', a: '#ff6fae', s: '#f3d2b4', e: '#1c1726', m: '#d0607a',
-      c: '#b9a2ff', C: '#8f75e0', w: '#ffffff', p: '#2a2633', b: '#ffffff',
+      c: '#b9a2ff', C: '#8f75e0', k: '#6b53b4', w: '#ffffff', p: '#2a2633', b: '#ffffff',
     },
     down: [
       '................',
@@ -229,7 +235,7 @@ const DESIGNS = {
       '..ohhoooooohAo..',
       '..ohcwwwwwwcAo..',
       '..occwwwwwwcco..',
-      '..oCCwwwwwwCCo..',
+      '..oCkCCkCCkCCo..',
     ],
     up: [
       '................',
@@ -244,7 +250,7 @@ const DESIGNS = {
       '..ohhhhhhhhhAo..',
       '..ohhhhhhhhhAo..',
       '..occhhhhhhcco..',
-      '..oCCCCCCCCCCo..',
+      '..oCkCCkCCkCCo..',
     ],
     right: [
       '................',
@@ -259,7 +265,7 @@ const DESIGNS = {
       '..ohAhhhhoooo...',
       '..ohAhhhccwso...',
       '..ohAhhcccccco..',
-      '...oCCCCCCCCo...',
+      '...oCCkCCkCCo...',
     ],
   },
 };
