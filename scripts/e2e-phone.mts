@@ -8,7 +8,8 @@
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3182 CDP=9222 [LOCK_MS=300000] node scripts/e2e-phone.mts    (never PORT 3131: the live server)
 // LOCK_MS is how long the "phone locked" case freezes the page (default 5 min, as in the acceptance list).
-// ONLY=3 / 4 / 5 / 6 runs just that part (campaign screens / quiz / refused room code / inventory); a full run is the acceptance.
+// ONLY=3 … 7 runs just that part (campaign screens / quiz / refused room code / inventory / show the join QR);
+// a full run is the acceptance.
 // SHOTS=<dir> saves screenshots of the campaign screens.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -785,6 +786,38 @@ try {
   await B6.tap('#view-place .bag-open');
   await B6.shot('phone-bag-open');
   } // part 6
+
+  if (!ONLY || ONLY === '7') {
+  // ================= part 7: "📱 Show the join QR" (this phone + the TVs) =================
+  console.log('\n— part 7: show the join QR —');
+  await kill9();
+  await boot(true);
+  const J = await phone('J');
+  await joinAs(J, 'sol');
+  const tv7 = new Client('tv7'); await tv7.open(); tv7.send({ t: 'hello', role: 'screen' });
+  await tv7.waitFor((m) => m.t === 'view');
+  const i7 = tv7.mark();
+  await J.tap('#btn-menu');
+  expect((await J.text('btn-show-join')).includes('Show the join QR'), '☰ → "📱 Show the join QR"');
+  await J.tap('#btn-show-join');
+  const qr = await tv7.waitFor((m) => m.t === 'joinQr', i7, 3000).catch(() => null);
+  expect(!!qr && qr.until - Date.now() > 25_000, 'the TVs are asked to show the QR (joinQr, ~30 s)');
+  let shown = false;
+  for (let k = 0; k < 40 && !shown; k++) {
+    // an SVG without width/height has naturalWidth 0 in Chrome even when drawn: check the rendered box
+    shown = await J.ev(`(() => { const img = document.getElementById('invite-qr'); const r = img.getBoundingClientRect(); return !img.hidden && img.complete && r.width > 100 && r.height > 100; })()`);
+    if (!shown) await sleep(100);
+  }
+  const qrState = await J.ev(`(() => { const img = document.getElementById('invite-qr'); const r = img.getBoundingClientRect(); return JSON.stringify({ hidden: img.hidden, complete: img.complete, w: Math.round(r.width), h: Math.round(r.height), src: img.getAttribute('src'), sheet: !document.getElementById('sheet-invite').hidden }); })()`);
+  // (the sheet is position:fixed, so offsetParent-based visible() can't see it: read its own state)
+  expect(shown && JSON.parse(qrState).sheet === true, 'this phone shows the QR too (another person can scan it right here)', qrState);
+  expect((await J.text('invite-code')) === room, `with the room code (${room})`);
+  const toastTop: number = await J.ev(`(() => { const t = document.getElementById('toast'); return t.hidden ? -1 : t.getBoundingClientRect().top; })()`);
+  expect(/QR shown on the TV for 30 s/.test(await J.text('toast')) && toastTop >= 0 && toastTop < 120,
+    'toast "QR shown on the TV for 30 s", at the TOP while the sheet is open (not over its buttons)', `top=${toastTop}`);
+  await J.shot('phone-show-join');
+  tv7.ws.close();
+  } // part 7
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}`);
   if (log) console.log(`--- server log ---\n${log}`);

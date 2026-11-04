@@ -180,7 +180,7 @@
   <div id="sheet-menu" class="sheet" hidden>
     <div class="sheet-panel">
       <button type="button" data-open="rules">How to play</button>
-      <button type="button" data-open="invite">Invite friends</button>
+      <button type="button" id="btn-show-join" data-open="invite">📱 Show the join QR</button>
       <button type="button" data-open="bag" hidden>🎒 Bag</button>
       <button type="button" id="btn-gm" data-open="gm" hidden>🎲 Game master</button>
       <button type="button" id="btn-vibrate">Vibration: on</button>
@@ -200,7 +200,8 @@
 
   <div id="sheet-invite" class="sheet" hidden>
     <div class="sheet-panel">
-      <h2>Invite friends</h2>
+      <h2>Join the game</h2>
+      <p class="dim">Scan to join or get back in.</p>
       <img id="invite-qr" alt="QR code to join the game" hidden>
       <p id="invite-code-line" hidden>Room code <strong id="invite-code" class="room-code"></strong></p>
       <p class="dim">On the same Wi-Fi, scan the code or open:</p>

@@ -734,6 +734,11 @@ const menu = initMenu({
   canLeave: () => member() !== null,
   onLeave: leaveGame,
   isGameMaster,
+  onShowJoin: () => {
+    if (!member()) return; // only players can ask the TVs (the server ignores anyone else)
+    send({ t: 'showJoin' });
+    toast('QR shown on the TV for 30 s');
+  },
 });
 const settingsSheet = createSettingsSheet({ send });
 const hostControls = createHostControls({ send });

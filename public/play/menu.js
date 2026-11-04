@@ -9,7 +9,7 @@ const SHEETS = ['menu', 'rules', 'invite', 'settings', 'gm', 'bag'];
 const RULE_CELL = 10; // px per cell for rule illustrations
 
 /**
- * @param {{ canLeave: () => boolean, onLeave: () => void, isGameMaster: () => boolean }} hooks
+ * @param {{ canLeave: () => boolean, onLeave: () => void, isGameMaster: () => boolean, onShowJoin: () => void }} hooks
  * @returns {{ refresh: () => void, close: (name?: string) => void, isOpen: () => boolean }}
  */
 export function initMenu(hooks) {
@@ -51,6 +51,9 @@ export function initMenu(hooks) {
     const sheet = $(`sheet-${s}`);
     sheet.addEventListener('click', (e) => { if (e.target === sheet) close(); }); // backdrop tap
   }
+
+  // the join QR: this phone shows it (the invite sheet opens via data-open) AND asks the TVs to show it
+  $('btn-show-join').addEventListener('click', () => hooks.onShowJoin());
 
   $('btn-vibrate').addEventListener('click', () => {
     haptics.setEnabled(!haptics.isEnabled());
