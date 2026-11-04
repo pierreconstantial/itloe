@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   SAMPLE_CONTENT as C, COUNTER, emptyFacts, fromLegacyState, holds, loadCampaign, newCampaign,
-  record, reduceCampaign, settle, validateContent, zoneAt,
+  record, reduceCampaign, settle, validateContent, zoneAt, holding,
 } from '../shared/campaign/index.js';
 import { initState, reduce } from '../shared/game.js';
 
@@ -127,7 +127,8 @@ test('3 block games → reward item + two worlds unlock AT ONCE (one step), seq 
   c = playOnce(c);
   assert.equal(c.facts.counters[COUNTER.blocksPlayed], 3);
   assert.ok(c.facts.done.includes('hub.false-start'));
-  assert.ok(c.facts.items.includes('reward-1') && c.facts.flags.includes('false-start-over'));
+  assert.equal(holding(c.facts, 'elodie', 'old-key'), 1, 'the Old key, to the chooser');
+  assert.ok(c.facts.flags.includes('false-start-over'));
   assert.deepEqual(unlockedNews(c).sort(), ['childhood', 'childhood.blocks', 'childhood.scene', 'teens', 'teens.blocks', 'teens.scene']);
   const seqs = c.news.map((n) => n.seq);
   assert.deepEqual(seqs, seqs.map((_, i) => before.newsSeq + i + 1), 'seq 1, 2, 3…');
@@ -188,7 +189,7 @@ test('rewards apply once; replayable games re-enter, one-shot scenes do not', ()
   let c = playOnce(playOnce(playOnce(party())));
   c = playOnce(c);
   assert.equal(c.news.filter((n) => n.t === 'item').length, 1, 'item news once');
-  assert.equal(c.facts.items.filter((x) => x === 'reward-1').length, 1);
+  assert.equal(holding(c.facts, 'elodie', 'old-key'), 1, 'given once, never twice');
   c = run(c, { t: 'back', id: 'e' }, { t: 'enter', id: 'e', node: 'childhood' }, { t: 'enter', id: 'e', node: 'childhood.scene' },
     { t: 'event', event: { t: 'scene.seen', sceneId: 'childhood-1', node: 'childhood.scene' } }, { t: 'back', id: 'e' });
   assert.equal(run(c, { t: 'enter', id: 'e', node: 'childhood.scene' }), c, 'one-shot scene, already done');

@@ -20,11 +20,11 @@
 import { CHARACTERS, isCharacterId } from '../characters.js';
 import { initState, ranking, reduce } from '../game.js';
 import { initQuiz, reduceQuiz, quizRanking, quizRunning } from '../quiz/index.js';
-import { emptyFacts, holds, record, settle, migrateTotals, COUNTER } from './rules.js';
+import { emptyFacts, holds, record, settle, migrateTotals, migrateInventory, addItem, holding, recipients, COUNTER } from './rules.js';
 import { validateContent, zoneAt, childrenOf } from './content.js';
 import { SAMPLE_CONTENT } from './sample.js';
 
-export { holds, record, settle, emptyFacts, COUNTER, validateContent, zoneAt, childrenOf, SAMPLE_CONTENT };
+export { holds, record, settle, emptyFacts, holding, recipients, COUNTER, validateContent, zoneAt, childrenOf, SAMPLE_CONTENT };
 
 /** @typedef {import('./types.js').Campaign} Campaign */
 /** @typedef {import('./types.js').CampaignAction} CampaignAction */
@@ -170,10 +170,11 @@ export function fromLegacyState(state, content) {
  */
 export function loadCampaign(raw, content) {
   const known = (/** @type {string} */ id) => !!content.nodes[id];
-  const f = raw.facts ?? emptyFacts();
+  const { items: _legacyItems, ...f } = /** @type {Facts & { items?: unknown }} */ (raw.facts ?? emptyFacts());
   /** @type {Facts} */
   const facts = {
     ...emptyFacts(), ...f,
+    inventory: migrateInventory(/** @type {any} */ (raw.facts ?? {}), content), // older saves: shared facts.items → the chooser's
     unlocked: (f.unlocked ?? []).filter(known),
     done: (f.done ?? []).filter(known),
     seen: (f.seen ?? []).filter(known),
@@ -206,10 +207,12 @@ function nextHost(party, goneId) {
 
 /**
  * Settles facts into the campaign, queuing news with fresh seqs.
- * @param {Campaign} c @param {Facts} facts @param {Content} content @returns {Campaign}
+ * @param {Campaign} c @param {Facts} facts @param {Content} content @param {CampaignEvent} [event]
+ * @returns {Campaign}
  */
-function withFacts(c, facts, content) {
-  const s = settle(facts, content, c.newsSeq);
+function withFacts(c, facts, content, event) {
+  // the party and the triggering event decide who item rewards go to ('all', 'winner')
+  const s = settle(facts, content, c.newsSeq, { party: c.party, event });
   if (s.facts === c.facts && facts === c.facts) return c;
   return { ...c, facts: s.facts, news: [...c.news, ...s.news], newsSeq: c.newsSeq + s.news.length };
 }
@@ -258,7 +261,8 @@ function withActivity(c, next, content) {
   if (next === prev) return c;
   const moved = { ...c, at: { ...c.at, activity: next } };
   if (prev && spec.running(prev) && next.phase === 'finished') {
-    return withFacts(moved, record(c.facts, spec.finished(next, c.at.node)), content);
+    const ev = spec.finished(next, c.at.node);
+    return withFacts(moved, record(c.facts, ev), content, ev);
   }
   return moved;
 }
@@ -328,7 +332,7 @@ export function reduceCampaign(c, a, content) {
     case 'event': {
       // external events only: every activity's finished event is derived by the engine (exactly once)
       if (DERIVED_EVENTS.has(a.event.t)) return c;
-      return withFacts(c, record(c.facts, a.event), content);
+      return withFacts(c, record(c.facts, a.event), content, a.event);
     }
 
     case 'ack': {
@@ -399,6 +403,18 @@ function gm(c, op, content) {
         ...c,
         facts: { ...f, counters, done: f.done.filter((id) => id !== op.node), seen: f.seen.filter((id) => id !== op.node) },
       };
+    }
+
+    case 'give':
+    case 'take': {
+      // only catalogue items and real characters; a take of more than they hold is refused whole
+      const who = op.op === 'give' ? op.to : op.from;
+      if (!content.items?.[op.item] || !isCharacterId(who)) return c;
+      const n = op.count === undefined ? 1 : op.count;
+      if (!Number.isInteger(n) || n < 1) return c;
+      if (op.op === 'take' && holding(f, who, op.item) < n) return c;
+      const inventory = addItem(f.inventory ?? {}, who, op.item, op.op === 'give' ? n : -n);
+      return withFacts(c, { ...f, inventory }, content); // a `has` condition may open something now
     }
 
     default:

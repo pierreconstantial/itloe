@@ -20,12 +20,24 @@ export {};
  *   | { done: string }                      // node id
  *   | { unlocked: string }                  // node id
  *   | { count: string, gte: number }        // facts.counters[count] >= gte
+ *   | { has: string, who?: CharacterId | 'anyone', gte?: number }   // inventory: item id held (default anyone, ≥ 1)
  *   | { all: Condition[] } | { any: Condition[] } | { not: Condition }} Condition
  */
 
 /**
  * Effect, applied once when a node first completes (or by gm).
- * @typedef {{ flag: string } | { item: string } | { unlock: string }} Effect
+ * @typedef {{ flag: string }
+ *   | { item: string, to?: RewardTo, count?: number }   // a CATALOGUE item; default to 'chooser', count 1
+ *   | { unlock: string }} Effect
+ */
+/**
+ * Who gets an item reward: the chooser · rank 1 of the activity that completed the node (all when
+ * tied) · every non-left party member · one character.
+ * @typedef {'chooser' | 'winner' | 'all' | CharacterId} RewardTo
+ */
+/**
+ * A real object of the story (Contract F): only catalogue items can exist.
+ * @typedef {{ id: string, name: string, icon: string, description: string }} Item
  */
 
 /**
@@ -58,6 +70,7 @@ export {};
  *   start: string,              // where a NEW campaign starts (the false-start blocks tableau)
  *   chooser: CharacterId,       // whose walking opens doors ('elodie')
  *   nodes: Record<string, Node>,
+ *   items: Record<string, Item>, // the item catalogue (keys = ids)
  * }} Content
  */
 
@@ -67,7 +80,7 @@ export {};
  * @typedef {{
  *   counters: Record<string, number>,   // 'blocks.played', 'blocks.won.elodie', 'node.<id>.finished', …
  *   flags: string[],
- *   items: string[],
+ *   inventory: Record<string, Record<string, number>>,  // CharacterId → itemId → count (0 is removed)
  *   unlocked: string[],                 // derived by settle, never removed except by gm lock
  *   done: string[],                     // derived by settle (complete held), rewards applied once
  *   seen: string[],                     // nodes the party has entered
@@ -93,7 +106,7 @@ export {};
 
 /**
  * @typedef {{ seq: number, t: 'unlocked', node: string }
- *   | { seq: number, t: 'item', item: string }} News
+ *   | { seq: number, t: 'item', item: string, to: CharacterId[] }} News   // who got it
  */
 
 // ---------------------------------------------------------------- the campaign (persisted state)
@@ -126,7 +139,9 @@ export {};
  *   | { op: 'lock', node: string }                      // the ONLY way an unlock is taken back
  *   | { op: 'setFlag', flag: string, on: boolean }
  *   | { op: 'count', counter: string, set?: number, by?: number }
- *   | { op: 'reset-node', node: string }} GmOp          // forget done/seen + its finished counter (rewards stay applied)
+ *   | { op: 'reset-node', node: string }                // forget done/seen + its finished counter (rewards stay applied)
+ *   | { op: 'give', item: string, to: CharacterId, count?: number }     // catalogue item, default 1
+ *   | { op: 'take', item: string, from: CharacterId, count?: number }} GmOp  // refused when they hold fewer
  */
 
 /**

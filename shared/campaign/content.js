@@ -15,6 +15,22 @@ export function childrenOf(content, id) {
 }
 
 /**
+ * Item ids a condition refers to ({ has }), for validation.
+ * @param {Condition} c
+ * @returns {{ has: string, who?: string }[]}
+ */
+function hasOf(c) {
+  if (!c || typeof c !== 'object') return [];
+  if ('has' in c) return [c];
+  if ('all' in c) return c.all.flatMap(hasOf);
+  if ('any' in c) return c.any.flatMap(hasOf);
+  if ('not' in c) return hasOf(c.not);
+  return [];
+}
+
+const REWARD_TO = new Set(['chooser', 'winner', 'all']);
+
+/**
  * Node ids a condition refers to (done / unlocked), for validation.
  * @param {Condition} c
  * @returns {string[]}
@@ -38,6 +54,8 @@ function isCondition(c) {
   if ('done' in o) return typeof o.done === 'string';
   if ('unlocked' in o) return typeof o.unlocked === 'string';
   if ('count' in o) return typeof o.count === 'string' && typeof o.gte === 'number';
+  if ('has' in o) return typeof o.has === 'string' && (o.gte === undefined || (typeof o.gte === 'number' && o.gte >= 1))
+    && (o.who === undefined || o.who === 'anyone' || isCharacterId(o.who));
   if ('all' in o) return Array.isArray(o.all) && o.all.every(isCondition);
   if ('any' in o) return Array.isArray(o.any) && o.any.every(isCondition);
   if ('not' in o) return isCondition(o.not);
@@ -59,6 +77,16 @@ export function validateContent(content) {
   const start = nodes[content.start];
   if (!start) errors.push(`start "${content.start}" is not a node`);
   else if (start.activity?.kind !== 'blocks') errors.push(`start "${content.start}" must be a blocks tableau`);
+  // the item catalogue: only these can exist
+  const items = content.items;
+  if (!items || typeof items !== 'object' || Array.isArray(items)) errors.push('content needs an item catalogue: items: { [id]: { id, name, icon, description } }');
+  for (const [key, it] of Object.entries(items ?? {})) {
+    if (!it || it.id !== key) errors.push(`item "${key}": id "${it?.id}" differs from its key`);
+    for (const f of /** @type {const} */ (['name', 'icon', 'description'])) {
+      if (typeof it?.[f] !== 'string' || !it[f].trim()) errors.push(`item "${key}": missing ${f}`);
+    }
+  }
+  const knownItem = (/** @type {string} */ id) => !!items?.[id];
   const hubs = ids.filter((id) => nodes[id].parent === null);
   if (hubs.length !== 1) errors.push(`exactly one root (parent: null) expected, found ${hubs.length}: ${hubs.join(', ')}`);
 
@@ -79,7 +107,15 @@ export function validateContent(content) {
     for (const ref of [...refsOf(n.unlock), ...refsOf(n.complete ?? { always: true })]) {
       if (!nodes[ref]) errors.push(`${at}: condition refers to unknown node "${ref}"`);
     }
+    for (const h of [...hasOf(n.unlock), ...hasOf(n.complete ?? { always: true })]) {
+      if (!knownItem(h.has)) errors.push(`${at}: condition needs unknown item "${h.has}" (not in the catalogue)`);
+    }
     for (const e of n.rewards ?? []) {
+      if ('item' in e) {
+        if (!knownItem(e.item)) errors.push(`${at}: reward gives unknown item "${e.item}" (not in the catalogue)`);
+        if (e.to !== undefined && !REWARD_TO.has(e.to) && !isCharacterId(e.to)) errors.push(`${at}: reward to "${e.to}" is not chooser | winner | all | a character`);
+        if (e.count !== undefined && !(Number.isInteger(e.count) && e.count >= 1)) errors.push(`${at}: reward count must be a whole number ≥ 1`);
+      }
       if ('unlock' in e && !nodes[e.unlock]) errors.push(`${at}: reward unlocks unknown node "${e.unlock}"`);
       if (!('unlock' in e) && !('item' in e) && !('flag' in e)) errors.push(`${at}: invalid reward ${JSON.stringify(e)}`);
     }

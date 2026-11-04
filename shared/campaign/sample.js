@@ -2,7 +2,7 @@
 // y = 4.6): the rect is the rug in front of each doorway — walking onto it enters.
 // SAMPLE content with placeholder ids and copy: the engine's demo and test fixture. NO story here:
 // the user writes the real content later, in its own files, with the same shape.
-//   false start (blocks) → 3 block games → reward item + 'childhood' and 'teens' unlock AT ONCE
+//   false start (blocks) → 3 block games → the Old key (to the chooser) + 'childhood' and 'teens' unlock AT ONCE
 //   each world: a blocks tableau + a scene stub; both done → world done
 //   World 1 also has a quiz, opening once its block game is done
 //   both worlds done → 'adult' unlocks
@@ -13,6 +13,12 @@
 export const SAMPLE_CONTENT = {
   start: 'hub.false-start',
   chooser: 'elodie',
+  // the item catalogue (Contract F): only these can exist; placeholders until the user writes the story
+  items: {
+    'old-key': { id: 'old-key', name: 'Old key (placeholder)', icon: '🗝️', description: 'Opens something, one day. (placeholder)' },
+    ticket: { id: 'ticket', name: 'Ticket (placeholder)', icon: '🎟️', description: 'A prize for the best quiz player. (placeholder)' },
+    photo: { id: 'photo', name: 'Photo (placeholder)', icon: '📷', description: 'A souvenir for everyone. (placeholder)' },
+  },
   nodes: {
     hub: { id: 'hub', kind: 'hub', parent: null, title: 'Hub (placeholder)', unlock: { always: true } },
     'hub.false-start': {
@@ -20,7 +26,7 @@ export const SAMPLE_CONTENT = {
       activity: { kind: 'blocks' }, replayable: true,
       unlock: { always: true },
       complete: { count: 'blocks.played', gte: 3 },
-      rewards: [{ item: 'reward-1' }, { flag: 'false-start-over' }],
+      rewards: [{ item: 'old-key' }, { flag: 'false-start-over' }], // to the chooser (default)
       door: { x: 5.4, y: 4.7, w: 2, h: 1.2 },
     },
 
@@ -44,6 +50,7 @@ export const SAMPLE_CONTENT = {
       id: 'childhood.quiz', kind: 'tableau', parent: 'childhood', title: 'World 1 quiz (placeholder)',
       activity: { kind: 'quiz', settings: { count: 5, seconds: 20, mode: 'mixed' } }, replayable: true,
       unlock: { done: 'childhood.blocks' }, // opens after the world's block game (not in the 3-games moment)
+      rewards: [{ item: 'ticket', to: 'winner' }], // rank 1 of the quiz (every co-winner when tied)
       door: { x: 7, y: 4.7, w: 2, h: 1.2 },
     },
 
@@ -61,6 +68,7 @@ export const SAMPLE_CONTENT = {
     'teens.scene': {
       id: 'teens.scene', kind: 'tableau', parent: 'teens', title: 'World 2 scene (placeholder)',
       activity: { kind: 'scene', sceneId: 'teens-1' }, unlock: { always: true },
+      rewards: [{ item: 'photo', to: 'all' }], // everyone present gets one
       door: { x: 9.8, y: 4.7, w: 2, h: 1.2 },
     },
 

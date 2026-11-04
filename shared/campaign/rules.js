@@ -37,7 +37,26 @@ export const COUNTER = {
 
 /** @returns {Facts} */
 export function emptyFacts() {
-  return { counters: {}, flags: [], items: [], unlocked: [], done: [], seen: [], asked: [], totals: {} };
+  return { counters: {}, flags: [], inventory: {}, unlocked: [], done: [], seen: [], asked: [], totals: {} };
+}
+
+/** How many of an item a character holds. @param {Facts} f @param {string} character @param {string} item */
+export const holding = (f, character, item) => f.inventory?.[character]?.[item] ?? 0;
+
+/**
+ * Inventory with `n` (positive: give, negative: take) of an item for a character; counts never go
+ * below 0, and an emptied entry is removed. Same object when nothing changes.
+ * @param {Facts['inventory']} inv @param {string} character @param {string} item @param {number} n
+ * @returns {Facts['inventory']}
+ */
+export function addItem(inv, character, item, n) {
+  const had = inv[character]?.[item] ?? 0;
+  const next = Math.max(0, had + n);
+  if (next === had) return inv;
+  const { [item]: _old, ...rest } = inv[character] ?? {};
+  const mine = next > 0 ? { ...rest, [item]: next } : rest;
+  const { [character]: _c, ...others } = inv;
+  return Object.keys(mine).length ? { ...others, [character]: mine } : others;
 }
 
 /** @param {Facts} f @param {string} key */
@@ -55,6 +74,12 @@ export function holds(c, f) {
   if ('done' in c) return f.done.includes(c.done);
   if ('unlocked' in c) return f.unlocked.includes(c.unlocked);
   if ('count' in c) return count(f, c.count) >= c.gte;
+  if ('has' in c) {
+    const need = typeof c.gte === 'number' ? c.gte : 1;
+    const who = c.who ?? 'anyone';
+    if (who === 'anyone') return Object.keys(f.inventory ?? {}).some((ch) => holding(f, ch, c.has) >= need);
+    return holding(f, who, c.has) >= need;
+  }
   if ('all' in c) return Array.isArray(c.all) && c.all.every((x) => holds(x, f));
   if ('any' in c) return Array.isArray(c.any) && c.any.some((x) => holds(x, f));
   if ('not' in c) return !holds(c.not, f);
@@ -152,9 +177,10 @@ export function completeCondition(n) {
  * @param {Facts} facts
  * @param {Content} content
  * @param {number} [fromSeq]  last news seq handed out; new news are numbered fromSeq+1, +2…
+ * @param {SettleContext} [ctx]  who the item rewards go to (the party; the event that triggered this step)
  * @returns {{ facts: Facts, news: News[] }}
  */
-export function settle(facts, content, fromSeq = 0) {
+export function settle(facts, content, fromSeq = 0, ctx = {}) {
   /** @type {News[]} */
   const news = [];
   let f = facts;
@@ -164,7 +190,7 @@ export function settle(facts, content, fromSeq = 0) {
   /** @type {Record<string, number>} */
   const counters = { ...f.counters };
   const flags = new Set(f.flags);
-  const items = new Set(f.items);
+  let inventory = f.inventory ?? {};
   let changed = false;
 
   /** @param {string} id */
@@ -178,14 +204,18 @@ export function settle(facts, content, fromSeq = 0) {
   const apply = (e) => {
     if ('flag' in e) flags.add(e.flag);
     else if ('item' in e) {
-      if (!items.has(e.item)) { items.add(e.item); news.push({ seq: ++seq, t: 'item', item: e.item }); }
+      if (!content.items?.[e.item]) return; // only catalogue items can exist (validateContent reports it)
+      const to = recipients(e.to, content, ctx);
+      const n = Number.isInteger(e.count) && /** @type {number} */ (e.count) > 0 ? /** @type {number} */ (e.count) : 1;
+      for (const ch of to) inventory = addItem(inventory, ch, e.item, n);
+      if (to.length) news.push({ seq: ++seq, t: 'item', item: e.item, to: /** @type {import('../characters.js').CharacterId[]} */ (to) });
     } else if ('unlock' in e) unlock(e.unlock);
   };
 
   for (let pass = 0, again = true; again && pass < 1000; pass++) {
     again = false;
     /** @type {Facts} */
-    const view = { ...f, unlocked: [...unlocked], done: [...done], counters, flags: [...flags], items: [...items] };
+    const view = { ...f, unlocked: [...unlocked], done: [...done], counters, flags: [...flags], inventory };
     for (const n of Object.values(content.nodes)) {
       const parentOpen = n.parent === null || unlocked.has(n.parent);
       if (!unlocked.has(n.id) && parentOpen && !counters[COUNTER.locked(n.id)] && holds(n.unlock, view)) {
@@ -204,6 +234,54 @@ export function settle(facts, content, fromSeq = 0) {
     }
   }
   if (!changed) return { facts, news: [] };
-  f = { ...f, unlocked: [...unlocked], done: [...done], counters, flags: [...flags], items: [...items] };
+  f = { ...f, unlocked: [...unlocked], done: [...done], counters, flags: [...flags], inventory };
   return { facts: f, news };
+}
+
+/**
+ * Context for item rewards. `party`: the characters present (for 'all'); `event`: the finished
+ * activity that triggered this step (for 'winner': its rank-1 characters, all of them when tied).
+ * @typedef {{ party?: { order: string[], players: Record<string, { character: string | null, left: boolean }> },
+ *   event?: CampaignEvent }} SettleContext
+ */
+
+/**
+ * Who gets an item reward. 'chooser' (default) · 'winner' = rank 1 of the activity that completed
+ * the node (all when tied; no ranking in this step → the chooser) · 'all' = every non-left party
+ * member · a CharacterId. Deduplicated, in party order.
+ * @param {string | undefined} to @param {Content} content @param {SettleContext} ctx @returns {string[]}
+ */
+export function recipients(to, content, ctx) {
+  const target = to ?? 'chooser';
+  if (target === 'chooser') return [content.chooser];
+  if (target === 'all') {
+    const p = ctx.party;
+    const all = p ? p.order.map((id) => p.players[id]).filter((m) => m && !m.left && m.character).map((m) => /** @type {string} */ (m.character)) : [];
+    return all.length ? [...new Set(all)] : [content.chooser];
+  }
+  if (target === 'winner') {
+    const e = ctx.event;
+    const ranking = e && 'ranking' in e ? e.ranking : [];
+    const top = ranking.filter((r) => r.rank === 1 && r.character).map((r) => /** @type {string} */ (r.character));
+    return top.length ? [...new Set(top)] : [content.chooser];
+  }
+  return [target];
+}
+
+/**
+ * Inventory made safe for the current content: an older save's flat facts.items (shared by everyone)
+ * goes to the chooser, one each; entries whose item left the catalogue are dropped; counts ≤ 0 removed.
+ * @param {Partial<Facts> & { items?: unknown }} f @param {Content} content @returns {Facts['inventory']}
+ */
+export function migrateInventory(f, content) {
+  const known = (/** @type {string} */ id) => !!content.items?.[id];
+  /** @type {Facts['inventory']} */
+  let inv = {};
+  for (const [ch, items] of Object.entries(f.inventory ?? {})) {
+    for (const [id, n] of Object.entries(items ?? {})) if (known(id) && typeof n === 'number' && n > 0) inv = addItem(inv, ch, id, Math.floor(n));
+  }
+  if (Array.isArray(f.items)) {
+    for (const id of f.items) if (typeof id === 'string' && known(id) && !holding({ ...emptyFacts(), inventory: inv }, content.chooser, id)) inv = addItem(inv, content.chooser, id, 1);
+  }
+  return inv;
 }
