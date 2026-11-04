@@ -5,7 +5,7 @@
 // id is written here. Static controls are built once, so a view arriving mid-typing keeps inputs intact.
 import { $ } from './dom.js';
 import { createConfirm } from './confirm.js';
-import { holds, holding } from '../../shared/campaign/index.js';
+import { activityRunning, holds, holding } from '../../shared/campaign/index.js';
 import { childMarks, content, explain, nodeTree, onContentChange, titleOf } from './campaign-view.js';
 import { catalogue } from './bag.js';
 import { CHARACTERS } from '../../shared/characters.js';
@@ -140,7 +140,8 @@ export function createGmPanel(io) {
     const nodes = content().nodes;
     const here = nodes[c.at.node];
     $('gm-where').textContent = `The party is at: ${titleOf(c.at.node)}`;
-    const playing = c.at.activity?.phase === 'playing';
+    // the campaign's own rule (the one the server refuses enter/back by): a block game or quiz under way
+    const playing = activityRunning(c.at.activity);
     const back = /** @type {HTMLButtonElement} */ ($('gm-back'));
     back.hidden = !here?.parent;
     back.disabled = playing;

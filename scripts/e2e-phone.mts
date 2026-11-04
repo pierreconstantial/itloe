@@ -703,6 +703,12 @@ try {
   await H.tap('#quiz-start');
   expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), 'Start → the first question on both phones');
   expect(/\d:\d\d/.test(await Q.text('quiz-clock')), 'countdown shown', await Q.text('quiz-clock'));
+  // the game master's Back follows the server: refused while the quiz runs, so shown disabled
+  await H.tap('#btn-menu');
+  await H.tap('#btn-gm');
+  const gmBack = await H.ev(`(() => { const b = document.getElementById('gm-back'); return { disabled: b.disabled, text: b.textContent }; })()`);
+  expect(gmBack.disabled && /end the game first/.test(gmBack.text), 'game master during a question: Back disabled ("end the game first")', JSON.stringify(gmBack));
+  await H.ev(`document.querySelector('#sheet-gm [data-close]').click()`);
 
   // ---- quiz 1: choices. H taps the right one, Élodie a wrong one; override on the first reveal ----
   for (let round = 0; round < 3; round++) {
