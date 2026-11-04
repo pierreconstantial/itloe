@@ -69,7 +69,7 @@ Shared code arms one timer per deadline, as the two clocks do today. A stale tim
 
 The campaign stores the round's kind next to it in `campaign.at`. An older save without it gets a derived kind: a state with `kind: 'quiz'` is a quiz, a state without `kind` is blocks. A saved kind that isn't registered stops the boot with an error naming the kind, and leaves the save file untouched. Today a load failure starts a fresh evening and quarantines the save, so this case needs its own path.
 
-**Hosting.** The production release workflow runs `npm run check`, `npm test`, `e2e:resume` and `test/hosting.test.js`. Infrastructure's deploy check reads `room` at the top of the save file and expects a `view` as the first message on a socket; every save change keeps both. A deploy restarts the server, mid-evening too, and relies on resume. A deploy that meets a save with an unregistered kind stops at boot, and Infrastructure restores the previous release and its saved data.
+**Hosting.** The evening runs hosted on Konstantin's server, not on a laptop, so a phone's Wi-Fi or internet dropping is likelier on the night than the server going down. The production release workflow runs `npm run check`, `npm test`, `e2e:resume` and `test/hosting.test.js`. Infrastructure's deploy check reads `room` at the top of the save file and expects a `view` as the first message on a socket; every save change keeps both. A deploy restarts the server, mid-evening too, and relies on resume. A deploy that meets a save with an unregistered kind stops at boot, and Infrastructure restores the previous release and its saved data.
 
 ### Players, rounds and the host: the RPG owns them
 
@@ -162,7 +162,10 @@ Before phase 1, in this order, on today's code:
 4. **The quiz's lobby becomes the room,** like the block lobby. The TV shows the party room with the "Quiz!" band; phones show the joystick with the object button, the settings and the host's Start.
 5. **The quiz's end follows the block flow.** On the phone, "Play again" starts a new quiz at once, and "Back to the room" returns to the room at the tableau.
 
-Between 3 and 4, a test-only commit adds end-to-end tests of chat, emotes and object actions as they work today: a socket-level check, and a TV screenshot with a speech bubble and an emote. Behaviour change 4 extends the object-action check to the room at a quiz tableau.
+Between 3 and 4:
+
+- Test-only commits fix two races in `e2e-phone.mts` (the typed quiz reads the next question before it shows; the reclaim check records the score before the server's answer), and add end-to-end tests of chat, emotes and object actions as they work today: a socket-level check, and a TV screenshot with a speech bubble and an emote. Behaviour change 4 extends the object-action check to the room at a quiz tableau.
+- **Found during the work: the phone's connection banner.** When the server is gone or the network drops, the phone's first reconnect attempt fails within the banner's 700 ms grace, and that second failure cancels the banner for good: the phone shows a frozen screen instead of "reconnecting". `e2e-phone` part 1's "server down: banner" check fails for this reason. An investigation is confirming the cause; once it does, the fix is its own behaviour-change commit, approved by Konstantin.
 
 Right after phase 3:
 
