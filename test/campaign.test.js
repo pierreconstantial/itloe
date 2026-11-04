@@ -147,7 +147,7 @@ test('game.finished is derived exactly once per game, in the same step, any end 
   const timed = run(newCampaign(C, 5), { t: 'join', id: 'e', character: 'elodie' },
     { t: 'activity', action: { t: 'config', id: 'e', patch: { mode: 'timed' } } },
     { t: 'activity', action: { t: 'start', id: 'e', now: 1000 } });
-  const d = /** @type {number} */ (timed.at.activity?.deadline);
+  const d = /** @type {number} */ (/** @type {any} */ (timed.at.activity)?.deadline);
   const rung = run(timed, { t: 'activity', action: { t: 'timeUp', deadline: d } });
   assert.equal(rung.facts.counters[COUNTER.blocksPlayed], 1);
   assert.notEqual(playing.facts, c.facts);

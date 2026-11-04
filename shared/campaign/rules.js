@@ -20,11 +20,10 @@ export const COUNTER = {
   locked: (node) => `node.${node}.locked`,
   /** @param {string} node — set when its rewards were applied: they never apply twice */
   rewarded: (node) => `node.${node}.rewarded`,
-  /** @param {string} quizId */
-  quizAnswered: (quizId) => `quiz.${quizId}.answered`,
-  /** @param {string} quizId */
-  quizCorrect: (quizId) => `quiz.${quizId}.correct`,
+  quizPlayed: 'quiz.played',
   /** @param {string} character */
+  quizWon: (character) => `quiz.won.${character}`,
+  /** @param {string} character — right answers across every quiz of the evening */
   correctBy: (character) => `quiz.correct.${character}`,
   /** @param {string} sceneId */
   sceneSeen: (sceneId) => `scene.${sceneId}.seen`,
@@ -34,7 +33,7 @@ export const COUNTER = {
 
 /** @returns {Facts} */
 export function emptyFacts() {
-  return { counters: {}, flags: [], items: [], unlocked: [], done: [], seen: [], totals: {} };
+  return { counters: {}, flags: [], items: [], unlocked: [], done: [], seen: [], asked: [], totals: {} };
 }
 
 /** @param {Facts} f @param {string} key */
@@ -87,11 +86,22 @@ export function record(f, e) {
       }
       return bump(f, add, totals);
     }
-    case 'quiz.answered':
-      return bump(f, {
-        [COUNTER.quizAnswered(e.quizId)]: 1,
-        ...(e.correct ? { [COUNTER.quizCorrect(e.quizId)]: 1, [COUNTER.correctBy(e.character)]: 1 } : {}),
-      });
+    case 'quiz.finished': {
+      /** @type {Record<string, number>} */
+      const add = { [COUNTER.quizPlayed]: 1, [COUNTER.finished(e.node)]: 1 };
+      /** @type {Record<string, number>} */
+      const totals = {};
+      for (const r of e.ranking) {
+        if (!r.character) continue;
+        totals[r.character] = (totals[r.character] ?? 0) + r.score;
+        if (r.correct > 0) add[COUNTER.correctBy(r.character)] = r.correct;
+        if (r.rank === 1 && e.ranking.length > 1) add[COUNTER.quizWon(r.character)] = 1;
+      }
+      const bumped = bump(f, add, totals);
+      const known = new Set(f.asked ?? []);
+      const fresh = (e.asked ?? []).filter((id) => typeof id === 'string' && !known.has(id));
+      return fresh.length ? { ...bumped, asked: [...(f.asked ?? []), ...fresh] } : bumped;
+    }
     case 'scene.seen':
       return bump(f, { [COUNTER.sceneSeen(e.sceneId)]: 1, ...(e.node ? { [COUNTER.finished(e.node)]: 1 } : {}) });
     case 'zone.entered':

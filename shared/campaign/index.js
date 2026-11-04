@@ -6,7 +6,8 @@
 //   fromLegacyState(state, content)          → Campaign wrapping a saved bare block State (any phase)
 //   loadCampaign(raw, content)               → Campaign; drops ids the content no longer has, re-settles
 //   reduceCampaign(campaign, action, content)→ Campaign; actions: join leave enter back activity event ack gm
-//   activityOf(campaign)                     → the live block State, or null
+//   activityOf(campaign)                     → the live activity State (block game or quiz), or null
+//   activityRunning(state)                   → a game / quiz is under way (enter/back refused)
 //   isUnlocked(campaign, nodeId) · nodeAt(campaign, content)
 //   holds(cond, facts) · record(facts, event) · settle(facts, content, fromSeq) → { facts, news }
 //   validateContent(content) → string[] · zoneAt(content, nodeId, x, y) → child id | null
@@ -18,6 +19,7 @@
 
 import { CHARACTERS, isCharacterId } from '../characters.js';
 import { initState, ranking, reduce } from '../game.js';
+import { initQuiz, reduceQuiz, quizRanking, quizRunning } from '../quiz/index.js';
 import { emptyFacts, holds, record, settle, COUNTER } from './rules.js';
 import { validateContent, zoneAt, childrenOf } from './content.js';
 import { SAMPLE_CONTENT } from './sample.js';
@@ -34,6 +36,8 @@ export { holds, record, settle, emptyFacts, COUNTER, validateContent, zoneAt, ch
 /** @typedef {import('./types.js').Party} Party */
 /** @typedef {import('./types.js').PartyMember} PartyMember */
 /** @typedef {import('../game.js').State} BlockState */
+/** @typedef {import('../quiz/index.js').QuizState} QuizState */
+/** @typedef {import('./types.js').ActivityState} ActivityState */
 
 /** Deterministic seed step (same LCG family as the game's own). @param {number} s */
 const nextSeed = (s) => (Math.imul(s >>> 0, 1103515245) + 12345) >>> 0;
@@ -60,23 +64,58 @@ const emptyParty = () => ({ order: [], players: {}, hostId: null });
 const quietSettle = (facts, content) => settle(facts, content, 0).facts;
 
 /**
- * Block lobby for a blocks tableau, seeded with every non-left party member (host = party host).
- * Not a blocks tableau → null.
- * @param {Node | undefined} node @param {Party} party @param {number} seed
- * @returns {BlockState | null}
+ * What the engine needs from each kind of nested activity (Contract E: blocks and quiz). A new kind of
+ * game plugs in here: how it starts (a lobby), how actions drive it, when it is under way, and the
+ * event it reports when it finishes (derived HERE, in the same step: exactly once).
+ * @typedef {{
+ *   init: (seed: number, settings: any) => ActivityState,
+ *   reduce: (s: any, action: any) => ActivityState,
+ *   running: (s: any) => boolean,
+ *   finished: (s: any, node: string) => CampaignEvent,
+ * }} ActivityKind
  */
-function blockLobby(node, party, seed) {
-  if (node?.activity?.kind !== 'blocks') return null;
-  let s = initState(seed, node.activity.settings);
+/** @type {Record<'blocks' | 'quiz', ActivityKind>} */
+const ACTIVITIES = {
+  blocks: {
+    init: (seed, settings) => initState(seed, settings),
+    reduce: (s, a) => reduce(s, a),
+    running: (s) => s.phase === 'playing',
+    finished: (s, node) => finishedEvent(s, node),
+  },
+  quiz: {
+    init: (seed, settings) => initQuiz(seed, settings),
+    reduce: (s, a) => reduceQuiz(s, a),
+    running: (s) => quizRunning(s),
+    finished: (s, node) => quizFinishedEvent(s, node),
+  },
+};
+
+/** @param {ActivityState} s @returns {ActivityKind} */
+const kindOf = (s) => ACTIVITIES['kind' in s && s.kind === 'quiz' ? 'quiz' : 'blocks'];
+
+/** A game or quiz is under way (no enter/back until it ends). @param {ActivityState | null} s */
+export const activityRunning = (s) => !!s && kindOf(s).running(s);
+
+/**
+ * The lobby of a tableau's activity (blocks or quiz), seeded with every non-left party member (host =
+ * party host). No such activity (a scene) → null.
+ * @param {Node | undefined} node @param {Party} party @param {number} seed
+ * @returns {ActivityState | null}
+ */
+function activityLobby(node, party, seed) {
+  const kind = node?.activity?.kind;
+  if (kind !== 'blocks' && kind !== 'quiz') return null;
+  const spec = ACTIVITIES[kind];
+  let s = spec.init(seed, /** @type {any} */ (node?.activity)?.settings);
   for (const id of party.order) {
     const m = party.players[id];
-    if (!m.left && m.character) s = reduce(s, { t: 'join', id, character: m.character });
+    if (!m.left && m.character) s = spec.reduce(s, { t: 'join', id, character: m.character });
   }
   return syncHost(s, party);
 }
 
 /** The party is the authority on who hosts: mirror it into the nested game when that player is seated. */
-/** @param {BlockState} s @param {Party} party @returns {BlockState} */
+/** @template {ActivityState} S @param {S} s @param {Party} party @returns {S} */
 function syncHost(s, party) {
   const h = party.hostId;
   if (h !== null && s.players[h] && !s.players[h].left && s.hostId !== h) return { ...s, hostId: h };
@@ -93,7 +132,7 @@ export function newCampaign(content, seed) {
   const facts = quietSettle({ ...emptyFacts(), seen: [content.start] }, content);
   return {
     v: 1, seed: nextSeed(seed), party, facts, news: [], newsSeq: 0,
-    at: { node: content.start, activity: blockLobby(content.nodes[content.start], party, seed) },
+    at: { node: content.start, activity: activityLobby(content.nodes[content.start], party, seed) },
   };
 }
 
@@ -140,7 +179,7 @@ export function loadCampaign(raw, content) {
   const keep = known(raw.at?.node); // else a fresh lobby is built at the start, which consumes a seed
   const at = keep
     ? { node: raw.at.node, activity: raw.at.activity ?? null }
-    : { node: content.start, activity: blockLobby(content.nodes[content.start], party, seed) };
+    : { node: content.start, activity: activityLobby(content.nodes[content.start], party, seed) };
   const s = settle(facts, content, newsSeq);
   return {
     v: 1, seed: keep ? seed : nextSeed(seed), party, at,
@@ -177,31 +216,42 @@ function finishedEvent(s, node) {
   };
 }
 
+/** quiz.finished for a nested quiz that just finished. @param {QuizState} s @param {string} node @returns {CampaignEvent} */
+function quizFinishedEvent(s, node) {
+  return {
+    t: 'quiz.finished', node,
+    ranking: quizRanking(s).map((r) => ({ character: s.players[r.id].character ?? null, score: r.score, rank: r.rank, correct: r.correct })),
+    asked: [...s.asked], endReason: s.endReason,
+  };
+}
+
 /** Moves the party to a node, creating its activity. @param {Campaign} c @param {string} node @param {Content} content @returns {Campaign} */
 function moveTo(c, node, content) {
-  const activity = blockLobby(content.nodes[node], c.party, c.seed);
+  const activity = activityLobby(content.nodes[node], c.party, c.seed);
   const facts = { ...c.facts, seen: withId(c.facts.seen, node) };
   return withFacts({ ...c, seed: activity ? nextSeed(c.seed) : c.seed, at: { node, activity } }, facts, content);
 }
 
 /**
- * Installs a new nested block State; a playing → finished transition records game.finished and
- * settles in the SAME step. A block lobby picks up party members it is missing (joined mid-game).
- * @param {Campaign} c @param {BlockState} next @param {Content} content @returns {Campaign}
+ * Installs a new nested activity State; an under-way → finished transition records its finished event
+ * (game.finished / quiz.finished) and settles in the SAME step. A lobby picks up party members it is
+ * missing (joined mid-game).
+ * @param {Campaign} c @param {ActivityState} next @param {Content} content @returns {Campaign}
  */
 function withActivity(c, next, content) {
   const prev = c.at.activity;
+  const spec = kindOf(next);
   if (next.phase === 'lobby') {
     for (const id of c.party.order) {
       const m = c.party.players[id];
-      if (!m.left && m.character && !next.players[id]) next = reduce(next, { t: 'join', id, character: m.character });
+      if (!m.left && m.character && !next.players[id]) next = spec.reduce(next, { t: 'join', id, character: m.character });
     }
   }
   next = syncHost(next, c.party);
   if (next === prev) return c;
   const moved = { ...c, at: { ...c.at, activity: next } };
-  if (prev?.phase === 'playing' && next.phase === 'finished') {
-    return withFacts(moved, record(c.facts, finishedEvent(next, c.at.node)), content);
+  if (prev && spec.running(prev) && next.phase === 'finished') {
+    return withFacts(moved, record(c.facts, spec.finished(next, c.at.node)), content);
   }
   return moved;
 }
@@ -239,7 +289,7 @@ export function reduceCampaign(c, a, content) {
       const moved = { ...c, party: { ...c.party, hostId, players: { ...c.party.players, [a.id]: { ...m, left: true } } } };
       const s = c.at.activity;
       if (!s) return moved;
-      const next = s.players[a.id] ? reduce(s, { t: 'leave', id: a.id }) : s;
+      const next = s.players[a.id] ? kindOf(s).reduce(s, { t: 'leave', id: a.id }) : s;
       return withActivity(moved, next, content); // a lobby drops them, a game marks them done (left)
     }
 
@@ -250,7 +300,7 @@ export function reduceCampaign(c, a, content) {
       if (!isHost(c, a.id) && !chooser) return c;
       const n = content.nodes[a.node];
       if (!n || n.parent !== c.at.node || !isUnlocked(c, n.id)) return c;
-      if (c.at.activity?.phase === 'playing') return c;
+      if (activityRunning(c.at.activity)) return c;
       if (n.kind === 'tableau' && c.facts.done.includes(n.id) && !n.replayable) return c; // one-shot, already seen
       return moveTo(c, n.id, content);
     }
@@ -258,14 +308,14 @@ export function reduceCampaign(c, a, content) {
     case 'back': {
       if (!isHost(c, a.id)) return c;
       const n = content.nodes[c.at.node];
-      if (!n || n.parent === null || c.at.activity?.phase === 'playing') return c; // endGame first
+      if (!n || n.parent === null || activityRunning(c.at.activity)) return c; // endGame first
       return moveTo(c, n.parent, content);
     }
 
     case 'activity': {
       const s = c.at.activity;
       if (!s) return c;
-      return withActivity(c, reduce(s, a.action), content);
+      return withActivity(c, kindOf(s).reduce(s, a.action), content); // routed by the activity's kind
     }
 
     case 'event': {

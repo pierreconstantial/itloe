@@ -78,6 +78,39 @@ injected by the server (socket → playerId; screens: `"screen"`), never taken f
   the engine in the SAME step, and the server saves once per step: a kill -9 persists both or neither, so
   a restart on the podium never counts a game twice.
 
+### Quiz (Contract E + addendum E1): a tableau `activity: { kind: 'quiz', settings }`
+
+The bank (`data/quiz/*.json`) stays on the server and is never served. While a quiz runs, `start`, `endGame`,
+`newGame` and `config` (host) go to the quiz; block-only messages get `err "not-playing"`.
+
+```jsonc
+{ "t": "start" }                       // host, quiz lobby/finished: picks `count` questions among the bank (filtered by the
+                                       // settings, minus every question asked this evening); none left → err "refused"
+{ "t": "answer", "choice": 2 }         // a choice round: the DISPLAYED index (choices are shuffled per round)
+{ "t": "answer", "text": "Victor Hugo" } // a text round. Once per round, before the deadline; else err "refused".
+                                       // The server judges it (choice: index; text: local French matcher; 'uncertain' →
+                                       // the pluggable judge, 4 s timeout, none for now → wrong) and only the verdict
+                                       // enters the reducer. The last answer closes the round at once.
+{ "t": "next" }                        // host, on the reveal: next question, or finished after the last
+{ "t": "override", "target": "p-abc", "ok": true }   // host, on the reveal: fixes any answer, both ways, re-scoring it
+{ "t": "config", "patch": { "count": 10, "seconds": 20, "mode": "mixed" } }  // host, quiz lobby/finished
+                                       // (count 3–30, seconds 10–60 step 5, mode choice | text | mixed; also
+                                       // categories: string[] | null, level: 1 | 2 | 3 | null)
+```
+
+- **Never the answer before the reveal:** during a quiz `view.state` is null (block clients never see a quiz),
+  `view.quiz` is the PUBLIC projection (shared/quiz/bank.js `projectQuiz`), and `view.campaign.at.activity`
+  carries the same projection. During `question`: the question text, category, level, the displayed choices
+  (choice rounds), and `answered` (who answered, never what). From `reveal` on: `answers` (choice/text, ok,
+  points) and `answer` `{ choice: displayed index | null, text }`.
+- **Scoring:** right = 100 + up to 50 for speed (linear on the time left); wrong or none = 0.
+- **Timed fairness:** an open question's deadline shifts on resume and after a suspended laptop, like the timed
+  block game. An answer left waiting for the judge when the server stopped is never re-judged: it is wrong,
+  and the host can override it.
+- **Campaign:** a finished quiz (last question, or the host's endGame) records `quiz.finished` in the same
+  step: counters `quiz.played`, `quiz.won.<character>`, `quiz.correct.<character>`, `node.<id>.finished`,
+  totals per character, and the shown question ids appended to `facts.asked` (never asked again).
+
 ## Server → client
 
 ```jsonc

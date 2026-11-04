@@ -13,7 +13,10 @@ import { makeStaticHandler } from './static.ts';
 import { makeApiHandler } from './http-api.ts';
 import { pickLan } from './lan.ts';
 import { makeClock } from './clock.ts';
-import { shiftDeadline } from './resume.ts';
+import { activityDeadline, isQuiz, shiftActivityDeadline, type ActivityState } from './resume.ts';
+import { loadBank, makeQuizClock, nullJudge, withTimeout } from './quiz.ts';
+import { candidatesFor, judgeAnswer, projectQuiz } from '../shared/quiz/bank.js';
+import { MAX_TEXT, type QuizAction, type QuizState } from '../shared/quiz/index.js';
 import { makeBests } from './bests.ts';
 import { CHARACTERS, isCharacterId } from '../shared/characters.js';
 import type { CharacterId } from '../shared/campaign/types.js';
@@ -37,8 +40,18 @@ assertContent(CONTENT); // broken content: refuse to boot, with every problem li
 const loaded = loadGame(FORCE_NEW, CONTENT);
 const game: Game = { campaign: loaded.campaign, room: loaded.room, bestPrevious: loaded.bestPrevious ?? null };
 
-/** The live block game (the campaign's nested activity), or null on the hub / in a world. */
-const activity = (): State | null => game.campaign.at.activity;
+/** The quiz question bank (data/quiz/*.json): validated at boot, never served (it holds the answers). */
+const bank = loadBank();
+/** Typed answers the local matcher finds 'uncertain' go to this judge (E1: the null judge for now). */
+const JUDGE_TIMEOUT_MS = 4000;
+const judge = withTimeout(nullJudge, JUDGE_TIMEOUT_MS);
+
+/** The campaign's nested activity (block game or quiz), or null on the hub / in a world / a scene. */
+const activity = (): ActivityState | null => game.campaign.at.activity;
+/** The block game, when that is what runs (block-only messages, bests, the block clock). */
+const blocks = (): State | null => { const s = activity(); return s && !isQuiz(s) ? s : null; };
+/** The quiz, when that is what runs. */
+const quiz = (): QuizState | null => { const s = activity(); return isQuiz(s) ? s : null; };
 const party = () => game.campaign.party;
 
 const bests = makeBests(game);
@@ -46,6 +59,7 @@ const bests = makeBests(game);
 // beat() first: after a suspend, the overdue bell may run before the heartbeat; the beat shifts the
 // deadline, so this timeUp no longer matches it and the reducer ignores it (the new one is armed).
 const clock = makeClock((deadline) => { beat(); applyGame({ t: 'timeUp', deadline }); });
+const quizClock = makeQuizClock((deadline) => { beat(); applyQuiz({ t: 'close', deadline }); });
 
 /** Avatar positions: in memory only, outside the reducer (see pos.ts). */
 const positions = makePositions<WebSocket>();
@@ -53,13 +67,17 @@ const positions = makePositions<WebSocket>();
 const zones = new Map<string, string | null>();
 
 const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
-  (prev, next) => { // before saveGame: it sets game.bestPrevious
+  (prev, next) => { // before saveGame: it sets game.bestPrevious (solo block games only)
     const a = prev.at.activity, b = next.at.activity;
-    if (a && b) bests.onChange(a, b);
-    else if (!b) game.bestPrevious = null;
+    if (a && b && !isQuiz(a) && !isQuiz(b)) bests.onChange(a, b);
+    else if (!b || isQuiz(b)) game.bestPrevious = null;
   },
   () => saveGame(game), // ONE atomic save per step: a finished game and its recorded facts land together
-  (prev, next) => { if (next.at.activity) clock.onChange(prev.at.activity, next.at.activity); },
+  (prev, next) => {
+    const a = prev.at.activity, b = next.at.activity;
+    if (b && !isQuiz(b)) clock.onChange(a && !isQuiz(a) ? a : null, b);
+    if (isQuiz(b)) quizClock.onChange(isQuiz(a) ? a : null, b);
+  },
   (_prev, next) => positions.prune(next.party),
   (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
   () => broadcast(),
@@ -72,7 +90,12 @@ function apply(action: CampaignAction): boolean {
 
 /** A block-game action, already rebuilt field by field, into the nested activity. */
 function applyGame(action: ServerAction): boolean {
-  return apply({ t: 'activity', action });
+  return blocks() !== null && apply({ t: 'activity', action });
+}
+
+/** A quiz action, already rebuilt field by field (ids, now, candidates, verdicts injected here). */
+function applyQuiz(action: QuizAction): boolean {
+  return quiz() !== null && apply({ t: 'activity', action });
 }
 
 /** Installs a new campaign and runs every change hook; false when nothing changed. */
@@ -98,8 +121,8 @@ function beat(): void {
   lastBeat = now;
   const c = game.campaign;
   const s = c.at.activity;
-  if (!s || s.phase !== 'playing' || s.deadline === null) return;
-  const shifted = gap > SUSPEND_GAP_MS ? shiftDeadline(s, now - gap + BEAT_MS, now) : s;
+  if (activityDeadline(s) === null || !s) return; // nothing on a clock (a timed block game, an open quiz question)
+  const shifted = gap > SUSPEND_GAP_MS ? shiftActivityDeadline(s, now - gap + BEAT_MS, now) : s;
   // a server-owned input moved: installed directly (not an engine transition), like the resume shift
   if (shifted !== s && commit({ ...c, at: { ...c.at, activity: shifted } })) {
     console.log(`[bloko] process was suspended ${Math.round(gap / 1000)} s — timed clock paused for that long`);
@@ -146,11 +169,19 @@ const online = (): string[] => party().order.filter((id) => sockets.get(id)?.rea
 
 /** `state` = the nested block game (null outside one), kept for clients that read it directly;
  *  `campaign` = the whole evening (TV hub/cutscenes, phone host panel). */
+/** The public quiz (never an answer before the reveal: shared/quiz/bank.js projectQuiz). */
+const publicQuiz = (s: QuizState) => projectQuiz(s, (id) => bank.byId.get(id));
+
+/** `state` stays the BLOCK game only (null during a quiz: block clients never see a quiz); `quiz` is the
+ *  projected quiz; the campaign travels with its quiz projected the same way (raw verdicts would leak). */
 const viewMsg = () => {
-  const s = activity();
+  const b = blocks();
+  const q = quiz();
+  const pq = q ? publicQuiz(q) : null;
+  const campaign = pq ? { ...game.campaign, at: { ...game.campaign.at, activity: pq } } : game.campaign;
   return JSON.stringify({
-    t: 'view', state: s, campaign: game.campaign, contentVersion: CONTENT_VERSION,
-    online: online(), now: Date.now(), best: s ? bests.view(s) : undefined,
+    t: 'view', state: b, quiz: pq, campaign, contentVersion: CONTENT_VERSION,
+    online: online(), now: Date.now(), best: b ? bests.view(b) : undefined,
   });
 };
 
@@ -313,10 +344,15 @@ function handleMessage(ws: WebSocket, m: any): void {
 
   // everything below needs an identified member; actions are rebuilt field by field,
   // so server-only inputs (now, deadline, timeUp) and ids can never come from the wire
-  if (!['start', 'again', 'newGame', 'endGame', 'retire', 'place', 'config', 'leave', 'enter', 'back', 'gm'].includes(m.t)) return;
+  if (!['start', 'again', 'newGame', 'endGame', 'retire', 'place', 'config', 'leave', 'enter', 'back', 'gm',
+    'answer', 'next', 'override'].includes(m.t)) return;
   const id = who.get(ws);
   if (!id) { sendErr(ws, 'unknown-player'); return; }
-  const s = activity();
+  // a quiz runs here: its own messages, and the shared names (start, endGame, newGame, config) go to it
+  const q = quiz();
+  if (q && !['leave', 'enter', 'back', 'gm'].includes(m.t)) { handleQuiz(ws, id, m, q); return; }
+  if (['answer', 'next', 'override'].includes(m.t)) { sendErr(ws, 'not-playing'); return; }
+  const s = blocks();
   const hostOfGame = s !== null && id === s.hostId;
   const phase = s?.phase ?? null;
 
@@ -392,6 +428,68 @@ function handleMessage(ws: WebSocket, m: any): void {
   }
 }
 
+/** Quiz messages (Contract E + E1). The answer is judged HERE, from the bank, and only its verdict enters
+ *  the reducer; an 'uncertain' typed answer goes to the pluggable judge (bounded by a timeout). */
+function handleQuiz(ws: WebSocket, id: string, m: any, q: QuizState): void {
+  const host = id === q.hostId;
+  const refusal = (): ErrCode => (host ? 'refused' : 'not-host');
+  switch (m.t) {
+    case 'start': {
+      // candidates: the bank filtered by the quiz settings, minus every question asked this evening
+      const candidates = candidatesFor(bank.questions, q.settings, game.campaign.facts.asked ?? []);
+      if (!applyQuiz({ t: 'start', id, now: Date.now(), candidates })) sendErr(ws, refusal());
+      return;
+    }
+
+    case 'answer': {
+      const r = q.round;
+      const question = r ? bank.byId.get(r.questionId) : undefined;
+      if (q.phase !== 'question' || !r || !question) { sendErr(ws, 'not-playing'); return; }
+      const given = r.asChoice
+        ? (Number.isInteger(m.choice) ? { choice: m.choice as number } : null)
+        : (typeof m.text === 'string' && m.text.trim() ? { text: m.text.trim().slice(0, MAX_TEXT) } : null);
+      if (!given) { sendErr(ws, 'refused'); return; }
+      const verdict = judgeAnswer(question, r, given);
+      if (!applyQuiz({ t: 'answer', id, ...given, now: Date.now(), verdict })) { sendErr(ws, 'refused'); return; }
+      if (verdict === 'uncertain' && 'text' in given) {
+        const { index, questionId } = r;
+        void judge(question, given.text).then((ok) => {
+          const now = quiz()?.round;
+          // only for the same round: a late verdict never lands on the next question's answer
+          if (now && now.index === index && now.questionId === questionId) applyQuiz({ t: 'verdict', target: id, ok });
+        });
+      }
+      return;
+    }
+
+    case 'next':
+      if (!applyQuiz({ t: 'next', id, now: Date.now() })) sendErr(ws, refusal());
+      return;
+
+    case 'override':
+      // host, on the reveal: any answer, both ways
+      if (typeof m.target !== 'string' || typeof m.ok !== 'boolean') return;
+      if (!applyQuiz({ t: 'override', id, target: m.target, ok: m.ok })) sendErr(ws, refusal());
+      return;
+
+    case 'endGame':
+    case 'newGame':
+      if (!applyQuiz({ t: m.t, id })) sendErr(ws, host ? 'refused' : 'not-host');
+      return;
+
+    case 'config':
+      if (!isPlainObject(m.patch)) return;
+      if (!applyQuiz({ t: 'config', id, patch: m.patch as Partial<QuizState['settings']> })) {
+        if (!host) sendErr(ws, 'not-host');
+        else if (q.phase === 'question' || q.phase === 'reveal') sendErr(ws, 'locked');
+      }
+      return;
+
+    default: // block-only (again, place, retire): not a quiz thing
+      sendErr(ws, 'not-playing');
+  }
+}
+
 // Dead-socket sweep: a phone that vanished (battery, Wi-Fi, lid) often never sends a TCP close, and
 // would stay "online" — blocking its character's reclaim. Ping every PING_MS; no pong by the next
 // sweep → terminate (close handler then broadcasts it offline). Browsers answer pings natively.
@@ -453,12 +551,15 @@ wss.on('connection', (ws) => {
 // ---------- start ----------
 
 saveGame(game); // a --new start must not let the next plain start resume the old game (and a v1 save is now v2)
+// resumed timed game or open quiz question: re-arm (fires at once if the deadline passed while down)
 const resumed = activity();
-if (resumed) clock.onChange(null, resumed); // resumed timed game: re-arm (fires at once if the deadline passed while down)
+if (resumed && !isQuiz(resumed)) clock.onChange(null, resumed);
+if (isQuiz(resumed)) quizClock.onChange(null, resumed);
 
 httpServer.listen(PORT, () => {
   console.log(`[bloko] ${loaded.how}`);
   console.log(`[bloko] saving to ${STATE_FILE}`);
+  console.log(`[bloko] quiz bank: ${bank.questions.length} questions (${bank.files.join(', ') || 'no files'}), judge: none (uncertain typed answers → wrong, host overrides)`);
   console.log(`[bloko] server → http://localhost:${PORT}/  (screen: /screen/, play: /play/, sim: /sim/)`);
   if (!lan) {
     console.log('[bloko] no LAN IPv4 detected (internal interfaces only) — set BLOKO_HOST to the address phones reach');

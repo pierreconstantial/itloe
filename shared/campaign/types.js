@@ -3,6 +3,11 @@
 export {};
 
 /** @typedef {import('../game.js').State} BlockState */
+/** @typedef {import('../quiz/index.js').QuizState} QuizState */
+/** @typedef {import('../quiz/index.js').QuizSettings} QuizSettings */
+/** @typedef {import('../quiz/index.js').QuizAction} QuizAction */
+/** The nested activity a tableau runs: the block game, or a quiz (Contract E: `kind: 'quiz'`). */
+/** @typedef {BlockState | QuizState} ActivityState */
 /** @typedef {import('../game.js').Settings} Settings */
 /** @typedef {import('../characters.js').CharacterId} CharacterId */
 
@@ -26,7 +31,7 @@ export {};
 /**
  * @typedef {{ kind: 'blocks', settings?: Partial<Settings> }
  *   | { kind: 'scene', sceneId: string }
- *   | { kind: 'quiz', quizId: string }} Activity
+ *   | { kind: 'quiz', settings?: Partial<QuizSettings> }} Activity     // questions from the server's bank (E1)
  */
 
 /** Door rectangle in world units (16 × 9), on a hub/world child: walking INTO it enters the node. */
@@ -66,6 +71,7 @@ export {};
  *   unlocked: string[],                 // derived by settle, never removed except by gm lock
  *   done: string[],                     // derived by settle (complete held), rewards applied once
  *   seen: string[],                     // nodes the party has entered
+ *   asked: string[],                    // quiz question ids already asked this evening (never asked again)
  *   totals: Record<string, number>,     // CharacterId → points across the evening
  * }} Facts
  */
@@ -76,7 +82,9 @@ export {};
  * @typedef {{ t: 'game.finished', kind: 'blocks', node: string,
  *     ranking: { character: CharacterId | null, score: number, rank: number }[],
  *     mode: string, size: number, endReason: 'stuck' | 'time' | 'host' | null }
- *   | { t: 'quiz.answered', quizId: string, character: CharacterId, correct: boolean }
+ *   | { t: 'quiz.finished', node: string,
+ *       ranking: { character: CharacterId | null, score: number, rank: number, correct: number }[],
+ *       asked: string[], endReason: 'done' | 'host' | null }
  *   | { t: 'scene.seen', sceneId: string, node?: string }
  *   | { t: 'zone.entered', zone: string, character: CharacterId }} CampaignEvent
  */
@@ -101,7 +109,7 @@ export {};
  * @typedef {{
  *   v: 1,
  *   seed: number,                                   // advanced on every block game created (deterministic)
- *   at: { node: string, activity: BlockState | null },
+ *   at: { node: string, activity: ActivityState | null },
  *   party: Party,
  *   facts: Facts,
  *   news: News[],                                   // not yet celebrated on the TV
@@ -128,7 +136,7 @@ export {};
  *   | { t: 'leave', id: string }
  *   | { t: 'enter', id: string, node: string }
  *   | { t: 'back', id: string }
- *   | { t: 'activity', action: import('../game.js').Action }
+ *   | { t: 'activity', action: import('../game.js').Action | QuizAction }   // routed by the activity's kind
  *   | { t: 'event', event: CampaignEvent }
  *   | { t: 'ack', id: 'screen', upTo: number }
  *   | { t: 'gm', id: string, op: GmOp }} CampaignAction

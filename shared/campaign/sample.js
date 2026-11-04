@@ -4,6 +4,7 @@
 // the user writes the real content later, in its own files, with the same shape.
 //   false start (blocks) → 3 block games → reward item + 'childhood' and 'teens' unlock AT ONCE
 //   each world: a blocks tableau + a scene stub; both done → world done
+//   World 1 also has a quiz, opening once its block game is done
 //   both worlds done → 'adult' unlocks
 
 /** @typedef {import('./types.js').Content} Content */
@@ -38,6 +39,12 @@ export const SAMPLE_CONTENT = {
       id: 'childhood.scene', kind: 'tableau', parent: 'childhood', title: 'World 1 scene (placeholder)',
       activity: { kind: 'scene', sceneId: 'childhood-1' }, unlock: { always: true },
       door: { x: 9.8, y: 4.7, w: 2, h: 1.2 },
+    },
+    'childhood.quiz': {
+      id: 'childhood.quiz', kind: 'tableau', parent: 'childhood', title: 'World 1 quiz (placeholder)',
+      activity: { kind: 'quiz', settings: { count: 5, seconds: 20, mode: 'mixed' } }, replayable: true,
+      unlock: { done: 'childhood.blocks' }, // opens after the world's block game (not in the 3-games moment)
+      door: { x: 7, y: 4.7, w: 2, h: 1.2 },
     },
 
     teens: {
