@@ -7,7 +7,7 @@ import { drawSprite, SPRITE_SIZE } from '../../shared/sprites.js';
 /**
  * A pixel-art canvas of a character.
  * @param {CharacterId} id @param {number} scale integer CSS px per sprite pixel
- * @param {Dir} [dir] @param {number} [frame] 0 = idle, 1|2 = walk frames
+ * @param {Dir} [dir] @param {number} [frame] 0 = idle; a walk animates through WALK_FRAMES (shared/sprites.js)
  * @returns {HTMLCanvasElement}
  */
 export function avatarCanvas(id, scale, dir = 'down', frame = 0) {

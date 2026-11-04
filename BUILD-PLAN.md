@@ -199,7 +199,8 @@ export function spawnPoint(characterId) {}   // → { x, y, dir } deterministic 
 // 16×16 indexed-palette pixel grids, per character: 4 directions × 3 walk frames + 1 idle
 // (user 2026-11-04: "smoother" — was 2 walk frames; clients animate by cycling WALK_FRAMES at 8 fps).
 export const SPRITES = {};  // Record<CharacterId, SpriteSheet>
-export const WALK_FRAMES = [];  // the frame indices of one walk cycle — clients cycle these, never hardcode
+export const WALK_FRAMES = [1, 2, 3, 2];  // one stride: contact A, passing, contact B, passing — cycle these, never hardcode
+export const WALK_FPS = 8;                // shared flip rate — clients animate WALK_FRAMES at this rate
 export function drawSprite(ctx, characterId, dir, frame, x, y, scale) {}  // canvas 2d, crisp pixels
 ```
 

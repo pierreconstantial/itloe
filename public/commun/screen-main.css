@@ -48,8 +48,9 @@ body.offline #offline-banner { display: flex; }
 
 .lobby {
   display: flex; align-items: stretch; justify-content: center;
-  gap: calc(48 * var(--u));
-  padding: calc(104 * var(--u)) calc(60 * var(--u)) 0;
+  gap: calc(24 * var(--u));
+  /* the wall between the window (left) and the double door (right) of the party room */
+  padding: calc(150 * var(--u)) calc(268 * var(--u)) 0;
 }
 .join, .lobby-side {
   background: rgba(14, 16, 22, 0.86);
@@ -59,10 +60,10 @@ body.offline #offline-banner { display: flex; }
 }
 .join {
   display: flex; align-items: center;
-  gap: calc(40 * var(--u));
+  gap: calc(30 * var(--u));
 }
 .join-qr {
-  width: calc(340 * var(--u)); height: calc(340 * var(--u));
+  width: calc(280 * var(--u)); height: calc(280 * var(--u));
   image-rendering: pixelated;
   border-radius: calc(14 * var(--u));
   border: calc(8 * var(--u)) solid #fff;
@@ -72,7 +73,7 @@ body.offline #offline-banner { display: flex; }
   display: flex; flex-direction: column; align-items: flex-start;
   text-align: left;
 }
-.lobby-invite { margin: 0 0 calc(10 * var(--u)); font-size: calc(42 * var(--u)); font-weight: 800; }
+.lobby-invite { margin: 0 0 calc(6 * var(--u)); font-size: calc(38 * var(--u)); font-weight: 800; }
 .join-label {
   margin: calc(10 * var(--u)) 0 calc(2 * var(--u));
   font-size: calc(26 * var(--u));
@@ -82,7 +83,7 @@ body.offline #offline-banner { display: flex; }
 }
 .room-code {
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
-  font-size: calc(124 * var(--u));
+  font-size: calc(108 * var(--u));
   line-height: 1;
   font-weight: 800;
   letter-spacing: 0.18em;
@@ -90,9 +91,9 @@ body.offline #offline-banner { display: flex; }
 }
 .join-url {
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
-  font-size: calc(34 * var(--u));
+  font-size: calc(28 * var(--u));
   font-weight: 700;
-  padding: calc(10 * var(--u)) calc(20 * var(--u));
+  padding: calc(8 * var(--u)) calc(16 * var(--u));
   border-radius: calc(14 * var(--u));
   background: var(--bg-2);
   border: 3px solid var(--accent);
@@ -101,15 +102,17 @@ body.offline #offline-banner { display: flex; }
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: calc(22 * var(--u));
   text-align: center;
-  max-width: calc(760 * var(--u));
+  max-width: calc(470 * var(--u));
 }
-.lobby .title { font-size: calc(96 * var(--u)); }
+.lobby .title { font-size: calc(80 * var(--u)); }
 .lobby-count {
   margin: 0;
-  font-size: calc(32 * var(--u));
+  font-size: calc(28 * var(--u));
   color: var(--fg-dim);
   display: flex; align-items: center; gap: calc(10 * var(--u));
 }
+
+.lobby .settings-line { font-size: calc(30 * var(--u)); }
 
 /* ---- game: layout 1 / 2 / 2×2 ---- */
 .arena {

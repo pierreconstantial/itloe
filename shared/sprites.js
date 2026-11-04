@@ -1,33 +1,46 @@
 // M3 Contract C — character sprites (P4 owns this file inside shared/).
 // 16×16 indexed-palette pixel art, Zelda-like: a big head on a small body.
 // Per character: an upper body (13 rows) per view — front (down), back (up), side (right) —
-// and the shared leg templates below (3 rows: idle + 2 walk frames). Left = mirrored right.
-// Grid letters index the character's palette; '.' is transparent.
+// and the shared leg templates below. Left = mirrored right.
+// Grid letters index the character's palette; '.' is transparent. Two letters are derived for every
+// character at assembly: q = shaded pants, d = shaded shoes (the far leg in side view).
+//
+// Walk cycle (contact – passing – contact – passing): on a contact frame the legs are apart, so the
+// body sits 1px lower (2 leg rows); on the passing frame the legs are together and the body is back
+// up (3 leg rows) — that 1px bob is most of what makes a 16×16 walk read smooth. Feet always end
+// on the bottom row, so callers anchor every frame the same way.
 
 /** @typedef {'up' | 'down' | 'left' | 'right'} Dir */
-/** Frame index: 0 = idle (standing), 1 and 2 = the two walk frames. @typedef {0 | 1 | 2} Frame */
+/** Frame index: 0 = idle (standing), 1 = contact A, 2 = passing, 3 = contact B. @typedef {0 | 1 | 2 | 3} Frame */
+/** @typedef {[string[], string[], string[], string[]]} DirFrames [idle, contactA, passing, contactB] */
 /**
  * @typedef {{
- *   palette: Record<string, string>,          // letter → CSS colour
- *   frames: Record<Dir, [string[], string[], string[]]>  // [idle, walk1, walk2], 16 rows of 16 letters
+ *   palette: Record<string, string>,   // letter → CSS colour
+ *   frames: Record<Dir, DirFrames>     // 16 rows of 16 letters each
  * }} SpriteSheet
  */
 
 export const SPRITE_SIZE = 16;
 export const DIRS = /** @type {const} */ (['down', 'up', 'left', 'right']);
-export const WALK_FRAMES = /** @type {const} */ ([1, 2]);
+/** One walk cycle, in order: clients step through these (at WALK_FPS), never hardcode frame numbers. */
+export const WALK_FRAMES = /** @type {const} */ ([1, 2, 3, 2]);
+/** Suggested walk animation rate (frames of WALK_FRAMES per second). */
+export const WALK_FPS = 8;
 
-// ---- shared legs (rows 13–15) ----------------------------------------------------
+// ---- shared legs (bottom rows) ------------------------------------------------------
+// [idle, contactA, passing, contactB]; contact frames have 2 rows (body 1px lower), the others 3.
 
 const LEGS_FRONT = [
   ['....oppppppo....', '....oppooppo....', '....obboobbo....'],
-  ['....oppppppo....', '....oppoobbo....', '....obbo........'],
-  ['....oppppppo....', '....obbooppo....', '........obbo....'],
+  ['....oppoobbo....', '....obbo........'],
+  ['....oppppppo....', '....oppooqqo....', '....obboodbo....'],
+  ['....obbooppo....', '........obbo....'],
 ];
 const LEGS_SIDE = [
   ['.....oppppo.....', '.....oppppo.....', '.....obbbbo.....'],
-  ['....oppoppo.....', '...oppo..oppo...', '...obbo..obbo...'],
-  ['.....oppppo.....', '.....oppppo.....', '....obbo.obbo...'],
+  ['...oqqo..oppo...', '..oddo....obbo..'],
+  ['.....oppppo.....', '.....oqoppo.....', '.....odobbo.....'],
+  ['...oppo..oqqo...', '..obbo....oddo..'],
 ];
 
 // ---- characters (upper 13 rows per view) -----------------------------------------
@@ -257,38 +270,50 @@ const DESIGNS = {
 const mirror = (rows) => rows.map((r) => [...r].reverse().join(''));
 
 /**
- * @param {string[]} upper
- * @param {string[][]} legs [idle, walk1, walk2]
- * @returns {[string[], string[], string[]]}
+ * Upper body + legs, feet on the bottom row: fewer leg rows push the body down (the walk bob).
+ * @param {string[]} upper 13 rows
+ * @param {string[][]} legs [idle, contactA, passing, contactB]
+ * @returns {DirFrames}
  */
-const withLegs = (upper, legs) => /** @type {[string[], string[], string[]]} */ (legs.map((l) => [...upper, ...l]));
+const withLegs = (upper, legs) => /** @type {DirFrames} */ (legs.map((l) => {
+  const pad = SPRITE_SIZE - upper.length - l.length;
+  return [...Array(pad).fill('.'.repeat(SPRITE_SIZE)), ...upper, ...l];
+}));
+
+/** '#rrggbb' scaled towards black. @param {string} hex @param {number} k */
+const shade = (hex, k) => '#' + [1, 3, 5]
+  .map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join('');
 
 /** @type {Record<string, SpriteSheet>} */
 export const SPRITES = Object.fromEntries(Object.entries(DESIGNS).map(([id, d]) => {
   const right = withLegs(d.right, LEGS_SIDE);
   return [id, {
-    palette: { ...d.palette },
+    palette: { ...d.palette, q: shade(d.palette.p, 0.72), d: shade(d.palette.b, 0.72) },
     frames: {
       down: withLegs(d.down, LEGS_FRONT),
       up: withLegs(d.up, LEGS_FRONT),
       right,
-      left: /** @type {[string[], string[], string[]]} */ (right.map(mirror)),
+      left: /** @type {DirFrames} */ (right.map(mirror)),
     },
   }];
 }));
+
+const WALK_COUNT = 3; // distinct walk frames: 1..3
 
 /**
  * The 16 rows of one frame, or null for an unknown character.
  * @param {string} characterId
  * @param {Dir} dir
- * @param {number} frame 0 idle, 1|2 walk (other values wrap to a walk frame)
+ * @param {number} frame 0 idle, 1..3 walk (other values wrap to a walk frame)
  * @returns {string[] | null}
  */
 export function spriteFrame(characterId, dir, frame) {
   const sheet = SPRITES[characterId];
   if (!sheet) return null;
   const frames = sheet.frames[dir] ?? sheet.frames.down;
-  return frames[frame === 0 ? 0 : 1 + ((Math.abs(Math.trunc(frame)) + 1) % 2)];
+  if (frame === 0) return frames[0];
+  const n = Math.abs(Math.trunc(frame)) - 1;
+  return frames[1 + (((n % WALK_COUNT) + WALK_COUNT) % WALK_COUNT)];
 }
 
 /** @type {Map<string, HTMLCanvasElement | OffscreenCanvas>} */
@@ -334,7 +359,7 @@ function paint(ctx, rows, palette, x, y, scale) {
  * @param {CanvasRenderingContext2D} ctx
  * @param {string} characterId
  * @param {Dir} dir
- * @param {number} frame 0 idle, 1|2 walk
+ * @param {number} frame 0 idle, 1..3 walk (cycle WALK_FRAMES)
  * @param {number} x
  * @param {number} y
  * @param {number} scale
