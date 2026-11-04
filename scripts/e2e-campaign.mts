@@ -208,25 +208,30 @@ try {
   await restartSame('on the hub');
 
   const at = () => camp(T1).at.node;
-  const step = async (c: Client, x: number, y: number) => { c.send({ t: 'pos', x, y, dir: 'up', moving: true }); await sleep(250); };
-  await step(E, 5, 7); // first known positions: open floor (a first pos only sets the baseline)
-  await step(P, 5, 7);
-  await step(E, 8, 2.7); // adult's door: still locked
+  const step = async (c: Client, p: { x: number, y: number }) => { c.send({ t: 'pos', ...p, dir: 'up', moving: true }); await sleep(250); };
+  // door points come from the served content, so a content edit never breaks this test
+  const content = await (await fetch(`${HTTP}/api/content`)).json();
+  const door = (id: string, fx = 0.5, fy = 0.5) => { const d = content.nodes[id].door; return { x: d.x + d.w * fx, y: d.y + d.h * fy }; };
+  const floor = { x: 8, y: 7.5 }; // open floor, below every door (doors sit on the back wall)
+  check(Object.values<any>(content.nodes).every((n) => !n.door || n.door.y + n.door.h < floor.y), 'the "open floor" point is outside every door');
+  await step(E, floor); // first known positions: open floor (a first pos only sets the baseline)
+  await step(P, floor);
+  await step(E, door('adult')); // adult's door: still locked
   check(at() === 'hub', 'chooser walks into a LOCKED door → nothing');
-  await step(P, 2, 4); // the host walks into childhood's door: only the chooser's walk enters
+  await step(P, door('childhood')); // the host walks into childhood's door: only the chooser's walk enters
   check(at() === 'hub', 'non-chooser walks into an unlocked door → nothing (the host enters by command)');
   const zoneCount = (z: string, ch: string) => Object.entries(camp(T1).facts.counters).find(([key]) => key.includes(z) && key.includes(ch))?.[1] ?? 0;
   check(zoneCount('childhood', 'pierre') === 1, 'the host stepping in is still recorded (zone.entered, counted once)');
-  await step(P, 2.3, 4.2); // still inside: no second count
+  await step(P, door('childhood', 0.7, 0.7)); // still inside: no second count
   check(zoneCount('childhood', 'pierre') === 1, 'standing in a door → no second zone.entered (edge-triggered)');
-  await step(E, 2, 4); // Élodie walks into childhood's door
+  await step(E, door('childhood')); // Élodie walks into childhood's door
   check(at() === 'childhood', 'chooser walks into an unlocked door → the party enters that world');
   await restartSame('in a world');
   i = P.mark(); P.send({ t: 'back' }); await until(P, (x) => x.at.node === 'hub', i);
-  await step(E, 2.2, 4.1); // still standing on the door after coming back: not a fresh step in
+  await step(E, door('childhood', 0.6, 0.6)); // still standing on the door after coming back: not a fresh step in
   check(at() === 'hub', 'back on the hub while standing on the door → no re-entry (edge-triggered)');
-  await step(E, 5, 7); // out…
-  await step(E, 2, 4); // …and in again
+  await step(E, floor); // out…
+  await step(E, door('childhood')); // …and in again
   check(at() === 'childhood', 'step out and back in → enters again');
   i = P.mark(); P.send({ t: 'back' }); await until(P, (x) => x.at.node === 'hub', i);
 
