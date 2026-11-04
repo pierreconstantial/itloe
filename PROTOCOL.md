@@ -1,4 +1,4 @@
-# Bloko — wire protocol (Contract B, FROZEN — English rename applied 2026-11-03)
+# Elo-D-1 — wire protocol (Contract B, FROZEN — English rename applied 2026-11-03)
 
 Transport: WebSocket, JSON text frames. HTTP static + WS share port **3131** (`PORT` env overrides, used by agents to run several mocks). WS path: **`/ws`**.
 

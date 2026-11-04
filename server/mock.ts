@@ -158,5 +158,5 @@ wss.on('connection', (ws) => {
 });
 
 httpServer.listen(PORT, () => {
-  console.log(`[mock] Bloko mock server → http://localhost:${PORT}/  (screen: /screen/, play: /play/, sim: /sim/)`);
+  console.log(`[mock] Elo-D-1 mock server → http://localhost:${PORT}/  (screen: /screen/, play: /play/, sim: /sim/)`);
 });

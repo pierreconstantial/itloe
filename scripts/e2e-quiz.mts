@@ -159,7 +159,7 @@ try {
   P.send({ t: 'gm', op: { op: 'goto', node: QUIZ } });
   let q = await untilQuiz(P, (x) => x.phase === 'lobby', i);
   const v0 = lastView(P);
-  check(Array.isArray(q.credits) && q.credits.some((c: string) => /Bloko/.test(c)), `credits in the lobby view (${q.credits?.join(' | ')})`);
+  check(Array.isArray(q.credits) && q.credits.some((c: string) => /Elo-D-1/.test(c)), `credits in the lobby view (${q.credits?.join(' | ')})`);
   check(v0.campaign.at.node === QUIZ && v0.state === null && q.order.length === 2 && q.hostId === idP,
     'quiz tableau → quiz lobby with the party seated; view.state null (block clients never see a quiz)');
   check(await errOf(E, { t: 'config', patch: { count: 3 } }) === 'not-host', 'quiz config: host only');

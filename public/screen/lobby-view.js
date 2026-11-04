@@ -100,7 +100,7 @@ export function renderLobby(s, _prev, join) {
     ? 'Waiting for the first guest…'
     : `${n}/${MAX_PLAYERS} guest${n === 1 ? '' : 's'}${host ? ` · ${host.name} starts the game from their phone` : ''}`;
   const side = h('div', 'lobby-side', [
-    h('h1', 'title', ['BLOKO']),
+    h('h1', 'title', ['ELO-D-1']),
     h('p', 'settings-line', [summarizeSettings(s.settings)]),
     h('p', 'lobby-count', [status]),
   ]);

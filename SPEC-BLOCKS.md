@@ -1,4 +1,4 @@
-# Bloko — Block-puzzle Party Game Spec (v1: 1–4 players, shared screen + phones)
+# Elo-D-1 — Block-puzzle Party Game Spec (v1: 1–4 players, shared screen + phones)
 
 A **Block-Blast / Woodoku-style** puzzle (the genre of the Netflix mobile games), turned into a living-room party game:
 

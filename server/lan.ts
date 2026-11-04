@@ -27,7 +27,7 @@ export async function pickLan(): Promise<Lan | null> {
   }
   if (all.length <= 1 || !process.stdin.isTTY) return all[0] ?? null;
 
-  console.log('[bloko] several network interfaces — which one do the phones reach?');
+  console.log('[elo-d-1] several network interfaces — which one do the phones reach?');
   all.forEach((l, i) => console.log(`  ${i + 1}) ${l.address}  (${l.iface})`));
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   try {
@@ -37,7 +37,7 @@ export async function pickLan(): Promise<Lan | null> {
     const n = Number(answer.trim() || '1');
     return all[n - 1] ?? all[0];
   } catch {
-    console.log('\n[bloko] no answer — using the first interface');
+    console.log('\n[elo-d-1] no answer — using the first interface');
     return all[0];
   } finally {
     rl.close();

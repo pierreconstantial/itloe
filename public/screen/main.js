@@ -453,7 +453,7 @@ function connect() {
     clearTimeout(openTimer);
     live.stop();
     if (ws !== sock) return;
-    console.info('[bloko] socket closed — retrying');
+    console.info('[elo-d-1] socket closed — retrying');
     document.body.classList.add('offline');
     stale = true;
     setTimeout(connect, RECONNECT_MS);
@@ -472,7 +472,7 @@ function reconnectNow(why) {
   lastReconnectAt = Date.now();
   const old = ws;
   ws = null;
-  console.info(`[bloko] reconnecting (${why})`);
+  console.info(`[elo-d-1] reconnecting (${why})`);
   document.body.classList.add('offline');
   stale = true;
   try { old?.close(); } catch { /* already closing */ }
