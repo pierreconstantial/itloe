@@ -1,4 +1,4 @@
-# Elo-D-1 — Build plan (multi-agent)
+# Itloe — Build plan (multi-agent)
 
 Goal: a **minimal playable version as fast as possible** (M1), then iterate (M2+).
 Strategy: the **main CLI session is the orchestrator**. It does the short **contracts phase** (P0) itself, then spawns **4 subagents in parallel** on disjoint files (P1–P4), reviews their work, and does the **integration pass** (P5). M2 work packages are parallel subagents again.

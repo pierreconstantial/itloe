@@ -79,7 +79,7 @@ function describe(c: Campaign, room: string): string {
 /** Copies a pre-migration save aside, once per migration (a timestamped name never overwrites). */
 function keepV1(): string {
   const dest = `${STATE_FILE}.v1-${Date.now()}.json`;
-  try { if (!existsSync(dest)) copyFileSync(STATE_FILE, dest); } catch (e) { console.error('[elo-d-1] could not keep the v1 save:', e); }
+  try { if (!existsSync(dest)) copyFileSync(STATE_FILE, dest); } catch (e) { console.error('[itloe] could not keep the v1 save:', e); }
   return dest;
 }
 
@@ -132,7 +132,7 @@ export function saveGame(game: Game): void {
       v: 2, campaign: game.campaign, room: game.room, savedAt: Date.now(), bestPrevious: game.bestPrevious ?? null,
     } satisfies SavedV2);
   } catch (e) {
-    console.error('[elo-d-1] could not save the evening:', e); // keep playing; the next change retries
+    console.error('[itloe] could not save the evening:', e); // keep playing; the next change retries
   }
 }
 
@@ -146,7 +146,7 @@ const isBests = (x: unknown): x is Bests => !!x && typeof x === 'object' && !Arr
 
 export function loadBests(): Bests {
   const r = readJson(BESTS_FILE, isBests);
-  if (r.kind === 'corrupt') console.error(`[elo-d-1] bests.json unreadable (${r.error}); moved to ${quarantine(BESTS_FILE)}`);
+  if (r.kind === 'corrupt') console.error(`[itloe] bests.json unreadable (${r.error}); moved to ${quarantine(BESTS_FILE)}`);
   return r.kind === 'ok' ? r.data : {};
 }
 
@@ -154,6 +154,6 @@ export function saveBests(bests: Bests): void {
   try {
     writeJsonAtomic(BESTS_FILE, bests);
   } catch (e) {
-    console.error('[elo-d-1] could not save best scores:', e);
+    console.error('[itloe] could not save best scores:', e);
   }
 }

@@ -1,4 +1,4 @@
-// Elo-D-1 server: HTTP static + WebSocket on one port, PROTOCOL.md over the shared pure campaign engine
+// Itloe server: HTTP static + WebSocket on one port, PROTOCOL.md over the shared pure campaign engine
 // (the evening: party, hub/worlds/tableaux, facts, news) with the block game nested as its activity.
 // Every change goes through apply() → solo best, save to disk, arm the timed-mode clock, doors, broadcast.
 // Run: npm start          (resumes the saved evening in any state; a timed clock keeps its remaining time)
@@ -126,7 +126,7 @@ function beat(): void {
   const shifted = gap > SUSPEND_GAP_MS ? shiftActivityDeadline(s, now - gap + BEAT_MS, now) : s;
   // a server-owned input moved: installed directly (not an engine transition), like the resume shift
   if (shifted !== s && commit({ ...c, at: { ...c.at, activity: shifted } })) {
-    console.log(`[elo-d-1] process was suspended ${Math.round(gap / 1000)} s — timed clock paused for that long`);
+    console.log(`[itloe] process was suspended ${Math.round(gap / 1000)} s — timed clock paused for that long`);
     return; // commit saved + broadcast
   }
   saveGame(game);
@@ -146,7 +146,7 @@ const httpServer = createServer((req, res) => {
   serveApi(req, res)
     .then((handled) => (handled ? undefined : serveStatic(req, res)))
     .catch((e) => {
-      console.error('[elo-d-1] http error:', e);
+      console.error('[itloe] http error:', e);
       if (!res.headersSent) res.writeHead(500);
       res.end();
     });
@@ -568,7 +568,7 @@ wss.on('connection', (ws) => {
       handleMessage(ws, m);
     } catch (e) {
       // a bad message or a reducer bug must not kill the game for everyone
-      console.error('[elo-d-1] message handling failed:', e);
+      console.error('[itloe] message handling failed:', e);
     }
   });
 
@@ -600,17 +600,17 @@ if (resumed && !isQuiz(resumed)) clock.onChange(null, resumed);
 if (isQuiz(resumed)) quizClock.onChange(null, resumed);
 
 httpServer.listen(PORT, () => {
-  console.log(`[elo-d-1] ${loaded.how}`);
-  console.log(`[elo-d-1] saving to ${STATE_FILE}`);
-  console.log(`[elo-d-1] quiz bank: ${bank.questions.length} questions (${bank.files.join(', ') || 'no files'}), judge: none (uncertain typed answers → wrong, host overrides)`);
-  console.log(`[elo-d-1] server → http://localhost:${PORT}/  (screen: /screen/, play: /play/, sim: /sim/)`);
+  console.log(`[itloe] ${loaded.how}`);
+  console.log(`[itloe] saving to ${STATE_FILE}`);
+  console.log(`[itloe] quiz bank: ${bank.questions.length} questions (${bank.files.join(', ') || 'no files'}), judge: none (uncertain typed answers → wrong, host overrides)`);
+  console.log(`[itloe] server → http://localhost:${PORT}/  (screen: /screen/, play: /play/, sim: /sim/)`);
   if (!lan) {
-    console.log('[elo-d-1] no LAN IPv4 detected (internal interfaces only) — set BLOKO_HOST to the address phones reach');
+    console.log('[itloe] no LAN IPv4 detected (internal interfaces only) — set BLOKO_HOST to the address phones reach');
     return;
   }
   const url = joinUrl();
   qrcodeTerminal.generate(url, { small: true }, (qr) => {
     console.log(qr);
-    console.log(`[elo-d-1] phones → ${url}   room ${game.room}   (via ${lan.iface})`);
+    console.log(`[itloe] phones → ${url}   room ${game.room}   (via ${lan.iface})`);
   });
 });

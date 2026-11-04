@@ -1,4 +1,4 @@
-# Elo-D-1
+# Itloe
 
 A party game for the living room, played as one long **evening**: it opens on a block puzzle (drop pieces on the board, fill rows and columns to clear them, chain clears for big combos), then a **hub** opens onto **worlds** to explore, with more games inside them, block games and **quizzes** in French, unlocked step by step.
 A laptop runs everything and shows it on the TV; 1 to 4 players play on their own phones, in the browser, with no app to install. Each player is a **character** (Pierre, Élodie, Sol, Anna).
@@ -19,7 +19,7 @@ npm start
 The terminal prints a QR code and a line like:
 
 ```
-[elo-d-1] phones → http://192.168.0.227:3131/play?room=MKYN   room MKYN   (via eth0)
+[itloe] phones → http://192.168.0.227:3131/play?room=MKYN   room MKYN   (via eth0)
 ```
 
 1. On the laptop, open **http://localhost:3131/** in a browser, go full screen, and send it to the TV. That's the shared screen.

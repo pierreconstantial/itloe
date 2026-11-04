@@ -344,7 +344,7 @@ function onBack() {
   if (menu.isOpen()) { menu.close(); return; }
   toast(member()
     ? "You're still in the game. Press back again to leave this page."
-    : 'Press back again to leave Elo-D-1.');
+    : 'Press back again to leave Itloe.');
 }
 
 // ---------- rendering ----------

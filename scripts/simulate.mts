@@ -137,7 +137,7 @@ function summarize(rs: GameResult[], rivals: GameResult[]) {
 
 // ---------- run ----------
 
-console.log(`Elo-D-1 balance sim — ${games} games per configuration, seeds ${seed0}..${seed0 + games - 1}` +
+console.log(`Itloe balance sim — ${games} games per configuration, seeds ${seed0}..${seed0 + games - 1}` +
   (whatIf ? `, WHAT-IF weights ${args.weights}` : ', weights = PIECE_SETS as committed'));
 for (const p of policies) console.log(`  ${p.name.padEnd(7)} ${p.label}`);
 console.log();

@@ -10,7 +10,7 @@ import { join } from 'node:path';
 const SITE = 'https://www.openquizzdb.org';
 const OUT = new URL('../data/sources/openquizzdb/', import.meta.url).pathname;
 const PAUSE_MS = 1500;
-const HEADERS = { 'user-agent': 'Elo-D-1-family-quiz/1.0 (private, non-commercial party game)' };
+const HEADERS = { 'user-agent': 'Itloe-family-quiz/1.0 (private, non-commercial party game)' };
 
 type Entry = { id: number, category: string, title: string, author: string | null, file: string | null, error?: string };
 

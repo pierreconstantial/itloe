@@ -1,8 +1,8 @@
 {
   "dataset": {
-    "name": "Elo-D-1 placeholder questions",
+    "name": "Itloe placeholder questions",
     "licence": "CC0 1.0 (written for this project)",
-    "attribution": "Placeholder questions written for Elo-D-1 (CC0 1.0)",
+    "attribution": "Placeholder questions written for Itloe (CC0 1.0)",
     "placeholder": true,
     "note": "PLACEHOLDER bank to build and test the quiz. Replace with the researched open-licensed French dataset (keep its licence and attribution in each question's source)."
   },
@@ -10,55 +10,55 @@
     {
       "id": "ph-geo-canberra", "q": "Quelle est la capitale de l'Australie ?",
       "choices": ["Sydney", "Canberra", "Melbourne", "Perth"], "answer": 1,
-      "category": "géographie", "level": 2, "source": "placeholder (Elo-D-1, CC0)"
+      "category": "géographie", "level": 2, "source": "placeholder (Itloe, CC0)"
     },
     {
       "id": "ph-lit-miserables", "q": "Qui a écrit « Les Misérables » ?",
       "answer": "Victor Hugo", "accept": ["Hugo"],
-      "category": "littérature", "level": 1, "source": "placeholder (Elo-D-1, CC0)"
+      "category": "littérature", "level": 1, "source": "placeholder (Itloe, CC0)"
     },
     {
       "id": "ph-his-bastille", "q": "En quelle année a eu lieu la prise de la Bastille ?",
       "answer": "1789",
-      "category": "histoire", "level": 1, "source": "placeholder (Elo-D-1, CC0)"
+      "category": "histoire", "level": 1, "source": "placeholder (Itloe, CC0)"
     },
     {
       "id": "ph-art-nuit-etoilee", "q": "Quel peintre a réalisé « La Nuit étoilée » ?",
       "choices": ["Claude Monet", "Vincent van Gogh", "Paul Cézanne", "Edvard Munch"], "answer": 1,
       "accept": ["Van Gogh"],
-      "category": "art", "level": 1, "source": "placeholder (Elo-D-1, CC0)"
+      "category": "art", "level": 1, "source": "placeholder (Itloe, CC0)"
     },
     {
       "id": "ph-geo-loire", "q": "Quel est le plus long fleuve de France ?",
       "choices": ["La Seine", "Le Rhône", "La Loire", "La Garonne"], "answer": 2,
-      "category": "géographie", "level": 1, "source": "placeholder (Elo-D-1, CC0)"
+      "category": "géographie", "level": 1, "source": "placeholder (Itloe, CC0)"
     },
     {
       "id": "ph-mus-mozart", "q": "Quel compositeur est né à Salzbourg en 1756 ?",
       "answer": "Mozart", "accept": ["Wolfgang Amadeus Mozart"],
       "anecdote": "Mozart composa ses premières pièces à cinq ans ; son père Leopold les nota pour lui.",
-      "category": "musique", "level": 1, "source": "placeholder (Elo-D-1, CC0)"
+      "category": "musique", "level": 1, "source": "placeholder (Itloe, CC0)"
     },
     {
       "id": "ph-sci-hexagone", "q": "Combien de côtés a un hexagone ?",
       "choices": ["5", "6", "7", "8"], "answer": 1,
-      "category": "sciences", "level": 1, "source": "placeholder (Elo-D-1, CC0)"
+      "category": "sciences", "level": 1, "source": "placeholder (Itloe, CC0)"
     },
     {
       "id": "ph-phi-descartes", "q": "Quel philosophe a écrit le « Discours de la méthode » ?",
       "answer": "Descartes", "accept": ["René Descartes"],
-      "category": "philosophie", "level": 2, "source": "placeholder (Elo-D-1, CC0)"
+      "category": "philosophie", "level": 2, "source": "placeholder (Itloe, CC0)"
     },
     {
       "id": "ph-geo-schonbrunn", "q": "Dans quelle ville se trouve le château de Schönbrunn ?",
       "choices": ["Munich", "Prague", "Vienne", "Budapest"], "answer": 2,
       "anecdote": "Résidence d'été des Habsbourg à Vienne, Schönbrunn compte plus de 1 400 pièces ; l'impératrice Sissi y vécut.",
-      "category": "géographie", "level": 1, "source": "placeholder (Elo-D-1, CC0)"
+      "category": "géographie", "level": 1, "source": "placeholder (Itloe, CC0)"
     },
     {
       "id": "ph-sci-or", "q": "Quel élément chimique a pour symbole « Au » ?",
       "choices": ["Argent", "Or", "Aluminium", "Cuivre"], "answer": 1,
-      "category": "sciences", "level": 2, "source": "placeholder (Elo-D-1, CC0)"
+      "category": "sciences", "level": 2, "source": "placeholder (Itloe, CC0)"
     }
   ]
 }
