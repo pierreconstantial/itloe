@@ -84,8 +84,9 @@ try {
   // ---------- playing (marathon) ----------
   i = A.mark(); A.send({ t: 'start' });
   await A.waitFor((m) => m.t === 'view' && m.state.phase === 'playing', i);
-  i = B.mark(); A.send({ t: 'place', ...legalMoves(A.lastView(), idA)[0] });
+  i = B.mark(); const iA = A.mark(); A.send({ t: 'place', ...legalMoves(A.lastView(), idA)[0] });
   await B.waitFor((m) => m.t === 'view', i);
+  await A.waitFor((m) => m.t === 'view', iA); // the snapshot is read from A: wait for A's copy too
   const playing = A.lastView();
   check(playing.players[idA].score > 0, 'a move is on the board before the kill');
 

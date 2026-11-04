@@ -5,7 +5,7 @@
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR) so it can kill -9 it.
 // Usage: PORT=3186 node scripts/e2e-campaign.mts      (never 3131: that's the live server)
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { check, Client, finish, HTTP, sleep } from './e2e-lib.mts';
@@ -84,8 +84,37 @@ async function screen(label: string): Promise<Client> {
 let P: Client, E: Client, T1: Client, T2: Client;
 let idP = '', idE = '';
 /** kill -9 + restart: the evening must come back byte for byte (persisted part), same room. */
+/** Paths where two JSON values differ (first `max`), for a readable failure. */
+function diff(a: any, b: any, path = '', out: string[] = [], max = 12): string[] {
+  if (out.length >= max || JSON.stringify(a) === JSON.stringify(b)) return out;
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
+    for (const key of new Set([...Object.keys(a), ...Object.keys(b)])) diff(a[key], b[key], `${path}.${key}`, out, max);
+  } else {
+    out.push(`${path || '.'}: ${JSON.stringify(a)?.slice(0, 80)} → ${JSON.stringify(b)?.slice(0, 80)}`);
+  }
+  return out;
+}
+const saved = () => JSON.parse(readFileSync(join(VAR, 'bloko.state.json'), 'utf8')).campaign;
+
+/** Every client has received the latest broadcast (they all show the same evening). A step is awaited
+ *  on ONE client; the others may still be a broadcast behind, so `before` is taken only once all agree. */
+async function converged(): Promise<any> {
+  const clients = () => [P, E, T1, T2];
+  for (let k = 0; k < 100; k++) {
+    const views = clients().map((c) => core(camp(c)));
+    if (views.every((x) => x === views[0])) return camp(T1);
+    await sleep(20);
+  }
+  throw new Error(`clients never converged: ${clients().map((c) => c.label).join(', ')}`);
+}
+
 async function restartSame(step: string): Promise<void> {
-  const before = camp(T1);
+  const before = await converged();
+  // the server saves BEFORE it broadcasts: whatever every client sees is already on disk
+  const disk = saved();
+  const onDisk = core(disk) === core(before);
+  if (!onDisk) console.log(`  [${step}] disk ≠ what every client sees:\n    ${diff(JSON.parse(core(before)), JSON.parse(core(disk))).join('\n    ')}`);
+  check(onDisk && disk.seed === before.seed, `${step}: what every client sees is already saved (before the kill)`);
   await kill9();
   await boot();
   for (const c of [P, E, T1, T2]) c?.ws.close();
@@ -93,7 +122,9 @@ async function restartSame(step: string): Promise<void> {
   E = await rejoin('E', idE);
   T1 = await screen('T1');
   T2 = await screen('T2');
-  check(core(camp(T1)) === core(before) && (await roomCode()) === room, `kill -9 ${step} → same evening resumed`);
+  const same = core(camp(T1)) === core(before);
+  if (!same) console.log(`  [${step}] resumed ≠ before (T1's last view):\n    ${diff(JSON.parse(core(before)), JSON.parse(core(camp(T1)))).join('\n    ')}`);
+  check(same && (await roomCode()) === room, `kill -9 ${step} → same evening resumed`);
   check(camp(T1).seed === before.seed, `kill -9 ${step} → same campaign seed (next games deal the same)`);
 }
 
