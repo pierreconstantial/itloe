@@ -259,28 +259,99 @@ can take back a character whose phone is offline.
 | P1 (server) | presence in `view` + broadcasts on attach/close, reclaim in `join`, `replaced` + newest-socket-wins, PROTOCOL.md lines, e2e (reclaim mid-game keeps the board, bump, two tabs, host reclaim) |
 | P2 (phone) | picker states (free / continue / taken), `replaced` screen, never auto-reconnect after `replaced`, acceptance pass on a second "device" (a fresh browser context) |
 
-### Contract D draft — campaign (NOT frozen; awaiting the user's flow and screens)
+### Contract D draft v2 — campaign: hub, worlds, unlocks (NOT frozen; user review pending)
 
-The block game becomes ONE activity inside a persisted campaign. Progress hangs on **characters**, not
-playerIds (characters are the real people and outlive devices).
+**The story (user, 2026-11-04).** It starts as a false start: just the 4-player block game. Then the game
+turns into Élo's life. A central **hub** (menu map) opens onto **worlds**, one per period of her life
+(childhood, teens, late teens / becoming adult, young adult in Vienna, Pierre…, more to come). Each world
+holds **tableaux** (scenes, games, quizzes, secrets). Worlds and tableaux **unlock progressively**:
+several at once, in any order Élodie likes, **triggered by actions** (e.g. "after playing the block game
+3 times, Élodie gets a reward and a new region opens"). Pierre is the game master and can override anything.
+Story content lives in data files and stays private to the repo.
+
+**Design: a pure rule engine over facts.** No hand-written transitions. Content is a graph of nodes
+whose unlock conditions are DATA. Activities report **events**, events update **facts**, and a pure `settle`
+recomputes what is unlocked until nothing changes (fixpoint), so chains and simultaneous unlocks come
+for free. The live game state stays a separate State machine (the block game as today), nested in the
+campaign as the current activity.
 
 ```js
-// shared/campaign.js — steps are DATA; kinds are a registry, so quiz and later games plug in
-// StepKind = 'room' | 'scene' | 'blocks' | 'quiz'
-// Step = { id, kind, title, ...kindData }     // e.g. scene: { lines, image }, blocks: { settings }
-export const STEPS = [];                       // ordered; the user's story flow fills this
-// Campaign = {
-//   stepId,                                   // current step
-//   done: string[],                           // completed step ids (replayable steps stay replayable)
-//   secrets: string[],                        // unlocked secrets (ids)
-//   totals: Record<CharacterId, number>,      // cumulative points across all games of the evening
-//   activity: State | null,                   // live state of the current step's game (today's block State)
+// shared/campaign/ (pure, JSDoc, no I/O — runs in Node and browsers like shared/game.js)
+
+// ---- content (data, edited by the user between sessions; ids are STABLE, titles free) ----
+// Node = {
+//   id: 'childhood' | 'childhood.ballet' | …,  // dotted: parent.child
+//   kind: 'hub' | 'world' | 'tableau',
+//   parent: id | null,
+//   title, intro?,                              // copy shown on the TV
+//   activity?: { kind: 'blocks', settings? } | { kind: 'quiz', quizId } | { kind: 'scene', sceneId } | …,
+//   unlock: Condition,                          // when the node becomes available ({ always: true } = from the start)
+//   complete?: Condition,                       // when it counts as done (default: its activity finished once)
+//   rewards?: Effect[],                         // applied ONCE, the first time the node completes
+//   replayable?: boolean,                       // games: yes; one-shot reveals: no
 // }
-// host-only (Pierre as game master, from a host panel on his phone): { t:'step', to: stepId } — next,
-// back, skip, replay; the server persists it like any other action. Steps never advance by themselves.
+// Condition (data, evaluated by holds(cond, facts)):
+//   { always: true } | { flag: 'x' } | { done: nodeId } | { unlocked: nodeId }
+//   | { count: 'blocks.played', gte: 3 }                 // counters, see Facts
+//   | { all: Condition[] } | { any: Condition[] } | { not: Condition }
+// Effect (data): { flag: 'x' } | { item: 'ballet-shoes' } | { unlock: nodeId }   // { unlock } = forced, beyond conditions
+export const CONTENT = {};   // Record<nodeId, Node>, built from small per-world files
+
+// ---- facts (persisted, keyed by STABLE ids and characters, never playerIds) ----
+// Facts = {
+//   counters: Record<string, number>,  // 'blocks.played', 'blocks.won.elodie', 'quiz.childhood.correct', …
+//   flags: string[],                   // arbitrary story facts: 'met-christel', 'false-start-over', …
+//   items: string[],                   // Élodie's rewards, shown on the hub
+//   unlocked: string[], done: string[],// derived by settle, stored so the TV can diff "NEW!" and so
+//   seen: string[],                    //   content edits can never RE-LOCK what guests already saw
+//   totals: Record<CharacterId, number>// points across the whole evening
+// }
+
+// ---- campaign state machine (the reducer the server persists) ----
+// Campaign = {
+//   v: 1,
+//   at: { node: nodeId, activity: State | null },  // where the party is now; activity = the live game
+//   facts: Facts,
+//   news: Unlock[],   // unlocks not yet celebrated on the TV (cutscene queue), drained by 'ack'
+// }
+// Phases follow `at.node`'s kind: hub (TV map; avatars walk it; a world door is chosen by Élodie
+// walking into it or by the host) → world (its tableaux) → tableau (runs its activity) → back up.
+export function reduceCampaign(campaign, action, content) {}
+// actions:
+//   { t:'enter', id, node }             // Élodie or the host: an UNLOCKED node of the current hub/world
+//   { t:'back', id }                    // up one level (host, or Élodie outside a running game)
+//   { t:'activity', action }            // forwarded to the nested game reducer (place, start, again…)
+//   { t:'event', event }                // server-internal: an activity finished or something happened →
+//                                       //   record(facts, event) then settle(facts, content)
+//   { t:'ack', id }                     // TV finished the unlock cutscene(s) → drop them from news
+//   { t:'gm', id, op }                  // HOST ONLY (game master): goto / unlock / lock / setFlag /
+//                                       //   count / reset-node; for live fixes ("skip that", "redo it")
+export function record(facts, event) {}      // pure: event → counters/flags/totals
+export function settle(facts, content) {}    // pure fixpoint: → { facts, news }; never removes an unlock
+export function holds(condition, facts) {}   // pure
+
+// Event (what activities report, data):
+//   { t:'game.finished', kind:'blocks', ranking: [{ character, score, rank }], mode, size }
+//   { t:'quiz.answered', quizId, character, correct }
+//   { t:'scene.seen', sceneId }   { t:'zone.entered', zone, character }   // walking into a spot on the TV
 ```
 
-Persistence is ONE envelope `{ campaign, savedAt }`, written atomically after every action, and resumed in every phase.
+Rules that keep the evening safe:
+- **Monotonic:** `settle` only adds unlocks and done marks. Only the host's `gm lock` takes anything back.
+- **Content-tolerant:** on load, unknown node ids in facts are ignored and `settle` re-runs, so the user can
+  add or edit worlds between sessions without breaking a saved evening.
+- **Facts hang on characters:** a reclaimed or replaced phone keeps everything (slice 2b).
+- **One persisted envelope** `{ v, campaign, room, savedAt }`, written atomically after every action and
+  resumed in every phase. Today's block `State` becomes `campaign.at.activity`. Migration: a saved bare
+  State loads as the hub's false-start blocks tableau.
+- **Wire:** `view` carries `campaign` (TV and phones derive their screens from it), `news` drives the TV
+  reward and unlock cutscenes, and the phone host panel sends `gm` ops.
+
+**Slice 3 assignments (after 2b, once the user approves):** P1 builds `shared/campaign/` (engine + tests,
+plus a tiny sample CONTENT with placeholder ids: false start → 3 blocks games → reward + 2 worlds
+unlock at once). P2 builds the server (envelope + migration, events from the finished block game,
+wire, e2e). Then the TV hub map + unlock cutscene and the phone host panel. The user writes the real
+content.
 
 ### Scene direction (user, 2026-11-04): the party room is **an Altbau apartment in Vienna** — herringbone
 (Fischgrät) parquet floor, high pale stucco walls with mouldings, tall casement double windows (evening
