@@ -353,6 +353,32 @@ Rules that keep the evening safe:
 - **Wire:** `view` carries `campaign` (TV and phones derive their screens from it), `news` drives the TV
   reward and unlock cutscenes, and the phone host panel sends `gm` ops.
 
+**Contract D addendum A1 (orchestrator, 2026-11-04, from P2's pre-coding questions):**
+1. **Party roster in the campaign:** `campaign.party = { order, players: { [id]: { id, character, name, color, left } }, hostId }`,
+   owned by `reduceCampaign`. `join` (incl. the server's reclaim), `leave` (leave the evening: `left` = true,
+   also forwarded to a live activity) and host passing are campaign actions. Presence, `pos`, host checks and
+   doors all read the party. An activity's own players are seeded from the party.
+2. **Blocks lifecycle:** `enter` on a blocks tableau creates its State in the block **lobby**, seeded with every
+   non-left party member, with the node's `settings`. The host can configure, then `start`. A party member who
+   joins while that block lobby is open is added to it too; one who joins mid-game watches until the next game.
+   `again` (rematch) and `newGame` (back to the block lobby) keep their meaning inside the tableau. `back`
+   leaves the tableau: host only, refused while playing (use `endGame` first).
+3. **Ack:** accepted only from `role:'screen'` sockets; the server injects `id: 'screen'`; `upTo` is required.
+4. **`game.finished` exactly once, from the ENGINE:** `reduceCampaign` derives it itself when a nested
+   activity moves playing → finished (any cause: stuck, time, host), recording and settling in the same step.
+   A single pure step plus one atomic save means a kill -9 persists both or neither. The event carries
+   `endReason`; a host-ended game counts as played. The server emits only external events (`zone.entered`).
+5. **Versions:** the envelope is `v:2`, independent of `campaign.v:1`. `bestPrevious` carries over as envelope
+   metadata.
+6. **Doors:** door rectangles are content data (`node.door = { x, y, w, h }` on the hub/world's children).
+   A pure `zoneAt(content, nodeId, x, y)` lives in shared/campaign. On a `pos` from the content's `chooser`
+   character (sample: 'elodie'), the server applies `enter` when it goes from outside to INSIDE an unlocked
+   door (edge-triggered). The host can always `enter` directly.
+7. **Wire compat:** `view` keeps `state` (= `campaign.at.activity`, possibly null) next to `campaign` while the
+   clients migrate. A NEW campaign starts AT the false-start blocks tableau (the story begins as just a
+   block game), so today's clients keep working until the hub is first entered.
+8. **GM ops:** shapes are defined by the engine; the server only checks host and forwards.
+
 **Slice 3 assignments (approved 2026-11-04). World entry: Élodie walks into a door, the host can override. Copy language is data: the user writes the real story text, placeholders are English.** P1 builds `shared/campaign/` (engine + tests,
 plus a tiny sample CONTENT with placeholder ids: false start → 3 blocks games → reward + 2 worlds
 unlock at once). P2 builds the server (envelope + migration, events from the finished block game,
