@@ -152,7 +152,11 @@ async function phone(label: string) {
   const tap = async (selector: string) => {
     // headless: a background or just-unfrozen tab stays hidden and never acks synthetic input
     await cmd('Page.bringToFront', {}, s);
-    const box = await ev(`(() => { const r = document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+    // the target may sit outside the viewport (a tall sheet scrolled elsewhere): bring it in first,
+    // or the touch lands on whatever happens to be at those coordinates — or on nothing at all
+    const box = await ev(`(() => { const e = document.querySelector(${JSON.stringify(selector)});
+      e.scrollIntoView({ block: 'center', inline: 'center' });
+      const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
     const touched = (async () => {
       await cmd('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: box.x, y: box.y }] }, s);
       await cmd('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }, s);
