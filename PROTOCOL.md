@@ -85,7 +85,8 @@ injected by the server (socket → playerId; screens: `"screen"`), never taken f
 { "t": "view", "state": { /* full State, see shared/game.js */ }, "campaign": { /* Campaign, see shared/campaign/types.js */ },
   "online": ["p-abc123"], "now": 1730700000000 }
 // slice 3: "campaign" = the whole evening (at.node, party, facts, news, …); "state" = campaign.at.activity
-// (the block game), null on the hub or in a world. "online" lists party members.
+// (the block game), null on the hub or in a world. "online" lists party members. "contentVersion": the
+// hash served by GET /api/content: re-fetch the content when it changes (content edited + server restarted).
 // broadcast to ALL after every change; "now" = server epoch ms (M2 Q4): clients compute
 // clock skew = now - Date.now() on receive and render timed-mode countdowns from state.deadline - (Date.now() + skew)
 // "online" (slice 2b): playerIds with a live socket, in seat order. EPHEMERAL: never in State or on
@@ -128,6 +129,11 @@ In solo games the view gains an optional sibling: `{ "t": "view", "state": …, 
 
 - `GET /api/join` → `{"url":"http://<lan-ip>:<port>/play?room=ABCD","code":"ABCD"}`
 - `GET /api/join-qr.svg` → QR of that URL (image/svg+xml, no-store)
+- `GET /api/content` → `{ "version": "3f9a1c0b2d4e", "start": …, "chooser": …, "nodes": { … } }`: the active campaign
+  content (shared/campaign/types.js `Content`) plus `version`, a short hash of the content computed once at boot,
+  also sent as the `ETag` header (application/json, no-store). Clients fetch it on load and again whenever a
+  view's `contentVersion` differs from the version they hold (public/commun/content.js); the view carries the
+  campaign state, never the content itself.
 
 ## Mock server only (`npm run mock`)
 

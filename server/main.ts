@@ -21,7 +21,7 @@ import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
 import { loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import type { ServerAction, Settings, State } from './rules.ts';
 import {
-  CONTENT, assertContent, reduceCampaign, isUnlocked, zoneAt,
+  CONTENT, CONTENT_VERSION, assertContent, reduceCampaign, isUnlocked, zoneAt,
   type Campaign, type CampaignAction, type GmOp,
 } from './campaign.ts';
 
@@ -116,7 +116,7 @@ const serveStatic = makeStaticHandler(ROOT);
 /** The address phones open (the QR's content); without a LAN IP, the host the request came in on. */
 const joinUrl = (hostHeader?: string): string =>
   `http://${lan ? `${lan.address}:${PORT}` : (hostHeader ?? `localhost:${PORT}`)}/play?room=${game.room}`;
-const serveApi = makeApiHandler((req) => ({ url: joinUrl(req?.headers.host), code: game.room }));
+const serveApi = makeApiHandler((req) => ({ url: joinUrl(req?.headers.host), code: game.room }), { version: CONTENT_VERSION, data: CONTENT });
 
 const httpServer = createServer((req, res) => {
   serveApi(req, res)
@@ -148,7 +148,10 @@ const online = (): string[] => party().order.filter((id) => sockets.get(id)?.rea
  *  `campaign` = the whole evening (TV hub/cutscenes, phone host panel). */
 const viewMsg = () => {
   const s = activity();
-  return JSON.stringify({ t: 'view', state: s, campaign: game.campaign, online: online(), now: Date.now(), best: s ? bests.view(s) : undefined });
+  return JSON.stringify({
+    t: 'view', state: s, campaign: game.campaign, contentVersion: CONTENT_VERSION,
+    online: online(), now: Date.now(), best: s ? bests.view(s) : undefined,
+  });
 };
 
 function send(ws: WebSocket, data: string | object): void {
