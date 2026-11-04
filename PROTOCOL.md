@@ -20,6 +20,8 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 { "t": "place", "piece": 0, "x": 3, "y": 5 }                // piece = index 0..2 in own hand; (x,y) = piece origin
 { "t": "config", "patch": { "mode": "timed" } }             // host only, phase lobby/finished (M2 Q4); invalid keys/values ignored
 { "t": "leave" }                                            // lobby/finished: player removed, slot freed; playing: marked done; host passes on
+{ "t": "newGame" }                                          // host only, phase finished → back to the LOBBY: players kept (minus left),
+                                                            // scores/boards reset, room code kept, newcomers can join again (M3 slice 2)
 { "t": "pos", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
 // M3 avatar movement — EPHEMERAL, never enters the reducer State. Client-authoritative:
 // the phone integrates its joystick locally and sends throttled updates (≤ 15/s, only when

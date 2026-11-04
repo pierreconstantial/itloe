@@ -219,7 +219,21 @@ to screens, held in server memory only — it never touches the reducer, persist
 Character designs (recognisable, 16×16): Pierre, Élodie (the birthday star — give her something festive),
 Sol (taller teen), Anna (14, K-pop style). Keep the QR/room-code lobby elements — avatars share the scene.
 
-Scene direction (user, 2026-11-04): the party room is **an Altbau apartment in Vienna** — herringbone
+### Slice 2 — bulletproof sessions (user feedback from the first live playtest, 2026-11-04)
+
+The user lost their phone session at the podium while looking for a way back to the room, and the
+podium's only exit was "Play again". Directives: "That's need to be super ultra solid" and "save
+always the state on the laptop, so that it can pause, resume without needing to restart everything.
+It must be super safe." Slice 2 makes session continuity unbreakable:
+
+| Who | What |
+|---|---|
+| P1 | `{ t:'newGame', id }` reducer action: host only, finished → lobby; players kept (minus left) with fresh boards/scores via newPlayer (character/name/colour kept), deadline/endReason cleared, new derived seed; tests |
+| P2 | Wire `newGame` (err not-host); timed-pause fairness: persist `savedAt` in the envelope and shift a live `deadline` by the downtime on load, so a killed/resumed timed game keeps its REMAINING time instead of expiring while the laptop was closed; e2e: newGame flow + kill -9 resume in every phase incl. the shifted deadline |
+| P3 | Phone session is NEVER losable. Acceptance (each must pass): reload; browser back then forward; back to the join URL (QR re-scan) with a live session → silent resume, no picker; bfcache restore (pageshow); phone locked 5 min mid-game → unlock resumes; WS drop → auto-reconnect with banner, never dumped to a menu. Picker appears ONLY when the server does not know the stored id; then it preselects the stored character ("Continue as Élodie") when that character is free. Podium: host gets BOTH "Play again" and "Back to the room" (newGame); guests see which was chosen |
+| P4 | TV: verify lobby re-entry after newGame (party room back, avatars resume, newcomers join); TV auto-reconnect after a server restart mid-game (banner → re-hello → same boards); cross-check P3's acceptance list from the TV side |
+
+### Scene direction (user, 2026-11-04): the party room is **an Altbau apartment in Vienna** — herringbone
 (Fischgrät) parquet floor, high pale stucco walls with mouldings, tall casement double windows (evening
 sky), tall white double door, warm light (chandelier); the birthday bunting and balloons live INSIDE
 this room. Keep it simple, readable, airy — old Zelda interior style.
