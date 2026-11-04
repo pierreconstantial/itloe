@@ -188,7 +188,48 @@ try {
   check((await tap(F2, 'sol')).id === idF, 'after restart: no stored id → tap the character → reclaim');
   await onlineIs(screen, [idA, idF], 'everyone back online');
   check(screen.lastView().hostId === idA, 'host kept through the restart');
-  for (const c of [E2, F2, screen, D, E, F]) c.ws.close();
+  // ---------- host controls: a dropped player can never block the game ----------
+  const G = await device('G'); const idG = (await tap(G, 'pierre')).id!;
+  i = E2.mark(); E2.send({ t: 'start' });
+  await E2.waitFor((m) => m.t === 'view' && m.state.phase === 'playing', i);
+  await closed(F2); // sol drops while NOT stuck: the game would wait for her forever
+  await onlineIs(screen, [idA, idG], 'controls: a player drops mid-game');
+  const errOf = async (c: Client, msg: object) => {
+    const k = c.mark(); c.send(msg);
+    const r = await c.waitFor((m) => m.t === 'err' || m.t === 'view', k).catch(() => null);
+    return r?.t === 'err' ? r.code : r ? 'view' : 'none';
+  };
+  check(await errOf(G, { t: 'retire', target: idF }) === 'not-host', 'non-host retire → err not-host');
+  check(await errOf(G, { t: 'endGame' }) === 'not-host', 'non-host endGame → err not-host');
+  i = screen.mark(); E2.send({ t: 'retire', target: idF });
+  const vr2 = (await screen.waitFor((m) => m.t === 'view' && m.state.players[idF]?.done, i)).state;
+  const pf = vr2.players[idF];
+  check(pf.done && pf.retired && !pf.left && vr2.phase === 'playing', 'host retires the dropped player → done + retired, not left, game goes on');
+  i = E2.mark(); E2.send({ t: 'retire', target: 'p-nope' }); await sleep(300);
+  check(!E2.since(i).some((m) => m.t === 'err'), "host's no-op retire (unknown target) → no error");
+  const F3 = await device('F3');
+  check((await tap(F3, 'sol')).id === idF, 'a retired player keeps the character: tap → reclaim');
+  check(F3.lastView().players[idF].retired === true, '…and sees themself out (done) on reconnect');
+  i = E2.mark(); E2.send({ t: 'place', ...legalMoves(E2.lastView(), idA)[0] }); await E2.waitFor((m) => m.t === 'view', i);
+  const scores = Object.fromEntries(E2.lastView().order.map((id: string) => [id, E2.lastView().players[id].score]));
+  i = screen.mark(); E2.send({ t: 'endGame' });
+  const ve = (await screen.waitFor((m) => m.t === 'view' && m.state.phase === 'finished', i)).state;
+  check(ve.endReason === 'host' && ve.order.every((id: string) => ve.players[id].done && ve.players[id].score === scores[id]),
+    'host endGame → finished, endReason host, everyone done, scores kept');
+  check(await errOf(E2, { t: 'endGame' }) === 'not-host', 'endGame on the podium → err not-host');
+  check(await errOf(E2, { t: 'retire', target: idG }) === 'not-host', 'retire on the podium → err not-host');
+  // solo: a host-ended game is a real score → solo best recorded
+  i = E2.mark(); E2.send({ t: 'newGame' }); await E2.waitFor((m) => m.t === 'view' && m.state.phase === 'lobby', i);
+  F3.send({ t: 'leave' }); G.send({ t: 'leave' });
+  await E2.waitFor((m) => m.t === 'view' && m.state.order.length === 1);
+  i = E2.mark(); E2.send({ t: 'start' }); await E2.waitFor((m) => m.t === 'view' && m.state.phase === 'playing', i);
+  i = E2.mark(); E2.send({ t: 'place', ...legalMoves(E2.lastView(), idA)[0] }); await E2.waitFor((m) => m.t === 'view', i);
+  const solo = E2.lastView().players[idA].score;
+  i = E2.mark(); E2.send({ t: 'endGame' });
+  const vb = await E2.waitFor((m) => m.t === 'view' && m.state.phase === 'finished', i);
+  check(vb.state.endReason === 'host' && vb.best?.score === solo && solo > 0, `solo game ended by the host still counts as a best (${solo})`);
+  void idG;
+  for (const c of [E2, F2, F3, G, screen, D, E, F]) c.ws.close();
 } catch (e) {
   check(false, `crashed: ${(e as Error).message}\n--- server log ---\n${log}`);
 } finally {

@@ -28,6 +28,12 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 { "t": "leave" }                                            // lobby/finished: player removed, slot freed; playing: marked done; host passes on
 { "t": "newGame" }                                          // host only, phase finished → back to the LOBBY: players kept (minus left),
                                                             // scores/boards reset, room code kept, newcomers can join again (M3 slice 2)
+{ "t": "endGame" }                                          // host only, phase playing → finished: every not-done player is marked
+                                                            // done (board frozen, score kept), endReason "host". Refused → err "not-host"
+{ "t": "retire", "target": "p-abc123" }                     // host only, phase playing: the target is marked done + retired (board frozen,
+                                                            // still ranked, NOT left: keeps seat + character, can reconnect). Everyone
+                                                            // done → finished, endReason "stuck". Non-host / not playing → err "not-host";
+                                                            // unknown, done or left target → silent no-op. The host may retire themself.
 { "t": "pos", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
 // M3 avatar movement — EPHEMERAL, never enters the reducer State. Client-authoritative:
 // the phone integrates its joystick locally and sends throttled updates (≤ 15/s, only when

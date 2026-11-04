@@ -244,7 +244,7 @@ function handleMessage(ws: WebSocket, m: any): void {
 
   // everything below needs an identified player; actions are rebuilt field by field,
   // so server-only inputs (now, deadline, timeUp) can never come from the wire
-  if (!['start', 'again', 'newGame', 'place', 'config', 'leave'].includes(m.t)) return;
+  if (!['start', 'again', 'newGame', 'endGame', 'retire', 'place', 'config', 'leave'].includes(m.t)) return;
   const id = who.get(ws);
   if (!id) { sendErr(ws, 'unknown-player'); return; }
   const phase = game.state.phase;
@@ -253,6 +253,18 @@ function handleMessage(ws: WebSocket, m: any): void {
     case 'start':
     case 'again':
       if (!apply({ t: m.t, id, now: Date.now() })) sendErr(ws, 'not-host');
+      return;
+
+    case 'endGame':
+      // host stops the game (someone dropped while not stuck); refused (non-host / not playing) → not-host, like again
+      if (!apply({ t: 'endGame', id })) sendErr(ws, 'not-host');
+      return;
+
+    case 'retire':
+      // host takes one player out (done, still ranked, keeps seat + character). Non-host or not playing →
+      // not-host; a host's no-op (unknown / already done / left target) is not an error, like config
+      if (typeof m.target !== 'string') return;
+      if (!apply({ t: 'retire', id, target: m.target }) && (id !== game.state.hostId || phase !== 'playing')) sendErr(ws, 'not-host');
       return;
 
     case 'newGame':

@@ -31,8 +31,9 @@ import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
  *   score: number,
  *   streak: number,             // consecutive clearing placements before now
  *   graceLeft: number,          // non-clearing placements still forgiven (reset to rules.grace on a clear)
- *   done: boolean,              // stuck, stopped by the bell, or left; board frozen
+ *   done: boolean,              // stuck, stopped by the bell, retired, ended by the host, or left; board frozen
  *   left: boolean,              // left mid-game (still shown until the game ends; not in the rematch)
+ *   retired?: boolean,          // taken out by the host mid-game: still ranked, keeps seat + character (absent on old saves)
  *   last: null | {
  *     n: number,                // per-player move counter (event id — clients react to n changing)
  *     pieceId: PieceId, x: number, y: number,
@@ -53,7 +54,7 @@ import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
  *   settings: Settings,         // host's current choice; editable in lobby and finished
  *   rules: Settings,            // locked snapshot used by the game being played / shown
  *   deadline: number | null,    // epoch ms of the timed-mode bell; null otherwise
- *   endReason: 'stuck' | 'time' | null
+ *   endReason: 'stuck' | 'time' | 'host' | null   // host = the host ended the game (endGame)
  * }} State
  *
  * `now` on start/again and the whole `timeUp` action are SERVER-injected, never from the wire.
@@ -64,6 +65,8 @@ import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
  *   | { t: 'config', id: string, patch: Partial<Settings> }
  *   | { t: 'timeUp', deadline: number }
  *   | { t: 'leave', id: string }
+ *   | { t: 'endGame', id: string }
+ *   | { t: 'retire', id: string, target: string }
  *   | { t: 'place', id: string, piece: 0 | 1 | 2, x: number, y: number }} Action
  */
 
@@ -158,7 +161,7 @@ export function newPlayer(id, name, color, size, grace = DEFAULT_SETTINGS.grace,
     board: emptyBoard(size),
     handIndex: 0,
     hand: [null, null, null],
-    score: 0, streak: 0, graceLeft: grace, done: false, left: false,
+    score: 0, streak: 0, graceLeft: grace, done: false, left: false, retired: false,
     last: null,
   };
 }
@@ -302,22 +305,28 @@ export function reduce(state, action) {
           },
         },
       };
-      const allDone = state.order.every((id) => players[id].done);
-      return allDone
-        ? { ...state, players, phase: 'finished', endReason: 'stuck' }
-        : { ...state, players };
+      return finishIfAllDone(state, players);
     }
 
     case 'timeUp': {
       if (state.phase !== 'playing') return state;
       if (state.deadline === null || action.deadline !== state.deadline) return state;
-      /** @type {Record<string, Player>} */
-      const players = {};
-      for (const id of state.order) {
-        const p = state.players[id];
-        players[id] = p.done ? p : { ...p, done: true };
-      }
-      return { ...state, players, phase: 'finished', endReason: 'time' };
+      return { ...state, players: allMarkedDone(state), phase: 'finished', endReason: 'time' };
+    }
+
+    case 'endGame': {
+      // host stops the game (e.g. someone dropped while not stuck): everyone still playing is frozen, scores kept
+      if (state.phase !== 'playing' || !isHost(state, action.id)) return state;
+      return { ...state, players: allMarkedDone(state), phase: 'finished', endReason: 'host' };
+    }
+
+    case 'retire': {
+      // host takes one player out: done (board frozen, still ranked) but NOT left — the seat, the
+      // character and a reconnect stay theirs. The last one out ends the game like getting stuck.
+      if (state.phase !== 'playing' || !isHost(state, action.id)) return state;
+      const t = state.players[action.target];
+      if (!t || t.done || t.left) return state;
+      return finishIfAllDone(state, { ...state.players, [t.id]: { ...t, done: true, retired: true } });
     }
 
     case 'leave': {
@@ -328,11 +337,7 @@ export function reduce(state, action) {
         const { [p.id]: _gone, ...players } = state.players;
         return { ...state, hostId, order: state.order.filter((id) => id !== p.id), players };
       }
-      const players = { ...state.players, [p.id]: { ...p, done: true, left: true } };
-      const allDone = state.order.every((id) => players[id].done);
-      return allDone
-        ? { ...state, hostId, players, phase: 'finished', endReason: 'stuck' }
-        : { ...state, hostId, players };
+      return finishIfAllDone({ ...state, hostId }, { ...state.players, [p.id]: { ...p, done: true, left: true } });
     }
 
     case 'again': {
@@ -364,6 +369,32 @@ export function reduce(state, action) {
     default:
       return state;
   }
+}
+
+/** @param {State} state @param {string} id */
+const isHost = (state, id) => state.hostId !== null && id === state.hostId;
+
+/** Every seated player done (already-done ones kept as is). @param {State} state @returns {Record<string, Player>} */
+function allMarkedDone(state) {
+  /** @type {Record<string, Player>} */
+  const players = {};
+  for (const id of state.order) {
+    const p = state.players[id];
+    players[id] = p.done ? p : { ...p, done: true };
+  }
+  return players;
+}
+
+/**
+ * Installs `players`; the game finishes (endReason 'stuck') once every seated player is done.
+ * @param {State} state
+ * @param {Record<string, Player>} players
+ * @returns {State}
+ */
+function finishIfAllDone(state, players) {
+  return state.order.every((id) => players[id].done)
+    ? { ...state, players, phase: 'finished', endReason: 'stuck' }
+    : { ...state, players };
 }
 
 /**
