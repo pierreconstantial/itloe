@@ -385,6 +385,43 @@ unlock at once). P2 builds the server (envelope + migration, events from the fin
 wire, e2e). Then the TV hub map + unlock cutscene and the phone host panel. The user writes the real
 content.
 
+### Contract E draft — quiz activity (user request 2026-11-04; NOT frozen)
+
+User: quiz games inside the campaign. Questions in **French**, general culture (geography, history,
+literature, art…), intermediate to good level. Basic mode first: the question shows on the TV, players
+answer on their phones, by **multiple choice or typed text**. The laptop will have access to a Claude
+model, for example to accept misspellings. The question bank comes from free open-licensed French
+datasets, bundled locally (research pending; licence and attribution must be kept).
+
+```js
+// data/quiz/*.json — the bank, server-side only (never served whole: it holds the answers)
+// Question = { id, q, choices?: string[4], answer: string | number /* index when choices */,
+//              accept?: string[], category, level: 1..3, source }   // source = dataset + licence
+
+// shared/quiz/ (pure, JSDoc, like shared/game.js)
+// QuizState = { kind:'quiz', phase:'lobby'|'question'|'reveal'|'finished', seed, settings,
+//   order, players{ id, character, name, color, score }, hostId,
+//   round: { index, questionId, deadline, answers: Record<id, { choice?|text?, at, verdict? }> } | null,
+//   endReason }
+// settings: { count: 10, seconds: 20, mode: 'choice'|'text'|'mixed', categories?, level? }
+// actions: start (host) · answer { id, choice | text } (once per round, before the deadline)
+//   · close (server: deadline or everyone answered) · verdict { id, ok } (server: async text judge)
+//   · override { id, target, ok } (host: fixes a text verdict on the reveal) · next (host) · endGame (host)
+// scoring: data table — correct +100, speed bonus ≤ +50 linear on the time left, 0 when wrong
+```
+
+- **The answer is never on the wire before the reveal.** The server keeps the bank. The view projects the
+  current question only: text and choices during `question`, plus the answer and verdicts at `reveal`.
+- **Text judging pipeline (server):** normalize (case, accents, punctuation, French articles) → exact or
+  `accept` match → edit distance under a length-relative threshold → otherwise **uncertain**. An uncertain
+  answer goes to a pluggable `judge(question, text) → Promise<boolean | null>` with a timeout. With no judge,
+  or null or a timeout: wrong, and the host can override on the reveal. The verdict enters the reducer as a
+  server action, so the reducer stays pure and a restart never re-judges.
+- **No repeats across the evening:** asked question ids are kept in the campaign (engine addition).
+- **Campaign:** a tableau `activity: { kind:'quiz', settings }`. It reports `quiz.finished` with the ranking
+  per character, exactly once (same derivation as blocks).
+- **Timed fairness:** the round deadline shifts on resume like the blocks deadline.
+
 ### Scene direction (user, 2026-11-04): the party room is **an Altbau apartment in Vienna** — herringbone
 (Fischgrät) parquet floor, high pale stucco walls with mouldings, tall casement double windows (evening
 sky), tall white double door, warm light (chandelier); the birthday bunting and balloons live INSIDE
