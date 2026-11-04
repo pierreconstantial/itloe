@@ -3,14 +3,15 @@
 // Every change goes through apply() → solo best, save to disk, arm the timed-mode clock, doors, broadcast.
 // Run: npm start          (resumes the saved evening in any state; a timed clock keeps its remaining time)
 //      npm start -- --new (or BLOKO_NEW=1: always a fresh evening)
-// Env: PORT (3131), BLOKO_HOST (LAN interface or address), BLOKO_VAR (data dir, default var/)
+// Env: PORT (3131), BLOKO_BIND, BLOKO_HOST (LAN), BLOKO_VAR, BLOKO_PUBLIC_ORIGIN + BLOKO_ACCESS_TOKEN
 
-import { createServer } from 'node:http';
+import { createServer, type IncomingMessage } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import qrcodeTerminal from 'qrcode-terminal';
 import { WebSocketServer, WebSocket } from 'ws';
 import { makeStaticHandler } from './static.ts';
 import { makeApiHandler } from './http-api.ts';
+import { makeAccess } from './access.ts';
 import { pickLan } from './lan.ts';
 import { makeClock } from './clock.ts';
 import { activityDeadline, isQuiz, shiftActivityDeadline, type ActivityState } from './resume.ts';
@@ -37,6 +38,7 @@ type ErrCode = 'full' | 'bad-place' | 'not-host' | 'not-playing' | 'unknown-play
 const PORT = Number(process.env.PORT ?? 3131);
 const ROOT = new URL('..', import.meta.url).pathname;
 const FORCE_NEW = process.argv.includes('--new') || process.env.BLOKO_NEW === '1';
+const access = makeAccess(process.env.BLOKO_PUBLIC_ORIGIN, process.env.BLOKO_ACCESS_TOKEN);
 
 // ---------- the evening + change hooks (wrap the engine, never inside it) ----------
 
@@ -138,26 +140,30 @@ setInterval(beat, BEAT_MS).unref();
 
 // ---------- HTTP ----------
 
-const lan = await pickLan();
+const lan = access.origin ? null : await pickLan();
 const serveStatic = makeStaticHandler(ROOT);
 /** The address phones open (the QR's content); without a LAN IP, the host the request came in on. */
 const joinUrl = (hostHeader?: string): string =>
-  `http://${lan ? `${lan.address}:${PORT}` : (hostHeader ?? `localhost:${PORT}`)}/play?room=${game.room}`;
+  access.joinUrl(game.room, `http://${lan ? `${lan.address}:${PORT}` : (hostHeader ?? `localhost:${PORT}`)}`);
 const serveApi = makeApiHandler((req) => ({ url: joinUrl(req?.headers.host), code: game.room }), { version: CONTENT_VERSION, data: CONTENT });
 
-const httpServer = createServer((req, res) => {
-  serveApi(req, res)
-    .then((handled) => (handled ? undefined : serveStatic(req, res)))
-    .catch((e) => {
-      console.error('[itloe] http error:', e);
-      if (!res.headersSent) res.writeHead(500);
-      res.end();
-    });
+const httpServer = createServer(async (req, res) => {
+  try {
+    if (!access.http(req, res)) return;
+    if (!await serveApi(req, res)) await serveStatic(req, res);
+  } catch (e) {
+    console.error('[itloe] http error:', e);
+    if (!res.headersSent) res.writeHead(500);
+    res.end();
+  }
 });
 
 // ---------- WebSocket protocol ----------
 
-const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+const wss = new WebSocketServer({
+  server: httpServer, path: '/ws', maxPayload: 16 * 1024,
+  verifyClient: ({ req }: { req: IncomingMessage }) => access.upgrade(req),
+});
 
 /** playerId of each identified player socket */
 const who = new Map<WebSocket, string>();
@@ -600,6 +606,7 @@ setInterval(() => {
 }, TICK_MS).unref();
 
 wss.on('connection', (ws) => {
+  ws.on('error', () => ws.terminate()); // malformed/oversized frames must not crash the process
   alive.add(ws);
   ws.on('pong', () => alive.add(ws));
   send(ws, viewMsg()); // screen gets a view immediately on connect
@@ -643,10 +650,14 @@ const resumed = activity();
 if (resumed && !isQuiz(resumed)) clock.onChange(null, resumed);
 if (isQuiz(resumed)) quizClock.onChange(null, resumed);
 
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, process.env.BLOKO_BIND, () => {
   console.log(`[itloe] ${loaded.how}`);
   console.log(`[itloe] saving to ${STATE_FILE}`);
   console.log(`[itloe] quiz bank: ${bank.questions.length} questions (${bank.files.join(', ') || 'no files'}), judge: none (uncertain typed answers → wrong, host overrides)`);
+  if (access.origin) {
+    console.log(`[itloe] server → ${access.origin}/ (invitation token required)`);
+    return; // invitation URLs and QR codes contain the secret: keep them out of service logs
+  }
   console.log(`[itloe] server → http://localhost:${PORT}/  (screen: /screen/, play: /play/, sim: /sim/)`);
   if (!lan) {
     console.log('[itloe] no LAN IPv4 detected (internal interfaces only) — set BLOKO_HOST to the address phones reach');

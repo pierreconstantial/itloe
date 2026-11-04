@@ -1,0 +1,51 @@
+name: Production release
+
+on:
+  push:
+    branches: [production]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: production-release
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts
+      - run: npm run check
+      - run: npm test
+      - run: PORT=3199 npm run e2e:resume
+      - run: npm run release
+      - name: Test packaged runtime
+        shell: bash
+        run: |
+          runtime=$(mktemp -d)
+          trap 'rm -rf "$runtime"' EXIT
+          tar -xzf "dist/release/itloe-${GITHUB_SHA}-linux-x64.tar.gz" -C "$runtime"
+          ITLOE_TEST_ROOT="$runtime" node --test test/hosting.test.js
+      - name: Publish deployment request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          tag="prod-${GITHUB_SHA}"
+          if draft=$(gh release view "$tag" --json isDraft --jq .isDraft 2>/dev/null); then
+            if [ "$draft" = false ]; then
+              echo 'This commit already has a published release; leaving it unchanged.'
+              exit 0
+            fi
+          else
+            gh release create "$tag" --target "$GITHUB_SHA" --draft \
+              --title "Production ${GITHUB_SHA}" --notes "Itloe runtime for production commit ${GITHUB_SHA}."
+          fi
+          gh release upload "$tag" "dist/release/itloe-${GITHUB_SHA}-linux-x64.tar.gz" dist/release/SHA256SUMS --clobber
+          gh release edit "$tag" --draft=false
