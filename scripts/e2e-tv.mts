@@ -404,6 +404,85 @@ try {
   await sleep(600);
   await tv.shot('world-map');
   check(tv.errors.length === 0, `no page exception through the campaign (${tv.errors.join(' | ') || 'none'})`);
+
+  // ---------- quiz: World 1's block game opens its quiz door; lobby → questions → reveals → podium ----------
+  const lastQuiz = (c: Client) => [...c.msgs].reverse().find((m) => m.t === 'view')?.quiz;
+  i = A2.mark(); A2.send({ t: 'enter', node: 'childhood.blocks' });
+  await A2.waitFor((m) => m.t === 'view' && m.state?.phase === 'lobby', i);
+  i = A2.mark(); A2.send({ t: 'start' }); await A2.waitFor((m) => m.t === 'view' && m.state?.phase === 'playing', i);
+  i = A2.mark(); A2.send({ t: 'endGame' }); await A2.waitFor((m) => m.t === 'view' && m.state?.phase === 'finished', i);
+  i = A2.mark(); A2.send({ t: 'back' }); await A2.waitFor((m) => m.t === 'view' && m.state === null && m.campaign?.at.node === 'childhood', i);
+  check(await tv.until(`JSON.parse(${doorsJs})['childhood.quiz'] !== 'locked'`, 'quiz door'), "World 1's block game done → its quiz door opens");
+  i = A2.mark(); A2.send({ t: 'enter', node: 'childhood.quiz' });
+  const ql = await A2.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'lobby', i);
+  check(await tv.until(`!!document.querySelector('.quiz-lobby') && document.querySelectorAll('.quiz-lobby .quiz-chip').length === ${ql.quiz.order.length}`, 'quiz lobby'),
+    `quiz lobby on the TV: "Quiz!", the ${ql.quiz.order.length} seated players, settings line`);
+  check(/questions · \d+ s each/.test(await tv.js(`document.querySelector('.quiz-lobby .settings-line')?.textContent ?? ''`)), '…with the quiz settings summary');
+  if ((ql.quiz.credits ?? []).length) {
+    check(await tv.until(`document.querySelector('.quiz-lobby .quiz-credits')?.textContent.includes(${JSON.stringify(String(ql.quiz.credits[0]).slice(0, 16))})`, 'credits'),
+      'quiz lobby: dataset credits line (CC BY-SA attribution)');
+  }
+  await tv.shot('quiz-lobby');
+
+  const phones = [A2, B, N, E];
+  const seated: string[] = ql.quiz.order;
+  const phoneOf = (id: string) => phones.find((c) => [...c.msgs].some((m) => m.t === 'welcome' && m.playerId === id));
+  i = A2.mark(); A2.send({ t: 'start' });
+  let qv = (await A2.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'question', i)).quiz;
+  let rounds = 0, anecdotes = 0;
+  while (qv?.phase === 'question' && rounds < 12) {
+    rounds++;
+    const choice = !!qv.round.question.choices;
+    check(await tv.until(`!!document.querySelector('.quiz-question') && document.querySelector('.quiz-q')?.textContent === ${JSON.stringify(qv.round.question.q)}`, 'question'),
+      `Q${rounds}: the question on the TV (${choice ? 'A–D tiles' : 'typed answer'})`);
+    if (rounds === 1) {
+      check(await tv.js(`!document.querySelector('.is-right') && !document.querySelector('.quiz-anecdote') && !document.querySelector('.quiz-source') && document.querySelectorAll('.quiz-choice').length === ${choice ? qv.round.question.choices.length : 0}`), '…no answer (nor anecdote, nor source) shown before the reveal');
+      const n0 = Number(await tv.js(`document.querySelector('.quiz-ring-num')?.textContent`));
+      await sleep(1300);
+      const n1 = Number(await tv.js(`document.querySelector('.quiz-ring-num')?.textContent`));
+      check(n0 > 0 && n1 < n0, `…the countdown ring runs (${n0} → ${n1})`);
+      check(!(await tv.js(`!!document.querySelector('.cutscene')`)), '…no unlock cutscene covers the question (interrupted, replayed when calm)');
+      await tv.shot('quiz-question');
+    }
+    // the first seated player answers: only their chip lights up
+    const [first, ...rest] = seated;
+    phoneOf(first)!.send(choice ? { t: 'answer', choice: 0 } : { t: 'answer', text: 'Victor Hugo' });
+    check(await tv.until(`document.querySelector('.quiz-question .quiz-chip[data-id="${first}"]')?.classList.contains('has-answered')
+      && [...document.querySelectorAll('.quiz-question .quiz-chip.has-answered')].length === 1`, 'chip'),
+      `Q${rounds}: who answered is shown (one chip lit, nothing about what)`);
+    i = A2.mark();
+    for (const id of rest) phoneOf(id)!.send(choice ? { t: 'answer', choice: 1 } : { t: 'answer', text: 'nope' });
+    const rv = (await A2.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'reveal', i, 6000)).quiz;
+    check(await tv.until(`document.querySelectorAll('.quiz-reveal .quiz-result').length === ${seated.length}`
+      + (choice ? ` && document.querySelectorAll('.quiz-choice.is-right').length === 1` : ` && !!document.querySelector('.quiz-answer')`), 'reveal'),
+      `Q${rounds}: reveal: the right answer lit, one result per player`);
+    const marks = await tv.js(`JSON.stringify([...document.querySelectorAll('.quiz-result')].map((r) => r.className.replace('quiz-result ', '')))`);
+    const want = JSON.stringify(seated.map((id) => `is-${rv.round.answers[id]?.ok === null ? 'pending' : rv.round.answers[id]?.ok ? 'right' : rv.round.answers[id] ? 'wrong' : 'none'}`));
+    check(marks === want, `Q${rounds}: ✓/✗ match the server's verdicts (${marks})`);
+    const source = rv.round.answer?.source;
+    if (source) check(await tv.until(`document.querySelector('.quiz-reveal .quiz-source')?.textContent.includes(${JSON.stringify(String(source).slice(0, 16))})`, 'source'), `Q${rounds}: reveal shows the question's source`);
+    const anecdote = rv.round.answer?.anecdote;
+    if (anecdote) {
+      anecdotes++;
+      check(await tv.until(`document.querySelector('.quiz-anecdote')?.textContent.includes(${JSON.stringify(anecdote.slice(0, 20))})`, 'anecdote'),
+        `Q${rounds}: the reveal shows the anecdote`);
+    }
+    if (rounds === 1 || (anecdote && anecdotes === 1)) { await sleep(900); await tv.shot(anecdote ? 'quiz-reveal-anecdote' : 'quiz-reveal'); }
+    i = A2.mark(); A2.send({ t: 'next' });
+    qv = (await A2.waitFor((m) => m.t === 'view' && (m.quiz?.phase === 'question' || m.quiz?.phase === 'finished'), i)).quiz;
+  }
+  check(qv?.phase === 'finished', `quiz played through (${rounds} questions, ${anecdotes} with an anecdote)`);
+  check(await tv.until(`document.querySelector('.podium .title')?.textContent === 'Quiz podium' && document.querySelectorAll('.rank-row').length === ${seated.length}`, 'quiz podium'),
+    'finished → the quiz podium, every player ranked');
+  check(await tv.js(`[...document.querySelectorAll('.rank-correct')].every((e) => e.textContent.includes('/') && e.textContent.trim().endsWith('✓'))`), '…with each player\'s right answers');
+  if ((qv.credits ?? []).length) check(await tv.js(`!!document.querySelector('.podium .quiz-credits')`), 'quiz podium: dataset credits line');
+  await sleep(4500);
+  await tv.shot('quiz-podium');
+  i = A2.mark(); A2.send({ t: 'back' });
+  await A2.waitFor((m) => m.t === 'view' && !m.quiz && m.campaign?.at.node === 'childhood', i);
+  check(await tv.until(`!document.querySelector('.quiz') && !!document.querySelector('.map-band') && !document.body.classList.contains('in-quiz')`, 'out of quiz'),
+    'host back → the world map again (quiz screen gone)');
+  check(tv.errors.length === 0, `no page exception through the quiz (${tv.errors.join(' | ') || 'none'})`);
   E.ws.close();
   for (const c of [A2, B, N]) c.ws.close();
 } catch (e) {

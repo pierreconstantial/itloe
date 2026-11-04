@@ -47,7 +47,8 @@ export function createCutscenes({ play, ack, canPlay, content, ackDelay = () => 
   /** @type {News[]} */
   let news = [];
   let maxShown = 0;
-  /** @type {{ upTo: number, from: number, ctl: AbortController } | null} */
+  /** interrupted: a game / quiz question started mid-moment → not shown, played again later */
+  /** @type {{ upTo: number, from: number, ctl: AbortController, interrupted: boolean } | null} */
   let current = null;
 
   /** Entries of a moment still waiting on the server (not acked by anyone). @param {number} from @param {number} upTo */
@@ -59,12 +60,13 @@ export function createCutscenes({ play, ack, canPlay, content, ackDelay = () => 
     if (!pending.length) return;
     const m = composeMoment(pending, content());
     const ctl = new AbortController();
-    current = { upTo: m.upTo, from: maxShown, ctl };
+    current = { upTo: m.upTo, from: maxShown, ctl, interrupted: false };
     try {
       await play(m, ctl.signal);
     } finally {
-      const { from } = current;
+      const { from, interrupted } = current;
       current = null;
+      if (interrupted) return; // not shown: the next calm moment plays it again (poke / update)
       maxShown = Math.max(maxShown, m.upTo);
       // ack only what is still there: if the other TV acked meanwhile, nothing to say
       if (!ctl.signal.aborted) {
@@ -76,7 +78,7 @@ export function createCutscenes({ play, ack, canPlay, content, ackDelay = () => 
     tick();
   }
 
-  return {
+  const api = {
     /**
      * Feed every view's campaign.
      * @param {News[]} list  campaign.news
@@ -86,11 +88,22 @@ export function createCutscenes({ play, ack, canPlay, content, ackDelay = () => 
       news = Array.isArray(list) ? list : [];
       if (typeof newsSeq === 'number' && newsSeq < maxShown) maxShown = 0;
       if (current && !stillPending(current.from, current.upTo)) current.ctl.abort(); // acked elsewhere
+      api.poke(); // interrupt it if play just started, else start a pending one
+    },
+    /**
+     * Re-check canPlay: start a deferred moment, or interrupt the running one when a game or a quiz
+     * question has started meanwhile (it never covers play; it is replayed once calm again).
+     */
+    poke: () => {
+      if (current && !current.interrupted && !canPlay()) {
+        current.interrupted = true;
+        current.ctl.abort();
+        return;
+      }
       tick();
     },
-    /** Re-check whether a deferred moment can start now (call when canPlay may have changed). */
-    poke: () => { tick(); },
     playing: () => current !== null,
     maxShown: () => maxShown,
   };
+  return api;
 }

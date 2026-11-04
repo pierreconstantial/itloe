@@ -123,3 +123,23 @@ test('cutscenes: with an ack delay, a TV that sees the news vanish meanwhile sta
   await new Promise((r) => setTimeout(r, 60));
   assert.deepEqual(acks, []);
 });
+
+test('cutscenes: a game / quiz question starting mid-moment interrupts it — not shown, not acked, replayed once calm', async () => {
+  let calm = true;
+  const { cs, plays, acks } = harness(() => calm);
+  const news = threeGames().news;
+  cs.update(news, 7);
+  assert.equal(plays.length, 1);
+  calm = false;           // the host started the quiz
+  cs.update(news, 7);     // the next view (quiz phase: question)
+  await tickOut();
+  assert.ok(plays[0].signal.aborted, 'interrupted at once');
+  assert.deepEqual(acks, []);
+  assert.equal(cs.maxShown(), 0, 'not counted as shown');
+  cs.poke(); await tickOut();
+  assert.equal(plays.length, 1, 'stays quiet while play runs');
+  calm = true; cs.poke();
+  assert.equal(plays.length, 2, 'replayed once calm again');
+  plays[1].done(); await tickOut();
+  assert.deepEqual(acks, [news.at(-1)?.seq]);
+});

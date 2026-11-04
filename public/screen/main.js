@@ -8,7 +8,7 @@ import { renderPodium, revealSchedule } from './podium-view.js';
 import { detectEvents, calloutsFor } from './events.js';
 import { sfx, installAudioUnlock, onAudioState } from './audio.js';
 import * as fx from './fx.js';
-import { syncClock } from '../commun/clock.js';
+import { syncClock, secondsLeft } from '../commun/clock.js';
 import { updateCountdown } from './countdown.js';
 import { legalPlacementCount } from '../../shared/board.js';
 import { createPartyRoom } from './party-room.js';
@@ -18,6 +18,7 @@ import { h } from './dom.js';
 import { createContentSource } from '../commun/content.js';
 import { doorStates, mapCopy } from './doors.js';
 import { createCutscenes } from './cutscenes.js';
+import { renderQuiz } from './quiz-view.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('./events.js').ScreenEvent} ScreenEvent */
@@ -101,6 +102,7 @@ function playersInDanger(s) {
 
 /** @param {State} next */
 function show(next) {
+  leaveQuiz();
   const prev = stale ? null : current;
   stale = false;
   current = next;
@@ -138,6 +140,7 @@ let campaign = null;
  * @param {Campaign} c
  */
 function showMap(c) {
+  leaveQuiz();
   if (current) {
     current = null;
     finishedAt = -Infinity;
@@ -157,6 +160,68 @@ function showMap(c) {
     ...(copy.items.length ? [h('p', 'map-items', copy.items.map((it) => h('span', 'map-item', [`🎁 ${it}`])))] : []),
   ]));
 }
+
+// ---------- quiz (view.quiz: the public projection — never the answer before the reveal) ----------
+
+/** @typedef {import('../../shared/quiz/bank.js').QuizView} QuizView */
+/** @type {QuizView | null} */
+let quiz = null;
+/** performance.now() when the quiz finished (its podium reveal clock). */
+let quizFinishedAt = -Infinity;
+let lastQuizTick = Infinity;
+
+/** @param {QuizView} q */
+function showQuiz(q) {
+  if (current) {
+    current = null;
+    finishedAt = -Infinity;
+    fx.clearAll();
+  }
+  stale = true;
+  updateCountdown(null);
+  party.setVisible(false);
+  party.setDoors([]);
+  document.body.classList.remove('party');
+  document.body.classList.add('in-quiz');
+  const prev = quiz;
+  quiz = q;
+  const roundChanged = q.round && (!prev?.round || prev.round.index !== q.round.index || prev.phase === 'lobby' || prev.phase === 'finished');
+  if (q.phase === 'question' && roundChanged) { lastQuizTick = Infinity; sfx.start(); }
+  if (q.phase === 'reveal' && prev?.phase === 'question') sfx.reveal();
+  if (q.phase === 'finished' && prev && prev.phase !== 'finished') {
+    quizFinishedAt = performance.now();
+    cancelPodium();
+    podiumSequence(/** @type {any} */ (q));
+  }
+  if (q.phase !== 'finished' && prev?.phase === 'finished') cancelPodium();
+  app.replaceChildren(renderQuiz(q, prev ? performance.now() - quizFinishedAt : Infinity));
+  drawQuizRing();
+}
+
+/** Leaving the quiz (back to a map or a block game): its podium sounds stop. */
+function leaveQuiz() {
+  if (!quiz) return;
+  quiz = null;
+  quizFinishedAt = -Infinity;
+  cancelPodium();
+  document.body.classList.remove('in-quiz');
+}
+
+/** Countdown ring of the open question: server deadline + clock skew; ticks in the last 5 s. */
+function drawQuizRing() {
+  const ring = /** @type {HTMLElement | null} */ (app.querySelector('.quiz-ring'));
+  if (!quiz || quiz.phase !== 'question' || !quiz.round || !ring) return;
+  const total = Math.max(1, quiz.rules?.seconds ?? 20);
+  const left = Math.max(0, secondsLeft(quiz.round.deadline));
+  const whole = Math.ceil(left);
+  ring.style.setProperty('--left', String(Math.min(1, left / total)));
+  ring.classList.toggle('is-urgent', left <= 5);
+  const num = ring.querySelector('.quiz-ring-num');
+  if (num) num.textContent = String(whole);
+  if (left <= 5 && whole > 0 && whole < lastQuizTick) sfx.tick(whole);
+  lastQuizTick = Math.min(lastQuizTick, whole);
+}
+setInterval(drawQuizRing, 100);
 
 // ---------- unlock / reward cutscenes (campaign.news) ----------
 
@@ -271,9 +336,11 @@ const HANDLERS = {
     syncClock(msg.now);
     if (msg.campaign) campaign = msg.campaign;
     const ready = content.sync(msg.contentVersion);
-    if (!msg.state) {
+    if (!msg.state && msg.quiz) {
+      showQuiz(msg.quiz);
+      presence.update(Array.isArray(msg.online) ? msg.online : undefined, msg.quiz.order.filter((/** @type {string} */ id) => !msg.quiz.players[id]?.left));
+    } else if (!msg.state) {
       if (!campaign) return;
-      // a quiz runs (view.quiz): its TV screen is the next package — until then, the map of its tableau
       // campaign hub / world: no block game on → the map; re-drawn once fresh content arrives
       showMap(campaign);
       ready.then(() => { if (campaign && !current) showMap(campaign); });
@@ -393,6 +460,7 @@ fetchJoinInfo().then((info) => {
   offline: () => [...presence.offline()],
   campaign: () => campaign,
   doors: () => party.doors(),
+  quiz: () => quiz,
   cutscene: () => ({ playing: cutscenes.playing(), maxShown: cutscenes.maxShown(), acks: acksSent, moments: momentsPlayed,
     text: document.querySelector('.cutscene')?.textContent ?? null }),
   contentVersion: () => content.version(),
