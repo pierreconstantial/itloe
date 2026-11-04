@@ -137,12 +137,13 @@ export function loadCampaign(raw, content) {
   const newsSeq = raw.newsSeq ?? Math.max(0, ...news.map((n) => n.seq));
   const party = raw.party ?? emptyParty();
   const seed = raw.seed ?? 1;
-  const at = known(raw.at?.node)
+  const keep = known(raw.at?.node); // else a fresh lobby is built at the start, which consumes a seed
+  const at = keep
     ? { node: raw.at.node, activity: raw.at.activity ?? null }
     : { node: content.start, activity: blockLobby(content.nodes[content.start], party, seed) };
   const s = settle(facts, content, newsSeq);
   return {
-    v: 1, seed: at === raw.at ? seed : nextSeed(seed), party, at,
+    v: 1, seed: keep ? seed : nextSeed(seed), party, at,
     facts: s.facts, news: [...news, ...s.news], newsSeq: newsSeq + s.news.length,
   };
 }

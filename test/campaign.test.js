@@ -342,3 +342,25 @@ test('determinism: same actions → same campaign (seeds advance on every block 
   const c2 = run(c1, { t: 'back', id: 'e' }, { t: 'enter', id: 'e', node: 'teens.blocks' });
   assert.notEqual(c1.at.activity?.seed, c2.at.activity?.seed);
 });
+
+test('loadCampaign: a JSON round-trip (a server restart) is deep-equal in every phase — no reshuffled seed', () => {
+  const lobby = party();
+  const playing = run(lobby, { t: 'activity', action: { t: 'start', id: 'e', now: 1 } });
+  const finished = run(playing, { t: 'activity', action: { t: 'endGame', id: 'e' } });
+  const withNews = playOnce(playOnce(playOnce(lobby)));
+  const hub = run(withNews, { t: 'back', id: 'e' });
+  const world = run(hub, { t: 'enter', id: 'e', node: 'childhood' });
+  const scene = run(world, { t: 'enter', id: 'e', node: 'childhood.scene' });
+  const fresh = newCampaign(C, 42);
+  /** @type {Record<string, Campaign>} */
+  const cases = { fresh, lobby, playing, finished, withNews, hub, world, scene };
+  for (const [name, c] of Object.entries(cases)) {
+    const back = loadCampaign(JSON.parse(JSON.stringify(c)), C);
+    assert.deepEqual(back, JSON.parse(JSON.stringify(c)), `${name}: deep-equal after load`);
+    assert.equal(back.seed, c.seed, `${name}: seed kept`);
+    // and the NEXT block game is the same one as without the restart
+    const next = (/** @type {Campaign} */ x) => run(x, { t: 'back', id: 'e' }, { t: 'gm', id: 'e', op: { op: 'goto', node: 'teens.blocks' } }).at.activity?.seed;
+    assert.equal(next(back), next(c), `${name}: next block game unchanged by the restart`);
+  }
+  assert.ok(withNews.news.length > 0, 'pending news survive too');
+});
