@@ -12,11 +12,14 @@ import { syncClock } from '../commun/clock.js';
 import { updateCountdown } from './countdown.js';
 import { legalPlacementCount } from '../../shared/board.js';
 import { createPartyRoom } from './party-room.js';
+import { createPresence } from './presence.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('./events.js').ScreenEvent} ScreenEvent */
 
 const RECONNECT_MS = 1000;
+/** Timers stopped for longer than this (laptop asleep, tab frozen) → the socket is presumed dead. */
+const WAKE_GAP_MS = 5000;
 /** How long "Time's up!" holds the screen before the podium reveal starts. */
 const TIMES_UP_MS = 2600;
 
@@ -49,6 +52,21 @@ function podiumLater(fn, ms) {
 function cancelPodium() {
   for (const id of podiumTimers) clearTimeout(id);
   podiumTimers.clear();
+}
+
+/** Who has dropped (debounced): dims their board / avatar so the host can say "tap your character". */
+const presence = createPresence({ onChange: applyPresence });
+
+/** Seated players who can be offline (a left player is gone, not offline). @param {State} s */
+const seated = (s) => s.order.filter((id) => s.players[id] && !/** @type {{ left?: boolean }} */ (s.players[id]).left);
+
+/** Marks offline players on the current DOM and in the party room, without a re-render. */
+function applyPresence() {
+  const off = presence.offline();
+  for (const el of app.querySelectorAll('[data-id]')) {
+    el.classList.toggle('is-offline', off.has(/** @type {HTMLElement} */ (el).dataset.id ?? ''));
+  }
+  party.setOffline(off);
 }
 
 /** @type {Record<State['phase'], (s: State, prev: State | null) => HTMLElement>} */
@@ -93,6 +111,7 @@ function show(next) {
   party.setVisible(next.phase === 'lobby');
   document.body.classList.toggle('party', next.phase === 'lobby');
   updateCountdown(next);
+  applyPresence();
   for (const e of events) react(e, next);
 }
 
@@ -155,6 +174,7 @@ const HANDLERS = {
     if (!msg.state) return;
     syncClock(msg.now);
     show(msg.state);
+    presence.update(Array.isArray(msg.online) ? msg.online : undefined, seated(msg.state));
   },
   pos: (msg) => party.onPos(msg),
 };
@@ -163,7 +183,9 @@ function connect() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const sock = new WebSocket(`${proto}://${location.host}/ws`);
   ws = sock;
+  // every listener checks `ws === sock`: an abandoned socket (see reconnectNow) can never act again
   sock.addEventListener('open', () => {
+    if (ws !== sock) return;
     document.body.classList.remove('offline');
     // Positions are server memory: after a reconnect its pos snapshot (or, after a server restart,
     // each phone's spawn point) is the truth — not where this TV last drew the avatars.
@@ -171,17 +193,55 @@ function connect() {
     sock.send(JSON.stringify({ t: 'hello', role: 'screen' }));
   });
   sock.addEventListener('message', (ev) => {
+    if (ws !== sock) return;
     /** @type {{ t?: string }} */
     let msg;
     try { msg = JSON.parse(String(ev.data)); } catch { return; }
-    HANDLERS[String(msg.t)]?.(msg);
+    HANDLERS[String(msg.t)]?.(msg); // a screen is never bumped: `replaced` is not for it and is ignored
   });
   sock.addEventListener('close', () => {
+    if (ws !== sock) return;
     document.body.classList.add('offline');
     stale = true;
     setTimeout(connect, RECONNECT_MS);
   });
 }
+
+/**
+ * Drops the current socket and opens a new one at once. After a sleep the old socket may be
+ * half-open: the server already terminated it, but this side never hears the FIN and close() can
+ * hang — so it is abandoned (its listeners go inert) instead of waited for.
+ * @param {string} why
+ */
+function reconnectNow(why) {
+  const old = ws;
+  ws = null;
+  console.info(`[bloko] reconnecting (${why})`);
+  document.body.classList.add('offline');
+  stale = true;
+  try { old?.close(); } catch { /* already closing */ }
+  connect();
+}
+
+// Wake detection: timers do not run while the laptop sleeps (or the tab is frozen), wall time does.
+// Hidden tabs are skipped (Chrome throttles their timers to ~1/min, which is not a sleep);
+// a tab shown again after a long hide reconnects instead.
+let lastTick = Date.now();
+let hiddenAt = 0;
+setInterval(() => {
+  const t = Date.now();
+  if (t - lastTick > WAKE_GAP_MS && document.visibilityState === 'visible') {
+    reconnectNow(`woke after ${Math.round((t - lastTick) / 1000)} s`);
+  }
+  lastTick = t;
+}, 1000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') { hiddenAt = Date.now(); return; }
+  const away = Date.now() - hiddenAt;
+  lastTick = Date.now();
+  if (hiddenAt && away > WAKE_GAP_MS) reconnectNow(`shown again after ${Math.round(away / 1000)} s`);
+});
+addEventListener('online', () => reconnectNow('network back'));
 
 installAudioUnlock();
 onAudioState((st) => {
@@ -203,4 +263,7 @@ fetchJoinInfo().then((info) => {
   /** Feed a fake `pos` (self-tests before the server relays them). @param {object} m */
   pos: (m) => party.onPos(m),
   avatars: () => party.snapshot(),
+  offline: () => [...presence.offline()],
+  /** Tests: simulate a wake from sleep. */
+  wake: () => reconnectNow('debug wake'),
 };

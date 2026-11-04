@@ -20,6 +20,7 @@ import { CHARACTERS } from '../../shared/characters.js';
  */
 
 const AVATAR_UNITS = 1.2;   // avatar height in world units
+const OFFLINE_ALPHA = 0.4;  // a dropped player's avatar fades (presence.js decides when)
 const STALE_MS = 400;       // no update for this long → idle frame
 const EASE_PER_S = 14;      // interpolation speed (higher = snappier)
 const ARRIVED = 0.04;       // units: closer than this counts as standing still
@@ -302,6 +303,14 @@ export function createPartyRoom(bg, fg) {
 
   // ---- players & positions ----
 
+  /** @type {Set<string>} */
+  let offline = new Set();
+
+  /** Players shown offline (debounced by presence.js): their avatar is dimmed and tagged. @param {Set<string>} ids */
+  function setOffline(ids) {
+    offline = ids;
+  }
+
   /** @param {State} s */
   function setPlayers(s) {
     const present = new Set();
@@ -389,19 +398,23 @@ export function createPartyRoom(bg, fg) {
     g.beginPath();
     g.ellipse(sx, sy - scale, size * 0.32, scale * 1.6, 0, 0, Math.PI * 2);
     g.fill();
+    const off = offline.has(a.id);
+    if (off) g.globalAlpha = OFFLINE_ALPHA;
     drawSprite(g, a.character, a.dir, spriteFrame, left, top, scale);
-    label(g, a, sx, Math.min(geo.h - unit * 0.3, sy + scale * 2));
+    g.globalAlpha = 1;
+    label(g, a, sx, Math.min(geo.h - unit * 0.3, sy + scale * 2), off);
   }
 
-  /** @param {CanvasRenderingContext2D} g @param {Avatar} a @param {number} cx @param {number} top */
-  function label(g, a, cx, top) {
+  /** @param {CanvasRenderingContext2D} g @param {Avatar} a @param {number} cx @param {number} top @param {boolean} off */
+  function label(g, a, cx, top, off) {
+    const text = off ? `${a.name} · 📵 offline` : a.name;
     const fontPx = Math.round(geo.unit * 0.26);
     g.font = `800 ${fontPx}px system-ui, -apple-system, 'Segoe UI', sans-serif`;
     g.textAlign = 'left';
     g.textBaseline = 'top';
     const h = fontPx * 1.35;
     const pad = h * 0.45, dot = h * 0.4, gap = h * 0.3;
-    const w = pad + dot + gap + g.measureText(a.name).width + pad;
+    const w = pad + dot + gap + g.measureText(text).width + pad;
     const margin = geo.unit * 0.1;
     const x0 = Math.min(geo.w - margin - w, Math.max(margin, cx - w / 2));
     g.fillStyle = 'rgba(12, 14, 18, 0.78)';
@@ -410,8 +423,8 @@ export function createPartyRoom(bg, fg) {
     g.fill();
     g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(`--p${a.color}`).trim() || '#fff';
     g.fillRect(x0 + pad, top + (h - dot) / 2, dot, dot);
-    g.fillStyle = '#ffffff';
-    g.fillText(a.name, x0 + pad + dot + gap, top + fontPx * 0.17);
+    g.fillStyle = off ? '#b9bcc4' : '#ffffff';
+    g.fillText(text, x0 + pad + dot + gap, top + fontPx * 0.17);
   }
 
   /** Shows the room (lobby) or hides it and stops the animation loop. @param {boolean} on */
@@ -439,8 +452,8 @@ export function createPartyRoom(bg, fg) {
   addEventListener('resize', () => { if (visible) layout(); });
 
   return {
-    setPlayers, onPos, setVisible, reset,
+    setPlayers, setOffline, onPos, setVisible, reset,
     /** Debug / tests: the drawn state of every avatar. */
-    snapshot: () => [...avatars.values()].map((a) => ({ id: a.id, name: a.name, character: a.character, x: a.x, y: a.y, dir: a.dir, walking: isWalking(a, performance.now()) })),
+    snapshot: () => [...avatars.values()].map((a) => ({ id: a.id, name: a.name, character: a.character, x: a.x, y: a.y, dir: a.dir, walking: isWalking(a, performance.now()), offline: offline.has(a.id) })),
   };
 }

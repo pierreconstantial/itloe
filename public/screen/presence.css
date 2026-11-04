@@ -1,0 +1,20 @@
+/* Slice 2b — a dropped player (presence.js, debounced) on the TV: board dimmed + tag, so the host
+   can tell them "tap your character". Avatars in the party room are dimmed on the canvas instead. */
+.panel.is-offline { opacity: 0.55; }
+.panel.is-offline .board { filter: grayscale(0.8) brightness(0.75); }
+.panel.is-offline .panel-head::after {
+  content: '📵 offline';
+  margin-left: 0.5em;
+  padding: 0.1em 0.6em;
+  border-radius: 999px;
+  background: rgba(12, 14, 18, 0.8);
+  color: #d7dae1;
+  font-size: 0.6em;
+  font-weight: 800;
+  white-space: nowrap;
+  align-self: center;
+}
+.panel { transition: opacity 0.4s; }
+/* the tag sits right after the name; the score keeps its place at the far right */
+.panel.is-offline .panel-head::after { order: 1; }
+.panel.is-offline .panel-head .score { order: 2; }
