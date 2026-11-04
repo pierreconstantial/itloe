@@ -6,23 +6,35 @@
 //   normalize: case, accents (é → e), ligatures (œ → oe), curly apostrophes, punctuation and hyphens
 //              (→ spaces), ONE leading French article (le/la/les/l'/un/une/des/du/de la/de l'/d').
 //   numbers:   an answer made of digits (a year…) must match EXACTLY: 1789 is never 1798.
-//   distance:  optimal string alignment (a swapped pair of letters counts as one typo), with a
-//              threshold relative to the answer's length: see THRESHOLDS.
+//   distance:  Levenshtein from `fastest-levenshtein` (MIT, zero dependencies, 21 kB), plus one rule of
+//              ours: a single swapped pair of adjacent letters ("Mozatr") is one typo, not two. The
+//              thresholds are data (JUDGE_RULES), relative to the answer's length.
+// Server and tests only: no browser imports this file (the bare npm import would not resolve there).
+import { distance as levenshtein } from 'fastest-levenshtein';
 
 /** @typedef {'right' | 'wrong' | 'uncertain'} LocalVerdict */
 /** @typedef {{ answer: string | number, choices?: string[], accept?: string[] }} Judgeable */
 
-/** Typo budget by answer length (normalized chars): [max length, typos still 'right']. Above all: last. */
-export const THRESHOLDS = /** @type {const} */ ([[3, 0], [7, 1], [12, 2], [Infinity, 3]]);
-/** A distance up to this factor × the budget is 'uncertain' rather than 'wrong'. */
-const UNCERTAIN_FACTOR = 2;
+/**
+ * The judge's tuning, as data:
+ *  - budgets: by answer length (normalized chars), [max length, typos still 'right'] — the last one covers the rest;
+ *  - uncertainFactor: a distance up to this × the budget is 'uncertain' rather than 'wrong';
+ *  - partialMinWord: a partial name ("Hugo" for "Victor Hugo") is 'uncertain' only when it has a word this long.
+ */
+export const JUDGE_RULES = Object.freeze({
+  budgets: /** @type {readonly (readonly [number, number])[]} */ ([[3, 0], [7, 1], [12, 2], [Infinity, 3]]),
+  uncertainFactor: 2,
+  partialMinWord: 3,
+});
+/** The length budgets (kept as an export for readers of the old name). */
+export const THRESHOLDS = JUDGE_RULES.budgets;
 
 /** Leading articles, longest first ("de la" before "de"); elided ones end with an apostrophe. */
 const ARTICLES = ["de la ", "de l'", 'les ', 'des ', 'une ', 'le ', 'la ', 'un ', 'du ', "l'", "d'"];
 
 /** @param {number} len @returns {number} */
 export function typoBudget(len) {
-  for (const [max, typos] of THRESHOLDS) if (len <= max) return typos;
+  for (const [max, typos] of JUDGE_RULES.budgets) if (len <= max) return typos;
   return 0;
 }
 
@@ -46,25 +58,22 @@ export function normalize(raw) {
   return s.replace(/'/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+/** Same letters, one pair of adjacent letters swapped ("mozatr" / "mozart"). @param {string} a @param {string} b */
+function oneAdjacentSwap(a, b) {
+  if (a.length !== b.length) return false;
+  let i = 0;
+  while (i < a.length && a[i] === b[i]) i++;
+  return i < a.length - 1 && a[i] === b[i + 1] && a[i + 1] === b[i] && a.slice(i + 2) === b.slice(i + 2);
+}
+
 /**
- * Optimal string alignment distance (Levenshtein + adjacent transpositions).
+ * Typos between two normalized strings: Levenshtein (fastest-levenshtein), where a single adjacent swap
+ * counts as one typo like a keyboard slip (plain Levenshtein would count it as two).
  * @param {string} a @param {string} b @returns {number}
  */
 export function distance(a, b) {
   if (a === b) return 0;
-  if (!a.length) return b.length;
-  if (!b.length) return a.length;
-  /** @type {number[][]} */
-  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...new Array(b.length).fill(0)]);
-  for (let j = 1; j <= b.length; j++) d[0][j] = j;
-  for (let i = 1; i <= a.length; i++) {
-    for (let j = 1; j <= b.length; j++) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
-      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
-    }
-  }
-  return d[a.length][b.length];
+  return oneAdjacentSwap(a, b) ? 1 : levenshtein(a, b);
 }
 
 /** The accepted spellings of a question's answer (the right choice's text, the answer, `accept`). @param {Judgeable} q @returns {string[]} */
@@ -87,8 +96,8 @@ function against(text, expected) {
   // partial names: "Hugo" for "Victor Hugo", or "Victor Hugo" for "Hugo"; a meaningful word is needed
   const tt = text.split(' '), et = expected.split(' ');
   const [small, big] = tt.length <= et.length ? [tt, et] : [et, tt];
-  if (small.some((w) => w.length >= 3) && small.every((w) => big.includes(w))) return 'uncertain';
-  if (budget > 0 && d <= budget * UNCERTAIN_FACTOR) return 'uncertain';
+  if (small.some((w) => w.length >= JUDGE_RULES.partialMinWord) && small.every((w) => big.includes(w))) return 'uncertain';
+  if (budget > 0 && d <= budget * JUDGE_RULES.uncertainFactor) return 'uncertain';
   return 'wrong';
 }
 

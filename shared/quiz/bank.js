@@ -17,6 +17,7 @@ import { judgeLocal, expectedAnswers } from './judge-local.js';
  *   category: string, level: 1 | 2 | 3,
  *   source: string,                // dataset + licence (attribution is kept)
  *   anecdote?: string,             // a fun fact, shown with the answer (often gives the answer away)
+ *   typed?: boolean,               // false: the answer is too long to type → never asked as text (choices only)
  * }} Question
  */
 
@@ -48,6 +49,8 @@ export function validateBank(questions) {
     }
     if (q.accept !== undefined && !(Array.isArray(q.accept) && q.accept.every(nonEmpty))) problems.push(`${at}: accept must be a list of strings`);
     if (q.anecdote !== undefined && !nonEmpty(q.anecdote)) problems.push(`${at}: anecdote must be a non-empty string when present`);
+    if (q.typed !== undefined && typeof q.typed !== 'boolean') problems.push(`${at}: typed must be true or false`);
+    if (q.typed === false && q.choices === undefined) problems.push(`${at}: typed: false needs choices (it can only be asked as a choice)`);
     if (!nonEmpty(q.category)) problems.push(`${at}: missing category`);
     if (![1, 2, 3].includes(/** @type {number} */ (q.level))) problems.push(`${at}: level must be 1, 2 or 3`);
     if (!nonEmpty(q.source)) problems.push(`${at}: missing source (dataset + licence)`);
@@ -65,6 +68,7 @@ export function candidatesFor(bank, settings, asked) {
   return bank
     .filter((q) => !done.has(q.id))
     .filter((q) => settings.mode !== 'choice' || !!q.choices)
+    .filter((q) => settings.mode !== 'text' || q.typed !== false) // a long answer nobody can type
     .filter((q) => !settings.categories || settings.categories.includes(q.category))
     .filter((q) => settings.level === null || q.level === settings.level)
     .map((q) => ({ id: q.id, choices: q.choices ? q.choices.length : 0 }));

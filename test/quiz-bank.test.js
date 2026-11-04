@@ -28,10 +28,12 @@ test('validateBank lists every problem', () => {
     { id: 'c', q: 'Q?', choices: ['A', 'a', 'B', 'C'], answer: 0, category: 'c', level: 2, source: 's' },
     { q: 'Q?', answer: '', category: 'c', level: 1, source: 's', accept: 'nope' },
     { id: 'd', q: 'Q?', answer: 'x', category: 'c', level: 1, source: 's', anecdote: '' },
+    { id: 'e', q: 'Q?', answer: 'x', category: 'c', level: 1, source: 's', typed: 'no' },
+    { id: 'f', q: 'Q?', answer: 'x', category: 'c', level: 1, source: 's', typed: false },
   ]);
   for (const part of ['duplicate id', 'missing question text', 'choices must be 4', 'answer must be the right choice', 'missing category',
     'level must be', 'missing source', 'duplicate choices', 'missing id', 'answer must be a non-empty string', 'accept must be',
-    'anecdote must be']) {
+    'anecdote must be', 'typed must be true or false', 'typed: false needs choices']) {
     assert.ok(bad.some((p) => p.includes(part)), part);
   }
 });
@@ -48,6 +50,16 @@ test('candidatesFor: settings filters and never a question asked earlier this ev
   const fresh = candidatesFor(BANK, QUIZ_DEFAULTS, ['ph-geo-canberra', 'ph-lit-miserables']);
   assert.equal(fresh.length, BANK.length - 2);
   assert.ok(!fresh.some((c) => c.id === 'ph-geo-canberra'));
+});
+
+test('typed: false — never asked as text (text mode skips it), still asked as a choice', () => {
+  const long = { id: 'long', q: 'Q?', choices: ['Il perdit son chapeau', 'B', 'C', 'D'], answer: 0, typed: false, category: 'c', level: 2, source: 's' };
+  const bank = [...BANK, /** @type {any} */ (long)];
+  assert.deepEqual(validateBank(bank), []);
+  assert.ok(!candidatesFor(bank, { ...QUIZ_DEFAULTS, mode: 'text' }, []).some((c) => c.id === 'long'), 'text mode: excluded');
+  assert.ok(candidatesFor(bank, { ...QUIZ_DEFAULTS, mode: 'choice' }, []).some((c) => c.id === 'long'), 'choice mode: in');
+  const mixed = candidatesFor(bank, { ...QUIZ_DEFAULTS, mode: 'mixed' }, []).find((c) => c.id === 'long');
+  assert.equal(mixed?.choices, 4, 'mixed: in, and a question with choices is always asked as a choice');
 });
 
 test('judgeAnswer: a displayed choice maps through the round permutation; text uses the local judge', () => {

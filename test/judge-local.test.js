@@ -1,7 +1,7 @@
 // Contract E — local text judge (shared/quiz/judge-local.js): real French tricky cases.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalize, distance, judgeLocal, typoBudget } from '../shared/quiz/judge-local.js';
+import { normalize, distance, judgeLocal, typoBudget, JUDGE_RULES } from '../shared/quiz/judge-local.js';
 
 /** @param {string | number} answer @param {{ choices?: string[], accept?: string[] }} [more] */
 const q = (answer, more = {}) => ({ answer, ...more });
@@ -85,6 +85,29 @@ test('accept spellings and choice questions asked as text', () => {
   const choice = q(2, { choices: ['Lyon', 'Marseille', 'Bordeaux', 'Lille'] });
   assert.equal(judgeLocal(choice, 'bordeaux'), 'right');
   assert.equal(judgeLocal(choice, 'Lyon'), 'wrong');
+});
+
+test('the library distance: plain Levenshtein, except ONE adjacent swap counts as one typo', () => {
+  assert.equal(distance('mozart', 'mozart'), 0);
+  assert.equal(distance('mozatr', 'mozart'), 1, 'one swap');
+  assert.equal(distance('mzoatr', 'mozart'), 4, 'two swaps: plain Levenshtein (2 each); only ONE swap is special');
+  assert.equal(distance('ab', 'ba'), 1);
+  assert.equal(distance('kitten', 'sitting'), 3, 'the classic Levenshtein example');
+});
+
+test('more French cases: hyphenated places, particles, swapped letters, two-word names', () => {
+  assert.equal(judgeLocal(q('Mont-Blanc'), 'mont blanc'), 'right');
+  assert.equal(judgeLocal(q('Charles de Gaulle'), 'De Gaulle'), 'uncertain', 'surname with its particle');
+  assert.equal(judgeLocal(q('Charles de Gaulle'), 'charles de gaule'), 'right', 'one letter missing on a long name');
+  assert.equal(judgeLocal(q('Mozart'), 'Mzoatr'), 'wrong', 'two swaps on 6 letters: too garbled (the host can override)');
+  assert.equal(judgeLocal(q('Napoléon Bonaparte'), 'Napoleon'), 'uncertain');
+  assert.equal(judgeLocal(q('Jeanne d’Arc'), "jeanne d'arc"), 'right', 'curly vs straight apostrophe inside a name');
+});
+
+test('the thresholds are data', () => {
+  assert.ok(Object.isFrozen(JUDGE_RULES));
+  assert.equal(JUDGE_RULES.uncertainFactor, 2);
+  assert.deepEqual(JUDGE_RULES.budgets.at(-1), [Infinity, 3]);
 });
 
 test('clearly wrong, empty or junk', () => {

@@ -13,6 +13,7 @@
     "e2e:presence": "node scripts/e2e-presence.mts"
   },
   "dependencies": {
+    "fastest-levenshtein": "^1.0.16",
     "qrcode": "^1.5.4",
     "qrcode-terminal": "^0.12.0",
     "ws": "^8.18.0"
