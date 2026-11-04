@@ -113,7 +113,10 @@ function show(next) {
   document.body.classList.toggle('party', next.phase === 'lobby');
   updateCountdown(next);
   applyPresence();
-  for (const e of events) react(e, next);
+  // the game ending in this very view (bell, host's endGame) marks everyone done at once:
+  // its own sound covers it, so no pile of per-player "done" sounds
+  const endsNow = events.some((e) => e.t === 'finished');
+  for (const e of events) if (!(endsNow && e.t === 'done')) react(e, next);
 }
 
 /**

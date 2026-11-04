@@ -103,7 +103,7 @@ function renderBoard(size, p) {
     }
     board.append(cell);
   }
-  if (p.done) board.append(h('div', 'done-overlay', ['💀 Done']));
+  if (p.done) board.append(h('div', 'done-overlay', [p.retired ? '🚪 Out' : '💀 Done']));
   return board;
 }
 

@@ -9,7 +9,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnPoint } from '../shared/world.js';
-import { check, Client, finish, HTTP, legalMoves, playToDone, sleep } from './e2e-lib.mts';
+import { check, Client, finish, HTTP, legalMoves, sleep } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -121,8 +121,6 @@ const tvOnlineBanner = "document.body.classList.contains('offline')";
 const tvOffline = 'JSON.stringify(window.bloko.offline().sort())';
 const boardsOf = (s: any) => JSON.stringify(s.order.map((id: string) => [id, s.players[id].board, s.players[id].score, s.players[id].hand]));
 
-let seed = 4242;
-const rnd = () => ((seed = (seed * 1103515245 + 12345) >>> 0) / 4294967296);
 
 /** kill -9, check the TV shows the banner, restart, check it comes back with the same game. */
 async function killAndBack(tv: Page, phase: string): Promise<void> {
@@ -240,10 +238,20 @@ try {
   const sc2 = A2.lastView().players[idA].score;
   check(await tv.until(`${tvState}.players['${idA}'].score === ${sc2}`, 'live after silence'), '…and the next move reaches it');
 
-  // ---------- finished: kill -9 on the podium ----------
-  await playToDone(A2, idA, B, rnd);
-  await playToDone(B, idB, A2, rnd);
-  check(await tv.until(`${tvState}.phase === 'finished'`, 'podium'), 'TV shows the podium');
+  // ---------- host controls: retire shows "Out", endGame shows the podium with its line ----------
+  i = A2.mark(); A2.send({ t: 'retire', target: idB });
+  await A2.waitFor((m) => m.t === 'view' && m.state.players[idB].retired, i);
+  check(await tv.until(`document.querySelector('.panel[data-id="${idB}"] .done-overlay')?.textContent.includes('Out')`, 'out overlay'),
+    'host retires a player → their board shows "🚪 Out" on the TV');
+  await tv.shot('retired');
+  i = A2.mark(); A2.send({ t: 'endGame' });
+  await A2.waitFor((m) => m.t === 'view' && m.state.phase === 'finished', i);
+  check(await tv.until(`${tvState}.phase === 'finished' && document.querySelector('.podium-ending')?.textContent === 'Game ended by the host'`, 'podium'),
+    'host endGame → TV podium says "Game ended by the host"');
+  check(await tv.js(`[...document.querySelectorAll('.rank-row')].some((r) => r.textContent.includes('Sol') && r.querySelector('.out-tag'))`),
+    '…and the retired player is ranked with an "out" tag');
+  await sleep(4000);
+  await tv.shot('podium-host');
   await killAndBack(tv, 'finished');
   A2 = await rejoin('A4', idA); B = await rejoin('B8', idB);
 

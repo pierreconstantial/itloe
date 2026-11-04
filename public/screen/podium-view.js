@@ -12,6 +12,9 @@ const FIRST_STEP_MS = 700;
 const STEP_MS = 1100;
 const CHAMPION_PAUSE_MS = 600;
 
+/** Line under the title, by how the game ended (no line when it ran its natural course). */
+const ENDINGS = /** @type {Record<string, string>} */ ({ host: 'Game ended by the host' });
+
 /**
  * When each ranking row appears, in ranking order (same order as `ranking(s)`).
  * One step per rank, worst rank first; tied players appear together; the champion(s) come
@@ -46,7 +49,7 @@ export function renderPodium(s, elapsedMs = Infinity) {
     const row = h('li', 'rank-row reveal' + (rank === 1 ? ' champion' : ''), [
       h('span', 'rank', [RANK_LABELS[rank - 1] ?? `${rank}th`]),
       colorDot(p.color),
-      h('span', 'rank-name', [p.name]),
+      h('span', 'rank-name', [p.name, ...(/** @type {{ retired?: boolean }} */ (p).retired ? [h('span', 'out-tag', ['out'])] : [])]),
       h('span', 'rank-score', [formatScore(p.score)]),
     ]);
     row.style.setProperty('--pc', playerColor(p.color));
@@ -55,7 +58,10 @@ export function renderPodium(s, elapsedMs = Infinity) {
   }
   const title = h('h1', 'title reveal', ['Podium']);
   delay(title, 0);
+  const ending = s.endReason ? ENDINGS[s.endReason] : undefined;
+  const sub = ending ? [h('p', 'podium-ending reveal', [ending])] : [];
+  for (const el of sub) delay(el, 0);
   const hint = h('p', 'podium-hint reveal', ["Play again on the host's phone"]);
   delay(hint, lastAt + 1200);
-  return h('section', 'podium', [title, list, hint]);
+  return h('section', 'podium', [title, ...sub, list, hint]);
 }
