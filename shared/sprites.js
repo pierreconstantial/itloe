@@ -106,19 +106,19 @@ const DESIGNS = {
     ],
   },
 
-  // Élodie — the birthday star, with a punk edge: striped party hat with a pompom, long brown hair,
-  // studded dark leather jacket open over a pink dress, dark tights and black boots.
+  // Élodie — long dark hair without a hat, a charcoal jacket over a muted plum dress,
+  // dark tights and black boots.
   elodie: {
     palette: {
-      o: '#2a1c24', h: '#8a5a30', H: '#5c3a1c', s: '#f6cfa4', e: '#2a1c24', m: '#c2485a',
-      a: '#ff5fa2', A: '#ffd23f', w: '#ffffff', c: '#ff7eb9', C: '#d94f92', k: '#3b2f3d',
-      p: '#4a3b4a', b: '#241a20',
+      o: '#201b23', h: '#302633', H: '#1e1a25', s: '#f6cfa4', e: '#201b23', m: '#a94b63',
+      a: '#ad7087', w: '#9c899d', c: '#544258', C: '#352c3d', k: '#24212c',
+      p: '#302a35', b: '#1c1920',
     },
     down: [
-      '.......ww.......',
-      '......oaAo......',
-      '.....oAaaAo.....',
-      '....oaaAAaao....',
+      '................',
+      '................',
+      '....oooooooo....',
+      '...ohhhhhhhho...',
       '...ohhhhhhhho...',
       '..ohhhssssshho..',
       '..ohsessssesho..',
@@ -130,10 +130,10 @@ const DESIGNS = {
       '..oCCCCCCCCCCo..',
     ],
     up: [
-      '.......ww.......',
-      '......oaAo......',
-      '.....oAaaAo.....',
-      '....oaaAAaao....',
+      '................',
+      '................',
+      '....oooooooo....',
+      '...ohhhhhhhho...',
       '...ohhhhhhhho...',
       '..ohhhhhhhhhho..',
       '..ohhhhhhhhhho..',
@@ -145,10 +145,10 @@ const DESIGNS = {
       '..oCCCCCCCCCCo..',
     ],
     right: [
-      '.......ww.......',
-      '......oaAo......',
-      '.....oAaaAo.....',
-      '....oaaAAaao....',
+      '................',
+      '................',
+      '....oooooooo....',
+      '...ohhhhhhhho...',
       '...ohhhhhhhho...',
       '..ohhhhhhssso...',
       '..ohhhhhhseso...',
@@ -269,13 +269,12 @@ const DESIGNS = {
     ],
   },
 
-  // Konz — the grown-up of the room: light blond hair, a short blond beard and a big smile,
-  // open green shirt over a cream tee, khaki trousers, brown shoes. No hat, no glasses: the
-  // beard is what reads at 16 px, and nothing else in the roster is blond or green.
+  // Konz — darker blond hair, clean-shaven and without glasses. A dark teal developer's
+  // sweatshirt has a small cyan code mark; khaki trousers and brown shoes.
   konz: {
     palette: {
-      o: '#2a2119', h: '#edca6e', H: '#ab7f33', s: '#f3c69a', e: '#2a2119', m: '#a8584e',
-      c: '#5e9e5e', C: '#43773f', w: '#f8f0d8', p: '#8a7a5e', b: '#5a4733',
+      o: '#27211d', h: '#c9a158', H: '#8f6b35', s: '#f3c69a', e: '#27211d', m: '#a8584e',
+      c: '#416d68', C: '#31534f', a: '#9fe6df', p: '#786d58', b: '#514333',
     },
     down: [
       '................',
@@ -284,13 +283,13 @@ const DESIGNS = {
       '...ohhhhhhhho...',
       '...ohssssssho...',
       '...osesssseso...',
-      '...oHssssssHo...',
-      '...oHssmmssHo...',
-      '...oHHHHHHHHo...',
+      '...osssssssso...',
+      '...osssmmssso...',
+      '...osssssssso...',
       '....oooooooo....',
-      '..osccwwwwccso..',
-      '..occcccccccco..',
-      '..oCCCCCCCCCCo..',
+      '..osccaccaccso..',
+      '..occaccacacco..',
+      '..oCCCaCCaCCCo..',
     ],
     up: [
       '................',
@@ -303,7 +302,7 @@ const DESIGNS = {
       '...oHhhhhhhHo...',
       '...ohHHHHHHho...',
       '....oossssoo....',
-      '..osccwwwwccso..',
+      '..osccccccccso..',
       '..occcccccccco..',
       '..oCCCCCCCCCCo..',
     ],
@@ -315,11 +314,11 @@ const DESIGNS = {
       '...ohhhhhssso...',
       '...ohhhssesso...',
       '...ohhhsssssso..',
-      '...ohHHsssmso...',
-      '...ohHHHHHHo....',
+      '...ohhssssmso...',
+      '...ohhssssso....',
       '....oooooo......',
-      '....occwwccso...',
-      '....occccccco...',
+      '....occacccso...',
+      '....ocaaaccco...',
       '...oCCCCCCCCo...',
     ],
   },
