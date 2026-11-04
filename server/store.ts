@@ -6,13 +6,15 @@
 import { randomInt } from 'node:crypto';
 import { quarantine, readJson, varPath, writeJsonAtomic } from './persist.ts';
 import { initState, type Settings, type State } from './rules.ts';
+import { savedAtMs, shiftDeadline } from './resume.ts';
 
 export const STATE_FILE = varPath('bloko.state.json');
 export const SETTINGS_FILE = varPath('settings.json');
 export const BESTS_FILE = varPath('bests.json');
 
-/** On-disk envelope: the pure game State plus server-only metadata. */
-type SavedGame = { v: 1, savedAt: string } & Game;
+/** On-disk envelope: the pure game State plus server-only metadata.
+ *  `savedAt`: epoch ms of the write (older envelopes: ISO string, or absent); drives the timed-pause shift. */
+type SavedGame = { v: 1, savedAt?: number | string } & Game;
 
 /** `bestPrevious`: solo record before the game on show, kept so "New best!" survives a restart. */
 export type Game = { state: State, room: string, bestPrevious?: number | null };
@@ -48,8 +50,9 @@ export function freshGame(): Game & { note: string } {
   return { state: initState(Date.now() >>> 0, settings), room: newRoomCode(), note };
 }
 
-/** Saved game in phase playing/finished → resume it; anything else → fresh game. */
-export function loadGame(forceNew: boolean): Game & { how: string } {
+/** Saved game in any phase → resume it (room code, host, players kept); missing/corrupt/--new → fresh game.
+ *  A timed game keeps its remaining time: its deadline moves forward by the downtime since savedAt. */
+export function loadGame(forceNew: boolean, now = Date.now()): Game & { how: string } {
   const fresh = (why: string) => {
     const g = freshGame();
     return { ...g, how: `new game (${why}), ${g.note}` };
@@ -58,19 +61,24 @@ export function loadGame(forceNew: boolean): Game & { how: string } {
   const r = readJson(STATE_FILE, isSavedGame);
   if (r.kind === 'missing') return fresh('no saved game');
   if (r.kind === 'corrupt') return fresh(`saved game unreadable: ${r.error}; moved to ${quarantine(STATE_FILE)}`);
-  const { state, room, bestPrevious, savedAt } = r.data;
-  if (state.phase === 'lobby') return fresh('saved game was still in the lobby');
-  const names = state.order.map((id) => `${state.players[id].name} ${state.players[id].score}`).join(', ');
+  const { room, bestPrevious } = r.data;
+  const since = savedAtMs(r.data.savedAt);
+  const state = shiftDeadline(r.data.state, since, now);
+  const names = state.order.map((id) => `${state.players[id].name} ${state.players[id].score}`).join(', ') || 'no players';
+  const at = since === null ? 'at an unknown time' : new Date(since).toISOString();
+  const shifted = state !== r.data.state
+    ? `, timed clock paused ${Math.round((now - (since as number)) / 1000)} s while down (${Math.round(((state.deadline as number) - now) / 1000)} s left)`
+    : '';
   return {
     state, room, bestPrevious,
-    how: `RESUMED game saved ${savedAt} — phase ${state.phase}, ${names}`
+    how: `RESUMED game saved ${at} — phase ${state.phase}, room ${room}, ${names}${shifted}`
       + ' (if piece weights changed since, upcoming hands differ from the original run; the game stays consistent)',
   };
 }
 
 export function saveGame(game: Game): void {
   try {
-    writeJsonAtomic(STATE_FILE, { v: 1, savedAt: new Date().toISOString(), ...game } satisfies SavedGame);
+    writeJsonAtomic(STATE_FILE, { v: 1, savedAt: Date.now(), ...game } satisfies SavedGame);
   } catch (e) {
     console.error('[bloko] could not save the game:', e); // keep playing; the next change retries
   }

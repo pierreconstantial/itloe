@@ -1,76 +1,9 @@
 // P2 end-to-end runtime test: drives a running server with WebSocket clients.
 // Usage: start the server, then: PORT=<same port> node scripts/e2e.mts
-import { canPlace } from '../shared/board.js';
+// (kill -9 / resume across phases: scripts/e2e-resume.mts, which runs its own server)
 import { PIECES } from '../shared/pieces.js';
 import { CHARACTERS } from '../shared/characters.js';
-
-const URL_WS = `ws://localhost:${process.env.PORT ?? 3141}/ws`;
-let failures = 0;
-function check(cond: boolean, label: string): void {
-  console.log(`${cond ? 'PASS' : 'FAIL'}  ${label}`);
-  if (!cond) failures++;
-}
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-class Client {
-  ws!: WebSocket;
-  msgs: any[] = [];
-  closed = false;
-  label: string;
-  constructor(label: string) { this.label = label; }
-  open(): Promise<void> {
-    this.ws = new WebSocket(URL_WS);
-    this.ws.onmessage = (e) => this.msgs.push(JSON.parse(String(e.data)));
-    this.ws.onclose = () => { this.closed = true; };
-    return new Promise((res, rej) => { this.ws.onopen = () => res(); this.ws.onerror = rej; });
-  }
-  send(m: unknown): void { this.ws.send(JSON.stringify(m)); }
-  mark(): number { return this.msgs.length; }
-  since(i: number): any[] { return this.msgs.slice(i); }
-  lastView(): any { return [...this.msgs].reverse().find((m) => m.t === 'view')?.state; }
-  async waitFor(pred: (m: any) => boolean, from = 0, ms = 2000): Promise<any> {
-    const end = Date.now() + ms;
-    while (Date.now() < end) {
-      const hit = this.msgs.slice(from).find(pred);
-      if (hit) return hit;
-      await sleep(10);
-    }
-    throw new Error(`${this.label}: timeout waiting (from ${from}); got ${JSON.stringify(this.since(from).map((m) => m.t))}`);
-  }
-}
-
-function legalMoves(state: any, id: string): { piece: number; x: number; y: number }[] {
-  const p = state.players[id];
-  const out: { piece: number; x: number; y: number }[] = [];
-  p.hand.forEach((pid: string | null, piece: number) => {
-    if (pid === null) return;
-    for (let y = 0; y < state.size; y++)
-      for (let x = 0; x < state.size; x++)
-        if (canPlace(p.board, state.size, PIECES[pid].cells, x, y)) out.push({ piece, x, y });
-  });
-  return out;
-}
-function illegalMove(state: any, id: string): { piece: number; x: number; y: number } {
-  const p = state.players[id];
-  const piece = p.hand.findIndex((h: string | null) => h !== null);
-  return { piece, x: state.size, y: state.size }; // out of bounds origin
-}
-
-/** Plays `c` (player `id`) until done, random legal moves; every move must be broadcast to `other`. */
-async function playToDone(c: Client, id: string, other: Client, rnd: () => number): Promise<number> {
-  let n = 0;
-  while (!c.lastView().players[id].done && c.lastView().phase === 'playing') {
-    const moves = legalMoves(c.lastView(), id);
-    const mv = moves[Math.floor(rnd() * moves.length)];
-    const a = c.mark(), b = other.mark();
-    c.send({ t: 'place', ...mv });
-    await c.waitFor((m) => m.t === 'view' || m.t === 'err', a);
-    await other.waitFor((m) => m.t === 'view', b);
-    if (c.since(a).some((m) => m.t === 'err')) throw new Error(`legal move refused: ${JSON.stringify(mv)}`);
-    if (++n > 2000) throw new Error('never got stuck');
-  }
-  return n;
-}
+import { check, Client, finish, HTTP, illegalMove, legalMoves, playToDone, sleep, URL_WS } from './e2e-lib.mts';
 
 let s = 12345;
 const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 4294967296);
@@ -86,7 +19,6 @@ const join = await (await fetch(URL_WS.replace(/^ws/, 'http').replace(/\/ws$/, '
 const room: string = join.code;
 check(/^[A-Z]{4}$/.test(room) && join.url.endsWith(`/play?room=${room}`), `/api/join → 4-letter code + url with ?room= (${join.url})`);
 // the QR's /play?room=CODE (no trailing slash) is redirected to the page: the code must survive the redirect
-const HTTP = URL_WS.replace(/^ws/, 'http').replace(/\/ws$/, '');
 const redirects = await Promise.all(['/play', '/screen', '/sim'].map(async (p) => {
   const r = await fetch(`${HTTP}${p}?room=${room}&x=1`, { redirect: 'manual' });
   return r.status === 302 && r.headers.get('location') === `${p}/?room=${room}&x=1`;
@@ -278,6 +210,43 @@ i = B.mark();
 B.send({ t: 'place', piece: 0, x: 0, y: 0 });
 check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-playing', 'place in finished → err not-playing');
 
+// --- newGame: podium → lobby, same players, newcomers can join, start works again ---
+ib = B.mark();
+B.send({ t: 'newGame' });
+check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-host', 'non-host newGame → err not-host');
+ia = Acur.mark(); ib = B.mark();
+Acur.send({ t: 'newGame' });
+const vn = (await B.waitFor((m) => m.t === 'view', ib)).state;
+await screen.waitFor((m) => m.t === 'view' && m.state.phase === 'lobby');
+check(vn.phase === 'lobby' && vn.hostId === idA && vn.order.join() === `${idA},${idB}` && vn.deadline === null && vn.endReason === null
+  && vn.order.every((id: string) => vn.players[id].score === 0 && vn.players[id].board.every((c: number) => c === 0)),
+  'host newGame → lobby, same players + host, fresh boards/scores, broadcast');
+check(vn.players[idA].character === 'anna' && vn.players[idB].character === 'sol', 'newGame keeps each character');
+const joinAfter = await (await fetch(`${HTTP}/api/join`)).json();
+check(joinAfter.code === room, 'newGame keeps the room code');
+ia = Acur.mark();
+Acur.send({ t: 'newGame' });
+check((await Acur.waitFor((m) => m.t === 'err', ia)).code === 'not-host', 'newGame outside finished (lobby) → err');
+const N = new Client('N'); await N.open(); N.send({ t: 'hello', role: 'player', room });
+i = N.mark(); N.send({ t: 'join', character: 'pierre' });
+const idN = (await N.waitFor((m) => m.t === 'welcome', i)).playerId;
+await Acur.waitFor((m) => m.t === 'view' && m.state.players[idN]);
+check(Acur.lastView().order.join() === `${idA},${idB},${idN}`, 'a newcomer joins the lobby after newGame');
+i = N.mark(); N.send({ t: 'start' });
+check((await N.waitFor((m) => m.t === 'err', i)).code === 'not-host', 'newcomer (non-host) start → err not-host');
+ia = Acur.mark();
+Acur.send({ t: 'start' });
+const vs = (await Acur.waitFor((m) => m.t === 'view' && m.state.phase === 'playing', ia)).state;
+check(vs.order.length === 3 && vs.seed !== fin.seed, 'host start after newGame → playing with 3 players, new seed');
+await playToDone(N, idN, Acur, rnd);
+await playToDone(B, idB, Acur, rnd);
+await playToDone(Acur, idA, B, rnd);
+await B.waitFor((m) => m.t === 'view' && m.state.phase === 'finished');
+check(B.lastView().phase === 'finished', 'second game played to the podium');
+N.send({ t: 'leave' });
+await B.waitFor((m) => m.t === 'view' && !m.state.players[idN]);
+N.ws.close();
+
 // --- again ---
 ib = B.mark();
 B.send({ t: 'again' });
@@ -300,5 +269,4 @@ Acur.send({ t: 'place', ...legalMoves(vm, idA)[0] });
 check((await Acur.waitFor((m) => m.t === 'view' || m.t === 'err', ia)).t === 'view', 'remaining player can still place');
 
 for (const c of [screen, Acur, B]) c.ws.close();
-console.log(failures ? `\n${failures} FAILURE(S)` : '\nALL PASS');
-process.exit(failures ? 1 : 0);
+finish();
