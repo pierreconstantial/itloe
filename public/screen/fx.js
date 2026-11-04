@@ -1,5 +1,6 @@
 // Transient visual effects. They live in #fx (fixed overlay, outside #app) so a re-render caused by
 // another player's move never cuts them short. Positions come from the freshly rendered DOM.
+import { createFloaterPlanner, LIFE_MS } from './floaters.js';
 
 const layer = /** @type {HTMLElement} */ (document.getElementById('fx'));
 const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('fx-canvas'));
@@ -106,6 +107,13 @@ function sweepDelay(i, size, m) {
 
 // ---- call-outs, floaters, shake ---------------------------------------------------
 
+/** Per-player floater plan (merge within 300 ms, else stack): see floaters.js. */
+const floaters = createFloaterPlanner();
+/** @type {Map<number, HTMLElement>} */
+const floaterEls = new Map();
+/** Vertical step between stacked floaters, in --u. */
+const FLOATER_STEP = 52;
+
 /**
  * @param {string} playerId
  * @param {string[]} lines biggest first
@@ -133,11 +141,25 @@ export function callout(playerId, lines, color) {
 export function scoreFloater(playerId, gained) {
   const score = panelOf(playerId)?.querySelector('.score');
   if (!score || gained <= 0) return;
+  const plan = floaters.add(playerId, gained, performance.now());
+  const shown = floaterEls.get(plan.key);
+  if (plan.kind === 'merge' && shown?.isConnected) {
+    // a fast follow-up: the floater on screen grows instead of a second one landing on it
+    shown.textContent = `+${plan.total}`;
+    shown.classList.toggle('fx-floater-big', plan.total >= 40);
+    // a short bump on `scale` (independent of the floater's own transform animation)
+    shown.style.transition = 'scale 0.12s ease-out';
+    shown.style.scale = '1.3';
+    setTimeout(() => { shown.style.scale = '1'; }, 120);
+    return;
+  }
   const r = score.getBoundingClientRect();
   const width = 400 * u();
-  const el = place('fx-floater', { left: r.right - width, top: r.bottom, width, height: 0 }, 1200);
-  el.textContent = `+${gained}`;
-  if (gained >= 40) el.classList.add('fx-floater-big');
+  const el = place('fx-floater', { left: r.right - width, top: r.bottom + plan.slot * FLOATER_STEP * u(), width, height: 0 }, LIFE_MS);
+  el.textContent = `+${plan.total}`;
+  if (plan.total >= 40) el.classList.add('fx-floater-big');
+  floaterEls.set(plan.key, el);
+  setTimeout(() => floaterEls.delete(plan.key), LIFE_MS);
 }
 
 /** Full-screen "Time's up!" card, held for `ms` (the podium reveal starts after it). @param {number} ms */

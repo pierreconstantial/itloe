@@ -35,7 +35,7 @@ export function detectMove(prev, next) {
   return {
     id: next.id,
     color: next.color,
-    cleared: clearedCells(prev.board, next.board),
+    cleared: clearedCells(prev.board, last.rows, last.cols, next.color),
     rows: last.rows,
     cols: last.cols,
     lines: last.rows.length + last.cols.length,

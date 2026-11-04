@@ -9,17 +9,25 @@ import { bindScore } from './score-ticker.js';
 /** @typedef {import('../../shared/game.js').Player} Player */
 
 /**
- * Cells that went filled → empty between two boards, with the colour they had.
- * Pure; the hook for clear animations (M2 juice can derive rows/cols from it).
- * @param {number[] | undefined} prev
- * @param {number[]} next
- * @returns {Map<number, number>} cell index → previous colour
+ * Every cell a move cleared, with the colour it had just before the clear: the cleared rows and
+ * columns (from the move record), each cell's colour from the board BEFORE the move, or the
+ * player's colour for the cells of the piece that completed the line (empty before, empty after —
+ * a before/after board diff misses exactly those). Pure; the hook for clear animations.
+ * @param {number[] | undefined} before  the board before the move
+ * @param {number[]} rows
+ * @param {number[]} cols
+ * @param {number} color  the player's colour (the placed piece's cells)
+ * @returns {Map<number, number>} cell index → colour
  */
-export function clearedCells(prev, next) {
+export function clearedCells(before, rows, cols, color) {
   /** @type {Map<number, number>} */
   const out = new Map();
-  if (!prev || prev.length !== next.length) return out;
-  for (let i = 0; i < next.length; i++) if (prev[i] && !next[i]) out.set(i, prev[i]);
+  if (!before) return out;
+  const size = Math.round(Math.sqrt(before.length));
+  if (size * size !== before.length) return out;
+  const add = (/** @type {number} */ i) => out.set(i, before[i] || color);
+  for (const r of rows) for (let x = 0; x < size; x++) add(r * size + x);
+  for (const c of cols) for (let y = 0; y < size; y++) add(y * size + c);
   return out;
 }
 
