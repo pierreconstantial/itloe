@@ -125,7 +125,7 @@ export function initQuiz(seed, settings) {
   };
 }
 
-/** Is a quiz under way (answers can come in)? @param {QuizState} s */
+/** Is a quiz under way (answers can come in)? @param {Pick<QuizState, 'phase'>} s */
 export const quizRunning = (s) => s.phase === 'question' || s.phase === 'reveal';
 
 /** Seated players who can still answer. @param {QuizState} s */

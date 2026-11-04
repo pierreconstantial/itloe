@@ -1,17 +1,20 @@
 // Host controls during a game (slice 2b): a disconnected player must never block the podium.
-// Lives in the ☰ menu sheet, host only, phase playing: "Take <name> out" per player still playing
-// (offline ones first and flagged), and "End game". Both are irreversible, so each needs a second
-// tap to confirm (same pattern as "Leave game"); an armed button disarms after a few seconds.
+// Lives in the ☰ menu sheet, host only, while a block game or quiz runs: "Take <name> out" per player
+// still playing (offline ones first and flagged; block games only), and "End game". Both are
+// irreversible, so each needs a second tap to confirm (same pattern as "Leave game"); an armed button
+// disarms after a few seconds.
 // Its buttons are inserted as direct children of the sheet panel, just before the #host-controls
 // marker, so they get the panel's button styles.
 import { $ } from './dom.js';
 import { createConfirm } from './confirm.js';
+import { quizRunning } from '../../shared/quiz/index.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
+/** @typedef {import('../../shared/quiz/bank.js').QuizView} QuizView */
 
 /** @param {{ send: (msg: unknown) => void }} io */
 export function createHostControls(io) {
-  /** @type {{ v: State | null, online: readonly string[], meId: string } | null} */ let last = null;
+  /** @type {{ v: State | null, q: QuizView | null, online: readonly string[], meId: string } | null} */ let last = null;
   // armed key: 'end' or a playerId
   const confirm = createConfirm(() => redraw());
   const tap = confirm.tap;
@@ -42,19 +45,22 @@ export function createHostControls(io) {
 
   function redraw() {
     const ctx = last;
-    const v = ctx?.v ?? null;
-    if (!ctx || !v || v.phase !== 'playing' || v.hostId !== ctx.meId) { place([]); confirm.disarm(); return; }
-    const { online } = ctx;
-    const live = new Set(online);
-    const playing = v.order.filter((id) => !v.players[id].done);
+    const v = ctx?.v ?? null, q = ctx?.q ?? null;
+    // exactly when the server accepts endGame: the game's host, while it runs
+    const blocks = ctx && v && v.phase === 'playing' && v.hostId === ctx.meId ? v : null;
+    const quiz = !!ctx && !!q && quizRunning(q) && q.hostId === ctx.meId;
+    if (!ctx || (!blocks && !quiz)) { place([]); confirm.disarm(); return; }
+    const live = new Set(ctx.online);
+    // a quiz has no "take out" (the server refuses retire there)
+    const playing = blocks ? blocks.order.filter((id) => !blocks.players[id].done) : [];
     // offline first: they are the ones blocking the podium
     playing.sort((a, b) => Number(live.has(a)) - Number(live.has(b)));
 
     const title = document.createElement('p');
     title.className = 'dim';
     title.textContent = 'Host';
-    const rows = playing.map((id) => {
-      const p = v.players[id];
+    const rows = !blocks ? [] : playing.map((id) => {
+      const p = blocks.players[id];
       const off = !live.has(id);
       const text = confirm.isArmed(id) ? `Tap again: take ${p.name} out`
         : `${off ? '📴 ' : ''}Take ${p.name} out${off ? ' (offline)' : ''}`;
@@ -69,9 +75,12 @@ export function createHostControls(io) {
   }
 
   return {
-    /** @param {State | null} v the block game, null when none @param {readonly string[]} online @param {string} meId */
-    render(v, online, meId) {
-      last = { v, online, meId };
+    /**
+     * @param {State | null} v the block game, null when none @param {QuizView | null} q the quiz, null when none
+     * @param {readonly string[]} online @param {string} meId
+     */
+    render(v, q, online, meId) {
+      last = { v, q, online, meId };
       redraw();
     },
   };

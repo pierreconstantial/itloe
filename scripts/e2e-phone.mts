@@ -652,7 +652,7 @@ try {
 
   if (!ONLY || ONLY === '4') {
   // ================= part 4: the quiz on the phone =================
-  console.log('\n— part 4: quiz (choices, typed answers, reveal, override, finished) —');
+  console.log('\n— part 4: quiz (choices, typed answers, reveal, override, finished, ended by the host) —');
   await kill9();
   await boot(true);
   const bank: { id: string, q: string, choices?: string[], answer: string | number, accept?: string[] }[] =
@@ -781,6 +781,24 @@ try {
     await H.tap('#quiz-next');
   }
   expect(await phaseIs(H, 'quiz-finished'), 'typed quiz finished');
+
+  // ---- quiz 3: the host ends it from the ☰ menu during a question ----
+  await H.tap('#quiz-again');
+  expect(await phaseIs(H, 'quiz-lobby'), 'Play again → the quiz lobby');
+  await H.tap('#quiz-start');
+  expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), 'Start → a question on both phones');
+  expect((await Q.hostButtons()).length === 0, 'quiz: guest menu has no host controls');
+  await H.tap('#btn-menu');
+  const qhb = await H.hostButtons();
+  expect(qhb.length === 2 && /End game/.test(qhb[1]), 'quiz: the host menu offers End game, no "take out"', JSON.stringify(qhb));
+  await H.tap('#btn-end-game');
+  const qArmed: string = await H.ev(`document.getElementById('btn-end-game').textContent`);
+  expect(/Tap again/.test(qArmed) && await Q.visible('quiz-question'), 'quiz End game: first tap arms, nothing ends yet', qArmed);
+  await H.tap('#btn-end-game');
+  expect(await phaseIs(H, 'quiz-finished') && await phaseIs(Q, 'quiz-finished'), 'quiz End game: second tap → finished on both phones');
+  expect(await Q.text('quiz-finished-kicker') === 'The host ended the quiz.' && (await H.hostButtons()).length === 0,
+    'quiz ended: "The host ended the quiz.", no host controls left', await Q.text('quiz-finished-kicker'));
+  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
   await H.tap('#quiz-back');
   let back = false;
   for (let k = 0; k < 40 && !back; k++) { back = (await H.snap())?.view === 'view-place'; if (!back) await sleep(100); }

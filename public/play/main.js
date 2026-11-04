@@ -382,7 +382,7 @@ function render() {
   // the settings sheet follows the activity: the block game's schema, or the quiz's
   if (v) settingsSheet.render(v.settings, isHost && configurable);
   else if (q) settingsSheet.render(q.settings, quizHost && quizConfigurable, QUIZ_SETTINGS);
-  hostControls.render(v, online, me?.id ?? '');
+  hostControls.render(v, q, online, playerId ?? '');
   if (q ? !(quizHost && quizConfigurable) : (!isHost || !configurable)) menu.close('settings');
   if (campaign && isGameMaster()) gmPanel.render(campaign);
   else menu.close('gm');
