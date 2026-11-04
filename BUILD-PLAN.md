@@ -259,7 +259,7 @@ can take back a character whose phone is offline.
 | P1 (server) | presence in `view` + broadcasts on attach/close, reclaim in `join`, `replaced` + newest-socket-wins, PROTOCOL.md lines, e2e (reclaim mid-game keeps the board, bump, two tabs, host reclaim) |
 | P2 (phone) | picker states (free / continue / taken), `replaced` screen, never auto-reconnect after `replaced`, acceptance pass on a second "device" (a fresh browser context) |
 
-### Contract D draft v2 — campaign: hub, worlds, unlocks (NOT frozen; user review pending)
+### Contract D v2 — campaign: hub, worlds, unlocks (FROZEN 2026-11-04, user approved; changes through the orchestrator)
 
 **The story (user, 2026-11-04).** It starts as a false start: just the 4-player block game. Then the game
 turns into Élo's life. A central **hub** (menu map) opens onto **worlds**, one per period of her life
@@ -353,7 +353,7 @@ Rules that keep the evening safe:
 - **Wire:** `view` carries `campaign` (TV and phones derive their screens from it), `news` drives the TV
   reward and unlock cutscenes, and the phone host panel sends `gm` ops.
 
-**Slice 3 assignments (after 2b, once the user approves):** P1 builds `shared/campaign/` (engine + tests,
+**Slice 3 assignments (approved 2026-11-04). World entry: Élodie walks into a door, the host can override. Copy language is data: the user writes the real story text, placeholders are English.** P1 builds `shared/campaign/` (engine + tests,
 plus a tiny sample CONTENT with placeholder ids: false start → 3 blocks games → reward + 2 worlds
 unlock at once). P2 builds the server (envelope + migration, events from the finished block game,
 wire, e2e). Then the TV hub map + unlock cutscene and the phone host panel. The user writes the real
