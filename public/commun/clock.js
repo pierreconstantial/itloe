@@ -8,6 +8,9 @@ export function syncClock(serverNow) {
   if (typeof serverNow === 'number' && Number.isFinite(serverNow)) skew = serverNow - Date.now();
 }
 
+/** The server's clock now (epoch ms): this device's clock + the last measured skew. */
+export const serverNow = () => Date.now() + skew;
+
 /** Seconds left until `deadline` (epoch ms, server clock); can go negative. @param {number} deadline */
 export function secondsLeft(deadline) {
   return (deadline - (Date.now() + skew)) / 1000;

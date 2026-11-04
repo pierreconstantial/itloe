@@ -254,6 +254,44 @@ try {
   let i = A2.mark(); A2.send({ t: 'start' });
   await A2.waitFor((m) => m.t === 'view' && m.state.phase === 'playing', i);
   check(await tv.until(`${tvState}.phase === 'playing'`, 'playing'), 'TV shows the game');
+
+  // ---------- "show the QR again": any player asks → side card on the TVs, never over a board ----------
+  const cardOn = `!document.querySelector('.join-qr-card').hidden`;
+  const noOverlap = (sel: string) => `(() => { const c = document.querySelector('.join-qr-card').getBoundingClientRect();
+    return [...document.querySelectorAll('${sel}')].every((e) => { const r = e.getBoundingClientRect(); return r.right <= c.left || r.bottom <= c.top || r.left >= c.right || r.top >= c.bottom; }); })()`;
+  B.send({ t: 'showJoin' }); // a non-host player
+  check(await tv.until(cardOn, 'join card'), 'a player asks → the TV shows the join card mid-game');
+  const code = (await (await fetch(`${HTTP}/api/join`)).json()).code;
+  check(await tv.until(`document.querySelector('.join-qr-code')?.textContent === ${JSON.stringify(code)} && !!document.querySelector('.join-qr-img')?.getAttribute('src')`, 'code'),
+    `…with the QR and the room code (${code})`);
+  check(await tv.until(noOverlap('.board-wrap'), 'reflow'), '…and the boards make room: no board under the card');
+  const j0 = await tv.js('window.bloko.joinQr()');
+  check(j0.secondsLeft > 10 && j0.secondsLeft <= 15 && j0.fraction > 0.7, `…a 15 s window, bar full (${j0.secondsLeft} s, ${Math.round(j0.fraction * 100)} %)`);
+  await tv.shot('join-qr-game');
+  await sleep(2200);                    // the server allows one request per socket per 2 s
+  A2.send({ t: 'showJoin' });
+  check(await tv.until(`window.bloko.joinQr().until > ${j0.until}`, 'extend'), 'a later request extends the window');
+  await tv.cmd('Page.reload');
+  await tv.front();
+  check(await tv.until(`!!window.bloko && ${cardOn}`, 'reloaded', 8000), 'a TV reloading mid-window shows the card again (re-sent on hello)');
+  const left = (await tv.js('window.bloko.joinQr()')).secondsLeft;
+  check(await tv.until(`!${cardOn} && !document.body.classList.contains('join-qr-open')`, 'expiry', (left + 3) * 1000),
+    `…and hides by itself at until (${left} s later), boards back to full width`);
+  await tv.cmd('Page.reload');
+  await tv.front();
+  await tv.until(`!!window.bloko?.state()`, 'reloaded 2', 8000);
+  await sleep(800);
+  check(!(await tv.js(cardOn)), 'a reload after until does not show it again');
+  // a player closes it early (hideJoin): every TV hides it at once, the boards reflow back
+  await sleep(2200);
+  B.send({ t: 'showJoin' });
+  check(await tv.until(`${cardOn} && document.body.classList.contains('join-qr-open')`, 'reopen'), 'asked again → open again');
+  const tClose = Date.now();
+  A2.send({ t: 'hideJoin' }); // any member may close it (not only the one who asked)
+  check(await tv.until(`!${cardOn} && !document.body.classList.contains('join-qr-open')`, 'close', 2000),
+    `another player closes it → hidden at once (${Date.now() - tClose} ms), boards back to full width`);
+  await sleep(600);
+  check(!(await tv.js(cardOn)), '…and it stays closed');
   i = B.mark(); A2.send({ t: 'place', ...legalMoves(A2.lastView(), idA)[0] }); await B.waitFor((m) => m.t === 'view', i);
   await drop(B);
   check(await tv.until(`document.querySelector('.panel[data-id="${idB}"]')?.classList.contains('is-offline')`, 'board dim', 3500),
@@ -445,6 +483,10 @@ try {
       check(n0 > 0 && n1 < n0, `…the countdown ring runs (${n0} → ${n1})`);
       check(!(await tv.js(`!!document.querySelector('.cutscene')`)), '…no unlock cutscene covers the question (interrupted, replayed when calm)');
       await tv.shot('quiz-question');
+      phoneOf(seated[1])!.send({ t: 'showJoin' });
+      check(await tv.until(cardOn, 'join card quiz'), 'quiz: a player asks → the join card shows');
+      check(await tv.until(noOverlap('.quiz-q, .quiz-choice, .quiz-type-hint, .quiz-ring'), 'quiz reflow'), '…beside the question: never over its text, tiles or ring');
+      await tv.shot('join-qr-quiz');
     }
     // the first seated player answers: only their chip lights up
     const [first, ...rest] = seated;

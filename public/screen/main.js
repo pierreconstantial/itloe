@@ -8,7 +8,7 @@ import { renderPodium, revealSchedule } from './podium-view.js';
 import { detectEvents, calloutsFor } from './events.js';
 import { sfx, installAudioUnlock, onAudioState } from './audio.js';
 import * as fx from './fx.js';
-import { syncClock, secondsLeft } from '../commun/clock.js';
+import { syncClock, secondsLeft, serverNow } from '../commun/clock.js';
 import { updateCountdown } from './countdown.js';
 import { legalPlacementCount } from '../../shared/board.js';
 import { createPartyRoom } from './party-room.js';
@@ -19,6 +19,7 @@ import { createContentSource } from '../commun/content.js';
 import { doorStates, mapCopy, nameOf } from './doors.js';
 import { createCutscenes } from './cutscenes.js';
 import { renderQuiz } from './quiz-view.js';
+import { applyJoinQr, joinQrState } from './join-qr.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('./events.js').ScreenEvent} ScreenEvent */
@@ -236,6 +237,50 @@ function drawQuizRing() {
 }
 setInterval(drawQuizRing, 100);
 
+// ---------- "show the QR again" (any player asks; screens get { t:'joinQr', until }) ----------
+// A side card with the join QR + room code + a shrinking bar. While it is open the block arena and
+// the quiz make room for it (body.join-qr-open), so it never covers a board or a question.
+
+/** @type {import('./join-qr.js').JoinWindow | null} */
+let joinWindow = null;
+const joinCard = h('aside', 'join-qr-card', [
+  h('p', 'join-qr-title', ['Scan to join or get back in']),
+  h('img', 'join-qr-img'),
+  h('p', 'join-qr-label', ['Room code']),
+  h('div', 'join-qr-code', ['']),
+  h('div', 'join-qr-bar', [h('span', 'join-qr-fill')]),
+]);
+joinCard.hidden = true;
+document.body.append(joinCard);
+
+/** @param {unknown} until */
+function onJoinQr(until) {
+  const was = joinWindow;
+  joinWindow = applyJoinQr(joinWindow, until, serverNow());
+  if (joinWindow && joinWindow !== was) {
+    // the room code may have changed (server restarted): refresh the QR and the code each time it opens
+    fetchJoinInfo().then((info) => {
+      joinInfo = info;
+      const img = /** @type {HTMLImageElement} */ (joinCard.querySelector('.join-qr-img'));
+      const code = info.code ?? '';
+      if (img.dataset.code !== code || !img.src) { img.src = `/api/join-qr.svg?room=${encodeURIComponent(code)}`; img.dataset.code = code; }
+      img.alt = 'QR code to join';
+      /** @type {HTMLElement} */ (joinCard.querySelector('.join-qr-code')).textContent = code;
+      joinCard.classList.toggle('no-code', !code);
+    });
+  }
+  drawJoinCard();
+}
+
+function drawJoinCard() {
+  const st = joinQrState(joinWindow, serverNow());
+  if (!st.visible) joinWindow = null;
+  if (joinCard.hidden === st.visible) joinCard.hidden = !st.visible;
+  document.body.classList.toggle('join-qr-open', st.visible);
+  if (st.visible) /** @type {HTMLElement} */ (joinCard.querySelector('.join-qr-fill')).style.transform = `scaleX(${st.fraction})`;
+}
+setInterval(drawJoinCard, 200);
+
 // ---------- unlock / reward cutscenes (campaign.news) ----------
 
 const CUTSCENE_MS = 4200;
@@ -372,6 +417,7 @@ const HANDLERS = {
   },
   pos: (msg) => party.onPos(msg),
   tick: (msg) => syncClock(msg.now), // liveness (any message feeds the watchdog) + clock skew
+  joinQr: (msg) => { syncClock(msg.now); onJoinQr(msg.until); },
 };
 
 function connect() {
@@ -479,6 +525,7 @@ fetchJoinInfo().then((info) => {
   campaign: () => campaign,
   doors: () => party.doors(),
   quiz: () => quiz,
+  joinQr: () => ({ ...joinQrState(joinWindow, serverNow()), until: joinWindow?.until ?? null }),
   cutscene: () => ({ playing: cutscenes.playing(), maxShown: cutscenes.maxShown(), acks: acksSent, moments: momentsPlayed,
     text: document.querySelector('.cutscene')?.textContent ?? null }),
   contentVersion: () => content.version(),
