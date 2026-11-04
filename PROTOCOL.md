@@ -118,6 +118,14 @@ The bank (`data/quiz/*.json`) stays on the server and is never served. While a q
   step: counters `quiz.played`, `quiz.won.<character>`, `quiz.correct.<character>`, `node.<id>.finished`,
   totals per character, and the shown question ids appended to `facts.asked` (never asked again).
 
+### Show the join QR again (any player, any moment)
+
+```jsonc
+{ "t": "showJoin" }   // any JOINED player, any phase: the TVs show the join QR (room code + address) for 30 s, so
+                      // someone can (re)join. A repeat extends the window. Rate-limited to one per socket per 2 s;
+                      // unknown senders and floods are ignored silently. EPHEMERAL: never in State or on disk.
+```
+
 ## Server → client
 
 ```jsonc
@@ -132,6 +140,9 @@ The bank (`data/quiz/*.json`) stays on the server and is never served. While a q
 // "online" (slice 2b): playerIds with a live socket, in seat order. EPHEMERAL: never in State or on
 // disk, empty after a server restart until phones reconnect. The view is re-broadcast whenever a
 // player socket attaches or closes. Dead sockets are detected by ping/pong within ~10 s.
+{ "t": "joinQr", "until": 1730700030000, "now": 1730700000000 }
+// SCREENS only, after a showJoin: show the join QR (GET /api/join-qr.svg) until `until` (server epoch ms;
+// `now` for the clock skew). Also sent to a screen that says hello while the window is open.
 { "t": "tick", "now": 1730700000000 }
 // liveness (slice 2b): sent to EVERY open socket every 10 s. A client that receives NO message at all
 // for 25 s treats its socket as dead (half-open after a silent Wi-Fi drop: no close event, and ping

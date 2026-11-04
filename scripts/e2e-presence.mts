@@ -3,7 +3,7 @@
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR) so it can kill -9 it.
 // Usage: PORT=3179 node scripts/e2e-presence.mts      (never 3131: that's the live server)
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { WebSocket as WsClient } from 'ws';
@@ -233,6 +233,36 @@ try {
   const vb = await E2.waitFor((m) => m.t === 'view' && m.state.phase === 'finished', i);
   check(vb.state.endReason === 'host' && vb.best?.score === solo && solo > 0, `solo game ended by the host still counts as a best (${solo})`);
   void idG;
+
+  // ---------- show the join QR again: any joined player → screens only, ephemeral, rate-limited ----------
+  const joinQrs = (c: Client, from: number) => c.since(from).filter((m) => m.t === 'joinQr');
+  i = screen.mark(); let iE = E2.mark();
+  const tShow = Date.now();
+  E2.send({ t: 'showJoin' });
+  const qr1 = await screen.waitFor((m) => m.t === 'joinQr', i);
+  check(qr1.until >= tShow + 29_000 && qr1.until <= Date.now() + 31_000 && typeof qr1.now === 'number', `showJoin → the screen gets joinQr until now + 30 s (${Math.round((qr1.until - tShow) / 1000)} s)`);
+  await sleep(300);
+  check(joinQrs(E2, iE).length === 0, 'players never receive joinQr (screens only)');
+  i = screen.mark();
+  E2.send({ t: 'showJoin' }); E2.send({ t: 'showJoin' }); // mashed
+  await sleep(400);
+  check(joinQrs(screen, i).length === 0, 'rate limit: repeats within 2 s from the same phone are ignored');
+  const stranger = new Client('stranger'); await stranger.open();
+  stranger.send({ t: 'hello', role: 'player', room });
+  i = screen.mark(); stranger.send({ t: 'showJoin' }); await sleep(400);
+  check(joinQrs(screen, i).length === 0, 'a socket that never joined is ignored');
+  await sleep(1800);
+  i = screen.mark(); E2.send({ t: 'showJoin' });
+  const qr2 = await screen.waitFor((m) => m.t === 'joinQr', i);
+  check(qr2.until > qr1.until, 'after 2 s a repeat goes through and EXTENDS the window');
+  const tv2 = new Client('tv2'); await tv2.open();
+  i = tv2.mark(); tv2.send({ t: 'hello', role: 'screen' });
+  const late = await tv2.waitFor((m) => m.t === 'joinQr', i);
+  check(late.until === qr2.until, 'a screen connecting while the window is open gets joinQr on hello');
+  check(!readFileSync(join(VAR, 'bloko.state.json'), 'utf8').includes('joinQr'), 'never on disk (ephemeral)');
+  for (const c of [stranger, tv2]) c.ws.close();
+  void iE;
+
   for (const c of [E2, F2, F3, G, screen, D, E, F]) c.ws.close();
 } catch (e) {
   check(false, `crashed: ${(e as Error).message}\n--- server log ---\n${log}`);

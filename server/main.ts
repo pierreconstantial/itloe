@@ -164,6 +164,13 @@ const roomOk = new WeakSet<WebSocket>();
 /** sockets that said hello as a screen: the only receivers of pos */
 const screens = new Set<WebSocket>();
 
+/** The join QR on the TVs (showJoin): until when, in epoch ms. Ephemeral, like presence and pos. */
+const SHOW_JOIN_MS = 30_000;
+const SHOW_JOIN_GAP_MS = 2000;
+let joinQrUntil = 0;
+const showJoinAt = new WeakMap<WebSocket, number>();
+const joinQrMsg = () => JSON.stringify({ t: 'joinQr', until: joinQrUntil, now: Date.now() });
+
 /** Presence (ephemeral, never in State or on disk): party members with a live socket, in party order. */
 const online = (): string[] => party().order.filter((id) => sockets.get(id)?.readyState === WebSocket.OPEN);
 
@@ -297,6 +304,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     if (rejoin) broadcast(); else send(ws, viewMsg());
     if (m.role === 'screen') {
       screens.add(ws);
+      if (joinQrUntil > Date.now()) send(ws, joinQrMsg()); // a TV (re)connecting mid-window shows it too
       for (const [playerId, pos] of positions.entries()) send(ws, posMsg(playerId, pos));
     } else {
       screens.delete(ws);
@@ -313,6 +321,19 @@ function handleMessage(ws: WebSocket, m: any): void {
     positions.set(id, pos);
     relayPos(id, pos);
     walk(id, pos);
+    return;
+  }
+
+  if (m.t === 'showJoin') {
+    // any joined player, any phase: the TVs show the join QR for a while (EPHEMERAL: never in State or
+    // on disk). A repeat extends it; one per socket per SHOW_JOIN_GAP_MS so a mashed button can't flood.
+    const id = who.get(ws);
+    const now = Date.now();
+    if (!id || !isMember(id) || now - (showJoinAt.get(ws) ?? 0) < SHOW_JOIN_GAP_MS) return;
+    showJoinAt.set(ws, now);
+    joinQrUntil = now + SHOW_JOIN_MS;
+    const msg = joinQrMsg();
+    for (const c of screens) send(c, msg);
     return;
   }
 
