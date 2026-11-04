@@ -188,6 +188,13 @@ export function freeCharacters(state) {}  // → CharacterId[] not picked by any
 // { t:'join', id, character } : valid only if the character exists and is free; name and
 // color copy from CHARACTERS. Old saved states without `character` stay loadable.
 
+// shared/world.js (P1) — single source for movement geometry (server clamps with it,
+// phone integrates with it, TV spawns/interpolates with it)
+export const WORLD = { w: 16, h: 9 };        // world units, 16:9
+export const WALK_SPEED = 4;                 // units/s
+export function spawnPoint(characterId) {}   // → { x, y, dir } deterministic per character:
+                                             //    x = 3 + 3.33·(color−1), y = 7, dir 'down'
+
 // shared/sprites.js (P4 — ownership exception inside shared/)
 // 16×16 indexed-palette pixel grids, per character: 4 directions × 2 walk frames + 1 idle.
 export const SPRITES = {};  // Record<CharacterId, SpriteSheet>

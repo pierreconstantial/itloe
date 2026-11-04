@@ -42,8 +42,11 @@ Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `dead
 // "bad-room": join refused — wrong or missing room code (phone shows "ask for the code on the TV")
 // "taken": join refused — that character is already picked by an active player (M3)
 { "t": "pos", "playerId": "p-abc123", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
-// M3: relayed to SCREEN clients only (phones don't receive pos). On screen connect the server
-// sends one pos per known player (last position, in-memory only — positions reset on restart).
+// M3: relayed to SCREEN clients only, with ONE exception: right after welcome (join or rejoin)
+// the server sends a player its OWN last pos if it has one — the phone seeds its local position
+// from that, else from shared/world.js spawnPoint(character). On screen connect the server sends
+// one pos per known player (last position, in-memory only — positions reset on restart, so after
+// a restart everyone is back at their spawn point on all clients consistently).
 ```
 
 **Forward compatibility rule (M3): every client MUST silently ignore messages with an unknown `t`.**
