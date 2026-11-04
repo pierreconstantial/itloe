@@ -233,6 +233,55 @@ It must be super safe." Slice 2 makes session continuity unbreakable:
 | P3 | Phone session is NEVER losable. Acceptance (each must pass): reload; browser back then forward; back to the join URL (QR re-scan) with a live session → silent resume, no picker; bfcache restore (pageshow); phone locked 5 min mid-game → unlock resumes; WS drop → auto-reconnect with banner, never dumped to a menu. Picker appears ONLY when the server does not know the stored id; then it preselects the stored character ("Continue as Élodie") when that character is free. Podium: host gets BOTH "Play again" and "Back to the room" (newGame); guests see which was chosen |
 | P4 | TV: verify lobby re-entry after newGame (party room back, avatars resume, newcomers join); TV auto-reconnect after a server restart mid-game (banner → re-hello → same boards); cross-check P3's acceptance list from the TV side |
 
+### Slice 2b — the character IS the identity (user decision, 2026-11-04)
+
+The evening is one long **campaign** that people join, leave and rejoin, with the server stopped and
+restarted along the way. A browser-stored id alone loses people: another browser, a private tab, cleared
+data, or a dead battery (Élodie borrows Sol's phone). The user chose **"tap your character"**: any device
+can take back a character whose phone is offline.
+
+- **Presence** (ephemeral like `pos`, never in State or on disk): `view` gains `online: string[]`, the
+  playerIds with a live socket. The server re-broadcasts the view whenever a player socket attaches or
+  closes, so every client sees who is online.
+- **Reclaim**: `join` with a character held by an OFFLINE non-left player → the server attaches the
+  socket to THAT player (no reducer change) and replies `welcome` with the existing playerId. The phone
+  stores it and resumes with the same board, score and hand. Held by an ONLINE player → `err taken`, as before.
+- **Bump**: if the old device comes back with its stored id after a reclaim (or the same id is opened in a
+  second tab), the newest socket wins and the old one gets `{ t:'replaced' }` and stops reconnecting.
+  The phone shows "Continued on another device", with a button that brings back the picker.
+- **Picker**: free characters are pickable; offline-held ones show "Continue as Élodie" (same sprite,
+  normal colour); online-held ones are greyed. The phone's stored character is preselected when pickable.
+- **The host follows its character**: a host who reclaims on a new phone is still host. A host is never
+  lost because a phone died.
+
+| Who | What |
+|---|---|
+| P1 (server) | presence in `view` + broadcasts on attach/close, reclaim in `join`, `replaced` + newest-socket-wins, PROTOCOL.md lines, e2e (reclaim mid-game keeps the board, bump, two tabs, host reclaim) |
+| P2 (phone) | picker states (free / continue / taken), `replaced` screen, never auto-reconnect after `replaced`, acceptance pass on a second "device" (a fresh browser context) |
+
+### Contract D draft — campaign (NOT frozen; awaiting the user's flow and screens)
+
+The block game becomes ONE activity inside a persisted campaign. Progress hangs on **characters**, not
+playerIds (characters are the real people and outlive devices).
+
+```js
+// shared/campaign.js — steps are DATA; kinds are a registry, so quiz and later games plug in
+// StepKind = 'room' | 'scene' | 'blocks' | 'quiz'
+// Step = { id, kind, title, ...kindData }     // e.g. scene: { lines, image }, blocks: { settings }
+export const STEPS = [];                       // ordered; the user's story flow fills this
+// Campaign = {
+//   stepId,                                   // current step
+//   done: string[],                           // completed step ids (replayable steps stay replayable)
+//   secrets: string[],                        // unlocked secrets (ids)
+//   totals: Record<CharacterId, number>,      // cumulative points across all games of the evening
+//   activity: State | null,                   // live state of the current step's game (today's block State)
+// }
+// host-only (Pierre as game master, from a host panel on his phone): { t:'step', to: stepId } — next,
+// back, skip, replay; the server persists it like any other action. Steps never advance by themselves.
+```
+
+Persistence is ONE envelope `{ campaign, savedAt }`, written atomically after every action, and resumed in every phase.
+
 ### Scene direction (user, 2026-11-04): the party room is **an Altbau apartment in Vienna** — herringbone
 (Fischgrät) parquet floor, high pale stucco walls with mouldings, tall casement double windows (evening
 sky), tall white double door, warm light (chandelier); the birthday bunting and balloons live INSIDE
