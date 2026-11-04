@@ -171,10 +171,9 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 |---|---|
 | `npm run check` | Type-checks everything (`tsc`, including the JSDoc-typed `shared/` and client JS) |
 | `npm test` | Unit tests of shared rules and client helpers (`node --test`) |
-| `npm run mock` | Mock server with near-real rules, for client work (`PORT` works too) |
 | `npm start` | The real server (`server/main.ts`, run directly by Node, no build step) |
 
-- **Simulator:** open **/sim/** on a running server: the TV screen plus player phones side by side in one page. With the real server, those phones open without a room code, so type the code from the terminal.
+- **Simulator:** open **/sim/** on a running server: the TV screen plus player phones side by side in one page. The phones get the room code from `/api/join`.
 - **End-to-end tests** (exit code 0 = all pass, the last line says `ALL PASS`). Never use port 3131: that's the live server.
 
   `e2e.mts` needs a separate server with a fresh lobby:

@@ -1,6 +1,6 @@
 # Itloe — wire protocol (Contract B, FROZEN — English rename applied 2026-11-03)
 
-Transport: WebSocket, JSON text frames. HTTP static + WS share port **3131** (`PORT` env overrides, used by agents to run several mocks). WS path: **`/ws`**.
+Transport: WebSocket, JSON text frames. HTTP static + WS share port **3131** (`PORT` env overrides). WS path: **`/ws`**.
 
 Static serving: `public/` at `/` (`/` redirects to `/screen/`), and **`shared/` is served at `/shared/`** so browser clients import the same game logic: `import { canPlace } from '/shared/board.js'`.
 
@@ -202,14 +202,3 @@ In solo games the view gains an optional sibling: `{ "t": "view", "state": …, 
   also sent as the `ETag` header (application/json, no-store). Clients fetch it on load and again whenever a
   view's `contentVersion` differs from the version they hold (public/commun/content.js); the view carries the
   campaign state, never the content itself.
-
-## Mock server only (`npm run mock`)
-
-`server/mock.ts` implements the above with near-real rules (no `reduce`), plus a debug message for client development:
-
-```jsonc
-{ "t": "debug", "scenario": "midgame" | "finished" }
-```
-
-- `midgame`: 4 players, half-filled boards, scores/streaks set — for `/screen` layout work.
-- `finished`: phase `finished` with ranked scores — for podium work.

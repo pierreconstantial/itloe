@@ -34,7 +34,7 @@ export function isCharacterId(id) {
 
 /**
  * Characters not picked by any player who has not left, in display order.
- * A player without `character` (save from before M3, mock server) holds the character
+ * A player without `character` (save from before M3) holds the character
  * of its colour slot, so the two can never share a colour.
  * @param {{ order: string[], players: Record<string, { color: number, left?: boolean, character?: CharacterId | null }> }} state
  * @returns {CharacterId[]}

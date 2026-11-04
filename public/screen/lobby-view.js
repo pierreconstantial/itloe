@@ -12,7 +12,7 @@ const QR_SRC = '/api/join-qr.svg';
 /** @typedef {import('../../shared/game.js').State} State */
 
 /**
- * How phones join. `code` / `qr` are null/false when the server has no join API (e.g. the mock).
+ * How phones join. `code` / `qr` are null/false when /api/join is unavailable.
  * @typedef {{ url: string, code: string | null, qr: boolean }} JoinInfo
  */
 

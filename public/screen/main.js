@@ -1,6 +1,6 @@
 // P4 — /screen: the TV page. Renders purely from each { t: 'view', state } (PROTOCOL.md);
 // juice (sound, particles, call-outs, shake) reacts to events derived from consecutive views.
-// Dev console: bloko.debug('midgame' | 'finished') (mock server only), bloko.render(state).
+// Dev console: bloko.render(state).
 
 import { renderLobby, fetchJoinInfo, fallbackJoinInfo } from './lobby-view.js';
 import { renderGame } from './game-view.js';
@@ -401,17 +401,17 @@ const HANDLERS = {
     const ready = content.sync(msg.contentVersion);
     if (!msg.state && msg.quiz) {
       showQuiz(msg.quiz);
-      presence.update(Array.isArray(msg.online) ? msg.online : undefined, msg.quiz.order.filter((/** @type {string} */ id) => !msg.quiz.players[id]?.left));
+      presence.update(Array.isArray(msg.online) ? msg.online : [], msg.quiz.order.filter((/** @type {string} */ id) => !msg.quiz.players[id]?.left));
     } else if (!msg.state) {
       if (!campaign) return;
       // campaign hub / world: no block game on → the map; re-drawn once fresh content arrives
       showMap(campaign);
       ready.then(() => { if (campaign && !current) showMap(campaign); });
-      presence.update(Array.isArray(msg.online) ? msg.online : undefined, campaign.party.order.filter((id) => !campaign?.party.players[id].left));
+      presence.update(Array.isArray(msg.online) ? msg.online : [], campaign.party.order.filter((id) => !campaign?.party.players[id].left));
     } else {
       party.setDoors([]);
       show(msg.state);
-      presence.update(Array.isArray(msg.online) ? msg.online : undefined, seated(msg.state));
+      presence.update(Array.isArray(msg.online) ? msg.online : [], seated(msg.state));
     }
     if (campaign) cutscenes.update(campaign.news, campaign.newsSeq);
   },
@@ -516,8 +516,6 @@ fetchJoinInfo().then((info) => {
 });
 
 /** @type {any} */ (window).bloko = {
-  /** @param {'midgame' | 'finished'} scenario */
-  debug: (scenario) => ws?.send(JSON.stringify({ t: 'debug', scenario })),
   state: () => current,
   /** @param {State} s */
   render: (s) => show(s),

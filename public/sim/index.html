@@ -14,13 +14,13 @@
   <div class="phones" id="phones"></div>
   <script>
     // slot= namespaces localStorage per iframe (otherwise all four rejoin as the same player);
-    // room= comes from /api/join so the real server's room check passes (mock has no /api, no room needed).
+    // room= comes from /api/join so the server's room check passes.
     (async () => {
       let room = '';
       try {
         const res = await fetch('/api/join');
         if (res.ok) room = '&room=' + encodeURIComponent((await res.json()).code);
-      } catch { /* mock server: no /api/join */ }
+      } catch { /* request failed: the phones ask for the code */ }
       const phones = document.getElementById('phones');
       for (let i = 1; i <= 4; i++) {
         const frame = document.createElement('iframe');

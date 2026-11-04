@@ -77,11 +77,8 @@ test('repeated views while missing keep the original drop time', () => {
   assert.equal(p.isOffline('b'), true);
 });
 
-test('no `online` field (mock server) → nobody offline; players who left are forgotten', () => {
+test('players who left are forgotten', () => {
   const { p, advance } = harness();
-  p.update(undefined, ['a', 'b']);
-  advance(5000);
-  assert.deepEqual([...p.offline()], []);
   p.update([], ['a', 'b']);
   advance(2000);
   assert.deepEqual([...p.offline()].sort(), ['a', 'b']);
