@@ -10,7 +10,13 @@
     "sim": "node scripts/simulate.mts",
     "e2e": "node scripts/e2e.mts",
     "e2e:resume": "node scripts/e2e-resume.mts",
-    "e2e:presence": "node scripts/e2e-presence.mts"
+    "e2e:presence": "node scripts/e2e-presence.mts",
+    "e2e:campaign": "node scripts/e2e-campaign.mts",
+    "e2e:quiz": "node scripts/e2e-quiz.mts",
+    "e2e:tv": "node scripts/e2e-tv.mts",
+    "e2e:phone": "node scripts/e2e-phone.mts",
+    "quiz:fetch": "node scripts/fetch-openquizzdb.mts",
+    "quiz:import": "node scripts/import-openquizzdb.mts"
   },
   "dependencies": {
     "fastest-levenshtein": "^1.0.16",
