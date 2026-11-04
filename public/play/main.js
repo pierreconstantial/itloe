@@ -115,7 +115,8 @@ const urlRoom = new URLSearchParams(location.search).get('room');
 if (urlRoom) save(KEYS.room, normalizeRoom(urlRoom));
 /** @type {string | null} */ let room = load(KEYS.room);
 /** The server refused our join for the room code: ask for it, then join with this character. */
-let roomPrompt = /** @type {{ character: CharacterId | null, retried: boolean } | null} */ (null);
+/** `refused`: the code the server just turned down (null: we had none to send). */
+let roomPrompt = /** @type {{ character: CharacterId | null, refused: string | null } | null} */ (null);
 /** Character tapped in the picker, kept for the join that follows a room prompt. @type {CharacterId | null} */
 let wantedCharacter = null;
 /** A join sent and not answered yet (welcome or err): the picker waits. @type {CharacterId | null} */
@@ -222,7 +223,7 @@ function receive(raw) {
     else if (m.code === 'full' && lastView && lastView.phase !== 'lobby') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} is back online on another phone.`);
     else if (m.code === 'full') showPickError('Sorry, the game is full (4 players max).');
     else if (m.code === 'taken') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} was just picked. Choose someone else!`);
-    else if (m.code === 'bad-room') roomPrompt = { character: wantedCharacter, retried: roomPrompt !== null };
+    else if (m.code === 'bad-room') onBadRoom();
     else if (ERR_TOASTS[m.code]) toast(ERR_TOASTS[m.code]);
     render(); // bad-place and friends: repaint from the last view
   }
@@ -351,9 +352,25 @@ function render() {
   renderGame(v, me);
 }
 
-/** @param {{ retried: boolean }} prompt */
+/**
+ * The server turned our room code down (a restart drew a new one, or a typo). That code is forgotten:
+ * never stored, never pre-filled again; the prompt names it. Without a code, just ask for one.
+ */
+function onBadRoom() {
+  const refused = room;
+  roomPrompt = { character: wantedCharacter, refused };
+  if (refused) {
+    forget(KEYS.room);
+    room = null;
+  }
+  roomInput.value = '';
+}
+
+/** @param {{ refused: string | null }} prompt */
 function renderRoomPrompt(prompt) {
-  $('room-error').hidden = !prompt.retried;
+  const err = $('room-error');
+  err.hidden = !prompt.refused;
+  if (prompt.refused) err.textContent = `That code (${prompt.refused}) didn't work. Check the TV and try again.`;
 }
 
 /** Our character, or the colour slot's character for a pre-M3 player. @param {Player} p @returns {CharacterId} */

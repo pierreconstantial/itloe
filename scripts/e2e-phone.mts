@@ -8,7 +8,7 @@
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3182 CDP=9222 [LOCK_MS=300000] node scripts/e2e-phone.mts    (never PORT 3131: the live server)
 // LOCK_MS is how long the "phone locked" case freezes the page (default 5 min, as in the acceptance list).
-// ONLY=3 / ONLY=4 runs just part 3 (campaign screens) / part 4 (quiz), for quick iteration; a full run is the acceptance.
+// ONLY=3 / 4 / 5 runs just that part (campaign screens / quiz / refused room code); a full run is the acceptance.
 // SHOTS=<dir> saves screenshots of the campaign screens.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -691,6 +691,38 @@ try {
   for (let k = 0; k < 40 && !back; k++) { back = (await H.snap())?.view === 'view-place'; if (!back) await sleep(100); }
   expect(back && (await H.text('place-title')).length > 0, 'host Back → the world screen', await H.text('place-title'));
   } // part 4
+
+  if (!ONLY || ONLY === '5') {
+  // ================= part 5: a refused room code (restart with a new code) =================
+  console.log('\n— part 5: room code refused —');
+  await kill9();
+  await boot(true);
+  const R = await phone('R');
+  await joinAs(R, 'sol'); // R now stores its id AND this room code
+  const oldRoom = room;
+  await kill9();
+  await boot(true); // a NEW evening: new code, R's stored id unknown
+  expect(room !== oldRoom, `the restart drew a new code (${oldRoom} → ${room})`);
+  await R.navigate(`${HTTP}/play/`); // reopened without ?room= (an old bookmark): only the stale code in storage
+  await R.waitFor((x) => x.view === 'view-pick', 10_000);
+  await R.tap('.pick-card[data-id="sol"]');
+  const prompt = await R.waitFor((x) => x.view === 'view-room', 5000);
+  const field: string = await R.ev(`document.getElementById('room-input').value`);
+  const err: string = await R.ev(`(() => { const e = document.getElementById('room-error'); return e.hidden ? '' : e.textContent; })()`);
+  expect(prompt?.view === 'view-room' && field === '', 'the refused code is NOT pre-filled', `field="${field}"`);
+  expect(err.includes(oldRoom), 'the bad-room error shows on the FIRST refusal, naming the code', err);
+  expect(await R.ev(`localStorage.getItem('bloko-room')`) === null, 'the refused code is forgotten (not stored)');
+  await R.type('#room-input', room.toLowerCase());
+  await R.tap('#room-form button[type="submit"]');
+  expect((await R.waitFor((x) => x.view === 'view-lobby', 5000))?.view === 'view-lobby', 'typing the new code joins (in the same character)');
+  // a phone that never had a code: the prompt asks for one, with no error
+  const N = await phone('N');
+  await N.navigate(`${HTTP}/play/`);
+  await N.waitFor((x) => x.view === 'view-pick', 10_000);
+  await N.tap('.pick-card[data-id="anna"]');
+  await N.waitFor((x) => x.view === 'view-room', 5000);
+  expect(!(await N.visible('room-error')), 'no code sent → just "ask for the code", no error');
+  } // part 5
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}`);
   if (log) console.log(`--- server log ---\n${log}`);
