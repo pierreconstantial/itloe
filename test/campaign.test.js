@@ -61,10 +61,10 @@ test('validateContent reports unknown parents, unknown refs, cycles, key/id mism
 });
 
 test('zoneAt: the child whose door contains the point, else null', () => {
-  assert.equal(zoneAt(C, 'hub', 2, 4), 'childhood');
-  assert.equal(zoneAt(C, 'hub', 14, 4), 'teens');
+  assert.equal(zoneAt(C, 'hub', 3, 5.2), 'childhood');
+  assert.equal(zoneAt(C, 'hub', 12.5, 5.2), 'teens');
   assert.equal(zoneAt(C, 'hub', 0.1, 0.1), null);
-  assert.equal(zoneAt(C, 'childhood', 4, 6), 'childhood.blocks');
+  assert.equal(zoneAt(C, 'childhood', 5, 5.2), 'childhood.blocks');
 });
 
 // ---------------------------------------------------------------- rules

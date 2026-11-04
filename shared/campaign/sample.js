@@ -1,3 +1,5 @@
+// Doors stand along the party room's back wall (between the window and the double door, floor line
+// y = 4.6): the rect is the rug in front of each doorway — walking onto it enters.
 // SAMPLE content with placeholder ids and copy: the engine's demo and test fixture. NO story here:
 // the user writes the real content later, in its own files, with the same shape.
 //   false start (blocks) → 3 block games → reward item + 'childhood' and 'teens' unlock AT ONCE
@@ -18,52 +20,52 @@ export const SAMPLE_CONTENT = {
       unlock: { always: true },
       complete: { count: 'blocks.played', gte: 3 },
       rewards: [{ item: 'reward-1' }, { flag: 'false-start-over' }],
-      door: { x: 7, y: 5, w: 2, h: 1.5 },
+      door: { x: 5.4, y: 4.7, w: 2, h: 1.2 },
     },
 
     childhood: {
       id: 'childhood', kind: 'world', parent: 'hub', title: 'World 1 (placeholder)',
       unlock: { done: 'hub.false-start' },
       complete: { all: [{ done: 'childhood.blocks' }, { done: 'childhood.scene' }] },
-      door: { x: 1, y: 3, w: 2, h: 2 },
+      door: { x: 2.2, y: 4.7, w: 2, h: 1.2 },
     },
     'childhood.blocks': {
       id: 'childhood.blocks', kind: 'tableau', parent: 'childhood', title: 'World 1 game (placeholder)',
       activity: { kind: 'blocks', settings: { size: 9 } }, replayable: true, unlock: { always: true },
-      door: { x: 3, y: 5, w: 2, h: 2 },
+      door: { x: 4.2, y: 4.7, w: 2, h: 1.2 },
     },
     'childhood.scene': {
       id: 'childhood.scene', kind: 'tableau', parent: 'childhood', title: 'World 1 scene (placeholder)',
       activity: { kind: 'scene', sceneId: 'childhood-1' }, unlock: { always: true },
-      door: { x: 11, y: 5, w: 2, h: 2 },
+      door: { x: 9.8, y: 4.7, w: 2, h: 1.2 },
     },
 
     teens: {
       id: 'teens', kind: 'world', parent: 'hub', title: 'World 2 (placeholder)',
       unlock: { done: 'hub.false-start' },
       complete: { all: [{ done: 'teens.blocks' }, { done: 'teens.scene' }] },
-      door: { x: 13, y: 3, w: 2, h: 2 },
+      door: { x: 11.8, y: 4.7, w: 2, h: 1.2 },
     },
     'teens.blocks': {
       id: 'teens.blocks', kind: 'tableau', parent: 'teens', title: 'World 2 game (placeholder)',
       activity: { kind: 'blocks', settings: { mode: 'timed', timedSeconds: 120 } }, replayable: true, unlock: { always: true },
-      door: { x: 3, y: 5, w: 2, h: 2 },
+      door: { x: 4.2, y: 4.7, w: 2, h: 1.2 },
     },
     'teens.scene': {
       id: 'teens.scene', kind: 'tableau', parent: 'teens', title: 'World 2 scene (placeholder)',
       activity: { kind: 'scene', sceneId: 'teens-1' }, unlock: { always: true },
-      door: { x: 11, y: 5, w: 2, h: 2 },
+      door: { x: 9.8, y: 4.7, w: 2, h: 1.2 },
     },
 
     adult: {
       id: 'adult', kind: 'world', parent: 'hub', title: 'World 3 (placeholder)',
       unlock: { all: [{ done: 'childhood' }, { done: 'teens' }] },
-      door: { x: 7, y: 2, w: 2, h: 1.5 },
+      door: { x: 8.6, y: 4.7, w: 2, h: 1.2 },
     },
     'adult.scene': {
       id: 'adult.scene', kind: 'tableau', parent: 'adult', title: 'World 3 scene (placeholder)',
       activity: { kind: 'scene', sceneId: 'adult-1' }, unlock: { always: true },
-      door: { x: 7, y: 5, w: 2, h: 2 },
+      door: { x: 7, y: 4.7, w: 2, h: 1.2 },
     },
   },
 };
