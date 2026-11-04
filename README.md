@@ -1,7 +1,7 @@
 # Itloe
 
 A party game for the living room, played as one long **evening**: it opens on a block puzzle (drop pieces on the board, fill rows and columns to clear them, chain clears for big combos), then a **hub** opens onto **worlds** to explore, with more games inside them, block games and **quizzes** in French, unlocked step by step.
-A laptop runs everything and shows it on the TV; 1 to 4 players play on their own phones, in the browser, with no app to install. Each player is a **character** (Pierre, Élodie, Sol, Anna).
+A laptop runs everything and shows it on the TV; 1 to 5 players play on their own phones, in the browser, with no app to install. Each player is a **character** (Pierre, Élodie, Sol, Anna, Konz).
 
 ## What you need
 
@@ -132,10 +132,45 @@ A bank file is `{ "dataset": { "name", "licence", "attribution" }, "questions": 
 
 ## For developers
 
+### Architecture
+
+The application runs locally on Node.js 24+, with HTTP and WebSocket traffic on the same port. Node runs the server's TypeScript directly; browsers run JavaScript ES modules directly. There is no build step or external database, and play works without internet access.
+
+| Location | Responsibility |
+|---|---|
+| `server/` | TypeScript: HTTP, WebSockets, trusted inputs, clocks, persistence, and server integration |
+| `shared/` | JavaScript with JSDoc types: reusable game rules, campaign rules/content, quiz helpers, characters, and scene/sprite helpers |
+| `public/play/` | Phone interface and controls |
+| `public/screen/` | TV interface, rendering, audio, and effects |
+| `public/commun/` | Shared browser helpers and CSS |
+| `public/sim/` | Development page combining the TV and phone pages |
+| `data/quiz/` | Server-only question banks |
+| `test/`, `scripts/` | Node unit tests, end-to-end suites, simulation, and data import tools |
+
+Phones send actions; the server binds them to a player, validates them, runs the shared reducers, and saves and broadcasts accepted changes. The campaign owns the party and progression, with the current block game or quiz nested inside it. Phone placement previews use the same rules as the server and reconcile with its next view.
+
+Rule reducers are deterministic: time and seeds are explicit inputs, and reducers perform no I/O. Refused/no-op actions return the same state object; the server uses object identity to skip change hooks. Accepted state changes flow through `apply`/`commit` in `server/main.ts`, including atomic JSON persistence. Activity completion and the resulting campaign facts are saved together. Timed games retain their remaining time across restart or laptop suspension.
+
+Positions, presence, and temporary join-QR display state are held in memory rather than saved. Avatar movement is client-authoritative under the protocol; game results and campaign progression are server-authoritative. Reconnection and character reclaim preserve the player's game and host role; the newest socket wins, and a replaced device stops reconnecting.
+
+Both `public/` and `shared/` are publicly served. Quiz bank data stays on the server; outgoing quiz views use `projectQuiz`, including inside the campaign, to hide answers and submitted answers/verdicts until reveal. Question IDs and campaign content IDs are stable; inventory and campaign totals follow characters rather than devices. Player capacity comes from the character roster in `shared/characters.js`.
+
+### Code conventions
+
+- ESM throughout, with explicit relative import extensions (`.ts` for TypeScript modules, `.js` for JavaScript modules) and `node:` imports for Node built-ins. Server TypeScript uses syntax compatible with Node's type stripping. Shared rules and client JavaScript use JSDoc types; one strict `tsc` run checks both languages.
+- Vanilla HTML/CSS/JavaScript clients and locally served assets. Runtime dependencies are kept small; `package.json` is the current dependency list.
+- Two-space indentation, semicolons, and single-quoted JS/TS strings. Functions and variables use `camelCase`, types use `PascalCase`, constants/tables use `UPPER_SNAKE_CASE`, and multiword filenames, CSS classes, and DOM IDs generally use hyphens. Formatting follows neighboring code; there is no configured formatter or linter.
+- Small functions, plain data, named exports, and closure-based `create…`/`make…` helpers are common. Existing tables describe pieces, settings, characters, campaign conditions/rewards, and scenes. Shared rule logic runs in Node and browsers; browser-specific common helpers live in `public/commun/`. Some shared assets, such as sprites, also provide rendering helpers.
+- Code, comments, docs, and interface wording use English. Quiz questions are intentionally French; story copy is content data. Existing `bloko` storage keys and `BLOKO_*` environment variables remain compatible despite the visible Itloe name.
+- UI uses the tokens in `public/commun/base.css` and existing DOM helpers. Boards use DOM/CSS grids; sprites and scenes use canvas. Phone layouts account for touch, keyboards, and safe areas; TV layouts prioritize readability.
+- Unit tests use `node:test` and `node:assert/strict` in `test/<topic>.test.js`, with small fixtures and explicit seeds/times. They cover shared rules and browser helper logic. Integration and browser scenarios live in `scripts/e2e-*.mts`.
+
+### Development commands and testing
+
 | Command | What it does |
 |---|---|
 | `npm run check` | Type-checks everything (`tsc`, including the JSDoc-typed `shared/` and client JS) |
-| `npm test` | Unit tests of the shared game logic (`node --test`) |
+| `npm test` | Unit tests of shared rules and client helpers (`node --test`) |
 | `npm run mock` | Mock server with near-real rules, for client work (`PORT` works too) |
 | `npm start` | The real server (`server/main.ts`, run directly by Node, no build step) |
 
@@ -163,8 +198,14 @@ A bank file is `{ "dataset": { "name", "licence", "attribution" }, "questions": 
 
   The browser suites need Chrome started with `--remote-debugging-port=<CDP>`; run **one browser suite at a time** and stop that Chrome afterwards. On a busy machine, `E2E_SLOW=3` multiplies every wait.
 
-- **Docs:** [`SPEC-BLOCKS.md`](SPEC-BLOCKS.md) (game design), [`PROTOCOL.md`](PROTOCOL.md) (WebSocket protocol and HTTP API), [`BUILD-PLAN.md`](BUILD-PLAN.md) (milestones and work packages).
-- **Layout:** `server/` (Node server, TypeScript), `shared/` (pure logic used by server and browsers: the block game, `campaign/` the evening, `quiz/` the quiz), `public/` (`/screen`, `/play`, `/sim` pages; `commun/` shared by them), `data/quiz/` (question bank), `test/`, `scripts/` (e2e suites, simulator, OpenQuizzDB fetch + import).
+### Further reading
+
+- [PROTOCOL.md](PROTOCOL.md): WebSocket messages, HTTP endpoints, trusted inputs, view filtering, and compatibility rules.
+- [SPEC-BLOCKS.md](SPEC-BLOCKS.md): original block-game design and technical direction.
+- [BUILD-PLAN.md](BUILD-PLAN.md): implementation history, contracts, and milestone-specific working agreements.
+- [AGENTS.md](AGENTS.md): instructions for coding agents working in this repository.
+
+The spec and build plan include earlier designs and examples. The roster has grown beyond four players; quizzes introduce hidden answers and French content; the current wire format uses `t` messages as documented in `PROTOCOL.md`. Historical P1–P4 ownership and commit prefixes belong to those coordinated work packages. For a change to a shared contract, compare its documentation with the current implementation and tests and resolve any discrepancy explicitly. Draft proposals describe future work, not existing interfaces.
 
 ### Konstantin's devbox setup
 
