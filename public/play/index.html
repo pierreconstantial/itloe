@@ -15,13 +15,11 @@
       <p class="dim">Connecting…</p>
     </section>
 
-    <section id="view-name" class="menu" hidden>
+    <section id="view-pick" class="menu" hidden>
       <h1 class="logo">Bloko</h1>
-      <form id="name-form">
-        <input id="name-input" maxlength="12" placeholder="Your name" autocomplete="given-name" enterkeyhint="go" required>
-        <button type="submit" class="primary">Let's go!</button>
-        <p id="name-error" class="error" hidden></p>
-      </form>
+      <p>Who are you tonight?</p>
+      <div id="picker-grid"></div>
+      <p id="pick-error" class="error" hidden></p>
       <button type="button" class="link" data-open="rules">How to play</button>
     </section>
 
@@ -41,14 +39,21 @@
       <p class="dim">Watch it on the big screen!</p>
     </section>
 
-    <section id="view-lobby" class="menu" hidden>
-      <h1 class="logo">Bloko</h1>
-      <p class="dim">Who's playing?</p>
-      <ul id="lobby-players"></ul>
-      <p id="lobby-settings" class="settings-summary"></p>
-      <button id="btn-settings-lobby" type="button" data-open="settings" hidden>⚙ Settings</button>
-      <button id="btn-start" class="primary" hidden>Start game</button>
-      <p id="lobby-hint" class="dim"></p>
+    <section id="view-lobby" hidden>
+      <div class="lobby-top">
+        <div id="lobby-me"></div>
+        <ul id="lobby-players"></ul>
+        <p id="lobby-settings" class="settings-summary"></p>
+        <div class="lobby-actions">
+          <button id="btn-settings-lobby" type="button" data-open="settings" hidden>⚙ Settings</button>
+          <button id="btn-start" class="primary" hidden>Start game</button>
+        </div>
+        <p id="lobby-hint" class="dim"></p>
+      </div>
+      <div id="stick-pad">
+        <p class="stick-hint">Touch and drag here to walk on the TV</p>
+        <div id="stick-base" hidden><div id="stick-knob"></div></div>
+      </div>
     </section>
 
     <section id="view-game" hidden>

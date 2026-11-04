@@ -6,7 +6,7 @@ const SLOT = new URLSearchParams(location.search).get('slot') ?? '';
 
 export const KEYS = Object.freeze({
   id: `bloko-id${SLOT}`,
-  name: `bloko-name${SLOT}`,
+  character: `bloko-character${SLOT}`, // last pick, highlighted in the picker
   vibrate: `bloko-vibrate${SLOT}`,
   room: `bloko-room${SLOT}`,
 });

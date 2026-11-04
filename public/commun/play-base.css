@@ -330,6 +330,147 @@ button.danger {
   background: var(--bg);
 }
 
+/* ---------- character picker ---------- */
+
+canvas.avatar {
+  image-rendering: pixelated;
+  display: block;
+  flex: none;
+}
+#picker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  width: min(340px, 100%);
+}
+.pick-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px 12px;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  background: var(--bg-2);
+  touch-action: manipulation;
+}
+.pick-card.c1 { --pc: var(--p1); }
+.pick-card.c2 { --pc: var(--p2); }
+.pick-card.c3 { --pc: var(--p3); }
+.pick-card.c4 { --pc: var(--p4); }
+.pick-card:not(:disabled):active { transform: scale(0.97); border-color: var(--pc); }
+.pick-name { font-size: 18px; font-weight: 700; }
+.pick-badge {
+  min-height: 1.2em;
+  font-size: 12px;
+  color: var(--fg-dim);
+}
+.pick-card.last { border-color: color-mix(in srgb, var(--pc) 60%, transparent); }
+.pick-card.pending { border-color: var(--pc); animation: pick-wait 0.9s ease-in-out infinite; }
+@keyframes pick-wait { 50% { opacity: 0.6; } }
+.pick-card.taken { opacity: 0.35; filter: grayscale(1); }
+.pick-card:disabled { opacity: 1; } /* overrides base.css: disabled only dims when taken */
+.pick-card.taken:disabled { opacity: 0.35; }
+
+/* ---------- lobby: header + virtual stick ---------- */
+
+#view-lobby {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: calc(12px + env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom));
+}
+.lobby-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+#lobby-me {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 44px; /* room for the fixed ☰ button */
+}
+.lobby-me-name { font-size: 22px; font-weight: 800; }
+#view-lobby #lobby-players {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+#view-lobby #lobby-players li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 6px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  font-size: 15px;
+}
+.lobby-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.lobby-actions button { touch-action: manipulation; }
+#view-lobby p { margin: 0; }
+
+#stick-pad {
+  position: relative;
+  flex: 1;
+  min-height: 45%;
+  margin-top: 12px;
+  border: 2px dashed rgb(255 255 255 / 10%);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 2%);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+}
+.stick-hint {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  color: var(--fg-dim);
+  font-size: 15px;
+  text-align: center;
+  pointer-events: none;
+}
+#stick-pad.active .stick-hint { visibility: hidden; }
+#stick-base {
+  position: absolute;
+  width: 132px;
+  height: 132px;
+  margin: -66px 0 0 -66px; /* centred on the touch point */
+  border-radius: 50%;
+  background: rgb(255 255 255 / 6%);
+  border: 2px solid rgb(255 255 255 / 15%);
+  pointer-events: none;
+}
+#stick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 45%);
+}
+
 /* ---------- room code ---------- */
 
 #room-input {
@@ -359,7 +500,7 @@ button.danger {
   color: var(--fg-dim);
   font-size: 14px;
 }
-#view-lobby > button:not(.primary),
+.lobby-actions > button:not(.primary),
 #view-podium > button:not(.primary) {
   font-size: 15px;
   padding: 0.5em 1.1em;

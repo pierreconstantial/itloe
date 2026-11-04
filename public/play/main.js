@@ -10,10 +10,18 @@ import * as haptics from './haptics.js';
 import { initMenu } from './menu.js';
 import { syncClock, secondsLeft, mmss } from '../commun/clock.js';
 import { createSettingsSheet, summarize } from './settings-ui.js';
+import { CHARACTERS, isCharacterId } from '../../shared/characters.js';
+import { spawnPoint } from '../../shared/world.js';
+import { createPicker } from './picker.js';
+import { createJoystick } from './joystick.js';
+import { avatarCanvas, paintAvatar } from './avatar.js';
+import { posFromEcho } from './movement.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('../../shared/game.js').Player} Player */
 /** @typedef {import('../../shared/pieces.js').PieceId} PieceId */
+/** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
+/** @typedef {import('./movement.js').Pos} Pos */
 /** @typedef {{ score: number, previous: number | null }} Best */
 
 const RANK_BADGES = ['①', '②', '③', '④'];
@@ -23,6 +31,8 @@ const TRAY_CELL = 13; // px per cell for tray miniatures
 const LIFT = 1.5; // the dragged piece floats this many cells above the finger
 const URGENT_SECONDS = 10; // the countdown turns red from here
 const CLOCK_TICK_MS = 250;
+const LOBBY_ME_SCALE = 4; // own avatar in the lobby header: 64 px
+const LOBBY_CHIP_SCALE = 2; // other players' avatars: 32 px
 
 /** @type {Record<string, string>} */
 const ERR_TOASTS = {
@@ -78,10 +88,14 @@ let pending = null;
 const urlRoom = new URLSearchParams(location.search).get('room');
 if (urlRoom) save(KEYS.room, normalizeRoom(urlRoom));
 /** @type {string | null} */ let room = load(KEYS.room);
-/** The server refused our join for the room code: ask for it, then join with this name. */
-let roomPrompt = /** @type {{ name: string, retried: boolean } | null} */ (null);
-/** Name typed on the name screen, kept for the join that follows a room prompt. */
-let wantedName = '';
+/** The server refused our join for the room code: ask for it, then join with this character. */
+let roomPrompt = /** @type {{ character: CharacterId | null, retried: boolean } | null} */ (null);
+/** Character tapped in the picker, kept for the join that follows a room prompt. @type {CharacterId | null} */
+let wantedCharacter = null;
+/** A join sent and not answered yet (welcome or err): the picker waits. @type {CharacterId | null} */
+let pendingPick = null;
+/** Where our avatar stands: from the server's echo after welcome, else our spawn point. @type {Pos | null} */
+let myPos = null;
 
 /** @type {{
  *   pointerId: number, index: number, pieceId: PieceId,
@@ -132,15 +146,21 @@ function send(msg) {
   if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
 }
 
-/** @param {string} raw */
+/** Unknown message types are ignored (PROTOCOL.md forward-compatibility rule). @param {string} raw */
 function receive(raw) {
   /** @type {any} */ let m;
   try { m = JSON.parse(raw); } catch { return; }
   if (m.t === 'welcome' && typeof m.playerId === 'string') {
+    if (m.playerId !== playerId) myPos = null; // a different player: its own echo or spawn
     playerId = m.playerId;
     roomPrompt = null;
+    pendingPick = null;
     save(KEYS.id, m.playerId);
     render();
+  } else if (m.t === 'pos') {
+    // the one pos a phone receives: our own last position, echoed right after welcome
+    const echoed = m.playerId === playerId ? posFromEcho(m) : null;
+    if (echoed) { myPos = echoed; render(); }
   } else if (m.t === 'view') {
     syncClock(m.now);
     const prev = lastView;
@@ -152,11 +172,24 @@ function receive(raw) {
     render();
   } else if (m.t === 'err') {
     pending = null;
-    if (m.code === 'full') showNameError('Sorry, the game is full (4 players max).');
-    else if (m.code === 'bad-room') roomPrompt = { name: wantedName, retried: roomPrompt !== null };
+    const refusedPick = pendingPick;
+    pendingPick = null;
+    if (m.code === 'full') showPickError('Sorry, the game is full (4 players max).');
+    else if (m.code === 'taken') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} was just picked. Choose someone else!`);
+    else if (m.code === 'bad-room') roomPrompt = { character: wantedCharacter, retried: roomPrompt !== null };
     else if (ERR_TOASTS[m.code]) toast(ERR_TOASTS[m.code]);
     render(); // bad-place and friends: repaint from the last view
   }
+}
+
+/** @param {CharacterId} character */
+function join(character) {
+  wantedCharacter = character;
+  pendingPick = character;
+  save(KEYS.character, character);
+  $('pick-error').hidden = true;
+  send({ t: 'join', character });
+  render();
 }
 
 /** Tell the server, forget this phone's player and come back as a stranger. */
@@ -164,6 +197,8 @@ function leaveGame() {
   send({ t: 'leave' });
   forget(KEYS.id);
   playerId = null;
+  myPos = null;
+  joystick.cancel();
   if (drag) endDrag();
   pending = null;
   reconnect();
@@ -172,7 +207,7 @@ function leaveGame() {
 
 // ---------- rendering ----------
 
-const VIEWS = ['loading', 'name', 'room', 'waiting', 'lobby', 'game', 'over', 'podium'];
+const VIEWS = ['loading', 'pick', 'room', 'waiting', 'lobby', 'game', 'over', 'podium'];
 
 /** @param {string} name */
 function show(name) {
@@ -193,10 +228,15 @@ function render() {
 
   // the piece being dragged left our hand → the drag is stale
   if (drag && (!me || me.hand[drag.index] !== drag.pieceId)) endDrag();
+  // walking is a lobby thing: leaving the lobby lets go of the stick (final moving:false)
+  if (!me || v.phase !== 'lobby') joystick.cancel();
 
   if (!me) {
     if (roomPrompt) { show('room'); renderRoomPrompt(roomPrompt); return; }
-    show(v.phase === 'lobby' ? 'name' : 'waiting');
+    if (v.phase !== 'lobby') { show('waiting'); return; }
+    show('pick');
+    const last = load(KEYS.character);
+    picker.render(v, pendingPick, isCharacterId(last) ? last : null);
     return;
   }
   if (v.phase === 'lobby') { show('lobby'); renderLobby(v, me, isHost); return; }
@@ -211,17 +251,40 @@ function renderRoomPrompt(prompt) {
   $('room-error').hidden = !prompt.retried;
 }
 
+/** Our character, or the colour slot's character for a pre-M3 player. @param {Player} p @returns {CharacterId} */
+function characterOf(p) {
+  if (isCharacterId(p.character)) return p.character;
+  return /** @type {CharacterId} */ (Object.values(CHARACTERS).find((c) => c.color === p.color)?.id ?? 'pierre');
+}
+
+/** The avatar's current position: joystick while held, else the echoed/spawn position. @param {Player} me @returns {Pos} */
+function currentPos(me) {
+  if (!myPos) myPos = { ...spawnPoint(characterOf(me)), moving: false };
+  return joystick.current() ?? myPos;
+}
+
 /** @param {State} v @param {Player} me @param {boolean} isHost */
 function renderLobby(v, me, isHost) {
+  const header = $('lobby-me');
+  header.replaceChildren(
+    avatarCanvas(characterOf(me), LOBBY_ME_SCALE, currentPos(me).dir),
+    Object.assign(document.createElement('span'), {
+      className: 'lobby-me-name',
+      textContent: `You're ${me.name}${me.id === v.hostId ? ' 👑' : ''}`,
+    }),
+  );
+
   const ul = $('lobby-players');
   ul.replaceChildren();
   for (const id of v.order) {
     const p = v.players[id];
+    if (id === me.id || p.left) continue;
     const li = document.createElement('li');
-    li.append(dotEl(p.color), document.createTextNode(
-      p.name + (id === v.hostId ? ' 👑' : '') + (id === me.id ? ' (you)' : '')));
+    li.append(avatarCanvas(characterOf(p), LOBBY_CHIP_SCALE), document.createTextNode(
+      p.name + (id === v.hostId ? ' 👑' : '')));
     ul.append(li);
   }
+  ul.hidden = ul.childElementCount === 0;
   $('lobby-settings').textContent = summarize(v.settings);
   $('btn-settings-lobby').hidden = !isHost;
   $('btn-start').hidden = !isHost;
@@ -349,8 +412,8 @@ function renderPodium(v, me, isHost) {
 }
 
 /** @param {string} text */
-function showNameError(text) {
-  const el = $('name-error');
+function showPickError(text) {
+  const el = $('pick-error');
   el.textContent = text;
   el.hidden = false;
 }
@@ -480,19 +543,31 @@ const menu = initMenu({
   onLeave: leaveGame,
 });
 const settingsSheet = createSettingsSheet({ send });
+const picker = createPicker({ onPick: join });
 
-const nameInput = /** @type {HTMLInputElement} */ ($('name-input'));
-nameInput.value = load(KEYS.name) ?? '';
-
-$('name-form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const name = nameInput.value.trim();
-  if (!name) { nameInput.focus(); return; }
-  save(KEYS.name, name);
-  wantedName = name;
-  $('name-error').hidden = true;
-  send({ t: 'join', name });
+const joystick = createJoystick({
+  pad: $('stick-pad'),
+  base: $('stick-base'),
+  knob: $('stick-knob'),
+  start: () => {
+    const me = lastView && playerId ? lastView.players[playerId] : undefined;
+    return me && lastView?.phase === 'lobby' ? currentPos(me) : null;
+  },
+  send: (pos) => {
+    const turned = myPos?.dir !== pos.dir;
+    myPos = pos;
+    send({ t: 'pos', ...pos });
+    if (turned) repaintMyAvatar(pos);
+  },
+  onGrab: () => haptics.buzz('pickup'),
 });
+
+/** Turn the lobby header avatar to the facing we just sent. @param {Pos} pos */
+function repaintMyAvatar(pos) {
+  const me = lastView && playerId ? lastView.players[playerId] : undefined;
+  const canvas = /** @type {HTMLCanvasElement | null} */ (document.querySelector('#lobby-me canvas'));
+  if (me && canvas) paintAvatar(canvas, characterOf(me), pos.dir);
+}
 
 const roomInput = /** @type {HTMLInputElement} */ ($('room-input'));
 roomInput.value = room ?? '';
@@ -505,7 +580,9 @@ $('room-form').addEventListener('submit', (e) => {
   save(KEYS.room, code);
   // a second hello on the same socket updates the room check, then the held join goes through
   send(helloMsg());
-  send({ t: 'join', name: roomPrompt?.name || wantedName || nameInput.value.trim() || 'Player' });
+  const character = roomPrompt?.character ?? wantedCharacter;
+  if (character) join(character);
+  else { roomPrompt = null; render(); } // nothing picked yet: back to the picker
 });
 
 $('btn-start').addEventListener('click', () => send({ t: 'start' }));
