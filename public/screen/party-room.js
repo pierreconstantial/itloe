@@ -305,13 +305,23 @@ export function createPartyRoom(bg, fg) {
 
   /** @type {Set<string>} */
   let offline = new Set();
+  /** Campaign doors on the map screens (empty in the block lobby). @type {import('./doors.js').DoorView[]} */
+  let doors = [];
+
+  /** Hub / world map: the doors to draw (see doors.js). @param {import('./doors.js').DoorView[]} list */
+  function setDoors(list) {
+    doors = list;
+  }
 
   /** Players shown offline (debounced by presence.js): their avatar is dimmed and tagged. @param {Set<string>} ids */
   function setOffline(ids) {
     offline = ids;
   }
 
-  /** @param {State} s */
+  /**
+   * Who is in the room: a block State (lobby) or the campaign party (map screens) — same roster shape.
+   * @param {{ order: string[], players: Record<string, { name: string, color: number, character?: string | null, left?: boolean }> }} s
+   */
   function setPlayers(s) {
     const present = new Set();
     for (const id of s.order) {
@@ -323,7 +333,7 @@ export function createPartyRoom(bg, fg) {
         : FALLBACK_CHARACTERS[(p.color - 1 + FALLBACK_CHARACTERS.length) % FALLBACK_CHARACTERS.length];
       let a = avatars.get(id);
       if (!a) {
-        const spawn = spawnPoint(p.character ?? null);
+        const spawn = spawnPoint(/** @type {import("../../shared/characters.js").CharacterId | null} */ (p.character ?? null));
         const known = lastPos.get(id);
         const start = known ?? { x: spawn.x, y: spawn.y, dir: spawn.dir, moving: false, at: 0 };
         a = {
@@ -372,6 +382,7 @@ export function createPartyRoom(bg, fg) {
       a.x += (a.tx - a.x) * k;
       a.y += (a.ty - a.y) * k;
     }
+    for (const d of doors) drawDoorway(g, d, now);
     list.sort((p, q) => p.y - q.y);
     for (const a of list) drawAvatar(g, a, isWalking(a, now) ? walkFrame : 0);
   }
@@ -427,6 +438,118 @@ export function createPartyRoom(bg, fg) {
     g.fillText(text, x0 + pad + dot + gap, top + fontPx * 0.17);
   }
 
+  // ---- campaign doors (map screens) ----
+  // A free-standing Altbau doorway per child node: its floor zone (content `door` rect, where walking
+  // in enters) is a rug in front; the doorway stands on the rug's back edge with the title on a plaque.
+
+  /** @param {CanvasRenderingContext2D} g @param {import('./doors.js').DoorView} d @param {number} now */
+  function drawDoorway(g, d, now) {
+    const { unit, scale: p } = geo;
+    const r = d.rect;
+    const X = (/** @type {number} */ u) => snap(geo.ox + u * unit, p);
+    const Y = (/** @type {number} */ u) => snap(geo.oy + u * unit, p);
+    const locked = d.state === 'locked';
+    const pulse = d.state === 'new' ? 0.5 + 0.5 * Math.sin(now / 260) : 0;
+    g.save();
+    if (locked) g.globalAlpha = 0.6;
+
+    // rug = the walk-in zone
+    const rx0 = X(r.x), rx1 = X(r.x + r.w), ry0 = Y(r.y), ry1 = Y(r.y + r.h);
+    rect(g, rx0, ry0, rx1 - rx0, ry1 - ry0, locked ? '#5b4a3c' : '#8c2f39');
+    rect(g, rx0 + p * 2, ry0 + p * 2, rx1 - rx0 - p * 4, ry1 - ry0 - p * 4, locked ? '#6a5848' : '#b23a48');
+    for (let x = rx0 + p * 4; x < rx1 - p * 4; x += p * 4) rect(g, x, ry0 + p, p * 2, p, locked ? '#7a6858' : '#e9c46a');
+
+    // doorway standing on the rug's back edge
+    const dw = Math.max(p * 14, snap((rx1 - rx0) * 0.7, p));
+    const dh = snap(unit * 1.75, p);
+    const dx0 = snap((rx0 + rx1) / 2 - dw / 2, p), dy1 = ry0 + p * 2, dy0 = dy1 - dh;
+    rect(g, dx0 - p * 3, dy0 - p * 3, dw + p * 6, p * 2, PAL.stucco);            // cornice
+    rect(g, dx0 - p * 2, dy0 - p, dw + p * 4, dh + p, PAL.frame);                // architrave
+    rect(g, dx0 - p, dy0, dw + p * 2, dh, PAL.stuccoShade);
+    if (locked) {
+      rect(g, dx0, dy0 + p, dw, dh - p, '#8a7a66');                              // closed leaves
+      const mid = dx0 + snap(dw / 2, p);
+      rect(g, mid, dy0 + p, p, dh - p, '#6d604f');
+      // padlock
+      const ly = dy0 + snap(dh * 0.5, p);
+      rect(g, mid - p * 3, ly, p * 7, p * 5, PAL.brass);
+      rect(g, mid - p * 2, ly - p * 3, p, p * 3, PAL.brassDark);
+      rect(g, mid + p * 2, ly - p * 3, p, p * 3, PAL.brassDark);
+      rect(g, mid - p * 2, ly - p * 4, p * 5, p, PAL.brassDark);
+      rect(g, mid, ly + p * 2, p, p * 2, PAL.brassDark);
+    } else {
+      // open: warm light inside, leaves folded against the jambs
+      const glow = g.createLinearGradient(0, dy0, 0, dy1);
+      glow.addColorStop(0, '#ffe7a8');
+      glow.addColorStop(1, '#ffb84d');
+      g.fillStyle = glow;
+      g.fillRect(dx0 + p * 2, dy0 + p, dw - p * 4, dh - p);
+      rect(g, dx0, dy0 + p, p * 2, dh - p, PAL.door);
+      rect(g, dx0 + dw - p * 2, dy0 + p, p * 2, dh - p, PAL.door);
+      // light spilling onto the rug
+      g.fillStyle = `rgba(255, 214, 140, ${0.22 + pulse * 0.25})`;
+      g.fillRect(dx0, dy1, dw, ry1 - dy1);
+      if (d.state === 'new') {
+        const halo = g.createRadialGradient(dx0 + dw / 2, dy0 + dh / 2, 0, dx0 + dw / 2, dy0 + dh / 2, unit * 1.4);
+        halo.addColorStop(0, `rgba(255, 236, 160, ${0.35 + pulse * 0.35})`);
+        halo.addColorStop(1, 'rgba(255, 236, 160, 0)');
+        g.fillStyle = halo;
+        g.fillRect(dx0 - unit, dy0 - unit, dw + unit * 2, dh + unit * 2);
+        for (let k = 0; k < 4; k++) {                                            // sparkles
+          const t = now / 700 + k * 1.7;
+          const sx = dx0 + dw / 2 + Math.cos(t) * (dw / 2 + p * 4);
+          const sy = dy0 + dh * 0.4 + Math.sin(t * 1.3) * dh * 0.45;
+          rect(g, snap(sx, p), snap(sy, p), p, p, '#fff6c8');
+          rect(g, snap(sx, p) - p, snap(sy, p), p * 3, p, `rgba(255, 246, 200, ${0.6 * pulse})`);
+        }
+      }
+    }
+    g.restore();
+    plaque(g, d, dx0 + dw / 2, dy0 - p * 4);
+  }
+
+  /**
+   * Title plaque above a doorway, fitted to the door's width (doors sit side by side): the font
+   * shrinks, then the title wraps onto two lines, so neighbouring plaques never overlap.
+   * @param {CanvasRenderingContext2D} g @param {import('./doors.js').DoorView} d @param {number} cx @param {number} bottom
+   */
+  function plaque(g, d, cx, bottom) {
+    const maxW = d.rect.w * geo.unit * 0.98;
+    const mark = d.state === 'done' ? '★ ' : d.state === 'locked' ? '🔒 ' : d.state === 'new' ? '✨ ' : '';
+    const text = `${mark}${d.title}`;
+    const font = (/** @type {number} */ px) => `800 ${px}px system-ui, -apple-system, 'Segoe UI', sans-serif`;
+    let fontPx = Math.round(geo.unit * 0.24);
+    const minPx = Math.round(geo.unit * 0.17);
+    g.font = font(fontPx);
+    while (fontPx > minPx && g.measureText(text).width + fontPx * 1.5 > maxW) g.font = font(--fontPx);
+    /** @type {string[]} */
+    let lines = [text];
+    if (g.measureText(text).width + fontPx * 1.5 > maxW) {
+      const words = text.split(' ');
+      let best = 1, bestW = Infinity;
+      for (let k = 1; k < words.length; k++) { // the split that balances the two lines best
+        const w = Math.max(g.measureText(words.slice(0, k).join(' ')).width, g.measureText(words.slice(k).join(' ')).width);
+        if (w < bestW) { bestW = w; best = k; }
+      }
+      lines = [words.slice(0, best).join(' '), words.slice(best).join(' ')];
+    }
+    const lineH = fontPx * 1.2;
+    const h = lineH * lines.length + fontPx * 0.4;
+    const w = Math.min(maxW, Math.max(...lines.map((l) => g.measureText(l).width)) + fontPx * 1.2);
+    const top = bottom - h;
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillStyle = d.state === 'locked' ? 'rgba(40, 34, 30, 0.8)' : 'rgba(58, 40, 22, 0.92)';
+    g.beginPath();
+    g.roundRect(cx - w / 2, top, w, h, fontPx * 0.35);
+    g.fill();
+    g.strokeStyle = d.state === 'locked' ? '#6d604f' : PAL.brass;
+    g.lineWidth = Math.max(1, geo.scale / 2);
+    g.stroke();
+    g.fillStyle = d.state === 'locked' ? '#b9ad9c' : d.state === 'done' ? '#ffd166' : '#fff3d6';
+    lines.forEach((l, k) => g.fillText(l, cx, top + fontPx * 0.2 + lineH * (k + 0.5) + 1, maxW));
+  }
+
   /** Shows the room (lobby) or hides it and stops the animation loop. @param {boolean} on */
   function setVisible(on) {
     if (on === visible) return;
@@ -452,7 +575,9 @@ export function createPartyRoom(bg, fg) {
   addEventListener('resize', () => { if (visible) layout(); });
 
   return {
-    setPlayers, setOffline, onPos, setVisible, reset,
+    setPlayers, setOffline, setDoors, onPos, setVisible, reset,
+    /** Debug / tests: the doors drawn. */
+    doors: () => doors.map((d) => ({ id: d.id, state: d.state, title: d.title })),
     /** Debug / tests: the drawn state of every avatar. */
     snapshot: () => [...avatars.values()].map((a) => ({ id: a.id, name: a.name, character: a.character, x: a.x, y: a.y, dir: a.dir, walking: isWalking(a, performance.now()), offline: offline.has(a.id) })),
   };

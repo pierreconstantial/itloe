@@ -33,6 +33,3 @@
   letter-spacing: 0.08em;
 }
 .podium-ending { margin: 0; font-size: calc(30 * var(--u)); color: var(--fg-dim); font-weight: 700; }
-
-/* Campaign hub / world placeholder (no block game on; the real hub map comes later). */
-.no-game { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: calc(24 * var(--u, 1px)); text-align: center; }

@@ -15,11 +15,16 @@ import { createPartyRoom } from './party-room.js';
 import { createPresence } from './presence.js';
 import { createLiveness } from '../commun/liveness.js';
 import { h } from './dom.js';
+import { createContentSource } from '../commun/content.js';
+import { doorStates, mapCopy } from './doors.js';
+import { createCutscenes } from './cutscenes.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('./events.js').ScreenEvent} ScreenEvent */
 
 const RECONNECT_MS = 1000;
+/** A socket still CONNECTING after this is abandoned and retried (Chrome throttles/queues attempts after failures). */
+const CONNECT_TIMEOUT_MS = 5000;
 /** Timers stopped for longer than this (laptop asleep, tab frozen) → the socket is presumed dead. */
 const WAKE_GAP_MS = 5000;
 /** How long "Time's up!" holds the screen before the podium reveal starts. */
@@ -120,27 +125,92 @@ function show(next) {
   for (const e of events) if (!(endsNow && e.t === 'done')) react(e, next);
 }
 
+/** @typedef {import('../../shared/campaign/types.js').Campaign} Campaign */
+
+/** Campaign content (titles, doors): fetched from the server, refreshed on a new contentVersion. */
+const content = createContentSource({ onChange: () => { if (campaign && !current) showMap(campaign); } });
+/** Last campaign from the server (views carry it next to `state`). @type {Campaign | null} */
+let campaign = null;
+
 /**
- * No block game (the party is on the campaign hub or in a world): a calm placeholder.
- * The next block view starts fresh (no replay of events against the old game).
- * @param {{ at?: { node?: string } } | undefined} campaign
+ * Hub / world map (no block game on): the party room with one door per child node, avatars walking
+ * as in the lobby, and a top band with where we are. The next block view starts fresh.
+ * @param {Campaign} c
  */
-function showNoGame(campaign) {
-  current = null;
+function showMap(c) {
+  if (current) {
+    current = null;
+    finishedAt = -Infinity;
+    cancelPodium();
+    fx.clearAll();
+  }
   stale = true;
-  finishedAt = -Infinity;
-  cancelPodium();
-  fx.clearAll();
-  party.setVisible(false);
-  document.body.classList.remove('party');
   updateCountdown(null);
-  const where = campaign?.at?.node;
-  app.replaceChildren(h('section', 'no-game', [
-    h('h1', 'title', ['BLOKO']),
-    h('p', 'settings-line', ['Hub coming soon']),
-    ...(where ? [h('p', 'podium-hint', [`(${where})`])] : []),
+  party.setPlayers(c.party);
+  party.setDoors(doorStates(c, content.get()));
+  party.setVisible(true);
+  document.body.classList.add('party');
+  const copy = mapCopy(c, content.get());
+  app.replaceChildren(h('section', 'map-band', [
+    h('h1', 'map-title', [copy.title]),
+    h('p', 'map-hint', [copy.hint]),
+    ...(copy.items.length ? [h('p', 'map-items', copy.items.map((it) => h('span', 'map-item', [`🎁 ${it}`])))] : []),
   ]));
 }
+
+// ---------- unlock / reward cutscenes (campaign.news) ----------
+
+const CUTSCENE_MS = 4200;
+let acksSent = 0;
+let momentsPlayed = 0;
+
+/** A moment may start: no block game or quiz question running, and a podium has finished its reveal. */
+function canPlayCutscene() {
+  // a hidden TV tab plays nothing (and so never acks what nobody saw); it plays once shown again
+  if (document.visibilityState !== 'visible') return false;
+  const quiz = /** @type {{ kind?: string, phase?: string } | null | undefined} */ (campaign?.at.activity);
+  if (quiz?.kind === 'quiz') return quiz.phase === 'lobby' || quiz.phase === 'finished';
+  if (!current) return true;
+  if (current.phase === 'lobby') return true;
+  if (current.phase !== 'finished') return false;
+  const reveal = Math.max(0, ...revealSchedule(current).map((r) => r.atMs));
+  return performance.now() - finishedAt > reveal + 1800;
+}
+
+/**
+ * One combined TV moment: headline, the unlocked titles, the rewards; fanfare + confetti.
+ * @param {import('./cutscenes.js').Moment} m @param {AbortSignal} signal
+ */
+function playMoment(m, signal) {
+  momentsPlayed++;
+  const box = h('div', 'cutscene', [
+    h('p', 'cutscene-headline', [m.headline]),
+    ...m.unlocked.map((u) => h('p', `cutscene-line is-${u.kind}`, [`🚪 ${u.title}`])),
+    ...m.items.map((it) => h('p', 'cutscene-line is-item', [h('span', 'cutscene-gift', ['🎁']), ` Reward: ${it}`])),
+  ]);
+  box.dataset.upTo = String(m.upTo);
+  document.body.append(box);
+  sfx.reveal();
+  setTimeout(() => { if (!signal.aborted) { sfx.fanfare(); fx.confetti(['#ffd166', '#ffffff', '#ff5fa2', '#3b8ea5']); } }, 600);
+  return new Promise((resolve) => {
+    const end = () => { box.classList.add('is-leaving'); setTimeout(() => box.remove(), 400); resolve(undefined); };
+    const timer = setTimeout(end, CUTSCENE_MS);
+    signal.addEventListener('abort', () => { clearTimeout(timer); end(); }, { once: true });
+  });
+}
+
+const cutscenes = createCutscenes({
+  play: playMoment,
+  ack: (upTo) => {
+    if (ws?.readyState !== WebSocket.OPEN) return;
+    acksSent++;
+    ws.send(JSON.stringify({ t: 'ack', upTo }));
+  },
+  canPlay: canPlayCutscene,
+  content: () => content.get(),
+  ackDelay: () => 200 + Math.random() * 1300,
+});
+setInterval(() => cutscenes.poke(), 500); // a deferred moment starts once the podium settles
 
 /**
  * @param {ScreenEvent} e
@@ -199,13 +269,21 @@ function podiumSequence(s) {
 const HANDLERS = {
   view: (msg) => {
     syncClock(msg.now);
+    if (msg.campaign) campaign = msg.campaign;
+    const ready = content.sync(msg.contentVersion);
     if (!msg.state) {
-      // campaign hub / world: no block game on. The real hub map is a later package.
-      showNoGame(msg.campaign);
-      return;
+      if (!campaign) return;
+      // a quiz runs (view.quiz): its TV screen is the next package — until then, the map of its tableau
+      // campaign hub / world: no block game on → the map; re-drawn once fresh content arrives
+      showMap(campaign);
+      ready.then(() => { if (campaign && !current) showMap(campaign); });
+      presence.update(Array.isArray(msg.online) ? msg.online : undefined, campaign.party.order.filter((id) => !campaign?.party.players[id].left));
+    } else {
+      party.setDoors([]);
+      show(msg.state);
+      presence.update(Array.isArray(msg.online) ? msg.online : undefined, seated(msg.state));
     }
-    show(msg.state);
-    presence.update(Array.isArray(msg.online) ? msg.online : undefined, seated(msg.state));
+    if (campaign) cutscenes.update(campaign.news, campaign.newsSeq);
   },
   pos: (msg) => party.onPos(msg),
   tick: (msg) => syncClock(msg.now), // liveness (any message feeds the watchdog) + clock skew
@@ -217,8 +295,13 @@ function connect() {
   ws = sock;
   // silent for 25 s (no tick, no view) → half-open: abandon it like after a sleep
   const live = createLiveness({ onDead: () => { if (ws === sock) reconnectNow('no message for 25 s'); } });
+  // a connect attempt can hang in CONNECTING (no open, no close): never wait on it forever
+  const openTimer = setTimeout(() => {
+    if (ws === sock && sock.readyState === WebSocket.CONNECTING) reconnectNow('connect timeout');
+  }, CONNECT_TIMEOUT_MS);
   // every listener checks `ws === sock`: an abandoned socket (see reconnectNow) can never act again
   sock.addEventListener('open', () => {
+    clearTimeout(openTimer);
     if (ws !== sock) { live.stop(); return; }
     live.start();
     document.body.classList.remove('offline');
@@ -236,8 +319,10 @@ function connect() {
     HANDLERS[String(msg.t)]?.(msg); // a screen is never bumped: `replaced` is not for it and is ignored
   });
   sock.addEventListener('close', () => {
+    clearTimeout(openTimer);
     live.stop();
     if (ws !== sock) return;
+    console.info('[bloko] socket closed — retrying');
     document.body.classList.add('offline');
     stale = true;
     setTimeout(connect, RECONNECT_MS);
@@ -252,7 +337,7 @@ function connect() {
  */
 function reconnectNow(why) {
   // wake and liveness can both fire on the same wake-up: keep a reconnect already under way
-  if (ws?.readyState === WebSocket.CONNECTING && Date.now() - lastReconnectAt < 3000) return;
+  if (why !== 'connect timeout' && ws?.readyState === WebSocket.CONNECTING && Date.now() - lastReconnectAt < 3000) return;
   lastReconnectAt = Date.now();
   const old = ws;
   ws = null;
@@ -306,6 +391,11 @@ fetchJoinInfo().then((info) => {
   pos: (m) => party.onPos(m),
   avatars: () => party.snapshot(),
   offline: () => [...presence.offline()],
+  campaign: () => campaign,
+  doors: () => party.doors(),
+  cutscene: () => ({ playing: cutscenes.playing(), maxShown: cutscenes.maxShown(), acks: acksSent, moments: momentsPlayed,
+    text: document.querySelector('.cutscene')?.textContent ?? null }),
+  contentVersion: () => content.version(),
   /** Tests: simulate a wake from sleep. */
   wake: () => reconnectNow('debug wake'),
 };

@@ -9,7 +9,11 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnPoint } from '../shared/world.js';
-import { check, Client, finish, HTTP, legalMoves, sleep } from './e2e-lib.mts';
+import { SAMPLE_CONTENT } from '../shared/campaign/index.js';
+
+/** A node's title (the server runs the sample content). @param {string} id */
+const C_TITLE = (id: string): string => SAMPLE_CONTENT.nodes[id].title;
+import { check, Client, finish, HTTP, legalMoves, sleep, SLOW } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -23,6 +27,8 @@ let server: ChildProcess | null = null;
 let log = '';
 async function boot(fresh = false): Promise<void> {
   log = '';
+  // a server left over from an aborted run would silently answer instead of ours
+  if (await fetch(`${HTTP}/api/join`).then(() => true, () => false)) throw new Error(`port ${PORT} is busy: fuser -k ${PORT}/tcp`);
   server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
     env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1' },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -45,13 +51,16 @@ async function kill9(): Promise<void> {
 // ---------- minimal CDP page ----------
 class Page {
   ws!: WebSocket;
+  targetId = '';
   seq = 0;
   pending = new Map<number, (r: any) => void>();
   console: string[] = [];
   errors: string[] = [];
-  static async open(url: string): Promise<Page> {
-    const t = await (await fetch(`http://127.0.0.1:${CDP}/json/new?${encodeURIComponent(url)}`, { method: 'PUT' })).json();
+  /** @param newWindow its own window: visible alongside the others (a second TV), not a background tab */
+  static async open(url: string, newWindow = false): Promise<Page> {
+    const t = newWindow ? await Page.newWindow(url) : await (await fetch(`http://127.0.0.1:${CDP}/json/new?${encodeURIComponent(url)}`, { method: 'PUT' })).json();
     const p = new Page();
+    p.targetId = t.id;
     p.ws = new WebSocket(t.webSocketDebuggerUrl);
     p.ws.onmessage = (e) => {
       const m = JSON.parse(String(e.data));
@@ -77,6 +86,24 @@ class Page {
     await this.cmd('Emulation.setFocusEmulationEnabled', { enabled: true });
   }
   visible(): Promise<boolean> { return this.js("document.visibilityState === 'visible'"); }
+  /** Target.createTarget({ newWindow }) through the browser endpoint → the new page's /json entry. */
+  static async newWindow(url: string): Promise<any> {
+    const ver = await (await fetch(`http://127.0.0.1:${CDP}/json/version`)).json();
+    const b = new WebSocket(ver.webSocketDebuggerUrl);
+    await new Promise((r) => { b.onopen = r; });
+    const res: any = await new Promise((r) => {
+      b.onmessage = (e) => { const m = JSON.parse(String(e.data)); if (m.id === 1) r(m); };
+      b.send(JSON.stringify({ id: 1, method: 'Target.createTarget', params: { url, newWindow: true } }));
+    });
+    b.close();
+    const id = res.result.targetId;
+    for (let k = 0; k < 50; k++) {
+      const t = (await (await fetch(`http://127.0.0.1:${CDP}/json/list`)).json()).find((x: any) => x.id === id);
+      if (t) return t;
+      await sleep(50);
+    }
+    throw new Error('new window target not listed');
+  }
   cmd(method: string, params: object = {}): Promise<any> {
     const id = ++this.seq;
     this.ws.send(JSON.stringify({ id, method, params }));
@@ -89,7 +116,7 @@ class Page {
     return r.result?.result?.value;
   }
   async until(expr: string, label: string, ms = 4000): Promise<boolean> {
-    const end = Date.now() + ms;
+    const end = Date.now() + ms * SLOW;
     while (Date.now() < end) {
       if (await this.js(expr).catch(() => false)) return true;
       await sleep(50);
@@ -103,7 +130,11 @@ class Page {
     mkdirSync(SHOTS, { recursive: true });
     writeFileSync(join(SHOTS, `${name}.png`), Buffer.from(r.result.data, 'base64'));
   }
-  close(): void { this.ws.close(); }
+  /** Closes the TAB, not just the debugger socket: a leaked TV tab keeps reconnecting to every later server. */
+  async close(): Promise<void> {
+    this.ws.close();
+    await fetch(`http://127.0.0.1:${CDP}/json/close/${this.targetId}`).catch(() => undefined);
+  }
 }
 
 // ---------- phones ----------
@@ -137,22 +168,41 @@ const boardsOf = (s: any) => JSON.stringify(s.order.map((id: string) => [id, s.p
 
 
 /** kill -9, check the TV shows the banner, restart, check it comes back with the same game. */
-async function killAndBack(tv: Page, phase: string): Promise<void> {
+async function killAndBack(tv: Page, phase: string, ref: Client): Promise<void> {
+  // the TV must have caught up with the last move before the snapshot (views race the kill)
+  const want = boardsOf(ref.lastView());
+  await tv.until(`(() => { const s = window.bloko.state(); return !!s && JSON.stringify(s.order.map((id) => [id, s.players[id].board, s.players[id].score, s.players[id].hand])) === ${JSON.stringify(want)}; })()`, 'tv converged');
   const before = await tv.js(`JSON.stringify(${tvState})`);
   await kill9();
   check(await tv.until(tvOnlineBanner, 'banner'), `${phase}: kill -9 → TV shows the "Connecting…" banner`);
   await tv.shot(`kill-${phase}-banner`);
   await sleep(1500);
   await boot();
-  check(await tv.until(`!${tvOnlineBanner}`, 'reconnect', 6000), `${phase}: restart → TV reconnects by itself, banner gone`);
+  const t0 = Date.now();
+  const back = await tv.until(`!${tvOnlineBanner}`, 'reconnect', 6000);
+  console.log(`      (${phase}: TV back ${Date.now() - t0} ms after the server answered)`);
+  if (!back) {
+    console.log('      diag:', await tv.js(`JSON.stringify({ vis: document.visibilityState, focus: document.hasFocus(), cls: document.body.className })`),
+      '| console:', tv.console.slice(-6).join(' / '), '| errors:', tv.errors.slice(-3).join(' / '));
+  }
+  check(back, `${phase}: restart → TV reconnects by itself, banner gone`);
   await sleep(300);
   const after = await tv.js(`JSON.stringify(${tvState})`);
   const a = JSON.parse(after), b = JSON.parse(before);
-  check(a.phase === phase && boardsOf(a) === boardsOf(b) && a.hostId === b.hostId, `${phase}: same phase, boards/scores/hands, host after the restart`);
+  const same = a.phase === phase && boardsOf(a) === boardsOf(b) && a.hostId === b.hostId;
+  if (!same) {
+    const diff = a.order.map((id: string) => `${id}: score ${b.players[id]?.score}→${a.players[id]?.score} hand ${JSON.stringify(b.players[id]?.hand)}→${JSON.stringify(a.players[id]?.hand)} done ${b.players[id]?.done}→${a.players[id]?.done}`);
+    console.log(`      diff: phase ${b.phase}→${a.phase} host ${b.hostId}→${a.hostId} seed ${b.seed}→${a.seed} | ${diff.join(' | ')}`);
+  }
+  check(same, `${phase}: same phase, boards/scores/hands, host after the restart`);
 }
 
 let tv: Page | null = null, tv2: Page | null = null;
 try {
+  // tabs left by an aborted run on OUR port would join our server as extra TVs: close them first
+  for (const t of await (await fetch(`http://127.0.0.1:${CDP}/json/list`)).json()) {
+    if (t.type === 'page' && String(t.url).startsWith(`${HTTP}/screen`)) await fetch(`http://127.0.0.1:${CDP}/json/close/${t.id}`);
+  }
   await boot(true);
   room = (await (await fetch(`${HTTP}/api/join`)).json()).code;
   tv = await Page.open(`${HTTP}/screen/`);
@@ -186,13 +236,13 @@ try {
   await B.waitFor((m) => m.t === 'replaced');
   await sleep(300);
   check(!(await tv.js(tvOnlineBanner)) && !(await tv2.js(tvOnlineBanner)), 'a phone bump (replaced) leaves both TVs connected');
-  tv2.close(); tv2 = null;
+  await tv2.close(); tv2 = null;
   await tv.front();
   check(await tv.until("document.visibilityState === 'visible'", 'tv visible', 2000), 'TV tab is visible again (test setup)');
   B = B4;
 
   // ---------- kill -9 in the lobby ----------
-  await killAndBack(tv, 'lobby');
+  await killAndBack(tv, 'lobby', B);
   let A2 = await rejoin('A2', idA); B = await rejoin('B5', idB);
   const spawnOk = async () => tv!.js(`JSON.stringify(window.bloko.avatars().map((a) => [a.id, Math.round(a.x * 10), Math.round(a.y * 10)]))`);
   const exp = JSON.stringify([[idA, Math.round(spawnPoint('anna').x * 10), Math.round(spawnPoint('anna').y * 10)], [idB, Math.round(spawnPoint('sol').x * 10), Math.round(spawnPoint('sol').y * 10)]]);
@@ -215,7 +265,7 @@ try {
   B = await device('B6'); await tap(B, 'sol');
   check(await tv.until(`!document.querySelector('.panel[data-id="${idB}"]').classList.contains('is-offline')`, 'undim', 1500), 'reclaim mid-game → board back to normal');
   i = A2.mark(); B.send({ t: 'place', ...legalMoves(B.lastView(), idB)[0] }); await A2.waitFor((m) => m.t === 'view', i);
-  await killAndBack(tv, 'playing');
+  await killAndBack(tv, 'playing', A2);
   check(await tv.until(`document.querySelectorAll('.panel.is-offline').length === 2`, 'all offline after restart', 3500),
     'after a restart, nobody reconnected yet → both boards tagged offline (true: online is empty)');
   A2 = await rejoin('A3', idA); B = await rejoin('B7', idB);
@@ -270,7 +320,7 @@ try {
     '…and the retired player is ranked with an "out" tag');
   await sleep(4000);
   await tv.shot('podium-host');
-  await killAndBack(tv, 'finished');
+  await killAndBack(tv, 'finished', A2);
   A2 = await rejoin('A4', idA); B = await rejoin('B8', idB);
 
   // ---------- newGame: back to the party room, newcomer appears ----------
@@ -287,27 +337,79 @@ try {
     'a newcomer joins after newGame and appears on the TV');
   await tv.shot('newgame-lobby');
 
-  // ---------- campaign: hub / world views carry state: null → placeholder, no crash ----------
+  // ---------- campaign: hub map with doors, combined unlock cutscene, two TVs, chooser walks in ----------
   tv.errors.length = 0;
+  const cv = () => [...A2.msgs].reverse().find((m) => m.t === 'view')?.campaign;
+  const doorsJs = `JSON.stringify(Object.fromEntries(window.bloko.doors().map((d) => [d.id, d.state])))`;
   i = A2.mark(); A2.send({ t: 'back' });
-  const hubView = await A2.waitFor((m) => m.t === 'view' && m.state === null, i).catch(() => null);
-  if (hubView) {
-    check(await tv.until(`window.bloko.state() === null && !!document.querySelector('.no-game') && document.getElementById('party-bg').hidden`, 'hub placeholder'),
-      `back to the hub (view.state null, at ${hubView.campaign?.at?.node}) → TV shows the placeholder, party room hidden`);
-    await tv.shot('hub-placeholder');
-    i = A2.mark(); A2.send({ t: 'enter', node: hubView.campaign?.at?.node === 'hub' ? 'hub.false-start' : '' });
-    await A2.waitFor((m) => m.t === 'view' && m.state?.phase === 'lobby', i);
-    check(await tv.until(`window.bloko.state()?.phase === 'lobby' && document.body.classList.contains('party') && window.bloko.avatars().length === 3`, 'back in'),
-      'host enters the block tableau again → TV back in the party room with every avatar');
-    check(tv.errors.length === 0, `no page exception through hub ↔ tableau (${tv.errors.join(' | ') || 'none'})`);
-  } else {
-    check(false, 'host back → expected a view with state null (campaign server)');
+  const hubView = await A2.waitFor((m) => m.t === 'view' && m.state === null, i);
+  check(await tv.until(`window.bloko.state() === null && !!document.querySelector('.map-band') && !document.getElementById('party-bg').hidden && window.bloko.avatars().length === 3`, 'hub map'),
+    `back to the hub (state null, at ${hubView.campaign?.at?.node}) → TV shows the map in the party room, every avatar there`);
+  const d0 = JSON.parse(await tv.js(doorsJs));
+  check(d0['hub.false-start'] === 'open' && d0.childhood === 'locked' && d0.teens === 'locked' && d0.adult === 'locked',
+    `hub doors: false start open, the worlds locked (${JSON.stringify(d0)})`);
+  check(!!(await tv.js('window.bloko.contentVersion()')), 'TV loaded the content from /api/content (versioned)');
+  await tv.shot('hub-map-locked');
+
+  // play the false start until the 3rd game unlocks the worlds; a second TV is open for the last one
+  i = A2.mark(); A2.send({ t: 'enter', node: 'hub.false-start' });
+  await A2.waitFor((m) => m.t === 'view' && m.state?.phase === 'lobby', i);
+  tv2 = await Page.open(`${HTTP}/screen/`, true); // its own window: BOTH TVs visible, both play
+  await tv2.until(`window.bloko?.state()?.phase === 'lobby'`, 'tv2');
+  check(await tv.visible() && await tv2.visible(), 'two TVs, both visible (separate windows)');
+  for (let g = 0; g < 4 && !(cv()?.news ?? []).length; g++) {
+    if (A2.lastView().phase === 'finished') { i = A2.mark(); A2.send({ t: 'newGame' }); await A2.waitFor((m) => m.t === 'view' && m.state?.phase === 'lobby', i); }
+    i = A2.mark(); A2.send({ t: 'start' }); await A2.waitFor((m) => m.t === 'view' && m.state?.phase === 'playing', i);
+    i = A2.mark(); A2.send({ t: 'endGame' }); await A2.waitFor((m) => m.t === 'view' && m.state?.phase === 'finished', i);
   }
+  const pending = cv()?.news ?? [];
+  check(pending.length > 0 && cv().facts.counters['blocks.played'] === 3, `3rd block game → news queued (${pending.length} entries, seq ${pending[0]?.seq}…${pending.at(-1)?.seq})`);
+  check(!(await tv.js('window.bloko.cutscene().playing')), 'cutscene waits for the podium reveal');
+  check(await tv.until(`window.bloko.cutscene().playing && /New worlds unlocked/.test(window.bloko.cutscene().text)`, 'cutscene', 12000),
+    'podium settled → ONE combined moment: "New worlds unlocked!"');
+  const csText = await tv.js('window.bloko.cutscene().text');
+  check(csText.includes(C_TITLE('childhood')) && csText.includes(C_TITLE('teens')) && csText.includes('Reward'), `…naming both worlds and the reward (${csText})`);
+  await sleep(1500);
+  await tv.shot('cutscene');
+  for (let k = 0; k < 150 && (cv()?.news ?? []).length; k++) await sleep(100);
+  check((cv()?.news ?? []).length === 0, 'after the moment, an ack clears the news on the server');
+  await sleep(2500);
+  const c1 = await tv.js('window.bloko.cutscene()'), c2 = await tv2.js('window.bloko.cutscene()');
+  check(c1.moments === 1 && c2.moments === 1 && !c1.playing && !c2.playing, `both TVs played the moment exactly once, no replay (TV1 ${c1.moments}, TV2 ${c2.moments})`);
+  check(c1.acks + c2.acks === 1, `ack sent once across the two TVs (TV1 ${c1.acks}, TV2 ${c2.acks})`);
+  check(c1.maxShown === pending.at(-1)?.seq && c2.maxShown === pending.at(-1)?.seq, `both remember the last seq shown (${c1.maxShown}, ${c2.maxShown})`);
+  await tv2.close(); tv2 = null;
+  await tv.front();
+
+  // back on the hub: the new doors glow
+  i = A2.mark(); A2.send({ t: 'back' });
+  await A2.waitFor((m) => m.t === 'view' && m.state === null, i);
+  check(await tv.until(`${doorsJs} === ${JSON.stringify(JSON.stringify({ 'hub.false-start': 'done', childhood: 'new', teens: 'new', adult: 'locked' }))}`, 'doors after unlock'),
+    'hub doors: false start done ★, both worlds NEW (glowing), the third still locked');
+  check(await tv.js(`document.querySelector('.map-items')?.textContent.includes('reward-1')`), 'the reward shows in the map band');
+  await sleep(600);
+  await tv.shot('hub-map-new');
+
+  // the chooser (Élodie) joins and walks into the childhood door → the TV switches to that world
+  const E = await device('E'); await tap(E, 'elodie');
+  await tv.until('window.bloko.avatars().length === 4', 'elodie avatar');
+  E.send({ t: 'pos', x: 8, y: 8, dir: 'up', moving: true });
+  await sleep(150);
+  const cd = SAMPLE_CONTENT.nodes.childhood.door!;
+  E.send({ t: 'pos', x: cd.x + cd.w / 2, y: cd.y + cd.h / 2, dir: 'up', moving: true });
+  check(await tv.until(`window.bloko.campaign()?.at.node === 'childhood' && document.querySelector('.map-title')?.textContent === ${JSON.stringify(C_TITLE('childhood'))}`, 'world'),
+    'Élodie walks into the childhood door → TV switches to that world');
+  const dw = JSON.parse(await tv.js(doorsJs));
+  check(dw['childhood.blocks'] === 'new' && dw['childhood.scene'] === 'new', `world doors: its two tableaux, new (${JSON.stringify(dw)})`);
+  await sleep(600);
+  await tv.shot('world-map');
+  check(tv.errors.length === 0, `no page exception through the campaign (${tv.errors.join(' | ') || 'none'})`);
+  E.ws.close();
   for (const c of [A2, B, N]) c.ws.close();
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack}\n--- server log ---\n${log}`);
 } finally {
-  tv?.close(); tv2?.close();
+  await tv?.close(); await tv2?.close();
   if (server) await kill9();
   rmSync(VAR, { recursive: true, force: true });
 }

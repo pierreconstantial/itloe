@@ -1,0 +1,55 @@
+/* Campaign on the TV: the map band (hub / world) and the unlock / reward cutscene. */
+
+.map-band {
+  display: grid; justify-items: center; gap: calc(8 * var(--u));
+  margin: calc(28 * var(--u)) auto 0;
+  width: max-content; max-width: 70vw;
+  padding: calc(14 * var(--u)) calc(36 * var(--u));
+  background: rgba(14, 16, 22, 0.82);
+  border: 3px solid rgba(255, 209, 102, 0.35);
+  border-radius: calc(22 * var(--u));
+  text-align: center;
+}
+.map-title { margin: 0; font-size: calc(54 * var(--u)); font-weight: 900; color: var(--accent, #ffd166); letter-spacing: 0.04em; }
+.map-hint { margin: 0; font-size: calc(24 * var(--u)); color: var(--fg-dim, #aab); }
+.map-items { margin: 0; display: flex; gap: calc(10 * var(--u)); flex-wrap: wrap; justify-content: center; }
+.map-item {
+  font-size: calc(22 * var(--u)); font-weight: 800;
+  padding: calc(4 * var(--u)) calc(14 * var(--u)); border-radius: 999px;
+  background: rgba(255, 209, 102, 0.14); color: #ffe7a8;
+}
+
+.cutscene {
+  position: fixed; left: 50%; top: 50%; z-index: 20;
+  transform: translate(-50%, -50%);
+  display: grid; justify-items: center; gap: calc(14 * var(--u));
+  min-width: calc(760 * var(--u));
+  padding: calc(40 * var(--u)) calc(64 * var(--u));
+  background: radial-gradient(ellipse at 50% 30%, rgba(80, 52, 20, 0.97), rgba(18, 14, 22, 0.97));
+  border: calc(6 * var(--u)) solid #d4a640;
+  border-radius: calc(28 * var(--u));
+  box-shadow: 0 0 0 100vmax rgba(8, 8, 14, 0.6), 0 0 calc(120 * var(--u)) rgba(255, 209, 102, 0.45);
+  text-align: center;
+  animation: cutscene-in 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.cutscene.is-leaving { animation: cutscene-out 0.4s ease-in both; }
+.cutscene-headline {
+  margin: 0 0 calc(8 * var(--u));
+  font-size: calc(72 * var(--u)); font-weight: 900; color: #ffd166;
+  text-shadow: 0 0 calc(30 * var(--u)) rgba(255, 209, 102, 0.7);
+}
+.cutscene-line {
+  margin: 0; font-size: calc(44 * var(--u)); font-weight: 800; color: #fff3d6;
+  opacity: 0; animation: cutscene-line 0.5s ease-out forwards;
+}
+.cutscene-line:nth-of-type(2) { animation-delay: 0.6s; }
+.cutscene-line:nth-of-type(3) { animation-delay: 1s; }
+.cutscene-line:nth-of-type(4) { animation-delay: 1.4s; }
+.cutscene-line:nth-of-type(n + 5) { animation-delay: 1.8s; }
+.cutscene-line.is-item { color: #ffe7a8; }
+.cutscene-gift { display: inline-block; animation: gift-pop 0.9s 1.2s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+
+@keyframes cutscene-in { from { opacity: 0; transform: translate(-50%, -50%) scale(0.6); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes cutscene-out { to { opacity: 0; transform: translate(-50%, -46%) scale(0.95); } }
+@keyframes cutscene-line { from { opacity: 0; transform: translateY(calc(16 * var(--u))); } to { opacity: 1; transform: none; } }
+@keyframes gift-pop { 0% { transform: scale(0) rotate(-30deg); } 70% { transform: scale(1.5) rotate(8deg); } 100% { transform: scale(1) rotate(0); } }

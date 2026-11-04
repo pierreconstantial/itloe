@@ -3,6 +3,8 @@ import { canPlace } from '../shared/board.js';
 import { PIECES } from '../shared/pieces.js';
 
 export const URL_WS = `ws://localhost:${process.env.PORT ?? 3141}/ws`;
+/** Timeout multiplier for a loaded machine: E2E_SLOW=3 triples every wait (default 1). */
+export const SLOW = Math.max(1, Number(process.env.E2E_SLOW ?? 1) || 1);
 export const HTTP = URL_WS.replace(/^ws/, 'http').replace(/\/ws$/, '');
 let failures = 0;
 export function check(cond: boolean, label: string): void {
@@ -38,7 +40,7 @@ export class Client {
   since(i: number): any[] { return this.msgs.slice(i); }
   lastView(): any { return [...this.msgs].reverse().find((m) => m.t === 'view')?.state; }
   async waitFor(pred: (m: any) => boolean, from = 0, ms = 2000): Promise<any> {
-    const end = Date.now() + ms;
+    const end = Date.now() + ms * SLOW;
     while (Date.now() < end) {
       const hit = this.msgs.slice(from).find(pred);
       if (hit) return hit;
