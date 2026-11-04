@@ -3,7 +3,7 @@
   "name": "OpenQuizzDB — general-culture selection",
   "licence": "CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)",
   "attribution": "Questions: OpenQuizzDB (https://www.openquizzdb.org), adapted (selection, format). Each question names its quiz and author in \"source\".",
-  "importedAt": "2026-11-04T12:40:08.546Z"
+  "importedAt": "2026-11-04T12:43:18.522Z"
  },
  "questions": [
   {
@@ -376,7 +376,6 @@
     "Isidore"
    ],
    "answer": 1,
-   "anecdote": "P",
    "category": "culture générale",
    "level": 2,
    "source": "OpenQuizzDB — Alphaquizz #I (Philippe Bresoux), CC BY-SA 4.0, openquizzdb.org"
@@ -421,7 +420,6 @@
     "Instrumental"
    ],
    "answer": 2,
-   "anecdote": "P",
    "category": "culture générale",
    "level": 2,
    "source": "OpenQuizzDB — Alphaquizz #I (Philippe Bresoux), CC BY-SA 4.0, openquizzdb.org"
@@ -1051,7 +1049,6 @@
     "Tourcoing"
    ],
    "answer": 3,
-   "anecdote": "P",
    "category": "culture générale",
    "level": 2,
    "source": "OpenQuizzDB — Alphaquizz #T (Philippe Bresoux), CC BY-SA 4.0, openquizzdb.org"
@@ -1411,7 +1408,6 @@
     "Zaire"
    ],
    "answer": 1,
-   "anecdote": "P",
    "category": "culture générale",
    "level": 2,
    "source": "OpenQuizzDB — Alphaquizz #Z (Philippe Bresoux), CC BY-SA 4.0, openquizzdb.org"
@@ -1426,7 +1422,6 @@
     "Zane"
    ],
    "answer": 2,
-   "anecdote": "P",
    "category": "culture générale",
    "level": 2,
    "source": "OpenQuizzDB — Alphaquizz #Z (Philippe Bresoux), CC BY-SA 4.0, openquizzdb.org"
@@ -1441,7 +1436,6 @@
     "Zwan"
    ],
    "answer": 2,
-   "anecdote": "P",
    "category": "culture générale",
    "level": 2,
    "source": "OpenQuizzDB — Alphaquizz #Z (Philippe Bresoux), CC BY-SA 4.0, openquizzdb.org"

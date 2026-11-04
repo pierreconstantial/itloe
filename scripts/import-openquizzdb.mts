@@ -30,6 +30,8 @@ const TYPED_MAX_WORDS = 3;
 const TYPED_MAX_CHARS = 25;
 /** No difficulty field in the v4 files: every question is "intermediate" until tagged by hand. */
 const DEFAULT_LEVEL = 2;
+/** Shorter source anecdotes are truncated fields, not sentences (test/quiz-real-bank.test.js checks it). */
+const MIN_ANECDOTE_CHARS = 12;
 
 type IndexEntry = { id: number, category: string, title: string, author: string | null, file: string | null };
 type RawQuestion = { id: number, question: string, propositions: string[], réponse: string, anecdote?: string };
@@ -60,7 +62,8 @@ for (const entry of index.quizzes) {
     const answer = choices.findIndex((c) => same(c, answerText));
     if (answer < 0) return skip('answer not among the choices');
     const typed = answerText.split(' ').length <= TYPED_MAX_WORDS && answerText.length <= TYPED_MAX_CHARS;
-    const anecdote = clean(r.anecdote);
+    // a few source anecdotes are truncated upstream (e.g. "P"): only real sentences are kept
+    const anecdote = clean(r.anecdote).length >= MIN_ANECDOTE_CHARS ? clean(r.anecdote) : '';
     questions.push({
       id: `oqdb-${entry.id}-${n + 1}`,
       q, choices, answer,

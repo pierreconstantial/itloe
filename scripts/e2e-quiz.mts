@@ -8,7 +8,7 @@
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR). Usage:
 //   PORT=3193 node scripts/e2e-quiz.mts      (never 3131: that's the live server)
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { check, Client, finish, HTTP, sleep } from './e2e-lib.mts';
@@ -20,6 +20,11 @@ const VAR = mkdtempSync(join(tmpdir(), 'bloko-quiz-'));
 const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 const BANK_FILE = new URL('../data/quiz/placeholder.json', import.meta.url).pathname;
 const QUIZ = 'childhood.quiz';
+// a FIXED bank (a copy of the placeholder file): the real bank (data/quiz/*.json) grows and changes, and
+// this test knows every answer of the bank it plays
+const FIXED_BANK = join(VAR, 'fixed-bank');
+mkdirSync(FIXED_BANK, { recursive: true });
+copyFileSync(BANK_FILE, join(FIXED_BANK, 'placeholder.json'));
 
 type Q = { id: string, q: string, choices?: string[], answer: string | number, accept?: string[], anecdote?: string };
 
@@ -28,7 +33,7 @@ let log = '';
 async function boot(fresh = false, env: Record<string, string> = {}): Promise<void> {
   log = '';
   server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', ...env },
+    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK, ...env },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   server.stdout!.on('data', (d) => { log += d; });
