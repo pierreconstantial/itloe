@@ -96,3 +96,10 @@
 .bag-icon { font-size: 32px; line-height: 1; }
 .bag-text p { margin: 2px 0 0; }
 .bag-count { color: var(--accent); }
+
+/* A toast (e.g. "→ World 1" when the party moves) must stay readable without covering an open bottom
+   sheet's buttons: while a sheet is open, it shows at the top of the screen instead (never dismissed). */
+body:has(.sheet:not([hidden])) #toast {
+  top: calc(16px + env(safe-area-inset-top));
+  bottom: auto;
+}
