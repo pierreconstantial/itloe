@@ -430,10 +430,16 @@ export function createPartyRoom(bg, fg) {
     }
   }
 
+  /** Forget every avatar and position (reconnect): the next view and pos snapshot rebuild the room. */
+  function reset() {
+    avatars.clear();
+    lastPos.clear();
+  }
+
   addEventListener('resize', () => { if (visible) layout(); });
 
   return {
-    setPlayers, onPos, setVisible,
+    setPlayers, onPos, setVisible, reset,
     /** Debug / tests: the drawn state of every avatar. */
     snapshot: () => [...avatars.values()].map((a) => ({ id: a.id, name: a.name, character: a.character, x: a.x, y: a.y, dir: a.dir, walking: isWalking(a, performance.now()) })),
   };

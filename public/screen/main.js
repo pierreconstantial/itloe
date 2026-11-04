@@ -37,6 +37,19 @@ let finishedAt = -Infinity;
 let ws = null;
 /** @type {import('./lobby-view.js').JoinInfo} */
 let joinInfo = fallbackJoinInfo();
+/** Pending podium sounds/confetti: cancelled as soon as the phase leaves 'finished' (rematch, back to the room). */
+const podiumTimers = new Set();
+
+/** setTimeout tracked in podiumTimers. @param {() => void} fn @param {number} ms */
+function podiumLater(fn, ms) {
+  const id = setTimeout(() => { podiumTimers.delete(id); fn(); }, ms);
+  podiumTimers.add(id);
+}
+
+function cancelPodium() {
+  for (const id of podiumTimers) clearTimeout(id);
+  podiumTimers.clear();
+}
 
 /** @type {Record<State['phase'], (s: State, prev: State | null) => HTMLElement>} */
 const VIEWS = {
@@ -69,7 +82,10 @@ function show(next) {
   const events = detectEvents(prev, next);
   const finished = events.find((e) => e.t === 'finished');
   if (finished) finishedAt = performance.now() + (finished.t === 'finished' && finished.reason === 'time' ? TIMES_UP_MS : 0);
-  if (next.phase !== 'finished') finishedAt = -Infinity;
+  if (next.phase !== 'finished') {
+    finishedAt = -Infinity;
+    cancelPodium();
+  }
   if (next.phase === 'lobby') fx.clearAll();
 
   app.replaceChildren(VIEWS[next.phase](next, prev));
@@ -112,7 +128,7 @@ function react(e, s) {
       if (e.reason === 'time') {
         sfx.bell();
         fx.timesUp(TIMES_UP_MS);
-        setTimeout(() => podiumSequence(s), TIMES_UP_MS);
+        podiumLater(() => podiumSequence(s), TIMES_UP_MS);
       } else {
         podiumSequence(s);
       }
@@ -125,9 +141,8 @@ function podiumSequence(s) {
   const schedule = revealSchedule(s);
   const championAt = Math.min(...schedule.filter((r) => r.rank === 1).map((r) => r.atMs));
   const steps = new Set(schedule.filter((r) => r.rank > 1).map((r) => r.atMs));
-  for (const at of steps) setTimeout(() => sfx.reveal(), at);
-  setTimeout(() => {
-    if (current?.phase !== 'finished') return;
+  for (const at of steps) podiumLater(() => sfx.reveal(), at);
+  podiumLater(() => {
     sfx.fanfare();
     fx.confetti(schedule.filter((r) => r.rank === 1).map((r) => fx.colorHex(s.players[r.id].color)).concat('#ffd166', '#ffffff'));
   }, championAt);
@@ -150,6 +165,9 @@ function connect() {
   ws = sock;
   sock.addEventListener('open', () => {
     document.body.classList.remove('offline');
+    // Positions are server memory: after a reconnect its pos snapshot (or, after a server restart,
+    // each phone's spawn point) is the truth — not where this TV last drew the avatars.
+    party.reset();
     sock.send(JSON.stringify({ t: 'hello', role: 'screen' }));
   });
   sock.addEventListener('message', (ev) => {
