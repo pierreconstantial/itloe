@@ -196,8 +196,10 @@ export function spawnPoint(characterId) {}   // → { x, y, dir } deterministic 
                                              //    x = 3 + 3.33·(color−1), y = 7, dir 'down'
 
 // shared/sprites.js (P4 — ownership exception inside shared/)
-// 16×16 indexed-palette pixel grids, per character: 4 directions × 2 walk frames + 1 idle.
+// 16×16 indexed-palette pixel grids, per character: 4 directions × 3 walk frames + 1 idle
+// (user 2026-11-04: "smoother" — was 2 walk frames; clients animate by cycling WALK_FRAMES at 8 fps).
 export const SPRITES = {};  // Record<CharacterId, SpriteSheet>
+export const WALK_FRAMES = [];  // the frame indices of one walk cycle — clients cycle these, never hardcode
 export function drawSprite(ctx, characterId, dir, frame, x, y, scale) {}  // canvas 2d, crisp pixels
 ```
 
@@ -215,6 +217,11 @@ to screens, held in server memory only — it never touches the reducer, persist
 
 Character designs (recognisable, 16×16): Pierre, Élodie (the birthday star — give her something festive),
 Sol (taller teen), Anna (14, K-pop style). Keep the QR/room-code lobby elements — avatars share the scene.
+
+Scene direction (user, 2026-11-04): the party room is **an Altbau apartment in Vienna** — herringbone
+(Fischgrät) parquet floor, high pale stucco walls with mouldings, tall casement double windows (evening
+sky), tall white double door, warm light (chandelier); the birthday bunting and balloons live INSIDE
+this room. Keep it simple, readable, airy — old Zelda interior style.
 
 **M2 assignments (2026-11-04):** P1 → Q4 game-logic (settings in State, timed mode, simple set — contract addendum proposed to the orchestrator BEFORE implementing) + Q5 weight structure. P2 → Q3 (persistence, resume, settings file, best scores) + Q2 server side (QR endpoints `GET /api/join` → `{url, code}` and `GET /api/join-qr.svg`, LAN picker, room code — protocol changes proposed first). P4 → Q1 juice, then Q2 screen-lobby QR once P2's endpoint lands. P3 → Q5 feel (haptics, rules screen, menu), then Q4 settings UI once P1's contract lands. Q6 cleanup last, by the orchestrator. Dependencies flow through the orchestrator.
 
