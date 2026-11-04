@@ -259,7 +259,10 @@ try {
   const cardOn = `!document.querySelector('.join-qr-card').hidden`;
   const noOverlap = (sel: string) => `(() => { const c = document.querySelector('.join-qr-card').getBoundingClientRect();
     return [...document.querySelectorAll('${sel}')].every((e) => { const r = e.getBoundingClientRect(); return r.right <= c.left || r.bottom <= c.top || r.left >= c.right || r.top >= c.bottom; }); })()`;
-  B.send({ t: 'showJoin' }); // a non-host player
+  let qrPhoneMark = B.mark();
+  B.send({ t: 'showJoin', requestId: 1 }); // a non-host player
+  const firstJoinAck = await B.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 1, qrPhoneMark);
+  check(firstJoinAck.accepted, 'the requesting player receives a show acknowledgement');
   check(await tv.until(cardOn, 'join card'), 'a player asks → the TV shows the join card mid-game');
   const code = (await (await fetch(`${HTTP}/api/join`)).json()).code;
   check(await tv.until(`document.querySelector('.join-qr-code')?.textContent === ${JSON.stringify(code)} && !!document.querySelector('.join-qr-img')?.getAttribute('src')`, 'code'),
@@ -269,7 +272,9 @@ try {
   check(j0.secondsLeft > 10 && j0.secondsLeft <= 15 && j0.fraction > 0.7, `…a 15 s window, bar full (${j0.secondsLeft} s, ${Math.round(j0.fraction * 100)} %)`);
   await tv.shot('join-qr-game');
   await sleep(2200);                    // the server allows one request per socket per 2 s
-  A2.send({ t: 'showJoin' });
+  qrPhoneMark = A2.mark(); A2.send({ t: 'showJoin', requestId: 2 });
+  const extendedJoinAck = await A2.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 2, qrPhoneMark);
+  check(extendedJoinAck.accepted, 'a second player gets the new window token');
   check(await tv.until(`window.bloko.joinQr().until > ${j0.until}`, 'extend'), 'a later request extends the window');
   await tv.cmd('Page.reload');
   await tv.front();
@@ -282,14 +287,18 @@ try {
   await tv.until(`!!window.bloko?.state()`, 'reloaded 2', 8000);
   await sleep(800);
   check(!(await tv.js(cardOn)), 'a reload after until does not show it again');
-  // a player closes it early (hideJoin): every TV hides it at once, the boards reflow back
+  // An old window cannot close a newer one; the current owner can close it early.
   await sleep(2200);
-  B.send({ t: 'showJoin' });
+  qrPhoneMark = B.mark(); B.send({ t: 'showJoin', requestId: 3 });
+  const currentJoinAck = await B.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 3, qrPhoneMark);
   check(await tv.until(`${cardOn} && document.body.classList.contains('join-qr-open')`, 'reopen'), 'asked again → open again');
+  qrPhoneMark = A2.mark(); A2.send({ t: 'hideJoin', token: extendedJoinAck.token, requestId: 4 });
+  const staleAck = await A2.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 4, qrPhoneMark);
+  check(!staleAck.accepted && await tv.js(cardOn), 'the previous player cannot close the newer window');
   const tClose = Date.now();
-  A2.send({ t: 'hideJoin' }); // any member may close it (not only the one who asked)
+  B.send({ t: 'hideJoin', token: currentJoinAck.token, requestId: 5 });
   check(await tv.until(`!${cardOn} && !document.body.classList.contains('join-qr-open')`, 'close', 2000),
-    `another player closes it → hidden at once (${Date.now() - tClose} ms), boards back to full width`);
+    `the current requester closes it → hidden at once (${Date.now() - tClose} ms), boards back to full width`);
   await sleep(600);
   check(!(await tv.js(cardOn)), '…and it stays closed');
   i = B.mark(); A2.send({ t: 'place', ...legalMoves(A2.lastView(), idA)[0] }); await B.waitFor((m) => m.t === 'view', i);

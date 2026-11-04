@@ -238,22 +238,29 @@ try {
   const joinQrs = (c: Client, from: number) => c.since(from).filter((m) => m.t === 'joinQr');
   i = screen.mark(); let iE = E2.mark();
   const tShow = Date.now();
-  E2.send({ t: 'showJoin' });
+  E2.send({ t: 'showJoin', requestId: 1 });
   const qr1 = await screen.waitFor((m) => m.t === 'joinQr', i);
+  const showAck1 = await E2.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 1, iE);
+  check(showAck1.accepted && typeof showAck1.token === 'string' && showAck1.until === qr1.until,
+    'requesting phone gets the accepted window token and deadline');
   check(qr1.until >= tShow + 14_000 && qr1.until <= Date.now() + 16_000 && typeof qr1.now === 'number', `showJoin → the screen gets joinQr until now + 15 s (${Math.round((qr1.until - tShow) / 1000)} s)`);
   await sleep(300);
   check(joinQrs(E2, iE).length === 0, 'players never receive joinQr (screens only)');
   i = screen.mark();
-  E2.send({ t: 'showJoin' }); E2.send({ t: 'showJoin' }); // mashed
+  iE = E2.mark();
+  E2.send({ t: 'showJoin', requestId: 2 }); E2.send({ t: 'showJoin', requestId: 3 }); // mashed
   await sleep(400);
   check(joinQrs(screen, i).length === 0, 'rate limit: repeats within 2 s from the same phone are ignored');
+  check(E2.since(iE).filter((m) => m.t === 'joinQrAck' && !m.accepted).length === 2,
+    'rate-limited requests are explicitly rejected to the phone');
   const stranger = new Client('stranger'); await stranger.open();
   stranger.send({ t: 'hello', role: 'player', room });
   i = screen.mark(); stranger.send({ t: 'showJoin' }); await sleep(400);
   check(joinQrs(screen, i).length === 0, 'a socket that never joined is ignored');
   await sleep(1800);
-  i = screen.mark(); E2.send({ t: 'showJoin' });
+  i = screen.mark(); iE = E2.mark(); E2.send({ t: 'showJoin', requestId: 4 });
   const qr2 = await screen.waitFor((m) => m.t === 'joinQr', i);
+  const showAck2 = await E2.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 4, iE);
   check(qr2.until > qr1.until, 'after 2 s a repeat goes through and EXTENDS the window');
   const tv2 = new Client('tv2'); await tv2.open();
   i = tv2.mark(); tv2.send({ t: 'hello', role: 'screen' });
@@ -264,10 +271,16 @@ try {
   // hideJoin: closes the window at once (until ≤ now); its own rate limit; nothing re-sent after a close
   i = screen.mark(); stranger.send({ t: 'hideJoin' }); await sleep(400);
   check(joinQrs(screen, i).length === 0, 'hideJoin from a socket that never joined → ignored');
-  i = screen.mark(); E2.send({ t: 'hideJoin' }); // right after a show: hides have their own limit
+  i = screen.mark(); iE = E2.mark(); E2.send({ t: 'hideJoin', token: showAck1.token, requestId: 5 });
+  const staleHide = await E2.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 5, iE);
+  check(!staleHide.accepted && joinQrs(screen, i).length === 0,
+    'an older window token cannot close a newer QR window');
+  i = screen.mark(); iE = E2.mark(); E2.send({ t: 'hideJoin', token: showAck2.token, requestId: 6 }); // right after a show: hides have their own limit
   const qrClose = await screen.waitFor((m) => m.t === 'joinQr', i);
+  const hideAck = await E2.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 6, iE);
+  check(hideAck.accepted, 'the owner phone receives an accepted hide acknowledgement');
   check(qrClose.until <= qrClose.now, `hideJoin → screens get joinQr with until ≤ now = close (${qrClose.until - qrClose.now} ms)`);
-  i = screen.mark(); E2.send({ t: 'hideJoin' }); await sleep(400);
+  i = screen.mark(); E2.send({ t: 'hideJoin', token: showAck2.token, requestId: 7 }); await sleep(400);
   check(joinQrs(screen, i).length === 0, 'a second hide (nothing open, and rate-limited) → nothing');
   const tv3 = new Client('tv3'); await tv3.open();
   i = tv3.mark(); tv3.send({ t: 'hello', role: 'screen' }); await tv3.waitFor((m) => m.t === 'view', i); await sleep(300);

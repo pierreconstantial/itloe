@@ -168,6 +168,7 @@ const screens = new Set<WebSocket>();
 /** The join QR on the TVs (showJoin / hideJoin): until when, in epoch ms; until ≤ now = closed.
  *  Ephemeral, like presence and pos. */
 let joinQrUntil = 0;
+let joinQrToken: string | null = null;
 const showJoinAt = new WeakMap<WebSocket, number>();
 /** Hides have their OWN limit: a quick "show, then close" must not be swallowed by the show's. */
 const hideJoinAt = new WeakMap<WebSocket, number>();
@@ -327,16 +328,29 @@ function handleMessage(ws: WebSocket, m: any): void {
   }
 
   if (m.t === 'showJoin' || m.t === 'hideJoin') {
-    // any joined player, any phase: the TVs show the join QR for JOIN_QR_MS, or close it now (EPHEMERAL:
-    // never in State or on disk). A show restarts the window; a hide with no window open is ignored.
-    // One show and one hide per socket per JOIN_QR_GAP_MS, so a mashed button can't flood.
+    // A phone gets an acknowledgement, including when rate-limited, so its UI reflects the TV.
+    // A hide needs the token of the current window: closing an older invite cannot close a newer one.
     const id = who.get(ws);
     const now = Date.now();
     const last = m.t === 'showJoin' ? showJoinAt : hideJoinAt;
-    if (!id || !isMember(id) || now - (last.get(ws) ?? 0) < JOIN_QR_GAP_MS) return;
-    if (m.t === 'hideJoin' && joinQrUntil <= now) return;
+    const action = m.t === 'showJoin' ? 'show' : 'hide';
+    const requestId = Number.isSafeInteger(m.requestId) ? m.requestId : null;
+    const allowed = !!id && isMember(id) && now - (last.get(ws) ?? 0) >= JOIN_QR_GAP_MS
+      && (action === 'show' || (joinQrUntil > now && typeof m.token === 'string' && m.token === joinQrToken));
+    if (!allowed) {
+      if (id && isMember(id)) send(ws, { t: 'joinQrAck', action, requestId, accepted: false, now });
+      return;
+    }
     last.set(ws, now);
-    joinQrUntil = m.t === 'showJoin' ? now + JOIN_QR_MS : now; // until ≤ now: the TVs close it
+    if (action === 'show') {
+      joinQrUntil = now + JOIN_QR_MS;
+      joinQrToken = randomUUID();
+    } else {
+      joinQrUntil = now; // until ≤ now: the TVs close it
+      joinQrToken = null;
+    }
+    send(ws, { t: 'joinQrAck', action, requestId, accepted: true, until: joinQrUntil,
+      ...(joinQrToken ? { token: joinQrToken } : {}), now: Date.now() });
     const msg = joinQrMsg();
     for (const c of screens) send(c, msg);
     return;

@@ -154,6 +154,7 @@ const conn = createConnection({
   onMessage: receive,
   onStatus: (up) => {
     $('conn-banner').hidden = up;
+    if (!up) resetJoinRequest();
     if (!up && drag) { endDrag(); render(); } // a drop can't be sent while offline
   },
   onReplaced,
@@ -193,6 +194,8 @@ function receive(raw) {
     render();
   } else if (m.t === 'tick') {
     syncClock(m.now); // keep-alive (fed to the watchdog in connection.js); keeps the countdown honest
+  } else if (m.t === 'joinQrAck') {
+    onJoinQrAck(m);
   } else if (m.t === 'pos') {
     // the one pos a phone receives: our own last position, echoed right after welcome
     const echoed = m.playerId === playerId ? posFromEcho(m) : null;
@@ -270,34 +273,70 @@ const isGameMaster = () => campaign !== null && playerId !== null && campaign.pa
 /** Walking: a member, on the hub / in a world, or in an open block lobby. */
 const canWalk = () => member() !== null && !quizView && (!lastView || lastView.phase === 'lobby');
 
-/** Until when the TVs show the join QR that THIS phone asked for (0 = none). */
+/** The latest accepted window from this phone. The server decides whether a request succeeded. */
 let joinShownUntil = 0;
+/** @type {string | null} */ let joinToken = null;
+let joinRequestId = 0;
+/** @type {number | null} */ let pendingShow = null;
+/** @type {{ id: number, announce: boolean } | null} */ let pendingHide = null;
 /** @type {ReturnType<typeof setTimeout> | undefined} */ let joinTimer;
 
 /** Shows our join-QR window state: the "Hide from the TV" button lives while the window is open. */
 function syncHideJoinButton() {
-  $('btn-hide-join').hidden = joinShownUntil <= Date.now();
+  $('btn-hide-join').hidden = !joinToken || joinShownUntil <= Date.now();
+}
+
+/** A lost connection makes every outstanding request and local TV window uncertain. */
+function resetJoinRequest() {
+  pendingShow = null;
+  pendingHide = null;
+  joinToken = null;
+  joinShownUntil = 0;
+  clearTimeout(joinTimer);
+  syncHideJoinButton();
+}
+
+/** @param {any} m */
+function onJoinQrAck(m) {
+  if (m.action === 'show' && m.requestId === pendingShow) {
+    pendingShow = null;
+    if (!m.accepted || typeof m.token !== 'string' || !Number.isFinite(m.until) || !Number.isFinite(m.now)) {
+      toast('TV QR was not shown. Wait a moment and try again.');
+      return;
+    }
+    joinToken = m.token;
+    joinShownUntil = Date.now() + Math.max(0, m.until - m.now);
+    clearTimeout(joinTimer);
+    joinTimer = setTimeout(syncHideJoinButton, Math.max(0, m.until - m.now) + 50);
+    syncHideJoinButton();
+    if ($('sheet-invite').hidden) hideJoinOnTv();
+    else toast(`QR shown on the TV for ${Math.round(JOIN_QR_MS / 1000)} s`);
+  } else if (m.action === 'hide' && m.requestId === pendingHide?.id) {
+    if (pendingHide?.announce) toast(m.accepted ? 'QR hidden on the TV' : 'That TV QR was already changed or closed.');
+    pendingHide = null;
+  }
 }
 
 /** ☰ → Show the join QR: the TVs show it for JOIN_QR_MS (players only: the server ignores anyone else). */
 function showJoinOnTv() {
   if (!member()) return;
-  send({ t: 'showJoin' });
-  joinShownUntil = Date.now() + JOIN_QR_MS;
-  clearTimeout(joinTimer);
-  joinTimer = setTimeout(syncHideJoinButton, JOIN_QR_MS + 50);
-  syncHideJoinButton();
-  toast(`QR shown on the TV for ${Math.round(JOIN_QR_MS / 1000)} s`);
+  if (!conn.isOnline()) { toast('Connection lost. Try again when connected.'); return; }
+  pendingShow = ++joinRequestId;
+  send({ t: 'showJoin', requestId: pendingShow });
 }
 
-/** Takes OUR join QR off the TVs, if it is still up. @returns {boolean} whether there was one to hide */
-function hideJoinOnTv() {
-  if (joinShownUntil <= Date.now()) return false;
-  send({ t: 'hideJoin' });
+/** Takes OUR current join QR off the TVs. @param {boolean} [announce] */
+function hideJoinOnTv(announce = false) {
+  if (!joinToken || joinShownUntil <= Date.now()) return;
+  const token = joinToken;
+  joinToken = null;
   joinShownUntil = 0;
   clearTimeout(joinTimer);
   syncHideJoinButton();
-  return true;
+  if (conn.isOnline()) {
+    pendingHide = { id: ++joinRequestId, announce };
+    send({ t: 'hideJoin', token, requestId: pendingHide.id });
+  }
 }
 
 /** First back press: close a sheet, or say how to get around (back-guard.js). */
@@ -766,7 +805,7 @@ const menu = initMenu({
   onLeave: leaveGame,
   isGameMaster,
   onShowJoin: showJoinOnTv,
-  onHideJoin: () => { if (hideJoinOnTv()) toast('QR hidden on the TV'); },
+  onHideJoin: () => hideJoinOnTv(true),
   // closing the QR sheet takes the TV card with it, when this phone put it there
   onClosed: (sheet) => { if (sheet === 'invite') hideJoinOnTv(); },
 });
