@@ -170,7 +170,7 @@ const online = (): string[] => party().order.filter((id) => sockets.get(id)?.rea
 /** `state` = the nested block game (null outside one), kept for clients that read it directly;
  *  `campaign` = the whole evening (TV hub/cutscenes, phone host panel). */
 /** The public quiz (never an answer before the reveal: shared/quiz/bank.js projectQuiz). */
-const publicQuiz = (s: QuizState) => projectQuiz(s, (id) => bank.byId.get(id));
+const publicQuiz = (s: QuizState) => projectQuiz(s, (id) => bank.byId.get(id), bank.credits);
 
 /** `state` stays the BLOCK game only (null during a quiz: block clients never see a quiz); `quiz` is the
  *  projected quiz; the campaign travels with its quiz projected the same way (raw verdicts would leak). */
