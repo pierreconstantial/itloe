@@ -19,7 +19,7 @@ export function bounds(cells) {
 
 /**
  * A piece drawn as a grid of cells.
- * @param {PieceId} id @param {number} color 1..4 @param {number} cellPx
+ * @param {PieceId} id @param {number} color 1..N (--p1..--pN) @param {number} cellPx
  * @returns {HTMLElement}
  */
 export function pieceEl(id, color, cellPx) {
@@ -50,7 +50,7 @@ export function toast(text, ms = 2200) {
   toastTimer = setTimeout(() => { el.hidden = true; }, ms);
 }
 
-/** Player colour dot. @param {number} color 1..4 @returns {HTMLElement} */
+/** Player colour dot. @param {number} color 1..N (--p1..--pN) @returns {HTMLElement} */
 export function dotEl(color) {
   const dot = document.createElement('span');
   dot.className = `dot c${color}`;

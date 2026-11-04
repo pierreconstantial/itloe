@@ -2,7 +2,7 @@
 // Usage: start the server, then: PORT=<same port> node scripts/e2e.mts
 // (kill -9 / resume across phases: scripts/e2e-resume.mts, which runs its own server)
 import { PIECES } from '../shared/pieces.js';
-import { CHARACTERS } from '../shared/characters.js';
+import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
 import { check, Client, finish, HTTP, illegalMove, legalMoves, playToDone, sleep, URL_WS } from './e2e-lib.mts';
 
 let s = 12345;
@@ -72,8 +72,26 @@ const M = new Client('M'); await M.open(); M.send({ t: 'hello', role: 'player', 
 i = M.mark(); M.send({ t: 'join', character: 'elodie' });
 const idM = (await M.waitFor((m) => m.t === 'welcome', i)).playerId;
 await A.waitFor((m) => m.t === 'view' && m.state.players[idL] && m.state.players[idM]);
+
+// "full" means every character is held, so exhaust whatever the roster holds beyond the four above
+// instead of assuming four: adding a character must not turn this refusal into a `taken`.
+const heldHere = new Set(['anna', 'sol', 'pierre', 'elodie']);
+const fillers: { c: Client, id: string }[] = [];
+for (const c of Object.keys(CHARACTERS).filter((id) => !heldHere.has(id))) {
+  const F = new Client(`F:${c}`); await F.open(); F.send({ t: 'hello', role: 'player', room });
+  i = F.mark(); F.send({ t: 'join', character: c });
+  const idF = (await F.waitFor((m) => m.t === 'welcome', i)).playerId;
+  await A.waitFor((m) => m.t === 'view' && m.state.players[idF], i);
+  fillers.push({ c: F, id: idF });
+}
 i = T.mark(); T.send({ t: 'join', character: 'pierre' });
-check((await T.waitFor((m) => m.t === 'err', i)).code === 'full', 'all characters picked → err full');
+check((await T.waitFor((m) => m.t === 'err', i)).code === 'full', `every character held (${ROSTER_SIZE}) → err full`);
+// hand the filler characters back, so what follows sees the same lobby as before
+for (const { c: F, id: idF } of fillers) {
+  i = A.mark(); F.send({ t: 'leave' });
+  await A.waitFor((m) => m.t === 'view' && !m.state.players[idF], i);
+  F.ws.close();
+}
 i = A.mark(); M.send({ t: 'leave' });
 await A.waitFor((m) => m.t === 'view' && !m.state.players[idM], i);
 i = T.mark(); T.send({ t: 'join', character: 'elodie' });

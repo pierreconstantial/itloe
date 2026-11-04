@@ -10,8 +10,9 @@ import * as haptics from './haptics.js';
 import { initMenu } from './menu.js';
 import { syncClock, secondsLeft, mmss } from '../commun/clock.js';
 import { createSettingsSheet, summarize } from './settings-ui.js';
-import { CHARACTERS, isCharacterId } from '../../shared/characters.js';
+import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.js';
 import { spawnPoint } from '../../shared/world.js';
+import { PARTY_ROOM } from '../../shared/scene.js';
 import { createPicker, pickStates, anyPickable } from './picker.js';
 import { createJoystick } from './joystick.js';
 import { avatarCanvas, paintAvatar } from './avatar.js';
@@ -226,7 +227,7 @@ function receive(raw) {
     pendingPick = null;
     if (m.code === 'refused') toast("That can't be done right now.");
     else if (m.code === 'full' && lastView && lastView.phase !== 'lobby') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} is back online on another phone.`);
-    else if (m.code === 'full') showPickError('Sorry, the game is full (4 players max).');
+    else if (m.code === 'full') showPickError(`Sorry, the game is full (${ROSTER_SIZE} players max).`);
     else if (m.code === 'taken') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} was just picked. Choose someone else!`);
     else if (m.code === 'bad-room') onBadRoom();
     else if (ERR_TOASTS[m.code]) toast(ERR_TOASTS[m.code]);
@@ -824,6 +825,8 @@ const joystick = createJoystick({
     const character = myCharacter();
     return character && canWalk() ? currentPos(character) : null;
   },
+  // one room so far; when there are several, this is where the current one is chosen
+  scene: () => PARTY_ROOM,
   send: (pos) => {
     const turned = myPos?.dir !== pos.dir;
     myPos = pos;

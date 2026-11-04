@@ -1,9 +1,16 @@
 // Avatar movement, integrated on the phone (client-authoritative, see PROTOCOL.md `pos`).
 // Pure functions over the shared geometry (shared/world.js): the server clamps with the same
 // clampToWorld, and the TV spawns from the same spawnPoint.
+//
+// Contract G: collision is the phone's job. The server keeps only its world clamp, so the walls and
+// props of shared/scene.js are enforced here, on the device that integrates the movement. The TV
+// draws what the phone sends. That means a phone could in principle walk through the sofa — it is
+// a party game on a LAN, and the alternative (the server re-simulating every step) buys nothing.
 import { WALK_SPEED, clampToWorld } from '../../shared/world.js';
+import { resolve } from '../../shared/scene.js';
 
 /** @typedef {import('../../shared/world.js').Dir} Dir */
+/** @typedef {import('../../shared/scene.js').Scene} Scene */
 /** @typedef {{ x: number, y: number, dir: Dir, moving: boolean }} Pos */
 
 const DEADZONE = 0.15; // fraction of the stick radius that does nothing
@@ -37,13 +44,28 @@ export function facing(vx, vy, prev) {
 }
 
 /**
- * One integration step, clamped to the world (screen y grows downwards).
+ * One integration step against the scene (screen y grows downwards). The candidate position goes
+ * through `resolve`, which clamps it to the world AND slides it along whatever it ran into, so a
+ * diagonal push against a wall keeps the component that is free.
+ *
+ * `moving` is what the stick says, not what the position did: pushing into a wall keeps the walk
+ * cycle running on the spot (the Zelda rule — only the position stops). It is also what the TV
+ * needs, since `moving` drives the animation there.
+ *
+ * Called every frame while the stick is held: `resolve` allocates nothing per solid (the scene's
+ * collider list is cached on the Scene) and this adds one candidate object on top of the Pos it
+ * already returned.
+ *
  * @param {Pos} pos @param {number} vx @param {number} vy @param {number} dt seconds
+ * @param {Scene} scene the room being walked
  * @returns {Pos}
  */
-export function step(pos, vx, vy, dt) {
+export function step(pos, vx, vy, dt, scene) {
+  const to = { x: pos.x + vx * WALK_SPEED * dt, y: pos.y + vy * WALK_SPEED * dt };
+  const at = resolve(scene, pos, to);
   return {
-    ...clampToWorld(pos.x + vx * WALK_SPEED * dt, pos.y + vy * WALK_SPEED * dt),
+    x: at.x,
+    y: at.y,
     dir: facing(vx, vy, pos.dir),
     moving: vx !== 0 || vy !== 0,
   };

@@ -4,6 +4,7 @@
 import { stickVector, step, roundPos, samePos } from './movement.js';
 
 /** @typedef {import('./movement.js').Pos} Pos */
+/** @typedef {import('../../shared/scene.js').Scene} Scene */
 
 const SEND_INTERVAL_MS = 1000 / 15;
 const MAX_DT = 0.05; // s; a stalled frame never teleports the avatar
@@ -13,6 +14,7 @@ const RADIUS_PX = 56; // knob travel = full speed
  * @param {{
  *   pad: HTMLElement, base: HTMLElement, knob: HTMLElement,
  *   start: () => Pos | null,       // where the avatar is now; null = walking not allowed
+ *   scene: () => Scene,            // the room being walked: what the feet collide with
  *   send: (pos: Pos) => void,      // wire send (already rounded)
  *   onGrab?: () => void,
  * }} o
@@ -20,6 +22,8 @@ const RADIUS_PX = 56; // knob travel = full speed
 export function createJoystick(o) {
   /** @type {number | null} */ let pointerId = null;
   let originX = 0, originY = 0, vx = 0, vy = 0;
+  /** The room we are walking, captured with the start position so one hold stays self-consistent. */
+  /** @type {Scene | null} */ let scene = null;
   /** @type {Pos | null} */ let pos = null;
   /** @type {Pos | null} */ let lastSent = null;
   let lastSentAt = -Infinity, lastFrame = 0, raf = 0;
@@ -38,10 +42,10 @@ export function createJoystick(o) {
 
   /** @param {number} t */
   function tick(t) {
-    if (pointerId === null || !pos) return;
+    if (pointerId === null || !pos || !scene) return;
     const dt = Math.min(MAX_DT, (t - lastFrame) / 1000);
     lastFrame = t;
-    pos = step(pos, vx, vy, dt);
+    pos = step(pos, vx, vy, dt, scene);
     flush(false);
     raf = requestAnimationFrame(tick);
   }
@@ -70,6 +74,7 @@ export function createJoystick(o) {
     moveKnob(0, 0);
     vx = vy = 0;
     pos = from;
+    scene = o.scene();
     lastSent = null; // the first frame always announces where we are
     lastFrame = performance.now();
     o.onGrab?.();

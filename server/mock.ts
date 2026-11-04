@@ -7,6 +7,7 @@ import { createServer } from 'node:http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { makeStaticHandler } from './static.ts';
 import { initState, newPlayer, placementScore } from '../shared/game.js';
+import { ROSTER_SIZE } from '../shared/characters.js';
 import { PIECES, handAt } from '../shared/pieces.js';
 import { canPlace, place, findClears, applyClears, anyFit, emptyBoard } from '../shared/board.js';
 
@@ -59,7 +60,7 @@ wss.on('connection', (ws) => {
     }
 
     if (m.t === 'join') {
-      if (state.phase !== 'lobby' || state.order.length >= 4) { send(ws, { t: 'err', code: 'full' }); return; }
+      if (state.phase !== 'lobby' || state.order.length >= ROSTER_SIZE) { send(ws, { t: 'err', code: 'full' }); return; }
       const id = `p-${Math.random().toString(36).slice(2, 8)}`;
       const color = state.order.length + 1;
       state.players[id] = newPlayer(id, String(m.name ?? 'Joueur'), color, state.size);

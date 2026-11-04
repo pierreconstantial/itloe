@@ -16,6 +16,8 @@ import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSy
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { check, Client, finish, HTTP, sleep, SLOW } from './e2e-lib.mts';
+import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
+import { FEET, PARTY_ROOM } from '../shared/scene.js';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -216,6 +218,24 @@ async function phone(label: string) {
     }
     await cmd('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }, s);
   };
+  /**
+   * Holds the stick hard in one fixed direction for `ms`, open loop — what you want for walking
+   * into a wall, where a closed loop aiming at an unreachable target would never finish.
+   */
+  const push = async (dx: number, dy: number, ms: number) => {
+    await cmd('Page.bringToFront', {}, s);
+    const pad = await ev(`(() => { const r = document.getElementById('stick-pad').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+    const len = Math.hypot(dx, dy) || 1;
+    const to = { x: pad.x + (dx / len) * 56, y: pad.y + (dy / len) * 56 };
+    await cmd('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: pad.x, y: pad.y }] }, s);
+    await cmd('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [to] }, s);
+    const end = Date.now() + ms;
+    while (Date.now() < end) {
+      await sleep(80);
+      await cmd('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [to] }, s); // keep it held
+    }
+    await cmd('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }, s);
+  };
   /** Real typing into a field (focus by a tap, then the keyboard's text). */
   const type = async (selector: string, value: string) => {
     await tap(selector);
@@ -232,7 +252,7 @@ async function phone(label: string) {
     const { data } = await cmd('Page.captureScreenshot', { format: 'png' }, s);
     writeFileSync(join(SHOTS, `${name}.png`), Buffer.from(data, 'base64'));
   };
-  return { label, ev, snap, waitFor, tap, placeOne, watch, navigate, history, lifecycle, board, card, continueButton, hostButtons, steer, text, visible, shot, type, vibes };
+  return { label, ev, snap, waitFor, tap, placeOne, watch, navigate, history, lifecycle, board, card, continueButton, hostButtons, steer, push, text, visible, shot, type, vibes };
 }
 type Phone = Awaited<ReturnType<typeof phone>>;
 
@@ -270,6 +290,15 @@ try {
   const B = await phone('B');
   await A.navigate(joinUrl());
   expect((await A.waitFor((x) => x.view === 'view-pick'))?.view === 'view-pick', 'fresh phone (no stored id) gets the picker');
+  // One card per character, in roster order, each carrying its own colour slot: derived from
+  // CHARACTERS so adding a character fails here rather than silently shipping an unstyled card.
+  const cards = await A.ev(`[...document.querySelectorAll('#picker-grid .pick-card')].map((c) => c.dataset.id + ':' + [...c.classList].find((k) => /^c\\d+$/.test(k)))`);
+  const wanted = Object.values(CHARACTERS).map((c) => `${c.id}:c${c.color}`);
+  expect(JSON.stringify(cards) === JSON.stringify(wanted),
+    `the picker shows all ${ROSTER_SIZE} characters with their colour slots`, `got ${JSON.stringify(cards)}`);
+  // every colour slot must actually be painted (a missing .pick-card.cN would leave --pc unset)
+  const painted = await A.ev(`[...document.querySelectorAll('#picker-grid .pick-card')].every((c) => getComputedStyle(c).getPropertyValue('--pc').trim() !== '')`);
+  expect(painted === true, 'every picker card resolves its --pc colour token');
   await A.tap('.pick-card[data-id="elodie"]');
   const a0 = await A.waitFor((x) => x.view === 'view-lobby');
   expect(a0?.view === 'view-lobby', 'A joins as Élodie (host)');
@@ -527,6 +556,57 @@ try {
   expect(await E3.visible('stick-pad') && await P3.visible('stick-pad'), 'joystick available on the hub');
   await E3.shot('phone-hub-chooser');
   await P3.shot('phone-hub-host');
+
+  // ---------- Contract G: the phone stops at the furniture and slides along it ----------
+  // Collision is the phone's own job (shared/scene.js, resolved in public/play/movement.js), so the
+  // proof is in the `pos` the phone relays: it must never put its feet inside a solid, and a push
+  // that is blocked on one axis must still travel on the other.
+  {
+    const table = PARTY_ROOM.props.find((p) => p.id === 'table')!.solid!;
+    const EPS = 0.02; // the wire rounds to 2 decimals
+    const inside = (p: { x: number, y: number }) =>
+      p.x + FEET.w / 2 > table.x + EPS && p.x - FEET.w / 2 < table.x + table.w - EPS
+      && p.y > table.y + EPS && p.y - FEET.h < table.y + table.h - EPS;
+    const posSince = (mark: number) => tv.msgs.slice(mark).filter((m) => m.t === 'pos' && m.playerId === idE3);
+
+    // stand on the open floor straight below the table, then push up into it
+    const below = { x: table.x + table.w / 2, y: table.y + table.h + FEET.h + 0.45 };
+    await E3.steer(below, () => { const p = lastPos(); return !!p && Math.hypot(p.x - below.x, p.y - below.y) < 0.35; }, lastPos, 10_000);
+    const start = lastPos();
+    expect(!!start && !inside(start), 'walked onto the open floor below the table', JSON.stringify(start));
+
+    let mark = tv.msgs.length;
+    await E3.push(0, -1, 2000); // straight up, into the table, far longer than it takes to reach it
+    await sleep(300);
+    const blockedTrail = posSince(mark);
+    const stopped = lastPos()!;
+    expect(blockedTrail.length > 0 && blockedTrail.every((p) => !inside(p)),
+      'walking into the table: every relayed position stays out of it',
+      `${blockedTrail.length} positions, first bad ${JSON.stringify(blockedTrail.find(inside) ?? null)}`);
+    expect(stopped.y - FEET.h >= table.y + table.h - EPS,
+      'the avatar stops at the table instead of walking through it', `stopped at ${JSON.stringify(stopped)}`);
+    expect(Math.abs(stopped.x - below.x) < 0.5, 'and it stopped head-on, not shoved sideways', `x=${stopped.x}`);
+
+    // Now push up-LEFT against the same face. While the feet are still under the table the upward
+    // half must stay blocked and only x may travel; past its left corner both are free again. The
+    // push is kept short on purpose: the door rugs start at y 4.7 and walking into one would enter it.
+    mark = tv.msgs.length;
+    const xBefore = stopped.x;
+    await E3.push(-1, -1, 500);
+    await sleep(300);
+    const slideTrail = posSince(mark);
+    const slid = lastPos()!;
+    const underTable = slideTrail.filter((p) => p.x + FEET.w / 2 > table.x && p.x - FEET.w / 2 < table.x + table.w);
+    expect(slideTrail.every((p) => !inside(p)), 'sliding along the table never clips into it',
+      `first bad ${JSON.stringify(slideTrail.find(inside) ?? null)}`);
+    expect(underTable.every((p) => p.y - FEET.h >= table.y + table.h - EPS),
+      'while still under the table the upward half of the push stays blocked',
+      `${underTable.length} positions under it`);
+    expect(slid.x < xBefore - 0.5, 'a diagonal push into the table slides along its face', `${xBefore} → ${slid.x}`);
+    expect(slid.y < stopped.y - 0.05, 'and past its corner the upward half is free again',
+      `y ${stopped.y} → ${slid.y}`);
+    expect(slid.y > 6, 'the check stayed clear of the door rugs', `y=${slid.y}`);
+  }
 
   await P3.tap('#btn-menu');
   await P3.tap('#btn-gm');
