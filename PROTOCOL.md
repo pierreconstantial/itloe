@@ -15,6 +15,12 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 { "t": "hello", "role": "screen" }                          // screen is exempt from the room check
 { "t": "join",  "character": "anna" }                       // after hello; M3: pick a free character from shared/characters.js
                                                             // name + colour derive from the character; err "taken" if already picked
+                                                            // RECLAIM (slice 2b): a character held by an OFFLINE (no live socket),
+                                                            // non-left player → this socket becomes THAT player, any phase: welcome
+                                                            // with the EXISTING playerId (+ own pos), same board/score/hand, host stays
+                                                            // host. Held by an ONLINE player → err "taken". A left player's character
+                                                            // is free (never reclaimable). Needs the room code like any join. Refusal codes
+                                                            // unchanged: game under way or roster exhausted → "full", else "taken".
 { "t": "start" }                                            // host only, phase lobby
 { "t": "again" }                                            // host only, phase finished
 { "t": "place", "piece": 0, "x": 3, "y": 5 }                // piece = index 0..2 in own hand; (x,y) = piece origin
@@ -36,9 +42,16 @@ Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `dead
 
 ```jsonc
 { "t": "welcome", "playerId": "p-abc123" }   // to a player client after join or successful rejoin
-{ "t": "view", "state": { /* full State, see shared/game.js */ }, "now": 1730700000000 }
+{ "t": "view", "state": { /* full State, see shared/game.js */ }, "online": ["p-abc123"], "now": 1730700000000 }
 // broadcast to ALL after every change; "now" = server epoch ms (M2 Q4): clients compute
 // clock skew = now - Date.now() on receive and render timed-mode countdowns from state.deadline - (Date.now() + skew)
+// "online" (slice 2b): playerIds with a live socket, in seat order. EPHEMERAL: never in State or on
+// disk, empty after a server restart until phones reconnect. The view is re-broadcast whenever a
+// player socket attaches or closes. Dead sockets are detected by ping/pong within ~10 s.
+{ "t": "replaced" }
+// slice 2b: another socket attached this player's id (reclaim on another device, or a second tab):
+// newest socket wins. Sent to the OLD socket, which the server then closes (code 4001). The client
+// must NOT auto-reconnect; it shows "Continued on another device" and offers the picker.
 { "t": "err", "code": "full" | "bad-place" | "not-host" | "not-playing" | "unknown-player" | "locked" | "bad-room" | "taken" }
 // "locked": config refused because a game is in progress
 // "bad-room": join refused — wrong or missing room code (phone shows "ask for the code on the TV")
@@ -55,7 +68,7 @@ Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `dead
 
 - M1 sends the **full State to everyone** (this game has no secrets); each client derives its own view.
 - `role: "screen"` gets no `welcome`, only `view`s (including immediately on connect).
-- Rejoin: `hello` with a known `playerId` → server re-attaches the socket, replies `welcome` + `view`. Unknown `playerId` → treated as a fresh client (must `join`).
+- Rejoin: `hello` with a known `playerId` → server re-attaches the socket, replies `welcome` + `view`. Unknown `playerId` → treated as a fresh client (must `join`). A rejoin also bumps any other live socket of that id (`replaced`).
 - The server re-validates every `place`; on refusal it sends `err: "bad-place"` and the client re-renders from the last `view`.
 
 ## Solo best scores (M2 Q3)
