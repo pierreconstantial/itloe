@@ -28,7 +28,8 @@ import { mulberry32 } from './rng.js';
  *   score: number,
  *   streak: number,             // consecutive clearing placements before now
  *   graceLeft: number,          // non-clearing placements still forgiven (reset to rules.grace on a clear)
- *   done: boolean,              // stuck or stopped by the bell, board frozen
+ *   done: boolean,              // stuck, stopped by the bell, or left; board frozen
+ *   left: boolean,              // left mid-game (still shown until the game ends; not in the rematch)
  *   last: null | {
  *     n: number,                // per-player move counter (event id — clients react to n changing)
  *     pieceId: PieceId, x: number, y: number,
@@ -152,7 +153,7 @@ export function newPlayer(id, name, color, size, grace = DEFAULT_SETTINGS.grace)
     board: emptyBoard(size),
     handIndex: 0,
     hand: [null, null, null],
-    score: 0, streak: 0, graceLeft: grace, done: false,
+    score: 0, streak: 0, graceLeft: grace, done: false, left: false,
     last: null,
   };
 }
@@ -319,14 +320,13 @@ export function reduce(state, action) {
 
     case 'leave': {
       const p = state.players[action.id];
-      if (!p) return state;
+      if (!p || p.left) return state;
       const hostId = state.hostId === p.id ? nextHost(state, p.id) : state.hostId;
       if (state.phase !== 'playing') {
         const { [p.id]: _gone, ...players } = state.players;
         return { ...state, hostId, order: state.order.filter((id) => id !== p.id), players };
       }
-      if (p.done && hostId === state.hostId) return state;
-      const players = p.done ? state.players : { ...state.players, [p.id]: { ...p, done: true } };
+      const players = { ...state.players, [p.id]: { ...p, done: true, left: true } };
       const allDone = state.order.every((id) => players[id].done);
       return allDone
         ? { ...state, hostId, players, phase: 'finished', endReason: 'stuck' }
@@ -346,8 +346,9 @@ export function reduce(state, action) {
 }
 
 /**
- * Locks rules ← settings, same players (ids/names/colors), fresh boards/scores, hand 0 dealt,
- * deadline set in timed mode. Timed mode without a finite `now` → `state` unchanged.
+ * Locks rules ← settings, same players (ids/names/colors) minus those who left, fresh
+ * boards/scores, hand 0 dealt, deadline set in timed mode. `state` unchanged if timed mode
+ * lacks a finite `now`, or if no player remains.
  * @param {State} state
  * @param {number} seed
  * @param {number | undefined} now
@@ -357,15 +358,17 @@ function beginPlay(state, seed, now) {
   const rules = { ...state.settings };
   const timed = rules.mode === 'timed';
   if (timed && !(typeof now === 'number' && Number.isFinite(now))) return state;
+  const order = state.order.filter((id) => !state.players[id].left);
+  if (order.length < 1) return state;
   const hand0 = handAt(seed, 0, rules.pieceSet);
   /** @type {Record<string, Player>} */
   const players = {};
-  for (const id of state.order) {
+  for (const id of order) {
     const old = state.players[id];
     players[id] = { ...newPlayer(id, old.name, old.color, rules.size, rules.grace), hand: hand0.slice() };
   }
   return {
-    ...state, phase: 'playing', seed, players, rules, size: rules.size,
+    ...state, phase: 'playing', seed, order, players, rules, size: rules.size,
     deadline: timed ? /** @type {number} */ (now) + rules.timedSeconds * 1000 : null,
     endReason: null,
   };
@@ -373,8 +376,8 @@ function beginPlay(state, seed, now) {
 
 /**
  * Who inherits the host role when `leaverId` leaves: the next player after them in join order
- * (wrapping), preferring one who is not done — mid-game, players who left are `done` too, and
- * this keeps the role away from them whenever someone is still playing. null if nobody is left.
+ * (wrapping) who has not left — a stuck player still holds a phone and can press «Replay».
+ * null if nobody is left.
  * @param {State} state
  * @param {string} leaverId
  * @returns {string | null}
@@ -382,7 +385,7 @@ function beginPlay(state, seed, now) {
 function nextHost(state, leaverId) {
   const i = state.order.indexOf(leaverId);
   const others = [...state.order.slice(i + 1), ...state.order.slice(0, i)];
-  return others.find((id) => !state.players[id].done) ?? others[0] ?? null;
+  return others.find((id) => !state.players[id].left) ?? null;
 }
 
 /**

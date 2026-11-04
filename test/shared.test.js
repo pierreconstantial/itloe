@@ -689,13 +689,14 @@ test('leave while playing: host skips players already out, and the last leave fi
   let s = reduce(lobby3(), { t: 'start', id: 'a' });
   s = reduce(s, { t: 'leave', id: 'b' }); // b out first
   assert.equal(s.hostId, 'a');
-  s = reduce(s, { t: 'leave', id: 'a' }); // host leaves: b is done, so c inherits
+  s = reduce(s, { t: 'leave', id: 'a' }); // host leaves: b has left, so c inherits
   assert.equal(s.hostId, 'c');
   assert.equal(s.phase, 'playing');
   s = reduce(s, { t: 'leave', id: 'c' }); // everyone done → finished
   assert.equal(s.phase, 'finished');
   assert.equal(s.endReason, 'stuck');
-  assert.equal(s.hostId, 'a'); // all done: plain next in order
+  assert.equal(s.hostId, null); // everyone left: no host, and «Replay» is impossible
+  assert.equal(reduce(s, { t: 'again', id: 'a' }), s);
 });
 
 test('leave while playing by a stuck host still hands the host role over', () => {
@@ -704,7 +705,8 @@ test('leave while playing by a stuck host still hands the host role over', () =>
   const left = reduce(s, { t: 'leave', id: 'a' });
   assert.notEqual(left, s);
   assert.equal(left.hostId, 'b');
-  assert.equal(left.players.a, s.players.a); // already done: player object untouched
+  assert.equal(left.players.a.left, true); // stuck, then left: now marked as departed
+  assert.equal(left.players.a.board, s.players.a.board);
 });
 
 test('leave in finished: removed from the podium, host passes, again needs a player', () => {
@@ -721,4 +723,91 @@ test('leave in finished: removed from the podium, host passes, again needs a pla
   s = reduce(reduce(s, { t: 'leave', id: 'b' }), { t: 'leave', id: 'c' });
   assert.equal(s.hostId, null);
   assert.deepEqual(s.order, []);
+});
+
+// ---------- left flag: departed players are not part of the rematch ----------
+
+test('newPlayer and joins start with left=false; lobby leave removes (no left flag needed)', () => {
+  const s = lobby3();
+  for (const id of s.order) assert.equal(s.players[id].left, false);
+  const started = reduce(s, { t: 'start', id: 'a' });
+  for (const id of started.order) assert.equal(started.players[id].left, false);
+});
+
+test('mid-game leave marks left + done, keeps board/score/last; double leave is same-ref', () => {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  s = reduce(s, { t: 'place', id: 'b', piece: 0, x: 0, y: 0 });
+  const before = s.players.b;
+  const left = reduce(s, { t: 'leave', id: 'b' });
+  const b = left.players.b;
+  assert.deepEqual([b.left, b.done], [true, true]);
+  assert.equal(b.board, before.board);
+  assert.equal(b.score, before.score);
+  assert.equal(b.last, before.last);
+  assert.equal(reduce(left, { t: 'leave', id: 'b' }), left);
+});
+
+test('again after a mid-game leave: rematch has only the remaining players, colours kept, finishable', () => {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  s = reduce(s, { t: 'leave', id: 'b' }); // P4 repro: b leaves mid-game…
+  /** @type {State} */
+  const fin = { ...s, phase: 'finished', players: { ...s.players, a: { ...s.players.a, done: true }, c: { ...s.players.c, done: true } } };
+  assert.deepEqual(fin.order, ['a', 'b', 'c']); // …still on the podium…
+  const again = reduce(fin, { t: 'again', id: 'a' });
+  assert.deepEqual(again.order, ['a', 'c']); // …but not in the rematch
+  assert.equal(again.players.b, undefined); // their id no longer re-attaches (server only welcomes known ids)
+  assert.equal(again.players.a.color, 1);
+  assert.equal(again.players.c.color, 3); // colours kept, not reassigned
+  for (const id of again.order) assert.deepEqual([again.players[id].left, again.players[id].done], [false, false]);
+  assert.equal(reduce(again, { t: 'place', id: 'b', piece: 0, x: 0, y: 0 }), again);
+  assert.equal(reduce(again, { t: 'leave', id: 'b' }), again);
+
+  // the rematch can finish: get a and c stuck → finished (with b it never could, b had no phone)
+  /** @type {State} */
+  const nearEnd = {
+    ...again,
+    players: Object.fromEntries(again.order.map((id) => [id,
+      { ...again.players[id], board: isolatedHolesBoard(), hand: /** @type {(string|null)[]} */ (['dot', 'h2', null]) }])),
+  };
+  let e = reduce(nearEnd, { t: 'place', id: 'a', piece: 0, x: 0, y: 0 });
+  assert.equal(e.phase, 'playing');
+  e = reduce(e, { t: 'place', id: 'c', piece: 0, x: 1, y: 1 });
+  assert.equal(e.phase, 'finished');
+  assert.equal(e.endReason, 'stuck');
+});
+
+test('again with every remaining player gone is invalid; a lone survivor can replay solo', () => {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  s = reduce(reduce(s, { t: 'leave', id: 'b' }), { t: 'leave', id: 'c' });
+  /** @type {State} */
+  const fin = { ...s, phase: 'finished', players: { ...s.players, a: { ...s.players.a, done: true } } };
+  const solo = reduce(fin, { t: 'again', id: 'a' });
+  assert.deepEqual(solo.order, ['a']);
+  assert.equal(solo.phase, 'playing');
+  // a lone left-flagged roster with a stale host (defensive): beginPlay refuses
+  /** @type {State} */
+  const ghost = { ...fin, players: { ...fin.players, a: { ...fin.players.a, left: true } } };
+  assert.equal(reduce(ghost, { t: 'again', id: 'a' }), ghost);
+});
+
+test('host handoff skips a left player onto a merely-stuck one', () => {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  s = reduce(s, { t: 'leave', id: 'b' }); // b gone
+  s = { ...s, players: { ...s.players, c: { ...s.players.c, done: true } } }; // c stuck, still connected
+  const left = reduce(s, { t: 'leave', id: 'a' });
+  assert.equal(left.hostId, 'c'); // not b
+  assert.equal(left.phase, 'finished'); // a was the last one playing
+  const again = reduce(left, { t: 'again', id: 'c' }); // the stuck player can start the rematch
+  assert.deepEqual(again.order, ['c']);
+});
+
+test('leave on the podium by a host skips players who left mid-game', () => {
+  let s = reduce(lobby3(), { t: 'start', id: 'a' });
+  s = reduce(s, { t: 'leave', id: 'b' });
+  /** @type {State} */
+  const fin = { ...s, phase: 'finished' };
+  const after = reduce(fin, { t: 'leave', id: 'a' });
+  assert.deepEqual(after.order, ['b', 'c']); // a removed; b stays shown until the rematch
+  assert.equal(after.hostId, 'c');
+  assert.deepEqual(reduce(after, { t: 'again', id: 'c' }).order, ['c']);
 });
