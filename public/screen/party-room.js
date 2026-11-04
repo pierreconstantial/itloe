@@ -1,11 +1,21 @@
-// M3 party room: the lobby scene with every joined guest's avatar walking on the TV.
+// M3 party room, M4 (Contract G) the hub's scene: the lobby room with every joined guest's avatar
+// walking in it, among props they collide with and sort against.
 // Positions are EPHEMERAL (`pos` messages, see PROTOCOL.md); the joined players come from the
 // last `view`. A pos (x, y) is the avatar's feet, in world units (WORLD = 16 × 9).
-// Two fixed canvases: #party-bg (scene, under the lobby UI) and #party-fg (avatars, above it).
+//
+// This file is ONE room: its backdrop painting, its scene's prop art, and the plumbing of the
+// avatars into the engine. The engine itself is generic — geometry in shared/scene.js, draw order
+// and the loop in ./scene-render.js. Three passes per frame:
+//   #party-bg  painted once on resize: wall, floor, window, door, chandelier, bunting, balloons
+//   #party-fg  per frame: the campaign doorways (flat on the back wall), then the engine's draw
+//              list — 'back' props, then 'sorted' props and avatars interleaved by baseline Y,
+//              then 'front' props.
 
 import { drawSprite, SPRITE_SIZE, WALK_FRAMES, WALK_FPS } from '../../shared/sprites.js';
-import { WORLD, spawnPoint } from '../../shared/world.js';
+import { WORLD } from '../../shared/world.js';
+import { PARTY_ROOM, spawnAt } from '../../shared/scene.js';
 import { CHARACTERS } from '../../shared/characters.js';
+import { makeView, renderScene, drawOrder, createLoop, lerp, py as snapY } from './scene-render.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('../../shared/world.js').Dir} Dir */
@@ -13,7 +23,8 @@ import { CHARACTERS } from '../../shared/characters.js';
 /**
  * @typedef {{
  *   id: string, name: string, color: number, character: string,
- *   x: number, y: number,      // drawn position (eased towards the target)
+ *   x: number, y: number,      // simulated position (eased towards the target, fixed timestep)
+ *   px: number, py: number,    // the same, one update earlier — drawing interpolates between them
  *   tx: number, ty: number,    // last reported position
  *   dir: Dir, moving: boolean, lastPosAt: number,
  * }} Avatar
@@ -24,6 +35,7 @@ const OFFLINE_ALPHA = 0.4;  // a dropped player's avatar fades (presence.js deci
 const STALE_MS = 400;       // no update for this long → idle frame
 const EASE_PER_S = 14;      // interpolation speed (higher = snappier)
 const ARRIVED = 0.04;       // units: closer than this counts as standing still
+const UPDATE_HZ = 60;       // fixed simulation rate; drawing interpolates between two updates
 const DIRS = new Set(['up', 'down', 'left', 'right']);
 const FALLBACK_CHARACTERS = Object.keys(CHARACTERS); // by colour, for players without a character
 
@@ -54,6 +66,80 @@ const SKY = ['#1f2a55', '#2f3570', '#53407e', '#8a4f84', '#c86a6e', '#f09a5c']; 
 const FLAGS = ['#e4572e', '#3b8ea5', '#f3a712', '#9b5de5', '#ff5fa2'];
 const PLANK_W = 3; // art pixels across a plank
 const PLANK_N = 4; // plank length in plank widths
+
+// ---- prop art ----------------------------------------------------------------------
+// Pixel grids, same letter-per-pixel convention as shared/sprites.js: '.' is transparent, every
+// other letter indexes the prop's palette. The grid is painted bottom-centred on the prop's box,
+// its last row on the anchorY — so a grid grows upwards from the floor contact, like a sprite.
+
+/** Velvet two-seater (o outline · c/C/l fabric · w/d wooden feet). */
+const SOFA_PAL = { o: '#2b3a33', c: '#4f7a68', C: '#3c6153', l: '#669a84', w: '#6b4a2c', d: '#4a3220' };
+const SOFA = [
+  '..ooooooooooooooooooo..',
+  '.olllllllllllllllllllo.',
+  '.occccccccccccccccccco.',
+  '.occccccccccccccccccco.',
+  '.oCcccccccccccccccccCo.',
+  '.oCCCCCCCCCCCCCCCCCCCo.',
+  'ooooooooooooooooooooooo',
+  'olllocccccccoccccccclo.',
+  'olllocccccccoccccccclo.',
+  'olllocccccccoccccccclo.',
+  'olllocCCCCCCoCCCCCCclo.',
+  'ooooooooooooooooooooooo',
+  'oCCCCCCCCCCCCCCCCCCCCCo',
+  '.ooooooooooooooooooooo.',
+  '.ww...............ww...',
+  '.dd...............dd...',
+];
+
+/** The birthday table: cloth, cake, two candles (o outline · w/W cloth · k icing · z sponge · y candle · A flame). */
+const TABLE_PAL = { o: '#6b4a2c', w: '#f6f0e3', W: '#d8ccb4', k: '#ff7eb9', z: '#f3c88a', y: '#fff3d6', A: '#ffcf5a' };
+const TABLE = [
+  '............A.A............',
+  '............y.y............',
+  '..........ookkkoo..........',
+  '..........okkkkko..........',
+  '..........ozzzzzo..........',
+  '..........ooooooo..........',
+  '...ooooooooooooooooooooo...',
+  '..owwwwwwwwwwwwwwwwwwwwwo..',
+  '..oWWWWWWWWWWWWWWWWWWWWWo..',
+  '..ooooooooooooooooooooooo..',
+  '...owwwwwwwwwwwwwwwwwwwo...',
+  '...owWwWwWwWwWwWwWwWwWwo...',
+  '...owWwWwWwWwWwWwWwWwWwo...',
+  '....oWWWWWWWWWWWWWWWWWo....',
+  '....ooooooooooooooooooo....',
+];
+
+/** Tall potted plant (o outline · G/g leaves · s stem · t/T terracotta). */
+const PLANT_PAL = { o: '#1e2b22', G: '#3f8a52', g: '#5fae6d', s: '#4a6b3a', t: '#b5633a', T: '#8e4a2a' };
+const PLANT = [
+  '.....ooo.....',
+  '....oGGGo....',
+  '..ooGgGgGoo..',
+  '.oGGGgGgGGGo.',
+  'oGGgGGGGGggGo',
+  'oGgGGGgGGGgGo',
+  '.oGGGGsGGGGo.',
+  '..oGGGsGGGo..',
+  '...oGGsGGo...',
+  '....oGsGo....',
+  '.....oso.....',
+  '.....oso.....',
+  '..ooooooooo..',
+  '..ottttttto..',
+  '..oTTTTTTTo..',
+  '..ottttttto..',
+  '...ottttto...',
+  '...otTTTto...',
+  '...ottttto...',
+  '....ooooo....',
+];
+
+/** Every prop grid, for the test that keeps them rectangular and inside their palette. */
+export const PROP_PIXELS = { sofa: { grid: SOFA, pal: SOFA_PAL }, table: { grid: TABLE, pal: TABLE_PAL }, plant: { grid: PLANT, pal: PLANT_PAL } };
 
 /** @param {number} v @param {number} p */
 const snap = (v, p) => Math.round(v / p) * p;
@@ -93,10 +179,12 @@ export function createPartyRoom(bg, fg) {
   const avatars = new Map();
   /** Last pos per player, kept even before the player shows up in a view. @type {Map<string, PosMsg & { at: number }>} */
   const lastPos = new Map();
-  let geo = { unit: 1, ox: 0, oy: 0, scale: 1, w: 0, h: 0, dpr: 1 };
-  let raf = 0;
-  let lastFrame = 0;
+  let geo = makeView(1, 1, 1, WORLD, AVATAR_UNITS, SPRITE_SIZE);
   let visible = false;
+  let frameNow = 0;                    // the timestamp of the frame being drawn (walk cycle, door sparkles)
+  let frameAlpha = 0;                  // …and how far it sits between the last two updates
+  /** Reused between frames so a steady room allocates nothing. @type {import('./scene-render.js').Item[]} */
+  const drawList = [];
 
   // ---- geometry ----
 
@@ -107,13 +195,7 @@ export function createPartyRoom(bg, fg) {
       c.width = Math.round(w * dpr);
       c.height = Math.round(h * dpr);
     }
-    const unit = Math.min(w / WORLD.w, h / WORLD.h);
-    geo = {
-      unit, dpr, w, h,
-      ox: (w - unit * WORLD.w) / 2,
-      oy: (h - unit * WORLD.h) / 2,
-      scale: Math.max(1, Math.round((AVATAR_UNITS * unit) / SPRITE_SIZE)),
-    };
+    geo = makeView(w, h, dpr, WORLD, AVATAR_UNITS, SPRITE_SIZE);
     paintScene();
   }
 
@@ -301,6 +383,39 @@ export function createPartyRoom(bg, fg) {
     g.fillRect(Math.round(cx), Math.round(cy + 8 * px), px, px * 18);
   }
 
+  // ---- props (the scene's furniture, PARTY_ROOM in shared/scene.js) ----
+  // Each prop is a pixel grid on the same art-pixel grid as the sprites, painted bottom-centred on
+  // its box: the last row sits ON the prop's anchorY, which is both its floor contact and what it
+  // sorts by. Adding furniture = one grid + one line in PROP_ART; the engine does the rest.
+
+  /**
+   * @param {CanvasRenderingContext2D} g @param {string[]} grid @param {Record<string, string>} pal
+   * @param {number} cx centre, CSS px @param {number} bottom baseline, CSS px @param {number} p art pixel
+   */
+  function paintGrid(g, grid, pal, cx, bottom, p) {
+    const x0 = snap(cx - (grid[0].length * p) / 2, p);
+    const y0 = bottom - grid.length * p;
+    for (let ry = 0; ry < grid.length; ry++) {
+      const row = grid[ry];
+      for (let rx = 0; rx < row.length; rx++) {
+        const color = pal[row[rx]];
+        if (color) rect(g, x0 + rx * p, y0 + ry * p, p, p, color);
+      }
+    }
+  }
+
+  /** One prop's art from a pixel grid. @param {string[]} grid @param {Record<string, string>} pal */
+  const pixelProp = (grid, pal) =>
+    /** @type {import('./scene-render.js').DrawProp} */ ((g, prop, v) =>
+      paintGrid(g, grid, pal, geo.ox + (prop.box.x + prop.box.w / 2) * v.unit, snapY(v, prop.anchorY), v.scale));
+
+  /** prop.kind → art. The only place this room's furniture is named. @type {import('./scene-render.js').PropArt} */
+  const PROP_ART = {
+    sofa: pixelProp(SOFA, SOFA_PAL),
+    table: pixelProp(TABLE, TABLE_PAL),
+    plant: pixelProp(PLANT, PLANT_PAL),
+  };
+
   // ---- players & positions ----
 
   /** @type {Set<string>} */
@@ -333,12 +448,13 @@ export function createPartyRoom(bg, fg) {
         : FALLBACK_CHARACTERS[(p.color - 1 + FALLBACK_CHARACTERS.length) % FALLBACK_CHARACTERS.length];
       let a = avatars.get(id);
       if (!a) {
-        const spawn = spawnPoint(/** @type {import("../../shared/characters.js").CharacterId | null} */ (p.character ?? null));
+        // a fresh avatar starts on walkable floor: the shared spawn point, nudged out of a prop
+        const spawn = spawnAt(PARTY_ROOM, /** @type {import("../../shared/characters.js").CharacterId | null} */ (p.character ?? null));
         const known = lastPos.get(id);
         const start = known ?? { x: spawn.x, y: spawn.y, dir: spawn.dir, moving: false, at: 0 };
         a = {
           id, name: p.name, color: p.color, character,
-          x: start.x, y: start.y, tx: start.x, ty: start.y,
+          x: start.x, y: start.y, px: start.x, py: start.y, tx: start.x, ty: start.y,
           dir: start.dir, moving: start.moving, lastPosAt: start.at,
         };
         avatars.set(id, a);
@@ -364,27 +480,37 @@ export function createPartyRoom(bg, fg) {
     a.tx = p.x; a.ty = p.y; a.dir = p.dir; a.moving = p.moving; a.lastPosAt = now;
   }
 
-  // ---- animation ----
+  // ---- animation: fixed-step simulation, interpolated drawing ----
 
-  /** @param {number} now */
-  function frame(now) {
-    raf = visible ? requestAnimationFrame(frame) : 0;
-    const dt = Math.min(0.5, (now - (lastFrame || now)) / 1000); // generous cap: a slow frame still catches up
-    lastFrame = now;
+  /** One simulation step: every avatar eases towards its last reported position. @param {number} dt */
+  function update(dt) {
+    const k = 1 - Math.exp(-EASE_PER_S * dt);
+    for (const a of avatars.values()) {
+      a.px = a.x; a.py = a.y;
+      a.x += (a.tx - a.x) * k;
+      a.y += (a.ty - a.y) * k;
+    }
+  }
+
+  /** @param {number} alpha how far this frame sits between the last two updates @param {number} now */
+  function draw(alpha, now) {
+    frameNow = now;
+    frameAlpha = alpha;
     const g = fgCtx;
     g.setTransform(geo.dpr, 0, 0, geo.dpr, 0, 0);
     g.clearRect(0, 0, geo.w, geo.h);
     g.imageSmoothingEnabled = false;
-    const k = 1 - Math.exp(-EASE_PER_S * dt);
-    const walkFrame = WALK_FRAMES[Math.floor((now / 1000) * WALK_FPS) % WALK_FRAMES.length];
-    const list = [...avatars.values()];
-    for (const a of list) {
-      a.x += (a.tx - a.x) * k;
-      a.y += (a.ty - a.y) * k;
-    }
-    for (const d of doors) drawDoorway(g, d, now);
-    list.sort((p, q) => p.y - q.y);
-    for (const a of list) drawAvatar(g, a, isWalking(a, now) ? walkFrame : 0);
+    for (const d of doors) drawDoorway(g, d, now); // the doorways lie flat on the back wall, under everything
+    renderScene(g, PARTY_ROOM, avatars.values(), PROP_ART, drawActor, geo, drawList);
+  }
+
+  const loop = createLoop(update, draw, UPDATE_HZ);
+
+  /** The engine's actor hook: an avatar, at the interpolated position, on its walk frame. */
+  /** @param {CanvasRenderingContext2D} g @param {any} a @param {import('./scene-render.js').View} v */
+  function drawActor(g, a, v) {
+    const walk = WALK_FRAMES[Math.floor((frameNow / 1000) * WALK_FPS) % WALK_FRAMES.length];
+    drawAvatar(g, /** @type {Avatar} */ (a), isWalking(a, frameNow) ? walk : 0, v);
   }
 
   /** @param {Avatar} a @param {number} now */
@@ -394,13 +520,13 @@ export function createPartyRoom(bg, fg) {
     return fresh && (a.moving || travelling); // updates stopped → idle, however far the easing got
   }
 
-  /** @param {CanvasRenderingContext2D} g @param {Avatar} a @param {number} spriteFrame */
-  function drawAvatar(g, a, spriteFrame) {
-    const { scale, unit } = geo;
+  /** @param {CanvasRenderingContext2D} g @param {Avatar} a @param {number} spriteFrame @param {import('./scene-render.js').View} v */
+  function drawAvatar(g, a, spriteFrame, v) {
+    const { scale, unit } = v;
     const size = SPRITE_SIZE * scale;
     // keep the whole sprite on screen even at the world's edges
-    const x = Math.min(WORLD.w - 0.5, Math.max(0.5, a.x));
-    const y = Math.min(WORLD.h, Math.max(AVATAR_UNITS, a.y));
+    const x = Math.min(WORLD.w - 0.5, Math.max(0.5, lerp(a.px, a.x, frameAlpha)));
+    const y = Math.min(WORLD.h, Math.max(AVATAR_UNITS, lerp(a.py, a.y, frameAlpha)));
     const { sx, sy } = toScreen(x, y);
     const left = Math.round(sx - size / 2);
     const top = Math.round(sy - size);
@@ -558,11 +684,9 @@ export function createPartyRoom(bg, fg) {
     fg.hidden = !on;
     if (on) {
       layout();
-      lastFrame = 0;
-      raf = requestAnimationFrame(frame);
-    } else if (raf) {
-      cancelAnimationFrame(raf);
-      raf = 0;
+      loop.start();
+    } else {
+      loop.stop();
     }
   }
 
@@ -580,5 +704,18 @@ export function createPartyRoom(bg, fg) {
     doors: () => doors.map((d) => ({ id: d.id, state: d.state, title: d.title })),
     /** Debug / tests: the drawn state of every avatar. */
     snapshot: () => [...avatars.values()].map((a) => ({ id: a.id, name: a.name, character: a.character, x: a.x, y: a.y, dir: a.dir, walking: isWalking(a, performance.now()), offline: offline.has(a.id) })),
+    /**
+     * Debug / tests: the ids painted this frame, back to front — prop ids (sofa, table, plant) and
+     * player ids interleaved. An avatar listed BEFORE a prop is drawn behind it.
+     * @returns {string[]}
+     */
+    drawOrder: () => drawOrder(PARTY_ROOM, avatars.values()),
+    /** Debug / tests: the room's geometry (colliders and anchors), to assert against. */
+    scene: () => ({
+      id: PARTY_ROOM.id,
+      floor: PARTY_ROOM.floor,
+      solids: PARTY_ROOM.solids,
+      props: PARTY_ROOM.props.map((p) => ({ id: p.id, anchorY: p.anchorY, layer: p.layer, solid: p.solid })),
+    }),
   };
 }

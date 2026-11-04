@@ -521,6 +521,10 @@ fetchJoinInfo().then((info) => {
   /** Feed a fake `pos` (self-tests before the server relays them). @param {object} m */
   pos: (m) => party.onPos(m),
   avatars: () => party.snapshot(),
+  /** Contract G: the party room's paint order, back to front (prop ids and player ids interleaved). */
+  drawOrder: () => party.drawOrder(),
+  /** Contract G: the room's colliders and prop anchors. */
+  scene: () => party.scene(),
   offline: () => [...presence.offline()],
   campaign: () => campaign,
   doors: () => party.doors(),
