@@ -7,7 +7,10 @@
     "mock": "node server/mock.ts",
     "check": "tsc",
     "test": "node --test",
-    "sim": "node scripts/simulate.mts"
+    "sim": "node scripts/simulate.mts",
+    "e2e": "node scripts/e2e.mts",
+    "e2e:resume": "node scripts/e2e-resume.mts",
+    "e2e:presence": "node scripts/e2e-presence.mts"
   },
   "dependencies": {
     "qrcode": "^1.5.4",
