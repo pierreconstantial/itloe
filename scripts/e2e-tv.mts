@@ -250,6 +250,52 @@ try {
   await sleep(500);
   check((await spawnOk()) === exp, 'lobby restart: avatars back, at their spawn points');
 
+  // ---------- Contract G: depth — the avatar goes behind or in front of the furniture ----------
+  // `drawOrder()` is the ids painted this frame, back to front; an avatar listed BEFORE a prop is
+  // drawn behind it. Everything is derived from `scene()` so nudging the furniture cannot quietly
+  // turn this into a test of nothing.
+  {
+    const scene = JSON.parse(await tv.js('JSON.stringify(window.bloko.scene())'));
+    const propOf = (id: string) => scene.props.find((p: any) => p.id === id);
+    const table = propOf('table');
+    check(!!table?.solid && typeof table.anchorY === 'number' && scene.id === 'party-room'
+      && ['sofa', 'table', 'plant'].every((id) => !!propOf(id)),
+      `TV exposes the room: floor, colliders and the three props with their anchors (${JSON.stringify(scene.props?.map((p: any) => [p.id, p.anchorY, p.layer]))})`);
+
+    const tx = table.solid.x + table.solid.w / 2;      // straight at the table
+    const behindY = table.anchorY - 1;                 // feet above its floor contact → behind it
+    const frontY = table.anchorY + 0.6;                // feet below it → in front of it
+    // the door rugs stop at y 5.9 and a `pos` inside one would enter that node, ending the lobby
+    check(behindY > 6, `the depth check stays clear of the door rugs (behindY=${behindY})`);
+
+    const order = async (): Promise<string[]> => JSON.parse(await tv!.js('JSON.stringify(window.bloko.drawOrder())'));
+    /** Put A's avatar at (tx, y) and wait for the TV's eased avatar to actually arrive there. */
+    const stand = async (y: number) => {
+      A2.send({ t: 'pos', x: tx, y, dir: 'down', moving: false });
+      return tv!.until(
+        `(() => { const a = window.bloko.avatars().find((a) => a.id === '${idA}'); return !!a && Math.abs(a.x - ${tx}) < 0.05 && Math.abs(a.y - ${y}) < 0.05; })()`,
+        `avatar settled at y=${y}`);
+    };
+
+    check(await stand(behindY), 'the avatar walks up behind the table (TV eased it into place)');
+    const back = await order();
+    check(back.indexOf(idA) >= 0 && back.indexOf('table') >= 0 && back.indexOf(idA) < back.indexOf('table'),
+      `standing above the table's anchor → the avatar is drawn BEHIND it (${back.join(' → ')})`);
+    check(back.indexOf(idA) > back.indexOf('sofa') && back.indexOf(idA) > back.indexOf('plant'),
+      `…and still in front of the sofa and the plant, whose anchors are higher up the room (${back.join(' → ')})`);
+
+    check(await stand(frontY), 'the avatar walks back down in front of the table');
+    const front = await order();
+    check(front.indexOf(idA) > front.indexOf('table'),
+      `standing below the table's anchor → the avatar is drawn IN FRONT of it (${front.join(' → ')})`);
+
+    // the other avatar never moved, so the two must have swapped around the table and nothing else
+    check(front.length === back.length && new Set(front).size === front.length
+      && ['sofa', 'table', 'plant', idA, idB].every((id) => front.includes(id)),
+      `the draw list holds every prop and every avatar exactly once (${front.join(' → ')})`);
+    await tv.shot('hub-depth-front');
+  }
+
   // ---------- playing: presence on boards, kill -9 ----------
   let i = A2.mark(); A2.send({ t: 'start' });
   await A2.waitFor((m) => m.t === 'view' && m.state.phase === 'playing', i);
