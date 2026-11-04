@@ -22,6 +22,7 @@ import { createHostControls } from './host-controls.js';
 import { createGmPanel } from './gm-panel.js';
 import { createQuizUi } from './quiz-ui.js';
 import { createBag } from './bag.js';
+import { JOIN_QR_MS } from '../../shared/join-qr.js';
 import { QUIZ_SETTINGS } from './quiz-text.js';
 import { childMarks, content, onContentChange, syncContent, titleOf } from './campaign-view.js';
 
@@ -268,6 +269,36 @@ const isGameMaster = () => campaign !== null && playerId !== null && campaign.pa
 
 /** Walking: a member, on the hub / in a world, or in an open block lobby. */
 const canWalk = () => member() !== null && !quizView && (!lastView || lastView.phase === 'lobby');
+
+/** Until when the TVs show the join QR that THIS phone asked for (0 = none). */
+let joinShownUntil = 0;
+/** @type {ReturnType<typeof setTimeout> | undefined} */ let joinTimer;
+
+/** Shows our join-QR window state: the "Hide from the TV" button lives while the window is open. */
+function syncHideJoinButton() {
+  $('btn-hide-join').hidden = joinShownUntil <= Date.now();
+}
+
+/** ☰ → Show the join QR: the TVs show it for JOIN_QR_MS (players only: the server ignores anyone else). */
+function showJoinOnTv() {
+  if (!member()) return;
+  send({ t: 'showJoin' });
+  joinShownUntil = Date.now() + JOIN_QR_MS;
+  clearTimeout(joinTimer);
+  joinTimer = setTimeout(syncHideJoinButton, JOIN_QR_MS + 50);
+  syncHideJoinButton();
+  toast(`QR shown on the TV for ${Math.round(JOIN_QR_MS / 1000)} s`);
+}
+
+/** Takes OUR join QR off the TVs, if it is still up. @returns {boolean} whether there was one to hide */
+function hideJoinOnTv() {
+  if (joinShownUntil <= Date.now()) return false;
+  send({ t: 'hideJoin' });
+  joinShownUntil = 0;
+  clearTimeout(joinTimer);
+  syncHideJoinButton();
+  return true;
+}
 
 /** First back press: close a sheet, or say how to get around (back-guard.js). */
 function onBack() {
@@ -734,11 +765,10 @@ const menu = initMenu({
   canLeave: () => member() !== null,
   onLeave: leaveGame,
   isGameMaster,
-  onShowJoin: () => {
-    if (!member()) return; // only players can ask the TVs (the server ignores anyone else)
-    send({ t: 'showJoin' });
-    toast('QR shown on the TV for 30 s');
-  },
+  onShowJoin: showJoinOnTv,
+  onHideJoin: () => { if (hideJoinOnTv()) toast('QR hidden on the TV'); },
+  // closing the QR sheet takes the TV card with it, when this phone put it there
+  onClosed: (sheet) => { if (sheet === 'invite') hideJoinOnTv(); },
 });
 const settingsSheet = createSettingsSheet({ send });
 const hostControls = createHostControls({ send });

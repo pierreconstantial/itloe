@@ -9,7 +9,11 @@ const SHEETS = ['menu', 'rules', 'invite', 'settings', 'gm', 'bag'];
 const RULE_CELL = 10; // px per cell for rule illustrations
 
 /**
- * @param {{ canLeave: () => boolean, onLeave: () => void, isGameMaster: () => boolean, onShowJoin: () => void }} hooks
+ * @param {{
+ *   canLeave: () => boolean, onLeave: () => void, isGameMaster: () => boolean,
+ *   onShowJoin: () => void, onHideJoin: () => void,
+ *   onClosed?: (sheet: string) => void,   // a sheet that was open just closed (or another one replaced it)
+ * }} hooks
  * @returns {{ refresh: () => void, close: (name?: string) => void, isOpen: () => boolean }}
  */
 export function initMenu(hooks) {
@@ -27,16 +31,26 @@ export function initMenu(hooks) {
     $('btn-leave').textContent = 'Leave game';
   }
 
+  /** Shows exactly the sheets `keep` says, telling the hook about each open sheet that closes. @param {(s: string) => boolean} keep */
+  function setOpen(keep) {
+    for (const s of SHEETS) {
+      const el = $(`sheet-${s}`);
+      const wasOpen = !el.hidden;
+      el.hidden = !keep(s);
+      if (wasOpen && el.hidden) hooks.onClosed?.(s);
+    }
+  }
+
   /** @param {string} name */
   function open(name) {
     refresh();
     if (name === 'invite') loadInvite();
-    for (const s of SHEETS) $(`sheet-${s}`).hidden = s !== name;
+    setOpen((s) => s === name);
   }
 
   /** Closes one sheet, or all of them. @param {string} [name] */
   function close(name) {
-    for (const s of SHEETS) if (!name || s === name) $(`sheet-${s}`).hidden = true;
+    setOpen((s) => !(!name || s === name) && !$(`sheet-${s}`).hidden);
   }
 
   renderRules();
@@ -54,6 +68,7 @@ export function initMenu(hooks) {
 
   // the join QR: this phone shows it (the invite sheet opens via data-open) AND asks the TVs to show it
   $('btn-show-join').addEventListener('click', () => hooks.onShowJoin());
+  $('btn-hide-join').addEventListener('click', () => hooks.onHideJoin());
 
   $('btn-vibrate').addEventListener('click', () => {
     haptics.setEnabled(!haptics.isEnabled());

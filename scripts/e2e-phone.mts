@@ -801,7 +801,7 @@ try {
   expect((await J.text('btn-show-join')).includes('Show the join QR'), '☰ → "📱 Show the join QR"');
   await J.tap('#btn-show-join');
   const qr = await tv7.waitFor((m) => m.t === 'joinQr', i7, 3000).catch(() => null);
-  expect(!!qr && qr.until - Date.now() > 25_000, 'the TVs are asked to show the QR (joinQr, ~30 s)');
+  expect(!!qr && qr.until - Date.now() > 10_000 && qr.until - Date.now() <= 16_000, 'the TVs are asked to show the QR (joinQr, ~15 s)');
   let shown = false;
   for (let k = 0; k < 40 && !shown; k++) {
     // an SVG without width/height has naturalWidth 0 in Chrome even when drawn: check the rendered box
@@ -813,9 +813,28 @@ try {
   expect(shown && JSON.parse(qrState).sheet === true, 'this phone shows the QR too (another person can scan it right here)', qrState);
   expect((await J.text('invite-code')) === room, `with the room code (${room})`);
   const toastTop: number = await J.ev(`(() => { const t = document.getElementById('toast'); return t.hidden ? -1 : t.getBoundingClientRect().top; })()`);
-  expect(/QR shown on the TV for 30 s/.test(await J.text('toast')) && toastTop >= 0 && toastTop < 120,
-    'toast "QR shown on the TV for 30 s", at the TOP while the sheet is open (not over its buttons)', `top=${toastTop}`);
+  expect(/QR shown on the TV for 15 s/.test(await J.text('toast')) && toastTop >= 0 && toastTop < 120,
+    'toast "QR shown on the TV for 15 s", at the TOP while the sheet is open (not over its buttons)', `top=${toastTop}`);
   await J.shot('phone-show-join');
+  // "Hide from the TV": the TVs close it at once, the button goes, the QR stays on this phone
+  const hideBtn = () => J.ev(`!document.getElementById('btn-hide-join').hidden`);
+  expect(await hideBtn(), 'a "Hide from the TV" button while our window is open');
+  let i7b = tv7.mark();
+  await J.tap('#btn-hide-join');
+  const close1 = await tv7.waitFor((m) => m.t === 'joinQr', i7b, 3000).catch(() => null);
+  expect(!!close1 && close1.until <= close1.now, 'Hide from the TV → the screen gets the close (until ≤ now)');
+  expect(!(await hideBtn()) && !(await J.ev(`document.getElementById('sheet-invite').hidden`)), '…the button goes, the QR stays on this phone');
+  // closing the sheet takes the TV card with it (show again after the 2 s limit, then Close)
+  await J.ev(`document.querySelector('#sheet-invite [data-close]').click()`);
+  await sleep(2100);
+  await J.tap('#btn-menu');
+  i7b = tv7.mark();
+  await J.tap('#btn-show-join');
+  await tv7.waitFor((m) => m.t === 'joinQr' && m.until > m.now, i7b, 3000);
+  i7b = tv7.mark();
+  await J.ev(`document.querySelector('#sheet-invite [data-close]').click()`);
+  const close2 = await tv7.waitFor((m) => m.t === 'joinQr', i7b, 3000).catch(() => null);
+  expect(!!close2 && close2.until <= close2.now, 'closing the QR sheet → the TV closes it too');
   tv7.ws.close();
   } // part 7
 } catch (e) {
