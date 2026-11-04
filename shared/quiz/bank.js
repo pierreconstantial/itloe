@@ -96,19 +96,22 @@ export const answerText = (q) => expectedAnswers(q)[0] ?? '';
  *   question: { q: string, category: string, level: number, choices: string[] | null },
  *   answered: string[],                       // who has answered (never what, before the reveal)
  *   answers: Record<string, { choice?: number, text?: string, ok: boolean | null, points: number, overridden?: boolean }> | null,
- *   answer: { choice: number | null, text: string, anecdote?: string } | null,   // null until the reveal (the anecdote too: it often gives the answer away)
+ *   answer: { choice: number | null, text: string, anecdote?: string, source: string } | null,   // null until the reveal (anecdote and source too: they can give the answer away)
  * }} RoundView
  */
 /**
- * @typedef {Omit<QuizState, 'round' | 'questions' | 'seed'> & { total: number, round: RoundView | null }} QuizView
+ * @typedef {Omit<QuizState, 'round' | 'questions' | 'seed'> & { total: number, round: RoundView | null, credits: string[] }} QuizView
+ * credits: the attribution lines of the loaded datasets, in every phase (licences such as CC BY-SA)
  */
 
 /**
  * The public quiz: what TVs and phones may see. During a question: the question and who answered,
  * NO verdicts, texts, choices given, nor the answer. From the reveal on: everything for that round.
- * @param {QuizState} s @param {(id: string) => Question | undefined} lookup @returns {QuizView}
+ * @param {QuizState} s @param {(id: string) => Question | undefined} lookup
+ * @param {readonly string[]} [credits] attribution lines of the loaded datasets (shown in every phase)
+ * @returns {QuizView}
  */
-export function projectQuiz(s, lookup) {
+export function projectQuiz(s, lookup, credits = []) {
   const { round, questions, seed: _seed, ...rest } = s;
   /** @type {RoundView | null} */
   let rv = null;
@@ -131,9 +134,10 @@ export function projectQuiz(s, lookup) {
           choice: round.asChoice && round.perm ? round.perm.indexOf(/** @type {number} */ (q.answer)) : null,
           text: answerText(q),
           ...(q.anecdote ? { anecdote: q.anecdote } : {}),
+          source: q.source,
         }
         : null,
     };
   }
-  return { ...rest, total: questions.length, round: rv };
+  return { ...rest, total: questions.length, round: rv, credits: [...credits] };
 }

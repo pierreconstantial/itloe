@@ -12,7 +12,16 @@ const ROOT = new URL('..', import.meta.url).pathname;
 /** Where the bank lives (BLOKO_QUIZ_DIR overrides it, e.g. for tests). Outside public/ and shared/: never served. */
 export const QUIZ_DIR = process.env.BLOKO_QUIZ_DIR ?? join(ROOT, 'data', 'quiz');
 
-export type Bank = { questions: Question[], byId: Map<string, Question>, files: string[] };
+/** `credits`: one attribution line per dataset (CC BY-SA and friends must stay visible in the game). */
+export type Bank = { questions: Question[], byId: Map<string, Question>, files: string[], credits: string[] };
+
+/** A file's attribution line: its `dataset.attribution`, else "name — licence". */
+function creditOf(dataset: any): string | null {
+  if (!dataset || typeof dataset !== 'object') return null;
+  if (typeof dataset.attribution === 'string' && dataset.attribution.trim()) return dataset.attribution.trim();
+  const parts = [dataset.name, dataset.licence].filter((x) => typeof x === 'string' && x.trim());
+  return parts.length ? parts.join(' — ') : null;
+}
 
 /**
  * Every data/quiz/*.json: `{ dataset, questions: [...] }` or a bare array of questions. Validated as a
@@ -23,19 +32,22 @@ export function loadBank(dir = QUIZ_DIR): Bank {
   try { files = readdirSync(dir).filter((f) => f.endsWith('.json')).sort(); } catch { /* no bank: no quiz questions */ }
   const questions: Question[] = [];
   const problems: string[] = [];
+  const credits: string[] = [];
   for (const f of files) {
     try {
       const data = JSON.parse(readFileSync(join(dir, f), 'utf8'));
       const list = Array.isArray(data) ? data : data?.questions;
       if (!Array.isArray(list)) { problems.push(`${f}: expected { questions: [...] } or an array`); continue; }
       questions.push(...list);
+      const credit = Array.isArray(data) ? null : creditOf(data?.dataset);
+      if (credit && !credits.includes(credit)) credits.push(credit);
     } catch (e: any) {
       problems.push(`${f}: ${e?.message ?? e}`);
     }
   }
   problems.push(...validateBank(questions));
   if (problems.length) throw new Error(`quiz bank is broken (${problems.length} problem(s)) in ${dir}:\n  - ${problems.join('\n  - ')}`);
-  return { questions, byId: new Map(questions.map((q) => [q.id, q])), files };
+  return { questions, byId: new Map(questions.map((q) => [q.id, q])), files, credits };
 }
 
 /**

@@ -2,6 +2,7 @@
   "dataset": {
     "name": "Bloko placeholder questions",
     "licence": "CC0 1.0 (written for this project)",
+    "attribution": "Placeholder questions written for Bloko (CC0 1.0)",
     "placeholder": true,
     "note": "PLACEHOLDER bank to build and test the quiz. Replace with the researched open-licensed French dataset (keep its licence and attribution in each question's source)."
   },

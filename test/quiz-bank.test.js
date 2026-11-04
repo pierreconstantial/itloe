@@ -98,6 +98,22 @@ function playAll(mode) {
   return { s, seen };
 }
 
+test('credits in every phase; a question\'s source only from the reveal on', () => {
+  const credits = ['OpenQuizzDB — CC BY-SA 4.0'];
+  let s = initQuiz(3, { mode: 'choice', count: 3 });
+  s = reduceQuiz(s, { t: 'join', id: 'a', character: 'anna' });
+  assert.deepEqual(projectQuiz(s, lookup, credits).credits, credits, 'lobby');
+  s = reduceQuiz(s, { t: 'start', id: 'a', now: T0, candidates: candidatesFor(BANK, s.settings, []) });
+  const question = projectQuiz(s, lookup, credits);
+  assert.deepEqual(question.credits, credits, 'question');
+  const src = /** @type {any} */ (lookup(/** @type {any} */ (s.round).questionId)).source;
+  assert.ok(!JSON.stringify(question).includes(JSON.stringify(src)), 'no source before the reveal');
+  s = reduceQuiz(s, { t: 'close', deadline: /** @type {any} */ (s.round).deadline });
+  const reveal = projectQuiz(s, lookup, credits);
+  assert.equal(reveal.round?.answer?.source, src, 'reveal: the question\'s source');
+  assert.deepEqual(projectQuiz(reduceQuiz(s, { t: 'endGame', id: 'a' }), lookup, credits).credits, credits, 'finished');
+});
+
 for (const mode of /** @type {const} */ (['choice', 'text', 'mixed'])) {
   test(`projection (${mode}): no answer, verdict, typed text or given choice in ANY question-phase view`, () => {
     const { s, seen } = playAll(mode);

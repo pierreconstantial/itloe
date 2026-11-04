@@ -154,6 +154,7 @@ try {
   P.send({ t: 'gm', op: { op: 'goto', node: QUIZ } });
   let q = await untilQuiz(P, (x) => x.phase === 'lobby', i);
   const v0 = lastView(P);
+  check(Array.isArray(q.credits) && q.credits.some((c: string) => /Bloko/.test(c)), `credits in the lobby view (${q.credits?.join(' | ')})`);
   check(v0.campaign.at.node === QUIZ && v0.state === null && q.order.length === 2 && q.hostId === idP,
     'quiz tableau → quiz lobby with the party seated; view.state null (block clients never see a quiz)');
   check(await errOf(E, { t: 'config', patch: { count: 3 } }) === 'not-host', 'quiz config: host only');
@@ -180,6 +181,7 @@ try {
   q = await untilQuiz(T, (x) => x.phase === 'reveal', i);
   check(q.round.answers[idP].ok === true && q.round.answers[idE].ok === false, 'everyone answered → reveal at once, with the verdicts');
   check(q.round.answer.text === expectedAnswers(question)[0], `reveal shows the answer ("${q.round.answer.text}")`);
+  check(q.round.answer.source === (question as any).source && q.credits.length > 0, `reveal shows the question's source ("${q.round.answer.source}")`);
   check(q.players[idP].score >= 100 && q.players[idP].score <= 150 && q.players[idE].score === 0, `scores: right 100 + speed (${q.players[idP].score}), wrong 0`);
   let leak = leakFree(question);
   check(leak.ok && leak.frames > 0, `round 1: the answer never on the wire before the reveal (${leak.frames} question frames grepped)${leak.leak ? ` LEAK: ${leak.leak}` : ''}`);
