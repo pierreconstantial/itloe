@@ -240,7 +240,7 @@ try {
   const tShow = Date.now();
   E2.send({ t: 'showJoin' });
   const qr1 = await screen.waitFor((m) => m.t === 'joinQr', i);
-  check(qr1.until >= tShow + 29_000 && qr1.until <= Date.now() + 31_000 && typeof qr1.now === 'number', `showJoin → the screen gets joinQr until now + 30 s (${Math.round((qr1.until - tShow) / 1000)} s)`);
+  check(qr1.until >= tShow + 14_000 && qr1.until <= Date.now() + 16_000 && typeof qr1.now === 'number', `showJoin → the screen gets joinQr until now + 15 s (${Math.round((qr1.until - tShow) / 1000)} s)`);
   await sleep(300);
   check(joinQrs(E2, iE).length === 0, 'players never receive joinQr (screens only)');
   i = screen.mark();
@@ -260,7 +260,19 @@ try {
   const late = await tv2.waitFor((m) => m.t === 'joinQr', i);
   check(late.until === qr2.until, 'a screen connecting while the window is open gets joinQr on hello');
   check(!readFileSync(join(VAR, 'bloko.state.json'), 'utf8').includes('joinQr'), 'never on disk (ephemeral)');
-  for (const c of [stranger, tv2]) c.ws.close();
+
+  // hideJoin: closes the window at once (until ≤ now); its own rate limit; nothing re-sent after a close
+  i = screen.mark(); stranger.send({ t: 'hideJoin' }); await sleep(400);
+  check(joinQrs(screen, i).length === 0, 'hideJoin from a socket that never joined → ignored');
+  i = screen.mark(); E2.send({ t: 'hideJoin' }); // right after a show: hides have their own limit
+  const qrClose = await screen.waitFor((m) => m.t === 'joinQr', i);
+  check(qrClose.until <= qrClose.now, `hideJoin → screens get joinQr with until ≤ now = close (${qrClose.until - qrClose.now} ms)`);
+  i = screen.mark(); E2.send({ t: 'hideJoin' }); await sleep(400);
+  check(joinQrs(screen, i).length === 0, 'a second hide (nothing open, and rate-limited) → nothing');
+  const tv3 = new Client('tv3'); await tv3.open();
+  i = tv3.mark(); tv3.send({ t: 'hello', role: 'screen' }); await tv3.waitFor((m) => m.t === 'view', i); await sleep(300);
+  check(joinQrs(tv3, i).length === 0, 'a screen saying hello after the close gets no joinQr');
+  for (const c of [stranger, tv2, tv3]) c.ws.close();
   void iE;
 
   for (const c of [E2, F2, F3, G, screen, D, E, F]) c.ws.close();

@@ -17,6 +17,7 @@ import { activityDeadline, isQuiz, shiftActivityDeadline, type ActivityState } f
 import { loadBank, makeQuizClock, nullJudge, withTimeout } from './quiz.ts';
 import { candidatesFor, judgeAnswer, projectQuiz } from '../shared/quiz/bank.js';
 import { MAX_TEXT, type QuizAction, type QuizState } from '../shared/quiz/index.js';
+import { JOIN_QR_GAP_MS, JOIN_QR_MS } from '../shared/join-qr.js';
 import { makeBests } from './bests.ts';
 import { CHARACTERS, isCharacterId } from '../shared/characters.js';
 import type { CharacterId } from '../shared/campaign/types.js';
@@ -164,11 +165,12 @@ const roomOk = new WeakSet<WebSocket>();
 /** sockets that said hello as a screen: the only receivers of pos */
 const screens = new Set<WebSocket>();
 
-/** The join QR on the TVs (showJoin): until when, in epoch ms. Ephemeral, like presence and pos. */
-const SHOW_JOIN_MS = 30_000;
-const SHOW_JOIN_GAP_MS = 2000;
+/** The join QR on the TVs (showJoin / hideJoin): until when, in epoch ms; until ≤ now = closed.
+ *  Ephemeral, like presence and pos. */
 let joinQrUntil = 0;
 const showJoinAt = new WeakMap<WebSocket, number>();
+/** Hides have their OWN limit: a quick "show, then close" must not be swallowed by the show's. */
+const hideJoinAt = new WeakMap<WebSocket, number>();
 const joinQrMsg = () => JSON.stringify({ t: 'joinQr', until: joinQrUntil, now: Date.now() });
 
 /** Presence (ephemeral, never in State or on disk): party members with a live socket, in party order. */
@@ -324,14 +326,17 @@ function handleMessage(ws: WebSocket, m: any): void {
     return;
   }
 
-  if (m.t === 'showJoin') {
-    // any joined player, any phase: the TVs show the join QR for a while (EPHEMERAL: never in State or
-    // on disk). A repeat extends it; one per socket per SHOW_JOIN_GAP_MS so a mashed button can't flood.
+  if (m.t === 'showJoin' || m.t === 'hideJoin') {
+    // any joined player, any phase: the TVs show the join QR for JOIN_QR_MS, or close it now (EPHEMERAL:
+    // never in State or on disk). A show restarts the window; a hide with no window open is ignored.
+    // One show and one hide per socket per JOIN_QR_GAP_MS, so a mashed button can't flood.
     const id = who.get(ws);
     const now = Date.now();
-    if (!id || !isMember(id) || now - (showJoinAt.get(ws) ?? 0) < SHOW_JOIN_GAP_MS) return;
-    showJoinAt.set(ws, now);
-    joinQrUntil = now + SHOW_JOIN_MS;
+    const last = m.t === 'showJoin' ? showJoinAt : hideJoinAt;
+    if (!id || !isMember(id) || now - (last.get(ws) ?? 0) < JOIN_QR_GAP_MS) return;
+    if (m.t === 'hideJoin' && joinQrUntil <= now) return;
+    last.set(ws, now);
+    joinQrUntil = m.t === 'showJoin' ? now + JOIN_QR_MS : now; // until ≤ now: the TVs close it
     const msg = joinQrMsg();
     for (const c of screens) send(c, msg);
     return;
