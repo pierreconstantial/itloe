@@ -48,6 +48,7 @@ class Page {
   seq = 0;
   pending = new Map<number, (r: any) => void>();
   console: string[] = [];
+  errors: string[] = [];
   static async open(url: string): Promise<Page> {
     const t = await (await fetch(`http://127.0.0.1:${CDP}/json/new?${encodeURIComponent(url)}`, { method: 'PUT' })).json();
     const p = new Page();
@@ -56,13 +57,26 @@ class Page {
       const m = JSON.parse(String(e.data));
       if (m.id && p.pending.has(m.id)) { p.pending.get(m.id)!(m); p.pending.delete(m.id); }
       if (m.method === 'Runtime.consoleAPICalled') p.console.push(m.params.args.map((a: any) => a.value).join(' '));
+      if (m.method === 'Runtime.exceptionThrown') p.errors.push(m.params.exceptionDetails?.exception?.description ?? m.params.exceptionDetails?.text);
     };
     await new Promise((r) => { p.ws.onopen = r; });
     await p.cmd('Runtime.enable');
     await p.cmd('Debugger.enable');
     await p.cmd('Emulation.setDeviceMetricsOverride', { width: 1920, height: 1080, deviceScaleFactor: 1, mobile: false });
+    await p.front();
     return p;
   }
+  /**
+   * Makes this the visible, focused tab. Full Chrome (unlike headless_shell) hides background tabs:
+   * their timers are throttled to ~1/min and the TV's wake check skips hidden tabs on purpose — a
+   * real TV tab is visible. Call after opening another tab and before any timing-sensitive step.
+   */
+  async front(): Promise<void> {
+    await this.cmd('Page.enable');
+    await this.cmd('Page.bringToFront');
+    await this.cmd('Emulation.setFocusEmulationEnabled', { enabled: true });
+  }
+  visible(): Promise<boolean> { return this.js("document.visibilityState === 'visible'"); }
   cmd(method: string, params: object = {}): Promise<any> {
     const id = ++this.seq;
     this.ws.send(JSON.stringify({ id, method, params }));
@@ -173,6 +187,8 @@ try {
   await sleep(300);
   check(!(await tv.js(tvOnlineBanner)) && !(await tv2.js(tvOnlineBanner)), 'a phone bump (replaced) leaves both TVs connected');
   tv2.close(); tv2 = null;
+  await tv.front();
+  check(await tv.until("document.visibilityState === 'visible'", 'tv visible', 2000), 'TV tab is visible again (test setup)');
   B = B4;
 
   // ---------- kill -9 in the lobby ----------
@@ -206,6 +222,7 @@ try {
   check(await tv.until(`document.querySelectorAll('.panel.is-offline').length === 0`, 'back online'), 'phones reconnect → tags clear');
 
   // ---------- wake from sleep: JS paused 6 s (timers stop, wall time runs) ----------
+  await tv.front();
   tv.console.length = 0;
   await tv.cmd('Debugger.pause');
   await sleep(6000);
@@ -222,6 +239,7 @@ try {
   for (let k = 0; k < 120 && A2.ticks.length === t0; k++) await sleep(100);
   const tk = A2.ticks.at(-1);
   check(A2.ticks.length > t0 && typeof tk?.now === 'number' && Math.abs(tk.now - Date.now()) < 2000, "server sends {t:'tick', now} to every socket, at least every 10 s");
+  await tv.front();
   tv.console.length = 0;
   const stoppedAt = Date.now();
   server!.kill('SIGSTOP');
@@ -268,6 +286,23 @@ try {
   check(await tv.until(`window.bloko.avatars().some((a) => a.id === '${idN}') && document.querySelector('.lobby-count').textContent.includes('3/')`, 'newcomer'),
     'a newcomer joins after newGame and appears on the TV');
   await tv.shot('newgame-lobby');
+
+  // ---------- campaign: hub / world views carry state: null → placeholder, no crash ----------
+  tv.errors.length = 0;
+  i = A2.mark(); A2.send({ t: 'back' });
+  const hubView = await A2.waitFor((m) => m.t === 'view' && m.state === null, i).catch(() => null);
+  if (hubView) {
+    check(await tv.until(`window.bloko.state() === null && !!document.querySelector('.no-game') && document.getElementById('party-bg').hidden`, 'hub placeholder'),
+      `back to the hub (view.state null, at ${hubView.campaign?.at?.node}) → TV shows the placeholder, party room hidden`);
+    await tv.shot('hub-placeholder');
+    i = A2.mark(); A2.send({ t: 'enter', node: hubView.campaign?.at?.node === 'hub' ? 'hub.false-start' : '' });
+    await A2.waitFor((m) => m.t === 'view' && m.state?.phase === 'lobby', i);
+    check(await tv.until(`window.bloko.state()?.phase === 'lobby' && document.body.classList.contains('party') && window.bloko.avatars().length === 3`, 'back in'),
+      'host enters the block tableau again → TV back in the party room with every avatar');
+    check(tv.errors.length === 0, `no page exception through hub ↔ tableau (${tv.errors.join(' | ') || 'none'})`);
+  } else {
+    check(false, 'host back → expected a view with state null (campaign server)');
+  }
   for (const c of [A2, B, N]) c.ws.close();
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack}\n--- server log ---\n${log}`);

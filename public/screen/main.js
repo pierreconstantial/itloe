@@ -14,6 +14,7 @@ import { legalPlacementCount } from '../../shared/board.js';
 import { createPartyRoom } from './party-room.js';
 import { createPresence } from './presence.js';
 import { createLiveness } from '../commun/liveness.js';
+import { h } from './dom.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('./events.js').ScreenEvent} ScreenEvent */
@@ -120,6 +121,28 @@ function show(next) {
 }
 
 /**
+ * No block game (the party is on the campaign hub or in a world): a calm placeholder.
+ * The next block view starts fresh (no replay of events against the old game).
+ * @param {{ at?: { node?: string } } | undefined} campaign
+ */
+function showNoGame(campaign) {
+  current = null;
+  stale = true;
+  finishedAt = -Infinity;
+  cancelPodium();
+  fx.clearAll();
+  party.setVisible(false);
+  document.body.classList.remove('party');
+  updateCountdown(null);
+  const where = campaign?.at?.node;
+  app.replaceChildren(h('section', 'no-game', [
+    h('h1', 'title', ['BLOKO']),
+    h('p', 'settings-line', ['Hub coming soon']),
+    ...(where ? [h('p', 'podium-hint', [`(${where})`])] : []),
+  ]));
+}
+
+/**
  * @param {ScreenEvent} e
  * @param {State} s
  */
@@ -175,8 +198,12 @@ function podiumSequence(s) {
 /** @type {Record<string, (msg: any) => void>} */
 const HANDLERS = {
   view: (msg) => {
-    if (!msg.state) return;
     syncClock(msg.now);
+    if (!msg.state) {
+      // campaign hub / world: no block game on. The real hub map is a later package.
+      showNoGame(msg.campaign);
+      return;
+    }
     show(msg.state);
     presence.update(Array.isArray(msg.online) ? msg.online : undefined, seated(msg.state));
   },

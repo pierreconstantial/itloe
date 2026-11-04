@@ -24,9 +24,9 @@ export function activeDeadline(s) {
   return s.phase === 'playing' && s.rules?.mode === 'timed' && typeof s.deadline === 'number' ? s.deadline : null;
 }
 
-/** Call on every view. @param {State} s */
+/** Call on every view; null = no block game on (hub / world). @param {State | null} s */
 export function updateCountdown(s) {
-  const next = activeDeadline(s);
+  const next = s ? activeDeadline(s) : null;
   if (next !== deadline) lastWhole = Infinity;
   deadline = next;
   el.hidden = deadline === null;
