@@ -446,6 +446,44 @@ datasets, bundled locally (research pending; licence and attribution must be kep
     token-subset → uncertain).
 11. The bank lives in data/quiz/, never served (a 404 test), and is validated at boot.
 
+### Contract F — inventory (user request 2026-11-04: "a simple and basic inventory system, object must exist"; FROZEN)
+
+Today an item is a free string in `facts.items`, shared by everyone. Contract F makes items **real objects**
+and gives each **player** their own inventory.
+
+```js
+// content: Content gains an item CATALOGUE; nothing outside it can exist
+// Item = { id, name, icon /* emoji */, description }
+// Content = { start, chooser, nodes, items: Record<itemId, Item> }
+// validateContent: every { item } reward, { has } condition and gm give/take names a catalogue item;
+//   catalogue keys = ids; name/icon/description non-empty
+
+// facts.inventory: Record<CharacterId, Record<itemId, number>>   (counts; 0 is removed)
+//   migration: the old facts.items → inventory[content.chooser] (one each); facts.items is dropped
+
+// Effect (rewards):  { item, to?: 'chooser' | 'winner' | 'all' | CharacterId, count?: 1 }
+//   default `to` = 'chooser'; 'winner' = rank 1 of the activity that completed the node (all if tied);
+//   'all' = every non-left party member
+// Condition:         { has: itemId, who?: CharacterId | 'anyone' /* default */, gte?: 1 }
+// News:              { seq, t:'item', item, to: CharacterId[] }     (TV: "🎁 Élodie gets <icon> <name>")
+// GmOp:              { op:'give', item, to: CharacterId, count? } | { op:'take', item, from: CharacterId, count? }
+```
+
+- **Items are data, never invented at runtime:** an unknown item id is refused everywhere (validation at boot,
+  gm ops → refused). Loading drops inventory entries whose item left the catalogue.
+- **Inventory hangs on characters** (like all facts), so it survives a phone change or a reclaim.
+- **UI v1, nothing more:**
+  - **Phone:** a "🎒 Bag" view (from ☰ and on the hub/world screen) listing my items: icon, name,
+    description, ×count.
+  - **TV:** the reward cutscene names who got what, and the hub band shows each player's item icons.
+  - **Game master:** give/take, with the two-tap confirm.
+- **Not in v1:** using, combining or trading items (a later contract, once the story needs it).
+
+| Who | What |
+|---|---|
+| P1 | engine (types, validateContent, rewards `to`, `has`, gm give/take, migration, tests, sample catalogue: 3 placeholder items) + TV (cutscene recipient, hub item icons) |
+| P2 | phone (🎒 Bag view, gm give/take with an item picker, "why locked" shows `has` leaves), server pass-through + e2e (reward lands in the right inventory, survives kill -9 and reclaim) |
+
 ### Scene direction (user, 2026-11-04): the party room is **an Altbau apartment in Vienna** — herringbone
 (Fischgrät) parquet floor, high pale stucco walls with mouldings, tall casement double windows (evening
 sky), tall white double door, warm light (chandelier); the birthday bunting and balloons live INSIDE
