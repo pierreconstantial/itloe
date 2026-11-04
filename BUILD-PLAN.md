@@ -166,6 +166,49 @@ Server → client:
 
 Playtest after Q1/Q2 — tuning questions in SPEC §13 get answered there, then Q5.
 
+---
+
+## M3 — Birthday party shell (REFRAME, 2026-11-04)
+
+The whole project is the centerpiece of a birthday: the host runs an evening of **story steps**; the
+block game is ONE step, replayed several times. Guests play as **Zelda-style pixel characters** whose
+avatars walk around on the TV. The full flow and the step screens will be specified later by the user —
+**slice 1 builds only the base**: character pick at join + avatars movable on the TV lobby.
+
+### Contract C — characters & movement (frozen like A/B; changes through the orchestrator)
+
+```js
+// shared/characters.js (P1)
+// CharacterId = 'pierre' | 'elodie' | 'sol' | 'anna'   (roster will grow later)
+// Character = { id, name, color }   // color 1..4 — the character IS the colour slot
+export const CHARACTERS = {};        // Record<CharacterId, Character>, insertion order = display order
+export function freeCharacters(state) {}  // → CharacterId[] not picked by any non-left player
+
+// shared/game.js (P1) — Player gains `character: CharacterId`; join becomes
+// { t:'join', id, character } : valid only if the character exists and is free; name and
+// color copy from CHARACTERS. Old saved states without `character` stay loadable.
+
+// shared/sprites.js (P4 — ownership exception inside shared/)
+// 16×16 indexed-palette pixel grids, per character: 4 directions × 2 walk frames + 1 idle.
+export const SPRITES = {};  // Record<CharacterId, SpriteSheet>
+export function drawSprite(ctx, characterId, dir, frame, x, y, scale) {}  // canvas 2d, crisp pixels
+```
+
+Movement is **ephemeral** (wire `pos`, see PROTOCOL.md): client-authoritative, relayed by the server
+to screens, held in server memory only — it never touches the reducer, persistence or tests.
+
+### Slice 1 assignments
+
+| Who | What |
+|---|---|
+| P1 | `shared/characters.js`, join-by-character in the reducer (+ `taken` semantics), `Player.character`, tests updated |
+| P2 | `pos` relay (validate/clamp, joined players only, screens only), pos snapshot on screen connect, forward `taken` |
+| P3 | Phone: character picker replaces name entry (sprites via `drawSprite`, taken ones greyed live from state), virtual joystick on the phone lobby, local movement integration (speed ~4 units/s, clamp to world), throttled `pos` |
+| P4 | `shared/sprites.js` FIRST (P3 depends on it; coloured-rectangle stub until it lands), then TV lobby becomes the party room: ground, avatars at positions, name labels, walk animation from dir/moving, interpolation between updates |
+
+Character designs (recognisable, 16×16): Pierre, Élodie (the birthday star — give her something festive),
+Sol (taller teen), Anna (14, K-pop style). Keep the QR/room-code lobby elements — avatars share the scene.
+
 **M2 assignments (2026-11-04):** P1 → Q4 game-logic (settings in State, timed mode, simple set — contract addendum proposed to the orchestrator BEFORE implementing) + Q5 weight structure. P2 → Q3 (persistence, resume, settings file, best scores) + Q2 server side (QR endpoints `GET /api/join` → `{url, code}` and `GET /api/join-qr.svg`, LAN picker, room code — protocol changes proposed first). P4 → Q1 juice, then Q2 screen-lobby QR once P2's endpoint lands. P3 → Q5 feel (haptics, rules screen, menu), then Q4 settings UI once P1's contract lands. Q6 cleanup last, by the orchestrator. Dependencies flow through the orchestrator.
 
 ---

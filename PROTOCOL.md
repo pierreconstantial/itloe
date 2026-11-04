@@ -13,12 +13,19 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 // room comes from the join URL (?room=) and is required to join; a rejoin with a known
 // playerId skips the room check (stored ids survive a new code). playerId optional.
 { "t": "hello", "role": "screen" }                          // screen is exempt from the room check
-{ "t": "join",  "name": "Lea" }                             // after hello; server assigns or reuses the id
+{ "t": "join",  "character": "anna" }                       // after hello; M3: pick a free character from shared/characters.js
+                                                            // name + colour derive from the character; err "taken" if already picked
 { "t": "start" }                                            // host only, phase lobby
 { "t": "again" }                                            // host only, phase finished
 { "t": "place", "piece": 0, "x": 3, "y": 5 }                // piece = index 0..2 in own hand; (x,y) = piece origin
 { "t": "config", "patch": { "mode": "timed" } }             // host only, phase lobby/finished (M2 Q4); invalid keys/values ignored
 { "t": "leave" }                                            // lobby/finished: player removed, slot freed; playing: marked done; host passes on
+{ "t": "pos", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
+// M3 avatar movement — EPHEMERAL, never enters the reducer State. Client-authoritative:
+// the phone integrates its joystick locally and sends throttled updates (≤ 15/s, only when
+// something changed). World coordinates: x ∈ [0,16], y ∈ [0,9] (16:9 units, avatar ≈ 1.2 units
+// tall); dir ∈ up|down|left|right. Server clamps to bounds, drops malformed or non-joined
+// senders silently, and accepts pos in ANY phase (screens decide when to render avatars).
 ```
 
 Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `deadline`) are NEVER accepted from the wire: the server injects them itself and strips them from client messages.
@@ -30,10 +37,16 @@ Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `dead
 { "t": "view", "state": { /* full State, see shared/game.js */ }, "now": 1730700000000 }
 // broadcast to ALL after every change; "now" = server epoch ms (M2 Q4): clients compute
 // clock skew = now - Date.now() on receive and render timed-mode countdowns from state.deadline - (Date.now() + skew)
-{ "t": "err", "code": "full" | "bad-place" | "not-host" | "not-playing" | "unknown-player" | "locked" | "bad-room" }
+{ "t": "err", "code": "full" | "bad-place" | "not-host" | "not-playing" | "unknown-player" | "locked" | "bad-room" | "taken" }
 // "locked": config refused because a game is in progress
 // "bad-room": join refused — wrong or missing room code (phone shows "ask for the code on the TV")
+// "taken": join refused — that character is already picked by an active player (M3)
+{ "t": "pos", "playerId": "p-abc123", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
+// M3: relayed to SCREEN clients only (phones don't receive pos). On screen connect the server
+// sends one pos per known player (last position, in-memory only — positions reset on restart).
 ```
+
+**Forward compatibility rule (M3): every client MUST silently ignore messages with an unknown `t`.**
 
 - M1 sends the **full State to everyone** (this game has no secrets); each client derives its own view.
 - `role: "screen"` gets no `welcome`, only `view`s (including immediately on connect).
