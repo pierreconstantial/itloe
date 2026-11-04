@@ -13,10 +13,12 @@ import { makeApiHandler } from './http-api.ts';
 import { pickLan } from './lan.ts';
 import { makeClock } from './clock.ts';
 import { makeBests } from './bests.ts';
+import { freeCharacters, isCharacterId } from '../shared/characters.js';
+import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
 import { loadGame, saveGame, saveSettings, STATE_FILE, type Game } from './store.ts';
 import { reduce, type ServerAction, type Settings, type State } from './rules.ts';
 
-type ErrCode = 'full' | 'bad-place' | 'not-host' | 'not-playing' | 'unknown-player' | 'locked' | 'bad-room';
+type ErrCode = 'full' | 'bad-place' | 'not-host' | 'not-playing' | 'unknown-player' | 'locked' | 'bad-room' | 'taken';
 
 const PORT = Number(process.env.PORT ?? 3131);
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -31,11 +33,15 @@ const bests = makeBests(game);
 
 const clock = makeClock((deadline) => apply({ t: 'timeUp', deadline }));
 
+/** Avatar positions: in memory only, outside the reducer (see pos.ts). */
+const positions = makePositions<WebSocket>();
+
 const onChange: ((prev: State, next: State) => void)[] = [
   (prev, next) => bests.onChange(prev, next), // before saveGame: it sets game.bestPrevious
   () => saveGame(game),
   (prev, next) => { if (next.settings && next.settings !== prev?.settings) saveSettings(next.settings); },
   (prev, next) => clock.onChange(prev, next),
+  (_prev, next) => positions.prune(next),
   () => broadcast(),
 ];
 
@@ -78,6 +84,8 @@ const who = new Map<WebSocket, string>();
 const sockets = new Map<string, WebSocket>();
 /** sockets whose hello carried the right room code (allowed to join) */
 const roomOk = new WeakSet<WebSocket>();
+/** sockets that said hello as a screen: the only receivers of pos */
+const screens = new Set<WebSocket>();
 
 const viewMsg = () => JSON.stringify({ t: 'view', state: game.state, now: Date.now(), best: bests.view(game.state) });
 
@@ -88,6 +96,18 @@ function send(ws: WebSocket, data: string | object): void {
 function broadcast(): void {
   const msg = viewMsg();
   for (const c of wss.clients) send(c, msg);
+}
+
+function relayPos(playerId: string, pos: Pos): void {
+  const msg = posMsg(playerId, pos);
+  for (const c of screens) send(c, msg);
+}
+
+/** welcome, then the player's own last pos (the one pos a phone receives) so it resumes where its avatar stands. */
+function welcome(ws: WebSocket, playerId: string): void {
+  send(ws, { t: 'welcome', playerId });
+  const pos = positions.get(playerId);
+  if (pos) send(ws, posMsg(playerId, pos));
 }
 
 function sendErr(ws: WebSocket, code: ErrCode): void {
@@ -112,26 +132,50 @@ function attach(ws: WebSocket, playerId: string): void {
   who.set(ws, playerId);
 }
 
+/** Why a join was refused: game under way or roster exhausted → full; otherwise the pick itself (taken, or not a character). */
+function joinRefusal(): ErrCode {
+  const s = game.state;
+  return s.phase !== 'lobby' || freeCharacters(s).length === 0 ? 'full' : 'taken';
+}
+
 const isPlainObject = (x: unknown): x is Settings => !!x && typeof x === 'object' && !Array.isArray(x);
 
 function handleMessage(ws: WebSocket, m: any): void {
   if (m.t === 'hello') {
     if (m.role === 'player' && typeof m.playerId === 'string' && game.state.players[m.playerId]) {
       attach(ws, m.playerId); // rejoin: re-attach, welcome + view (no room check: stored ids outlive a code)
-      send(ws, { t: 'welcome', playerId: m.playerId });
+      welcome(ws, m.playerId);
     }
     if (String(m.room ?? '').trim().toUpperCase() === game.room) roomOk.add(ws);
     else roomOk.delete(ws);
     send(ws, viewMsg()); // screen, fresh player and rejoin all get the current view
+    if (m.role === 'screen') {
+      screens.add(ws);
+      for (const [playerId, pos] of positions.entries()) send(ws, posMsg(playerId, pos));
+    } else {
+      screens.delete(ws);
+    }
+    return;
+  }
+
+  if (m.t === 'pos') {
+    // ephemeral avatar movement: bypasses the reducer; malformed, unjoined or flooding senders dropped silently
+    const id = who.get(ws);
+    if (!id || !canMove(game.state, id) || !positions.allow(ws)) return;
+    const pos = parsePos(m);
+    if (!pos) return;
+    positions.set(id, pos);
+    relayPos(id, pos);
     return;
   }
 
   if (m.t === 'join') {
     if (!roomOk.has(ws)) { sendErr(ws, 'bad-room'); return; }
     const id = `p-${randomUUID().slice(0, 8)}`;
-    if (!apply({ t: 'join', id, name: String(m.name ?? 'Player') })) { sendErr(ws, 'full'); return; }
+    const character = m.character;
+    if (!isCharacterId(character) || !apply({ t: 'join', id, character })) { sendErr(ws, joinRefusal()); return; }
     attach(ws, id);
-    send(ws, { t: 'welcome', playerId: id });
+    welcome(ws, id);
     return;
   }
 
@@ -190,10 +234,18 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
+    screens.delete(ws);
     const id = who.get(ws);
     who.delete(ws);
     if (id && sockets.get(id) === ws) sockets.delete(id);
-    // player stays in the game: phones rejoin via hello + playerId
+    // player stays in the game: phones rejoin via hello + playerId.
+    // A phone that drops mid-walk must not leave its avatar walking on the TV forever.
+    const pos = id ? positions.get(id) : undefined;
+    if (id && pos?.moving) {
+      const stopped = { ...pos, moving: false };
+      positions.set(id, stopped);
+      relayPos(id, stopped);
+    }
   });
 });
 
