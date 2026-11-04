@@ -85,6 +85,15 @@ screen.send({ t: 'hello', role: 'screen' });
 const join = await (await fetch(URL_WS.replace(/^ws/, 'http').replace(/\/ws$/, '/api/join'))).json();
 const room: string = join.code;
 check(/^[A-Z]{4}$/.test(room) && join.url.endsWith(`/play?room=${room}`), `/api/join → 4-letter code + url with ?room= (${join.url})`);
+// the QR's /play?room=CODE (no trailing slash) is redirected to the page: the code must survive the redirect
+const HTTP = URL_WS.replace(/^ws/, 'http').replace(/\/ws$/, '');
+const redirects = await Promise.all(['/play', '/screen', '/sim'].map(async (p) => {
+  const r = await fetch(`${HTTP}${p}?room=${room}&x=1`, { redirect: 'manual' });
+  return r.status === 302 && r.headers.get('location') === `${p}/?room=${room}&x=1`;
+}));
+const landed = await fetch(`${HTTP}/play?room=${room}`);
+check(redirects.every(Boolean) && landed.status === 200 && new URL(landed.url).search === `?room=${room}`,
+  '/play?room=… (and /screen, /sim) redirect to the page keeping the query string');
 const R = new Client('R'); await R.open();
 R.send({ t: 'hello', role: 'player' });
 let i = R.mark(); R.send({ t: 'join', character: 'elodie' });

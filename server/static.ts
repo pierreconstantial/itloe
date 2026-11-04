@@ -21,10 +21,13 @@ export function makeStaticHandler(rootDir: string) {
   const sharedDir = join(rootDir, 'shared');
 
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
-    let path = (req.url ?? '/').split('?')[0];
-    if (path === '/') { res.writeHead(302, { location: '/screen/' }); res.end(); return; }
+    const url = req.url ?? '/';
+    const q = url.indexOf('?');
+    let path = q < 0 ? url : url.slice(0, q);
+    const query = q < 0 ? '' : url.slice(q); // redirects keep it: the QR's /play?room=CODE must reach the page
+    if (path === '/') { res.writeHead(302, { location: '/screen/' + query }); res.end(); return; }
     if (path === '/screen' || path === '/play' || path === '/sim') {
-      res.writeHead(302, { location: path + '/' }); res.end(); return;
+      res.writeHead(302, { location: path + '/' + query }); res.end(); return;
     }
     if (path.endsWith('/')) path += 'index.html';
 
