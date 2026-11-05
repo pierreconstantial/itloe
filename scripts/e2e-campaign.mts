@@ -282,6 +282,12 @@ try {
     return everyone().every((c, j) => !c.since(from[j]).some((m) => m.t === t));
   };
   const GAP = 700; // past the per-socket limits: say and emote one per 650 ms, interact one per 700 ms
+  const cooldown = async (playerId: string, kind: 'social' | 'interact') => {
+    const last = T1.msgs.findLast((m) => m.playerId === playerId
+      && (kind === 'interact' ? m.t === 'interact' : m.t === 'say' || m.t === 'emote'));
+    const remaining = (last?.at ?? 0) + GAP - Date.now();
+    if (remaining > 0) await sleep(remaining);
+  };
 
   let from = marks();
   let t0 = Date.now();
@@ -292,7 +298,7 @@ try {
   const stranger = new Client('stranger'); await stranger.open();
   stranger.send({ t: 'hello', role: 'player', room });
   await stranger.waitFor((m) => m.t === 'view');
-  await sleep(GAP);
+  await cooldown(idE, 'social');
   from = marks();
   stranger.send({ t: 'say', text: 'intrus' }); stranger.send({ t: 'emote', kind: 'victory' });
   T1.send({ t: 'say', text: 'écran' }); T1.send({ t: 'emote', kind: 'victory' });
@@ -300,39 +306,41 @@ try {
   from = marks();
   for (const text of ['é'.repeat(101), '', '   ', '\u0007\u0007', 42]) E.send({ t: 'say', text });
   check(await none('say', from), 'say with over-long (101 characters), empty, blank, control-only or non-string text → dropped');
-  await sleep(GAP);
+  await cooldown(idE, 'social');
   from = marks();
   E.send({ t: 'say', text: '🎂'.repeat(100) });
   got = await relayed('say', from);
   check(got.every((m) => m?.text === '🎂'.repeat(100)), 'say with 100 characters (counted as code points) → relayed');
 
-  await sleep(GAP);
+  await cooldown(idE, 'social');
   i = T1.mark();
   E.send({ t: 'say', text: 'un' }); E.send({ t: 'say', text: 'deux' }); E.send({ t: 'emote', kind: 'victory' });
   P.send({ t: 'say', text: 'trois' });
   await sleep(400 * SLOW);
   const burst = T1.since(i).filter((m) => m.t === 'say' || m.t === 'emote').map((m) => m.text ?? m.kind);
   check(burst.join() === 'un,trois', `rate limit: one say or emote per 650 ms per socket; a second say and an emote right after are dropped, another phone is not held back (${burst.join()})`);
-  await sleep(GAP);
+  await cooldown(idE, 'social');
   from = marks();
   E.send({ t: 'say', text: 'quatre' });
   check((await relayed('say', from)).every((m) => m?.text === 'quatre'), '…and after 650 ms the same phone speaks again');
 
-  await sleep(GAP);
+  await cooldown(idN, 'social');
   from = marks();
   t0 = Date.now();
   N2.send({ t: 'emote', kind: 'annoy' });
   got = await relayed('emote', from);
   check(got.every((m) => m?.playerId === idN && m.kind === 'annoy' && m.at >= t0), 'emote → relayed to every client with playerId, kind and at');
-  await sleep(GAP);
+  await cooldown(idN, 'social');
   from = marks();
   N2.send({ t: 'emote', kind: 'dance' }); N2.send({ t: 'emote' });
   check(await none('emote', from), 'emote of an unknown kind (or none) → dropped');
 
   // the history keeps the last 30 lines: 33 lines from three phones, each at its own pace
   for (let n = 0; n < 11; n++) {
-    await sleep(GAP);
+    await Promise.all([idP, idE, idN].map((id) => cooldown(id, 'social')));
+    const start = T1.mark();
     for (const [j, c] of [P, E, N2].entries()) c.send({ t: 'say', text: `ligne ${n * 3 + j}` });
+    await Promise.all([0, 1, 2].map((j) => T1.waitFor((m) => m.t === 'say' && m.text === `ligne ${n * 3 + j}`, start)));
   }
   await T1.waitFor((m) => m.t === 'say' && m.text === 'ligne 32');
   const last30 = JSON.stringify(T1.msgs.filter((m) => m.t === 'say').slice(-30));
@@ -350,7 +358,7 @@ try {
   check(Object.values<any>(content.nodes).every((n) => !n.door || n.door.y + n.door.h < TABLE.y), 'the table point is outside every door');
   /** Élodie (just past her limit) asks for an object's action → the interact event each client got, or null. */
   const interact = async (object = 'table') => {
-    await sleep(GAP);
+    await cooldown(idE, 'interact');
     const from = marks();
     E.send({ t: 'interact', object });
     return relayed('interact', from);
@@ -364,7 +372,7 @@ try {
   };
   await step(E, TABLE);
   await interactsHere('in a block lobby', true);
-  await sleep(GAP);
+  await cooldown(idE, 'interact');
   i = T1.mark();
   E.send({ t: 'interact', object: 'table' }); E.send({ t: 'interact', object: 'table' });
   await sleep(400 * SLOW);

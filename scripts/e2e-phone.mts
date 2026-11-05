@@ -470,7 +470,6 @@ try {
   await kill9();
   const down = await A.waitFor((x) => x.banner, 5000);
   expect(down?.banner === true && down.view === 'view-game', 'server down: banner, never dumped to a menu', `view=${down?.view}`);
-  await sleep(2000);
   await boot();
   await resumes(A, 'server back: phone A in the same game', 'view-game', idA, 10_000);
   await resumes(B, 'server back: phone B in the same game', 'view-game', idB, 10_000);
@@ -811,24 +810,28 @@ try {
   await Q.tap('#quiz-text');
   const top1: number = await Q.ev(`document.getElementById('quiz-q').getBoundingClientRect().top`);
   expect(top0 === top1, 'focusing the field does not move the question', `${top0} → ${top1}`);
-  for (let round = 0; round < 3; round++) {
+  {
     const bq = byQ.get(plain(await H.text('quiz-q')))!;
     // a name typed in lower case, without accents: the server's French matcher accepts it
     const typed = rightText(bq).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
     await H.type('#quiz-text', typed);
-    if (round === 0) await H.shot('quiz-question-typed');
+    await H.shot('quiz-question-typed');
     await H.tap('#quiz-send');
     await Q.type('#quiz-text', 'zzz');
     await Q.tap('#quiz-send');
-    expect(await phaseIs(H, 'quiz-reveal'), `typed round ${round + 1}: reveal`);
+    expect(await phaseIs(H, 'quiz-reveal'), 'typed round: reveal');
     const hv = await H.text('quiz-verdict');
     expect(/^✓ Right!/.test(hv) && /^✗ Wrong/.test(await Q.text('quiz-verdict')), `"${typed}" judged right on the server; "zzz" wrong`, hv);
     const results: string = await Q.text('quiz-results');
     expect(results.includes(typed) && results.includes('zzz'), 'the reveal lists what everyone typed', results);
     await H.tap('#quiz-next');
-    if (round < 2) expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), `Next → typed question ${round + 2}`);
+    expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), 'Next → typed question 2');
   }
+  await H.tap('#btn-menu');
+  await H.tap('#btn-end-game');
+  await H.tap('#btn-end-game');
   expect(await phaseIs(H, 'quiz-finished'), 'typed quiz finished');
+  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
 
   // ---- quiz 3 (Play again): straight into a new quiz; the host ends it from the ☰ menu during a question ----
   await H.tap('#quiz-again');

@@ -177,7 +177,6 @@ async function killAndBack(tv: Page, phase: string, ref: Client): Promise<void> 
   await kill9();
   check(await tv.until(tvOnlineBanner, 'banner'), `${phase}: kill -9 → TV shows the "Connecting…" banner`);
   await tv.shot(`kill-${phase}-banner`);
-  await sleep(1500);
   await boot();
   const t0 = Date.now();
   const back = await tv.until(`!${tvOnlineBanner}`, 'reconnect', 6000);
@@ -187,7 +186,7 @@ async function killAndBack(tv: Page, phase: string, ref: Client): Promise<void> 
       '| console:', tv.console.slice(-6).join(' / '), '| errors:', tv.errors.slice(-3).join(' / '));
   }
   check(back, `${phase}: restart → TV reconnects by itself, banner gone`);
-  await sleep(300);
+  await tv.until(`(() => { const s = window.bloko.state(); return s?.phase === ${JSON.stringify(phase)} && JSON.stringify(s.order.map((id) => [id, s.players[id].board, s.players[id].score, s.players[id].hand])) === ${JSON.stringify(want)}; })()`, 'resumed view');
   const after = await tv.js(`JSON.stringify(${tvState})`);
   const a = JSON.parse(after), b = JSON.parse(before);
   const same = a.phase === phase && boardsOf(a) === boardsOf(b) && a.hostId === b.hostId;
@@ -312,7 +311,7 @@ try {
     B.send({ t: 'emote', kind: 'victory' });
     await A2.waitFor((m) => m.t === 'say', a);
     await B.waitFor((m) => m.t === 'emote', b);
-    await sleep(400); // the TV got both with the phones: a few frames to draw them
+    if (SHOTS) await sleep(400); // the TV got both with the phones: a few frames to draw them
     await tv.shot('lobby-say-emote');
   }
 
@@ -428,7 +427,7 @@ try {
     'host endGame → TV podium says "Game ended by the host"');
   check(await tv.js(`[...document.querySelectorAll('.rank-row')].some((r) => r.textContent.includes('Sol') && r.querySelector('.out-tag'))`),
     '…and the retired player is ranked with an "out" tag');
-  await sleep(4000);
+  if (SHOTS) await sleep(4000);
   await tv.shot('podium-host');
   await killAndBack(tv, 'finished', A2);
   A2 = await rejoin('A4', idA); B = await rejoin('B8', idB);
@@ -486,7 +485,7 @@ try {
     'podium settled → ONE combined moment: "New worlds unlocked!"');
   const csText = await tv.js('window.bloko.cutscene().text');
   check(csText.includes(C_TITLE('childhood')) && csText.includes(C_TITLE('teens')) && csText.includes(`Élodie gets ${SAMPLE_CONTENT.items['old-key'].icon} ${SAMPLE_CONTENT.items['old-key'].name}`), `…naming both worlds and who got what (${csText})`);
-  await sleep(1500);
+  if (SHOTS) await sleep(1500);
   await tv.shot('cutscene');
   for (let k = 0; k < 150 && (cv()?.news ?? []).length; k++) await sleep(100);
   check((cv()?.news ?? []).length === 0, 'after the moment, an ack clears the news on the server');
@@ -504,7 +503,7 @@ try {
   check(await tv.until(`${doorsJs} === ${JSON.stringify(JSON.stringify({ 'hub.false-start': 'done', childhood: 'new', teens: 'new', adult: 'locked' }))}`, 'doors after unlock'),
     'hub doors: false start done ★, both worlds NEW (glowing), the third still locked');
   check(await tv.js(`!document.querySelector('.map-bags')`), "the key is Élodie's, and she isn't here yet: no bag in the band");
-  await sleep(600);
+  if (SHOTS) await sleep(600);
   await tv.shot('hub-map-new');
 
   // the chooser (Élodie) joins and walks into the childhood door → the TV switches to that world
@@ -520,7 +519,7 @@ try {
     'Élodie walks into the childhood door → TV switches to that world');
   const dw = JSON.parse(await tv.js(doorsJs));
   check(dw['childhood.blocks'] === 'new' && dw['childhood.scene'] === 'new', `world doors: its two tableaux, new (${JSON.stringify(dw)})`);
-  await sleep(600);
+  if (SHOTS) await sleep(600);
   await tv.shot('world-map');
   check(tv.errors.length === 0, `no page exception through the campaign (${tv.errors.join(' | ') || 'none'})`);
 
@@ -556,7 +555,7 @@ try {
   check(await tv.until(`(() => { const a = window.bloko.avatars().find((a) => a.id === '${idA}'); return a && Math.abs(a.x - 9) < 0.2; })()`, 'quiz avatar moves'),
     '…and avatars walk there (pos relayed)');
   await tv.until('!window.bloko.cutscene().playing', 'quiz room calm', 12000); // the quiz door's unlock moment plays here first
-  await sleep(600);
+  if (SHOTS) await sleep(600);
   await tv.shot('quiz-room');
 
   const phones = [A2, B, N, E!];
@@ -606,7 +605,7 @@ try {
       check(await tv.until(`document.querySelector('.quiz-anecdote')?.textContent.includes(${JSON.stringify(anecdote.slice(0, 20))})`, 'anecdote'),
         `Q${rounds}: the reveal shows the anecdote`);
     }
-    if (rounds === 1 || (anecdote && anecdotes === 1)) { await sleep(900); await tv.shot(anecdote ? 'quiz-reveal-anecdote' : 'quiz-reveal'); }
+    if (rounds === 1 || (anecdote && anecdotes === 1)) { if (SHOTS) await sleep(900); await tv.shot(anecdote ? 'quiz-reveal-anecdote' : 'quiz-reveal'); }
     i = A2.mark(); A2.send({ t: 'next' });
     qv = quizOf(await A2.waitFor((m) => m.t === 'view' && (quizOf(m)?.phase === 'question' || quizOf(m)?.phase === 'finished'), i));
   }
@@ -615,7 +614,7 @@ try {
     'finished → the quiz podium, every player ranked');
   check(await tv.js(`[...document.querySelectorAll('.rank-correct')].every((e) => e.textContent.includes('/') && e.textContent.trim().endsWith('✓'))`), '…with each player\'s right answers');
   if ((qv.credits ?? []).length) check(await tv.js(`!!document.querySelector('.podium .quiz-credits')`), 'quiz podium: dataset credits line');
-  await sleep(4500);
+  if (SHOTS) await sleep(4500);
   await tv.shot('quiz-podium');
   i = A2.mark(); A2.send({ t: 'back' });
   await A2.waitFor((m) => m.t === 'view' && !quizOf(m) && m.campaign?.at.node === 'childhood', i);

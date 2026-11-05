@@ -144,7 +144,9 @@ test('a save with a minigame this release does not have stops the boot and is le
   for (const [label, save] of [['stored kind', stored], ['kind derived from the round', derived]]) {
     const text = JSON.stringify(save);
     const app = await boot(t, text);
-    const [code] = await Promise.race([app.exited, delay(10_000).then(() => [null])]);
+    const timeout = new AbortController();
+    const [code] = await Promise.race([app.exited, delay(10_000, [null], { signal: timeout.signal })])
+      .finally(() => timeout.abort());
     assert.notEqual(code, null, `${label}: the server must stop at boot\n${app.log()}`);
     assert.notEqual(code, 0, label);
     assert.match(app.log(), /"darts"/, `${label}: the error names the kind`);
