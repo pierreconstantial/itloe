@@ -12,16 +12,14 @@
 // also after a failure, a Ctrl-C or the deadline.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createWriteStream, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
-import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { compareShots } from './e2e-compare.mts';
-import { sleep } from './e2e-lib.mts';
+import { freePort, killGroups, startChrome, startServer } from './e2e-lib.mts';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const SELF = new URL(import.meta.url).pathname;
 const SLOT = join(ROOT, 'scripts/e2e-slot.sh');
-const CHROME = '/usr/bin/google-chrome';
 /** Past this, everything still running or waiting is stopped: a run must fit a 10-minute foreground command. */
 const DEADLINE_MS = 9 * 60_000;
 
@@ -43,35 +41,6 @@ function parse(spec: string): { suite: string, only?: string } | null {
   const [suite, only, ...rest] = spec.split(':');
   if (!SUITES[suite] || rest.length || (only !== undefined && !SUITES[suite].focus?.includes(only))) return null;
   return { suite, only };
-}
-
-/** A free TCP port on loopback (never 3131: the OS hands out ephemeral ports). */
-function freePort(): Promise<number> {
-  return new Promise((res, rej) => {
-    const s = createServer().once('error', rej);
-    s.listen(0, '127.0.0.1', () => { const { port } = s.address() as { port: number }; s.close(() => res(port)); });
-  });
-}
-
-async function waitHttp(url: string, what: string, proc: ChildProcess): Promise<void> {
-  for (let k = 0; k < 300; k++) {
-    if (proc.exitCode !== null) throw new Error(`${what} exited (${proc.exitCode}) before answering`);
-    if (await fetch(url).then(() => true, () => false)) return;
-    await sleep(100);
-  }
-  throw new Error(`${what} did not answer on ${url} within 30 s`);
-}
-
-/** Headless Chrome on a scratch profile, in its own process group when `detached`; resolves once CDP answers. */
-async function startChrome(profile: string, detached = false): Promise<{ proc: ChildProcess, cdp: string }> {
-  const proc = spawn(CHROME, ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', 'about:blank'], { stdio: 'ignore', detached });
-  // with port 0 Chrome picks a free port itself and writes it to DevToolsActivePort
-  const portFile = join(profile, 'DevToolsActivePort');
-  for (let k = 0; k < 300 && !existsSync(portFile) && proc.exitCode === null; k++) await sleep(100);
-  if (!existsSync(portFile)) throw new Error(`Chrome did not start (${CHROME})`);
-  const cdp = readFileSync(portFile, 'utf8').split('\n')[0];
-  await waitHttp(`http://127.0.0.1:${cdp}/json/version`, 'Chrome', proc);
-  return { proc, cdp };
 }
 
 function stop(proc: ChildProcess | null): Promise<void> {
@@ -96,11 +65,7 @@ async function job(spec: string): Promise<number> {
       console.log(`e2e-run: Chrome on CDP=${env.CDP}`);
     }
     if (def.server) {
-      server = spawn(process.execPath, [join(ROOT, 'server/main.ts'), '--new'], {
-        env: { ...env, BLOKO_VAR: join(scratch, 'var'), BLOKO_HOST: '127.0.0.1', ITLOE_CONTENT: 'sample' },
-        stdio: ['ignore', 'inherit', 'inherit'],
-      });
-      await waitHttp(`http://127.0.0.1:${env.PORT}/api/join`, 'the server', server);
+      server = await startServer(env.PORT!, join(scratch, 'var'), 'sample', { env });
     }
     const run = spawn(process.execPath, [join(ROOT, 'scripts', def.script)], { env, stdio: 'inherit' });
     return await new Promise<number>((r) => run.once('exit', (code) => r(code ?? 1)));
@@ -119,20 +84,6 @@ type Run = { spec: string, name: string, log: string, proc: ChildProcess, queued
 function fmt(ms: number): string {
   const s = Math.round(ms / 1000);
   return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m${String(s % 60).padStart(2, '0')}s`;
-}
-
-/** Sends `sig` to a whole process group (a job's: slot script, job, suite, its server, Chrome); false once it's empty. */
-function signal(pgid: number, sig: NodeJS.Signals | 0): boolean {
-  try { process.kill(-pgid, sig); return true; } catch { return false; }
-}
-
-/** Stops process groups: SIGTERM, then SIGKILL for what's left after 3 s. Resolves once all are gone, so
- *  nothing (Chrome shutting down, a server saving) still writes to the scratch folder. */
-async function killGroups(pgids: number[]): Promise<void> {
-  for (const g of pgids) signal(g, 'SIGTERM');
-  for (let k = 0; k < 30 && pgids.some((g) => signal(g, 0)); k++) await sleep(100);
-  for (const g of pgids) signal(g, 'SIGKILL');
-  for (let k = 0; k < 50 && pgids.some((g) => signal(g, 0)); k++) await sleep(100);
 }
 
 async function runner(args: string[]): Promise<number> {

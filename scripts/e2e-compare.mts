@@ -5,6 +5,7 @@
 // It shows what differs and judges nothing: two runs of the same code differ in random content too.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { cdpConnect } from './e2e-lib.mts';
 
 type Screen = { name: string, changed: number, note: string, text: string[] };
 
@@ -48,21 +49,15 @@ const PIXELS = `async (a, b) => {
   return { changed: d / (p.length / 4), pixels: d, diff: btoa(s) };
 }`;
 
-/** One page in the Chrome on port `cdp`: evaluate(fn, ...args) runs PIXELS-like functions there. */
+/** One page in the Chrome on port `cdp`: evaluate(fn, ...args) calls the function `fn` (source) there. */
 async function page(cdp: string) {
-  const t = await (await fetch(`http://127.0.0.1:${cdp}/json/new?about:blank`, { method: 'PUT' })).json();
-  const ws = new WebSocket(t.webSocketDebuggerUrl);
-  await new Promise((r, j) => { ws.onopen = r; ws.onerror = j; });
-  let id = 0;
-  const wait = new Map<number, (m: any) => void>();
-  ws.onmessage = (e) => { const m = JSON.parse(String(e.data)); wait.get(m.id)?.(m); wait.delete(m.id); };
+  const { cmd } = await cdpConnect(cdp);
+  const { targetId } = await cmd('Target.createTarget', { url: 'about:blank' });
+  const { sessionId } = await cmd('Target.attachToTarget', { targetId, flatten: true });
   return async (fn: string, ...args: string[]): Promise<any> => {
-    const i = ++id;
-    const reply = new Promise<any>((r) => wait.set(i, r));
-    ws.send(JSON.stringify({ id: i, method: 'Runtime.evaluate', params: { expression: `(${fn})(...${JSON.stringify(args)})`, awaitPromise: true, returnByValue: true } }));
-    const m = await reply;
-    if (m.error || m.result.exceptionDetails) throw new Error(`compare: ${JSON.stringify(m.error ?? m.result.exceptionDetails)}`);
-    return m.result.result.value;
+    const r = await cmd('Runtime.evaluate', { expression: `(${fn})(...${JSON.stringify(args)})`, awaitPromise: true, returnByValue: true }, sessionId);
+    if (r.exceptionDetails) throw new Error(`compare: ${r.exceptionDetails.exception?.description ?? r.exceptionDetails.text}`);
+    return r.result.value;
   };
 }
 
