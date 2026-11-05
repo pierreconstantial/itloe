@@ -22,8 +22,8 @@ function lineDiff(a: string[], b: string[]): string[] {
   let i = 0, j = 0;
   while (i < n || j < m) {
     if (i < n && j < m && a[i] === b[j]) { i++; j++; }
-    else if (j < m && (i === n || l[i][j + 1] >= l[i + 1][j])) out.push(`+ ${b[j++]}`);
-    else out.push(`- ${a[i++]}`);
+    else if (i < n && (j === m || l[i + 1][j] >= l[i][j + 1])) out.push(`- ${a[i++]}`);
+    else out.push(`+ ${b[j++]}`);
   }
   return out;
 }
@@ -45,7 +45,7 @@ const PIXELS = `async (a, b) => {
   const c = new OffscreenCanvas(y.width, y.height); c.getContext('2d').putImageData(out, 0, 0);
   const bytes = new Uint8Array(await (await c.convertToBlob({ type: 'image/png' })).arrayBuffer());
   let s = ''; for (let k = 0; k < bytes.length; k += 0x8000) s += String.fromCharCode(...bytes.subarray(k, k + 0x8000));
-  return { changed: d / (p.length / 4), diff: btoa(s) };
+  return { changed: d / (p.length / 4), pixels: d, diff: btoa(s) };
 }`;
 
 /** One page in the Chrome on port `cdp`: evaluate(fn, ...args) runs PIXELS-like functions there. */
@@ -84,7 +84,7 @@ export async function compareShots(cdp: string, dir: string, ref: string, suites
       const px = await evaluate(PIXELS, read(old, '.png').toString('base64'), read(cur, '.png').toString('base64'));
       if (px.diff) writeFileSync(join(cur, `${s}.diff.png`), Buffer.from(px.diff, 'base64'));
       if (!px.size && !px.changed && !text.length) { same++; continue; }
-      const note = px.size ? `size ${px.size}` : `${(100 * px.changed).toFixed(2)}% pixels`;
+      const note = px.size ? `size ${px.size}` : px.changed < 1e-4 ? `${px.pixels ?? 0} pixel(s)` : `${(100 * px.changed).toFixed(2)}% pixels`;
       differ.push({ name: `${suite}/${s}`, changed: px.size ? 1 : px.changed, note, text });
     }
   }
