@@ -188,7 +188,7 @@ try {
   check(woke.phase === 'playing' && woke.deadline > dueSoon && !A.since(i).some((m) => m.t === 'view' && blocksOf(m).phase === 'finished'),
     `overdue bell on wake → ignored, clock paused (${Math.round((woke.deadline - Date.now()) / 100) / 10} s left)`);
   const ended = await A.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'finished', i, 6000);
-  check(ended.state.endReason === 'time', `…and the bell still rings at the shifted deadline (endReason ${ended.state.endReason})`);
+  check(blocksOf(ended).endReason === 'time', `…and the bell still rings at the shifted deadline (endReason ${blocksOf(ended).endReason})`);
 
   // ---------- a pre-campaign (v1) save: migrated into the campaign, never lost ----------
   await kill9();

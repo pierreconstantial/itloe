@@ -188,7 +188,7 @@ try {
   // P and E answer right at the same moment → same points → a tie at rank 1
   await playQuiz(P, [{ c: P, right: true }, { c: E, right: true }, { c: S, right: false }], T);
   k = await until(T, (x) => x.facts.done.includes(QUIZ));
-  const ranks = [...T.msgs].reverse().find((m) => m.t === 'view' && quizOf(m))?.quiz;
+  const ranks = quizOf([...T.msgs].reverse().find((m) => m.t === 'view' && quizOf(m)));
   const tie = ranks.players[idP].score === ranks.players[idE].score;
   const tickets = [k.facts.inventory.pierre?.ticket ?? 0, k.facts.inventory.elodie?.ticket ?? 0, k.facts.inventory.sol?.ticket ?? 0];
   check(tie ? tickets.join() === '1,1,0' : tickets.filter((n) => n === 1).length === 1,
