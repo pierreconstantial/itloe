@@ -366,7 +366,7 @@ function render() {
   const tableau = screensHere();
   const configurable = tableau !== null && mem !== null && hostId === playerId && round?.status !== 'running';
   if (tableau) settingsSheet.render(tableauSettings(), configurable, tableau.settings);
-  hostControls.render(round?.kind === 'blocks' ? round.view : null, round?.kind === 'quiz' ? round.view : null, online, playerId ?? '', hostId);
+  hostControls.render(round, online, playerId ?? '', hostId);
   if (!configurable) menu.close('settings');
   if (campaign && isGameMaster()) gmPanel.render(campaign, round?.status ?? null);
   else menu.close('gm');

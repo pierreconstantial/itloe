@@ -327,6 +327,7 @@ function finishIfAllDone(state, players) {
 export const BLOCK_RULES = {
   init: startGame,
   reduce,
+  retire: true, // taken out: done, still ranked, the seat kept (not a leave)
   status: (s) => (s.phase === 'playing' ? 'running' : s.phase === 'finished' ? 'finished' : null),
   result: (s) => ({
     ranking: ranking(s).map((r) => ({ character: s.players[r.id].character ?? null, score: r.score, rank: r.rank })),

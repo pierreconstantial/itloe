@@ -74,6 +74,7 @@ import { QUIZ_RULES } from './quiz/index.js';
  *   deadlineAction: (deadline: number) => A,    // fired when it passes; a stale one must be refused
  *   shiftDeadline: (s: S, by: number) => S,     // deadlines moved by a downtime (ms): resume, sleep
  *   resume?: (s: S) => S,                       // what a restart does besides the shift
+ *   retire?: true,                              // the reducer takes the host's retire itself (else: the target's leave)
  *   describe: (s: S) => string,                 // the round in the boot log
  * }} MinigameRules
  */

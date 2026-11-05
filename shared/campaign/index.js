@@ -372,7 +372,13 @@ export function reduceCampaign(c, a, content) {
     case 'activity': {
       const s = c.at.activity;
       if (!s) return c;
-      return withActivity(c, kindOf(c).reduce(s, a.action, ctxOf(c)), content); // routed by the round's kind
+      const rules = kindOf(c);
+      // the host taking a player out: the minigame's own rule, else it counts as that player leaving the round
+      const action = a.action?.t === 'retire' && !rules.retire
+        ? (isHost(c, a.action.id) && roundStatus(c) === 'running' ? { t: 'leave', id: a.action.target } : null)
+        : a.action;
+      if (!action) return c;
+      return withActivity(c, rules.reduce(s, action, ctxOf(c)), content); // routed by the round's kind
     }
 
     case 'config': {

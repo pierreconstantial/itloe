@@ -52,6 +52,22 @@ test('quiz under way: enter/back refused; a newcomer waits for the next round', 
   assert.ok(c.party.players.a && !quiz(c).players.a, 'joined the evening, not seated mid-quiz');
 });
 
+test('taking a player out of a quiz counts as their leaving: host only, while it runs', () => {
+  let c = run(inQuiz(), { t: 'start', id: 'e', now: 1, inputs: CANDIDATES });
+  assert.equal(run(c, act({ t: 'retire', id: 's', target: 'e' })), c, 'a guest can\'t');
+  c = run(c, act({ t: 'retire', id: 'e', target: 's' }));
+  assert.equal(quiz(c).players.s.left, true, 'Sol is out of the quiz');
+  assert.equal(quiz(c).players.s.score, 0, '…and keeps a score for the podium');
+  assert.equal(c.party.players.s.left, false, '…but still in the evening');
+  assert.equal(run(c, act({ t: 'retire', id: 'e', target: 's' })), c, 'twice: nothing more');
+  const r = /** @type {any} */ (quiz(c).round);
+  c = run(c, act({ t: 'answer', id: 'e', ...(r.asChoice ? { choice: 0 } : { text: 'x' }), now: 2, verdict: 'right' }));
+  assert.equal(quiz(c).phase, 'reveal', 'the round no longer waits for Sol');
+  c = run(c, act({ t: 'endGame', id: 'e' }));
+  assert.equal(roundStatus(c), 'finished');
+  assert.equal(run(c, act({ t: 'retire', id: 'e', target: 'e' })), c, 'on the podium: refused');
+});
+
 test('asked survives loadCampaign; an older campaign without it loads with an empty list', () => {
   const c = playThrough(inQuiz());
   const loaded = loadCampaign(JSON.parse(JSON.stringify(c)), C);

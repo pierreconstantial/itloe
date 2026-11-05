@@ -100,7 +100,8 @@ export function createQuizUi(io) {
     buildQuestion(r);
     $('quiz-category').textContent = r.question.category ? `${r.question.category}${r.question.level ? ` · ${'★'.repeat(r.question.level)}` : ''}` : '';
     $('quiz-q').textContent = frenchSpaces(r.question.q);
-    const sent = r.answered.includes(meId) || mine?.key === roundKey(r);
+    const out = !!v.players[meId]?.left; // taken out by the host: no more answers, the score counts
+    const sent = out || r.answered.includes(meId) || mine?.key === roundKey(r);
     const asChoice = !!r.question.choices;
     $('quiz-choices').hidden = !asChoice;
     $('quiz-text-form').hidden = asChoice;
@@ -112,6 +113,7 @@ export function createQuizUi(io) {
     /** @type {HTMLButtonElement} */ ($('quiz-send')).disabled = sent;
     if (sent && mine?.text !== undefined && mine.key === roundKey(r)) input.value = mine.text;
     $('quiz-sent').hidden = !sent;
+    $('quiz-sent').textContent = out ? 'The host took you out — your score counts' : 'Answer sent ✓';
     renderAnswered(v, r);
   }
 

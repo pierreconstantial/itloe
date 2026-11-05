@@ -882,8 +882,15 @@ try {
   expect((await Q.hostButtons()).length === 0, 'quiz: guest menu has no host controls');
   await H.tap('#btn-menu');
   const qhb = await H.hostButtons();
-  expect(qhb.length === 2 && /End game/.test(qhb[1]), 'quiz: the host menu offers End game, no "take out"', JSON.stringify(qhb));
+  expect(qhb.length === 4 && qhb.slice(1, 3).every((t) => /^Take .+ out$/.test(t)) && /End game/.test(qhb[3]), 'quiz: the host menu offers "take out" per player, and End game', JSON.stringify(qhb));
   await H.shot('quiz-host-menu');
+  const qGuest = `[data-retire="${await Q.ev(`localStorage.getItem('bloko-id')`)}"]`;
+  await H.tap(qGuest);
+  await H.tap(qGuest);
+  let outLine = '';
+  for (let k = 0; k < 50 && !/took you out/.test(outLine); k++) { await sleep(100); outLine = await Q.text('quiz-sent'); }
+  expect(/took you out/.test(outLine) && await Q.ev(`[...document.querySelectorAll('#quiz-choices button, #quiz-send')].every((b) => b.disabled)`)
+    && (await H.hostButtons()).length === 3, 'quiz: the host takes the guest out (second tap): their answers close, End game stays', outLine);
   await H.tap('#btn-end-game');
   const qArmed: string = await H.ev(`document.getElementById('btn-end-game').textContent`);
   expect(/Tap again/.test(qArmed) && await Q.visible('quiz-question'), 'quiz End game: first tap arms, nothing ends yet', qArmed);
