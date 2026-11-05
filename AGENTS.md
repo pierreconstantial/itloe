@@ -1,5 +1,10 @@
 # Instructions for coding agents
 
+## Project context
+
+- Itloe is played once, at Élodie's birthday party ("the evening"), hosted on Konstantin's server. Hard deadline: Friday 13 November 2026.
+- Until then the game is in development: saves need no backward compatibility. Write no new save migrations; a save from an earlier version may start a fresh evening, but must never load into a broken state. A save written by the current version must still resume after a restart.
+
 ## Before editing
 
 - Read the README's “For developers” section for architecture, code conventions, and test commands. Inspect the neighboring implementation and relevant tests before choosing an approach.

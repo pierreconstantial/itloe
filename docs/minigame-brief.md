@@ -304,7 +304,7 @@ Done when:
 Scope:
 
 - the development start setting;
-- a contributor guide as a `reference` document: what a minigame consists of, its registration lines, what the frame offers, what a minigame can and can't do, avatars and unsaved messages, the development start, and tests. Blocks is the worked example;
+- a contributor guide as a `reference` document: this brief's Terms, what a minigame consists of, its registration lines, what the frame offers, what a minigame can and can't do, avatars and unsaved messages, the development start, and tests. Blocks is the worked example;
 - the README's scripts and environment variables.
 
 Done when blocks and quiz each start directly with their own scratch save folder, and the guide matches what adding a minigame actually takes.
