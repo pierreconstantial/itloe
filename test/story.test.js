@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { newCampaign, reduceCampaign, validateContent, holding } from '../shared/campaign/index.js';
-import { INTRO_KEY, MEMORY_WORLDS, OPENING_PLAYERS, STORY_CONTENT } from '../shared/campaign/story.js';
+import { INTRO_KEY, MEMORY_WORLDS, OPENING_PLAYERS, PORTAL, STORY_CONTENT } from '../shared/campaign/story.js';
+import { PARTY_ROOM, spawnAt } from '../shared/scene.js';
+import { CHARACTERS } from '../shared/characters.js';
 
 /** @param {import('../shared/campaign/types.js').Campaign} campaign
  * @param {import('../shared/campaign/types.js').CampaignAction} action */
@@ -62,4 +64,13 @@ test('future needs all seven keys, while world entrances remain unassigned', () 
   assert.equal(c.facts.unlocked.includes('future'), false);
   c = act(c, { t: 'gm', id: 'elodie', op: { op: 'give', item: INTRO_KEY, to: 'elodie' } });
   assert.equal(c.facts.unlocked.includes('future'), true);
+});
+
+test('the portal stands clear of every avatar on the party room\'s spawn row', () => {
+  // an avatar is drawn 1.2 units tall above its feet (AVATAR_UNITS in public/screen/party-room.js)
+  for (const character of /** @type {import('../shared/characters.js').CharacterId[]} */ (Object.keys(CHARACTERS))) {
+    const at = spawnAt(PARTY_ROOM, character);
+    assert.ok(at.y - 1.2 > PORTAL.y + PORTAL.radius || Math.abs(at.x - PORTAL.x) > PORTAL.radius,
+      `${character} starts at ${at.x}, ${at.y}, in front of the portal`);
+  }
 });

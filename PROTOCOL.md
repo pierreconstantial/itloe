@@ -103,8 +103,9 @@ round ends may reach the next round.
 
 The first match requires Pierre, Élodie, Sol and Anna. After it finishes, `campaign.facts.flags` contains
 `portal.ready`; the host sends `{ "t": "newGame" }` to return everyone to the lobby. A portal is then drawn
-at the room centre. Elo walks into it with the ordinary `pos` message; the server applies the portal
-transition only for her and queues `{ "seq": 1, "t": "apparition" }` in `campaign.news`. The other phones
+in the middle of the room, behind the row where the guests start. Elo walks into it with the ordinary
+`pos` message; the server applies the portal transition only for her and queues
+`{ "seq": 1, "t": "apparition" }` in `campaign.news`. The other phones
 continue to show the lobby. The screen plays the apparition and sends the ordinary `ack` when it ends.
 That acknowledgement adds `apparition.seen` to the persisted facts and reveals the key.
 
