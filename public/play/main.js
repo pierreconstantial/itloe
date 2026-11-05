@@ -12,7 +12,7 @@ import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.
 import { spawnPoint } from '../../shared/world.js';
 import { roomAt } from '../../shared/campaign/content.js';
 import { nearbyObject, OBJECT_ACTIONS } from '../../shared/interactions.js';
-import { INTRO_KEY, INTRO_KEY_SPOT, OPENING_PLAYERS } from '../../shared/campaign/story.js';
+import { INTRO_KEY, INTRO_KEY_SPOT, openingPlayersPresent } from '../../shared/campaign/story.js';
 import { createPicker, pickStates, anyPickable } from './picker.js';
 import { createJoystick } from './joystick.js';
 import { avatarCanvas, paintAvatar } from './avatar.js';
@@ -597,7 +597,7 @@ function renderLobby(v, me, isHost, settings) {
   $('lobby-settings').textContent = settings;
   const opening = isStory() && campaign?.at.node === content().start && !campaign.facts.flags.includes('portal.ready');
   const portalReady = isStory() && campaign?.at.node === content().start && campaign.facts.flags.includes('portal.ready');
-  const quartetReady = OPENING_PLAYERS.every((character) => v.order.some((id) => !v.players[id].left && v.players[id].character === character));
+  const quartetReady = openingPlayersPresent(v);
   $('btn-settings-lobby').hidden = !isHost || !!portalReady;
   $('btn-start').hidden = !isHost || !!portalReady;
   /** @type {HTMLButtonElement} */ ($('btn-start')).disabled = !!opening && !quartetReady;

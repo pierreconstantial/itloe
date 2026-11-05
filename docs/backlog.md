@@ -29,7 +29,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Ids in client code](#ids-in-client-code) | Node, character and item ids written into the clients | P2 | Open | Low |
 | [Other guests in other roles](#other-guests-in-other-roles) | Guests beyond the four players, e.g. controlling NPCs or in games | P3 | Needs decision | High |
 | [Room before the content arrives](#room-before-the-content-arrives) | A reloaded phone walks the party room until the content loads | P3 | Open | Low |
-| [Four-player check written twice](#four-player-check-written-twice) | The phone and the server each count the opening's players | P3 | Open | Trivial |
 | [Pickup handles one item](#pickup-handles-one-item) | `collect` only knows the first key | P3 | Open | Low |
 | [TV lobby band parameters](#tv-lobby-band-parameters) | `renderLobby` takes two option objects side by side | P3 | Open | Trivial |
 | [Protocol differences](#protocol-differences) | `PROTOCOL.md` disagrees with the code in three places | P3 | Open | Trivial |
@@ -86,7 +85,7 @@ Each new story step adds more branches in all three layers.
 - story steps as content data, read by generic engine code;
 - one story module per layer that shared code calls at a few named points.
 
-[Ids in client code](#ids-in-client-code) and [Four-player check written twice](#four-player-check-written-twice) would fold into it.
+[Ids in client code](#ids-in-client-code) would fold into it.
 
 ### Ids in client code
 
@@ -105,12 +104,6 @@ The party is the four players Pierre, Élodie, Sol and Anna. Other guests may la
 Phones and the TV use the bundled sample content until `/api/content` answers, and the sample names no rooms. So a phone reloaded at the hub walks the party room's furniture until the content arrives, then the apartment's. If the request fails, it stays wrong until the content loads. Before a node's room, the phone chose the room from the campaign's flags, which come with the first view.
 
 **Recommendation:** check on real phones during the manual test whether anyone notices. If it matters, send the node's room with the view, or wait for the content before enabling the joystick.
-
-### Four-player check written twice
-
-The opening requires four players before its first game. The phone and the server each count them, so the rule lives in two places.
-
-**Recommendation:** one shared function, or a `required` value in the content that both read.
 
 ### Pickup handles one item
 
