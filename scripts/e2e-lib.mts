@@ -17,6 +17,10 @@ export function finish(): never {
   process.exit(failures ? 1 : 0);
 }
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** A view's block game (its round's view while a block game runs), else null. */
+export const blocksOf = (v: any): any => (v?.round?.kind === 'blocks' ? v.round.view : null);
+/** A view's quiz (its round's view while a quiz runs: the public projection), else null. */
+export const quizOf = (v: any): any => (v?.round?.kind === 'quiz' ? v.round.view : null);
 
 export class Client {
   ws!: WebSocket;
@@ -38,7 +42,8 @@ export class Client {
   send(m: unknown): void { this.ws.send(JSON.stringify(m)); }
   mark(): number { return this.msgs.length; }
   since(i: number): any[] { return this.msgs.slice(i); }
-  lastView(): any { return [...this.msgs].reverse().find((m) => m.t === 'view')?.state; }
+  /** The block game in the last view, or null. */
+  lastView(): any { return blocksOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
   async waitFor(pred: (m: any) => boolean, from = 0, ms = 2000): Promise<any> {
     const end = Date.now() + ms * SLOW;
     while (Date.now() < end) {

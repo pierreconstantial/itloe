@@ -9,7 +9,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, Client, finish, HTTP, sleep, SLOW } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, quizOf, sleep, SLOW } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -40,11 +40,13 @@ async function kill9(): Promise<void> {
 }
 const roomCode = async (): Promise<string> => (await (await fetch(`${HTTP}/api/join`)).json()).code;
 
+/** A view's campaign with its round's view where the save keeps the round (`at.activity`), comparable with the save. */
+const campaignOf = (m: any): any => m?.campaign && { ...m.campaign, at: { ...m.campaign.at, activity: m.round?.view ?? null } };
 /** The last campaign a client saw. */
-const camp = (c: Client): any => [...c.msgs].reverse().find((m) => m.t === 'view')?.campaign;
+const camp = (c: Client): any => campaignOf([...c.msgs].reverse().find((m) => m.t === 'view'));
 /** Waits for a view whose campaign satisfies `pred`. */
 const until = async (c: Client, pred: (k: any) => boolean, from = 0, ms = 3000) =>
-  (await c.waitFor((m) => m.t === 'view' && !!m.campaign && pred(m.campaign), from, ms)).campaign;
+  campaignOf(await c.waitFor((m) => m.t === 'view' && !!m.campaign && pred(campaignOf(m)), from, ms));
 /** The persisted part of the evening, comparable across a restart (the seed is checked on its own). */
 const core = (k: any) => JSON.stringify({
   // a timed game's deadline moves by the downtime on purpose (checked on its own)
@@ -135,7 +137,7 @@ const played = (k: any) => k.facts.counters['blocks.played'] ?? 0;
 async function playOne(n: number): Promise<void> {
   let i = P.mark();
   P.send({ t: camp(P).at.activity.phase === 'lobby' ? 'start' : 'again' });
-  await P.waitFor((m) => m.t === 'view' && m.state?.phase === 'playing', i);
+  await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   i = P.mark();
   P.send({ t: 'endGame' });
   const k = await until(P, (x) => x.at.activity?.phase === 'finished', i);
@@ -155,7 +157,8 @@ try {
   check(k.v === 1 && k.at.node === 'hub.false-start' && k.at.activity?.phase === 'lobby', 'new evening starts AT the false-start blocks tableau, block lobby open');
   check(k.party.hostId === idP && k.at.activity.hostId === idP && k.at.activity.order.join() === `${idP},${idE}`, 'party = both phones, host = first in, both seated in the block lobby');
   const v = T1.msgs.findLast((m) => m.t === 'view');
-  check(JSON.stringify(v.state) === JSON.stringify(v.campaign.at.activity), 'view: state = campaign.at.activity (old clients keep working)');
+  check(v.round?.kind === 'blocks' && v.round.status === 'lobby' && JSON.stringify(v.round.view) === JSON.stringify(saved().at.activity)
+    && !('activity' in v.campaign.at), 'view: the round carries the block game; the campaign on the wire carries no raw round state');
   check(!k.facts.unlocked.includes('childhood') && k.news.length === 0, 'worlds locked, no news yet');
   await restartSame('in the false-start lobby');
 
@@ -164,7 +167,7 @@ try {
   await restartSame('on podium 1');
   check(played(camp(T1)) === 1, 'podium 1 after restart: still 1 game played (counted once)');
   let i = P.mark(); P.send({ t: 'again' });
-  await P.waitFor((m) => m.t === 'view' && m.state?.phase === 'playing', i);
+  await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   await restartSame('mid-game 2 (playing)');
   check(played(camp(T1)) === 1, 'mid-game restart counts nothing');
   check(await errOf(P, { t: 'back' }) === 'refused', 'back while a game is played → refused (endGame first)');
@@ -207,7 +210,7 @@ try {
   check(await errOf(E, { t: 'back' }) === 'not-host', 'non-host back → not-host');
   i = P.mark(); P.send({ t: 'back' });
   k = await until(P, (x) => x.at.node === 'hub', i);
-  check(k.at.activity === null && T1.msgs.findLast((m) => m.t === 'view').state === null, 'host back → hub, no block game (view state null)');
+  check(k.at.activity === null && T1.msgs.findLast((m) => m.t === 'view').round === null, 'host back → hub, no block game (view round null)');
   await restartSame('on the hub');
 
   const at = () => camp(T1).at.node;
@@ -251,7 +254,7 @@ try {
   check(k.at.activity?.phase === 'lobby' && k.at.activity.settings.mode === 'timed' && k.at.activity.order.length === 2,
     "host enters a world's blocks tableau → its lobby with the node's settings (timed), the whole party seated");
   i = P.mark(); P.send({ t: 'start' });
-  await P.waitFor((m) => m.t === 'view' && m.state?.phase === 'playing', i);
+  await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   const deadline = camp(T1).at.activity.deadline;
   await restartSame('in a timed world game');
   const after = camp(T1).at.activity;
@@ -372,7 +375,7 @@ try {
   await step(E, TABLE);
 
   i = P.mark(); P.send({ t: 'start' });
-  await P.waitFor((m) => m.t === 'view' && m.state?.phase === 'playing', i);
+  await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   await interactsHere('during a running block game', false);
   i = P.mark(); P.send({ t: 'endGame' });
   await until(P, (x) => x.at.activity?.phase === 'finished', i);
@@ -384,17 +387,17 @@ try {
   await until(P, (x) => x.at.node === 'childhood', i);
   await interactsHere('in a world', true);
   i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'childhood.quiz' } });
-  await P.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'lobby', i);
+  await P.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'lobby', i);
   await interactsHere('in a quiz lobby', true);
   i = P.mark(); P.send({ t: 'start' });
-  const question = (await P.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'question', i)).quiz;
+  const question = quizOf(await P.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'question', i));
   await interactsHere('during a quiz question', false);
   i = P.mark();
   for (const c of [P, E, N2]) c.send(question.round.question.choices ? { t: 'answer', choice: 0 } : { t: 'answer', text: 'x' });
-  await P.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'reveal', i);
+  await P.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'reveal', i);
   await interactsHere('on a quiz reveal', false);
   i = P.mark(); P.send({ t: 'endGame' });
-  await P.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'finished', i);
+  await P.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'finished', i);
   await interactsHere('on a finished quiz', false);
   for (const c of [N2, stranger]) c.ws.close();
 

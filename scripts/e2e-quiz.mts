@@ -11,7 +11,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, Client, finish, HTTP, sleep } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, quizOf, sleep } from './e2e-lib.mts';
 import { expectedAnswers } from '../shared/quiz/judge-local.js';
 
 const PORT = process.env.PORT ?? '3141';
@@ -60,9 +60,9 @@ function tap(c: Client): Client {
   return c;
 }
 const lastView = (c: Client) => [...c.msgs].reverse().find((m) => m.t === 'view');
-const qv = (c: Client) => lastView(c)?.quiz;
+const qv = (c: Client) => quizOf(lastView(c));
 const untilQuiz = async (c: Client, pred: (q: any) => boolean, from = 0, ms = 4000) =>
-  (await c.waitFor((m) => m.t === 'view' && !!m.quiz && pred(m.quiz), from, ms)).quiz;
+  quizOf(await c.waitFor((m) => m.t === 'view' && !!quizOf(m) && pred(quizOf(m)), from, ms));
 const errOf = async (c: Client, msg: object): Promise<string | null> => {
   const i = c.mark();
   c.send(msg);
@@ -102,9 +102,9 @@ function leakFree(question: Q): { ok: boolean, frames: number, leak?: string } {
     for (const raw of list) {
       if (!raw.includes(JSON.stringify(question.q))) continue;
       const m = JSON.parse(raw);
-      if (m.t !== 'view' || m.quiz?.phase !== 'question') continue;
+      if (m.t !== 'view' || quizOf(m)?.phase !== 'question') continue;
       frames++;
-      const shown = new Set<string>(m.quiz.round.question.choices ?? []);
+      const shown = new Set<string>(quizOf(m).round.question.choices ?? []);
       for (const text of expectedAnswers(question)) {
         if (!shown.has(text) && raw.includes(JSON.stringify(text))) return { ok: false, frames, leak: text };
       }
@@ -160,8 +160,8 @@ try {
   let q = await untilQuiz(P, (x) => x.phase === 'lobby', i);
   const v0 = lastView(P);
   check(Array.isArray(q.credits) && q.credits.some((c: string) => /Itloe/.test(c)), `credits in the lobby view (${q.credits?.join(' | ')})`);
-  check(v0.campaign.at.node === QUIZ && v0.state === null && q.order.length === 2 && q.hostId === idP,
-    'quiz tableau → quiz lobby with the party seated; view.state null (block clients never see a quiz)');
+  check(v0.campaign.at.node === QUIZ && blocksOf(v0) === null && q.order.length === 2 && q.hostId === idP,
+    'quiz tableau → quiz lobby with the party seated; no block game in the view (block clients never see a quiz)');
   check(await errOf(E, { t: 'config', patch: { count: 3 } }) === 'not-host', 'quiz config: host only');
   i = P.mark(); P.send({ t: 'config', patch: { count: 3, seconds: 10, mode: 'mixed' } });
   q = await untilQuiz(P, (x) => x.settings.count === 3 && x.settings.seconds === 10, i);
