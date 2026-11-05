@@ -133,4 +133,5 @@ Open `http://127.0.0.1:3199/sim/`: the TV and four phones side by side. Pick cha
   - [`test/round.test.js`](../test/round.test.js): server code through a round's `io`, without a server (walking, positions, unsaved messages, what's dropped after the round);
   - [`test/avatar-layer.test.js`](../test/avatar-layer.test.js): the avatar layer over a game area;
   - `e2e-tv.mts`'s `standin` section and `e2e-phone.mts`'s part 8: a TV screen and a phone screen swapped into the lists in the browser, with avatars, unsaved messages and the joystick.
-- **Over real sockets:** the `scripts/e2e-*.mts` suites start their own server on a scratch save folder; [`scripts/e2e-quiz.mts`](../scripts/e2e-quiz.mts) is the pattern for one minigame. The README's "Development commands and testing" lists them and how to run the browser suites.
+- **Over real sockets:** the `scripts/e2e-*.mts` suites start their own server on a scratch save folder; [`scripts/e2e-quiz.mts`](../scripts/e2e-quiz.mts) is the pattern for one minigame. The README's "Development commands and testing" lists them and how to run them.
+- **Playing it:** a short script with [`scripts/drive.mts`](../scripts/drive.mts) plays a round of your minigame on its development start (`content: 'minigame:<kind>'`) with a TV and phones in headless Chrome, and takes screenshots to look at.
