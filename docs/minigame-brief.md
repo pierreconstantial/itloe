@@ -26,7 +26,8 @@ Itloe is a party game for one evening, and agents write the code. Build what the
 - **Minigame**: a registered kind of game with its own rules: `blocks` and `quiz` today. A content node's `activity.kind` names a minigame, or `scene`, which stays a content kind without rules.
 - **Round**: one play of a minigame at a tableau. The host starts it from the room, and it runs until its podium closes. `campaign.at.activity` holds the round's state; between rounds there is none.
 - **Status**: a round's `running` or `finished` (podium), derived by the minigame from its state. The quiz's `question` and `reveal` are both `running`.
-- **Room**: a walkable space with walls and furniture (geometry from `shared/scene.js`). The RPG has one today, the party room, shown between rounds; a minigame can bring its own for its round.
+- **Room**: one of the RPG's places, where avatars walk among walls and furniture (geometry from `shared/scene.js`). Today there is one, the party room, shown between rounds. Minigames have no rooms.
+- **Game area**: where a minigame lets avatars walk over its own screen during its round, e.g. players already out of a block game roaming over its board to distract the others. Its bounds are a `shared/scene.js` scene without furniture.
 - **Shared code**: everything that isn't a minigame's own files: the campaign engine (the RPG), the server, and the parts of the phone and TV around the games.
 - **Frame**: the screens every minigame shares: the room at a tableau between rounds, the podium, and the host controls.
 - **Unsaved message**: a message a minigame's server code sends to the phones and TVs during its round, never saved.
@@ -90,7 +91,7 @@ The campaign stores the round's kind next to it in `campaign.at`. An older save 
 Chat (`say`), emotes (`emote`: victory, fart, annoy) and object actions (`interact`: the sofa, the table, the plant) belong to the RPG. Shared code handles them and never passes them to a minigame.
 
 - **Chat and emotes** work at every moment, during rounds too, as today. A minigame can't switch them off.
-- **Object actions** work only between rounds, in the party room. Their objects are the party room's furniture, so a minigame's own room has no object button. With behaviour change 4, the room at a quiz tableau gets them, like the room at a block tableau.
+- **Object actions** work only between rounds, in the party room. Their objects are the party room's furniture, so a minigame's game area has no object button. With behaviour change 4, the room at a quiz tableau gets them, like the room at a block tableau.
 
 ### Screens: the frame around every minigame
 
@@ -109,13 +110,13 @@ Unsaved messages are their own message, apart from chat and emotes: those are ma
 
 ### Avatars: usable by any minigame
 
-- **TV.** The avatar drawing leaves `createPartyRoom` and becomes a layer that any minigame's TV screen can use with its own room (geometry from `shared/scene.js`) and the world-to-screen projection. The party room uses the same layer, unchanged. `pos` messages reach the layer whatever screen is showing.
+- **TV.** The avatar drawing leaves `createPartyRoom` and becomes a layer that any minigame's TV screen can use with its game area and the world-to-screen projection. The party room uses the same layer, unchanged. `pos` messages reach the layer whatever screen is showing.
   - Speech bubbles and emotes move with the layer: `say` and `emote` reach it whatever screen is showing, like `pos`. A minigame's TV screen can show a bubble or an emote over an avatar from its own unsaved message.
   - The furniture effects of object actions stay in the party room.
-  - In the party room, avatars and props share one depth-sorted list. Whether a minigame's own room can have props that avatars walk behind is settled with the minigame contract at checkpoint 1.
-- **Phone.** A minigame's phone screen can switch on the joystick with its own room and start position. The room between rounds and the map keep using it as today.
+  - Over a minigame's screen, avatars are always drawn on top: a game area has no furniture to walk behind, as no planned minigame needs it. In the party room, avatars and props keep sharing one depth-sorted list.
+- **Phone.** A minigame's phone screen can switch on the joystick with its game area and start position. The room between rounds and the map keep using it as today.
 - **Server.**
-  - During a round, `pos` belongs to that minigame's room. Those positions are kept apart from the party-room positions and are dropped when the round ends, so the room resumes where everyone stood.
+  - During a round, `pos` belongs to that minigame's game area. Those positions are kept apart from the party-room positions and are dropped when the round ends, so the room resumes where everyone stood.
   - The minigame's server code decides who may walk during its round, and can read positions, for example to place a fart.
   - Effects such as a fart travel as unsaved messages.
 - **For contributors:** avatars are drawn above the minigame's screen, so anything they must line up with is placed in world coordinates (16 × 9).
