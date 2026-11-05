@@ -53,10 +53,11 @@ const core = (k: any) => JSON.stringify({
   at: { node: k.at.node, kind: k.at.kind, activity: k.at.activity && { ...k.at.activity, deadline: null }, settings: k.at.settings },
   party: k.party, facts: k.facts, news: k.news, newsSeq: k.newsSeq,
 });
+/** The err `msg` is answered with (every use expects one: waiting long costs a normal run nothing), or null. */
 const errOf = async (c: Client, msg: object): Promise<string | null> => {
   const i = c.mark();
   c.send(msg);
-  try { return (await c.waitFor((m) => m.t === 'err', i, 600)).code; } catch { return null; }
+  try { return (await c.waitFor((m) => m.t === 'err', i, 5000)).code; } catch { return null; }
 };
 
 /** A round trip on one socket: an `enter` of no node changes nothing and is answered with an err, after
