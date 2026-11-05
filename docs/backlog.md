@@ -57,7 +57,7 @@ In the apartment, the cats, friends, keepsakes and the key are drawn after the d
 
 ### A room per character at the hub
 
-Before "a node's room" (phase 5 in `docs/minigame-brief.md`), Élodie walked the apartment at the hub after the portal, while the other players stayed "in the old lobby": their phones walked the party room, and the TV hid them unless a game master set `person.<id>.unlocked`. A node's room puts everyone at the hub in the apartment; who may walk and who is drawn stay the story's rules, so the others remain hidden as before.
+Before each node named its room (`roomAt`, see `docs/minigames.md`), Élodie walked the apartment at the hub after the portal, while the other players stayed "in the old lobby": their phones walked the party room, and the TV hid them unless a game master set `person.<id>.unlocked`. A node's room puts everyone at the hub in the apartment; who may walk and who is drawn stay the story's rules, so the others remain hidden as before.
 
 **Recommendation:** Pierre decides whether the others being somewhere else is a story moment. If it is, the story needs a rule for who is in which room, which a room chosen by node can't express.
 
