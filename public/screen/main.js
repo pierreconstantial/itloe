@@ -22,7 +22,7 @@ import { createContentSource } from '../commun/content.js';
 import { doorStates, mapCopy, nameOf } from './doors.js';
 import { roomAt } from '../../shared/campaign/content.js';
 import { createCutscenes } from './cutscenes.js';
-import { renderQuiz } from './quiz-view.js';
+import { renderQuiz, quizRevealSchedule } from './quiz-view.js';
 import { applyJoinQr, joinQrState } from './join-qr.js';
 import { INTRO_KEY, OPENING_PLAYERS, REUNIONS } from '../../shared/campaign/story.js';
 
@@ -371,11 +371,15 @@ const CUTSCENE_MS = 4200;
 let acksSent = 0;
 let momentsPlayed = 0;
 
-/** A moment may start: no block game or quiz question running, and a podium has finished its reveal. */
+/** A moment may start: no round running, and a podium (a block game's or a quiz's) has finished its reveal. */
 function canPlayCutscene() {
   // a hidden TV tab plays nothing (and so never acks what nobody saw); it plays once shown again
   if (document.visibilityState !== 'visible') return false;
-  if (quiz) return quiz.phase === 'finished';
+  if (quiz) {
+    if (quiz.phase !== 'finished') return false;
+    const reveal = Math.max(0, ...quizRevealSchedule(quiz).map((r) => r.atMs));
+    return performance.now() - quizFinishedAt > reveal + 1800;
+  }
   if (!current) return true; // between rounds: the room at a tableau, the hub, a world
   if (current.phase !== 'finished') return false;
   const reveal = Math.max(0, ...revealSchedule(current).map((r) => r.atMs));
