@@ -179,7 +179,7 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 | `npm start` | The real server (`server/main.ts`, run directly by Node, no build step) |
 
 - **Simulator:** open **/sim/** on a running server: the TV screen plus player phones side by side in one page. The phones get the room code from `/api/join`.
-- **End-to-end tests:** `npm run e2e` runs every suite; `npm run e2e -- quiz phone:4` runs the named ones. Run it in the foreground: it blocks until all are done (a full run takes about 3 minutes), then prints one line per suite (pass or fail, duration, log file), the FAIL lines of a failed suite, and an overall line; it exits non-zero on a failure. It runs the suites in parallel through the machine's shared slots, and does the setup for you: free ports, headless Chrome for the browser suites, a server for `base`, scratch data folders, all removed afterwards, also after Ctrl-C.
+- **End-to-end tests:** the runner requires Linux, Google Chrome at `/usr/bin/google-chrome`, and `flock` on `PATH` (provided by util-linux). `npm run e2e` runs every suite; `npm run e2e -- quiz phone:4` runs the named ones. Run it in the foreground: it blocks until all are done (a full run takes about 3 minutes), then prints one line per suite (pass or fail, duration, log file), the FAIL lines of a failed suite, and an overall line; it exits non-zero on a failure. It runs the suites in parallel through the machine's shared slots, and does the setup for you: free ports, headless Chrome for the browser suites, a server for `base`, scratch data folders, all removed afterwards, also after Ctrl-C.
 
   | Suite | Covers |
   |---|---|

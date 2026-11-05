@@ -67,7 +67,7 @@ nested in its tableau, with its kind in `campaign.at.kind` and the tableau's set
 Between rounds (`campaign.at.activity` null) the party is in the room at the tableau; `campaign.at.kind` names
 the tableau's minigame there too (null on the hub, in a world, at a scene).
 `join` and `leave` act on the EVENING: `join` adds a party member (during a round they watch, and play the
-next round started from the room), `leave` leaves the evening (reported to the round's minigame, which decides
+next round, including a rematch), `leave` leaves the evening (reported to the round's minigame, which decides
 what it means: a block game marks them done; the stored id stops rejoining; the host passes on). Every id is
 injected by the server (socket → playerId; screens: `"screen"`), never taken from the wire.
 
@@ -79,7 +79,7 @@ the tableau's settings, from its minigame's schema: host only (else `err "not-ho
 The round messages, the same for every minigame, at a minigame's tableau (elsewhere → `err "not-playing"`):
 `start` (from the room: a round with every party member who hasn't left, online or not; the quiz picks its
 questions among the bank's candidates, none left → refused), `again` (on the podium: a new round at once with
-the round's players who have not left), `newGame` (on the podium: back to the room at the tableau),
+every party member who has not left, including newcomers), `newGame` (on the podium: back to the room at the tableau),
 `endGame` (a running round → its podium, endReason "host") and `retire { target }` (the minigame decides what
 taking a player out means; a minigame without its own rule, like the quiz, takes the player out of the round as
 if they had left it: no more answers, the score kept). A guest's round message → `err "not-host"`;
@@ -151,7 +151,7 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 ```jsonc
 { "t": "start" }                       // host, in the room: picks `count` questions among the bank (filtered by the
                                        // settings, minus every question asked this evening); none left → err "refused"
-{ "t": "again" }                       // host, quiz finished: a new quiz at once, same players minus those who left,
+{ "t": "again" }                       // host, quiz finished: a new quiz at once, every non-left party member (newcomers too),
                                        // questions picked as for start
 { "t": "newGame" }                     // host, quiz finished → back to the room at the tableau
 { "t": "answer", "choice": 2 }         // a choice round: the DISPLAYED index (choices are shuffled per round)
