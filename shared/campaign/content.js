@@ -78,7 +78,7 @@ export function validateContent(content) {
   if (!isCharacterId(content.chooser)) errors.push(`chooser "${content.chooser}" is not a character`);
   const start = nodes[content.start];
   if (!start) errors.push(`start "${content.start}" is not a node`);
-  else if (start.activity?.kind !== 'blocks') errors.push(`start "${content.start}" must be a blocks tableau`);
+  else if (!minigame(start.activity?.kind)) errors.push(`start "${content.start}" must be the tableau of a minigame`);
   // the item catalogue: only these can exist
   const items = content.items;
   if (!items || typeof items !== 'object' || Array.isArray(items)) errors.push('content needs an item catalogue: items: { [id]: { id, name, icon, description } }');

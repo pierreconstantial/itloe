@@ -68,7 +68,7 @@ export {};
 
 /**
  * @typedef {{
- *   start: string,              // where a NEW campaign starts (the false-start blocks tableau)
+ *   start: string,              // where a NEW campaign starts: a minigame's tableau (the false-start block game)
  *   chooser: CharacterId,       // whose walking opens doors ('elodie')
  *   nodes: Record<string, Node>,
  *   items: Record<string, Item>, // the item catalogue (keys = ids)

@@ -50,7 +50,7 @@ test('validateContent reports unknown parents, unknown refs, cycles, key/id mism
   bad.chooser = 'bowser';
   const errs = validateContent(bad).join('\n');
   for (const want of ['unknown parent "nowhere"', 'unknown node "ghost"', 'a tableau cannot have children', 'differs from its key',
-    'unlocks unknown node "nope"', 'start "adult" must be a blocks tableau', 'chooser "bowser"']) {
+    'unlocks unknown node "nope"', 'start "adult" must be the tableau of a minigame', 'chooser "bowser"']) {
     assert.ok(errs.includes(want), `missing: ${want}\n${errs}`);
   }
   /** @type {any} */
@@ -58,6 +58,25 @@ test('validateContent reports unknown parents, unknown refs, cycles, key/id mism
   cyc.nodes.childhood.parent = 'teens';
   cyc.nodes.teens.parent = 'childhood';
   assert.ok(validateContent(cyc).some((e) => e.includes('parent cycle')));
+});
+
+test('validateContent checks activities through the rules list: any minigame starts', () => {
+  /** @type {any} */
+  const quizStart = structuredClone(C);
+  quizStart.start = 'childhood.quiz';
+  assert.deepEqual(validateContent(quizStart), []);
+  const c = newCampaign(quizStart, 1);
+  assert.equal(c.at.kind, 'quiz');
+  assert.equal(c.at.activity?.phase, 'lobby');
+
+  /** @type {any} */
+  const bad = structuredClone(C);
+  bad.start = 'childhood.scene';
+  bad.nodes['teens.scene'].activity = { kind: 'darts' };
+  const errs = validateContent(bad).join('\n');
+  for (const want of ['start "childhood.scene" must be the tableau of a minigame', 'node "teens.scene": unknown activity "darts"']) {
+    assert.ok(errs.includes(want), `missing: ${want}\n${errs}`);
+  }
 });
 
 test('zoneAt: the child whose door contains the point, else null', () => {
