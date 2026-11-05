@@ -50,7 +50,7 @@ const until = async (c: Client, pred: (k: any) => boolean, from = 0, ms = 3000) 
 /** The persisted part of the evening, comparable across a restart (the seed is checked on its own). */
 const core = (k: any) => JSON.stringify({
   // a timed game's deadline moves by the downtime on purpose (checked on its own)
-  at: { ...k.at, activity: k.at.activity && { ...k.at.activity, deadline: null } },
+  at: { node: k.at.node, kind: k.at.kind, activity: k.at.activity && { ...k.at.activity, deadline: null }, settings: k.at.settings },
   party: k.party, facts: k.facts, news: k.news, newsSeq: k.newsSeq,
 });
 const errOf = async (c: Client, msg: object): Promise<string | null> => {
@@ -251,7 +251,7 @@ try {
   await until(P, (x) => x.at.node === 'teens', i);
   i = P.mark(); P.send({ t: 'enter', node: 'teens.blocks' });
   k = await until(P, (x) => x.at.node === 'teens.blocks', i);
-  check(k.at.activity?.phase === 'lobby' && k.at.activity.settings.mode === 'timed' && k.at.activity.order.length === 2,
+  check(k.at.activity?.phase === 'lobby' && k.at.settings.mode === 'timed' && k.at.activity.order.length === 2,
     "host enters a world's blocks tableau → its lobby with the node's settings (timed), the whole party seated");
   i = P.mark(); P.send({ t: 'start' });
   await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);

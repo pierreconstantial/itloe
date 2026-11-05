@@ -11,7 +11,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, HTTP, quizOf, sleep } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, quizOf, settingsOf, sleep } from './e2e-lib.mts';
 import { expectedAnswers } from '../shared/quiz/judge-local.js';
 
 const PORT = process.env.PORT ?? '3141';
@@ -164,7 +164,7 @@ try {
     'quiz tableau → quiz lobby with the party seated; no block game in the view (block clients never see a quiz)');
   check(await errOf(E, { t: 'config', patch: { count: 3 } }) === 'not-host', 'quiz config: host only');
   i = P.mark(); P.send({ t: 'config', patch: { count: 3, seconds: 10, mode: 'mixed' } });
-  q = await untilQuiz(P, (x) => x.settings.count === 3 && x.settings.seconds === 10, i);
+  await P.waitFor((m) => m.t === 'view' && settingsOf(m)?.count === 3 && settingsOf(m).seconds === 10, i);
   check(true, 'host configures the quiz (3 questions, 10 s)');
   check(await errOf(E, { t: 'start' }) === 'not-host', 'quiz start: host only');
   check(await errOf(E, { t: 'place', piece: 0, x: 0, y: 0 }) === 'not-playing', 'block messages during a quiz → not-playing');
@@ -297,7 +297,7 @@ try {
   P.send({ t: 'gm', op: { op: 'goto', node: QUIZ } });
   await untilQuiz(P, (x) => x.phase === 'lobby');
   i = P.mark(); P.send({ t: 'config', patch: { count: 3, mode: 'text' } });
-  await untilQuiz(P, (x) => x.settings.count === 3 && x.settings.mode === 'text', i);
+  await P.waitFor((m) => m.t === 'view' && settingsOf(m)?.count === 3 && settingsOf(m).mode === 'text', i);
   i = T.mark(); P.send({ t: 'start' });
   q = await untilQuiz(T, (x) => x.phase === 'question', i);
   const tq = tiny.find((x) => x.q === q.round.question.q)!;

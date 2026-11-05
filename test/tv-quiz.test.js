@@ -1,10 +1,13 @@
 // TV quiz screen helpers (public/screen/quiz-view.js) over the real reducer + public projection.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initQuiz, reduceQuiz } from '../shared/quiz/index.js';
+import { initQuiz, reduceQuiz as reduceRound } from '../shared/quiz/index.js';
 import { projectQuiz } from '../shared/quiz/bank.js';
 import { anecdoteOf, pickedBy, questionHeader, revealRows, seatedIds } from '../public/screen/quiz-view.js';
 import { summarizeQuiz } from '../public/commun/quiz-text.js';
+
+/** The quiz reducer, with the tableau's settings the campaign passes: the ones the quiz was created with. */
+const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { settings: s.rules });
 
 const T0 = 1_700_000_000_000;
 /** @type {Record<string, any>} */

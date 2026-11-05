@@ -1,10 +1,13 @@
 // TV effects logic: the clear ghost includes the completing piece's cells; "+N" floaters merge / stack.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initState, newPlayer, reduce } from '../shared/game.js';
+import { initState, newPlayer, reduce as reduceGame } from '../shared/game.js';
 import { detectMove } from '../public/screen/events.js';
 import { clearedCells } from '../public/screen/game-view.js';
 import { createFloaterPlanner, MERGE_MS, LIFE_MS } from '../public/screen/floaters.js';
+
+/** The block reducer, with the tableau's settings the campaign passes: the ones the game was created with. */
+const reduce = (/** @type {import('../shared/game.js').State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { settings: s.rules });
 
 const SIZE = 8;
 

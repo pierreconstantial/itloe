@@ -5,7 +5,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { validateBank, candidatesFor, judgeAnswer, projectQuiz, answerText } from '../shared/quiz/bank.js';
 import { expectedAnswers } from '../shared/quiz/judge-local.js';
-import { initQuiz, reduceQuiz, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
+import { initQuiz, reduceQuiz as reduceRound, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
+
+/** The quiz reducer, with the tableau's settings the campaign passes: the ones the quiz was created with. */
+const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { settings: s.rules });
 
 /** @type {import('../shared/quiz/bank.js').Question[]} */
 const BANK = JSON.parse(readFileSync(new URL('../data/quiz/placeholder.json', import.meta.url), 'utf8')).questions;
@@ -78,7 +81,7 @@ function playAll(mode) {
   let s = initQuiz(7, { mode, count: 10 });
   s = reduceQuiz(s, { t: 'join', id: 'a', character: 'anna' });
   s = reduceQuiz(s, { t: 'join', id: 'b', character: 'sol' });
-  s = reduceQuiz(s, { t: 'start', id: 'a', now: T0, candidates: candidatesFor(BANK, s.settings, []) });
+  s = reduceQuiz(s, { t: 'start', id: 'a', now: T0, candidates: candidatesFor(BANK, s.rules, []) });
   /** @type {{ phase: string, json: string, q: import('../shared/quiz/bank.js').Question }[]} */
   const seen = [];
   let now = T0;
@@ -103,7 +106,7 @@ test('credits in every phase; a question\'s source only from the reveal on', () 
   let s = initQuiz(3, { mode: 'choice', count: 3 });
   s = reduceQuiz(s, { t: 'join', id: 'a', character: 'anna' });
   assert.deepEqual(projectQuiz(s, lookup, credits).credits, credits, 'lobby');
-  s = reduceQuiz(s, { t: 'start', id: 'a', now: T0, candidates: candidatesFor(BANK, s.settings, []) });
+  s = reduceQuiz(s, { t: 'start', id: 'a', now: T0, candidates: candidatesFor(BANK, s.rules, []) });
   const question = projectQuiz(s, lookup, credits);
   assert.deepEqual(question.credits, credits, 'question');
   const src = /** @type {any} */ (lookup(/** @type {any} */ (s.round).questionId)).source;

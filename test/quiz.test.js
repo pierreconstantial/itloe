@@ -1,7 +1,11 @@
 // Contract E — the quiz reducer (shared/quiz/index.js): pure, seeded, never sees an answer.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initQuiz, reduceQuiz, quizRanking, resolvePending, mergeQuizSettings, pointsFor, SCORING, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
+import { initQuiz, reduceQuiz as reduceRound, quizRanking, resolvePending, mergeQuizSettings, pointsFor, SCORING, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
+
+/** @typedef {import('../shared/quiz/index.js').QuizState} QuizState */
+/** The reducer, with the tableau's settings the campaign passes: by default the ones the quiz was created with. */
+const reduceQuiz = (/** @type {QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a, settings = s.rules) => reduceRound(s, a, { settings });
 
 const T0 = 1_700_000_000_000;
 /** 6 candidates: 4 with choices, 2 text-only. */

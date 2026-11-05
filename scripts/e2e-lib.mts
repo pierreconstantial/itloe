@@ -21,6 +21,8 @@ export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export const blocksOf = (v: any): any => (v?.round?.kind === 'blocks' ? v.round.view : null);
 /** A view's quiz (its round's view while a quiz runs: the public projection), else null. */
 export const quizOf = (v: any): any => (v?.round?.kind === 'quiz' ? v.round.view : null);
+/** A view's tableau settings (the campaign keeps them), else null. */
+export const settingsOf = (v: any): any => v?.campaign?.at.settings ?? null;
 
 export class Client {
   ws!: WebSocket;
@@ -44,6 +46,8 @@ export class Client {
   since(i: number): any[] { return this.msgs.slice(i); }
   /** The block game in the last view, or null. */
   lastView(): any { return blocksOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
+  /** The tableau's settings in the last view, or null. */
+  lastSettings(): any { return settingsOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
   async waitFor(pred: (m: any) => boolean, from = 0, ms = 2000): Promise<any> {
     const end = Date.now() + ms * SLOW;
     while (Date.now() < end) {

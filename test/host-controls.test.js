@@ -1,9 +1,12 @@
 // Host controls: endGame + retire (a disconnected player can never block a game).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initState, ranking, reduce } from '../shared/game.js';
+import { initState, ranking, reduce as reduceGame } from '../shared/game.js';
 
 /** @typedef {import('../shared/game.js').State} State */
+
+/** The reducer, with the tableau's settings the campaign passes: the ones the round was created with. */
+const reduce = (/** @type {State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { settings: s.rules });
 
 /** Marathon game under way: a (host, anna), b (sol), c (pierre); a has made one move. @returns {State} */
 function game3() {

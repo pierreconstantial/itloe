@@ -5,7 +5,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, HTTP, legalMoves, playToDone, sleep } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, legalMoves, playToDone, settingsOf, sleep } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -70,14 +70,18 @@ try {
   await A.waitFor((m) => m.t === 'view' && blocksOf(m).order.length === 2);
   A.send({ t: 'pos', x: 4, y: 4, dir: 'up', moving: false });
   await sleep(100);
+  i = A.mark(); A.send({ t: 'config', patch: { grace: 2 } }); // settings changed in the lobby
+  await A.waitFor((m) => m.t === 'view' && settingsOf(m)?.grace === 2, i);
   const lobby = A.lastView();
+  const lobbySettings = JSON.stringify(A.lastSettings());
   check(!readFileSync(join(VAR, 'bloko.state.json'), 'utf8').includes('"pos"'), 'avatar positions are never persisted');
 
   await kill9(); await boot();
   check((await roomCode()) === room, `lobby kill -9 → same room code (${room})`);
   A = await rejoin('A', idA); B = await rejoin('B', idB);
-  check(core(A.lastView()) === core(lobby) && A.lastView().phase === 'lobby' && A.lastView().hostId === idA,
-    'lobby kill -9 → same players, host and settings; stored ids rejoin');
+  check(core(A.lastView()) === core(lobby) && A.lastView().phase === 'lobby' && A.lastView().hostId === idA
+    && JSON.stringify(A.lastSettings()) === lobbySettings && A.lastSettings().grace === 2,
+    'lobby kill -9 → same players, host and settings (changed in the lobby); stored ids rejoin');
   check(!A.msgs.some((m) => m.t === 'pos'), 'positions are ephemeral: none replayed after a restart');
   check(/RESUMED .* block game lobby/.test(log), 'server log says it resumed the lobby');
 
@@ -100,11 +104,16 @@ try {
   await playToDone(A, idA, B, rnd);
   await playToDone(B, idB, A, rnd);
   await A.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'finished');
+  i = A.mark(); A.send({ t: 'config', patch: { cleanBoardBonus: 450 } }); // the next game's settings, set on the podium
+  await A.waitFor((m) => m.t === 'view' && settingsOf(m)?.cleanBoardBonus === 450, i);
   const podium = A.lastView();
+  const podiumSettings = JSON.stringify(A.lastSettings());
 
   await kill9(); await boot();
   A = await rejoin('A', idA); B = await rejoin('B', idB);
   check(core(A.lastView()) === core(podium) && A.lastView().phase === 'finished', 'finished kill -9 → same podium');
+  check(JSON.stringify(A.lastSettings()) === podiumSettings && A.lastSettings().grace === 2 && A.lastSettings().cleanBoardBonus === 450,
+    'finished kill -9 → the settings changed in the lobby and on the podium are kept');
   i = B.mark(); B.send({ t: 'newGame' });
   check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-host', 'after resume: non-host newGame → err not-host');
   i = A.mark(); A.send({ t: 'newGame' });
@@ -118,7 +127,7 @@ try {
 
   // ---------- playing (timed): the clock keeps its REMAINING time ----------
   A.send({ t: 'config', patch: { mode: 'timed', timedSeconds: 60 } });
-  await A.waitFor((m) => m.t === 'view' && blocksOf(m).settings.mode === 'timed');
+  await A.waitFor((m) => m.t === 'view' && settingsOf(m)?.mode === 'timed');
   i = A.mark(); A.send({ t: 'start' });
   const tv = await A.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'playing', i);
   const deadline0 = blocksOf(tv).deadline as number;
@@ -194,7 +203,8 @@ try {
   await kill9();
   const v2 = JSON.parse(readFileSync(FILE, 'utf8'));
   check(v2.v === 2 && !!v2.campaign && typeof v2.savedAt === 'number', 'the save is an envelope v2 { v:2, campaign, room, savedAt }');
-  const legacy = { v: 1, savedAt: Date.now(), state: v2.campaign.at.activity, room: v2.room, bestPrevious: null };
+  // a v1 save is a bare block State, which kept its settings
+  const legacy = { v: 1, savedAt: Date.now(), state: { ...v2.campaign.at.activity, settings: v2.campaign.at.settings }, room: v2.room, bestPrevious: null };
   writeFileSync(FILE, JSON.stringify(legacy));
   await boot();
   check(/MIGRATED a v1 save/.test(log), 'v1 save → migrated (server log says so)');

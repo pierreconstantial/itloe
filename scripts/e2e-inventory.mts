@@ -9,7 +9,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, HTTP, quizOf, sleep } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, quizOf, settingsOf, sleep } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -83,7 +83,7 @@ const gm = (c: Client, op: object) => c.send({ t: 'gm', op });
 async function playQuiz(host: Client, players: { c: Client, right: boolean }[], T: Client): Promise<void> {
   let i = T.mark();
   host.send({ t: 'config', patch: { count: 3, mode: 'choice' } });
-  await T.waitFor((m) => m.t === 'view' && quizOf(m)?.settings.mode === 'choice' && quizOf(m).settings.count === 3, i);
+  await T.waitFor((m) => m.t === 'view' && settingsOf(m)?.mode === 'choice' && settingsOf(m).count === 3, i);
   i = T.mark(); host.send({ t: 'start' });
   let q = quizOf(await T.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'question', i));
   for (let r = 0; r < 3; r++) {

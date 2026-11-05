@@ -6,11 +6,14 @@ import { PIECES, PIECE_SETS, handAt } from '../shared/pieces.js';
 import { CHARACTERS, ROSTER_SIZE, freeCharacters } from '../shared/characters.js';
 import { WORLD, WALK_SPEED, spawnPoint, clampToWorld } from '../shared/world.js';
 import {
-  DEFAULT_SETTINGS, SETTINGS_SCHEMA, initState, newPlayer, normalizeSettings, placementScore, ranking, reduce,
+  DEFAULT_SETTINGS, SETTINGS_SCHEMA, initState, newPlayer, normalizeSettings, placementScore, ranking, reduce as reduceGame,
 } from '../shared/game.js';
 
 /** @typedef {import('../shared/game.js').State} State */
 /** @typedef {import('../shared/game.js').Player} Player */
+
+/** The reducer, with the tableau's settings the campaign passes: by default the ones the round was created with. */
+const reduce = (/** @type {State} */ s, /** @type {import('../shared/game.js').Action} */ a, settings = s.rules) => reduceGame(s, a, { settings });
 
 const SIZE = 8;
 
@@ -424,7 +427,6 @@ test('defaults = M1 behaviour; initState normalizes the settings it is given', (
     size: 8, mode: 'marathon', timedSeconds: 180, pieceSet: 'full', grace: 1, cleanBoardBonus: 300,
   });
   const s = initState(1);
-  assert.deepEqual(s.settings, DEFAULT_SETTINGS);
   assert.deepEqual(s.rules, DEFAULT_SETTINGS);
   assert.equal(s.size, 8);
   assert.equal(s.deadline, null);
@@ -432,8 +434,8 @@ test('defaults = M1 behaviour; initState normalizes the settings it is given', (
   const t = initState(1, { size: 10, timedSeconds: 999, pieceSet: /** @type {any} */ ('weird') });
   assert.equal(t.size, 10);
   assert.equal(t.rules.size, 10);
-  assert.equal(t.settings.timedSeconds, 300);
-  assert.equal(t.settings.pieceSet, 'full');
+  assert.equal(t.rules.timedSeconds, 300);
+  assert.equal(t.rules.pieceSet, 'full');
   assert.deepEqual(Object.keys(SETTINGS_SCHEMA).sort(), Object.keys(DEFAULT_SETTINGS).sort());
 });
 
@@ -460,39 +462,12 @@ test('normalizeSettings: clamp + snap ranges, reject bad choices, ignore junk', 
   assert.equal(normalizeSettings({ grace: 2 }, base).size, 10); // patch applies on top of base
 });
 
-test('config: host only, lobby/finished only, no-op patch → same state', () => {
-  const s = lobby2();
-  assert.equal(reduce(s, { t: 'config', id: 'b', patch: { size: 9 } }), s); // not host
-  assert.equal(reduce(s, { t: 'config', id: 'a', patch: { size: 8 } }), s); // no change
-  assert.equal(reduce(s, { t: 'config', id: 'a', patch: /** @type {any} */ ({ size: 7 }) }), s); // invalid → no change
-  assert.equal(reduce(s, { t: 'config', id: 'a', patch: /** @type {any} */ (null) }), s);
-  const started = reduce(s, { t: 'start', id: 'a' });
-  assert.equal(reduce(started, { t: 'config', id: 'a', patch: { size: 9 } }), started); // locked mid-game
-});
-
-test('config in lobby: settings + rules + size + lobby boards follow', () => {
-  const s = reduce(lobby2(), { t: 'config', id: 'a', patch: { size: 10, grace: 2 } });
-  assert.equal(s.settings.size, 10);
-  assert.equal(s.rules.size, 10);
-  assert.equal(s.size, 10);
-  assert.equal(s.players.a.board.length, 100);
-  assert.equal(s.players.b.graceLeft, 2);
-  assert.deepEqual(s.order, ['a', 'b']);
-  assert.equal(s.players.b.color, 2);
-  const joined = reduce(s, { t: 'join', id: 'c', character: 'sol' });
-  assert.equal(joined.players.c.board.length, 100); // late joiner gets the current size
-});
-
-test('config in finished: only settings change, again locks them in', () => {
+test('again locks in the tableau settings it is given; the podium kept the old rules until then', () => {
   const s = reduce(lobby2(), { t: 'start', id: 'a' });
   /** @type {State} */
   const fin = { ...s, phase: 'finished' };
-  const cfg = reduce(fin, { t: 'config', id: 'a', patch: { size: 9, pieceSet: 'simple' } });
-  assert.equal(cfg.settings.size, 9);
-  assert.equal(cfg.rules.size, 8); // podium boards still 8×8
-  assert.equal(cfg.size, 8);
-  assert.equal(cfg.players.a.board, fin.players.a.board);
-  const again = reduce(cfg, { t: 'again', id: 'a' });
+  assert.equal(fin.rules.size, 8); // podium boards still 8×8
+  const again = reduce(fin, { t: 'again', id: 'a' }, { ...fin.rules, size: 9, pieceSet: 'simple' });
   assert.equal(again.rules.size, 9);
   assert.equal(again.size, 9);
   assert.equal(again.rules.pieceSet, 'simple');
@@ -661,9 +636,6 @@ test('mid-game: a left player does not block its character; rematch keeps charac
   assert.deepEqual(again.order, ['a', 'c']);
   assert.deepEqual(again.order.map((id) => again.players[id].character), ['pierre', 'sol']);
   assert.deepEqual(again.order.map((id) => [again.players[id].name, again.players[id].color]), [['Pierre', 1], ['Sol', 3]]);
-  // config in the lobby rebuilds players and must keep their characters too
-  const cfg = reduce(lobby3(), { t: 'config', id: 'a', patch: { size: 9 } });
-  assert.deepEqual(cfg.order.map((id) => cfg.players[id].character), ['pierre', 'elodie', 'sol']);
 });
 
 test('leave in lobby: host passes to the next player; empty lobby stays valid', () => {
@@ -857,22 +829,18 @@ test('newGame: host on the podium → fresh lobby, same players, new seed, setti
   assert.notEqual(s.seed, fin.seed);
   assert.equal(s.seed, reduce(fin, { t: 'again', id: 'a' }).seed); // same derivation as «Replay»
   assert.deepEqual([s.deadline, s.endReason], [null, null]);
-  assert.deepEqual(s.rules, s.settings);
+  assert.deepEqual(s.rules, fin.rules);
   assert.equal(s.size, s.rules.size);
   for (const id of s.order) {
     const p = s.players[id];
     assert.deepEqual(p, newPlayer(id, fin.players[id].name, fin.players[id].color, SIZE, s.rules.grace, fin.players[id].character));
     assert.deepEqual(p.hand, [null, null, null]); // lobby players hold no hand, like after a join
   }
-  // config is live again in that lobby and rebuilds boards
-  const cfg = reduce(s, { t: 'config', id: 'a', patch: { size: 10 } });
-  assert.deepEqual([cfg.rules.size, cfg.players.c.board.length], [10, 100]);
 });
 
-test('newGame: settings changed on the podium become the lobby rules', () => {
-  const fin = reduce(podium3(), { t: 'config', id: 'a', patch: { size: 9, grace: 2 } });
-  assert.equal(fin.rules.size, 8); // podium keeps showing the old game
-  const s = reduce(fin, { t: 'newGame', id: 'a' });
+test('newGame: the tableau settings it is given become the lobby rules', () => {
+  const fin = podium3();
+  const s = reduce(fin, { t: 'newGame', id: 'a' }, { ...fin.rules, size: 9, grace: 2 });
   assert.deepEqual([s.rules.size, s.size, s.rules.grace], [9, 9, 2]);
   assert.equal(s.players.a.board.length, 81);
   assert.equal(s.players.a.graceLeft, 2);

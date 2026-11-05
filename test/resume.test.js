@@ -1,9 +1,15 @@
 // P2 — timed-pause fairness (server/resume.ts): any round keeps its remaining time.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initState, reduce } from '../server/rules.ts';
+import { initState, reduce as reduceGame } from '../server/rules.ts';
 import { savedAtMs, shiftRound } from '../server/resume.ts';
-import { initQuiz, reduceQuiz } from '../shared/quiz/index.js';
+import { initQuiz, reduceQuiz as reduceRound } from '../shared/quiz/index.js';
+
+/** The block reducer, with the tableau's settings the campaign passes: the ones the game was created with. */
+const reduce = (/** @type {import('../shared/game.js').State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { settings: s.rules });
+
+/** The quiz reducer, with the tableau's settings the campaign passes: the ones the quiz was created with. */
+const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { settings: s.rules });
 
 const T0 = 1_700_000_000_000;
 

@@ -6,8 +6,11 @@ import {
   record, reduceCampaign, settle, validateContent, zoneAt, holding,
 } from '../shared/campaign/index.js';
 import { minigameContent } from '../shared/campaign/sample.js';
-import { initState, reduce } from '../shared/game.js';
+import { DEFAULT_SETTINGS, initState, reduce as reduceGame } from '../shared/game.js';
 import { MINIGAMES } from '../shared/minigames.js';
+
+/** The block reducer, with the tableau's settings the campaign passes: the ones the game was created with. */
+const reduce = (/** @type {import('../shared/game.js').State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { settings: s.rules });
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
 /** @typedef {import('../shared/campaign/types.js').CampaignAction} CampaignAction */
@@ -180,7 +183,7 @@ test('round.finished is derived exactly once per game, in the same step, any end
   assert.equal(run(c, { t: 'event', event: { t: 'round.finished', kind: 'blocks', node: 'hub.false-start', ranking: [], endReason: 'stuck' } }), c);
   // the bell
   const timed = run(newCampaign(C, 5), { t: 'join', id: 'e', character: 'elodie' },
-    { t: 'activity', action: { t: 'config', id: 'e', patch: { mode: 'timed' } } },
+    { t: 'config', id: 'e', patch: { mode: 'timed' } },
     { t: 'activity', action: { t: 'start', id: 'e', now: 1000 } });
   const d = /** @type {number} */ (/** @type {any} */ (timed.at.activity)?.deadline);
   const rung = run(timed, { t: 'activity', action: { t: 'timeUp', deadline: d } });
@@ -213,10 +216,29 @@ test('chain: both tableaux done → world done → third world unlocks', () => {
 
 test('node settings reach the block lobby (teens.blocks is timed)', () => {
   let c = run(playOnce(playOnce(playOnce(party()))), { t: 'back', id: 'e' }, { t: 'enter', id: 'e', node: 'teens' }, { t: 'enter', id: 'e', node: 'teens.blocks' });
-  assert.equal(c.at.activity?.settings.mode, 'timed');
-  assert.equal(c.at.activity?.settings.timedSeconds, 120);
+  assert.equal(/** @type {any} */ (c.at.settings).mode, 'timed');
+  assert.equal(/** @type {any} */ (c.at.settings).timedSeconds, 120);
   c = run(c, { t: 'back', id: 'e' }, { t: 'enter', id: 'e', node: 'childhood' });
   assert.equal(c.at.node, 'teens', 'enter only a child of where the party is (childhood is a sibling)');
+});
+
+test('config: the host sets the tableau settings, not while a round runs; a round locks them in; leaving resets them', () => {
+  const c = party();
+  const timed = run(c, { t: 'config', id: 'e', patch: { mode: 'timed', size: 11 } });
+  assert.deepEqual(/** @type {any} */ (timed.at.settings), { ...DEFAULT_SETTINGS, mode: 'timed' }, 'invalid values ignored');
+  assert.equal(run(timed, { t: 'config', id: 's', patch: { size: 9 } }), timed, 'guest → refused');
+  assert.equal(run(timed, { t: 'config', id: 'e', patch: { mode: 'timed' } }), timed, 'no change → same campaign');
+  const playing = run(timed, { t: 'activity', action: { t: 'start', id: 'e', now: 1000 } });
+  assert.equal(/** @type {any} */ (playing.at.activity).rules.mode, 'timed', 'start locks them in');
+  assert.equal(run(playing, { t: 'config', id: 'e', patch: { size: 9 } }), playing, 'running → refused');
+  const podium = run(playing, { t: 'activity', action: { t: 'endGame', id: 'e' } });
+  const next = run(podium, { t: 'config', id: 'e', patch: { size: 9 } });
+  assert.equal(/** @type {any} */ (next.at.settings).size, 9, 'the podium takes the next settings');
+  assert.equal(/** @type {any} */ (next.at.activity).rules.size, 8, '…and keeps showing the game played');
+  const again = run(next, { t: 'activity', action: { t: 'again', id: 'e', now: 2000 } });
+  assert.equal(/** @type {any} */ (again.at.activity).rules.size, 9, 'again locks them in');
+  const back = run(next, { t: 'gm', id: 'e', op: { op: 'goto', node: 'hub' } }, { t: 'gm', id: 'e', op: { op: 'goto', node: C.start } });
+  assert.deepEqual(back.at.settings, DEFAULT_SETTINGS, 'leaving the tableau resets them to the content');
 });
 
 test('rewards apply once; replayable games re-enter, one-shot scenes do not', () => {
@@ -364,7 +386,7 @@ test('content tolerance: unknown ids dropped, settle re-runs, nothing re-locked'
   assert.ok(l2.facts.unlocked.includes('bonus'));
   assert.ok(l2.news.some((n) => n.t === 'unlocked' && n.node === 'bonus' && n.seq > raw.newsSeq));
   // the party stood in a node that no longer exists → back at the start
-  const lost = loadCampaign({ ...raw, at: { node: 'removed.world', kind: null, activity: null } }, C);
+  const lost = loadCampaign({ ...raw, at: { node: 'removed.world', kind: null, activity: null, settings: null } }, C);
   assert.equal(lost.at.node, C.start);
   assert.equal(lost.at.activity?.phase, 'lobby');
 });
