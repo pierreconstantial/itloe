@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newCampaign, reduceCampaign, validateContent, holding } from '../shared/campaign/index.js';
+import { newCampaign, reduceCampaign, validateContent, holding, roomAt, SAMPLE_CONTENT } from '../shared/campaign/index.js';
 import { INTRO_KEY, MEMORY_WORLDS, OPENING_PLAYERS, PORTAL, STORY_CONTENT } from '../shared/campaign/story.js';
-import { PARTY_ROOM, spawnAt } from '../shared/scene.js';
+import { APARTMENT_ROOM, DOOR_FOUR_ROOM, PARTY_ROOM, spawnAt } from '../shared/scene.js';
 import { CHARACTERS } from '../shared/characters.js';
 
 /** @param {import('../shared/campaign/types.js').Campaign} campaign
@@ -73,4 +73,12 @@ test('the portal stands clear of every avatar on the party room\'s spawn row', (
     assert.ok(at.y - 1.2 > PORTAL.y + PORTAL.radius || Math.abs(at.x - PORTAL.x) > PORTAL.radius,
       `${character} starts at ${at.x}, ${at.y}, in front of the portal`);
   }
+});
+
+test('the story names its rooms by node: the hub is the apartment, door #4 its own room, the rest the party room', () => {
+  assert.equal(roomAt(STORY_CONTENT, 'hub'), APARTMENT_ROOM);
+  assert.equal(roomAt(STORY_CONTENT, 'hub.door4'), DOOR_FOUR_ROOM);
+  for (const node of ['hub.false-start', 'memory.childhood', 'future']) assert.equal(roomAt(STORY_CONTENT, node), PARTY_ROOM);
+  assert.equal(roomAt(SAMPLE_CONTENT, 'hub'), PARTY_ROOM);
+  assert.equal(roomAt(STORY_CONTENT, undefined), PARTY_ROOM);
 });

@@ -26,11 +26,11 @@ import { INTRO_KEY, INTRO_KEY_SPOT, OPENING_PLAYERS, PORTAL } from '../shared/ca
 import type { CharacterId } from '../shared/campaign/types.js';
 import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
 import { holding } from '../shared/campaign/index.js';
-import { PARTY_ROOM, APARTMENT_ROOM, DOOR_FOUR_ROOM, spawnAt } from '../shared/scene.js';
+import { PARTY_ROOM, spawnAt } from '../shared/scene.js';
 import { nearbyObject } from '../shared/interactions.js';
 import { loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import {
-  CONTENT, CONTENT_VERSION, assertContent, reduceCampaign, isUnlocked, roundStatus, zoneAt,
+  CONTENT, CONTENT_VERSION, assertContent, reduceCampaign, isUnlocked, roundStatus, zoneAt, roomAt,
   type Campaign, type CampaignAction, type GmOp,
 } from './campaign.ts';
 
@@ -356,7 +356,7 @@ function handleMessage(ws: WebSocket, m: any): void {
 
   if (m.t === 'interact') {
     const id = who.get(ws);
-    // the party room's furniture: wherever avatars walk there (hub, world, a block or quiz lobby)
+    // the furniture of the room where the party is (roomAt), wherever avatars walk (hub, world, a block or quiz lobby)
     if (!id || !isMember(id) || (game.campaign.at.activity && roundStatus(game.campaign) !== 'lobby')) return;
     if (STORY_MODE && game.campaign.at.node === 'hub' && party().players[id].character !== CONTENT.chooser) return;
     if (STORY_MODE && m.object === INTRO_KEY && game.campaign.at.node === 'hub'
@@ -372,9 +372,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     if (now - (interactionAt.get(ws) ?? 0) < 700) return;
     const member = party().players[id];
     const position = positions.get(id) ?? spawnAt(PARTY_ROOM, member.character);
-    const scene = STORY_MODE && game.campaign.at.node === 'hub' ? APARTMENT_ROOM
-      : game.campaign.at.node === 'hub.door4' ? DOOR_FOUR_ROOM : PARTY_ROOM;
-    const object = nearbyObject(scene, position);
+    const object = nearbyObject(roomAt(CONTENT, game.campaign.at.node), position);
     if (!object || object.id !== m.object) return;
     interactionAt.set(ws, now);
     const event = { t: 'interact', playerId: id, object: object.id, at: now };

@@ -12,7 +12,7 @@ import { syncClock, secondsLeft, mmss } from '../commun/clock.js';
 import { createSettingsSheet, summarize } from './settings-ui.js';
 import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.js';
 import { spawnPoint } from '../../shared/world.js';
-import { PARTY_ROOM, APARTMENT_ROOM, DOOR_FOUR_ROOM } from '../../shared/scene.js';
+import { roomAt } from '../../shared/campaign/content.js';
 import { nearbyObject, OBJECT_ACTIONS } from '../../shared/interactions.js';
 import { INTRO_KEY, INTRO_KEY_SPOT, OPENING_PLAYERS } from '../../shared/campaign/story.js';
 import { createPicker, pickStates, anyPickable } from './picker.js';
@@ -283,6 +283,8 @@ function member() {
 
 /** The party host steers the evening (game-master panel). */
 const isStory = () => campaign?.facts.flags.includes('story.elo-50') ?? false;
+/** The room where the party is: what the joystick walks in and the object button looks around. */
+const roomHere = () => roomAt(content(), campaign?.at.node);
 const isGameMaster = () => campaign !== null && playerId !== null && campaign.party.hostId === playerId
   && !!member() && (!isStory() || campaign.facts.flags.includes('portal.entered'));
 
@@ -516,8 +518,7 @@ function updateInteraction() {
   const canCollect = inHub && character === 'elodie' && pos && campaign?.facts.flags.includes('apparition.seen')
     && !campaign.facts.inventory.elodie?.[INTRO_KEY]
     && Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius;
-  const object = pos && (!inHub || character === 'elodie')
-    ? nearbyObject(inHub ? APARTMENT_ROOM : campaign?.at.node === 'hub.door4' ? DOOR_FOUR_ROOM : PARTY_ROOM, pos) : null;
+  const object = pos && (!inHub || character === 'elodie') ? nearbyObject(roomHere(), pos) : null;
   const button = /** @type {HTMLButtonElement} */ ($('btn-interact'));
   button.dataset.object = canCollect ? INTRO_KEY : object?.id ?? '';
   button.disabled = !(canCollect || object) || !conn.isOnline();
@@ -905,9 +906,7 @@ const joystick = createJoystick({
     const character = myCharacter();
     return character && canWalk() ? currentPos(character) : null;
   },
-  // one room so far; when there are several, this is where the current one is chosen
-  scene: () => campaign?.at.node === 'hub.door4' ? DOOR_FOUR_ROOM
-    : isStory() && campaign?.at.node === 'hub' ? APARTMENT_ROOM : PARTY_ROOM,
+  scene: roomHere,
   send: (pos) => {
     const turned = myPos?.dir !== pos.dir;
     myPos = pos;
@@ -955,8 +954,7 @@ $('btn-interact').addEventListener('click', () => {
       send({ t: 'interact', object: INTRO_KEY }); return;
     }
   }
-  const object = character ? nearbyObject(isStory() && campaign?.at.node === 'hub' ? APARTMENT_ROOM
-    : campaign?.at.node === 'hub.door4' ? DOOR_FOUR_ROOM : PARTY_ROOM, currentPos(character)) : null;
+  const object = character ? nearbyObject(roomHere(), currentPos(character)) : null;
   if (object) send({ t: 'interact', object: object.id });
   updateInteraction();
 });

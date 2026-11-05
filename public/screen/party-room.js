@@ -1,6 +1,6 @@
 // M3 party room, M4 (Contract G) the hub's scene: the lobby room with every joined guest's avatar
-// walking in it, among props they collide with and sort against. Its modes are the three rooms:
-// the party room, the apartment and door #4's room.
+// walking in it, among props they collide with and sort against. It draws the three rooms:
+// the party room, the apartment and door #4's room (ROOMS in shared/scene.js; roomAt picks one).
 //
 // This file is ONE room: its backdrop painting, its scene's prop art, the furniture effects of
 // object actions, and the story's drawings (the portal, the cats, the friends, the keepsakes, the
@@ -161,7 +161,7 @@ export function createPartyRoom(bg, fg, avatars) {
 
   let geo = worldView(1, 1, 1);
   let visible = false;
-  /** @type {'lobby' | 'apartment' | 'second-room'} */ let mode = 'lobby';
+  /** @type {import('../../shared/scene.js').Scene} */ let room = PARTY_ROOM;
   let portalVisible = false;
   let keyVisible = false;
   /** @type {string[]} */ let hubPeople = [];
@@ -200,7 +200,7 @@ export function createPartyRoom(bg, fg, avatars) {
     const Y = (/** @type {number} */ u) => snap(geo.oy + u * unit, p);
     const floorTop = Y(SCENE.floorTop);
 
-    if (mode === 'second-room') {
+    if (room === DOOR_FOUR_ROOM) {
       rect(g, 0, 0, w, floorTop, '#b8a998');
       rect(g, 0, floorTop, w, h - floorTop, '#8a6951');
       rect(g, 0, floorTop - p * 3, w, p * 3, PAL.stucco);
@@ -211,7 +211,7 @@ export function createPartyRoom(bg, fg, avatars) {
     paintWall(g, w, floorTop, p, Y);
     paintFloor(g, floorTop, w, h, p);
     paintWindow(g, X(SCENE.window.x0), X(SCENE.window.x1), Y(SCENE.window.top), floorTop - Y(SCENE.sill) + Y(0), p);
-    if (mode === 'apartment') {
+    if (room === APARTMENT_ROOM) {
       paintTerrace(g, X, Y, w, h, floorTop, p);
       paintChandelier(g, X(5.4), Y(SCENE.cornice), Y(SCENE.chandelier.y), p, unit);
       paintLight(g, X(5.4), Y(SCENE.chandelier.y), X(10.5), h, unit);
@@ -443,7 +443,7 @@ export function createPartyRoom(bg, fg, avatars) {
       } else if (active && prop.id === 'sofa') {
         g.translate(0, Math.abs(Math.sin(elapsed / 110)) * v.scale * 1.5);
       }
-      if (mode === 'apartment' && prop.id === 'sofa') {
+      if (room === APARTMENT_ROOM && prop.id === 'sofa') {
         g.translate(cx, 0);
         g.scale(1.7, 1);
         g.translate(-cx, 0);
@@ -507,10 +507,9 @@ export function createPartyRoom(bg, fg, avatars) {
     g.clearRect(0, 0, geo.w, geo.h);
     g.imageSmoothingEnabled = false;
     for (const d of doors) drawDoorway(g, d, now); // the doorways lie flat on the back wall, under everything
-    if (portalVisible && mode === 'lobby') drawPortal(g, now);
-    avatars.draw(g, geo, alpha, now,
-      mode === 'second-room' ? DOOR_FOUR_ROOM : mode === 'apartment' ? APARTMENT_ROOM : PARTY_ROOM, PROP_ART);
-    if (mode === 'apartment') {
+    if (portalVisible && room === PARTY_ROOM) drawPortal(g, now);
+    avatars.draw(g, geo, alpha, now, room, PROP_ART);
+    if (room === APARTMENT_ROOM) {
       drawCats(g, now);
       drawHubPeople(g, now);
       drawDecorations(g);
@@ -732,10 +731,10 @@ export function createPartyRoom(bg, fg, avatars) {
     }
   }
 
-  /** @param {'lobby' | 'apartment' | 'second-room'} next */
-  function setMode(next) {
-    if (mode === next) return;
-    mode = next;
+  /** @param {import('../../shared/scene.js').Scene} next a room from ROOMS, by roomAt */
+  function setRoom(next) {
+    if (room === next) return;
+    room = next;
     if (visible) paintScene();
   }
 
@@ -747,7 +746,7 @@ export function createPartyRoom(bg, fg, avatars) {
   addEventListener('resize', () => { if (visible) layout(); });
 
   return {
-    setPlayers, setDoors, onInteract, setVisible, setMode,
+    setPlayers, setDoors, onInteract, setVisible, setRoom,
     setPortal: (/** @type {boolean} */ on) => { portalVisible = on; },
     setKey: (/** @type {boolean} */ on) => { keyVisible = on; },
     setHubPeople: (/** @type {string[]} */ people) => { hubPeople = people; },

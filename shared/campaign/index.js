@@ -12,6 +12,7 @@
 //   isUnlocked(campaign, nodeId) · nodeAt(campaign, content)
 //   holds(cond, facts) · record(facts, event) · settle(facts, content, fromSeq) → { facts, news }
 //   validateContent(content) → string[] · zoneAt(content, nodeId, x, y) → child id | null
+//   roomAt(content, nodeId) → the node's room (a scene)
 //   SAMPLE_CONTENT (placeholder content: the demo and test fixture)
 //
 // Server contract: ids are injected (socket → playerId; ack: 'screen'); `activity.action` is rebuilt
@@ -21,10 +22,10 @@
 import { CHARACTERS, isCharacterId } from '../characters.js';
 import { minigame } from '../minigames.js';
 import { emptyFacts, holds, record, settle, migrateTotals, migrateInventory, addItem, holding, recipients, COUNTER } from './rules.js';
-import { validateContent, zoneAt, childrenOf } from './content.js';
+import { validateContent, zoneAt, roomAt, childrenOf } from './content.js';
 import { SAMPLE_CONTENT } from './sample.js';
 
-export { holds, record, settle, emptyFacts, holding, recipients, COUNTER, validateContent, zoneAt, childrenOf, SAMPLE_CONTENT };
+export { holds, record, settle, emptyFacts, holding, recipients, COUNTER, validateContent, zoneAt, roomAt, childrenOf, SAMPLE_CONTENT };
 
 /** @typedef {import('./types.js').Campaign} Campaign */
 /** @typedef {import('./types.js').CampaignAction} CampaignAction */

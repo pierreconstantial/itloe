@@ -252,3 +252,6 @@ export const APARTMENT_ROOM = room('apartment-room', PARTY_FLOOR, [
 
 /** Neutral second room beyond door #4; its story and furnishings have not been specified. */
 export const DOOR_FOUR_ROOM = room('door-four-room', PARTY_FLOOR, []);
+
+/** Every room by its id, which a content node names as its `room` (roomAt in shared/campaign/content.js). */
+export const ROOMS = Object.freeze(Object.fromEntries([PARTY_ROOM, APARTMENT_ROOM, DOOR_FOUR_ROOM].map((r) => [r.id, r])));

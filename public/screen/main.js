@@ -18,6 +18,7 @@ import { createLiveness } from '../commun/liveness.js';
 import { h } from './dom.js';
 import { createContentSource } from '../commun/content.js';
 import { doorStates, mapCopy, nameOf } from './doors.js';
+import { roomAt } from '../../shared/campaign/content.js';
 import { createCutscenes } from './cutscenes.js';
 import { renderQuiz, renderQuizRoom } from './quiz-view.js';
 import { applyJoinQr, joinQrState } from './join-qr.js';
@@ -130,7 +131,7 @@ function show(next) {
   if (next.phase === 'lobby') fx.clearAll();
 
   app.replaceChildren(VIEWS[next.phase](next, prev));
-  party.setMode('lobby');
+  party.setRoom(roomAt(content.get(), campaign?.at.node));
   party.setPortal(portalReady());
   party.setKey(false);
   party.setPlayers(next);
@@ -173,8 +174,7 @@ function showMap(c) {
     return member?.character === 'elodie' || c.facts.flags.includes(`person.${member?.character}.unlocked`);
   });
   party.setPlayers({ ...c.party, order: visibleIds });
-  const story = c.facts.flags.includes('story.elo-50');
-  party.setMode(story && c.at.node === 'hub' ? 'apartment' : story && c.at.node === 'hub.door4' ? 'second-room' : 'lobby');
+  party.setRoom(roomAt(content.get(), c.at.node));
   party.setPortal(false);
   party.setKey(inApartment && c.facts.flags.includes('apparition.seen') && !(c.facts.inventory.elodie?.[INTRO_KEY] > 0));
   party.setHubPeople(inApartment ? REUNIONS.filter((person) => c.facts.flags.includes(person.flag)
@@ -226,7 +226,7 @@ function showQuiz(q) {
   updateCountdown(null);
   // the quiz's lobby is the party room, as in a block lobby: avatars walk under the band
   const room = q.phase === 'lobby';
-  party.setMode('lobby');
+  party.setRoom(roomAt(content.get(), campaign?.at.node));
   party.setPortal(false);
   party.setKey(false);
   party.setPlayers(q);

@@ -63,6 +63,7 @@ export {};
  *   rewards?: Effect[],         // applied ONCE, the first time the node completes
  *   replayable?: boolean,       // can be entered again once done (games: yes)
  *   door?: Door,                // where its door is on the parent's map (hub/world children)
+ *   room?: string,              // the room the TV draws here, an id in ROOMS (shared/scene.js); default: the party room
  * }} Node
  */
 

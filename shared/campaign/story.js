@@ -41,7 +41,7 @@ export const STORY_CONTENT = {
     }),
   ]),
   nodes: {
-    hub: { id: 'hub', kind: 'hub', parent: null, title: "Elo's Vienna apartment", unlock: { always: true } },
+    hub: { id: 'hub', kind: 'hub', parent: null, title: "Elo's Vienna apartment", room: 'apartment-room', unlock: { always: true } },
     'hub.false-start': {
       id: 'hub.false-start', kind: 'tableau', parent: 'hub', title: 'Block game',
       activity: { kind: 'blocks' }, replayable: true, unlock: { always: true },
@@ -49,7 +49,7 @@ export const STORY_CONTENT = {
       rewards: [{ flag: 'portal.ready' }],
     },
     'hub.door4': {
-      id: 'hub.door4', kind: 'world', parent: 'hub', title: 'Door #4',
+      id: 'hub.door4', kind: 'world', parent: 'hub', title: 'Door #4', room: 'door-four-room',
       unlock: { has: INTRO_KEY, who: 'elodie' },
       door: { x: 7.6, y: 4.7, w: 2.7, h: 1.2 },
     },

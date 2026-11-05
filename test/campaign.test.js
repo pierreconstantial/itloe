@@ -39,7 +39,7 @@ test('the sample content is valid', () => {
   assert.deepEqual(validateContent(C), []);
 });
 
-test('validateContent reports unknown parents, unknown refs, cycles, key/id mismatch, bad start', () => {
+test('validateContent reports unknown parents, unknown refs, cycles, key/id mismatch, bad start, unknown room', () => {
   /** @type {any} */
   const bad = structuredClone(C);
   bad.nodes['teens.blocks'].parent = 'nowhere';
@@ -50,9 +50,10 @@ test('validateContent reports unknown parents, unknown refs, cycles, key/id mism
   bad.nodes['teens.scene'].rewards = [{ unlock: 'nope' }];
   bad.start = 'adult';
   bad.chooser = 'bowser';
+  bad.nodes.teens.room = 'ballroom';
   const errs = validateContent(bad).join('\n');
   for (const want of ['unknown parent "nowhere"', 'unknown node "ghost"', 'a tableau cannot have children', 'differs from its key',
-    'unlocks unknown node "nope"', 'start "adult" must be the tableau of a minigame', 'chooser "bowser"']) {
+    'unlocks unknown node "nope"', 'start "adult" must be the tableau of a minigame', 'chooser "bowser"', 'unknown room "ballroom"']) {
     assert.ok(errs.includes(want), `missing: ${want}\n${errs}`);
   }
   /** @type {any} */
