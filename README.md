@@ -148,7 +148,7 @@ The application runs locally on Node.js 24+, with HTTP and WebSocket traffic on 
 | `data/quiz/` | Server-only question banks |
 | `test/`, `scripts/` | Node unit tests, end-to-end suites, simulation, and data import tools |
 
-Phones send actions; the server binds them to a player, validates them, runs the shared reducers, and saves and broadcasts accepted changes. The campaign owns the party and progression, with the current block game or quiz nested inside it. Phone placement previews use the same rules as the server and reconcile with its next view.
+Phones send actions; the server binds them to a player, validates them, runs the shared reducers, and saves and broadcasts accepted changes. The server handles the evening's own messages and passes every other one to the running minigame's server code, listed in `server/minigames.ts` beside the rules list in `shared/minigames.js`. The campaign owns the party and progression, with the current block game or quiz nested inside it. Phone placement previews use the same rules as the server and reconcile with its next view.
 
 Rule reducers are deterministic: time and seeds are explicit inputs, and reducers perform no I/O. Refused/no-op actions return the same state object; the server uses object identity to skip change hooks. Accepted state changes flow through `apply`/`commit` in `server/main.ts`, including atomic JSON persistence. Activity completion and the resulting campaign facts are saved together. Timed games retain their remaining time across restart or laptop suspension.
 

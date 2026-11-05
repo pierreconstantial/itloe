@@ -56,12 +56,21 @@ Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `dead
 ### Campaign (slice 3, Contract D v2 + A1): the evening around the block game
 
 The server runs the campaign engine (`shared/campaign/`). The party (who is in the evening, their characters,
-the host) lives in `campaign.party`; the block game is `campaign.at.activity`, nested in a blocks tableau.
+the host) lives in `campaign.party`; a minigame's round (the block game, a quiz) is `campaign.at.activity`,
+nested in its tableau, with its kind in `campaign.at.kind`.
 `join` and `leave` act on the EVENING: `join` adds a party member (seated at once in an open block lobby;
 mid-game they watch until the next lobby), `leave` leaves the evening (forwarded to a live game: dropped
-from a lobby, marked done in a game; the stored id stops rejoining; the host passes on). All block-game
-messages above go to the nested game; with no block game there → `err "not-playing"`. Every id is
+from a lobby, marked done in a game; the stored id stops rejoining; the host passes on). Every id is
 injected by the server (socket → playerId; screens: `"screen"`), never taken from the wire.
+
+**Routing.** The server handles `hello`, `join`, `leave`, `enter`, `back`, `gm`, `ack`, `pos`, `say`,
+`emote`, `interact`, `showJoin` and `hideJoin` itself. Every other message from a party member goes to the
+running round's minigame (its server code, `server/minigames.ts`), with the sender's id and the time
+injected; the minigame turns it into an action or refuses it, and answers a message it does not know with
+`err "not-playing"`. With no round running → `err "not-playing"`; from a socket that is not a party member
+→ `err "unknown-player"`. The round messages (`start`, `again`, `newGame`, `endGame`, `retire`, `config`)
+still go to the minigame: blocks and quiz keep their own lobbies for now. A message sent just before a
+round ends may reach the next round.
 
 ```jsonc
 { "t": "enter", "node": "childhood" }   // host, or the content's chooser (Élodie), into an UNLOCKED child of where
@@ -92,8 +101,8 @@ injected by the server (socket → playerId; screens: `"screen"`), never taken f
 
 ### Quiz (Contract E + addendum E1): a tableau `activity: { kind: 'quiz', settings }`
 
-The bank (`data/quiz/*.json`) stays on the server and is never served. While a quiz runs, `start`, `again`,
-`endGame`, `newGame` and `config` (host) go to the quiz, as in the block game; block-only messages get `err "not-playing"`.
+The bank (`data/quiz/*.json`) stays on the server and is never served. While a quiz runs, its messages
+below go to the quiz (Routing above); block-only messages (`place`, `retire`) get `err "not-playing"`.
 
 ```jsonc
 { "t": "start" }                       // host, quiz lobby: picks `count` questions among the bank (filtered by the
@@ -150,7 +159,7 @@ The bank (`data/quiz/*.json`) stays on the server and is never served. While a q
   "online": ["p-abc123"], "now": 1730700000000 }
 // "round" = the running round (shared/minigames.js RoundView), null between rounds (the hub, a world, a
 // scene): its minigame "kind", its "status" (lobby | running | finished: the podium) and its minigame's
-// "view" of its state, the same for everyone. blocks: the full State (shared/game.js),
+// "view" of its state, the same for everyone (server/minigames.ts). blocks: the full State (shared/game.js),
 // plus "best" in solo games (below); quiz: the public projection (below).
 // "campaign" = the whole evening (at.node, at.kind, party, facts, news, …) WITHOUT the round's raw state
 // (`at.activity`): that travels only through "round". The saved campaign keeps it.
