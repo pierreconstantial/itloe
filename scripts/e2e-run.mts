@@ -28,8 +28,8 @@ const DEADLINE_MS = 9 * 60_000;
 /** The suites, longest first: they start first, so they get the first slots. `<suite>:<x>` runs the suite with
  *  ONLY=x, for x in `focus`: the parts its header lists (a suite runs nothing of an unknown part, and passes). */
 const SUITES: Record<string, { script: string, browser?: boolean, server?: boolean, focus?: string[], env?: Record<string, string> }> = {
-  phone: { script: 'e2e-phone.mts', browser: true, focus: ['1', '2', '3', '4', '5', '6', '7'], env: { LOCK_MS: '20000' } },
-  tv: { script: 'e2e-tv.mts', browser: true, focus: ['connection', 'campaign', 'quiz'] },
+  phone: { script: 'e2e-phone.mts', browser: true, focus: ['1', '2', '3', '4', '5', '6', '7', '8'], env: { LOCK_MS: '20000' } },
+  tv: { script: 'e2e-tv.mts', browser: true, focus: ['connection', 'campaign', 'quiz', 'standin'] },
   campaign: { script: 'e2e-campaign.mts' },
   quiz: { script: 'e2e-quiz.mts' },
   inventory: { script: 'e2e-inventory.mts' },
