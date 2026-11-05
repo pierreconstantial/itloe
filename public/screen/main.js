@@ -520,8 +520,6 @@ fetchJoinInfo().then((info) => {
 /** @type {any} */ (window).bloko = {
   /** The round shown (running, or its podium): { kind, status, view }; null between rounds. */
   round: () => shownRound,
-  state: () => (shownRound?.kind === 'blocks' ? shownRound.view : null),
-  quiz: () => (shownRound?.kind === 'quiz' ? shownRound.view : null),
   /** Feed a fake `pos` (self-tests before the server relays them). @param {object} m */
   pos: (m) => avatars.onPos(m),
   avatars: () => avatars.snapshot(),
