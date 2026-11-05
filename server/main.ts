@@ -190,9 +190,14 @@ function send(ws: WebSocket, data: string | object): void {
   if (ws.readyState === WebSocket.OPEN) ws.send(typeof data === 'string' ? data : JSON.stringify(data));
 }
 
-function broadcast(): void {
-  const msg = viewMsg();
+/** Every open socket, phones and TVs alike: the one send-to-everyone step. */
+function sendAll(data: string | object): void {
+  const msg = typeof data === 'string' ? data : JSON.stringify(data);
   for (const c of wss.clients) send(c, msg);
+}
+
+function broadcast(): void {
+  sendAll(viewMsg());
 }
 
 function relayPos(playerId: string, pos: Pos): void {
@@ -344,11 +349,11 @@ function handleMessage(ws: WebSocket, m: any): void {
       const event = { t: 'say' as const, playerId: id, text, at: now };
       chat.push(event);
       if (chat.length > 30) chat.shift();
-      for (const c of wss.clients) send(c, event);
+      sendAll(event);
     } else if (isEmote(m.kind)) {
       socialAt.set(ws, now);
       const event = { t: 'emote', playerId: id, kind: m.kind, at: now };
-      for (const c of wss.clients) send(c, event);
+      sendAll(event);
     }
     return;
   }
@@ -376,7 +381,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     if (!object || object.id !== m.object) return;
     interactionAt.set(ws, now);
     const event = { t: 'interact', playerId: id, object: object.id, at: now };
-    for (const c of wss.clients) send(c, event);
+    sendAll(event);
     return;
   }
 
@@ -544,8 +549,7 @@ setInterval(() => {
 // It carries `now`, refreshing every client's clock skew for free.
 const TICK_MS = 10_000;
 setInterval(() => {
-  const msg = JSON.stringify({ t: 'tick', now: Date.now() });
-  for (const c of wss.clients) send(c, msg);
+  sendAll({ t: 'tick', now: Date.now() });
 }, TICK_MS).unref();
 
 wss.on('connection', (ws) => {
