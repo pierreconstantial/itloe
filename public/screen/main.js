@@ -198,7 +198,7 @@ const showPlace = (c) => (c.at.kind ? showRoom(c) : showMap(c));
 
 /**
  * Hub / world map (no round on): the party room with one door per child node, avatars walking
- * as in the room at a tableau, and a top band with where we are. The next block view starts fresh.
+ * as in the room at a tableau, and a top band with where we are. The next round starts fresh.
  * @param {Campaign} c
  */
 function showMap(c) {

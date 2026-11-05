@@ -379,7 +379,7 @@ function render() {
 
   if (!mem) {
     if (roomPrompt) { show('room'); renderRoomPrompt(roomPrompt); return; }
-    // the picker shows whenever there is something to tap: a free character while no block game is
+    // the picker shows whenever there is something to tap: a free character while no round is
     // under way, or (anytime) a character whose phone is offline, to continue as
     const joinable = round === null;
     const states = campaign ? pickStates(campaign.party, joinable, online) : null;

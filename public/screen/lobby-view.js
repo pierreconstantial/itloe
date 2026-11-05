@@ -92,7 +92,7 @@ function renderJoin(join) {
 /**
  * Party-room lobby: a top band (join box + title, next-game settings, status); the guests
  * themselves are the avatars walking below it (party-room.js), so there are no slot cards.
- * A quiz tableau shows the same band with its own title and settings line.
+ * Every minigame's tableau shows the same band with its own title and settings line.
  * @param {Pick<State, 'order'> & { players: Record<string, { name: string, color: number }> }} s
  * @param {unknown} _prev
  * @param {JoinInfo} join
