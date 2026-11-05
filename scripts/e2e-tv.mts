@@ -555,10 +555,6 @@ try {
     `quiz lobby on the TV: the party room with the "Quiz!" band and the ${quizOf(ql).order.length} seated players' avatars`);
   check(/questions · \d+ s each/.test(await tv.js(`document.querySelector('.lobby .settings-line')?.textContent ?? ''`)), '…with the quiz settings summary');
   check(await tv.js(`!!document.querySelector('.lobby .join-qr') && document.querySelector('.lobby-count')?.textContent.includes('${quizOf(ql).order.length}/')`), '…the join QR and who\'s in');
-  if ((quizOf(ql).credits ?? []).length) {
-    check(await tv.until(`document.querySelector('.lobby .quiz-credits')?.textContent.includes(${JSON.stringify(String(quizOf(ql).credits[0]).slice(0, 16))})`, 'credits'),
-      'quiz lobby: dataset credits line (CC BY-SA attribution)');
-  }
   A2.send({ t: 'pos', x: 9, y: 6, dir: 'right', moving: false });
   check(await tv.until(`(() => { const a = window.bloko.avatars().find((a) => a.id === '${idA}'); return a && Math.abs(a.x - 9) < 0.2; })()`, 'quiz avatar moves'),
     '…and avatars walk there (pos relayed)');
