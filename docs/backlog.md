@@ -36,6 +36,8 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Debug accessors show only the party room](#debug-accessors-show-only-the-party-room) | `bloko.drawOrder()` and `bloko.scene()` ignore the apartment and door #4's room | P3 | Open | Trivial |
 | [Apartment sofa sparkle](#apartment-sofa-sparkle) | The sofa's sparkle overlaps its "Comfy!" bubble in the apartment | P3 | Open | Trivial |
 | [Portal drawn after use](#portal-drawn-after-use) | The TV still draws the used portal at the false start | P3 | Open | Trivial |
+| [Shared urgent keyframes](#shared-urgent-keyframes) | `blocks.css` and `quiz.css` both define `@keyframes urgent` | P3 | Open | Trivial |
+| [Minigame wording in shared folders](#minigame-wording-in-shared-folders) | Block and quiz files sit in `public/commun/` and `fx.js` | P3 | Open | Low |
 | [GameStory.md frontmatter](#gamestorymd-frontmatter) | The story document lacks the standard frontmatter | P3 | Open | Trivial |
 
 ## Items
@@ -141,6 +143,18 @@ The sofa's object-action sparkle is placed for the party room's narrow sofa. In 
 If a game master sends the party back to the false start after Élodie went through the portal, the TV still draws the portal there (`public/screen/main.js`, `show`), but the server refuses to let anyone through it.
 
 **Recommendation:** draw the portal only while it can be entered: `portal.ready` set and `portal.entered` not set.
+
+### Shared urgent keyframes
+
+`public/screen/blocks.css` and the quiz's `quiz.css` both define `@keyframes urgent`. The quiz's, loaded last, also drives the block countdown's pulse. It looks as intended only because of the load order.
+
+**Recommendation:** give each its own name, scoped like the rest of the minigame's CSS.
+
+### Minigame wording in shared folders
+
+`public/commun/settings-text.js` and `public/commun/quiz-text.js` are the block game's and the quiz's own wording, shared between phone and TV, but they sit in the shared folder. `public/screen/fx.js` holds block-only effects next to the confetti the frame uses.
+
+**Recommendation:** move each minigame's wording and effects next to its own files, so `public/commun/` and the frame's `fx.js` name no minigame.
 
 ### GameStory.md frontmatter
 
