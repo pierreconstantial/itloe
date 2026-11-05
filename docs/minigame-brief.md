@@ -22,7 +22,10 @@ Itloe is a party game for one evening, and agents write the code. Build what the
 - **Hard deadline: Friday 13 November 2026.**
 - **`konst` is rebased onto `origin/master` at `ba3c3cd`** and pushed to `origin/konst`. This brief is checked against that base.
 - **No backward compatibility.** Saves from earlier versions need not load: a fresh evening is fine, and no new save migrations are written. The existing migrations stay. A save written by the current version must still resume after a restart.
-- **Pierre works on `origin/pierre`** (the story's opening), merged after this work with adjustments. It overlaps this work in three places: its `portal` campaign action requires the opening block game's lobby (`c.at.activity?.phase !== 'lobby'`), which phase 3c removes; `public/screen/party-room.js`, which phase 5 splits; and `server/main.ts`. Its `STORY_CONTENT` passes phase 1's content validation.
+- **Pierre's branch is merged** (`origin/pierre` at `ab8ef7d`, the story's opening; merge commit `0007b80`).
+  - His story content (`STORY_CONTENT`) is the default; every e2e suite runs on the sample content (`ITLOE_CONTENT=sample`).
+  - His opening rules (`STORY_MODE`, `storyId === 'elo-50'`) sit in shared code: `server/main.ts`, the campaign reducer and both clients. Phase 3c carries the portal's lobby check over to "between rounds at the start tableau".
+  - His room modes (the party room, the apartment, door #4's room) live in `public/screen/party-room.js`, the server's `interact` and the phone's joystick.
 
 ## Terms
 
@@ -31,7 +34,7 @@ Itloe is a party game for one evening, and agents write the code. Build what the
 - **Minigame**: a registered kind of game with its own rules: `blocks` and `quiz` today. A content node's `activity.kind` names a minigame, or `scene`, which stays a content kind without rules.
 - **Round**: one play of a minigame at a tableau. The host starts it from the room, and it runs until its podium closes. `campaign.at.activity` holds the round's state; between rounds there is none.
 - **Status**: a round's `running` or `finished` (podium), derived by the minigame from its state; also `lobby` until phase 3c removes the games' lobbies. The quiz's `question` and `reveal` are both `running`.
-- **Room**: what the TV draws for a node: a space with walls and furniture where avatars walk (geometry from `shared/scene.js`). Today there is one, the party room, used for every node. Minigames have no rooms.
+- **Room**: what the TV draws for a node: a space with walls and furniture where avatars walk (geometry from `shared/scene.js`). Today there are three, all in `public/screen/party-room.js`: the party room, the apartment and door #4's room. Minigames have no rooms.
 - **Map**: the room at the hub or in a world, with a door for each node the party can enter from there.
 - **The room at a tableau**: the room between rounds at a tableau, under the tableau's band.
 - **Game area**: where a minigame lets avatars walk over its own screen during its round, e.g. players already out of a block game roaming over its board to distract the others. Its bounds are a `shared/scene.js` scene without furniture.
@@ -117,7 +120,7 @@ Unsaved messages are their own message, apart from chat and emotes: those are ma
 
 ### Avatars: usable by any minigame
 
-- **TV.** The avatar drawing leaves `createPartyRoom` and becomes a layer that any minigame's TV screen can use with its game area and the world-to-screen projection. The party room uses the same layer, unchanged. `pos` messages reach the layer whatever screen is showing.
+- **TV.** The avatar drawing leaves `createPartyRoom` and becomes a layer that any minigame's TV screen can use with its game area and the world-to-screen projection. Every room uses the same layer, unchanged. `pos` messages reach the layer whatever screen is showing.
   - Speech bubbles and emotes move with the layer: `say` and `emote` reach it whatever screen is showing, like `pos`. A minigame's TV screen can show a bubble or an emote over an avatar from its own unsaved message.
   - The furniture effects of object actions stay in the party room.
   - Over a minigame's screen, avatars are always drawn on top: a game area has no furniture to walk behind, as no planned minigame needs it. In the party room, avatars and props keep sharing one depth-sorted list.
