@@ -1,16 +1,13 @@
 // What the server keeps on disk:
 //   bloko.state.json  the evening: envelope v2 { v:2, campaign, room, savedAt, bestPrevious }, rewritten
-//                     after every change (atomic). A v1 envelope (bare block State, before the campaign)
-//                     is migrated on load; the original file is kept next to it, never lost.
+//                     after every change (atomic). A file in any other shape is quarantined, never lost.
 //   bests.json        solo best scores, keyed "<size>:<mode>"
 
-import { copyFileSync, existsSync } from 'node:fs';
 import { randomInt } from 'node:crypto';
 import { quarantine, readJson, varPath, writeJsonAtomic } from './persist.ts';
-import type { State } from './rules.ts';
 import { roundDeadline, savedAtMs, shiftRound } from './resume.ts';
 import { minigame } from '../shared/minigames.js';
-import { fromLegacyState, loadCampaign, newCampaign, UnknownMinigameError, type Campaign, type Content } from './campaign.ts';
+import { loadCampaign, newCampaign, UnknownMinigameError, type Campaign, type Content } from './campaign.ts';
 
 export const STATE_FILE = varPath('bloko.state.json');
 export const BESTS_FILE = varPath('bests.json');
@@ -21,20 +18,6 @@ export type Game = { campaign: Campaign, room: string, bestPrevious?: number | n
 
 /** On-disk envelope v2. `savedAt`: epoch ms of the write; drives the timed-pause shift. */
 type SavedV2 = { v: 2, campaign: Campaign, room: string, savedAt: number, bestPrevious?: number | null };
-/** Pre-campaign envelope (M2..slice 2): the bare block State. `savedAt` may be an ISO string or absent. */
-type SavedV1 = { v: 1, savedAt?: number | string, state: State, room: string, bestPrevious?: number | null };
-
-function isV1(x: unknown): x is SavedV1 {
-  const g = x as SavedV1;
-  if (!g || g.v !== 1 || typeof g.room !== 'string' || !g.state) return false;
-  const s = g.state;
-  return ['lobby', 'playing', 'finished'].includes(s.phase)
-    && typeof s.seed === 'number' && typeof s.size === 'number'
-    && Array.isArray(s.order) && !!s.players && typeof s.players === 'object'
-    && !!(s as State & { settings?: unknown }).settings && !!s.rules
-    && s.order.every((id: string) => !!s.players[id] && Array.isArray(s.players[id].board));
-}
-
 /** Shape guard only; loadCampaign then makes the content safe (unknown ids dropped, re-settled). */
 function isV2(x: unknown): x is SavedV2 {
   const g = x as SavedV2;
@@ -42,8 +25,6 @@ function isV2(x: unknown): x is SavedV2 {
   return !!g && g.v === 2 && typeof g.room === 'string' && !!c && typeof c === 'object'
     && !!c.at && typeof c.at.node === 'string' && !!c.party && Array.isArray(c.party.order);
 }
-
-const isEnvelope = (x: unknown): x is SavedV1 | SavedV2 => isV2(x) || isV1(x);
 
 /** Room code: 4 letters, no I/O (read aloud off a TV). Stops stray devices, not security. */
 export function newRoomCode(): string {
@@ -74,13 +55,6 @@ function describe(c: Campaign, room: string): string {
   return `at ${c.at.node}${game}, room ${room}, party: ${party}, unlocked ${c.facts.unlocked.length}, news ${c.news.length}`;
 }
 
-/** Copies a pre-migration save aside, once per migration (a timestamped name never overwrites). */
-function keepV1(): string {
-  const dest = `${STATE_FILE}.v1-${Date.now()}.json`;
-  try { if (!existsSync(dest)) copyFileSync(STATE_FILE, dest); } catch (e) { console.error('[itloe] could not keep the v1 save:', e); }
-  return dest;
-}
-
 /**
  * The saved evening in any state → resume it (room code, party, host, nested game, facts, news kept);
  * missing/corrupt/--new → a fresh campaign at content.start. A timed game keeps its remaining time.
@@ -93,21 +67,14 @@ export function loadGame(forceNew: boolean, content: Content, now = Date.now()):
     return { ...g, how: `new evening (${why}): ${describe(g.campaign, g.room)}` };
   };
   if (forceNew) return fresh('--new / BLOKO_NEW=1');
-  const r = readJson(STATE_FILE, isEnvelope);
+  const r = readJson(STATE_FILE, isV2);
   if (r.kind === 'missing') return fresh('no saved evening');
   if (r.kind === 'corrupt') return fresh(`save unreadable: ${r.error}; moved to ${quarantine(STATE_FILE)}`);
 
   const env = r.data;
   let campaign: Campaign;
-  let how: string;
   try {
-    if (env.v === 2) {
-      campaign = loadCampaign(env.campaign, content);
-      how = 'RESUMED';
-    } else {
-      campaign = fromLegacyState(env.state, content);
-      how = `MIGRATED a v1 save (original kept as ${keepV1()}) and resumed`;
-    }
+    campaign = loadCampaign(env.campaign, content);
   } catch (e: any) {
     if (e instanceof UnknownMinigameError) {
       throw new Error(`cannot resume ${STATE_FILE}: ${e.message}. Boot stopped; the save is left untouched for a release that has "${e.kind}".`);
@@ -124,7 +91,7 @@ export function loadGame(forceNew: boolean, content: Content, now = Date.now()):
   const at = since === null ? 'at an unknown time' : new Date(since).toISOString();
   return {
     campaign: shiftedCampaign, room: env.room, bestPrevious: env.bestPrevious ?? null,
-    how: `${how} evening saved ${at}: ${describe(shiftedCampaign, env.room)}${shifted}`,
+    how: `RESUMED evening saved ${at}: ${describe(shiftedCampaign, env.room)}${shifted}`,
   };
 }
 

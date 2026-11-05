@@ -1,7 +1,6 @@
-// Saves written before the minigame kind was stored next to the round still resume, a save whose
-// minigame this release does not have stops the boot and is left untouched, and a save it cannot resume (a
-// lobby from an earlier version) starts a fresh evening and is quarantined. Real server, scratch data.
-// The fixtures in test/fixtures/ are saves as the server wrote them before the kind was stored.
+// A save whose minigame this release does not have stops the boot and is left untouched, and a save it
+// cannot resume starts a fresh evening and is quarantined. Real server, scratch data.
+// test/fixtures/save-v2-blocks.json is a save as the server writes it, in a timed block game.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
@@ -83,66 +82,11 @@ const fixture = (/** @type {string} */ name) => readFile(join(FIXTURES, name), '
 /** Remaining time of a deadline, as the view tells it. @param {any} view @param {number} deadline */
 const left = (view, deadline) => deadline - view.now;
 
-test('a v1 save (bare block game) is migrated and resumes', { timeout: 20_000 }, async (t) => {
-  const save = await fixture('save-v1.json');
-  const app = await boot(t, save);
-  const view = await firstView(app.port, app.running, app.log);
-  const old = JSON.parse(save).state;
-  assert.equal(view.t, 'view');
-  assert.equal(view.round.kind, 'blocks');
-  assert.equal(view.round.status, 'running');
-  const s = view.round.view;
-  assert.equal(s.phase, 'playing');
-  assert.deepEqual(s.order, old.order);
-  assert.equal(s.players['p-anna'].score, old.players['p-anna'].score);
-  assert.equal(view.campaign.party.hostId, old.hostId);
-  assert.ok(Math.abs(left(view, s.deadline) - 40_000) < 3000, `the timed game keeps its 40 s (${left(view, s.deadline)} ms)`);
-  assert.match(app.log(), /MIGRATED a v1 save/);
-  const saved = JSON.parse(await readFile(join(app.varDir, 'bloko.state.json'), 'utf8'));
-  assert.equal(saved.v, 2);
-  assert.equal(saved.room, 'KDZT');
-  assert.equal(saved.campaign.at.kind, 'blocks');
-});
-
-test('a v2 save in a block game, from before the kind was stored, resumes as blocks', { timeout: 20_000 }, async (t) => {
-  const save = await fixture('save-v2-blocks.json');
-  const app = await boot(t, save);
-  const view = await firstView(app.port, app.running, app.log);
-  const old = JSON.parse(save).campaign.at.activity;
-  assert.equal(view.round.kind, 'blocks');
-  const s = view.round.view;
-  assert.equal(s.phase, 'playing');
-  assert.deepEqual(s.players['p-anna'].board, old.players['p-anna'].board);
-  assert.ok(Math.abs(left(view, s.deadline) - 40_000) < 3000, `the timed game keeps its 40 s (${left(view, s.deadline)} ms)`);
-  const saved = JSON.parse(await readFile(join(app.varDir, 'bloko.state.json'), 'utf8'));
-  assert.equal(saved.room, 'KDZT');
-  assert.equal(saved.campaign.at.kind, 'blocks');
-});
-
-test('a v2 save mid-question, from before the kind was stored, resumes as a quiz', { timeout: 20_000 }, async (t) => {
-  const save = await fixture('save-v2-quiz.json');
-  const app = await boot(t, save);
-  const view = await firstView(app.port, app.running, app.log);
-  assert.equal(view.round.kind, 'quiz');
-  assert.equal(view.round.status, 'running');
-  const q = view.round.view;
-  assert.equal(q.phase, 'question');
-  assert.equal(q.round.index, 1);
-  assert.deepEqual(q.round.answered, ['p-bob']);
-  assert.equal(q.round.answers, null, 'no answer on the wire before the reveal');
-  assert.equal(view.campaign.at.activity, undefined, 'the campaign on the wire carries no raw round state');
-  assert.ok(Math.abs(left(view, q.round.deadline) - 15_000) < 3000, `the question keeps its 15 s (${left(view, q.round.deadline)} ms)`);
-  const saved = JSON.parse(await readFile(join(app.varDir, 'bloko.state.json'), 'utf8'));
-  assert.equal(saved.campaign.at.kind, 'quiz');
-});
-
 test('a save with a minigame this release does not have stops the boot and is left byte-identical', { timeout: 20_000 }, async (t) => {
   const v2 = JSON.parse(await fixture('save-v2-blocks.json'));
   const stored = structuredClone(v2);
   stored.campaign.at.kind = 'darts';
-  const derived = structuredClone(v2);
-  derived.campaign.at.activity.kind = 'darts';
-  for (const [label, save] of [['stored kind', stored], ['kind derived from the round', derived]]) {
+  for (const [label, save] of [['stored kind', stored]]) {
     const text = JSON.stringify(save);
     const app = await boot(t, text);
     const timeout = new AbortController();
@@ -156,7 +100,7 @@ test('a save with a minigame this release does not have stops the boot and is le
   }
 });
 
-test('a save holding a round in a lobby (an earlier version) starts a fresh evening and is quarantined, not deleted', { timeout: 20_000 }, async (t) => {
+test('a save holding a round in a lobby starts a fresh evening and is quarantined, not deleted', { timeout: 20_000 }, async (t) => {
   const v2 = JSON.parse(await fixture('save-v2-blocks.json'));
   v2.campaign.at.activity.phase = 'lobby';
   const text = JSON.stringify(v2);
@@ -171,12 +115,12 @@ test('a save holding a round in a lobby (an earlier version) starts a fresh even
   assert.equal(await readFile(join(app.varDir, kept[0]), 'utf8'), text, 'byte-identical');
 });
 
-test('older saves with missing or removed characters start fresh and keep the old file', { timeout: 30_000 }, async (t) => {
-  for (const file of ['save-v1.json', 'save-v2-blocks.json']) {
+test('a save with missing or removed characters starts fresh and keeps the old file', { timeout: 30_000 }, async (t) => {
+  for (const file of ['save-v2-blocks.json']) {
     for (const character of [null, undefined, 'konz']) {
       await t.test(`${file}: ${String(character)}`, async (t) => {
         const save = JSON.parse(await fixture(file));
-        const players = (save.v === 1 ? save.state : save.campaign.party).players;
+        const players = save.campaign.party.players;
         players[Object.keys(players)[0]].character = character;
         const text = JSON.stringify(save);
         const app = await boot(t, text);

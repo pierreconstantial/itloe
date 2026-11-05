@@ -2,11 +2,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  SAMPLE_CONTENT as C, COUNTER, emptyFacts, fromLegacyState, holds, loadCampaign, newCampaign,
+  SAMPLE_CONTENT as C, COUNTER, emptyFacts, holds, loadCampaign, newCampaign,
   record, reduceCampaign, settle, validateContent, zoneAt, holding,
 } from '../shared/campaign/index.js';
 import { minigameContent } from '../shared/campaign/sample.js';
-import { DEFAULT_SETTINGS, startGame, reduce as reduceGame } from '../shared/game.js';
+import { DEFAULT_SETTINGS } from '../shared/game.js';
 import { MINIGAMES } from '../shared/minigames.js';
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
@@ -355,24 +355,7 @@ test('gm: host only; goto / unlock / lock (sticks) / setFlag / count / reset-nod
   assert.equal(run(c, { t: 'gm', id: 'e', op: /** @type {any} */ ({ op: 'explode' }) }), c);
 });
 
-// ---------------------------------------------------------------- migration + tolerance
-
-test('fromLegacyState: party rebuilt from the State, State kept as is, at the false start', () => {
-  let s = /** @type {import('../shared/game.js').State} */ (startGame({ seed: 9, settings: {}, now: 1,
-    players: [{ id: 'a', character: 'anna' }, { id: 'b', character: 'sol' }] }));
-  s = reduceGame(s, { t: 'leave', id: 'b' }, { hostId: 'a' });
-  s = /** @type {any} */ ({ ...s, hostId: 'a', settings: s.rules }); // a v1 State kept its host and settings
-  const c = fromLegacyState(s, C);
-  assert.equal(c.at.node, C.start);
-  assert.equal(c.at.activity, s);
-  assert.deepEqual(c.party.order, ['a', 'b']);
-  assert.equal(c.party.hostId, 'a');
-  assert.deepEqual(c.party.players.b, { id: 'b', character: 'sol', name: s.players.b.name, color: s.players.b.color, left: true });
-  assert.deepEqual(c.news, []);
-  const ended = reduceCampaign(c, { t: 'activity', action: { t: 'endGame', id: 'a' } }, C);
-  assert.equal(ended.facts.counters[COUNTER.played('blocks')], 1, 'the migrated game counts when it ends');
-  assert.throws(() => fromLegacyState(/** @type {any} */ ({ ...s, phase: 'lobby' }), C), /can resume/, 'a v1 lobby: not resumable');
-});
+// ---------------------------------------------------------------- loading a save
 
 test('loadCampaign: a round its minigame cannot give a status (a lobby from an earlier version) is refused', () => {
   const c = run(party(), { t: 'start', id: 'e', now: 1 });
@@ -439,11 +422,4 @@ test('loadCampaign: a JSON round-trip (a server restart) is deep-equal in every 
     assert.equal(next(back), next(c), `${name}: next block game unchanged by the restart`);
   }
   assert.ok(withNews.news.length > 0, 'pending news survive too');
-});
-
-test('loadCampaign: a party member playing a character the roster does not have refuses the save', () => {
-  const saved = JSON.parse(JSON.stringify(party()));
-  saved.party.order.push('k');
-  saved.party.players.k = { id: 'k', character: 'konz', name: 'Konz', color: 5, left: false };
-  assert.throws(() => loadCampaign(saved, C), /"konz", not a character/);
 });

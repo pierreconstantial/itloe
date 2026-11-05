@@ -36,7 +36,7 @@ import { QUIZ_RULES } from './quiz/index.js';
  * minigame's own counters, added to the facts. `asked`: content ids the round used up for the evening
  * (facts.asked: never asked again).
  * @typedef {{
- *   ranking: { character: CharacterId | null, score: number, rank: number }[],
+ *   ranking: { character: CharacterId, score: number, rank: number }[],
  *   endReason: string | null,
  *   counters?: Record<string, number>,
  *   asked?: string[],

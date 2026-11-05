@@ -204,7 +204,7 @@ export function room(id, floor, props, extraSolids = []) {
  * Where a character starts in a scene: the shared spawn point, nudged onto walkable floor if a prop
  * (or a later room) stands on it. Searches outwards, preferring the open floor towards the camera,
  * and rounds to the wire's 2 decimals.
- * @param {Scene} scene @param {CharacterId | null | undefined} characterId
+ * @param {Scene} scene @param {CharacterId} characterId
  * @returns {Spawn}
  */
 export function spawnAt(scene, characterId) {

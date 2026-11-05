@@ -128,7 +128,7 @@ Open `http://127.0.0.1:3199/sim/`: the TV and four phones side by side. Pick cha
 ## Tests
 
 - **`npm run check` and `npm test`** for every change. `test/campaign.test.js` already checks that every registered minigame's development start validates and starts at its tableau.
-- **Rules:** unit tests in `test/<topic>.test.js` with `node:test`, small fixtures and explicit seeds and times, as [`test/shared.test.js`](../test/shared.test.js) does for blocks. Cover the RPG's actions, a stale deadline and the result.
+- **Rules:** tests in `test/<topic>.test.js` with `node:test`, small fixtures and explicit seeds and times, that play the rules through in order, as [`test/story.test.js`](../test/story.test.js) does for the opening. Cover the RPG's actions, a stale deadline and the result.
 - **Stand-ins** show how to test the minigame parts in isolation:
   - [`test/round.test.js`](../test/round.test.js): server code through a round's `io`, without a server (walking, positions, unsaved messages, what's dropped after the round);
   - [`test/avatar-layer.test.js`](../test/avatar-layer.test.js): the avatar layer over a game area;

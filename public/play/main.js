@@ -34,7 +34,7 @@ import { childMarks, content, onContentChange, syncContent, titleOf } from './ca
 /** @typedef {import('./movement.js').Pos} Pos */
 /** A minigame's game area our avatar walks, and where it stands there. @typedef {{ area: import('../../shared/scene.js').Scene, pos: Pos }} GameArea */
 /** The round's players, as every minigame's view carries them (shared/minigames.js). @typedef {import('../../shared/minigames.js').RoundPlayers} RoundPlayers */
-/** A party member in the room at a tableau. @typedef {{ id: string, name: string, color: number, character?: string | null, left?: boolean }} LobbyPlayer */
+/** A party member in the room at a tableau. @typedef {{ id: string, name: string, color: number, character: CharacterId, left?: boolean }} LobbyPlayer */
 
 const MEDALS = ['🥇', '🥈', '🥉', ''];
 const LOBBY_ME_SCALE = 4; // own avatar in the lobby header: 64 px
@@ -475,16 +475,10 @@ function renderRoomPrompt(prompt) {
   if (prompt.refused) err.textContent = `That code (${prompt.refused}) didn't work. Check the TV and try again.`;
 }
 
-/** Our character, or the colour slot's character for a pre-M3 player. @param {LobbyPlayer} p @returns {CharacterId} */
-function characterOf(p) {
-  if (isCharacterId(p.character)) return p.character;
-  return /** @type {CharacterId} */ (Object.values(CHARACTERS).find((c) => c.color === p.color)?.id ?? 'pierre');
-}
-
 /** Our character, from the party. @returns {CharacterId | null} */
 function myCharacter() {
   const m = member();
-  return m && isCharacterId(m.character) ? m.character : null;
+  return m ? m.character : null;
 }
 
 /** The avatar's current position: joystick while held, else the echoed/spawn position (in the game area: its
@@ -582,7 +576,7 @@ function renderLobby(v, me, isHost, settings) {
   dockStick('lobby');
   const header = $('lobby-me');
   header.replaceChildren(
-    avatarCanvas(characterOf(me), LOBBY_ME_SCALE, currentPos(characterOf(me)).dir),
+    avatarCanvas(me.character, LOBBY_ME_SCALE, currentPos(me.character).dir),
     Object.assign(document.createElement('span'), {
       className: 'lobby-me-name',
       textContent: `You're ${me.name}${me.id === partyHost() ? ' 👑' : ''}`,
@@ -595,7 +589,7 @@ function renderLobby(v, me, isHost, settings) {
     const p = v.players[id];
     if (id === me.id || p.left) continue;
     const li = document.createElement('li');
-    li.append(avatarCanvas(characterOf(p), LOBBY_CHIP_SCALE), document.createTextNode(
+    li.append(avatarCanvas(p.character, LOBBY_CHIP_SCALE), document.createTextNode(
       p.name + (id === partyHost() ? ' 👑' : '')));
     ul.append(li);
   }
@@ -713,7 +707,7 @@ const joystick = createJoystick({
 function repaintMyAvatar(pos) {
   const me = member();
   const canvas = /** @type {HTMLCanvasElement | null} */ (document.querySelector('#lobby-me canvas'));
-  if (me && canvas) paintAvatar(canvas, characterOf(me), pos.dir);
+  if (me && canvas) paintAvatar(canvas, me.character, pos.dir);
 }
 
 const roomInput = /** @type {HTMLInputElement} */ ($('room-input'));

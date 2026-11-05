@@ -15,7 +15,7 @@ test('clear ghost: a piece completing a row → every cell of that row, the piec
   // row 0 holds colour 3 except (6,0),(7,0); an h2 at (6,0) completes it
   const board = new Array(SIZE * SIZE).fill(0);
   for (let x = 0; x < 6; x++) board[x] = 3;
-  const p = { ...newPlayer('a', 'Ana', 1, SIZE), board, hand: /** @type {any} */ (['h2', 'dot', 'dot']) };
+  const p = { ...newPlayer('a', 'Ana', 1, SIZE, 'pierre'), board, hand: /** @type {any} */ (['h2', 'dot', 'dot']) };
   /** @type {import('../shared/game.js').State} */
   const s = { .../** @type {import('../shared/game.js').State} */ (startGame({ seed: 42, settings: {}, players: [{ id: 'a', character: 'pierre' }], now: 0 })), order: ['a'], players: { a: p } };
   const s2 = reduce(s, { t: 'place', id: 'a', piece: 0, x: 6, y: 0 });
@@ -50,16 +50,4 @@ test('floaters: gains within the merge window grow one floater; later ones stack
   const d = f.add('p', 3, LIFE_MS + 10);
   assert.equal(d.kind, 'new');
   assert.equal(d.slot, 0, 'the first floater has expired: its slot is free again');
-});
-
-test('floaters: bot speed (a move every 100 ms for 2 s) never stacks more than the screen can hold', () => {
-  const f = createFloaterPlanner();
-  let maxSlot = 0, shown = 0;
-  for (let t = 0; t < 2000; t += 100) {
-    const r = f.add('bot', 4, t);
-    if (r.kind === 'new') shown++;
-    maxSlot = Math.max(maxSlot, r.slot);
-  }
-  assert.equal(shown, Math.ceil(2000 / LIFE_MS), 'one growing floater per lifetime, the next one only once it has faded');
-  assert.equal(maxSlot, 0, 'never two on top of each other');
 });

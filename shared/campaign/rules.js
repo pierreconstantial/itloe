@@ -94,17 +94,6 @@ function bump(f, add, kind, points = {}) {
 }
 
 /**
- * Facts.totals of an older save was flat (CharacterId → points, block games only): → { blocks: … }.
- * @param {unknown} totals @returns {Facts['totals']}
- */
-export function migrateTotals(totals) {
-  if (!totals || typeof totals !== 'object') return {};
-  const entries = Object.entries(totals);
-  if (entries.length && entries.every(([, v]) => typeof v === 'number')) return { blocks: /** @type {Record<string, number>} */ (totals) };
-  return /** @type {Facts['totals']} */ (totals);
-}
-
-/**
  * What an event changes in the facts (counters + totals). Unlocks are settle's job.
  * @param {Facts} f
  * @param {CampaignEvent} e
@@ -119,15 +108,14 @@ export function record(f, e) {
       /** @type {Record<string, number>} */
       const totals = {};
       for (const r of e.ranking) {
-        if (!r.character) continue;
         totals[r.character] = (totals[r.character] ?? 0) + r.score;
         if (r.rank === 1 && e.ranking.length > 1) add[COUNTER.won(e.kind, r.character)] = 1;
       }
       for (const [k, n] of Object.entries(e.counters ?? {})) add[k] = (add[k] ?? 0) + n;
       const bumped = bump(f, add, e.kind, totals);
-      const known = new Set(f.asked ?? []);
+      const known = new Set(f.asked);
       const fresh = (e.asked ?? []).filter((id) => typeof id === 'string' && !known.has(id));
-      return fresh.length ? { ...bumped, asked: [...(f.asked ?? []), ...fresh] } : bumped;
+      return fresh.length ? { ...bumped, asked: [...f.asked, ...fresh] } : bumped;
     }
     case 'scene.seen':
       return bump(f, { [COUNTER.sceneSeen(e.sceneId)]: 1, ...(e.node ? { [COUNTER.finished(e.node)]: 1 } : {}) });
@@ -217,7 +205,7 @@ export function settle(facts, content, fromSeq = 0, ctx = {}) {
 /**
  * Context for item rewards. `party`: the characters present (for 'all'); `event`: the finished
  * activity that triggered this step (for 'winner': its rank-1 characters, all of them when tied).
- * @typedef {{ party?: { order: string[], players: Record<string, { character: string | null, left: boolean }> },
+ * @typedef {{ party?: { order: string[], players: Record<string, { character: string, left: boolean }> },
  *   event?: CampaignEvent }} SettleContext
  */
 
@@ -232,32 +220,29 @@ export function recipients(to, content, ctx) {
   if (target === 'chooser') return [content.chooser];
   if (target === 'all') {
     const p = ctx.party;
-    const all = p ? p.order.map((id) => p.players[id]).filter((m) => m && !m.left && m.character).map((m) => /** @type {string} */ (m.character)) : [];
+    const all = p ? p.order.map((id) => p.players[id]).filter((m) => m && !m.left).map((m) => m.character) : [];
     return all.length ? [...new Set(all)] : [content.chooser];
   }
   if (target === 'winner') {
     const e = ctx.event;
     const ranking = e && 'ranking' in e ? e.ranking : [];
-    const top = ranking.filter((r) => r.rank === 1 && r.character).map((r) => /** @type {string} */ (r.character));
+    const top = ranking.filter((r) => r.rank === 1).map((r) => r.character);
     return top.length ? [...new Set(top)] : [content.chooser];
   }
   return [target];
 }
 
 /**
- * Inventory made safe for the current content: an older save's flat facts.items (shared by everyone)
- * goes to the chooser, one each; entries whose item left the catalogue are dropped; counts ≤ 0 removed.
- * @param {Partial<Facts> & { items?: unknown }} f @param {Content} content @returns {Facts['inventory']}
+ * Inventory made safe for the current content: entries whose item left the catalogue are dropped;
+ * counts ≤ 0 removed.
+ * @param {Partial<Facts>} f @param {Content} content @returns {Facts['inventory']}
  */
-export function migrateInventory(f, content) {
+export function safeInventory(f, content) {
   const known = (/** @type {string} */ id) => !!content.items?.[id];
   /** @type {Facts['inventory']} */
   let inv = {};
   for (const [ch, items] of Object.entries(f.inventory ?? {})) {
     for (const [id, n] of Object.entries(items ?? {})) if (known(id) && typeof n === 'number' && n > 0) inv = addItem(inv, ch, id, Math.floor(n));
-  }
-  if (Array.isArray(f.items)) {
-    for (const id of f.items) if (typeof id === 'string' && known(id) && !holding({ ...emptyFacts(), inventory: inv }, content.chooser, id)) inv = addItem(inv, content.chooser, id, 1);
   }
   return inv;
 }

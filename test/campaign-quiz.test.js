@@ -68,14 +68,11 @@ test('taking a player out of a quiz counts as their leaving: host only, while it
   assert.equal(run(c, act({ t: 'retire', id: 'e', target: 'e' })), c, 'on the podium: refused');
 });
 
-test('asked survives loadCampaign; an older campaign without it loads with an empty list', () => {
+test('asked survives loadCampaign', () => {
   const c = playThrough(inQuiz());
   const loaded = loadCampaign(JSON.parse(JSON.stringify(c)), C);
   assert.deepEqual(loaded.facts.asked, c.facts.asked);
   assert.deepEqual(loaded, c, 'round trip is exact');
-  const old = JSON.parse(JSON.stringify(newCampaign(C, 1)));
-  delete old.facts.asked;
-  assert.deepEqual(loadCampaign(old, C).facts.asked, []);
 });
 
 test('an injected round.finished event is refused: only the engine derives it (exactly once)', () => {
@@ -103,12 +100,4 @@ test('the quiz result counts right answers per node (total and per character) fo
   assert.equal(f.counters[QUIZ_COUNTER.correctBy('elodie')], 3);
   assert.ok(holds({ count: QUIZ_COUNTER.nodeCorrect('childhood.quiz'), gte: 4 }, f), '"unlock X when the childhood quiz had ≥ 4 right"');
   assert.deepEqual(f.totals, { quiz: { elodie: 900, sol: 400 } });
-});
-
-test('loadCampaign migrates an older flat totals into totals.blocks', () => {
-  const c = newCampaign(SAMPLE_CONTENT, 1);
-  const old = JSON.parse(JSON.stringify({ ...c, facts: { ...c.facts, totals: { elodie: 120, sol: 80 } } }));
-  assert.deepEqual(loadCampaign(old, SAMPLE_CONTENT).facts.totals, { blocks: { elodie: 120, sol: 80 } });
-  const already = JSON.parse(JSON.stringify({ ...c, facts: { ...c.facts, totals: { blocks: { elodie: 1 }, quiz: { sol: 2 } } } }));
-  assert.deepEqual(loadCampaign(already, SAMPLE_CONTENT).facts.totals, { blocks: { elodie: 1 }, quiz: { sol: 2 } });
 });

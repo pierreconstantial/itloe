@@ -113,7 +113,7 @@ export {};
 
 // ---------------------------------------------------------------- the campaign (persisted state)
 
-/** @typedef {{ id: string, character: CharacterId | null, name: string, color: number, left: boolean }} PartyMember */
+/** @typedef {{ id: string, character: CharacterId, name: string, color: number, left: boolean }} PartyMember */
 
 /**
  * The evening's roster, owned by reduceCampaign (A1). A round starts with its members present.

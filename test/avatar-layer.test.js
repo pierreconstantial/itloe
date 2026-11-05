@@ -7,6 +7,7 @@ import { PARTY_ROOM, room } from '../shared/scene.js';
 
 /** A stand-in minigame's game area: a scene without furniture. */
 const AREA = room('stand-in-area', { x: 0.5, y: 0.5, w: 15, h: 8 }, []);
+/** @type {import('../public/screen/avatar-layer.js').Roster} */
 const PARTY = {
   order: ['p-anna', 'p-sol', 'p-pierre'],
   players: {

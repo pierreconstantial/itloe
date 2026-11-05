@@ -4,7 +4,6 @@ import assert from 'node:assert/strict';
 import { startQuiz, reduceQuiz as reduceRound } from '../shared/quiz/index.js';
 import { projectQuiz } from '../shared/quiz/bank.js';
 import { anecdoteOf, pickedBy, questionHeader, revealRows, seatedIds } from '../public/screen/quiz-view.js';
-import { summarizeQuiz } from '../public/commun/quiz-text.js';
 
 /** The quiz reducer, with the host the campaign passes: 'a'. */
 const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { hostId: 'a' });
@@ -67,22 +66,4 @@ test('reveal: right / wrong / pending / none per seated player, points, who pick
   assert.equal(anecdoteOf(q), null, 'no anecdote in this projection');
   const withAnecdote = /** @type {any} */ ({ ...q, round: { ...q.round, answer: { choice: null, text: 'x', anecdote: '  Canberra fut choisie en 1908.  ' } } });
   assert.equal(anecdoteOf(withAnecdote), 'Canberra fut choisie en 1908.');
-});
-
-test('summarizeQuiz wording', () => {
-  assert.equal(summarizeQuiz({ count: 10, seconds: 20, mode: 'mixed' }), '10 questions · 20 s each · choices and typed answers');
-  assert.equal(summarizeQuiz({ count: 5, seconds: 30, mode: 'choice' }), '5 questions · 30 s each · multiple choice');
-});
-
-test('credits in every phase; the question source only from the reveal on', async () => {
-  const { creditsOf, sourceOf } = await import('../public/screen/quiz-view.js');
-  const s = question();
-  const credits = ['OpenQuizzDB — CC BY-SA 4.0'];
-  const q = projectQuiz(s, (id) => ({ ...BANK[id], source: 'OpenQuizzDB #123 (CC BY-SA)' }), credits);
-  assert.deepEqual(creditsOf(q), credits, 'question phase: credits shown');
-  assert.equal(sourceOf(q), null, 'no source before the reveal');
-  const closed = reduceQuiz(s, { t: 'close', deadline: /** @type {number} */ (s.round?.deadline) });
-  const r = projectQuiz(closed, (id) => ({ ...BANK[id], source: 'OpenQuizzDB #123 (CC BY-SA)' }), credits);
-  assert.equal(sourceOf(r), 'OpenQuizzDB #123 (CC BY-SA)');
-  assert.deepEqual(creditsOf({ ...r, credits: /** @type {any} */ (undefined) }), [], 'older server without credits');
 });

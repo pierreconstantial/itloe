@@ -119,7 +119,7 @@ export function makeQuizServer(): MinigameServer<QuizState, QuizAction, Candidat
     },
 
     // candidates: the bank filtered by the quiz settings, minus every question asked this evening
-    inputs: (settings, facts) => candidatesFor(bank.questions, settings, facts.asked ?? []),
+    inputs: (settings, facts) => candidatesFor(bank.questions, settings, facts.asked),
 
     // the public quiz: never an answer before the reveal (shared/quiz/bank.js projectQuiz)
     view: (s) => projectQuiz(s, (qid) => bank.byId.get(qid), bank.credits),

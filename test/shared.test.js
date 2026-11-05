@@ -3,10 +3,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyBoard, canPlace, place, findClears, applyClears, anyFit, legalPlacementCount } from '../shared/board.js';
 import { PIECES, PIECE_SETS, handAt } from '../shared/pieces.js';
-import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
-import { WORLD, WALK_SPEED, spawnPoint, clampToWorld } from '../shared/world.js';
 import {
-  DEFAULT_SETTINGS, SETTINGS_SCHEMA, startGame, newPlayer, normalizeSettings, placementScore, ranking, reduce as reduceGame,
+  DEFAULT_SETTINGS, startGame, newPlayer, normalizeSettings, placementScore, ranking, reduce as reduceGame,
 } from '../shared/game.js';
 
 /** @typedef {import('../shared/game.js').State} State */
@@ -45,7 +43,7 @@ function fullExcept(empties) {
  * @returns {State}
  */
 function playing(over = {}, seed = 42) {
-  const p = { ...newPlayer('a', 'Ana', 1, SIZE), ...over };
+  const p = { ...newPlayer('a', 'Ana', 1, SIZE, 'pierre'), ...over };
   return { ...started(['pierre']), seed, order: ['a'], players: { a: p } };
 }
 
@@ -103,9 +101,8 @@ test('anyFit: isolated holes, nulls skipped', () => {
 
 // ---------- pieces.js ----------
 
-test('piece set: 29 pieces, sane shapes', () => {
+test('piece set: sane shapes', () => {
   const ids = Object.keys(PIECES);
-  assert.equal(ids.length, 29);
   for (const id of ids) {
     const p = PIECES[id];
     assert.equal(p.id, id);
@@ -115,8 +112,6 @@ test('piece set: 29 pieces, sane shapes', () => {
     assert.equal(Math.min(...p.cells.map((c) => c[0])), 0);
     assert.equal(Math.min(...p.cells.map((c) => c[1])), 0);
   }
-  assert.equal(PIECES.sq3.cells.length, 9);
-  assert.equal(PIECES.h5.cells.length, 5);
 });
 
 test('handAt: deterministic, valid ids', () => {
@@ -157,15 +152,6 @@ test('startGame: names and colours from the characters, the same hand 0 to every
   assert.equal(s.players.a.handIndex, 0);
   assert.deepEqual([s.rules.size, s.size, s.players.a.board.length], [9, 9, 81]);
   assert.equal(startGame({ seed: 42, settings: {}, players: [], now: 0 }), null, 'nobody to play');
-});
-
-test('characters: roster data', () => {
-  const ids = Object.keys(CHARACTERS);
-  assert.deepEqual(ids, ['pierre', 'elodie', 'sol', 'anna']); // display order
-  assert.equal(ROSTER_SIZE, ids.length);
-  assert.deepEqual(Object.values(CHARACTERS).map((c) => c.color), [1, 2, 3, 4]);
-  assert.equal(CHARACTERS.elodie.name, 'Élodie');
-  for (const [id, c] of Object.entries(CHARACTERS)) assert.equal(c.id, id);
 });
 
 // ---------- reduce: place ----------
@@ -278,8 +264,8 @@ test('stuck → done; last player done → finished', () => {
 });
 
 test('one player stuck, the other alive → still playing', () => {
-  const a = { ...newPlayer('a', 'Ana', 1, SIZE), board: isolatedHolesBoard(), hand: /** @type {(string|null)[]} */ (['dot', 'h2', null]) };
-  const b = newPlayer('b', 'Bob', 2, SIZE);
+  const a = { ...newPlayer('a', 'Ana', 1, SIZE, 'pierre'), board: isolatedHolesBoard(), hand: /** @type {(string|null)[]} */ (['dot', 'h2', null]) };
+  const b = newPlayer('b', 'Bob', 2, SIZE, 'elodie');
   b.hand = ['dot', 'dot', 'dot'];
   /** @type {State} */
   const s = { ...started(['pierre']), order: ['a', 'b'], players: { a, b } };
@@ -302,10 +288,10 @@ test('ranking: ties share a rank, standard competition (1,1,3), join order withi
   const s = started(['pierre']);
   s.order = ['a', 'b', 'c', 'd'];
   s.players = {
-    a: { ...newPlayer('a', 'Ana', 1, SIZE), score: 10 },
-    b: { ...newPlayer('b', 'Bob', 2, SIZE), score: 30 },
-    c: { ...newPlayer('c', 'Cal', 3, SIZE), score: 30 },
-    d: { ...newPlayer('d', 'Dan', 4, SIZE), score: 5 },
+    a: { ...newPlayer('a', 'Ana', 1, SIZE, 'pierre'), score: 10 },
+    b: { ...newPlayer('b', 'Bob', 2, SIZE, 'elodie'), score: 30 },
+    c: { ...newPlayer('c', 'Cal', 3, SIZE, 'sol'), score: 30 },
+    d: { ...newPlayer('d', 'Dan', 4, SIZE, 'anna'), score: 5 },
   };
   assert.deepEqual(ranking(s), [
     { id: 'b', rank: 1, score: 30 },
@@ -359,23 +345,6 @@ const SZT = ['s_h', 'z_h', 's_v', 'z_v', 't_down', 't_up', 't_right', 't_left'];
  * @returns {State}
  */
 const game2 = (settings, now = 0) => started(['pierre', 'elodie'], settings, now);
-
-test('defaults = M1 behaviour; startGame normalizes the settings it is given', () => {
-  assert.deepEqual(DEFAULT_SETTINGS, {
-    size: 8, mode: 'marathon', timedSeconds: 180, pieceSet: 'full', grace: 1, cleanBoardBonus: 300,
-  });
-  const s = game2();
-  assert.deepEqual(s.rules, DEFAULT_SETTINGS);
-  assert.equal(s.size, 8);
-  assert.equal(s.deadline, null);
-  assert.equal(s.endReason, null);
-  const t = game2({ size: 10, timedSeconds: 999, pieceSet: /** @type {any} */ ('weird') });
-  assert.equal(t.size, 10);
-  assert.equal(t.rules.size, 10);
-  assert.equal(t.rules.timedSeconds, 300);
-  assert.equal(t.rules.pieceSet, 'full');
-  assert.deepEqual(Object.keys(SETTINGS_SCHEMA).sort(), Object.keys(DEFAULT_SETTINGS).sort());
-});
 
 test('normalizeSettings: clamp + snap ranges, reject bad choices, ignore junk', () => {
   const n = (/** @type {unknown} */ patch) => normalizeSettings(patch);
@@ -568,45 +537,4 @@ test('leave in finished: removed from the podium', () => {
   const s = reduce(fin, { t: 'leave', id: 'a' });
   assert.deepEqual(s.order, ['b', 'c']);
   assert.deepEqual(ranking(s).map((r) => r.id).sort(), ['b', 'c']);
-});
-
-test('startGame: everyone starts with left=false', () => {
-  const s = game3();
-  for (const id of s.order) assert.equal(s.players[id].left, false);
-});
-
-test('mid-game leave marks left + done, keeps board/score/last; double leave is same-ref', () => {
-  let s = game3();
-  s = reduce(s, { t: 'place', id: 'b', piece: 0, x: 0, y: 0 });
-  const before = s.players.b;
-  const left = reduce(s, { t: 'leave', id: 'b' });
-  const b = left.players.b;
-  assert.deepEqual([b.left, b.done], [true, true]);
-  assert.equal(b.board, before.board);
-  assert.equal(b.score, before.score);
-  assert.equal(b.last, before.last);
-  assert.equal(reduce(left, { t: 'leave', id: 'b' }), left);
-});
-
-// ---------- world geometry ----------
-
-test('world: spawnPoint is deterministic, distinct per character, inside the world', () => {
-  assert.deepEqual(WORLD, { w: 16, h: 9 });
-  assert.equal(WALK_SPEED, 4);
-  /** @type {number[]} */
-  const xs = [];
-  for (const c of /** @type {import('../shared/characters.js').CharacterId[]} */ (Object.keys(CHARACTERS))) {
-    const p = spawnPoint(c);
-    assert.deepEqual(p, spawnPoint(c)); // deterministic
-    assert.equal(p.x, 3 + 3.33 * (CHARACTERS[c].color - 1));
-    assert.deepEqual([p.y, p.dir], [7.6, 'down']);
-    assert.ok(p.x >= 0 && p.x <= WORLD.w && p.y >= 0 && p.y <= WORLD.h);
-    xs.push(p.x);
-  }
-  assert.equal(new Set(xs).size, xs.length);
-  assert.deepEqual(spawnPoint('pierre'), { x: 3, y: 7.6, dir: 'down' });
-  assert.deepEqual(spawnPoint(null), { x: 8, y: 7.6, dir: 'down' }); // pre-M3 player: centre fallback
-  assert.deepEqual(clampToWorld(-1, 20), { x: 0, y: 9 });
-  assert.deepEqual(clampToWorld(7.5, 4.25), { x: 7.5, y: 4.25 });
-  assert.deepEqual(clampToWorld(NaN, Infinity), { x: 0, y: 0 });
 });

@@ -13,7 +13,7 @@ import { typedUrl } from '../public/screen/lobby-view.js';
 
 const ROOT = process.env.ITLOE_TEST_ROOT ?? new URL('..', import.meta.url).pathname;
 const ORIGIN = 'https://itloe.example.test';
-const TOKEN = 'hosting-test-token-never-a-real-secret';
+const TOKEN = 'Tq7wZk';
 
 /** @param {import('node:test').TestContext} t */
 async function server(t) {
@@ -92,7 +92,7 @@ test('public hosting gates HTTP and sockets, and invites a fresh browser', { tim
   assert.equal(login.headers.get('cache-control'), 'no-store');
   const setCookie = login.headers.get('set-cookie');
   assert.ok(setCookie);
-  assert.match(setCookie, /^__Host-itloe_access=[a-f0-9]{64}; Path=\/; Secure; HttpOnly; SameSite=Lax$/);
+  assert.match(setCookie, /^__Host-itloe_access=[a-f0-9]{64}; Path=\/; Max-Age=2592000; Secure; HttpOnly; SameSite=Lax$/);
   assert.ok(!setCookie.includes(TOKEN));
   const cookie = setCookie.split(';')[0];
   const headers = { Cookie: cookie };

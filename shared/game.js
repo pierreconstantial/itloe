@@ -24,7 +24,7 @@ import { ranking } from './ranking.js';
  *   id: string,
  *   name: string,               // copied from CHARACTERS[character] when the round starts
  *   color: number,              // 1..4, maps to CSS var --p1..--p4; = CHARACTERS[character].color
- *   character: CharacterId | null,  // null only for saves from before M3
+ *   character: CharacterId,
  *   board: number[],            // see board.js
  *   handIndex: number,          // n of the hand currently held (0-based)
  *   hand: (PieceId | null)[],   // length 3, null = already placed
@@ -146,7 +146,7 @@ export function startGame({ seed, settings, players, now }) {
   const seated = {};
   for (const { id, character } of players) {
     const { name, color } = CHARACTERS[character];
-    seated[id] = { ...newPlayer(id, name, color, rules.size, rules.grace, character), hand: hand0.slice() };
+    seated[id] = { ...newPlayer(id, name, color, rules.size, character, rules.grace), hand: hand0.slice() };
   }
   return {
     phase: 'playing', seed, size: rules.size, order: players.map((p) => p.id), players: seated, rules,
@@ -161,11 +161,11 @@ export function startGame({ seed, settings, players, now }) {
  * @param {string} name
  * @param {number} color
  * @param {number} size
+ * @param {CharacterId} character
  * @param {number} [grace]  rules.grace
- * @param {CharacterId | null} [character]
  * @returns {Player}
  */
-export function newPlayer(id, name, color, size, grace = DEFAULT_SETTINGS.grace, character = null) {
+export function newPlayer(id, name, color, size, character, grace = DEFAULT_SETTINGS.grace) {
   return {
     id, name, color, character,
     board: emptyBoard(size),
@@ -330,7 +330,7 @@ export const BLOCK_RULES = {
   retire: true, // taken out: done, still ranked, the seat kept (not a leave)
   status: (s) => (s.phase === 'playing' ? 'running' : s.phase === 'finished' ? 'finished' : null),
   result: (s) => ({
-    ranking: ranking(s).map((r) => ({ character: s.players[r.id].character ?? null, score: r.score, rank: r.rank })),
+    ranking: ranking(s).map((r) => ({ character: s.players[r.id].character, score: r.score, rank: r.rank })),
     endReason: s.endReason,
   }),
   settings: (patch, base) => normalizeSettings(patch, base),
