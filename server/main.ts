@@ -59,10 +59,11 @@ const clock = makeClock((kind, deadline) => {
   if (game.campaign.at.kind === kind) apply({ t: 'activity', action: minigame(kind)!.deadlineAction(deadline) });
 });
 
-/** The running round's in-memory side (round.ts): its server code's io. Null between rounds. */
+/** The running round's in-memory side (round.ts): its server code's io, with unsaved messages. Null
+ *  between rounds. */
 let round: Round<unknown> | null = null;
 const openRound = (c: Campaign): Round<unknown> | null =>
-  c.at.activity ? makeRound({ apply: (action) => apply({ t: 'activity', action: action as any }) }) : null;
+  c.at.activity ? makeRound({ apply: (action) => apply({ t: 'activity', action: action as any }), sendAll }) : null;
 round = openRound(game.campaign); // a resumed round
 
 /** Avatar positions: in memory only, outside the reducer (see pos.ts). */

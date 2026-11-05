@@ -15,9 +15,11 @@ export type ErrCode = 'full' | 'bad-place' | 'not-host' | 'not-playing' | 'unkno
  *  the round's state. */
 export type MessageCtx<S> = { id: string, now: number, hostId: string | null, state: S };
 
-/** `apply`: runs an action on the round now, false when refused or when the round is over (e.g. the
- *  quiz's verdict, arriving later). */
-export type MinigameIo<A> = { apply: (action: A) => boolean };
+/** The round's io, the same for its whole round (server/round.ts); once the round is over, what goes
+ *  through it is dropped. `apply`: runs an action on the round now, false when refused or when the round
+ *  is over (e.g. the quiz's verdict, arriving later). `send`: an unsaved message to every phone and TV
+ *  (the wire's `unsaved`), never saved, for the round's running screens. */
+export type MinigameIo<A> = { apply: (action: A) => boolean, send: (data: object) => void };
 
 /** What a message comes to: an action (with the error the sender gets when the rules refuse it), a
  *  refusal, or nothing (null: ignored silently). */

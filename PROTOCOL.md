@@ -86,6 +86,9 @@ into an action or refuses it, and answers a message it does not know with `err "
 running → `err "not-playing"`; from a socket that is not a party member → `err "unknown-player"`. A message
 sent just before a round ends may reach the next round.
 
+A minigame's server code may handle a message without changing saved state, and may answer with unsaved
+messages (`unsaved` below) during its round.
+
 ```jsonc
 { "t": "enter", "node": "childhood" }   // host, or the content's chooser (Élodie), into an UNLOCKED child of where
                                         // the party is; refused while a game is played, or on a done one-shot
@@ -222,6 +225,12 @@ is refused like any round button at the wrong moment.
 // slice 2b: another socket attached this player's id (reclaim on another device, or a second tab):
 // newest socket wins. Sent to the OLD socket, which the server then closes (code 4001). The client
 // must NOT auto-reconnect; it shows "Continued on another device" and offers the picker.
+{ "t": "unsaved", "data": { "t": "fart", "x": 7.2, "y": 4.5 } }
+// to EVERY socket: an unsaved message from the running round's minigame (its server code's io.send,
+// server/minigames.ts), never saved. "data" is the minigame's own object, for its running screens; a client
+// with no minigame screen running ignores it. Only during its round: once the round has ended (its podium
+// closed, or Play again replaced it), the server drops what the server code still sends. Messages on a
+// socket keep their order, so one sent before the round ended arrives before the view that ends it.
 { "t": "err", "code": "full" | "bad-place" | "not-host" | "not-playing" | "unknown-player" | "locked" | "bad-room" | "taken" | "refused" }
 // "refused" (slice 3): enter/back not allowed here (locked node, game being played, one-shot already done)
 // Round buttons (start, again, newGame, endGame, retire) answer alike in every minigame: a guest's →
