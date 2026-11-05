@@ -9,14 +9,14 @@
 //        PORT=3182 CDP=9222 [LOCK_MS=300000] node scripts/e2e-phone.mts    (never PORT 3131: the live server)
 // LOCK_MS is how long the "phone locked" case freezes the page (default 5 min, as in the acceptance list).
 // ONLY=1 … 8 runs just that part (continuity / host controls / campaign / quiz / room code / inventory / QR /
-// a stand-in minigame's phone screen walking its game area);
+// a stand-in minigame's phone screen walking its game area); an unknown part is refused.
 // a full run is the acceptance.
 // SHOTS=<dir> saves screenshots of the block, quiz and campaign screens, each with its visible text (<name>.txt).
 import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, Client, finish, HTTP, sleep, SLOW, SOCKET_PROBE, TEARDOWN_PROBE } from './e2e-lib.mts';
+import { check, Client, finish, HTTP, onlyPart, sleep, SLOW, SOCKET_PROBE, TEARDOWN_PROBE } from './e2e-lib.mts';
 import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
 import { FEET, PARTY_ROOM } from '../shared/scene.js';
 
@@ -25,6 +25,7 @@ if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT
 const CDP = process.env.CDP ?? '9222';
 const LOCK_MS = Number(process.env.LOCK_MS ?? 5 * 60_000);
 const SHOTS = process.env.SHOTS; // a folder: screenshots of the screens land there
+const ONLY = onlyPart(['1', '2', '3', '4', '5', '6', '7', '8']); // e.g. ONLY=3: just the campaign part (quick iteration)
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-phone-'));
 // the quiz part plays a FIXED bank (a copy of the placeholder file), whatever the real bank holds
 const FIXED_BANK = join(VAR, 'fixed-bank');
@@ -289,7 +290,6 @@ async function joinAs(p: Phone, character: string): Promise<string | null> {
 const setMode = (p: Phone, mode: 'Timed' | 'Marathon') =>
   p.ev(`document.querySelectorAll('#settings-body .seg button').forEach((b) => { if (b.textContent === '${mode}') b.click(); })`);
 
-const ONLY = process.env.ONLY; // e.g. ONLY=3: just the campaign part (quick iteration)
 
 try {
   await boot(true);

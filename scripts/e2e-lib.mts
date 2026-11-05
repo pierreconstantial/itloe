@@ -23,6 +23,14 @@ export function finish(): never {
   process.exit(failures ? 1 : 0);
 }
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** The part ONLY names (one of a suite's `parts`), or undefined for a full run. An unknown part exits 2 with
+ *  the list: a suite would otherwise run nothing of it, and pass. */
+export function onlyPart(parts: string[]): string | undefined {
+  const only = process.env.ONLY;
+  if (only === undefined || only === '' || parts.includes(only)) return only || undefined;
+  console.log(`ONLY=${only}: no such part; the parts: ${parts.join(' ')}`);
+  process.exit(2);
+}
 
 /**
  * Test-only, injected into a page before its scripts, like TEARDOWN_PROBE: keeps the page's latest socket and what it sends (`window.__sent`, parsed), so a test can see what the page

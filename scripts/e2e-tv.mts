@@ -2,7 +2,7 @@
 // server this script kill -9s, and phones as WebSocket clients. Checks the room again after newGame,
 // auto-reconnect after a restart in every phase, presence dimming (debounced), screens never bumped,
 // and the wake-from-sleep reconnect; a stand-in minigame screen with avatars and unsaved messages.
-// ONLY=connection|campaign|quiz|standin runs just that section.
+// ONLY=connection|campaign|quiz|standin runs just that section (an unknown one is refused).
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3180 CDP=9222 [SHOTS=dir] node scripts/e2e-tv.mts       (never PORT 3131: the live server)
 // SHOTS=<dir> saves screenshots, each with its visible text (<name>.txt).
@@ -15,13 +15,13 @@ import { SAMPLE_CONTENT } from '../shared/campaign/index.js';
 
 /** A node's title (the server runs the sample content). @param {string} id */
 const C_TITLE = (id: string): string => SAMPLE_CONTENT.nodes[id].title;
-import { blocksOf, check, Client, finish, HTTP, legalMoves, quizOf, roomOf, settled, sleep, SLOW, SOCKET_PROBE, TEARDOWN_PROBE } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, legalMoves, quizOf, onlyPart, roomOf, settled, sleep, SLOW, SOCKET_PROBE, TEARDOWN_PROBE } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const CDP = process.env.CDP ?? '9222';
 const SHOTS = process.env.SHOTS;
-const ONLY = process.env.ONLY;
+const ONLY = onlyPart(['connection', 'campaign', 'quiz', 'standin']);
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-tv-'));
 const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 

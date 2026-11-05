@@ -23,11 +23,11 @@ const SLOT = join(ROOT, 'scripts/e2e-slot.sh');
 /** Past this, everything still running or waiting is stopped: a run must fit a 10-minute foreground command. */
 const DEADLINE_MS = 9 * 60_000;
 
-/** The suites, longest first: they start first, so they get the first slots. `<suite>:<x>` runs the suite with
- *  ONLY=x, for x in `focus`: the parts its header lists (a suite runs nothing of an unknown part, and passes). */
-const SUITES: Record<string, { script: string, browser?: boolean, server?: boolean, focus?: string[], env?: Record<string, string> }> = {
-  phone: { script: 'e2e-phone.mts', browser: true, focus: ['1', '2', '3', '4', '5', '6', '7', '8'], env: { LOCK_MS: '20000' } },
-  tv: { script: 'e2e-tv.mts', browser: true, focus: ['connection', 'campaign', 'quiz', 'standin'] },
+/** The suites, longest first: they start first, so they get the first slots. `<suite>:<x>` runs a `focus` suite
+ *  with ONLY=x, one of its parts; the suite itself refuses an unknown part and lists its parts. */
+const SUITES: Record<string, { script: string, browser?: boolean, server?: boolean, focus?: boolean, env?: Record<string, string> }> = {
+  phone: { script: 'e2e-phone.mts', browser: true, focus: true, env: { LOCK_MS: '20000' } },
+  tv: { script: 'e2e-tv.mts', browser: true, focus: true },
   campaign: { script: 'e2e-campaign.mts' },
   quiz: { script: 'e2e-quiz.mts' },
   inventory: { script: 'e2e-inventory.mts' },
@@ -39,7 +39,7 @@ const SUITES: Record<string, { script: string, browser?: boolean, server?: boole
 /** `phone:4` → the phone suite with ONLY=4; null for an unknown suite. */
 function parse(spec: string): { suite: string, only?: string } | null {
   const [suite, only, ...rest] = spec.split(':');
-  if (!SUITES[suite] || rest.length || (only !== undefined && !SUITES[suite].focus?.includes(only))) return null;
+  if (!SUITES[suite] || rest.length || (only !== undefined && (!SUITES[suite].focus || !only))) return null;
   return { suite, only };
 }
 
@@ -190,7 +190,7 @@ async function runner(args: string[]): Promise<number> {
 }
 
 function usage(msg: string): number {
-  console.error(`e2e: ${msg}\nUsage: npm run e2e [-- [--shots <dir> [--compare <ref>]] <suite>…]\n  suites: ${Object.keys(SUITES).join(' ')}\n  one part (the suite's ONLY): ${Object.entries(SUITES).filter(([, d]) => d.focus).map(([n, d]) => `${n}:${d.focus!.join('|')}`).join('  ')}`);
+  console.error(`e2e: ${msg}\nUsage: npm run e2e [-- [--shots <dir> [--compare <ref>]] <suite>…]\n  suites: ${Object.keys(SUITES).join(' ')}\n  one part (the suite's ONLY; an unknown one lists them): ${Object.entries(SUITES).filter(([, d]) => d.focus).map(([n]) => `${n}:<part>`).join('  ')}`);
   return 2;
 }
 
