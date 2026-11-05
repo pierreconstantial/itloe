@@ -437,15 +437,15 @@ function handleMessage(ws: WebSocket, m: any): void {
 
   // everything below needs an identified member; actions are rebuilt field by field,
   // so server-only inputs (now, deadline, timeUp) and ids can never come from the wire
-  if (!['start', 'again', 'newGame', 'endGame', 'retire', 'place', 'config', 'leave', 'enter', 'back', 'gm',
-    'answer', 'next', 'override'].includes(m.t)) return;
   const id = who.get(ws);
   if (!id) { sendErr(ws, 'unknown-player'); return; }
+  const evening = ['leave', 'enter', 'back', 'gm'].includes(m.t);
   // a quiz runs here: its own messages, and the shared names (start, again, endGame, newGame, config) go to it
   const q = quiz();
-  if (q && !['leave', 'enter', 'back', 'gm'].includes(m.t)) { handleQuiz(ws, id, m, q); return; }
-  if (['answer', 'next', 'override'].includes(m.t)) { sendErr(ws, 'not-playing'); return; }
+  if (q && !evening) { handleQuiz(ws, id, m, q); return; }
   const s = blocks();
+  // no round here: nothing but the evening's messages
+  if (!s && !evening) { sendErr(ws, 'not-playing'); return; }
   const hostOfGame = s !== null && id === s.hostId;
   const phase = s?.phase ?? null;
 
@@ -477,16 +477,14 @@ function handleMessage(ws: WebSocket, m: any): void {
       return;
     }
 
-    // ---- the nested block game (no game here → not-playing) ----
+    // ---- the nested block game ----
     case 'start':
     case 'again':
-      if (!s) { sendErr(ws, 'not-playing'); return; }
       if (!applyGame({ t: m.t, id, now: Date.now() })) sendErr(ws, 'not-host');
       return;
 
     case 'endGame':
       // host stops the game (someone dropped while not stuck); refused (non-host / not playing) → not-host, like again
-      if (!s) { sendErr(ws, 'not-playing'); return; }
       if (!applyGame({ t: 'endGame', id })) sendErr(ws, 'not-host');
       return;
 
@@ -499,7 +497,6 @@ function handleMessage(ws: WebSocket, m: any): void {
 
     case 'newGame':
       // podium → block lobby inside the same tableau; refused (non-host or not finished) → not-host, like again
-      if (!s) { sendErr(ws, 'not-playing'); return; }
       if (!applyGame({ t: 'newGame', id })) sendErr(ws, 'not-host');
       return;
 
@@ -514,13 +511,16 @@ function handleMessage(ws: WebSocket, m: any): void {
       return;
 
     case 'config':
-      if (!isPlainObject(m.patch) || !s) return;
+      if (!isPlainObject(m.patch)) return;
       if (!applyGame({ t: 'config', id, patch: m.patch as Partial<Settings> })) {
         // a host's no-op patch (unknown keys/values, same settings) is not an error
         if (!hostOfGame) sendErr(ws, 'not-host');
         else if (phase === 'playing') sendErr(ws, 'locked');
       }
       return;
+
+    default: // not a block-game thing (a quiz's answer, …)
+      sendErr(ws, 'not-playing');
   }
 }
 
