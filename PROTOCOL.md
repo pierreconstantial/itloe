@@ -37,8 +37,12 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 // M3 avatar movement — EPHEMERAL, never enters the reducer State. Client-authoritative:
 // the phone integrates its joystick locally and sends throttled updates (≤ 15/s, only when
 // something changed). World coordinates: x ∈ [0,16], y ∈ [0,9] (16:9 units, avatar ≈ 1.2 units
-// tall); dir ∈ up|down|left|right. Server clamps to bounds, drops malformed or non-joined
-// senders silently, and accepts pos in ANY phase (screens decide when to render avatars).
+// tall); dir ∈ up|down|left|right. Server clamps to bounds and drops malformed or non-joined
+// senders silently. Between rounds, pos moves the player in the room (doors below). During a round
+// (until its podium closes), pos belongs to the round's minigame and its game area: kept only from the
+// players its server code lets walk (`walks`, server/minigames.ts; blocks and quiz: nobody), else
+// dropped silently; no doors. Those positions are the round's own, apart from the room's, and are
+// dropped when it ends: the room's positions stay where everyone stood (no longer moving).
 { "t": "say", "text": "Hello!" }                         // joined player; 1–100 printable characters
 { "t": "emote", "kind": "victory" }                      // joined player; victory | fart | annoy
 { "t": "interact", "object": "table" }                    // near the sofa | table | plant in the party room
@@ -108,7 +112,7 @@ messages (`unsaved` below) during its round.
                                         // TV reconnecting mid-cutscene, never drop a cutscene they did not play.
 ```
 
-- **Doors:** `pos` stays ephemeral, but the server reads it against the current node's doors (`zoneAt`):
+- **Doors:** `pos` stays ephemeral, but between rounds the server reads it against the current node's doors (`zoneAt`):
   stepping INTO a door (edge, not standing in it) records `zone.entered` for that character, and for the
   content's chooser on an unlocked door applies `enter`. After the party moves, standing where a door
   now is does not fire it: only a fresh step in does.
@@ -240,10 +244,12 @@ is refused like any round button at the wrong moment.
 // "taken": join refused — that character is already picked by an active player (M3)
 { "t": "pos", "playerId": "p-abc123", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
 // M3: relayed to SCREEN clients only, with ONE exception: right after welcome (join or rejoin)
-// the server sends a player its OWN last pos if it has one — the phone seeds its local position
-// from that, else from shared/world.js spawnPoint(character). On screen connect the server sends
-// one pos per known player (last position, in-memory only — positions reset on restart, so after
-// a restart everyone is back at their spawn point on all clients consistently).
+// the server sends a player its OWN last pos in the room if it has one — the phone seeds its local
+// position from that, else from shared/world.js spawnPoint(character); a minigame's phone screen picks
+// its own start in its game area. On screen connect the server sends one pos per known player: the
+// round's positions during a round, else the room's (last position, in-memory only — positions reset
+// on restart, so after a restart everyone is back at their spawn point on all clients consistently).
+// When a round ends, every screen gets the room's positions again, before the view that ends it.
 ```
 
 **Forward compatibility rule (M3): every client MUST silently ignore messages with an unknown `t`.**

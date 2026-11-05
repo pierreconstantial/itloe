@@ -192,7 +192,7 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
   |---|---|---|
   | `e2e-resume.mts` | kill -9 in every phase, timed clock kept, v1 save migration | `PORT` |
   | `e2e-presence.mts` | reclaim a character, newest device wins, host controls | `PORT` |
-  | `e2e-campaign.mts` | false start → unlocks → news acked by two TVs → doors, kill -9 at each step; chat, emotes and object actions (relay, history, rate limits, where interact works) | `PORT` |
+  | `e2e-campaign.mts` | false start → unlocks → news acked by two TVs → doors, kill -9 at each step; chat, emotes and object actions (relay, history, rate limits, where interact works); `pos` during a round kept apart from the room's | `PORT` |
   | `e2e-inventory.mts` | rewards land in the right inventory (chooser / winner / all), survive kill -9 and a reclaim; host give/take, unknown items refused | `PORT` |
   | `e2e-quiz.mts` | quiz over real sockets: no answer on the wire before the reveal, judging, override, resume | `PORT` (plays a fixed copy of `placeholder.json`) |
   | `e2e-tv.mts` | the TV page in headless Chrome | `PORT`, `CDP`, optional `SHOTS=<dir>` |

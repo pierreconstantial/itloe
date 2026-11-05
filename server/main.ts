@@ -59,15 +59,24 @@ const clock = makeClock((kind, deadline) => {
   if (game.campaign.at.kind === kind) apply({ t: 'activity', action: minigame(kind)!.deadlineAction(deadline) });
 });
 
-/** The running round's in-memory side (round.ts): its server code's io, with unsaved messages. Null
- *  between rounds. */
-let round: Round<unknown> | null = null;
-const openRound = (c: Campaign): Round<unknown> | null =>
-  c.at.activity ? makeRound({ apply: (action) => apply({ t: 'activity', action: action as any }), sendAll }) : null;
-round = openRound(game.campaign); // a resumed round
-
-/** Avatar positions: in memory only, outside the reducer (see pos.ts). */
+/** The room's avatar positions: in memory only, outside the reducer (see pos.ts). A round keeps its own. */
 const positions = makePositions<WebSocket>();
+
+/** The running round's in-memory side (round.ts): its server code's io, with unsaved messages, and its
+ *  positions. Null between rounds. */
+let round: Round<unknown> | null = null;
+const openRound = (c: Campaign): Round<unknown> | null => {
+  if (!c.at.kind || !c.at.activity) return null;
+  // nobody keeps walking in the room while the round runs (a stick released just as the round began)
+  for (const [id, pos] of positions.entries()) if (pos.moving) positions.set(id, { ...pos, moving: false });
+  return makeRound(serverOf(c.at.kind), {
+    state: () => game.campaign.at.activity,
+    apply: (action) => apply({ t: 'activity', action: action as any }),
+    sendAll,
+    relay: relayPos,
+  });
+};
+round = openRound(game.campaign); // a resumed round
 /** Door each walker currently stands in (edge trigger: entering a door fires once). In memory only. */
 const zones = new Map<string, string | null>();
 
@@ -84,10 +93,16 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   (prev, next) => clock.onChange(prev.at, next.at),
   (prev, next) => {
     if (roundOf(prev) === roundOf(next)) return;
-    round?.end(); // the old round's io goes quiet before the next round opens
+    const ended = round;
+    round = null;
+    if (ended) { // the old round's io goes quiet and its positions go before the next round opens
+      ended.end();
+      // the screens draw the room's positions again: the room resumes where everyone stood
+      for (const c of screens) sendPositions(c);
+    }
     round = openRound(next);
   },
-  (_prev, next) => positions.prune(next.party),
+  (_prev, next) => { positions.prune(next.party); round?.positions.prune(next.party); },
   (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
   () => broadcast(),
 ];
@@ -213,6 +228,11 @@ function broadcast(): void {
   sendAll(viewMsg());
 }
 
+/** A screen's snapshot of the positions it draws: the round's during a round, else the room's. */
+function sendPositions(ws: WebSocket): void {
+  for (const [playerId, pos] of (round?.positions ?? positions).entries()) send(ws, posMsg(playerId, pos));
+}
+
 function relayPos(playerId: string, pos: Pos): void {
   const msg = posMsg(playerId, pos);
   for (const c of screens) send(c, msg);
@@ -329,7 +349,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     if (m.role === 'screen') {
       screens.add(ws);
       if (joinQrUntil > Date.now()) send(ws, joinQrMsg()); // a TV (re)connecting mid-window shows it too
-      for (const [playerId, pos] of positions.entries()) send(ws, posMsg(playerId, pos));
+      sendPositions(ws);
     } else {
       screens.delete(ws);
     }
@@ -340,6 +360,11 @@ function handleMessage(ws: WebSocket, m: any): void {
     // ephemeral avatar movement: bypasses the engine (doors aside); malformed, unjoined or flooding senders dropped silently
     const id = who.get(ws);
     if (!id || !canMove(party(), id) || !positions.allow(ws)) return;
+    if (round) { // the round's game area: kept apart from the room, walking as its minigame allows, no doors
+      const pos = parsePos(m);
+      if (pos) round.walk(id, pos);
+      return;
+    }
     if (STORY_MODE && game.campaign.at.node === 'hub' && party().players[id].character === CONTENT.chooser
       && !game.campaign.facts.flags.includes('apparition.seen')) return;
     const pos = parsePos(m);
@@ -592,10 +617,11 @@ wss.on('connection', (ws) => {
     }
     // player stays in the game: phones rejoin via hello + playerId.
     // A phone that drops mid-walk must not leave its avatar walking on the TV forever.
-    const pos = id ? positions.get(id) : undefined;
+    const walking = round?.positions ?? positions;
+    const pos = id ? walking.get(id) : undefined;
     if (id && pos?.moving) {
       const stopped = { ...pos, moving: false };
-      positions.set(id, stopped);
+      walking.set(id, stopped);
       relayPos(id, stopped);
     }
   });

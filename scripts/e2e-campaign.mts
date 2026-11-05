@@ -390,11 +390,26 @@ try {
   const next = await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   check(!!blocksOf(next).players[idN], 'the newcomer is seated in the round started from the room');
   await interactsHere('during a running block game', false);
+  // during a round, pos belongs to its minigame's game area, apart from the room's positions; blocks lets nobody walk
+  i = T1.mark();
+  E.send({ t: 'pos', ...floor, dir: 'up', moving: true });
+  await sleep(400 * SLOW);
+  check(!T1.since(i).some((m) => m.t === 'pos'), 'during a running block game, a pos is dropped (blocks lets nobody walk)');
+  const T4 = new Client('T4'); await T4.open();
+  T4.send({ t: 'hello', role: 'screen' });
+  await T4.waitFor((m) => m.t === 'chatHistory');
+  await sleep(200 * SLOW);
+  check(!T4.msgs.some((m) => m.t === 'pos'), "a TV saying hello during the round gets the round's positions: none in a block game");
+  T4.ws.close();
   i = P.mark(); P.send({ t: 'endGame' });
   await until(P, (x) => x.at.activity?.phase === 'finished', i);
   await interactsHere('on a block podium', false);
-  i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'hub' } });
-  await until(P, (x) => x.at.node === 'hub', i);
+  const [iT1, iP] = [T1.mark(), P.mark()];
+  P.send({ t: 'gm', op: { op: 'goto', node: 'hub' } });
+  await until(P, (x) => x.at.node === 'hub', iP);
+  const back = await T1.waitFor((m) => m.t === 'pos' && m.playerId === idE, iT1).catch(() => null);
+  check(back?.x === TABLE.x && back?.y === TABLE.y && back?.moving === false,
+    `after the round, the TVs get the room's positions again: Élodie stands at the table, not walking (${JSON.stringify(back)})`);
   await interactsHere('on the hub', true);
   i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'childhood' } });
   await until(P, (x) => x.at.node === 'childhood', i);
