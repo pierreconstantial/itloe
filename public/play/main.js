@@ -26,7 +26,7 @@ import { createQuizUi } from './quiz-ui.js';
 import { createBag } from './bag.js';
 import { createSocial } from './social.js';
 import { JOIN_QR_MS } from '../../shared/join-qr.js';
-import { QUIZ_SETTINGS } from './quiz-text.js';
+import { QUIZ_SETTINGS, summarizeQuiz } from './quiz-text.js';
 import { childMarks, content, onContentChange, syncContent, titleOf } from './campaign-view.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
@@ -37,6 +37,7 @@ import { childMarks, content, onContentChange, syncContent, titleOf } from './ca
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
 /** @typedef {import('./movement.js').Pos} Pos */
 /** @typedef {{ score: number, previous: number | null }} Best */
+/** A seat in a block or quiz lobby. @typedef {{ id: string, name: string, color: number, character?: string | null, left?: boolean }} LobbyPlayer */
 
 const RANK_BADGES = ['①', '②', '③', '④'];
 const MEDALS = ['🥇', '🥈', '🥉', ''];
@@ -278,8 +279,8 @@ function member() {
 /** The party host steers the evening (game-master panel). */
 const isGameMaster = () => campaign !== null && playerId !== null && campaign.party.hostId === playerId && !!member();
 
-/** Walking: a member, on the hub / in a world, or in an open block lobby. */
-const canWalk = () => member() !== null && !quizView && (!lastView || lastView.phase === 'lobby');
+/** Walking: a member, on the hub / in a world, or in an open block or quiz lobby. */
+const canWalk = () => member() !== null && (quizView ? quizView.phase === 'lobby' : !lastView || lastView.phase === 'lobby');
 
 /** The latest accepted window from this phone. The server decides whether a request succeeded. */
 let joinShownUntil = 0;
@@ -419,6 +420,8 @@ function render() {
       $('waiting-text').textContent = "A quiz is on. You'll play the next one!";
       return;
     }
+    // the quiz's lobby is the room, like the block lobby: walk, settings, the host's Start
+    if (q.phase === 'lobby') { show('lobby'); renderLobby(q, q.players[playerId], quizHost, summarizeQuiz(q.settings)); return; }
     show('quiz');
     quizUi.render(q, playerId);
     return;
@@ -429,7 +432,7 @@ function render() {
     $('waiting-text').textContent = "A game is on. You'll play the next one!";
     return;
   }
-  if (v.phase === 'lobby') { show('lobby'); renderLobby(v, me, isHost); return; }
+  if (v.phase === 'lobby') { show('lobby'); renderLobby(v, me, isHost, summarize(v.settings)); return; }
   if (v.phase === 'finished') { show('podium'); renderPodium(v, me, isHost); return; }
   if (me.done) { show('over'); renderGameOver(v, me); return; }
   show('game');
@@ -457,7 +460,7 @@ function renderRoomPrompt(prompt) {
   if (prompt.refused) err.textContent = `That code (${prompt.refused}) didn't work. Check the TV and try again.`;
 }
 
-/** Our character, or the colour slot's character for a pre-M3 player. @param {Player} p @returns {CharacterId} */
+/** Our character, or the colour slot's character for a pre-M3 player. @param {LobbyPlayer} p @returns {CharacterId} */
 function characterOf(p) {
   if (isCharacterId(p.character)) return p.character;
   return /** @type {CharacterId} */ (Object.values(CHARACTERS).find((c) => c.color === p.color)?.id ?? 'pierre');
@@ -538,8 +541,12 @@ function renderPlace(c, mem) {
   dockStick('place');
 }
 
-/** @param {State} v @param {Player} me @param {boolean} isHost */
-function renderLobby(v, me, isHost) {
+/**
+ * The room at a tableau: the block game's lobby, or the quiz's.
+ * @param {{ order: string[], players: Record<string, LobbyPlayer>, hostId: string | null }} v
+ * @param {LobbyPlayer} me @param {boolean} isHost @param {string} settings the settings summary
+ */
+function renderLobby(v, me, isHost, settings) {
   dockStick('lobby');
   const header = $('lobby-me');
   header.replaceChildren(
@@ -561,7 +568,7 @@ function renderLobby(v, me, isHost) {
     ul.append(li);
   }
   ul.hidden = ul.childElementCount === 0;
-  $('lobby-settings').textContent = summarize(v.settings);
+  $('lobby-settings').textContent = settings;
   $('btn-settings-lobby').hidden = !isHost;
   $('btn-start').hidden = !isHost;
   $('lobby-hint').textContent = isHost
@@ -866,7 +873,7 @@ const joystick = createJoystick({
 
 /** Turn the lobby header avatar to the facing we just sent. @param {Pos} pos */
 function repaintMyAvatar(pos) {
-  const me = lastView && playerId ? lastView.players[playerId] : undefined;
+  const me = playerId ? (quizView ?? lastView)?.players[playerId] : undefined;
   const canvas = /** @type {HTMLCanvasElement | null} */ (document.querySelector('#lobby-me canvas'));
   if (me && canvas) paintAvatar(canvas, characterOf(me), pos.dir);
 }

@@ -112,3 +112,9 @@
 /* attribution (CC BY-SA datasets): small, legible, never in the way */
 .quiz-credits, .quiz-source { margin: 0; font-size: calc(20 * var(--u)); color: var(--fg-dim, #aab); opacity: 0.85; max-width: calc(1500 * var(--u)); }
 .podium .quiz-credits { margin-top: calc(12 * var(--u)); }
+/* the room at a quiz tableau: along the bottom of the floor, leaving the band its block-lobby size */
+.lobby > .quiz-credits {
+  position: fixed; left: 50%; bottom: calc(16 * var(--u)); transform: translateX(-50%);
+  width: max-content; max-width: calc(1200 * var(--u)); text-align: center;
+  padding: calc(6 * var(--u)) calc(16 * var(--u)); border-radius: calc(12 * var(--u)); background: rgba(14, 16, 22, 0.75);
+}

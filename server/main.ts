@@ -364,7 +364,8 @@ function handleMessage(ws: WebSocket, m: any): void {
 
   if (m.t === 'interact') {
     const id = who.get(ws);
-    if (!id || !isMember(id) || quiz() || (blocks() && blocks()?.phase !== 'lobby')) return;
+    // the party room's furniture: wherever avatars walk there (hub, world, a block or quiz lobby)
+    if (!id || !isMember(id) || (activity() && activity()?.phase !== 'lobby')) return;
     const now = Date.now();
     if (now - (interactionAt.get(ws) ?? 0) < 700) return;
     const member = party().players[id];

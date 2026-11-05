@@ -1,5 +1,5 @@
 // Phone quiz screen (Contract E): renders strictly from the view's PUBLIC quiz (shared/quiz/bank.js
-// projectQuiz), which never carries an answer before the reveal. Phases: lobby (host: settings + start),
+// projectQuiz), which never carries an answer before the reveal. Its lobby is the room (main.js); phases here:
 // question (4 big choices or a typed answer; one shot), reveal (my verdict + points, the answer, everyone's
 // answers; host: overrides + next), finished (ranking; host: again / back).
 // Controls are built once per question, so a view arriving mid-typing never resets the text field.
@@ -7,14 +7,13 @@ import { $ } from './dom.js';
 import * as haptics from './haptics.js';
 import { createConfirm } from './confirm.js';
 import { secondsLeft, mmss } from '../commun/clock.js';
-import { summarizeQuiz } from './quiz-text.js';
 import { SCORING, MAX_TEXT } from '../../shared/quiz/index.js';
 
 /** @typedef {import('../../shared/quiz/bank.js').QuizView} QuizView */
 /** @typedef {import('../../shared/quiz/bank.js').RoundView} RoundView */
 
 const URGENT_SECONDS = 5;
-const PHASES = ['lobby', 'question', 'reveal', 'finished'];
+const PHASES = ['question', 'reveal', 'finished'];
 
 /** French typography: a narrow no-break space before ? ! : ; » (never orphaned at a line start). @param {string} s */
 const frenchSpaces = (s) => s.replace(/\s+([?!:;»])/g, '\u202f$1').replace(/«\s+/g, '«\u202f');
@@ -54,7 +53,6 @@ export function createQuizUi(io) {
     input.blur(); // the keyboard goes away: the answer is sent
     render(/** @type {QuizView} */ (last), meId);
   });
-  $('quiz-start').addEventListener('click', () => io.send({ t: 'start' }));
   $('quiz-next').addEventListener('click', () => io.send({ t: 'next' }));
   $('quiz-again').addEventListener('click', () => io.send({ t: 'newGame' }));
   $('quiz-back').addEventListener('click', () => io.send({ t: 'back' }));
@@ -200,20 +198,12 @@ export function createQuizUi(io) {
   function render(v, id) {
     last = v;
     meId = id;
-    const host = v.hostId === id;
     for (const ph of PHASES) $(`quiz-${ph}`).hidden = v.phase !== ph;
     const r = v.round;
-    $('quiz-progress').textContent = v.phase === 'lobby' ? 'Quiz' : v.phase === 'finished' ? 'Results' : r ? `Question ${r.index + 1}/${r.total}` : 'Quiz';
+    $('quiz-progress').textContent = v.phase === 'finished' ? 'Results' : r ? `Question ${r.index + 1}/${r.total}` : 'Quiz';
     const me = v.players[id];
-    $('quiz-score').textContent = me && v.phase !== 'lobby' ? `${me.score} pts` : '';
+    $('quiz-score').textContent = me ? `${me.score} pts` : '';
 
-    if (v.phase === 'lobby') {
-      $('quiz-summary').textContent = summarizeQuiz(v.settings);
-      $('quiz-players').replaceChildren(...v.order.map((pid) => el('li', '', `${v.players[pid].name}${pid === v.hostId ? ' 👑' : ''}`)));
-      $('quiz-start').hidden = !host;
-      $('btn-settings-quiz').hidden = !host;
-      $('quiz-lobby-hint').textContent = host ? 'Set it up, then start when everyone is here.' : 'Quiz! Waiting for the host…';
-    }
     if (v.phase === 'question' && r) renderQuestion(v, r);
     if (v.phase === 'reveal' && r) renderReveal(v, r);
     if (v.phase === 'finished') renderFinished(v);

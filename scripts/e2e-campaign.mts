@@ -385,7 +385,7 @@ try {
   await interactsHere('in a world', true);
   i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'childhood.quiz' } });
   await P.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'lobby', i);
-  await interactsHere('in a quiz lobby', false); // behaviour change 4 (the quiz's lobby becomes the room) flips this to true
+  await interactsHere('in a quiz lobby', true);
   i = P.mark(); P.send({ t: 'start' });
   const question = (await P.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'question', i)).quiz;
   await interactsHere('during a quiz question', false);

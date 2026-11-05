@@ -46,7 +46,7 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 // Speech and emotes are short lived, server relayed events, limited to one per 650 ms per socket.
 // A reconnecting client receives { t: "chatHistory", messages: [...] } with up to 30 recent
 // speech events. The history is in memory only and is cleared by a server restart.
-// Interaction is available while avatars are visible (hub/world or block lobby). The server
+// Interaction is available while avatars are visible (hub/world, block or quiz lobby). The server
 // checks the sender's latest position against the closest object and relays an `interact` event
 // with playerId, object and at. It is limited to one per 700 ms per socket.
 ```

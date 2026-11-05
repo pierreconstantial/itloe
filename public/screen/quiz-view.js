@@ -1,10 +1,12 @@
 // TV quiz screen (Contract E), rendered from view.quiz — the PUBLIC projection (shared/quiz/bank.js
-// projectQuiz): no answer before the reveal. Lobby → question → reveal → … → finished (the shared podium).
+// projectQuiz): no answer before the reveal. Lobby (the party room, like the block lobby) → question →
+// reveal → … → finished (the shared podium).
 // Pure helpers (tested) + DOM builders; main.js owns timers and sounds.
 
 import { h, colorDot, playerColor, formatScore } from './dom.js';
 import { bindScore } from './score-ticker.js';
 import { renderPodium, revealSchedule } from './podium-view.js';
+import { renderLobby } from './lobby-view.js';
 import { summarizeQuiz } from '../commun/quiz-text.js';
 
 /** @typedef {import('../../shared/quiz/bank.js').QuizView} QuizView */
@@ -64,7 +66,7 @@ export const sourceOf = (q) => {
   return typeof s === 'string' && s.trim() ? s.trim() : null;
 };
 
-/** Small attribution line for the lobby and the podium. @param {QuizView} q */
+/** Small attribution line for the room's band and the podium. @param {QuizView} q */
 function creditsLine(q) {
   const lines = creditsOf(q);
   return lines.length ? [h('p', 'quiz-credits', [lines.join(' · ')])] : []; // the lines say what they credit
@@ -98,16 +100,15 @@ function scoreboard(q) {
   }));
 }
 
-/** @param {QuizView} q */
-export function renderQuizLobby(q) {
-  const n = seatedIds(q).length;
-  return h('section', 'quiz quiz-lobby', [
-    h('h1', 'quiz-title', ['Quiz!']),
-    h('p', 'settings-line', [summarizeQuiz(q.settings)]),
-    h('div', 'quiz-chips', seatedIds(q).map((id) => chip(q, id))),
-    h('p', 'podium-hint', [n ? 'The host starts the quiz from their phone' : 'Waiting for players…']),
-    ...creditsLine(q),
-  ]);
+/**
+ * The room at a quiz tableau: the block lobby's band (join box, "Quiz!", the quiz settings, who's in),
+ * and the dataset credits along the bottom; the players are the avatars walking below the band.
+ * @param {QuizView} q @param {import('./lobby-view.js').JoinInfo} join
+ */
+export function renderQuizRoom(q, join) {
+  const room = renderLobby(q, null, join, { title: 'Quiz!', settings: summarizeQuiz(q.settings) });
+  room.append(...creditsLine(q));
+  return room;
 }
 
 /**
@@ -190,10 +191,9 @@ export function renderQuizPodium(q, elapsedMs) {
 /** The podium's reveal steps for a finished quiz (sounds / confetti in main.js). @param {QuizView} q */
 export const quizRevealSchedule = (q) => revealSchedule(/** @type {any} */ (q));
 
-/** @param {QuizView} q @param {number} podiumElapsedMs */
+/** A quiz under way or finished (its lobby is the room: renderQuizRoom). @param {QuizView} q @param {number} podiumElapsedMs */
 export function renderQuiz(q, podiumElapsedMs = Infinity) {
   if (q.phase === 'question' && q.round) return renderQuestion(q);
   if (q.phase === 'reveal' && q.round) return renderReveal(q);
-  if (q.phase === 'finished') return renderQuizPodium(q, podiumElapsedMs);
-  return renderQuizLobby(q);
+  return renderQuizPodium(q, podiumElapsedMs);
 }

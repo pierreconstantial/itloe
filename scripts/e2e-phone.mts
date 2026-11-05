@@ -678,16 +678,32 @@ try {
   await H.tap('[data-gm="goto"]');
   await H.tap('[data-gm="goto"]');
   await H.ev(`document.querySelector('#sheet-gm [data-close]').click()`);
-  const inQuiz = async (p: Phone) => { for (let k = 0; k < 40; k++) { if ((await p.snap())?.view === 'view-quiz') return true; await sleep(100); } return false; };
-  expect(await inQuiz(H) && await inQuiz(Q), 'Go there → both phones on the quiz screen');
-  expect(await Q.visible('quiz-lobby') && /Waiting for the host/.test(await Q.text('quiz-lobby-hint')) && !(await Q.visible('quiz-start')),
-    'guest: "Quiz! Waiting for the host…", no Start', await Q.text('quiz-lobby-hint'));
-  expect(await H.visible('quiz-start') && await H.visible('btn-settings-quiz'), 'host: Start + ⚙ Settings');
-  await H.shot('quiz-lobby-host');
+  // the quiz's lobby is the room, like a block lobby: the walking screen
+  const inRoom = async (p: Phone) => { for (let k = 0; k < 40; k++) { if ((await p.snap())?.view === 'view-lobby') return true; await sleep(100); } return false; };
+  expect(await inRoom(H) && await inRoom(Q), 'Go there → both phones in the room (the walking screen)');
+  expect(/Waiting for the host/.test(await Q.text('lobby-hint')) && !(await Q.visible('btn-start')) && !(await Q.visible('btn-settings-lobby')),
+    'guest: "Waiting for the host to start…", no Start, no Settings', await Q.text('lobby-hint'));
+  expect(await H.visible('btn-start') && await H.visible('btn-settings-lobby'), 'host: Start + ⚙ Settings');
+  expect(await Q.visible('stick-pad') && await Q.visible('btn-interact') && await H.visible('stick-pad'), 'the joystick and the object button');
+  // Élodie walks to the birthday table (the TV socket sees her relayed pos) and blows the candles
+  const qtv = new Client('qtv'); await qtv.open(); qtv.send({ t: 'hello', role: 'screen' });
+  const qPos = () => { const m = [...qtv.msgs].reverse().find((x) => x.t === 'pos' && x.playerId === idQ); return m ? { x: m.x, y: m.y } : null; };
+  const TABLE = { x: 11.1, y: 7.5 }; // in front of the table
+  await Q.steer(TABLE, () => { const p = qPos(); return !!p && Math.hypot(p.x - TABLE.x, p.y - TABLE.y) < 0.35; }, qPos, 15_000);
+  const label = await Q.text('btn-interact');
+  expect(/Blow candles/.test(label) && !(await Q.ev(`document.getElementById('btn-interact').disabled`)), 'near the table: the object button offers it', label);
+  const mark = qtv.msgs.length;
+  await Q.tap('#btn-interact');
+  const blown = await qtv.waitFor((m) => m.t === 'interact' && m.playerId === idQ && m.object === 'table', mark, 3000).catch(() => null);
+  const qToast = await Q.waitFor((x) => !!x.toast, 3000);
+  expect(!!blown && /Make a wish/.test(qToast?.toast ?? ''), 'object action in the quiz room: relayed to the TV, feedback toast on the phone', qToast?.toast ?? '');
+  qtv.ws.close();
+  await H.shot('quiz-room-host');
+  await Q.shot('quiz-room-guest');
 
   /** Host settings through the real sheet (data-driven from QUIZ_SETTINGS_SCHEMA). */
   const setQuiz = async (count: number, mode: 'Choices' | 'Typed') => {
-    await H.tap('#btn-settings-quiz');
+    await H.tap('#btn-settings-lobby');
     const labels: string = await H.ev(`[...document.querySelectorAll('#settings-body .setting-label')].map((e) => e.textContent).join('|')`);
     for (let k = 0; k < 30; k++) {
       const now = Number(/\d+/.exec(await H.ev(`document.querySelector('#settings-body .stepper output').textContent`))?.[0]);
@@ -702,10 +718,10 @@ try {
   };
   const labels = await setQuiz(3, 'Choices');
   expect(labels === 'Questions|Time per question|Answers', 'quiz settings sheet from the quiz schema', labels);
-  expect(/^3 questions .* multiple choice$/.test(await Q.text('quiz-summary')), 'guests see the settings summary', await Q.text('quiz-summary'));
+  expect(/^3 questions .* multiple choice$/.test(await Q.text('lobby-settings')), 'guests see the settings summary', await Q.text('lobby-settings'));
 
   const phaseIs = async (p: Phone, id: string) => { for (let k = 0; k < 60; k++) { if (await p.visible(id)) return true; await sleep(100); } return false; };
-  await H.tap('#quiz-start');
+  await H.tap('#btn-start');
   expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), 'Start → the first question on both phones');
   expect(/\d:\d\d/.test(await Q.text('quiz-clock')), 'countdown shown', await Q.text('quiz-clock'));
   // the game master's Back follows the server: refused while the quiz runs, so shown disabled
@@ -760,9 +776,9 @@ try {
 
   // ---- quiz 2 (Play again): typed answers, really typed ----
   await H.tap('#quiz-again');
-  expect(await phaseIs(H, 'quiz-lobby'), 'Play again → the quiz lobby');
+  expect(await phaseIs(H, 'view-lobby'), 'Play again → the room');
   await setQuiz(3, 'Typed');
-  await H.tap('#quiz-start');
+  await H.tap('#btn-start');
   expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question') && await Q.visible('quiz-text-form') && !(await Q.visible('quiz-choices')),
     'typed round: a text field, no choices');
   const attrs = await Q.ev(`(() => { const i = document.getElementById('quiz-text'); return [i.getAttribute('autocorrect'), i.getAttribute('autocapitalize'), i.spellcheck, i.lang].join(','); })()`);
@@ -792,8 +808,8 @@ try {
 
   // ---- quiz 3: the host ends it from the ☰ menu during a question ----
   await H.tap('#quiz-again');
-  expect(await phaseIs(H, 'quiz-lobby'), 'Play again → the quiz lobby');
-  await H.tap('#quiz-start');
+  expect(await phaseIs(H, 'view-lobby'), 'Play again → the room');
+  await H.tap('#btn-start');
   expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), 'Start → a question on both phones');
   expect((await Q.hostButtons()).length === 0, 'quiz: guest menu has no host controls');
   await H.tap('#btn-menu');

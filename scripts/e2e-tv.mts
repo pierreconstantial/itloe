@@ -520,14 +520,21 @@ try {
   check(await tv.until(`JSON.parse(${doorsJs})['childhood.quiz'] !== 'locked'`, 'quiz door'), "World 1's block game done → its quiz door opens");
   i = A2.mark(); A2.send({ t: 'enter', node: 'childhood.quiz' });
   const ql = await A2.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'lobby', i);
-  check(await tv.until(`!!document.querySelector('.quiz-lobby') && document.querySelectorAll('.quiz-lobby .quiz-chip').length === ${ql.quiz.order.length}`, 'quiz lobby'),
-    `quiz lobby on the TV: "Quiz!", the ${ql.quiz.order.length} seated players, settings line`);
-  check(/questions · \d+ s each/.test(await tv.js(`document.querySelector('.quiz-lobby .settings-line')?.textContent ?? ''`)), '…with the quiz settings summary');
+  check(await tv.until(`document.querySelector('.lobby .title')?.textContent === 'Quiz!' && document.body.classList.contains('party')
+    && !document.getElementById('party-bg').hidden && window.bloko.avatars().length === ${ql.quiz.order.length}`, 'quiz room'),
+    `quiz lobby on the TV: the party room with the "Quiz!" band and the ${ql.quiz.order.length} seated players' avatars`);
+  check(/questions · \d+ s each/.test(await tv.js(`document.querySelector('.lobby .settings-line')?.textContent ?? ''`)), '…with the quiz settings summary');
+  check(await tv.js(`!!document.querySelector('.lobby .join-qr') && document.querySelector('.lobby-count')?.textContent.includes('${ql.quiz.order.length}/')`), '…the join QR and who\'s in');
   if ((ql.quiz.credits ?? []).length) {
-    check(await tv.until(`document.querySelector('.quiz-lobby .quiz-credits')?.textContent.includes(${JSON.stringify(String(ql.quiz.credits[0]).slice(0, 16))})`, 'credits'),
+    check(await tv.until(`document.querySelector('.lobby .quiz-credits')?.textContent.includes(${JSON.stringify(String(ql.quiz.credits[0]).slice(0, 16))})`, 'credits'),
       'quiz lobby: dataset credits line (CC BY-SA attribution)');
   }
-  await tv.shot('quiz-lobby');
+  A2.send({ t: 'pos', x: 9, y: 6, dir: 'right', moving: false });
+  check(await tv.until(`(() => { const a = window.bloko.avatars().find((a) => a.id === '${idA}'); return a && Math.abs(a.x - 9) < 0.2; })()`, 'quiz avatar moves'),
+    '…and avatars walk there (pos relayed)');
+  await tv.until('!window.bloko.cutscene().playing', 'quiz room calm', 12000); // the quiz door's unlock moment plays here first
+  await sleep(600);
+  await tv.shot('quiz-room');
 
   const phones = [A2, B, N, E];
   const seated: string[] = ql.quiz.order;

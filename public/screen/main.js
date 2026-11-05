@@ -18,7 +18,7 @@ import { h } from './dom.js';
 import { createContentSource } from '../commun/content.js';
 import { doorStates, mapCopy, nameOf } from './doors.js';
 import { createCutscenes } from './cutscenes.js';
-import { renderQuiz } from './quiz-view.js';
+import { renderQuiz, renderQuizRoom } from './quiz-view.js';
 import { applyJoinQr, joinQrState } from './join-qr.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
@@ -193,9 +193,12 @@ function showQuiz(q) {
   }
   stale = true;
   updateCountdown(null);
-  party.setVisible(false);
+  // the quiz's lobby is the party room, as in a block lobby: avatars walk under the band
+  const room = q.phase === 'lobby';
+  party.setPlayers(q);
+  party.setVisible(room);
   party.setDoors([]);
-  document.body.classList.remove('party');
+  document.body.classList.toggle('party', room);
   document.body.classList.add('in-quiz');
   const prev = quiz;
   quiz = q;
@@ -208,7 +211,7 @@ function showQuiz(q) {
     podiumSequence(/** @type {any} */ (q));
   }
   if (q.phase !== 'finished' && prev?.phase === 'finished') cancelPodium();
-  app.replaceChildren(renderQuiz(q, prev ? performance.now() - quizFinishedAt : Infinity));
+  app.replaceChildren(room ? renderQuizRoom(q, joinInfo) : renderQuiz(q, prev ? performance.now() - quizFinishedAt : Infinity));
   drawQuizRing();
 }
 
@@ -513,6 +516,7 @@ connect();
 fetchJoinInfo().then((info) => {
   joinInfo = info;
   if (current?.phase === 'lobby') app.replaceChildren(renderLobby(current, current, joinInfo));
+  else if (quiz?.phase === 'lobby') app.replaceChildren(renderQuizRoom(quiz, joinInfo));
 });
 
 /** @type {any} */ (window).bloko = {
