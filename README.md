@@ -179,7 +179,7 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 - **Simulator:** open **/sim/** on a running server: the TV screen plus player phones side by side in one page. The phones get the room code from `/api/join`.
 - **End-to-end tests** (exit code 0 = all pass, the last line says `ALL PASS`). Never use port 3131: that's the live server.
 
-  `e2e.mts` needs a separate server with a fresh lobby, on the sample content:
+  `e2e.mts` needs a separate server with a fresh evening, on the sample content:
 
   ```sh
   ITLOE_CONTENT=sample BLOKO_VAR=/tmp/bloko-e2e PORT=3199 npm start -- --new
