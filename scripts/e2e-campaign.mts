@@ -140,8 +140,10 @@ async function playOne(n: number): Promise<void> {
   P.send({ t: camp(P).at.activity === null ? 'start' : 'again' });
   await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   i = P.mark();
+  const tvFrom = T1.mark();
   P.send({ t: 'endGame' });
   const k = await until(P, (x) => x.at.activity?.phase === 'finished', i);
+  await until(T1, (x) => x.at.activity?.phase === 'finished' && played(x) === n, tvFrom);
   check(played(k) === n && k.at.activity.endReason === 'host', `block game ${n} ended by the host → blocks.played = ${played(k)}`);
 }
 
@@ -261,7 +263,7 @@ try {
   i = P.mark(); P.send({ t: 'start' });
   const timedStart = await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   check(blocksOf(timedStart).order.length === 2, '…and the round starts with the whole party seated');
-  const deadline = camp(T1).at.activity.deadline;
+  const deadline = blocksOf(timedStart).deadline;
   await restartSame('in a timed world game');
   const after = camp(T1).at.activity;
   check(after.phase === 'playing' && after.deadline >= deadline, 'timed world game resumed, its deadline shifted by the downtime (never shortened)');

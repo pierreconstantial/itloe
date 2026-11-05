@@ -119,6 +119,7 @@ A.send({ t: 'pos', x: 5, y: 4, dir: 'down', moving: true });
 await screen.waitFor((m) => m.t === 'pos' && m.playerId === idA && m.x === 5);
 const S2 = new Client('S2'); await S2.open(); S2.send({ t: 'hello', role: 'screen' });
 const snap = await S2.waitFor((m) => m.t === 'pos' && m.playerId === idA);
+await S2.waitFor((m) => m.t === 'pos' && m.playerId === idB);
 const firstPos = S2.msgs.findIndex((m) => m.t === 'pos'), lastView = S2.msgs.findLastIndex((m) => m.t === 'view');
 check(snap.x === 5 && snap.y === 4 && posOf(S2, 0, idB).length === 1 && lastView < firstPos, 'new screen gets view, then one pos per known player');
 S2.ws.close();
@@ -189,6 +190,7 @@ i = A2.mark(); ib = B.mark();
 const mv2 = legalMoves(A2.lastView(), idA)[0];
 A2.send({ t: 'place', ...mv2 });
 await B.waitFor((m) => m.t === 'view', ib);
+await A2.waitFor((m) => m.t === 'view', i);
 check(A2.since(i).some((m) => m.t === 'view') && !A2.since(i).some((m) => m.t === 'err'), 'rejoined socket can place');
 
 // --- replaced-socket path: second connection hellos with same id while first is alive ---
@@ -260,6 +262,7 @@ ia = Acur.mark();
 Acur.send({ t: 'start' });
 const vs = blocksOf(await Acur.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', ia));
 check(vs.order.length === 3 && vs.seed !== fin.seed, 'host start after newGame → playing with 3 players, new seed');
+await Promise.all([N, B].map((c) => c.waitFor((m) => m.t === 'view' && blocksOf(m)?.seed === vs.seed)));
 await playToDone(N, idN, Acur, rnd);
 await playToDone(B, idB, Acur, rnd);
 await playToDone(Acur, idA, B, rnd);

@@ -121,6 +121,7 @@ try {
   check(screen.lastHost() === idA, 'reclaimed host is still host');
   let i = A3.mark(); A3.send({ t: 'start' });
   await A3.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
+  await B2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing');
   check(A3.lastView().phase === 'playing', 'reclaimed host can start the game');
 
   // ---------- mid-game reclaim keeps board, score, hand ----------

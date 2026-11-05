@@ -460,8 +460,8 @@ try {
   check(await tv.until('true', 'noop', 100) && (await (async () => { const end = Date.now() + 3000; while (Date.now() < end) { if (tv!.console.some((l) => l.includes('woke after'))) return true; await sleep(50); } return false; })()),
     'wake after a 6 s freeze → TV drops the old socket and reconnects');
   check(await tv.until(`!${tvOnlineBanner}`, 'reconnected'), '…and is live again');
-  i = B.mark(); A2.send({ t: 'place', ...legalMoves(A2.lastView(), idA)[0] }); await B.waitFor((m) => m.t === 'view', i);
-  const sc = A2.lastView().players[idA].score;
+  i = B.mark(); A2.send({ t: 'place', ...legalMoves(A2.lastView(), idA)[0] });
+  const sc = blocksOf(await B.waitFor((m) => m.t === 'view', i)).players[idA].score;
   check(await tv.until(`${tvState}.players['${idA}'].score === ${sc}`, 'live after wake'), 'a move after the wake reaches the TV');
 
   // ---------- silent socket (half-open): SIGSTOP the server, TCP stays up but nothing arrives ----------
@@ -482,8 +482,8 @@ try {
   check(silentHit && silentAfter <= 26_000, `silent socket → TV gives up on it by itself (${Math.round(silentAfter / 1000)} s after the server froze; ≤ 25 s of silence)`);
   server!.kill('SIGCONT');
   check(await tv.until(`!${tvOnlineBanner}`, 'back after SIGCONT', 8000), '…server back → TV live again');
-  i = B.mark(); A2.send({ t: 'place', ...legalMoves(A2.lastView(), idA)[0] }); await B.waitFor((m) => m.t === 'view', i);
-  const sc2 = A2.lastView().players[idA].score;
+  i = B.mark(); A2.send({ t: 'place', ...legalMoves(A2.lastView(), idA)[0] });
+  const sc2 = blocksOf(await B.waitFor((m) => m.t === 'view', i)).players[idA].score;
   check(await tv.until(`${tvState}.players['${idA}'].score === ${sc2}`, 'live after silence'), '…and the next move reaches it');
 
   // ---------- host controls: retire shows "Out", endGame shows the podium with its line ----------

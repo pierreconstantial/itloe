@@ -88,6 +88,7 @@ try {
   // ---------- playing (marathon) ----------
   i = A.mark(); A.send({ t: 'start' });
   await A.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
+  await B.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing');
   i = B.mark(); const iA = A.mark(); A.send({ t: 'place', ...legalMoves(A.lastView(), idA)[0] });
   await B.waitFor((m) => m.t === 'view', i);
   await A.waitFor((m) => m.t === 'view', iA); // the snapshot is read from A: wait for A's copy too
