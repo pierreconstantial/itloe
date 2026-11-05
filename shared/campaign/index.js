@@ -5,7 +5,7 @@
 //   newCampaign(content, seed)               → Campaign at content.start, empty party, block lobby
 //   fromLegacyState(state, content)          → Campaign wrapping a saved bare block State (any phase)
 //   loadCampaign(raw, content)               → Campaign; drops ids the content no longer has, re-settles
-//   reduceCampaign(campaign, action, content)→ Campaign; actions: join leave enter back activity event ack gm
+//   reduceCampaign(campaign, action, content)→ Campaign; actions: join leave enter back activity config event ack gm
 //   activityOf(campaign)                     → the live activity State (block game or quiz), or null
 //   roundStatus(campaign)                    → 'lobby' | 'running' | 'finished', or null (no round);
 //                                              running: enter/back refused
@@ -40,6 +40,7 @@ export { holds, record, settle, emptyFacts, holding, recipients, COUNTER, valida
 /** @typedef {import('../quiz/index.js').QuizState} QuizState */
 /** @typedef {import('./types.js').ActivityState} ActivityState */
 /** @typedef {import('../minigames.js').MinigameKind} MinigameKind */
+/** @typedef {import('./types.js').TableauSettings} TableauSettings */
 
 /** Deterministic seed step (same LCG family as the game's own). @param {number} s */
 const nextSeed = (s) => (Math.imul(s >>> 0, 1103515245) + 12345) >>> 0;
@@ -98,21 +99,34 @@ function savedKind(at) {
 }
 
 /**
+ * The settings a tableau starts with: its content's, on top of its minigame's defaults. No minigame → null.
+ * @param {Node | undefined} node @returns {TableauSettings | null}
+ */
+function settingsAt(node) {
+  const spec = minigame(node?.activity?.kind);
+  return spec ? spec.settings(/** @type {any} */ (node?.activity)?.settings) : null;
+}
+
+/** What the campaign passes with every action of its round. @param {Campaign} c */
+const ctxOf = (c) => ({ settings: c.at.settings });
+
+/**
  * The round of a tableau's minigame, in its lobby, seeded with every non-left party member (host =
- * party host). No minigame (a scene, a hub or a world) → no round.
+ * party host), and the tableau's settings. No minigame (a scene, a hub or a world) → no round.
  * @param {Node | undefined} node @param {Party} party @param {number} seed
- * @returns {{ kind: MinigameKind | null, activity: ActivityState | null }}
+ * @returns {{ kind: MinigameKind | null, activity: ActivityState | null, settings: TableauSettings | null }}
  */
 function roundAt(node, party, seed) {
   const kind = node?.activity?.kind;
   const spec = minigame(kind);
-  if (!spec) return { kind: null, activity: null };
-  let s = spec.init(seed, /** @type {any} */ (node?.activity)?.settings);
+  const settings = settingsAt(node);
+  if (!spec) return { kind: null, activity: null, settings: null };
+  let s = spec.init(seed, settings);
   for (const id of party.order) {
     const m = party.players[id];
-    if (!m.left && m.character) s = spec.reduce(s, { t: 'join', id, character: m.character });
+    if (!m.left && m.character) s = spec.reduce(s, { t: 'join', id, character: m.character }, { settings });
   }
-  return { kind: /** @type {MinigameKind} */ (kind), activity: syncHost(s, party) };
+  return { kind: /** @type {MinigameKind} */ (kind), activity: syncHost(s, party), settings };
 }
 
 /** The party is the authority on who hosts: mirror it into the nested game when that player is seated. */
@@ -154,7 +168,7 @@ export function fromLegacyState(state, content) {
   }
   const facts = quietSettle({ ...emptyFacts(), seen: [content.start],
     flags: content.storyId ? [`story.${content.storyId}`] : [] }, content);
-  return { v: 1, seed: nextSeed(state.seed), party, facts, news: [], newsSeq: 0, at: { node: content.start, kind: 'blocks', activity: state } };
+  return { v: 1, seed: nextSeed(state.seed), party, facts, news: [], newsSeq: 0, at: { node: content.start, kind: 'blocks', activity: state, settings: minigame('blocks')?.settings(/** @type {any} */ (state).settings) ?? null } };
 }
 
 /**
@@ -192,7 +206,7 @@ export function loadCampaign(raw, content) {
   const kind = savedKind(raw.at); // first: a round of an unknown minigame stops the load even where the node is gone
   const keep = known(raw.at?.node); // else a fresh lobby is built at the start, which consumes a seed
   const at = keep
-    ? { node: raw.at.node, kind, activity: raw.at.activity ?? null }
+    ? { node: raw.at.node, kind, activity: raw.at.activity ?? null, settings: raw.at.settings ?? settingsAt(content.nodes[raw.at.node]) }
     : { node: content.start, ...roundAt(content.nodes[content.start], party, seed) };
   const s = settle(facts, content, newsSeq);
   return {
@@ -242,7 +256,7 @@ function withActivity(c, next, content) {
   if (spec.status(next) === 'lobby') {
     for (const id of c.party.order) {
       const m = c.party.players[id];
-      if (!m.left && m.character && !next.players[id]) next = spec.reduce(next, { t: 'join', id, character: m.character });
+      if (!m.left && m.character && !next.players[id]) next = spec.reduce(next, { t: 'join', id, character: m.character }, ctxOf(c));
     }
   }
   next = syncHost(next, c.party);
@@ -289,7 +303,7 @@ export function reduceCampaign(c, a, content) {
       const moved = { ...c, party: { ...c.party, hostId, players: { ...c.party.players, [a.id]: { ...m, left: true } } } };
       const s = c.at.activity;
       if (!s) return moved;
-      const next = s.players[a.id] ? kindOf(c).reduce(s, { t: 'leave', id: a.id }) : s;
+      const next = s.players[a.id] ? kindOf(c).reduce(s, { t: 'leave', id: a.id }, ctxOf(c)) : s;
       return withActivity(moved, next, content); // a lobby drops them, a game marks them done (left)
     }
 
@@ -311,7 +325,7 @@ export function reduceCampaign(c, a, content) {
         || roundStatus(c) !== 'lobby' || !c.facts.flags.includes('portal.ready')
         || c.facts.flags.includes('portal.entered')) return c;
       const facts = { ...c.facts, flags: withId(c.facts.flags, 'portal.entered'), seen: withId(c.facts.seen, 'hub') };
-      const moved = withFacts({ ...c, at: { node: 'hub', kind: null, activity: null } }, facts, content);
+      const moved = withFacts({ ...c, at: { node: 'hub', kind: null, activity: null, settings: null } }, facts, content);
       const seq = moved.newsSeq + 1;
       return { ...moved, news: [...moved.news, { seq, t: 'apparition' }], newsSeq: seq };
     }
@@ -338,7 +352,15 @@ export function reduceCampaign(c, a, content) {
     case 'activity': {
       const s = c.at.activity;
       if (!s) return c;
-      return withActivity(c, kindOf(c).reduce(s, a.action), content); // routed by the round's kind
+      return withActivity(c, kindOf(c).reduce(s, a.action, ctxOf(c)), content); // routed by the round's kind
+    }
+
+    case 'config': {
+      // the host sets the tableau's settings, except while a round runs; kept until the party leaves the tableau
+      const spec = minigame(c.at.kind);
+      if (!isHost(c, a.id) || !spec || roundStatus(c) === 'running') return c;
+      const settings = spec.settings(a.patch, c.at.settings);
+      return JSON.stringify(settings) === JSON.stringify(c.at.settings) ? c : { ...c, at: { ...c.at, settings } };
     }
 
     case 'event': {

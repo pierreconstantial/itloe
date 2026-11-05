@@ -74,8 +74,6 @@ export function withTimeout(judge: Judge, ms: number): Judge {
 /** Typed answers the local matcher finds 'uncertain' go to the judge, bounded by this (E1: the null judge for now). */
 const JUDGE_TIMEOUT_MS = 4000;
 
-const isPlainObject = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
-
 /** The quiz's server code. Loads the bank at boot: a broken bank refuses to boot. */
 export function makeQuizServer(): MinigameServer<QuizState, QuizAction, Candidate[]> {
   const bank = loadBank();
@@ -123,13 +121,6 @@ export function makeQuizServer(): MinigameServer<QuizState, QuizAction, Candidat
         case 'newGame':
           return { action: { t: m.t, id }, refused: refusal };
 
-        case 'config':
-          if (!isPlainObject(m.patch)) return null;
-          return {
-            action: { t: 'config', id, patch: m.patch as Partial<QuizState['settings']> },
-            refused: !host ? 'not-host' : q.phase === 'question' || q.phase === 'reveal' ? 'locked' : undefined,
-          };
-
         case 'retire':
           // a round button, answered like in every minigame; the quiz has no "take out" yet (phase 4)
           if (typeof m.target !== 'string') return null;
@@ -141,7 +132,7 @@ export function makeQuizServer(): MinigameServer<QuizState, QuizAction, Candidat
     },
 
     // candidates: the bank filtered by the quiz settings, minus every question asked this evening
-    inputs: (s, facts) => candidatesFor(bank.questions, s.settings, facts.asked ?? []),
+    inputs: (settings, facts) => candidatesFor(bank.questions, settings, facts.asked ?? []),
 
     // the public quiz: never an answer before the reveal (shared/quiz/bank.js projectQuiz)
     view: (s) => projectQuiz(s, (qid) => bank.byId.get(qid), bank.credits),

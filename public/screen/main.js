@@ -3,6 +3,7 @@
 // Dev console: bloko.render(state).
 
 import { renderLobby, fetchJoinInfo, fallbackJoinInfo } from './lobby-view.js';
+import { summarizeSettings } from '../commun/settings-text.js';
 import { renderGame } from './game-view.js';
 import { renderPodium, revealSchedule } from './podium-view.js';
 import { detectEvents, calloutsFor } from './events.js';
@@ -88,15 +89,18 @@ function applyPresence() {
 const portalReady = () => !!campaign?.facts.flags.includes('story.elo-50') && campaign.facts.flags.includes('portal.ready')
   && campaign.at.node === 'hub.false-start';
 
+/** The tableau's settings: the campaign keeps them (null where no minigame is). @returns {any} */
+const tableauSettings = () => campaign?.at.settings ?? null;
+
 /** @type {Record<State['phase'], (s: State, prev: State | null) => HTMLElement>} */
 const VIEWS = {
-  lobby: (s, prev) => renderLobby(s, prev, joinInfo, undefined, portalReady()
+  lobby: (s, prev) => renderLobby(s, prev, joinInfo, { title: 'ITLOE', settings: summarizeSettings(tableauSettings()) }, portalReady()
     ? { status: 'A portal has appeared. Élodie, walk into it!' } : {
       required: campaign?.facts.flags.includes('story.elo-50') && campaign.at.node === 'hub.false-start'
         ? OPENING_PLAYERS.length : undefined,
     }),
   playing: (s, prev) => renderGame(s, prev, { danger: playersInDanger(s) }),
-  finished: (s) => renderPodium(s, performance.now() - finishedAt, { again: !portalReady() }),
+  finished: (s) => renderPodium(s, performance.now() - finishedAt, { next: summarizeSettings(tableauSettings()), again: !portalReady() }),
 };
 
 /** Fewer legal placements than this (and more than 0) → the board frame pulses. */
@@ -245,7 +249,8 @@ function showQuiz(q) {
     podiumSequence(/** @type {any} */ (q));
   }
   if (q.phase !== 'finished' && prev?.phase === 'finished') cancelPodium();
-  app.replaceChildren(room ? renderQuizRoom(q, joinInfo) : renderQuiz(q, prev ? performance.now() - quizFinishedAt : Infinity));
+  app.replaceChildren(room ? renderQuizRoom(q, joinInfo, tableauSettings())
+    : renderQuiz(q, prev ? performance.now() - quizFinishedAt : Infinity, tableauSettings()));
   drawQuizRing();
 }
 
@@ -588,7 +593,7 @@ connect();
 fetchJoinInfo().then((info) => {
   joinInfo = info;
   if (current?.phase === 'lobby') app.replaceChildren(VIEWS.lobby(current, current));
-  else if (quiz?.phase === 'lobby') app.replaceChildren(renderQuizRoom(quiz, joinInfo));
+  else if (quiz?.phase === 'lobby') app.replaceChildren(renderQuizRoom(quiz, joinInfo, tableauSettings()));
 });
 
 /** @type {any} */ (window).bloko = {

@@ -32,14 +32,23 @@ import { QUIZ_RULES } from './quiz/index.js';
  */
 
 /**
+ * What the campaign passes with every action of a round. `settings`: the tableau's settings, kept by the
+ * campaign (the host's choice until the party leaves the tableau); a round locks them in when it starts.
+ * @template [T=any]
+ * @typedef {{ settings: T }} RoundCtx
+ */
+
+/**
  * What a minigame's rules supply. Every function is pure; time, randomness and ids come in through
  * actions. Refused actions return the SAME state object.
  * @template S, A
+ * @template [T=any]
  * @typedef {{
- *   init: (seed: number, settings: any) => S,   // a new round, in its lobby
- *   reduce: (s: S, a: A) => S,
+ *   init: (seed: number, settings: T) => S,     // a new round, in its lobby
+ *   reduce: (s: S, a: A, ctx: RoundCtx<T>) => S,
  *   status: (s: S) => RoundStatus,
  *   result: (s: S, node: string) => RoundResult,   // once finished; node: the tableau it ran at
+ *   settings: (patch: unknown, base?: T) => T,  // `base` (default: the minigame's defaults) with every valid key of `patch`
  *   validateSettings: (settings: unknown) => string[],   // a content node's settings: problems, as readable lines
  *   sampleSettings: object,                     // the development start's settings (ITLOE_CONTENT=minigame:<kind>)
  *   deadline: (s: S) => number | null,          // the next deadline (epoch ms), or null: nothing on a clock

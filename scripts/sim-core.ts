@@ -170,8 +170,9 @@ export function playGame(
   seed: number, settings: Partial<Settings>, policy: Policy, weights?: Weights, salt = 0
 ): GameResult {
   let s: State = initState(seed, settings);
-  s = reduce(s, { t: 'join', id: 'a', character: 'pierre' });
-  s = reduce(s, { t: 'start', id: 'a', now: 0 });
+  const ctx = { settings: s.rules }; // the settings the game is played with
+  s = reduce(s, { t: 'join', id: 'a', character: 'pierre' }, ctx);
+  s = reduce(s, { t: 'start', id: 'a', now: 0 }, ctx);
   const { rules } = s;
   const rng = mulberry32((seed ^ hashName(policy.name) ^ Math.imul(salt, 0x85ebca6b)) >>> 0);
 
@@ -212,7 +213,7 @@ export function playGame(
     if (p.handIndex >= HAND_CAP) { r.capped = true; break; }
     const moves = legalMoves(p, rules);
     const m = policy.choose(moves, { p, size: rules.size, rng });
-    const next = reduce(s, { t: 'place', id: 'a', piece: m.piece, x: m.x, y: m.y });
+    const next = reduce(s, { t: 'place', id: 'a', piece: m.piece, x: m.x, y: m.y }, ctx);
     if (next === s) throw new Error(`policy ${policy.name} chose an illegal move (seed ${seed})`);
     s = next.players.a.handIndex !== p.handIndex ? redeal(next, next.players.a.handIndex) : next;
     const q = s.players.a;

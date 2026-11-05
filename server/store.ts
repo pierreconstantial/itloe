@@ -31,7 +31,7 @@ function isV1(x: unknown): x is SavedV1 {
   return ['lobby', 'playing', 'finished'].includes(s.phase)
     && typeof s.seed === 'number' && typeof s.size === 'number'
     && Array.isArray(s.order) && !!s.players && typeof s.players === 'object'
-    && !!s.settings && !!s.rules
+    && !!(s as State & { settings?: unknown }).settings && !!s.rules
     && s.order.every((id) => !!s.players[id] && Array.isArray(s.players[id].board));
 }
 

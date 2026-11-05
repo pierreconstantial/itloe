@@ -24,7 +24,7 @@ export const summarize = summarizeSettings;
 
 /**
  * Fills #settings-body. Every tap sends one `config` patch; the controls show
- * state.settings only, so they update when the server's next view arrives.
+ * the tableau's settings only (campaign.at.settings), so they update when the server's next view arrives.
  * @param {{ send: (msg: unknown) => void }} io
  */
 export function createSettingsSheet(io) {

@@ -281,6 +281,9 @@ function member() {
   return lastView?.players[playerId] ?? null;
 }
 
+/** The tableau's settings: the campaign keeps them (null where no minigame is). @returns {any} */
+const tableauSettings = () => campaign?.at.settings ?? null;
+
 /** The party host steers the evening (game-master panel). */
 const isStory = () => campaign?.facts.flags.includes('story.elo-50') ?? false;
 /** The room where the party is: what the joystick walks in and the object button looks around. */
@@ -391,8 +394,8 @@ function render() {
   const quizConfigurable = q !== null && (q.phase === 'lobby' || q.phase === 'finished');
 
   // the settings sheet follows the activity: the block game's schema, or the quiz's
-  if (v) settingsSheet.render(v.settings, isHost && configurable);
-  else if (q) settingsSheet.render(q.settings, quizHost && quizConfigurable, QUIZ_SETTINGS);
+  if (v) settingsSheet.render(tableauSettings(), isHost && configurable);
+  else if (q) settingsSheet.render(tableauSettings(), quizHost && quizConfigurable, QUIZ_SETTINGS);
   hostControls.render(v, q, online, playerId ?? '');
   if (q ? !(quizHost && quizConfigurable) : (!isHost || !configurable)) menu.close('settings');
   if (campaign && isGameMaster()) gmPanel.render(campaign, round?.status ?? null);
@@ -431,7 +434,7 @@ function render() {
       return;
     }
     // the quiz's lobby is the room, like the block lobby: walk, settings, the host's Start
-    if (q.phase === 'lobby') { show('lobby'); renderLobby(q, q.players[playerId], quizHost, summarizeQuiz(q.settings)); return; }
+    if (q.phase === 'lobby') { show('lobby'); renderLobby(q, q.players[playerId], quizHost, summarizeQuiz(tableauSettings())); return; }
     show('quiz');
     quizUi.render(q, playerId);
     return;
@@ -448,7 +451,7 @@ function render() {
     $('waiting-text').textContent = "A game is on. You'll play the next one!";
     return;
   }
-  if (v.phase === 'lobby') { show('lobby'); renderLobby(v, me, isHost, summarize(v.settings)); return; }
+  if (v.phase === 'lobby') { show('lobby'); renderLobby(v, me, isHost, summarize(tableauSettings())); return; }
   if (v.phase === 'finished') { show('podium'); renderPodium(v, me, isHost); return; }
   if (me.done) { show('over'); renderGameOver(v, me); return; }
   show('game');
@@ -735,7 +738,7 @@ function renderPodium(v, me, isHost) {
     );
     ol.append(li);
   }
-  $('podium-settings').textContent = portalReady ? 'Return to the room together.' : `Next game: ${summarize(v.settings)}`;
+  $('podium-settings').textContent = portalReady ? 'Return to the room together.' : `Next game: ${summarize(tableauSettings())}`;
   $('btn-settings-podium').hidden = !isHost || !!portalReady;
   $('btn-again').hidden = !!portalReady;
   $('podium-hint').textContent = portalReady ? 'Waiting for the host to return to the room…'

@@ -28,7 +28,7 @@ export type Reply<A> = { action: A, refused?: ErrCode } | { refused: ErrCode } |
  *  rounds runs, before the save. */
 export type MinigameServer<S, A, I = undefined> = {
   message: (m: any, ctx: MessageCtx<S, I>, io: MinigameIo<A>) => Reply<A>,
-  inputs?: (state: S, facts: Facts) => I,
+  inputs?: (settings: any, facts: Facts) => I,   // settings: the tableau's
   view: (state: S) => unknown,
   onChange?: (prev: S | null, next: S | null) => void,
 };

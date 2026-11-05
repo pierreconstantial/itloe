@@ -24,7 +24,7 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 { "t": "start" }                                            // host only, phase lobby
 { "t": "again" }                                            // host only, phase finished
 { "t": "place", "piece": 0, "x": 3, "y": 5 }                // piece = index 0..2 in own hand; (x,y) = piece origin
-{ "t": "config", "patch": { "mode": "timed" } }             // host only, phase lobby/finished (M2 Q4); invalid keys/values ignored
+{ "t": "config", "patch": { "mode": "timed" } }             // the tableau's settings (Campaign below); invalid keys/values ignored
 { "t": "leave" }                                            // lobby/finished: player removed, slot freed; playing: marked done; host passes on
 { "t": "newGame" }                                          // host only, phase finished → back to the LOBBY: players kept (minus left),
                                                             // scores/boards reset, room code kept, newcomers can join again (M3 slice 2)
@@ -57,18 +57,21 @@ Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `dead
 
 The server runs the campaign engine (`shared/campaign/`). The party (who is in the evening, their characters,
 the host) lives in `campaign.party`; a minigame's round (the block game, a quiz) is `campaign.at.activity`,
-nested in its tableau, with its kind in `campaign.at.kind`.
+nested in its tableau, with its kind in `campaign.at.kind` and the tableau's settings in `campaign.at.settings`
+(the content's, then the host's choice until the party leaves the tableau; a round locks them in when it starts).
 `join` and `leave` act on the EVENING: `join` adds a party member (seated at once in an open block lobby;
 mid-game they watch until the next lobby), `leave` leaves the evening (forwarded to a live game: dropped
 from a lobby, marked done in a game; the stored id stops rejoining; the host passes on). Every id is
 injected by the server (socket → playerId; screens: `"screen"`), never taken from the wire.
 
 **Routing.** The server handles `hello`, `join`, `leave`, `enter`, `back`, `gm`, `ack`, `pos`, `say`,
-`emote`, `interact`, `showJoin` and `hideJoin` itself. Every other message from a party member goes to the
+`emote`, `interact`, `showJoin`, `hideJoin` and `config` itself. `config { patch }` sets the tableau's
+settings, from its minigame's schema: host only (else `err "not-host"`), not while a round runs (`err
+"locked"`), and not where no minigame is (`err "not-playing"`); a host's no-op patch is silent. Every other message from a party member goes to the
 running round's minigame (its server code, `server/minigames.ts`), with the sender's id and the time
 injected; the minigame turns it into an action or refuses it, and answers a message it does not know with
 `err "not-playing"`. With no round running → `err "not-playing"`; from a socket that is not a party member
-→ `err "unknown-player"`. The round messages (`start`, `again`, `newGame`, `endGame`, `retire`, `config`)
+→ `err "unknown-player"`. The round messages (`start`, `again`, `newGame`, `endGame`, `retire`)
 still go to the minigame: blocks and quiz keep their own lobbies for now. A message sent just before a
 round ends may reach the next round.
 
@@ -138,7 +141,7 @@ is refused like any round button at the wrong moment.
                                        // enters the reducer. The last answer closes the round at once.
 { "t": "next" }                        // host, on the reveal: next question, or finished after the last
 { "t": "override", "target": "p-abc", "ok": true }   // host, on the reveal: fixes any answer, both ways, re-scoring it
-{ "t": "config", "patch": { "count": 10, "seconds": 20, "mode": "mixed" } }  // host, quiz lobby/finished
+{ "t": "config", "patch": { "count": 10, "seconds": 20, "mode": "mixed" } }  // the tableau's settings (Routing)
                                        // (count 3–30, seconds 10–60 step 5, mode choice | text | mixed; also
                                        // categories: string[] | null, level: 1 | 2 | 3 | null)
 ```
@@ -182,7 +185,7 @@ is refused like any round button at the wrong moment.
 // scene): its minigame "kind", its "status" (lobby | running | finished: the podium) and its minigame's
 // "view" of its state, the same for everyone (server/minigames.ts). blocks: the full State (shared/game.js),
 // plus "best" in solo games (below); quiz: the public projection (below).
-// "campaign" = the whole evening (at.node, at.kind, party, facts, news, …) WITHOUT the round's raw state
+// "campaign" = the whole evening (at.node, at.kind, at.settings, party, facts, news, …) WITHOUT the round's raw state
 // (`at.activity`): that travels only through "round". The saved campaign keeps it.
 // "online" lists party members. "contentVersion": the
 // hash served by GET /api/content: re-fetch the content when it changes (content edited + server restarted).

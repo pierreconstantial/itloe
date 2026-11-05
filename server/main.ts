@@ -467,6 +467,14 @@ function handleMessage(ws: WebSocket, m: any): void {
       return;
     }
 
+    case 'config':
+      // the tableau's settings: host only, not while a round runs; a host's no-op patch is silent
+      if (game.campaign.at.kind === null) { sendErr(ws, 'not-playing'); return; }
+      if (!isPlainObject(m.patch) || apply({ t: 'config', id, patch: m.patch })) return;
+      if (id !== party().hostId) sendErr(ws, 'not-host');
+      else if (roundStatus(game.campaign) === 'running') sendErr(ws, 'locked');
+      return;
+
     // the story's opening: its first round needs the four opening players, and none follows once the
     // portal is ready; any other start or again goes on to the round's minigame
     case 'start':
@@ -487,7 +495,7 @@ function handleMessage(ws: WebSocket, m: any): void {
 /**
  * Every other message goes to the running round's minigame (no round → not-playing), with the sender's
  * id and the time. Until the RPG owns rounds, that includes the round messages (start, again, newGame,
- * endGame, retire, config): the games still have their lobbies.
+ * endGame, retire): the games still have their lobbies.
  */
 function roundMessage(ws: WebSocket, id: string, m: any): void {
   const { kind, activity: state } = game.campaign.at;
@@ -495,7 +503,7 @@ function roundMessage(ws: WebSocket, id: string, m: any): void {
   const server = serverOf(kind);
   // a later action (the quiz's verdict) lands only while a round of this minigame runs
   const io = { apply: (action: unknown) => game.campaign.at.kind === kind && apply({ t: 'activity', action: action as any }) };
-  const inputs = () => server.inputs?.(state, game.campaign.facts);
+  const inputs = () => server.inputs?.(game.campaign.at.settings, game.campaign.facts);
   const reply = server.message(m, { id, now: Date.now(), state, inputs }, io);
   if (!reply) return;
   if (!('action' in reply)) sendErr(ws, reply.refused);

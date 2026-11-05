@@ -11,6 +11,7 @@ import { summarizeQuiz } from '../commun/quiz-text.js';
 
 /** @typedef {import('../../shared/quiz/bank.js').QuizView} QuizView */
 /** @typedef {import('../../shared/quiz/bank.js').RoundView} RoundView */
+/** @typedef {import('../../shared/quiz/index.js').QuizSettings} QuizSettings */
 
 export const CHOICE_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -103,10 +104,10 @@ function scoreboard(q) {
 /**
  * The room at a quiz tableau: the block lobby's band (join box, "Quiz!", the quiz settings, who's in),
  * and the dataset credits along the bottom; the players are the avatars walking below the band.
- * @param {QuizView} q @param {import('./lobby-view.js').JoinInfo} join
+ * @param {QuizView} q @param {import('./lobby-view.js').JoinInfo} join @param {QuizSettings} settings the tableau's
  */
-export function renderQuizRoom(q, join) {
-  const room = renderLobby(q, null, join, { title: 'Quiz!', settings: summarizeQuiz(q.settings) });
+export function renderQuizRoom(q, join, settings) {
+  const room = renderLobby(q, null, join, { title: 'Quiz!', settings: summarizeQuiz(settings) });
   room.append(...creditsLine(q));
   return room;
 }
@@ -175,13 +176,13 @@ export function renderReveal(q) {
 
 /**
  * Finished: the shared podium, with each player's right answers.
- * @param {QuizView} q @param {number} elapsedMs
+ * @param {QuizView} q @param {number} elapsedMs @param {QuizSettings} settings the tableau's (the next quiz)
  */
-export function renderQuizPodium(q, elapsedMs) {
+export function renderQuizPodium(q, elapsedMs, settings) {
   const s = /** @type {any} */ (q);
   const podium = renderPodium(s, elapsedMs, {
     title: 'Quiz podium',
-    next: summarizeQuiz(q.settings),
+    next: summarizeQuiz(settings),
     rowExtra: (id) => [h('span', 'rank-correct', [`${q.players[id].correct}/${q.total} ✓`])],
   });
   podium.append(...creditsLine(q));
@@ -191,9 +192,12 @@ export function renderQuizPodium(q, elapsedMs) {
 /** The podium's reveal steps for a finished quiz (sounds / confetti in main.js). @param {QuizView} q */
 export const quizRevealSchedule = (q) => revealSchedule(/** @type {any} */ (q));
 
-/** A quiz under way or finished (its lobby is the room: renderQuizRoom). @param {QuizView} q @param {number} podiumElapsedMs */
-export function renderQuiz(q, podiumElapsedMs = Infinity) {
+/**
+ * A quiz under way or finished (its lobby is the room: renderQuizRoom).
+ * @param {QuizView} q @param {number} podiumElapsedMs @param {QuizSettings} settings the tableau's
+ */
+export function renderQuiz(q, podiumElapsedMs, settings) {
   if (q.phase === 'question' && q.round) return renderQuestion(q);
   if (q.phase === 'reveal' && q.round) return renderReveal(q);
-  return renderQuizPodium(q, podiumElapsedMs);
+  return renderQuizPodium(q, podiumElapsedMs, settings);
 }

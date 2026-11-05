@@ -8,6 +8,8 @@ export {};
 /** @typedef {import('../quiz/index.js').QuizAction} QuizAction */
 /** The nested activity a tableau runs: the block game, or a quiz (Contract E: `kind: 'quiz'`). */
 /** @typedef {BlockState | QuizState} ActivityState */
+/** A tableau's settings, by its minigame: the content's, then the host's choice until the party leaves. */
+/** @typedef {import('../game.js').Settings | QuizSettings} TableauSettings */
 /** @typedef {import('../game.js').Settings} Settings */
 /** @typedef {import('../characters.js').CharacterId} CharacterId */
 /** @typedef {import('../minigames.js').MinigameKind} MinigameKind */
@@ -122,7 +124,8 @@ export {};
  * @typedef {{
  *   v: 1,
  *   seed: number,                                   // advanced on every block game created (deterministic)
- *   at: { node: string, kind: MinigameKind | null, activity: ActivityState | null },  // kind: the round's minigame
+ *   at: { node: string, kind: MinigameKind | null, activity: ActivityState | null,   // kind: the round's minigame
+ *         settings: TableauSettings | null },                                    // the tableau's (null: no minigame)
  *   party: Party,
  *   facts: Facts,
  *   news: News[],                                   // not yet celebrated on the TV
@@ -160,6 +163,7 @@ export {};
  *   | { t: 'collect', id: string, item: string }
  *   | { t: 'back', id: string }
  *   | { t: 'activity', action: import('../game.js').Action | QuizAction }   // routed by the activity's kind
+ *   | { t: 'config', id: string, patch: unknown }                            // host: the tableau's settings
  *   | { t: 'event', event: CampaignEvent }
  *   | { t: 'ack', id: 'screen', upTo: number }
  *   | { t: 'gm', id: string, op: GmOp }} CampaignAction

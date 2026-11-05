@@ -2,7 +2,6 @@
 
 import { h, colorDot } from './dom.js';
 import { ROSTER_SIZE } from '../../shared/characters.js';
-import { summarizeSettings } from '../commun/settings-text.js';
 
 /** The game holds one player per character: the roster is the cap (the server refuses a join
  *  only once every character is held). */
@@ -94,14 +93,14 @@ function renderJoin(join) {
  * Party-room lobby: a top band (join box + title, next-game settings, status); the guests
  * themselves are the avatars walking below it (party-room.js), so there are no slot cards.
  * A quiz tableau shows the same band with its own title and settings line.
- * @param {Pick<State, 'order' | 'hostId'> & { players: Record<string, { name: string, color: number }>, settings: unknown }} s
+ * @param {Pick<State, 'order' | 'hostId'> & { players: Record<string, { name: string, color: number }> }} s
  * @param {unknown} _prev
  * @param {JoinInfo} join
- * @param {{ title: string, settings: string }} [band] default: the block game's
+ * @param {{ title: string, settings: string }} band the minigame's title and the tableau's settings, summarized
  * @param {{required?: number, status?: string}} [options] required: the guests a round needs;
  *   status: replaces the guest count when no round starts here
  */
-export function renderLobby(s, _prev, join, band = { title: 'ITLOE', settings: summarizeSettings(/** @type {State} */ (s).settings) }, options = {}) {
+export function renderLobby(s, _prev, join, band, options = {}) {
   const n = s.order.length;
   const max = options.required ?? MAX_PLAYERS;
   const host = s.hostId ? s.players[s.hostId] : undefined;

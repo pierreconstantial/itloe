@@ -4,12 +4,11 @@
 // (0 when there was none), so a client shows "New best!" when its score > previous.
 
 import { loadBests, saveBests, type Game } from './store.ts';
-import type { ServerAction, Settings, State } from './rules.ts';
+import type { ServerAction, State } from './rules.ts';
 import type { MinigameServer } from './minigames.ts';
 
 const keyOf = (s: State): string => `${s.rules.size}:${s.rules.mode}`;
 const isSolo = (s: State): boolean => s.order.length === 1;
-const isPlainObject = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
 
 export function makeBlockServer(game: Game): MinigameServer<State, ServerAction> {
   const bests = loadBests();
@@ -52,14 +51,6 @@ export function makeBlockServer(game: Game): MinigameServer<State, ServerAction>
             return { refused: 'bad-place' };
           }
           return { action: { t: 'place', id, piece: m.piece, x: m.x, y: m.y }, refused: s.phase === 'playing' ? 'bad-place' : 'not-playing' };
-
-        case 'config':
-          if (!isPlainObject(m.patch)) return null;
-          // a host's no-op patch (unknown keys/values, same settings) is not an error
-          return {
-            action: { t: 'config', id, patch: m.patch as Partial<Settings> },
-            refused: !host ? 'not-host' : s.phase === 'playing' ? 'locked' : undefined,
-          };
 
         default: // not a block-game thing (a quiz's answer, …)
           return { refused: 'not-playing' };

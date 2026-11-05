@@ -6,7 +6,7 @@
 // Phases: lobby → question → reveal → question → … → finished → question (again) or lobby (newGame).
 //
 // Actions (ids, now, deadline, candidates and verdicts are injected by the server, never from the wire):
-//   join { id, character } · leave { id } · config { id, patch }       (lobby; config also on finished)
+//   join { id, character } · leave { id }                              (join: lobby only)
 //   start { id, now, candidates }   host: lobby → question 1 (seeded pick among candidates)
 //   again { id, now, candidates }   host: finished → question 1 of a new quiz (same players minus left)
 //   answer { id, choice | text, now, verdict }   once per round, before the deadline
@@ -18,6 +18,8 @@
 //   endGame { id }                  host: question/reveal → finished
 //   newGame { id }                  host: finished → lobby (same players minus left, scores reset)
 // The last answer of a round closes it at once (no waiting for the timer when everyone answered).
+// The settings are the tableau's, kept by the campaign and passed with every action; start and again lock
+// them in as the quiz's rules.
 
 import { CHARACTERS, isCharacterId } from '../characters.js';
 import { mulberry32 } from '../rng.js';
@@ -43,8 +45,7 @@ import { mulberry32 } from '../rng.js';
  *   kind: 'quiz',
  *   phase: 'lobby' | 'question' | 'reveal' | 'finished',
  *   seed: number,
- *   settings: QuizSettings,
- *   rules: QuizSettings,          // settings locked at start
+ *   rules: QuizSettings,          // the tableau's settings, locked at start
  *   order: string[],
  *   players: Record<string, QuizPlayer>,
  *   hostId: string | null,
@@ -57,7 +58,6 @@ import { mulberry32 } from '../rng.js';
 /**
  * @typedef {{ t: 'join', id: string, character: CharacterId }
  *   | { t: 'leave', id: string }
- *   | { t: 'config', id: string, patch: Partial<QuizSettings> }
  *   | { t: 'start', id: string, now: number, candidates: Candidate[] }
  *   | { t: 'again', id: string, now: number, candidates: Candidate[] }
  *   | { t: 'answer', id: string, choice?: number, text?: string, now: number, verdict: Verdict }
@@ -147,7 +147,7 @@ export function validateQuizSettings(settings) {
 export function initQuiz(seed, settings) {
   const s = mergeQuizSettings(QUIZ_DEFAULTS, settings);
   return {
-    kind: 'quiz', phase: 'lobby', seed: seed >>> 0, settings: s, rules: s,
+    kind: 'quiz', phase: 'lobby', seed: seed >>> 0, rules: s,
     order: [], players: {}, hostId: null, questions: [], round: null, asked: [], endReason: null,
   };
 }
@@ -248,9 +248,10 @@ const nextHost = (players, order, goneId) => order.find((id) => id !== goneId &&
 /**
  * @param {QuizState} s
  * @param {QuizAction} a
+ * @param {import('../minigames.js').RoundCtx<QuizSettings>} ctx  the tableau's settings: start and again lock them in
  * @returns {QuizState}  the SAME object when the action is refused
  */
-export function reduceQuiz(s, a) {
+export function reduceQuiz(s, a, ctx) {
   switch (a.t) {
     case 'join': {
       if (s.phase !== 'lobby' || s.players[a.id] || !isCharacterId(a.character)) return s;
@@ -275,18 +276,12 @@ export function reduceQuiz(s, a) {
       return next.phase === 'question' && everyoneAnswered(next) ? reveal(next) : next;
     }
 
-    case 'config': {
-      if (!isHost(s, a.id) || quizRunning(s)) return s;
-      const settings = mergeQuizSettings(s.settings, a.patch);
-      return JSON.stringify(settings) === JSON.stringify(s.settings) ? s : { ...s, settings };
-    }
-
     case 'start':
     case 'again': {
       // like the block game: start from the lobby, again (a rematch) from the podium
       if (!isHost(s, a.id) || s.phase !== (a.t === 'start' ? 'lobby' : 'finished') || !Number.isFinite(a.now)) return s;
       if (active(s).length === 0 || !Array.isArray(a.candidates)) return s;
-      const rules = s.settings;
+      const rules = ctx.settings;
       const pool = askable(a.candidates, rules.mode);
       if (pool.length === 0) return s; // nothing left to ask
       const seed = nextSeed(s.seed);
@@ -405,7 +400,7 @@ export function quizRanking(s) {
 
 /**
  * The quiz's entry in the rules list (shared/minigames.js).
- * @type {import('../minigames.js').MinigameRules<QuizState, QuizAction>}
+ * @type {import('../minigames.js').MinigameRules<QuizState, QuizAction, QuizSettings>}
  */
 export const QUIZ_RULES = {
   init: initQuiz,
@@ -430,6 +425,7 @@ export const QUIZ_RULES = {
       endReason: s.endReason, counters, asked: [...s.asked],
     };
   },
+  settings: (patch, base = QUIZ_DEFAULTS) => mergeQuizSettings(base, patch),
   validateSettings: validateQuizSettings,
   sampleSettings: { count: 3, seconds: 20, mode: 'mixed' },
   deadline: (s) => (s.phase === 'question' && s.round ? s.round.deadline : null),

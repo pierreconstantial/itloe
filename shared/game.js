@@ -51,8 +51,7 @@ import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
  *   hostId: string | null,
  *   order: string[],
  *   players: Record<string, Player>,
- *   settings: Settings,         // host's current choice; editable in lobby and finished
- *   rules: Settings,            // locked snapshot used by the game being played / shown
+ *   rules: Settings,            // locked snapshot used by the game being played / shown (choice: the campaign)
  *   deadline: number | null,    // epoch ms of the timed-mode bell; null otherwise
  *   endReason: 'stuck' | 'time' | 'host' | null   // host = the host ended the game (endGame)
  * }} State
@@ -62,7 +61,6 @@ import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
  *   | { t: 'start', id: string, now?: number }
  *   | { t: 'again', id: string, now?: number }
  *   | { t: 'newGame', id: string }
- *   | { t: 'config', id: string, patch: Partial<Settings> }
  *   | { t: 'timeUp', deadline: number }
  *   | { t: 'leave', id: string }
  *   | { t: 'endGame', id: string }
@@ -137,16 +135,6 @@ export function validateSettings(settings) {
 }
 
 /**
- * @param {Settings} a
- * @param {Settings} b
- */
-function sameSettings(a, b) {
-  return Object.keys(SETTINGS_SCHEMA).every(
-    (k) => a[/** @type {keyof Settings} */ (k)] === b[/** @type {keyof Settings} */ (k)]
-  );
-}
-
-/**
  * @param {number} seed
  * @param {Partial<Settings>} [settings]  e.g. the persisted settings file; normalized
  * @returns {State}
@@ -155,7 +143,7 @@ export function initState(seed, settings) {
   const s = normalizeSettings(settings ?? {});
   return {
     phase: 'lobby', seed, size: s.size, hostId: null, order: [], players: {},
-    settings: s, rules: { ...s }, deadline: null, endReason: null,
+    rules: { ...s }, deadline: null, endReason: null,
   };
 }
 
@@ -224,9 +212,10 @@ export function ranking(state) {
  * Rules: BUILD-PLAN.md «Contract A», normative paragraph, + Q4 addendum.
  * @param {State} state
  * @param {Action} action
+ * @param {import('./minigames.js').RoundCtx<Settings>} ctx  the tableau's settings: start, again and newGame lock them in
  * @returns {State}
  */
-export function reduce(state, action) {
+export function reduce(state, action, ctx) {
   switch (action.t) {
     case 'join': {
       if (state.phase !== 'lobby') return state;
@@ -245,27 +234,11 @@ export function reduce(state, action) {
       };
     }
 
-    case 'config': {
-      if (state.phase === 'playing') return state;
-      if (action.id !== state.hostId || state.hostId === null) return state;
-      const settings = normalizeSettings(action.patch, state.settings);
-      if (sameSettings(settings, state.settings)) return state;
-      if (state.phase === 'finished') return { ...state, settings };
-      const rules = { ...settings };
-      /** @type {Record<string, Player>} */
-      const players = {};
-      for (const id of state.order) {
-        const p = state.players[id];
-        players[id] = newPlayer(id, p.name, p.color, rules.size, rules.grace, p.character ?? null);
-      }
-      return { ...state, settings, rules, size: rules.size, players };
-    }
-
     case 'start': {
       if (state.phase !== 'lobby') return state;
       if (action.id !== state.hostId || state.hostId === null) return state;
       if (state.order.length < 1) return state;
-      return beginPlay(state, state.seed, action.now);
+      return beginPlay(state, state.seed, action.now, ctx.settings);
     }
 
     case 'place': {
@@ -358,14 +331,14 @@ export function reduce(state, action) {
       if (state.phase !== 'finished') return state;
       if (action.id !== state.hostId || state.hostId === null) return state;
       if (state.order.length < 1) return state;
-      return beginPlay(state, nextSeed(state.seed), action.now);
+      return beginPlay(state, nextSeed(state.seed), action.now, ctx.settings);
     }
 
     case 'newGame': {
       // Podium → lobby: same players minus those who left, fresh, joins/config/start open again.
       if (state.phase !== 'finished') return state;
       if (action.id !== state.hostId || state.hostId === null) return state;
-      const rules = { ...state.settings };
+      const rules = { ...ctx.settings };
       const order = state.order.filter((id) => !state.players[id].left);
       /** @type {Record<string, Player>} */
       const players = {};
@@ -418,10 +391,11 @@ function finishIfAllDone(state, players) {
  * @param {State} state
  * @param {number} seed
  * @param {number | undefined} now
+ * @param {Settings} settings  the tableau's settings, locked in as the rules
  * @returns {State}
  */
-function beginPlay(state, seed, now) {
-  const rules = { ...state.settings };
+function beginPlay(state, seed, now, settings) {
+  const rules = { ...settings };
   const timed = rules.mode === 'timed';
   if (timed && !(typeof now === 'number' && Number.isFinite(now))) return state;
   const order = state.order.filter((id) => !state.players[id].left);
@@ -468,7 +442,7 @@ function nextSeed(seed) {
 
 /**
  * The block game's entry in the rules list (shared/minigames.js).
- * @type {import('./minigames.js').MinigameRules<State, Action>}
+ * @type {import('./minigames.js').MinigameRules<State, Action, Settings>}
  */
 export const BLOCK_RULES = {
   init: initState,
@@ -478,6 +452,7 @@ export const BLOCK_RULES = {
     ranking: ranking(s).map((r) => ({ character: s.players[r.id].character ?? null, score: r.score, rank: r.rank })),
     endReason: s.endReason,
   }),
+  settings: (patch, base) => normalizeSettings(patch, base),
   validateSettings,
   sampleSettings: { mode: 'timed', timedSeconds: 60 },
   deadline: (s) => (s.phase === 'playing' && typeof s.deadline === 'number' ? s.deadline : null),
