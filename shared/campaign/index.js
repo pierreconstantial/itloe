@@ -15,12 +15,10 @@
 //   SAMPLE_CONTENT (placeholder content: the demo and test fixture)
 //
 // Server contract: ids are injected (socket → playerId; ack: 'screen'); `activity.action` is rebuilt
-// field by field (now / deadline / timeUp server-only); game.finished is derived HERE, in the same
-// step as the nested playing → finished, so a single atomic save persists both or neither.
+// field by field (now / deadline / timeUp server-only); round.finished is derived HERE, in the same
+// step as the round's running → finished, so a single atomic save persists both or neither.
 
 import { CHARACTERS, isCharacterId } from '../characters.js';
-import { ranking } from '../game.js';
-import { quizRanking } from '../quiz/index.js';
 import { minigame } from '../minigames.js';
 import { emptyFacts, holds, record, settle, migrateTotals, migrateInventory, addItem, holding, recipients, COUNTER } from './rules.js';
 import { validateContent, zoneAt, childrenOf } from './content.js';
@@ -65,18 +63,6 @@ const emptyParty = () => ({ order: [], players: {}, hostId: null });
  * @param {Facts} facts @param {Content} content
  */
 const quietSettle = (facts, content) => settle(facts, content, 0).facts;
-
-/**
- * The event each minigame reports when a round finishes (derived HERE, in the same step: exactly once).
- * @type {Record<MinigameKind, { finished: (s: any, node: string) => CampaignEvent, finishedEvent: CampaignEvent['t'] }>}
- */
-const FINISHED = {
-  blocks: { finished: (s, node) => finishedEvent(s, node), finishedEvent: 'game.finished' },
-  quiz: { finished: (s, node) => quizFinishedEvent(s, node), finishedEvent: 'quiz.finished' },
-};
-
-/** Events only the engine may produce (an activity's end): an external copy could count a game twice. */
-const DERIVED_EVENTS = new Set(Object.values(FINISHED).map((k) => k.finishedEvent));
 
 /** The rules of the campaign's round (its kind is stored next to it). @param {Campaign} c */
 const kindOf = (c) => /** @type {import('../minigames.js').MinigameRules<any, any>} */ (minigame(c.at.kind));
@@ -226,24 +212,6 @@ function withFacts(c, facts, content, event) {
   return { ...c, facts: s.facts, news: [...c.news, ...s.news], newsSeq: c.newsSeq + s.news.length };
 }
 
-/** game.finished for a nested block game that just finished. @param {BlockState} s @param {string} node @returns {CampaignEvent} */
-function finishedEvent(s, node) {
-  return {
-    t: 'game.finished', kind: 'blocks', node,
-    ranking: ranking(s).map((r) => ({ character: s.players[r.id].character ?? null, score: r.score, rank: r.rank })),
-    mode: s.rules.mode, size: s.rules.size, endReason: s.endReason,
-  };
-}
-
-/** quiz.finished for a nested quiz that just finished. @param {QuizState} s @param {string} node @returns {CampaignEvent} */
-function quizFinishedEvent(s, node) {
-  return {
-    t: 'quiz.finished', node,
-    ranking: quizRanking(s).map((r) => ({ character: s.players[r.id].character ?? null, score: r.score, rank: r.rank, correct: r.correct })),
-    asked: [...s.asked], endReason: s.endReason,
-  };
-}
-
 /** Moves the party to a node, creating its activity. @param {Campaign} c @param {string} node @param {Content} content @returns {Campaign} */
 function moveTo(c, node, content) {
   const round = roundAt(content.nodes[node], c.party, c.seed);
@@ -252,8 +220,8 @@ function moveTo(c, node, content) {
 }
 
 /**
- * Installs a new nested activity State; an under-way → finished transition records its finished event
- * (game.finished / quiz.finished) and settles in the SAME step. A lobby picks up party members it is
+ * Installs a new nested activity State; a running → finished transition records the round's result
+ * (round.finished) and settles in the SAME step. A lobby picks up party members it is
  * missing (joined mid-game).
  * @param {Campaign} c @param {ActivityState} next @param {Content} content @returns {Campaign}
  */
@@ -270,7 +238,8 @@ function withActivity(c, next, content) {
   if (next === prev) return c;
   const moved = { ...c, at: { ...c.at, activity: next } };
   if (prev && spec.status(prev) === 'running' && spec.status(next) === 'finished') {
-    const ev = FINISHED[/** @type {MinigameKind} */ (c.at.kind)].finished(next, c.at.node);
+    /** @type {CampaignEvent} */
+    const ev = { t: 'round.finished', kind: /** @type {MinigameKind} */ (c.at.kind), node: c.at.node, ...spec.result(next, c.at.node) };
     return withFacts(moved, record(c.facts, ev), content, ev);
   }
   return moved;
@@ -339,8 +308,8 @@ export function reduceCampaign(c, a, content) {
     }
 
     case 'event': {
-      // external events only: every activity's finished event is derived by the engine (exactly once)
-      if (DERIVED_EVENTS.has(a.event.t)) return c;
+      // external events only: a round's result is derived by the engine (exactly once)
+      if (a.event.t === 'round.finished') return c;
       return withFacts(c, record(c.facts, a.event), content, a.event);
     }
 

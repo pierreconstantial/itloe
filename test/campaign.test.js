@@ -80,15 +80,15 @@ test('holds: every condition shape; unknown shapes are false', () => {
   assert.equal(holds(/** @type {any} */ ({ typo: 1 }), f), false);
 });
 
-test('record: game.finished counts plays, per-node finishes, wins and totals by character', () => {
+test('record: round.finished counts plays, per-node finishes, wins and totals by character', () => {
   const f = record(emptyFacts(), {
-    t: 'game.finished', kind: 'blocks', node: 'hub.false-start', mode: 'marathon', size: 8, endReason: 'host',
+    t: 'round.finished', kind: 'blocks', node: 'hub.false-start', endReason: 'host',
     ranking: [{ character: 'elodie', score: 30, rank: 1 }, { character: 'sol', score: 10, rank: 2 }],
   });
-  assert.equal(f.counters[COUNTER.blocksPlayed], 1);
+  assert.equal(f.counters[COUNTER.played('blocks')], 1);
   assert.equal(f.counters[COUNTER.finished('hub.false-start')], 1);
-  assert.equal(f.counters[COUNTER.blocksWon('elodie')], 1);
-  assert.equal(f.counters[COUNTER.blocksWon('sol')], undefined);
+  assert.equal(f.counters[COUNTER.won('blocks', 'elodie')], 1);
+  assert.equal(f.counters[COUNTER.won('blocks', 'sol')], undefined);
   assert.deepEqual(f.totals, { blocks: { elodie: 30, sol: 10 } }, 'block points kept apart from quiz points');
 });
 
@@ -121,11 +121,11 @@ test('new campaign starts AT the false-start blocks lobby, no news', () => {
 test('3 block games → reward item + two worlds unlock AT ONCE (one step), seq increasing', () => {
   let c = party();
   c = playOnce(c); c = playOnce(c);
-  assert.equal(c.facts.counters[COUNTER.blocksPlayed], 2);
+  assert.equal(c.facts.counters[COUNTER.played('blocks')], 2);
   assert.deepEqual(c.news, []);
   const before = c;
   c = playOnce(c);
-  assert.equal(c.facts.counters[COUNTER.blocksPlayed], 3);
+  assert.equal(c.facts.counters[COUNTER.played('blocks')], 3);
   assert.ok(c.facts.done.includes('hub.false-start'));
   assert.equal(holding(c.facts, 'elodie', 'old-key'), 1, 'the Old key, to the chooser');
   assert.ok(c.facts.flags.includes('false-start-over'));
@@ -135,22 +135,22 @@ test('3 block games → reward item + two worlds unlock AT ONCE (one step), seq 
   assert.equal(c.newsSeq, seqs.at(-1));
 });
 
-test('game.finished is derived exactly once per game, in the same step, any end reason', () => {
+test('round.finished is derived exactly once per game, in the same step, any end reason', () => {
   let c = party();
   c = run(c, { t: 'activity', action: { t: 'start', id: 'e', now: 1 } });
   const playing = c;
   c = run(c, { t: 'activity', action: { t: 'endGame', id: 'e' } });
-  assert.equal(c.facts.counters[COUNTER.blocksPlayed], 1);
-  // replays of the finished state, or an injected game.finished event, never count twice
+  assert.equal(c.facts.counters[COUNTER.played('blocks')], 1);
+  // replays of the finished state, or an injected round.finished event, never count twice
   assert.equal(run(c, { t: 'activity', action: { t: 'endGame', id: 'e' } }), c);
-  assert.equal(run(c, { t: 'event', event: { t: 'game.finished', kind: 'blocks', node: 'hub.false-start', ranking: [], mode: 'marathon', size: 8, endReason: 'stuck' } }), c);
+  assert.equal(run(c, { t: 'event', event: { t: 'round.finished', kind: 'blocks', node: 'hub.false-start', ranking: [], endReason: 'stuck' } }), c);
   // the bell
   const timed = run(newCampaign(C, 5), { t: 'join', id: 'e', character: 'elodie' },
     { t: 'activity', action: { t: 'config', id: 'e', patch: { mode: 'timed' } } },
     { t: 'activity', action: { t: 'start', id: 'e', now: 1000 } });
   const d = /** @type {number} */ (/** @type {any} */ (timed.at.activity)?.deadline);
   const rung = run(timed, { t: 'activity', action: { t: 'timeUp', deadline: d } });
-  assert.equal(rung.facts.counters[COUNTER.blocksPlayed], 1);
+  assert.equal(rung.facts.counters[COUNTER.played('blocks')], 1);
   assert.notEqual(playing.facts, c.facts);
 });
 
@@ -306,7 +306,7 @@ test('fromLegacyState: party rebuilt from the State, State kept as is, at the fa
   assert.deepEqual(c.party.players.b, { id: 'b', character: 'sol', name: s.players.b.name, color: s.players.b.color, left: true });
   assert.deepEqual(c.news, []);
   const ended = reduceCampaign(c, { t: 'activity', action: { t: 'endGame', id: 'a' } }, C);
-  assert.equal(ended.facts.counters[COUNTER.blocksPlayed], 1, 'the migrated game counts when it ends');
+  assert.equal(ended.facts.counters[COUNTER.played('blocks')], 1, 'the migrated game counts when it ends');
 });
 
 test('content tolerance: unknown ids dropped, settle re-runs, nothing re-locked', () => {

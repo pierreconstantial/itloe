@@ -84,6 +84,16 @@ export const QUIZ_SETTINGS_SCHEMA = Object.freeze({
 /** Points: a right answer is worth `right` plus up to `speedMax` for answering early (linear on the time left). */
 export const SCORING = Object.freeze({ right: 100, speedMax: 50 });
 
+/** The quiz's own counters, recorded with its result (content conditions may read them). */
+export const QUIZ_COUNTER = {
+  /** @param {string} character — right answers across every quiz of the evening */
+  correctBy: (character) => `quiz.correct.${character}`,
+  /** @param {string} node — right answers in that quiz tableau, everyone together (content: "≥ 4 right") */
+  nodeCorrect: (node) => `node.${node}.correct`,
+  /** @param {string} node @param {string} character — right answers in that quiz tableau by one character */
+  nodeCorrectBy: (node, character) => `node.${node}.correct.${character}`,
+};
+
 /** Longest typed answer kept (anything longer is cut). */
 export const MAX_TEXT = 120;
 
@@ -384,4 +394,23 @@ export const QUIZ_RULES = {
   init: initQuiz,
   reduce: reduceQuiz,
   status: (s) => (quizRunning(s) ? 'running' : s.phase === 'lobby' ? 'lobby' : 'finished'),
+  result: (s, node) => {
+    const ranking = quizRanking(s);
+    /** @type {Record<string, number>} */
+    const counters = {};
+    let right = 0;
+    for (const r of ranking) {
+      const character = s.players[r.id].character;
+      if (r.correct > 0) right += r.correct;
+      if (r.correct > 0 && character) {
+        counters[QUIZ_COUNTER.correctBy(character)] = r.correct;
+        counters[QUIZ_COUNTER.nodeCorrectBy(node, character)] = r.correct;
+      }
+    }
+    if (right > 0) counters[QUIZ_COUNTER.nodeCorrect(node)] = right;
+    return {
+      ranking: ranking.map((r) => ({ character: s.players[r.id].character ?? null, score: r.score, rank: r.rank })),
+      endReason: s.endReason, counters, asked: [...s.asked],
+    };
+  },
 };

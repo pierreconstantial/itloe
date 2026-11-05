@@ -4,10 +4,25 @@
 import { BLOCK_RULES } from './game.js';
 import { QUIZ_RULES } from './quiz/index.js';
 
+/** @typedef {import('./characters.js').CharacterId} CharacterId */
+
 /**
  * A round's status, derived by its minigame from its state. `lobby` lasts until the games' lobbies
  * move to the campaign; `finished` is the podium.
  * @typedef {'lobby' | 'running' | 'finished'} RoundStatus
+ */
+
+/**
+ * What a finished round reports; the campaign records it once. `ranking`: every seated player in display
+ * order (character null only in saves from before characters), ties sharing a rank. `counters`: the
+ * minigame's own counters, added to the facts. `asked`: content ids the round used up for the evening
+ * (facts.asked: never asked again).
+ * @typedef {{
+ *   ranking: { character: CharacterId | null, score: number, rank: number }[],
+ *   endReason: string | null,
+ *   counters?: Record<string, number>,
+ *   asked?: string[],
+ * }} RoundResult
  */
 
 /**
@@ -18,6 +33,7 @@ import { QUIZ_RULES } from './quiz/index.js';
  *   init: (seed: number, settings: any) => S,   // a new round, in its lobby
  *   reduce: (s: S, a: A) => S,
  *   status: (s: S) => RoundStatus,
+ *   result: (s: S, node: string) => RoundResult,   // once finished; node: the tableau it ran at
  * }} MinigameRules
  */
 

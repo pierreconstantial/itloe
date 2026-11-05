@@ -79,7 +79,7 @@ test('reward to "winner": rank 1 of the activity that completed the node — all
   c = game(C, c);
   assert.deepEqual(['elodie', 'sol', 'anna'].map((ch) => holding(c.facts, ch, 'ticket')), [2, 2, 2], 'tied → all, count 2 each');
   // a clear winner (pure: the ranking of the triggering event)
-  const ev = { t: 'game.finished', kind: 'blocks', node: 'x', mode: 'marathon', size: 8, endReason: 'stuck',
+  const ev = { t: 'round.finished', kind: 'blocks', node: 'x', endReason: 'stuck',
     ranking: [{ character: 'sol', score: 90, rank: 1 }, { character: 'elodie', score: 10, rank: 2 }] };
   assert.deepEqual(recipients('winner', C, { event: /** @type {any} */ (ev) }), ['sol']);
   assert.deepEqual(recipients('winner', C, {}), ['elodie'], 'no ranking in this step → the chooser');

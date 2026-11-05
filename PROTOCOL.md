@@ -86,8 +86,8 @@ injected by the server (socket → playerId; screens: `"screen"`), never taken f
   stepping INTO a door (edge, not standing in it) records `zone.entered` for that character, and for the
   content's chooser on an unlocked door applies `enter`. After the party moves, standing where a door
   now is does not fire it: only a fresh step in does.
-- **Exactly once:** a block game's playing → finished (stuck, time, host) is recorded as `game.finished` by
-  the engine in the SAME step, and the server saves once per step: a kill -9 persists both or neither, so
+- **Exactly once:** a block game's playing → finished (stuck, time, host) is recorded as the round's result
+  (`round.finished`) by the engine in the SAME step, and the server saves once per step: a kill -9 persists both or neither, so
   a restart on the podium never counts a game twice.
 
 ### Quiz (Contract E + addendum E1): a tableau `activity: { kind: 'quiz', settings }`
@@ -126,7 +126,7 @@ The bank (`data/quiz/*.json`) stays on the server and is never served. While a q
 - **Timed fairness:** an open question's deadline shifts on resume and after a suspended laptop, like the timed
   block game. An answer left waiting for the judge when the server stopped is never re-judged: it is wrong,
   and the host can override it.
-- **Campaign:** a finished quiz (last question, or the host's endGame) records `quiz.finished` in the same
+- **Campaign:** a finished quiz (last question, or the host's endGame) records its result in the same
   step: counters `quiz.played`, `quiz.won.<character>`, `quiz.correct.<character>`, `node.<id>.finished`,
   totals per character, and the shown question ids appended to `facts.asked` (never asked again).
 

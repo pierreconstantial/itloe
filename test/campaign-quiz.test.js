@@ -1,8 +1,9 @@
 // Contract E / E1 — a quiz tableau inside the campaign engine (shared/campaign): enter → quiz lobby
-// seeded from the party → finished exactly once → counters, totals and the evening's asked ids.
+// seeded from the party → finished exactly once → its result: counters, totals and the evening's asked ids.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { newCampaign, reduceCampaign, loadCampaign, roundStatus, SAMPLE_CONTENT, COUNTER, record, holds } from '../shared/campaign/index.js';
+import { initQuiz, QUIZ_COUNTER, QUIZ_RULES } from '../shared/quiz/index.js';
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
 /** @typedef {import('../shared/campaign/types.js').CampaignAction} CampaignAction */
@@ -63,16 +64,16 @@ test('quiz under way: enter/back refused; a newcomer waits for the next lobby', 
   assert.ok(c.party.players.a && !quiz(c).players.a, 'joined the evening, not seated mid-quiz');
 });
 
-test('finished → quiz.finished recorded exactly once: counters, totals, asked', () => {
+test('finished → the quiz result recorded exactly once: counters, totals, asked', () => {
   const c = playThrough(inQuiz());
   const q = quiz(c);
   assert.equal(q.phase, 'finished');
   const f = c.facts;
-  assert.equal(f.counters[COUNTER.quizPlayed], 1);
+  assert.equal(f.counters[COUNTER.played('quiz')], 1);
   assert.equal(f.counters[COUNTER.finished(QUIZ)], 1);
-  assert.equal(f.counters[COUNTER.correctBy('elodie')], 5);
-  assert.equal(f.counters[COUNTER.correctBy('sol')] ?? 0, 0);
-  assert.equal(f.counters[COUNTER.quizWon('elodie')], 1);
+  assert.equal(f.counters[QUIZ_COUNTER.correctBy('elodie')], 5);
+  assert.equal(f.counters[QUIZ_COUNTER.correctBy('sol')] ?? 0, 0);
+  assert.equal(f.counters[COUNTER.won('quiz', 'elodie')], 1);
   assert.equal(f.totals.quiz?.elodie, q.players.e.score, 'quiz points in totals.quiz');
   assert.equal(f.totals.blocks, undefined, 'never mixed with block points');
   assert.deepEqual(f.asked, q.asked);
@@ -80,7 +81,7 @@ test('finished → quiz.finished recorded exactly once: counters, totals, asked'
   assert.ok(f.done.includes(QUIZ), 'default completion: its activity finished once');
   // nothing after the finish counts again
   const again = run(c, act({ t: 'endGame', id: 'e' }), act({ t: 'verdict', target: 's', ok: true }));
-  assert.equal(again.facts.counters[COUNTER.quizPlayed], 1);
+  assert.equal(again.facts.counters[COUNTER.played('quiz')], 1);
 });
 
 test('a second quiz: newGame → lobby → asked grows, never duplicated', () => {
@@ -89,7 +90,7 @@ test('a second quiz: newGame → lobby → asked grows, never duplicated', () =>
   c = run(c, act({ t: 'newGame', id: 'e' }));
   assert.equal(quiz(c).phase, 'lobby');
   c = playThrough(c, 999_000);
-  assert.equal(c.facts.counters[COUNTER.quizPlayed], 2);
+  assert.equal(c.facts.counters[COUNTER.played('quiz')], 2);
   assert.equal(new Set(c.facts.asked).size, c.facts.asked.length, 'no duplicates');
   assert.ok(first.every((id) => c.facts.asked.includes(id)));
 });
@@ -98,7 +99,7 @@ test('the host ending a quiz still counts it (endReason host)', () => {
   let c = run(inQuiz(), act({ t: 'start', id: 'e', now: 1, candidates: CANDIDATES }));
   c = run(c, act({ t: 'endGame', id: 'e' }));
   assert.equal(quiz(c).endReason, 'host');
-  assert.equal(c.facts.counters[COUNTER.quizPlayed], 1);
+  assert.equal(c.facts.counters[COUNTER.played('quiz')], 1);
   assert.equal(c.facts.asked.length, 1, 'the one question shown counts as asked');
 });
 
@@ -112,26 +113,29 @@ test('asked survives loadCampaign; an older campaign without it loads with an em
   assert.deepEqual(loadCampaign(old, C).facts.asked, []);
 });
 
-test('an injected quiz.finished event is refused: only the engine derives it (exactly once)', () => {
+test('an injected round.finished event is refused: only the engine derives it (exactly once)', () => {
   const c = newCampaign(SAMPLE_CONTENT, 1);
-  const injected = reduceCampaign(c, { t: 'event', event: { t: 'quiz.finished', node: 'childhood.quiz', ranking: [], asked: ['q1'], endReason: 'done' } }, SAMPLE_CONTENT);
+  const injected = reduceCampaign(c, { t: 'event', event: { t: 'round.finished', kind: 'quiz', node: 'childhood.quiz', ranking: [], asked: ['q1'], endReason: 'done' } }, SAMPLE_CONTENT);
   assert.equal(injected, c);
 });
 
-test('quiz.finished counts right answers per node (total and per character) for content conditions', () => {
+test('the quiz result counts right answers per node (total and per character) for content conditions', () => {
   const C = SAMPLE_CONTENT;
-  let c = newCampaign(C, 1);
-  c = reduceCampaign(c, { t: 'gm', id: 'x', op: { op: 'goto', node: 'childhood.quiz' } }, C); // refused: no host yet
-  /** @type {import('../shared/campaign/types.js').CampaignEvent} */
-  const e = {
-    t: 'quiz.finished', node: 'childhood.quiz', asked: [], endReason: 'done',
-    ranking: [{ character: 'elodie', score: 900, rank: 1, correct: 3 }, { character: 'sol', score: 400, rank: 2, correct: 2 }],
+  const c = newCampaign(C, 1);
+  /** @type {QuizState} */
+  const q = {
+    ...initQuiz(1), phase: 'finished', endReason: 'done', order: ['e', 's'],
+    players: {
+      e: { id: 'e', character: 'elodie', name: 'Élodie', color: 1, score: 900, correct: 3, left: false },
+      s: { id: 's', character: 'sol', name: 'Sol', color: 2, score: 400, correct: 2, left: false },
+    },
   };
-  const f = record(c.facts, e);
-  assert.equal(f.counters[COUNTER.nodeCorrect('childhood.quiz')], 5);
-  assert.equal(f.counters[COUNTER.nodeCorrectBy('childhood.quiz', 'elodie')], 3);
-  assert.equal(f.counters[COUNTER.nodeCorrectBy('childhood.quiz', 'sol')], 2);
-  assert.ok(holds({ count: COUNTER.nodeCorrect('childhood.quiz'), gte: 4 }, f), '"unlock X when the childhood quiz had ≥ 4 right"');
+  const f = record(c.facts, { t: 'round.finished', kind: 'quiz', node: 'childhood.quiz', ...QUIZ_RULES.result(q, 'childhood.quiz') });
+  assert.equal(f.counters[QUIZ_COUNTER.nodeCorrect('childhood.quiz')], 5);
+  assert.equal(f.counters[QUIZ_COUNTER.nodeCorrectBy('childhood.quiz', 'elodie')], 3);
+  assert.equal(f.counters[QUIZ_COUNTER.nodeCorrectBy('childhood.quiz', 'sol')], 2);
+  assert.equal(f.counters[QUIZ_COUNTER.correctBy('elodie')], 3);
+  assert.ok(holds({ count: QUIZ_COUNTER.nodeCorrect('childhood.quiz'), gte: 4 }, f), '"unlock X when the childhood quiz had ≥ 4 right"');
   assert.deepEqual(f.totals, { quiz: { elodie: 900, sol: 400 } });
 });
 

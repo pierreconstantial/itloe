@@ -460,4 +460,8 @@ export const BLOCK_RULES = {
   init: initState,
   reduce,
   status: (s) => (s.phase === 'playing' ? 'running' : s.phase),
+  result: (s) => ({
+    ranking: ranking(s).map((r) => ({ character: s.players[r.id].character ?? null, score: r.score, rank: r.rank })),
+    endReason: s.endReason,
+  }),
 };

@@ -93,12 +93,8 @@ export {};
 // ---------------------------------------------------------------- events (what activities report)
 
 /**
- * @typedef {{ t: 'game.finished', kind: 'blocks', node: string,
- *     ranking: { character: CharacterId | null, score: number, rank: number }[],
- *     mode: string, size: number, endReason: 'stuck' | 'time' | 'host' | null }
- *   | { t: 'quiz.finished', node: string,
- *       ranking: { character: CharacterId | null, score: number, rank: number, correct: number }[],
- *       asked: string[], endReason: 'done' | 'host' | null }
+ * round.finished: a round's result, derived by the engine only (exactly once), never from outside.
+ * @typedef {({ t: 'round.finished', kind: MinigameKind, node: string } & import('../minigames.js').RoundResult)
  *   | { t: 'scene.seen', sceneId: string, node?: string }
  *   | { t: 'zone.entered', zone: string, character: CharacterId }} CampaignEvent
  */
