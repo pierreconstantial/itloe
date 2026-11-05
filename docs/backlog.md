@@ -27,6 +27,7 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Story rules in shared code](#story-rules-in-shared-code) | The opening's rules are spread through shared code | P2 | Needs decision | High |
 | [Ids in client code](#ids-in-client-code) | Node, character and item ids written into the clients | P2 | Open | Low |
 | [Other guests in other roles](#other-guests-in-other-roles) | Guests beyond the four players, e.g. controlling NPCs or in games | P3 | Needs decision | High |
+| [Room before the content arrives](#room-before-the-content-arrives) | A reloaded phone walks the party room until the content loads | P3 | Open | Low |
 | [Unknown content setting](#unknown-content-setting) | An unknown `ITLOE_CONTENT` silently starts the story | P3 | Open | Trivial |
 | [Four-player check written twice](#four-player-check-written-twice) | The phone and the server each count the opening's players | P3 | Open | Trivial |
 | [Pickup handles one item](#pickup-handles-one-item) | `collect` only knows the first key | P3 | Open | Low |
@@ -84,6 +85,12 @@ The party is the four players Pierre, Élodie, Sol and Anna. Other guests may la
 
 **Recommendation:** decide the roles first, then design how such a guest joins, which phone screens they get, and what the server lets them do. The roster stays at the four players either way.
 
+### Room before the content arrives
+
+Phones and the TV use the bundled sample content until `/api/content` answers, and the sample names no rooms. So a phone reloaded at the hub walks the party room's furniture until the content arrives, then the apartment's. If the request fails, it stays wrong until the content loads. Before a node's room, the phone chose the room from the campaign's flags, which come with the first view.
+
+**Recommendation:** check on real phones during the manual test whether anyone notices. If it matters, send the node's room with the view, or wait for the content before enabling the joystick.
+
 ### Unknown content setting
 
 `server/campaign.ts` starts the story for any `ITLOE_CONTENT` value other than `sample` or `minigame:<kind>`, without a warning. A typo such as `ITLOE_CONTENT=smaple` silently starts the story.
@@ -121,7 +128,7 @@ The campaign's `collect` action accepts only `memory-key-intro`, at the hub. Eac
 
 The TV's debug accessors `bloko.drawOrder()` and `bloko.scene()` report `PARTY_ROOM` even in the apartment or door #4's room, so `e2e-tv` can't check depth there.
 
-**Recommendation:** report the room on screen. Phase 5's "a node's room" (`docs/minigame-brief.md`) may make this a one-line change.
+**Recommendation:** pass the room on screen instead of `PARTY_ROOM` in `party.drawOrder()` and `party.scene()` (`public/screen/party-room.js`), now that the TV knows each node's room.
 
 ### Apartment sofa sparkle
 
