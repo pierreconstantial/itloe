@@ -269,6 +269,8 @@ try {
   // play again from the podium: a new quiz at once, as in the block game
   check(await errOf(P, { t: 'start' }) === 'refused', 'quiz start on the podium → refused (start is for the lobby)');
   check(await errOf(E, { t: 'again' }) === 'not-host', 'quiz again: host only');
+  check(await errOf(E, { t: 'retire', target: idP }) === 'not-host' && await errOf(P, { t: 'retire', target: idE }) === 'refused',
+    'quiz retire, like every round button: a guest → not-host, the host → refused');
   i = T.mark(); P.send({ t: 'again' });
   q = await untilQuiz(T, (x) => x.phase === 'question', i);
   check(q.round.index === 0 && q.order.length === 2 && Object.values<any>(q.players).every((p) => p.score === 0), 'host again on the podium → question 1 of a new quiz, same players, scores reset');

@@ -232,7 +232,7 @@ const joinAfter = await (await fetch(`${HTTP}/api/join`)).json();
 check(joinAfter.code === room, 'newGame keeps the room code');
 ia = Acur.mark();
 Acur.send({ t: 'newGame' });
-check((await Acur.waitFor((m) => m.t === 'err', ia)).code === 'not-host', 'newGame outside finished (lobby) → err');
+check((await Acur.waitFor((m) => m.t === 'err', ia)).code === 'refused', 'host newGame outside finished (lobby) → err refused');
 const N = new Client('N'); await N.open(); N.send({ t: 'hello', role: 'player', room });
 i = N.mark(); N.send({ t: 'join', character: 'pierre' });
 const idN = (await N.waitFor((m) => m.t === 'welcome', i)).playerId;

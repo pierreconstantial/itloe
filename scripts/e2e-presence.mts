@@ -220,8 +220,8 @@ try {
   const ve = blocksOf(await screen.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'finished', i));
   check(ve.endReason === 'host' && ve.order.every((id: string) => ve.players[id].done && ve.players[id].score === scores[id]),
     'host endGame → finished, endReason host, everyone done, scores kept');
-  check(await errOf(E2, { t: 'endGame' }) === 'not-host', 'endGame on the podium → err not-host');
-  check(await errOf(E2, { t: 'retire', target: idG }) === 'not-host', 'retire on the podium → err not-host');
+  check(await errOf(E2, { t: 'endGame' }) === 'refused', 'host endGame on the podium → err refused');
+  check(await errOf(E2, { t: 'retire', target: idG }) === 'refused', 'host retire on the podium → err refused');
   // solo: a host-ended game is a real score → solo best recorded
   i = E2.mark(); E2.send({ t: 'newGame' }); await E2.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'lobby', i);
   F3.send({ t: 'leave' }); G.send({ t: 'leave' });
