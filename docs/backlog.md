@@ -22,6 +22,7 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | Item | Description | Priority | Status | Complexity |
 |---|---|---|---|---|
 | [Phone lock on real phones](#phone-lock-on-real-phones) | Locking and unlocking a phone is never tested | P1 | Open | Low |
+| [Apartment drawings cover avatars](#apartment-drawings-cover-avatars) | The cats, friends, keepsakes and key are always drawn over avatars | P2 | Open | Low |
 | [Story rules in shared code](#story-rules-in-shared-code) | The opening's rules are spread through shared code | P2 | Needs decision | High |
 | [Ids in client code](#ids-in-client-code) | Node, character and item ids written into the clients | P2 | Open | Low |
 | [Unknown content setting](#unknown-content-setting) | An unknown `ITLOE_CONTENT` silently starts the story | P3 | Open | Trivial |
@@ -29,6 +30,8 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Pickup handles one item](#pickup-handles-one-item) | `collect` only knows the first key | P3 | Open | Low |
 | [TV lobby band parameters](#tv-lobby-band-parameters) | `renderLobby` takes two option objects side by side | P3 | Open | Trivial |
 | [Protocol differences](#protocol-differences) | `PROTOCOL.md` disagrees with the code in three places | P3 | Open | Trivial |
+| [Debug accessors show only the party room](#debug-accessors-show-only-the-party-room) | `bloko.drawOrder()` and `bloko.scene()` ignore the apartment and door #4's room | P3 | Open | Trivial |
+| [Apartment sofa sparkle](#apartment-sofa-sparkle) | The sofa's sparkle overlaps its "Comfy!" bubble in the apartment | P3 | Open | Trivial |
 | [GameStory.md frontmatter](#gamestorymd-frontmatter) | The story document lacks the standard frontmatter | P3 | Open | Trivial |
 
 ## Items
@@ -38,6 +41,12 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 On the evening, phones lock and unlock all the time. The phone suite's "phone locked … → unlock resumes" check is skipped (`e2e-phone` part 1 prints a SKIP): headless Chrome doesn't freeze a page with `Page.setWebLifecycleState('frozen')`, so the unlock path, the `resume` probe on a stale socket, never runs. The other reconnect checks pass.
 
 **Recommendation:** test it by hand on real phones, an iPhone and an Android, during the next manual test: lock mid-game for a few minutes, with and without the server restarting meanwhile, then unlock. Automate it only if a way to freeze a page in headless Chrome turns up.
+
+### Apartment drawings cover avatars
+
+In the apartment, the cats, friends, keepsakes and the key are drawn after the depth-sorted list of props and avatars (`public/screen/party-room.js`). An avatar walking in front of a cat still has the cat drawn over it.
+
+**Recommendation:** make them props of the apartment's scene (`APARTMENT_ROOM`), so they sort with the avatars like the party room's furniture.
 
 ### Story rules in shared code
 
@@ -92,6 +101,18 @@ The campaign's `collect` action accepts only `memory-key-intro`, at the hub. Eac
 - `interact` also works at a scene tableau.
 
 **Recommendation:** update `PROTOCOL.md` to match the code; the code's behaviour is fine.
+
+### Debug accessors show only the party room
+
+The TV's debug accessors `bloko.drawOrder()` and `bloko.scene()` report `PARTY_ROOM` even in the apartment or door #4's room, so `e2e-tv` can't check depth there.
+
+**Recommendation:** report the room on screen. Phase 5's "a node's room" (`docs/minigame-brief.md`) may make this a one-line change.
+
+### Apartment sofa sparkle
+
+The sofa's object-action sparkle is placed for the party room's narrow sofa. In the apartment, where the sofa is stretched 1.7×, it overlaps the "Comfy!" bubble.
+
+**Recommendation:** place the effect from the prop's box.
 
 ### GameStory.md frontmatter
 
