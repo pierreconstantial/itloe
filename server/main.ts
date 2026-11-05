@@ -67,8 +67,14 @@ const positions = makePositions<WebSocket>();
 let round: Round<unknown> | null = null;
 const openRound = (c: Campaign): Round<unknown> | null => {
   if (!c.at.kind || !c.at.activity) return null;
-  // nobody keeps walking in the room while the round runs (a stick released just as the round began)
-  for (const [id, pos] of positions.entries()) if (pos.moving) positions.set(id, { ...pos, moving: false });
+  // Keep the room's position even for someone who never moved: their game-area position must not
+  // survive the return to the room. Nobody keeps walking there while the round runs.
+  for (const id of c.party.order) {
+    const member = c.party.players[id];
+    if (member.left) continue;
+    const pos = positions.get(id) ?? spawnAt(roomAt(CONTENT, c.at.node), member.character);
+    positions.set(id, { ...pos, moving: false });
+  }
   return makeRound(serverOf(c.at.kind), {
     state: () => game.campaign.at.activity,
     apply: (action) => apply({ t: 'activity', action: action as any }),

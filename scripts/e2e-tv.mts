@@ -718,9 +718,9 @@ try {
   i = A2.mark(); A2.send({ t: 'gm', op: { op: 'goto', node: 'childhood.blocks' } });
   await A2.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.node === 'childhood.blocks', i);
   A2.send({ t: 'pos', x: 6, y: 6.5, dir: 'left', moving: false }); // where Anna stands in the room
-  const annaAt = (x: number, y: number, within: number) => `(() => { const a = window.bloko.avatars().find((a) => a.id === '${idA}');
+  const avatarAt = (id: string, x: number, y: number, within: number) => `(() => { const a = window.bloko.avatars().find((a) => a.id === '${id}');
     return !!a && Math.abs(a.x - ${x}) < ${within} && Math.abs(a.y - ${y}) < ${within}; })()`;
-  check(await tv.until(`${tvRoom} && ${annaAt(6, 6.5, 0.05)}`, 'room at a block tableau'), 'stand-in: the room at a block tableau, Anna standing in it');
+  check(await tv.until(`${tvRoom} && ${avatarAt(idA, 6, 6.5, 0.05)}`, 'room at a block tableau'), 'stand-in: the room at a block tableau, Anna standing in it');
   await tv.js(STAND_IN_TV);
   const errorsBefore = tv.errors.length;
   const fart = { t: 'unsaved', data: { t: 'fart', x: 3, y: 2 } };
@@ -737,10 +737,13 @@ try {
   check(await tv.until(`JSON.stringify(window.__standIn.messages) === ${JSON.stringify(JSON.stringify([fart]))}`, 'unsaved'),
     "…and an unsaved message reaches the running screen's message()");
   await tv.js(`window.bloko.pos({ playerId: '${idA}', x: 3, y: 2, dir: 'down', moving: false })`); // Anna in the game area
+  await tv.js(`window.bloko.pos({ playerId: '${idB}', x: 4, y: 2, dir: 'down', moving: false })`); // Sol never moved in the room
   i = A2.mark(); A2.send({ t: 'endGame' }); await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i);
   i = A2.mark(); A2.send({ t: 'newGame' }); await A2.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
   check(await tv.until(tvRoom, 'room again'), 'back to the room after the round');
-  check(await tv.js(annaAt(6, 6.5, 0.01)), `…Anna stands where she stood in the room at once, without walking there (${JSON.stringify(await tv.js(`window.bloko.avatars().find((a) => a.id === '${idA}')`))})`);
+  check(await tv.js(avatarAt(idA, 6, 6.5, 0.01)), `…Anna stands where she stood in the room at once, without walking there (${JSON.stringify(await tv.js(`window.bloko.avatars().find((a) => a.id === '${idA}')`))})`);
+  const solSpawn = spawnPoint('sol');
+  check(await tv.js(avatarAt(idB, solSpawn.x, solSpawn.y, 0.01)), '…Sol, who never moved in the room, is back at the spawn instead of the game-area position');
   check(await tv.js('window.__standIn.unmounted') && tv.errors.length === errorsBefore, '…the stand-in screen is unmounted, no page exception');
   await tv.js('(async () => { (await import("/screen/minigames.js")).SCREENS.blocks = window.__standIn.real; })()');
   } // standin
