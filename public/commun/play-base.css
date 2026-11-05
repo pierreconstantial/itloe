@@ -8,6 +8,8 @@ html, body {
   height: 100dvh;
 }
 [hidden] { display: none !important; }
+/* the frame's root for a minigame's screens: they lay out as if they were the frame's own */
+#view-round { display: contents; }
 
 /* ---------- "menu" views (name, lobby, game over, podium…) ---------- */
 

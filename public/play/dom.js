@@ -56,3 +56,9 @@ export function dotEl(color) {
   dot.className = `dot c${color}`;
   return dot;
 }
+
+/** Loads a stylesheet once, after the page's own (a minigame's screens bring theirs). @param {URL} url */
+export function addStylesheet(url) {
+  if (typeof document === 'undefined' || document.querySelector(`link[href="${url.href}"]`)) return;
+  document.head.append(Object.assign(document.createElement('link'), { rel: 'stylesheet', href: url.href }));
+}

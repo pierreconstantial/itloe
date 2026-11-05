@@ -1,9 +1,10 @@
-// Phone quiz screen (Contract E): renders strictly from the view's PUBLIC quiz (shared/quiz/bank.js
-// projectQuiz), which never carries an answer before the reveal. Between quizzes the party is in the room (main.js); phases here:
+// Phone quiz screens (Contract E), mounted by the frame (./minigames.js): render strictly from the view's
+// PUBLIC quiz (shared/quiz/bank.js projectQuiz), which never carries an answer before the reveal. Between
+// quizzes the party is in the room (main.js); phases here:
 // question (4 big choices or a typed answer; one shot), reveal (my verdict + points, the answer, everyone's
 // answers; host: overrides + next), finished (ranking; host: Play again / Back to the room).
 // Controls are built once per question, so a view arriving mid-typing never resets the text field.
-import { $ } from './dom.js';
+import { $, addStylesheet } from './dom.js';
 import * as haptics from './haptics.js';
 import { createConfirm } from './confirm.js';
 import { secondsLeft, mmss } from '../commun/clock.js';
@@ -13,6 +14,7 @@ import { SCORING, MAX_TEXT } from '../../shared/quiz/index.js';
 /** @typedef {import('../../shared/quiz/bank.js').RoundView} RoundView */
 
 const URGENT_SECONDS = 5;
+const TICK_MS = 250; // the countdown's refresh
 const PHASES = ['question', 'reveal', 'finished'];
 
 /** French typography: a narrow no-break space before ? ! : ; » (never orphaned at a line start). @param {string} s */
@@ -224,5 +226,70 @@ export function createQuizUi(io) {
     clock.classList.toggle('urgent', left <= URGENT_SECONDS);
   }
 
-  return { render, tick };
+  return { render, tick, stop: confirm.disarm };
 }
+
+addStylesheet(new URL('./quiz.css', import.meta.url));
+
+const MARKUP = `
+  <section id="view-quiz">
+    <header class="quiz-top">
+      <span id="quiz-progress" class="kicker">Quiz</span>
+      <span id="quiz-clock" class="clock" hidden></span>
+      <span id="quiz-score" class="quiz-score"></span>
+    </header>
+
+    <div id="quiz-question" class="quiz-pane" hidden>
+      <p id="quiz-category" class="dim"></p>
+      <h2 id="quiz-q"></h2>
+      <div id="quiz-choices" class="quiz-choices"></div>
+      <form id="quiz-text-form" class="quiz-text-form" hidden>
+        <input id="quiz-text" type="text" lang="fr" inputmode="text" enterkeyhint="send" placeholder="Your answer"
+               autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" aria-label="Your answer">
+        <button id="quiz-send" type="submit" class="primary">Send</button>
+      </form>
+      <p id="quiz-sent" class="quiz-sent" hidden>Answer sent ✓</p>
+      <ul id="quiz-answered" class="quiz-chips"></ul>
+    </div>
+
+    <div id="quiz-reveal" class="quiz-pane" hidden>
+      <p id="quiz-verdict" class="quiz-verdict"></p>
+      <p id="quiz-reveal-q" class="dim"></p>
+      <p class="quiz-correct">Answer: <strong id="quiz-answer"></strong></p>
+      <p id="quiz-anecdote" class="quiz-anecdote" hidden></p>
+      <ul id="quiz-results" class="quiz-results"></ul>
+      <button id="quiz-next" type="button" class="primary" hidden>Next question</button>
+      <p id="quiz-reveal-hint" class="dim">Waiting for the host…</p>
+    </div>
+
+    <div id="quiz-finished" class="quiz-pane" hidden>
+      <p id="quiz-finished-kicker" class="kicker"></p>
+      <h2>Quiz over!</h2>
+      <ol id="quiz-ranking" class="quiz-ranking"></ol>
+      <div class="lobby-actions">
+        <button id="quiz-again" type="button" class="primary" hidden>Play again</button>
+        <button id="quiz-back" type="button" hidden>Back to the room</button>
+      </div>
+      <p id="quiz-finished-hint" class="dim">Waiting for the host…</p>
+    </div>
+  </section>
+`;
+
+/** The quiz's entry in the phone's list (./minigames.js). @type {import('./minigames.js').PhoneScreen} */
+export const QUIZ_SCREEN = {
+  title: 'Quiz!',
+  mount(root, io) {
+    root.insertAdjacentHTML('beforeend', MARKUP);
+    const ui = createQuizUi(io);
+    const clock = setInterval(ui.tick, TICK_MS);
+    return {
+      update: (round) => ui.render(round.view, io.meId(), io.isHost()),
+      message: () => {},
+      unmount() {
+        clearInterval(clock);
+        ui.stop();
+        root.replaceChildren();
+      },
+    };
+  },
+};

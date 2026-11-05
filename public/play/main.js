@@ -23,7 +23,7 @@ import { createConnection } from './connection.js';
 import { installBackGuard } from './back-guard.js';
 import { createHostControls } from './host-controls.js';
 import { createGmPanel } from './gm-panel.js';
-import { createQuizUi } from './quiz-ui.js';
+import { screenOf } from './minigames.js';
 import { createBag } from './bag.js';
 import { createSocial } from './social.js';
 import { JOIN_QR_MS } from '../../shared/join-qr.js';
@@ -104,9 +104,9 @@ let round = null;
 let lastView = null;
 /** The whole evening (slice 3), null from a pre-campaign server. @type {Campaign | null} */
 let campaign = null;
-/** The quiz running here (the round's view, the PUBLIC projection: no answer before the reveal), else null.
- *  @type {import('../../shared/quiz/bank.js').QuizView | null} */
-let quizView = null;
+/** The minigame screens mounted in #view-round while a round runs: their kind and handle, else null.
+ *  @type {{ kind: string, screen: import('./minigames.js').Mounted } | null} */
+let running = null;
 /** At least one view arrived. */
 let viewed = false;
 /** Solo record for the current (size, mode), inside the block view in solo games. @type {Best | null} */
@@ -165,6 +165,7 @@ const conn = createConnection({
     updateInteraction();
     if (!up) resetJoinRequest();
     if (!up && drag) { endDrag(); render(); } // a drop can't be sent while offline
+    else if (running) render(); // the minigame's screens hear of it
   },
   onReplaced,
 });
@@ -220,7 +221,6 @@ function receive(raw) {
     round = m.round ?? null;
     lastView = round?.kind === 'blocks' ? round.view : null;
     campaign = m.campaign ?? null;
-    quizView = round?.kind === 'quiz' ? round.view : null;
     viewed = true;
     syncContent(m.contentVersion); // fetches the content on the first view and whenever it changed
     lastBest = lastView ? /** @type {State & { best?: Best }} */ (lastView).best ?? null : null;
@@ -246,6 +246,7 @@ function receive(raw) {
     else if (m.code === 'taken') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} was just picked. Choose someone else!`);
     else if (m.code === 'bad-room') onBadRoom();
     else if (ERR_TOASTS[m.code]) toast(ERR_TOASTS[m.code]);
+    running?.screen.message(m);
     render(); // bad-place and friends: repaint from the last view
   }
 }
@@ -376,11 +377,37 @@ function onBack() {
 
 // ---------- rendering ----------
 
-const VIEWS = ['loading', 'pick', 'room', 'replaced', 'waiting', 'wait-lobby', 'place', 'quiz', 'lobby', 'game', 'over', 'podium'];
+const VIEWS = ['loading', 'pick', 'room', 'replaced', 'waiting', 'wait-lobby', 'place', 'round', 'lobby', 'game', 'over', 'podium'];
 
-/** @param {string} name */
+/** Shows one screen; the running minigame's screens go whenever another one shows. @param {string} name */
 function show(name) {
+  if (name !== 'round') unmountScreen();
   for (const v of VIEWS) $(`view-${v}`).hidden = v !== name;
+}
+
+/** What the frame offers a minigame's screens. @type {import('./minigames.js').PhoneIo} */
+const io = {
+  send,
+  meId: () => playerId ?? '',
+  isHost: () => playerId !== null && partyHost() === playerId,
+  online: () => online,
+  connected: () => conn.isOnline(),
+};
+
+/** The screens of a round of `kind`, mounted in #view-round (kept while the kind stays). @param {string} kind */
+function mountScreen(kind) {
+  if (running?.kind !== kind) {
+    unmountScreen();
+    running = { kind, screen: /** @type {import('./minigames.js').PhoneScreen} */ (screenOf(kind)).mount($('view-round'), io) };
+  }
+  return running.screen;
+}
+
+/** Removes the running minigame's screens, with their listeners, loops and timers. */
+function unmountScreen() {
+  const r = running;
+  running = null;
+  r?.screen.unmount();
 }
 
 function render() {
@@ -394,8 +421,7 @@ function render() {
   const mem = member();
   const hostId = partyHost();
   const isHost = me !== null && v !== null && me.id === hostId;
-  const q = quizView;
-  const quizHost = q !== null && playerId !== null && hostId === playerId;
+  const q = round?.kind === 'quiz' ? round.view : null;
   // the tableau's minigame (null on the hub, in a world, at a scene) and the room between its rounds
   const kind = campaign?.at.kind ?? null;
   const inRoom = kind !== null && round === null;
@@ -442,14 +468,14 @@ function render() {
     renderLobby(here, mem, hostId === playerId, kind === 'quiz' ? summarizeQuiz(tableauSettings()) : summarize(tableauSettings()));
     return;
   }
-  if (q) {
-    if (!playerId || !q.players[playerId]) { // in the evening, but this quiz started before we joined
+  if (round && screenOf(round.kind)) { // a minigame's screens, mounted by the frame
+    if (!playerId || !round.view.players[playerId]) { // in the evening, but this round started before we joined
       show('waiting');
       $('waiting-text').textContent = "A game is on. You'll play the next one!";
       return;
     }
-    show('quiz');
-    quizUi.render(q, playerId, quizHost);
+    show('round');
+    mountScreen(round.kind).update(round, /** @type {Campaign} */ (campaign));
     return;
   }
   if (!v) {
@@ -898,7 +924,6 @@ const menu = initMenu({
 const settingsSheet = createSettingsSheet({ send });
 const hostControls = createHostControls({ send });
 const gmPanel = createGmPanel({ send });
-const quizUi = createQuizUi({ send });
 const bag = createBag();
 const social = createSocial({
   send,
@@ -982,6 +1007,6 @@ for (let i = 0; i < 3; i++) {
 
 installBackGuard({ onBack });
 onContentChange(render); // titles, doors and the tree come with the content
-setInterval(() => { updateClock(); quizUi.tick(); }, CLOCK_TICK_MS);
+setInterval(updateClock, CLOCK_TICK_MS);
 show('loading');
 conn.start();

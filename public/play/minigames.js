@@ -1,0 +1,42 @@
+// The phone's running screens: one entry per minigame, by kind (shared/minigames.js). Adding a minigame is
+// one import line and one entry here. The frame (main.js) mounts an entry's screens into its root while a
+// round of that kind runs, and replaces them with its own screens when the round ends.
+import { QUIZ_SCREEN } from './quiz-ui.js';
+
+/** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
+/** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
+
+/**
+ * What the frame offers a minigame's phone screens.
+ * @typedef {{
+ *   send: (msg: unknown) => void,   // a plain message to the server (PROTOCOL.md)
+ *   meId: () => string,             // this phone's player
+ *   isHost: () => boolean,          // is this phone the party's host?
+ *   online: () => readonly string[],  // players with a live socket
+ *   connected: () => boolean,       // is this phone's socket up? (the frame calls update when it changes)
+ * }} PhoneIo
+ */
+
+/**
+ * A minigame's screens, mounted. `update`: every view while they show, and on connection changes;
+ * `message`: the server's messages for the running round (an `err` refusing this phone's message);
+ * `unmount`: removes the screens' markup, listeners, loops, sounds and timers.
+ * @typedef {{ update: (round: RoundView, campaign: Campaign) => void, message: (msg: any) => void, unmount: () => void }} Mounted
+ */
+
+/**
+ * One minigame's phone screens. `title`: the minigame's name; `mount`: builds its screens inside `root`
+ * (CSS scoped under them, nothing added to index.html).
+ * @typedef {{
+ *   title: string,
+ *   mount: (root: HTMLElement, io: PhoneIo) => Mounted,
+ * }} PhoneScreen
+ */
+
+/** @type {Record<string, PhoneScreen>} */
+export const SCREENS = {
+  quiz: QUIZ_SCREEN,
+};
+
+/** A minigame's phone screens, or null (none registered). @param {string | null | undefined} kind @returns {PhoneScreen | null} */
+export const screenOf = (kind) => (typeof kind === 'string' && Object.hasOwn(SCREENS, kind) ? SCREENS[kind] : null);
