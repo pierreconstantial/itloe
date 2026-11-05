@@ -12,6 +12,7 @@ import { syncClock, secondsLeft, serverNow } from '../commun/clock.js';
 import { updateCountdown } from './countdown.js';
 import { legalPlacementCount } from '../../shared/board.js';
 import { createPartyRoom } from './party-room.js';
+import { createAvatarLayer } from './avatar-layer.js';
 import { createPresence } from './presence.js';
 import { createLiveness } from '../commun/liveness.js';
 import { h } from './dom.js';
@@ -34,9 +35,12 @@ const WAKE_GAP_MS = 5000;
 const TIMES_UP_MS = 2600;
 
 const app = /** @type {HTMLElement} */ (document.getElementById('app'));
+/** Every player's avatar, whatever screen is showing. */
+const avatars = createAvatarLayer();
 const party = createPartyRoom(
   /** @type {HTMLCanvasElement} */ (document.getElementById('party-bg')),
   /** @type {HTMLCanvasElement} */ (document.getElementById('party-fg')),
+  avatars,
 );
 const soundHint = /** @type {HTMLElement} */ (document.getElementById('sound-hint'));
 
@@ -76,7 +80,7 @@ function applyPresence() {
   for (const el of app.querySelectorAll('[data-id]')) {
     el.classList.toggle('is-offline', off.has(/** @type {HTMLElement} */ (el).dataset.id ?? ''));
   }
-  party.setOffline(off);
+  avatars.setOffline(off);
 }
 
 /** @type {Record<State['phase'], (s: State, prev: State | null) => HTMLElement>} */
@@ -479,9 +483,9 @@ const HANDLERS = {
     }
     if (campaign) cutscenes.update(campaign.news, campaign.newsSeq);
   },
-  pos: (msg) => party.onPos(msg),
-  say: (msg) => party.onSocial(msg),
-  emote: (msg) => party.onSocial(msg),
+  pos: (msg) => avatars.onPos(msg),
+  say: (msg) => avatars.onSocial(msg),
+  emote: (msg) => avatars.onSocial(msg),
   interact: (msg) => party.onInteract(msg),
   tick: (msg) => syncClock(msg.now), // liveness (any message feeds the watchdog) + clock skew
   joinQr: (msg) => { syncClock(msg.now); onJoinQr(msg.until); },
@@ -505,6 +509,7 @@ function connect() {
     document.body.classList.remove('offline');
     // Positions are server memory: after a reconnect its pos snapshot (or, after a server restart,
     // each phone's spawn point) is the truth — not where this TV last drew the avatars.
+    avatars.reset();
     party.reset();
     sock.send(JSON.stringify({ t: 'hello', role: 'screen' }));
   });
@@ -585,8 +590,8 @@ fetchJoinInfo().then((info) => {
   /** @param {State} s */
   render: (s) => show(s),
   /** Feed a fake `pos` (self-tests before the server relays them). @param {object} m */
-  pos: (m) => party.onPos(m),
-  avatars: () => party.snapshot(),
+  pos: (m) => avatars.onPos(m),
+  avatars: () => avatars.snapshot(),
   /** Contract G: the party room's paint order, back to front (prop ids and player ids interleaved). */
   drawOrder: () => party.drawOrder(),
   /** Contract G: the room's colliders and prop anchors. */

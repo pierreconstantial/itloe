@@ -1,45 +1,24 @@
 // M3 party room, M4 (Contract G) the hub's scene: the lobby room with every joined guest's avatar
-// walking in it, among props they collide with and sort against.
-// Positions are EPHEMERAL (`pos` messages, see PROTOCOL.md); the joined players come from the
-// last `view`. A pos (x, y) is the avatar's feet, in world units (WORLD = 16 × 9).
+// walking in it, among props they collide with and sort against. Its modes are the three rooms:
+// the party room, the apartment and door #4's room.
 //
-// This file is ONE room: its backdrop painting, its scene's prop art, and the plumbing of the
-// avatars into the engine. The engine itself is generic — geometry in shared/scene.js, draw order
-// and the loop in ./scene-render.js. Three passes per frame:
+// This file is ONE room: its backdrop painting, its scene's prop art, the furniture effects of
+// object actions, and the story's drawings (the portal, the cats, the friends, the keepsakes, the
+// key). The avatars are the avatar layer's (./avatar-layer.js), drawn in this room's scene; the
+// engine itself is generic — geometry in shared/scene.js, draw order and the loop in
+// ./scene-render.js. Three passes per frame:
 //   #party-bg  painted once on resize: wall, floor, window, door, chandelier, bunting, balloons
 //   #party-fg  per frame: the campaign doorways (flat on the back wall), then the engine's draw
 //              list — 'back' props, then 'sorted' props and avatars interleaved by baseline Y,
 //              then 'front' props.
 
-import { drawSprite, SPRITE_SIZE, WALK_FRAMES, WALK_FPS } from '../../shared/sprites.js';
-import { WORLD } from '../../shared/world.js';
-import { PARTY_ROOM, APARTMENT_ROOM, DOOR_FOUR_ROOM, spawnAt } from '../../shared/scene.js';
+import { PARTY_ROOM, APARTMENT_ROOM, DOOR_FOUR_ROOM } from '../../shared/scene.js';
 import { INTRO_KEY, INTRO_KEY_SPOT, PORTAL } from '../../shared/campaign/story.js';
-import { CHARACTERS } from '../../shared/characters.js';
 import { OBJECT_ACTIONS } from '../../shared/interactions.js';
-import { makeView, renderScene, drawOrder, createLoop, lerp, py as snapY } from './scene-render.js';
+import { createLoop, py as snapY } from './scene-render.js';
+import { worldView } from './avatar-layer.js';
 
-/** @typedef {import('../../shared/game.js').State} State */
-/** @typedef {import('../../shared/world.js').Dir} Dir */
-/** @typedef {{ playerId: string, x: number, y: number, dir: Dir, moving: boolean }} PosMsg */
-/**
- * @typedef {{
- *   id: string, name: string, color: number, character: string,
- *   x: number, y: number,      // simulated position (eased towards the target, fixed timestep)
- *   px: number, py: number,    // the same, one update earlier — drawing interpolates between them
- *   tx: number, ty: number,    // last reported position
- *   dir: Dir, moving: boolean, lastPosAt: number,
- * }} Avatar
- */
-
-const AVATAR_UNITS = 1.2;   // avatar height in world units
-const OFFLINE_ALPHA = 0.4;  // a dropped player's avatar fades (presence.js decides when)
-const STALE_MS = 400;       // no update for this long → idle frame
-const EASE_PER_S = 14;      // interpolation speed (higher = snappier)
-const ARRIVED = 0.04;       // units: closer than this counts as standing still
 const UPDATE_HZ = 60;       // fixed simulation rate; drawing interpolates between two updates
-const DIRS = new Set(['up', 'down', 'left', 'right']);
-const FALLBACK_CHARACTERS = Object.keys(CHARACTERS); // by colour, for players without a character
 
 /** Scene layout in world units (16 × 9). The lobby panels (screen-main.css) fill the wall between window and door. */
 const SCENE = {
@@ -172,28 +151,22 @@ export function parquetColor(ax, ay) {
   return PLANKS[((id % PLANKS.length) + PLANKS.length) % PLANKS.length];
 }
 
-/** @param {HTMLCanvasElement} bg @param {HTMLCanvasElement} fg */
-export function createPartyRoom(bg, fg) {
+/**
+ * @param {HTMLCanvasElement} bg @param {HTMLCanvasElement} fg
+ * @param {ReturnType<typeof import('./avatar-layer.js').createAvatarLayer>} avatars
+ */
+export function createPartyRoom(bg, fg, avatars) {
   const bgCtx = /** @type {CanvasRenderingContext2D} */ (bg.getContext('2d'));
   const fgCtx = /** @type {CanvasRenderingContext2D} */ (fg.getContext('2d'));
 
-  /** @type {Map<string, Avatar>} */
-  const avatars = new Map();
-  /** Last pos per player, kept even before the player shows up in a view. @type {Map<string, PosMsg & { at: number }>} */
-  const lastPos = new Map();
-  /** @type {Map<string, {text?: string, kind?: string, until: number, started: number}>} */
-  const expressions = new Map();
-  let geo = makeView(1, 1, 1, WORLD, AVATAR_UNITS, SPRITE_SIZE);
+  let geo = worldView(1, 1, 1);
   let visible = false;
   /** @type {'lobby' | 'apartment' | 'second-room'} */ let mode = 'lobby';
   let portalVisible = false;
   let keyVisible = false;
   /** @type {string[]} */ let hubPeople = [];
   /** @type {{id: string, icon: string}[]} */ let decorations = [];
-  let frameNow = 0;                    // the timestamp of the frame being drawn (walk cycle, door sparkles)
-  let frameAlpha = 0;                  // …and how far it sits between the last two updates
-  /** Reused between frames so a steady room allocates nothing. @type {import('./scene-render.js').Item[]} */
-  const drawList = [];
+  let frameNow = 0;                    // the timestamp of the frame being drawn (furniture effects)
 
   // ---- geometry ----
 
@@ -204,7 +177,7 @@ export function createPartyRoom(bg, fg) {
       c.width = Math.round(w * dpr);
       c.height = Math.round(h * dpr);
     }
-    geo = makeView(w, h, dpr, WORLD, AVATAR_UNITS, SPRITE_SIZE);
+    geo = worldView(w, h, dpr);
     paintScene();
   }
 
@@ -497,10 +470,8 @@ export function createPartyRoom(bg, fg) {
     plant: pixelProp(PLANT, PLANT_PAL),
   };
 
-  // ---- players & positions ----
+  // ---- players, doors & object actions ----
 
-  /** @type {Set<string>} */
-  let offline = new Set();
   /** Campaign doors on the map screens (empty in the block lobby). @type {import('./doors.js').DoorView[]} */
   let doors = [];
 
@@ -509,67 +480,13 @@ export function createPartyRoom(bg, fg) {
     doors = list;
   }
 
-  /** Players shown offline (debounced by presence.js): their avatar is dimmed and tagged. @param {Set<string>} ids */
-  function setOffline(ids) {
-    offline = ids;
-  }
-
   /**
    * Who is in the room: a block State (lobby) or the campaign party (map screens) — same roster shape.
-   * @param {{ order: string[], players: Record<string, { name: string, color: number, character?: string | null, left?: boolean }> }} s
+   * A fresh avatar starts at its spawn point in the party room.
+   * @param {import('./avatar-layer.js').Roster} s
    */
   function setPlayers(s) {
-    const present = new Set();
-    for (const id of s.order) {
-      const p = s.players[id];
-      if (!p || /** @type {{ left?: boolean }} */ (p).left) continue;
-      present.add(id);
-      const character = (p.character && CHARACTERS[/** @type {keyof typeof CHARACTERS} */ (p.character)])
-        ? p.character
-        : FALLBACK_CHARACTERS[(p.color - 1 + FALLBACK_CHARACTERS.length) % FALLBACK_CHARACTERS.length];
-      let a = avatars.get(id);
-      if (!a) {
-        // a fresh avatar starts on walkable floor: the shared spawn point, nudged out of a prop
-        const spawn = spawnAt(PARTY_ROOM, /** @type {import("../../shared/characters.js").CharacterId | null} */ (p.character ?? null));
-        const known = lastPos.get(id);
-        const start = known ?? { x: spawn.x, y: spawn.y, dir: spawn.dir, moving: false, at: 0 };
-        a = {
-          id, name: p.name, color: p.color, character,
-          x: start.x, y: start.y, px: start.x, py: start.y, tx: start.x, ty: start.y,
-          dir: start.dir, moving: start.moving, lastPosAt: start.at,
-        };
-        avatars.set(id, a);
-      }
-      a.name = p.name;
-      a.color = p.color;
-      a.character = character;
-    }
-    for (const id of avatars.keys()) if (!present.has(id)) avatars.delete(id);
-    for (const id of lastPos.keys()) if (!s.players[id]) lastPos.delete(id);
-  }
-
-  /** @param {unknown} m a `pos` message from the server */
-  function onPos(m) {
-    const msg = /** @type {Partial<PosMsg>} */ (m);
-    if (typeof msg.playerId !== 'string' || !Number.isFinite(msg.x) || !Number.isFinite(msg.y)) return;
-    const dir = DIRS.has(String(msg.dir)) ? /** @type {Dir} */ (msg.dir) : 'down';
-    const now = performance.now();
-    const p = { playerId: msg.playerId, x: Number(msg.x), y: Number(msg.y), dir, moving: !!msg.moving, at: now };
-    lastPos.set(p.playerId, p);
-    const a = avatars.get(p.playerId);
-    if (!a) return;
-    a.tx = p.x; a.ty = p.y; a.dir = p.dir; a.moving = p.moving; a.lastPosAt = now;
-  }
-
-  /** @param {any} m short lived speech or reaction, shown by the avatar */
-  function onSocial(m) {
-    if (typeof m.playerId !== 'string') return;
-    const now = performance.now();
-    if (m.t === 'say' && typeof m.text === 'string') {
-      expressions.set(m.playerId, { text: m.text, started: now, until: now + 5500 });
-    } else if (m.t === 'emote' && ['victory', 'fart', 'annoy'].includes(m.kind)) {
-      expressions.set(m.playerId, { kind: m.kind, started: now, until: now + 2200 });
-    }
+    avatars.setPlayers(s, PARTY_ROOM);
   }
 
   /** @param {any} m a server-validated action at an object */
@@ -577,36 +494,22 @@ export function createPartyRoom(bg, fg) {
     if (typeof m.playerId !== 'string' || typeof m.object !== 'string' || !Object.hasOwn(OBJECT_ACTIONS, m.object)) return;
     const now = performance.now();
     objectEffects.set(m.object, { started: now, until: now + 2800 });
-    expressions.set(m.playerId, {
-      text: OBJECT_ACTIONS[/** @type {keyof typeof OBJECT_ACTIONS} */ (m.object)].feedback,
-      started: now, until: now + 2000,
-    });
+    avatars.say(m.playerId, OBJECT_ACTIONS[/** @type {keyof typeof OBJECT_ACTIONS} */ (m.object)].feedback, 2000);
   }
 
-  // ---- animation: fixed-step simulation, interpolated drawing ----
-
-  /** One simulation step: every avatar eases towards its last reported position. @param {number} dt */
-  function update(dt) {
-    const k = 1 - Math.exp(-EASE_PER_S * dt);
-    for (const a of avatars.values()) {
-      a.px = a.x; a.py = a.y;
-      a.x += (a.tx - a.x) * k;
-      a.y += (a.ty - a.y) * k;
-    }
-  }
+  // ---- animation: the avatar layer's fixed-step simulation, interpolated drawing ----
 
   /** @param {number} alpha how far this frame sits between the last two updates @param {number} now */
   function draw(alpha, now) {
     frameNow = now;
-    frameAlpha = alpha;
     const g = fgCtx;
     g.setTransform(geo.dpr, 0, 0, geo.dpr, 0, 0);
     g.clearRect(0, 0, geo.w, geo.h);
     g.imageSmoothingEnabled = false;
     for (const d of doors) drawDoorway(g, d, now); // the doorways lie flat on the back wall, under everything
     if (portalVisible && mode === 'lobby') drawPortal(g, now);
-    renderScene(g, mode === 'second-room' ? DOOR_FOUR_ROOM : mode === 'apartment' ? APARTMENT_ROOM : PARTY_ROOM,
-      avatars.values(), PROP_ART, drawActor, geo, drawList);
+    avatars.draw(g, geo, alpha, now,
+      mode === 'second-room' ? DOOR_FOUR_ROOM : mode === 'apartment' ? APARTMENT_ROOM : PARTY_ROOM, PROP_ART);
     if (mode === 'apartment') {
       drawCats(g, now);
       drawHubPeople(g, now);
@@ -700,147 +603,7 @@ export function createPartyRoom(bg, fg) {
     g.fillStyle = '#fff3d6'; g.fillText('PICK UP', sx, sy + geo.scale * 2);
   }
 
-  const loop = createLoop(update, draw, UPDATE_HZ);
-
-  /** The engine's actor hook: an avatar, at the interpolated position, on its walk frame. */
-  /** @param {CanvasRenderingContext2D} g @param {any} a @param {import('./scene-render.js').View} v */
-  function drawActor(g, a, v) {
-    const walk = WALK_FRAMES[Math.floor((frameNow / 1000) * WALK_FPS) % WALK_FRAMES.length];
-    drawAvatar(g, /** @type {Avatar} */ (a), isWalking(a, frameNow) ? walk : 0, v);
-  }
-
-  /** @param {Avatar} a @param {number} now */
-  function isWalking(a, now) {
-    const fresh = now - a.lastPosAt < STALE_MS;
-    const travelling = Math.hypot(a.tx - a.x, a.ty - a.y) > ARRIVED;
-    return fresh && (a.moving || travelling); // updates stopped → idle, however far the easing got
-  }
-
-  /** @param {CanvasRenderingContext2D} g @param {Avatar} a @param {number} spriteFrame @param {import('./scene-render.js').View} v */
-  function drawAvatar(g, a, spriteFrame, v) {
-    const { scale, unit } = v;
-    const size = SPRITE_SIZE * scale;
-    // keep the whole sprite on screen even at the world's edges
-    const x = Math.min(WORLD.w - 0.5, Math.max(0.5, lerp(a.px, a.x, frameAlpha)));
-    const y = Math.min(WORLD.h, Math.max(AVATAR_UNITS, lerp(a.py, a.y, frameAlpha)));
-    const { sx, sy } = toScreen(x, y);
-    const left = Math.round(sx - size / 2);
-    const top = Math.round(sy - size);
-    // shadow
-    g.fillStyle = 'rgba(0, 0, 0, 0.35)';
-    g.beginPath();
-    g.ellipse(sx, sy - scale, size * 0.32, scale * 1.6, 0, 0, Math.PI * 2);
-    g.fill();
-    const off = offline.has(a.id);
-    const expression = expressions.get(a.id);
-    const active = expression && expression.until > frameNow ? expression : null;
-    if (expression && !active) expressions.delete(a.id);
-    if (off) g.globalAlpha = OFFLINE_ALPHA;
-    const elapsed = active ? frameNow - active.started : 0;
-    g.save();
-    if (active?.kind === 'victory') {
-      g.translate(0, -Math.abs(Math.sin(elapsed / 100)) * scale * 2);
-    } else if (active?.kind === 'annoy') {
-      g.translate(Math.sin(elapsed / 35) * scale, 0);
-    }
-    drawSprite(g, a.character, a.dir, spriteFrame, left, top, scale);
-    g.restore();
-    g.globalAlpha = 1;
-    if (active) drawExpression(g, active, sx, top, size, scale, elapsed);
-    label(g, a, sx, Math.min(geo.h - unit * 0.3, sy + scale * 2), off);
-  }
-
-  /** Comic style accents and speech, anchored to the avatar rather than a screen corner. */
-  /** @param {CanvasRenderingContext2D} g @param {{text?: string, kind?: string}} expression
-   * @param {number} sx @param {number} top @param {number} size @param {number} scale @param {number} elapsed */
-  function drawExpression(g, expression, sx, top, size, scale, elapsed) {
-    if (expression.text) {
-      const font = Math.max(18, Math.round(geo.unit * 0.25));
-      g.font = `800 ${font}px system-ui, sans-serif`;
-      const maxWidth = Math.min(geo.w * 0.26, geo.unit * 3.8);
-      const words = expression.text.split(' ').flatMap((word) => {
-        if (g.measureText(word).width <= maxWidth) return [word];
-        const chunks = [];
-        let chunk = '';
-        for (const char of word) {
-          if (chunk && g.measureText(chunk + char).width > maxWidth) { chunks.push(chunk); chunk = char; }
-          else chunk += char;
-        }
-        if (chunk) chunks.push(chunk);
-        return chunks;
-      });
-      const lines = [''];
-      for (const word of words) {
-        const last = lines.length - 1;
-        const proposed = lines[last] ? `${lines[last]} ${word}` : word;
-        if (lines[last] && g.measureText(proposed).width > maxWidth) lines.push(word);
-        else lines[last] = proposed;
-      }
-      const pad = font * 0.65;
-      const lineH = font * 1.22;
-      const width = Math.min(geo.w - 16, Math.max(...lines.map((line) => g.measureText(line).width)) + pad * 2);
-      const height = lines.length * lineH + pad * 1.4;
-      const x = Math.max(8, Math.min(geo.w - width - 8, sx + size * 0.24));
-      const y = Math.max(8, top - height - scale * 2);
-      g.fillStyle = '#fff9ee';
-      g.strokeStyle = '#24202b';
-      g.lineWidth = Math.max(3, scale);
-      g.beginPath();
-      g.roundRect(x, y, width, height, font * 0.55);
-      g.fill(); g.stroke();
-      g.beginPath();
-      g.moveTo(Math.max(x + 14, Math.min(x + width - 14, sx + size * 0.3)), y + height);
-      g.lineTo(sx + size * 0.15, top - scale);
-      g.stroke();
-      g.fillStyle = '#201b29';
-      g.textBaseline = 'top';
-      lines.forEach((line, i) => g.fillText(line, x + pad, y + pad * 0.55 + i * lineH));
-      return;
-    }
-    const kind = expression.kind;
-    const font = Math.max(26, Math.round(geo.unit * 0.55));
-    g.font = `900 ${font}px system-ui, sans-serif`;
-    g.textAlign = 'center';
-    g.textBaseline = 'middle';
-    g.lineWidth = Math.max(3, scale);
-    g.strokeStyle = '#201b29';
-    const glyph = kind === 'victory' ? '✌' : kind === 'annoy' ? '💢' : '💨';
-    const gx = kind === 'fart' ? sx - size * 0.58 - elapsed * 0.02 : sx + size * 0.44;
-    const gy = kind === 'fart' ? top + size * 0.75 - elapsed * 0.035 : top - font * 0.2 - Math.sin(elapsed / 120) * scale;
-    g.strokeText(glyph, gx, gy);
-    g.fillText(glyph, gx, gy);
-    if (kind === 'annoy') {
-      g.strokeStyle = '#ee4058';
-      for (const side of [-1, 1]) {
-        g.beginPath();
-        g.moveTo(sx + side * size * 0.7, top + size * 0.12);
-        g.lineTo(sx + side * size * 0.95, top - size * 0.1);
-        g.stroke();
-      }
-    }
-  }
-
-  /** @param {CanvasRenderingContext2D} g @param {Avatar} a @param {number} cx @param {number} top @param {boolean} off */
-  function label(g, a, cx, top, off) {
-    const text = off ? `${a.name} · 📵 offline` : a.name;
-    const fontPx = Math.round(geo.unit * 0.26);
-    g.font = `800 ${fontPx}px system-ui, -apple-system, 'Segoe UI', sans-serif`;
-    g.textAlign = 'left';
-    g.textBaseline = 'top';
-    const h = fontPx * 1.35;
-    const pad = h * 0.45, dot = h * 0.4, gap = h * 0.3;
-    const w = pad + dot + gap + g.measureText(text).width + pad;
-    const margin = geo.unit * 0.1;
-    const x0 = Math.min(geo.w - margin - w, Math.max(margin, cx - w / 2));
-    g.fillStyle = 'rgba(12, 14, 18, 0.78)';
-    g.beginPath();
-    g.roundRect(x0, top, w, h, h / 2);
-    g.fill();
-    g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(`--p${a.color}`).trim() || '#fff';
-    g.fillRect(x0 + pad, top + (h - dot) / 2, dot, dot);
-    g.fillStyle = off ? '#b9bcc4' : '#ffffff';
-    g.fillText(text, x0 + pad + dot + gap, top + fontPx * 0.17);
-  }
+  const loop = createLoop(avatars.update, draw, UPDATE_HZ);
 
   // ---- campaign doors (map screens) ----
   // A free-standing Altbau doorway per child node: its floor zone (content `door` rect, where walking
@@ -976,18 +739,15 @@ export function createPartyRoom(bg, fg) {
     if (visible) paintScene();
   }
 
-  /** Forget every avatar and position (reconnect): the next view and pos snapshot rebuild the room. */
+  /** Forget the furniture effects (reconnect); the avatar layer resets its own. */
   function reset() {
-    avatars.clear();
-    lastPos.clear();
-    expressions.clear();
     objectEffects.clear();
   }
 
   addEventListener('resize', () => { if (visible) layout(); });
 
   return {
-    setPlayers, setOffline, setDoors, onPos, onSocial, onInteract, setVisible, setMode,
+    setPlayers, setDoors, onInteract, setVisible, setMode,
     setPortal: (/** @type {boolean} */ on) => { portalVisible = on; },
     setKey: (/** @type {boolean} */ on) => { keyVisible = on; },
     setHubPeople: (/** @type {string[]} */ people) => { hubPeople = people; },
@@ -995,14 +755,12 @@ export function createPartyRoom(bg, fg) {
     reset,
     /** Debug / tests: the doors drawn. */
     doors: () => doors.map((d) => ({ id: d.id, state: d.state, title: d.title })),
-    /** Debug / tests: the drawn state of every avatar. */
-    snapshot: () => [...avatars.values()].map((a) => ({ id: a.id, name: a.name, character: a.character, x: a.x, y: a.y, dir: a.dir, walking: isWalking(a, performance.now()), offline: offline.has(a.id) })),
     /**
      * Debug / tests: the ids painted this frame, back to front — prop ids (sofa, table, plant) and
      * player ids interleaved. An avatar listed BEFORE a prop is drawn behind it.
      * @returns {string[]}
      */
-    drawOrder: () => drawOrder(PARTY_ROOM, avatars.values()),
+    drawOrder: () => avatars.drawOrder(PARTY_ROOM),
     /** Debug / tests: the room's geometry (colliders and anchors), to assert against. */
     scene: () => ({
       id: PARTY_ROOM.id,
