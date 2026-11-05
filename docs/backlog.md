@@ -23,6 +23,8 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 |---|---|---|---|---|
 | [Phone lock on real phones](#phone-lock-on-real-phones) | Locking and unlocking a phone is never tested | P1 | Open | Low |
 | [Apartment drawings cover avatars](#apartment-drawings-cover-avatars) | The cats, friends, keepsakes and key are always drawn over avatars | P2 | Open | Low |
+| [Fifth player after the opening](#fifth-player-after-the-opening) | Once the portal is ready, a fifth player can join | P2 | Needs decision | Low |
+| [A room per character at the hub](#a-room-per-character-at-the-hub) | Élodie walks the apartment while the others walk the party room | P2 | Needs decision | Medium |
 | [Story rules in shared code](#story-rules-in-shared-code) | The opening's rules are spread through shared code | P2 | Needs decision | High |
 | [Ids in client code](#ids-in-client-code) | Node, character and item ids written into the clients | P2 | Open | Low |
 | [Unknown content setting](#unknown-content-setting) | An unknown `ITLOE_CONTENT` silently starts the story | P3 | Open | Trivial |
@@ -32,6 +34,7 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Protocol differences](#protocol-differences) | `PROTOCOL.md` disagrees with the code in three places | P3 | Open | Trivial |
 | [Debug accessors show only the party room](#debug-accessors-show-only-the-party-room) | `bloko.drawOrder()` and `bloko.scene()` ignore the apartment and door #4's room | P3 | Open | Trivial |
 | [Apartment sofa sparkle](#apartment-sofa-sparkle) | The sofa's sparkle overlaps its "Comfy!" bubble in the apartment | P3 | Open | Trivial |
+| [Portal drawn after use](#portal-drawn-after-use) | The TV still draws the used portal at the false start | P3 | Open | Trivial |
 | [GameStory.md frontmatter](#gamestorymd-frontmatter) | The story document lacks the standard frontmatter | P3 | Open | Trivial |
 
 ## Items
@@ -47,6 +50,18 @@ On the evening, phones lock and unlock all the time. The phone suite's "phone lo
 In the apartment, the cats, friends, keepsakes and the key are drawn after the depth-sorted list of props and avatars (`public/screen/party-room.js`). An avatar walking in front of a cat still has the cat drawn over it.
 
 **Recommendation:** make them props of the apartment's scene (`APARTMENT_ROOM`), so they sort with the avatars like the party room's furniture.
+
+### Fifth player after the opening
+
+The opening needs exactly four players before its first game. Once the portal is ready, the server lets a fifth player join, and the phone's character picker offers Konz again. `GameStory.md` speaks of four players.
+
+**Recommendation:** decide whether a fifth guest may join after the opening. If not, refuse the join while the story's opening runs, in the server's `join` check.
+
+### A room per character at the hub
+
+After the portal, Élodie walks the apartment at the hub while the other players stay "in the old lobby": their phones walk the party room (`public/play/main.js`), and the TV hides them unless a game master sets `person.<id>.unlocked`. That amounts to a room per character, which a room chosen by node can't express.
+
+**Recommendation:** Pierre decides whether this is a story moment. If it is, the story needs a rule for who is in which room; if not, everyone at the hub is in the apartment.
 
 ### Story rules in shared code
 
@@ -113,6 +128,12 @@ The TV's debug accessors `bloko.drawOrder()` and `bloko.scene()` report `PARTY_R
 The sofa's object-action sparkle is placed for the party room's narrow sofa. In the apartment, where the sofa is stretched 1.7×, it overlaps the "Comfy!" bubble.
 
 **Recommendation:** place the effect from the prop's box.
+
+### Portal drawn after use
+
+If a game master sends the party back to the false start after Élodie went through the portal, the TV still draws the portal there (`public/screen/main.js`, `show`), but the server refuses to let anyone through it.
+
+**Recommendation:** draw the portal only while it can be entered: `portal.ready` set and `portal.entered` not set.
 
 ### GameStory.md frontmatter
 
