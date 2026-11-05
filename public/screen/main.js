@@ -173,7 +173,8 @@ function showMap(c) {
     return member?.character === 'elodie' || c.facts.flags.includes(`person.${member?.character}.unlocked`);
   });
   party.setPlayers({ ...c.party, order: visibleIds });
-  party.setMode(!storyScene ? 'lobby' : inApartment ? 'apartment' : 'second-room');
+  const story = c.facts.flags.includes('story.elo-50');
+  party.setMode(story && c.at.node === 'hub' ? 'apartment' : story && c.at.node === 'hub.door4' ? 'second-room' : 'lobby');
   party.setPortal(false);
   party.setKey(inApartment && c.facts.flags.includes('apparition.seen') && !(c.facts.inventory.elodie?.[INTRO_KEY] > 0));
   party.setHubPeople(inApartment ? REUNIONS.filter((person) => c.facts.flags.includes(person.flag)

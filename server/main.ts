@@ -26,7 +26,7 @@ import { INTRO_KEY, INTRO_KEY_SPOT, OPENING_PLAYERS, PORTAL } from '../shared/ca
 import type { CharacterId } from '../shared/campaign/types.js';
 import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
 import { holding } from '../shared/campaign/index.js';
-import { PARTY_ROOM, APARTMENT_ROOM, spawnAt } from '../shared/scene.js';
+import { PARTY_ROOM, APARTMENT_ROOM, DOOR_FOUR_ROOM, spawnAt } from '../shared/scene.js';
 import { nearbyObject } from '../shared/interactions.js';
 import { loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import {
@@ -372,7 +372,8 @@ function handleMessage(ws: WebSocket, m: any): void {
     if (now - (interactionAt.get(ws) ?? 0) < 700) return;
     const member = party().players[id];
     const position = positions.get(id) ?? spawnAt(PARTY_ROOM, member.character);
-    const scene = STORY_MODE && game.campaign.at.node === 'hub' ? APARTMENT_ROOM : PARTY_ROOM;
+    const scene = STORY_MODE && game.campaign.at.node === 'hub' ? APARTMENT_ROOM
+      : game.campaign.at.node === 'hub.door4' ? DOOR_FOUR_ROOM : PARTY_ROOM;
     const object = nearbyObject(scene, position);
     if (!object || object.id !== m.object) return;
     interactionAt.set(ws, now);

@@ -517,7 +517,7 @@ function updateInteraction() {
     && !campaign.facts.inventory.elodie?.[INTRO_KEY]
     && Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius;
   const object = pos && (!inHub || character === 'elodie')
-    ? nearbyObject(inHub ? APARTMENT_ROOM : PARTY_ROOM, pos) : null;
+    ? nearbyObject(inHub ? APARTMENT_ROOM : campaign?.at.node === 'hub.door4' ? DOOR_FOUR_ROOM : PARTY_ROOM, pos) : null;
   const button = /** @type {HTMLButtonElement} */ ($('btn-interact'));
   button.dataset.object = canCollect ? INTRO_KEY : object?.id ?? '';
   button.disabled = !(canCollect || object) || !conn.isOnline();
@@ -907,7 +907,7 @@ const joystick = createJoystick({
   },
   // one room so far; when there are several, this is where the current one is chosen
   scene: () => campaign?.at.node === 'hub.door4' ? DOOR_FOUR_ROOM
-    : isStory() && campaign?.at.node === 'hub' && myCharacter() === 'elodie' ? APARTMENT_ROOM : PARTY_ROOM,
+    : isStory() && campaign?.at.node === 'hub' ? APARTMENT_ROOM : PARTY_ROOM,
   send: (pos) => {
     const turned = myPos?.dir !== pos.dir;
     myPos = pos;
@@ -955,8 +955,8 @@ $('btn-interact').addEventListener('click', () => {
       send({ t: 'interact', object: INTRO_KEY }); return;
     }
   }
-  const object = character ? nearbyObject(isStory() && campaign?.at.node === 'hub' ? APARTMENT_ROOM : PARTY_ROOM,
-    currentPos(character)) : null;
+  const object = character ? nearbyObject(isStory() && campaign?.at.node === 'hub' ? APARTMENT_ROOM
+    : campaign?.at.node === 'hub.door4' ? DOOR_FOUR_ROOM : PARTY_ROOM, currentPos(character)) : null;
   if (object) send({ t: 'interact', object: object.id });
   updateInteraction();
 });
