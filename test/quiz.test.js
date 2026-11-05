@@ -107,15 +107,18 @@ test('uncertain text: pending until the judge; credited when the verdict lands, 
   let s = started({ mode: 'text' });
   s = reduceQuiz(s, { t: 'answer', id: 'a', text: 'Hugo', now: T0 + 1000, verdict: 'uncertain' });
   assert.equal(s.round?.answers.a.ok, null);
-  s = reduceQuiz(s, { t: 'verdict', target: 'a', ok: true }); // judged during the question
+  const of = { index: 0, questionId: /** @type {any} */ (s.round).questionId };
+  s = reduceQuiz(s, { t: 'verdict', target: 'a', ok: true, ...of }); // judged during the question
   s = reduceQuiz(s, { t: 'answer', id: 'b', text: 'Zola', now: T0 + 2000, verdict: 'uncertain' });
   assert.equal(s.phase, 'reveal');
   assert.equal(s.players.a.correct, 1, 'judged right before the close → credited at the reveal');
   assert.equal(s.players.b.score, 0, 'still pending');
-  const late = reduceQuiz(s, { t: 'verdict', target: 'b', ok: true });
+  assert.equal(reduceQuiz(s, { t: 'verdict', target: 'b', ok: true, ...of, index: 1 }), s, 'a verdict about another round is ignored');
+  assert.equal(reduceQuiz(s, { t: 'verdict', target: 'b', ok: true, ...of, questionId: 'other' }), s, '…also by its question');
+  const late = reduceQuiz(s, { t: 'verdict', target: 'b', ok: true, ...of });
   assert.equal(late.players.b.correct, 1, 'a verdict landing on the reveal credits at once');
-  assert.equal(reduceQuiz(late, { t: 'verdict', target: 'b', ok: false }), late, 'a decided answer is not re-judged');
-  const timedOut = reduceQuiz(s, { t: 'verdict', target: 'b', ok: null });
+  assert.equal(reduceQuiz(late, { t: 'verdict', target: 'b', ok: false, ...of }), late, 'a decided answer is not re-judged');
+  const timedOut = reduceQuiz(s, { t: 'verdict', target: 'b', ok: null, ...of });
   assert.equal(timedOut.round?.answers.b.ok, false, 'null (no judge / timeout) → wrong');
 });
 

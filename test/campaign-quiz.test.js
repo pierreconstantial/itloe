@@ -80,7 +80,7 @@ test('finished → the quiz result recorded exactly once: counters, totals, aske
   assert.equal(f.asked.length, 5);
   assert.ok(f.done.includes(QUIZ), 'default completion: its activity finished once');
   // nothing after the finish counts again
-  const again = run(c, act({ t: 'endGame', id: 'e' }), act({ t: 'verdict', target: 's', ok: true }));
+  const again = run(c, act({ t: 'endGame', id: 'e' }), act({ t: 'verdict', target: 's', ok: true, index: 0, questionId: 'x' }));
   assert.equal(again.facts.counters[COUNTER.played('quiz')], 1);
 });
 

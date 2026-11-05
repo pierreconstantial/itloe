@@ -545,11 +545,8 @@ function handleQuiz(ws: WebSocket, id: string, m: any, q: QuizState): void {
       if (!applyQuiz({ t: 'answer', id, ...given, now: Date.now(), verdict })) { sendErr(ws, 'refused'); return; }
       if (verdict === 'uncertain' && 'text' in given) {
         const { index, questionId } = r;
-        void judge(question, given.text).then((ok) => {
-          const now = quiz()?.round;
-          // only for the same round: a late verdict never lands on the next question's answer
-          if (now && now.index === index && now.questionId === questionId) applyQuiz({ t: 'verdict', target: id, ok });
-        });
+        // the reducer ignores a verdict for another round: a late one never lands on the next question's answer
+        void judge(question, given.text).then((ok) => applyQuiz({ t: 'verdict', target: id, ok, index, questionId }));
       }
       return;
     }

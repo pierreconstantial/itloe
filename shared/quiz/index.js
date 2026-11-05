@@ -11,7 +11,8 @@
 //   again { id, now, candidates }   host: finished → question 1 of a new quiz (same players minus left)
 //   answer { id, choice | text, now, verdict }   once per round, before the deadline
 //   close { deadline }              server: the round's timer rang (stale deadlines are ignored)
-//   verdict { target, ok }          server: the async judge decided an 'uncertain' answer (null = wrong)
+//   verdict { target, ok, index, questionId }   server: the async judge decided an 'uncertain' answer of that
+//                                   round (null = wrong); a verdict for another round is ignored
 //   override { id, target, ok }     host, on the reveal: fixes any answer, both ways, re-scoring it
 //   next { id, now }                host: reveal → next question, or finished after the last
 //   endGame { id }                  host: question/reveal → finished
@@ -61,7 +62,7 @@ import { mulberry32 } from '../rng.js';
  *   | { t: 'again', id: string, now: number, candidates: Candidate[] }
  *   | { t: 'answer', id: string, choice?: number, text?: string, now: number, verdict: Verdict }
  *   | { t: 'close', deadline: number }
- *   | { t: 'verdict', target: string, ok: boolean | null }
+ *   | { t: 'verdict', target: string, ok: boolean | null, index: number, questionId: string }
  *   | { t: 'override', id: string, target: string, ok: boolean }
  *   | { t: 'next', id: string, now: number }
  *   | { t: 'endGame', id: string }
@@ -331,6 +332,8 @@ export function reduceQuiz(s, a) {
       const r = s.round;
       const ans = r?.answers[a.target];
       if (!r || !ans || ans.ok !== null || !quizRunning(s)) return s;
+      // only for the round it was asked about: a late verdict never lands on the next question's answer
+      if (r.index !== a.index || r.questionId !== a.questionId) return s;
       const ok = a.ok === true;
       const answers = { ...r.answers, [a.target]: { ...ans, ok } };
       const players = r.credited && ok ? credit(s.players, a.target, ans, 1) : s.players;
