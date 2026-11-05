@@ -5,6 +5,7 @@ import { BLOCK_SCREEN } from './blocks-ui.js';
 import { QUIZ_SCREEN } from './quiz-ui.js';
 
 /** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
+/** @typedef {import('../../shared/minigames.js').MinigameKind} MinigameKind */
 /** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
 
 /**
@@ -51,11 +52,11 @@ import { QUIZ_SCREEN } from './quiz-ui.js';
  * }} PhoneScreen
  */
 
-/** @type {Record<string, PhoneScreen>} */
+/** @type {Record<MinigameKind, PhoneScreen>} */
 export const SCREENS = {
   blocks: BLOCK_SCREEN,
   quiz: QUIZ_SCREEN,
 };
 
 /** A minigame's phone screens, or null (none registered). @param {string | null | undefined} kind @returns {PhoneScreen | null} */
-export const screenOf = (kind) => (typeof kind === 'string' && Object.hasOwn(SCREENS, kind) ? SCREENS[kind] : null);
+export const screenOf = (kind) => (typeof kind === 'string' && Object.hasOwn(SCREENS, kind) ? SCREENS[/** @type {MinigameKind} */ (kind)] : null);
