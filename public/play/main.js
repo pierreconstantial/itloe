@@ -614,7 +614,8 @@ function renderLobby(v, me, isHost, settings) {
   /** @type {HTMLButtonElement} */ ($('btn-start')).disabled = !!opening && !quartetReady;
   $('lobby-hint').textContent = portalReady ? 'A portal has appeared. Élodie, walk into it!'
     : opening && !quartetReady ? 'Wait for all four players.'
-      : isHost ? 'Everyone in? Hit start!' : 'Waiting for the host to start…';
+      : isHost ? (v.order.length === 1 ? 'Play solo, or wait for friends to join.' : 'Everyone in? Hit start!')
+        : 'Waiting for the host to start…';
 }
 
 /** @param {State} v @param {Player} me */
