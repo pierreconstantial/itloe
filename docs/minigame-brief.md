@@ -19,7 +19,8 @@ Itloe is a party game for one evening, and agents write the code. Build what the
 ## Before starting
 
 - **The work happens on the `konst` branch.** Pierre reviews it and merges it into `master`. When to push and open the pull request is Konstantin's decision. `AGENTS.md` applies to every session working on it.
-- **`konst` is rebased onto `origin/master` at `ba3c3cd`** and isn't pushed yet. This brief is checked against that base.
+- **`konst` is rebased onto `origin/master` at `ba3c3cd`** and pushed to `origin/konst`. This brief is checked against that base.
+- **Pierre works on `origin/pierre`** (the story's opening), merged after this work with adjustments. It overlaps this work in three places: its `portal` campaign action requires the opening block game's lobby (`c.at.activity?.phase !== 'lobby'`), which phase 3c removes; `public/screen/party-room.js`, which phase 5 splits; and `server/main.ts`. Its `STORY_CONTENT` passes phase 1's content validation.
 
 ## Terms
 
@@ -142,6 +143,21 @@ Unsaved messages are their own message, apart from chat and emotes: those are ma
 - **Server to clients: one field for the running round.** It carries the kind, the status and the minigame's view, and is empty between rounds. `view.state`, `view.quiz` and `view.best` are removed, and the best score moves inside the block view. The campaign on the wire carries no raw round state, and the saved campaign keeps it.
 - **The same view for everyone.** A minigame's server code may filter it, the way the quiz hides answers until the reveal.
 
+### The minigame contract (agreed at checkpoint 1)
+
+- **Rules:** `MinigameRules` in `shared/minigames.js`, one entry per minigame in `MINIGAMES`.
+- **Server code (phase 2):** a list in `server/minigames.ts`, one file per minigame, each entry with:
+  - `message(m, ctx, io)`: every party member's message the RPG doesn't handle → an action, a refusal, or nothing; `io.apply(action)` for later actions such as the quiz's verdict;
+  - `inputs?(state, facts)`: server inputs for a round's start (the quiz's candidates);
+  - `view(state)`: the same view for everyone, which it may filter;
+  - `onChange?(prev, next)`: e.g. the block game's best score.
+
+  The view message carries `round: { kind, status, view } | null`. Phase 5 adds `io.send` for unsaved messages and the walking and position hooks.
+- **Running screens (phase 4):** one list for phones and one for the TV, each entry `{ title, mount(root, io) → { update(round, campaign), message(msg), unmount() } }`.
+  - The phone's `io` offers `send`, `meId`, `isHost()`, and the joystick on or off with a game area; the TV's offers the avatar layer and the world-to-screen projection.
+  - An optional `podium(round)` adds the minigame's podium lines (the quiz's right answers, "New best!").
+  - `unmount` removes the screen's listeners, loops, sounds and timers.
+
 ### Registration: explicit lists
 
 Each layer has one list: rules, server, phone and TV. Adding a minigame means one import line in each, plus its type entries. Blocks and quiz are registered from their current files.
@@ -166,7 +182,8 @@ Before phase 1, in this order, on today's code:
 Between 3 and 4:
 
 - Done: test-only commits fix two races in `e2e-phone.mts` and add end-to-end tests of chat, emotes and object actions as they work today. Behaviour change 4 flips the marked quiz-lobby line in `e2e-campaign.mts` ("in a quiz lobby") to expect object actions there.
-- **Found during the work: the phone's connection banner.** When the server is gone or the network drops, the phone's first reconnect attempt fails within the banner's 700 ms grace, and that second failure cancels the banner for good: the phone shows a frozen screen instead of "reconnecting". `e2e-phone` part 1's "server down: banner" check fails for this reason. An investigation is confirming the cause; once it does, the fix is its own behaviour-change commit, approved by Konstantin.
+- **Found during the work: the phone's connection banner.** When the server is gone or the network drops, the phone's first reconnect attempt fails within the banner's 700 ms grace, and that second failure cancels the banner for good: the phone shows a frozen screen instead of "reconnecting". `e2e-phone` part 1's "server down: banner" check fails for this reason. Fixed in its own behaviour-change commit (`8e9c855`).
+- **Found during the work: the "phone locked" check tests nothing.** In headless Chrome 156, `Page.setWebLifecycleState('frozen')` doesn't freeze the page, so "phone locked … → unlock resumes" passes without exercising the unlock. A test-only commit makes it report a visible skip when the page didn't freeze, and require a fresh socket after the unlock.
 
 Right after phase 3:
 
@@ -194,7 +211,7 @@ Done when:
 - `npm run check`, `npm test`, `e2e:campaign`, `e2e:quiz`, `e2e:resume`, `e2e:inventory` and `e2e:presence` pass, with changes to the suites limited to their direct reads of the save file;
 - new tests show that a save with an unregistered kind stops the boot and leaves the file byte-identical, and that a v1 save, a v2 save in a block game and a v2 save mid-question all resume.
 
-**Checkpoint 1**: before phase 2, Konstantin reviews the minigame contract: the rules part, and the planned shapes of the server code and running screens. Pierre may want to see it too.
+**Checkpoint 1**: before phase 2, Konstantin reviews the minigame contract: the rules part, and the planned shapes of the server code and running screens. Agreed, as "The minigame contract" above; Pierre doesn't need to review it.
 
 ### Phase 2: server code and the view message
 
