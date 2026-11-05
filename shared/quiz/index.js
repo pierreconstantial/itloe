@@ -20,6 +20,7 @@
 
 import { CHARACTERS } from '../characters.js';
 import { mulberry32 } from '../rng.js';
+import { ranking } from '../ranking.js';
 
 /** @typedef {import('../characters.js').CharacterId} CharacterId */
 /** @typedef {'choice' | 'text' | 'mixed'} QuizMode */
@@ -341,19 +342,11 @@ function everyoneAnswered(s) {
 }
 
 /**
- * Final standings: score desc (ties share a rank), seat order breaks display ties.
+ * Final standings: the shared ranking (shared/ranking.js), with each player's right answers.
  * @param {QuizState} s @returns {{ id: string, rank: number, score: number, correct: number }[]}
  */
 export function quizRanking(s) {
-  const ordered = [...s.order].sort((a, b) => s.players[b].score - s.players[a].score || s.order.indexOf(a) - s.order.indexOf(b));
-  let prevScore = NaN, prevRank = 0;
-  return ordered.map((id, i) => {
-    const { score, correct } = s.players[id];
-    const rank = score === prevScore ? prevRank : i + 1;
-    prevScore = score;
-    prevRank = rank;
-    return { id, rank, score, correct };
-  });
+  return ranking(s).map((r) => ({ ...r, correct: s.players[r.id].correct }));
 }
 
 /**

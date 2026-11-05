@@ -4,6 +4,7 @@
 import { emptyBoard, canPlace, place, findClears, applyClears, anyFit } from './board.js';
 import { PIECES, handAt } from './pieces.js';
 import { CHARACTERS } from './characters.js';
+import { ranking } from './ranking.js';
 
 /**
  * @typedef {import('./pieces.js').PieceId} PieceId
@@ -189,29 +190,8 @@ export function placementScore(cells, lines, streak, boardEmptied, cleanBoardBon
   return cells + 10 * lines * lines * (1 + streak) + (boardEmptied ? cleanBoardBonus : 0);
 }
 
-/**
- * The ONE ranking rule for every podium and crown (contract addition, P5 2026-11-04).
- * Score descending; equal scores SHARE a rank (standard competition ranking: 1, 1, 3);
- * display order among ties = join order. Rank 1 can be held by several co-champions.
- * @param {State} state
- * @returns {{ id: string, rank: number, score: number }[]} in display order
- */
-export function ranking(state) {
-  const ordered = [...state.order].sort(
-    (a, b) =>
-      state.players[b].score - state.players[a].score ||
-      state.order.indexOf(a) - state.order.indexOf(b)
-  );
-  let prevScore = NaN;
-  let prevRank = 0;
-  return ordered.map((id, i) => {
-    const score = state.players[id].score;
-    const rank = score === prevScore ? prevRank : i + 1;
-    prevScore = score;
-    prevRank = rank;
-    return { id, rank, score };
-  });
-}
+/** The ranking rule (shared/ranking.js), kept as this module's export. */
+export { ranking };
 
 /**
  * Pure reducer. Invalid or out-of-phase actions return `state` unchanged

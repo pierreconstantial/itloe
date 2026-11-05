@@ -3,7 +3,7 @@
 // Path ../../shared: resolved on disk by tsc, normalized to /shared/ by the browser.
 import { canPlace, place, findClears, applyClears } from '../../shared/board.js';
 import { PIECES } from '../../shared/pieces.js';
-import { ranking } from '../../shared/game.js';
+import { ranking } from '../../shared/ranking.js';
 import { KEYS, load, save, forget } from './storage.js';
 import { $, bounds, pieceEl, dotEl, toast } from './dom.js';
 import * as haptics from './haptics.js';

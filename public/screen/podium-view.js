@@ -2,7 +2,7 @@
 // The reveal is driven by `elapsedMs` since the game ended, so a re-render mid-sequence resumes
 // where it was (negative CSS delays) instead of restarting; elapsed = Infinity shows it settled.
 
-import { ranking } from '../../shared/game.js';
+import { ranking } from '../../shared/ranking.js';
 import { h, colorDot, playerColor, formatScore } from './dom.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
