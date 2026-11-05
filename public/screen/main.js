@@ -8,7 +8,7 @@ import { sfx, installAudioUnlock, onAudioState } from './audio.js';
 import * as fx from './fx.js';
 import { syncClock, serverNow } from '../commun/clock.js';
 import { createPartyRoom } from './party-room.js';
-import { createAvatarLayer } from './avatar-layer.js';
+import { createAvatarLayer, worldView } from './avatar-layer.js';
 import { createPresence } from './presence.js';
 import { createLiveness } from '../commun/liveness.js';
 import { h } from './dom.js';
@@ -91,7 +91,7 @@ const portalReady = () => !!campaign?.facts.flags.includes('story.elo-50') && ca
 const tableauSettings = () => campaign?.at.settings ?? null;
 
 /** What the frame offers a minigame's screen. @type {import('./minigames.js').TvIo} */
-const io = { continuous: () => !gap };
+const io = { continuous: () => !gap, avatars, worldView };
 
 /** Removes the running minigame's screen, with its listeners, loops, sounds and timers. */
 function unmountScreen() {
@@ -100,11 +100,13 @@ function unmountScreen() {
   r?.screen.unmount();
 }
 
-/** Leaving a round for the room or the map: its screen goes, its podium's sounds stop. */
+/** Leaving a round for the room or the map: its screen goes, its podium's sounds stop, and the avatars
+ *  stand where they stood in the room (its positions came back just before this view), without walking there. */
 function leaveRound() {
   unmountScreen();
   if (!shownRound) return;
   shownRound = null;
+  avatars.settle();
   finishedAt = -Infinity;
   cancelPodium();
   fx.clearAll();
@@ -413,6 +415,7 @@ const HANDLERS = {
     if (campaign) cutscenes.update(campaign.news, campaign.newsSeq);
   },
   pos: (msg) => avatars.onPos(msg),
+  unsaved: (msg) => running?.screen.message(msg), // the running minigame's own; none running: ignored
   say: (msg) => avatars.onSocial(msg),
   emote: (msg) => avatars.onSocial(msg),
   interact: (msg) => party.onInteract(msg),

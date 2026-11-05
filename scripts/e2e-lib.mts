@@ -19,6 +19,20 @@ export function finish(): never {
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
+ * Test-only, injected into a page before its scripts, like TEARDOWN_PROBE: keeps the page's latest socket and what it sends (`window.__sent`, parsed), so a test can see what the page
+ * told the server and hand the page a message as if the server sent it (`window.__receive(msg)`).
+ */
+export const SOCKET_PROBE = `(() => {
+  const W = window.WebSocket;
+  window.__sent = [];
+  window.WebSocket = class extends W {
+    constructor(...a) { super(...a); window.__ws = this; }
+    send(data) { try { window.__sent.push(JSON.parse(data)); } catch {} return super.send(data); }
+  };
+  window.__receive = (m) => window.__ws.dispatchEvent(new MessageEvent('message', { data: JSON.stringify(m) }));
+})()`;
+
+/**
  * Test-only, injected into a page before its scripts (Page.addScriptToEvaluateOnNewDocument): records every
  * timer, interval and animation frame still pending, and every listener on window or document still
  * attached, each with the page's modules on the stack that made it. window.__live(files) lists the ones a

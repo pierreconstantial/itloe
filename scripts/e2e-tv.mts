@@ -1,7 +1,8 @@
 // TV end-to-end (slice 2/2b, screen side): a real /screen/ page in headless Chrome (CDP), a real
 // server this script kill -9s, and phones as WebSocket clients. Checks the room again after newGame,
 // auto-reconnect after a restart in every phase, presence dimming (debounced), screens never bumped,
-// and the wake-from-sleep reconnect. ONLY=connection|campaign|quiz runs just that section.
+// and the wake-from-sleep reconnect; a stand-in minigame screen with avatars and unsaved messages.
+// ONLY=connection|campaign|quiz|standin runs just that section.
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3180 CDP=9222 [SHOTS=dir] node scripts/e2e-tv.mts       (never PORT 3131: the live server)
 // SHOTS=<dir> saves screenshots, each with its visible text (<name>.txt).
@@ -14,7 +15,7 @@ import { SAMPLE_CONTENT } from '../shared/campaign/index.js';
 
 /** A node's title (the server runs the sample content). @param {string} id */
 const C_TITLE = (id: string): string => SAMPLE_CONTENT.nodes[id].title;
-import { blocksOf, check, Client, finish, HTTP, legalMoves, quizOf, roomOf, sleep, SLOW, TEARDOWN_PROBE } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, legalMoves, quizOf, roomOf, sleep, SLOW, SOCKET_PROBE, TEARDOWN_PROBE } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -178,6 +179,30 @@ const SOUND_PROBE = `(() => {
 })()`;
 /** How many times the TV played the "joined" sound (sfx.joined: two notes, 784 then 1175 Hz). */
 const tvJoined = 'window.__tones.filter((f, k, all) => f === 784 && all[k + 1] === 1175).length';
+/**
+ * A stand-in minigame's TV screen, put in the page's list (public/screen/minigames.js) in place of the block
+ * game's by this test only: it draws the first seated player's avatar over its game area and keeps the
+ * messages it gets. `window.__standIn.real` is the block game's entry, to put back.
+ */
+const STAND_IN_TV = `(async () => {
+  const [{ SCREENS }, { room }] = await Promise.all([import('/screen/minigames.js'), import('/shared/scene.js')]);
+  const area = room('stand-in-area', { x: 0.5, y: 0.5, w: 15, h: 8 }, []);
+  const s = window.__standIn = { io: [], messages: [], drew: 0, unmounted: false, real: SCREENS.blocks };
+  SCREENS.blocks = { ...s.real, mount(root, io) {
+    s.io = Object.keys(io).sort();
+    const canvas = Object.assign(document.createElement('canvas'), { width: 320, height: 180 });
+    root.replaceChildren(canvas);
+    return {
+      update(round) {
+        io.avatars.update(1 / 60);
+        io.avatars.draw(canvas.getContext('2d'), io.worldView(320, 180, 1), 1, performance.now(), area, {}, round.view.order.slice(0, 1));
+        s.drew++;
+      },
+      message(msg) { s.messages.push(msg); },
+      unmount() { s.unmounted = true; root.replaceChildren(); },
+    };
+  } };
+})()`;
 /** A key press on the TV unlocks its sound (a page load locks it again). */
 async function soundOn(tv: Page): Promise<boolean> {
   for (const type of ['keyDown', 'keyUp']) await tv.cmd('Input.dispatchKeyEvent', { type, key: 'a' });
@@ -241,6 +266,7 @@ try {
   tv = await Page.open(`${HTTP}/screen/`);
   await tv.cmd('Page.addScriptToEvaluateOnNewDocument', { source: TEARDOWN_PROBE }); // the teardown checks
   await tv.cmd('Page.addScriptToEvaluateOnNewDocument', { source: SOUND_PROBE });
+  await tv.cmd('Page.addScriptToEvaluateOnNewDocument', { source: SOCKET_PROBE });
   await tv.cmd('Page.reload');
   check(await tv.until(`${tvRoom} && !${tvOnlineBanner}`, 'tv room'), 'TV opens on the room at the false start');
   check(await soundOn(tv), 'a key press turns the TV\'s sound on');
@@ -676,6 +702,39 @@ try {
   check(tv.errors.length === 0, `no page exception through the quiz (${tv.errors.join(' | ') || 'none'})`);
   } // quiz
   } // campaign / quiz
+
+  if (!ONLY || ONLY === 'standin') {
+  // ---------- a minigame's TV screen: avatars over its game area, unsaved messages, the room back after it.
+  // A stand-in screen, put in the TV's list by this test (the round itself is a block game's) ----------
+  i = A2.mark(); A2.send({ t: 'gm', op: { op: 'goto', node: 'childhood.blocks' } });
+  await A2.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.node === 'childhood.blocks', i);
+  A2.send({ t: 'pos', x: 6, y: 6.5, dir: 'left', moving: false }); // where Anna stands in the room
+  const annaAt = (x: number, y: number, within: number) => `(() => { const a = window.bloko.avatars().find((a) => a.id === '${idA}');
+    return !!a && Math.abs(a.x - ${x}) < ${within} && Math.abs(a.y - ${y}) < ${within}; })()`;
+  check(await tv.until(`${tvRoom} && ${annaAt(6, 6.5, 0.05)}`, 'room at a block tableau'), 'stand-in: the room at a block tableau, Anna standing in it');
+  await tv.js(STAND_IN_TV);
+  const errorsBefore = tv.errors.length;
+  const fart = { t: 'unsaved', data: { t: 'fart', x: 3, y: 2 } };
+  await tv.js(`window.__receive(${JSON.stringify(fart)})`);
+  await sleep(200);
+  check(await tv.js('window.__standIn.messages.length') === 0 && tv.errors.length === errorsBefore,
+    'an unsaved message with no minigame screen running is ignored');
+  i = A2.mark(); A2.send({ t: 'start' });
+  await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
+  check(await tv.until('window.__standIn.drew > 0', 'stand-in mounted'), 'the frame mounts the stand-in screen for the round');
+  check(JSON.stringify(await tv.js('window.__standIn.io')) === '["avatars","continuous","worldView"]',
+    `…its io offers the avatar layer and the world-to-screen projection (${JSON.stringify(await tv.js('window.__standIn.io'))})`);
+  await tv.js(`window.__receive(${JSON.stringify(fart)})`);
+  check(await tv.until(`JSON.stringify(window.__standIn.messages) === ${JSON.stringify(JSON.stringify([fart]))}`, 'unsaved'),
+    "…and an unsaved message reaches the running screen's message()");
+  await tv.js(`window.bloko.pos({ playerId: '${idA}', x: 3, y: 2, dir: 'down', moving: false })`); // Anna in the game area
+  i = A2.mark(); A2.send({ t: 'endGame' }); await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i);
+  i = A2.mark(); A2.send({ t: 'newGame' }); await A2.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
+  check(await tv.until(tvRoom, 'room again'), 'back to the room after the round');
+  check(await tv.js(annaAt(6, 6.5, 0.01)), `…Anna stands where she stood in the room at once, without walking there (${JSON.stringify(await tv.js(`window.bloko.avatars().find((a) => a.id === '${idA}')`))})`);
+  check(await tv.js('window.__standIn.unmounted') && tv.errors.length === errorsBefore, '…the stand-in screen is unmounted, no page exception');
+  await tv.js('(async () => { (await import("/screen/minigames.js")).SCREENS.blocks = window.__standIn.real; })()');
+  } // standin
 
   for (const c of [A2, B, N, E]) c?.ws.close();
 } catch (e) {

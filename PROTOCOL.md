@@ -232,10 +232,11 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 // must NOT auto-reconnect; it shows "Continued on another device" and offers the picker.
 { "t": "unsaved", "data": { "t": "fart", "x": 7.2, "y": 4.5 } }
 // to EVERY socket: an unsaved message from the running round's minigame (its server code's io.send,
-// server/minigames.ts), never saved. "data" is the minigame's own object, for its running screens; a client
-// with no minigame screen running ignores it. Only during its round: once the round has ended (its podium
-// closed, or Play again replaced it), the server drops what the server code still sends. Messages on a
-// socket keep their order, so one sent before the round ended arrives before the view that ends it.
+// server/minigames.ts), never saved. "data" is the minigame's own object, for its running screens, which get
+// the whole message; a client with no minigame screen running ignores it. Only during its round: once the
+// round has ended (its podium closed, or Play again replaced it), the server drops what the server code
+// still sends. Messages on a socket keep their order, so one sent before the round ended arrives before
+// the view that ends it.
 { "t": "err", "code": "full" | "bad-place" | "not-host" | "not-playing" | "unknown-player" | "locked" | "bad-room" | "taken" | "refused" }
 // "refused" (slice 3): enter/back not allowed here (locked node, game being played, one-shot already done)
 // Round buttons (start, again, newGame, endGame, retire) answer alike in every minigame: a guest's →

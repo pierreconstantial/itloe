@@ -2,7 +2,7 @@
 // One layer for the whole page: `pos`, `say` and `emote` reach it at every moment, and the screen
 // that is showing draws it — a room with its props (avatars and props in one depth-sorted list,
 // see ./scene-render.js), or a minigame's screen with its game area, a scene without furniture,
-// where the avatars are drawn on top.
+// where the avatars are drawn on top, only those of the players the screen names (its walkers).
 // Positions are EPHEMERAL (`pos` messages, see PROTOCOL.md); the players come from the last `view`.
 // A pos (x, y) is the avatar's feet, in world units (WORLD = 16 × 9).
 //
@@ -147,6 +147,15 @@ export function createAvatarLayer() {
     expressions.clear();
   }
 
+  /** Every avatar stands at its last reported position at once, without walking there (the room's
+   *  positions, back after a round). */
+  function settle() {
+    for (const a of avatars.values()) {
+      a.x = a.px = a.tx;
+      a.y = a.py = a.ty;
+    }
+  }
+
   // ---- animation: fixed-step simulation, interpolated drawing ----
 
   /** One simulation step: every avatar eases towards its last reported position. @param {number} dt */
@@ -159,17 +168,31 @@ export function createAvatarLayer() {
     }
   }
 
+  /** Reused between frames, like drawList. @type {Avatar[]} */
+  const onlyList = [];
+  /** The avatars drawn: every one, or only those of the players in `only`. @param {readonly string[]} [only] */
+  function shown(only) {
+    if (!only) return avatars.values();
+    onlyList.length = 0;
+    for (const id of only) {
+      const a = avatars.get(id);
+      if (a) onlyList.push(a);
+    }
+    return onlyList;
+  }
+
   /**
-   * Draws every avatar into `scene`: a room's props through `art`, sorted with the avatars by
+   * Draws the avatars into `scene`: a room's props through `art`, sorted with the avatars by
    * baseline; a game area has no props, so the avatars are drawn on top of what is already there.
    * @param {CanvasRenderingContext2D} g @param {View} v
    * @param {number} alpha how far this frame sits between the last two updates @param {number} now
    * @param {Scene} scene @param {PropArt} [art]
+   * @param {readonly string[]} [only] only these players' avatars (a minigame's walkers); every one without it
    */
-  function draw(g, v, alpha, now, scene, art = {}) {
+  function draw(g, v, alpha, now, scene, art = {}, only) {
     frameNow = now;
     frameAlpha = alpha;
-    renderScene(g, scene, avatars.values(), art, drawActor, v, drawList);
+    renderScene(g, scene, shown(only), art, drawActor, v, drawList);
   }
 
   /** The engine's actor hook: an avatar, at the interpolated position, on its walk frame. */
@@ -314,13 +337,13 @@ export function createAvatarLayer() {
   }
 
   return {
-    setPlayers, setOffline, onPos, onSocial, say, emote, reset, update, draw,
+    setPlayers, setOffline, onPos, onSocial, say, emote, reset, settle, update, draw,
     /**
      * Debug / tests: the ids `draw` paints into `scene`, back to front — prop ids and player ids
      * interleaved. An avatar listed BEFORE a prop is drawn behind it.
-     * @param {Scene} scene @returns {string[]}
+     * @param {Scene} scene @param {readonly string[]} [only] @returns {string[]}
      */
-    drawOrder: (scene) => drawOrder(scene, avatars.values()),
+    drawOrder: (scene, only) => drawOrder(scene, shown(only)),
     /** Debug / tests: the drawn state of every avatar. */
     snapshot: () => [...avatars.values()].map((a) => ({ id: a.id, name: a.name, character: a.character, x: a.x, y: a.y, dir: a.dir, walking: isWalking(a, performance.now()), offline: offline.has(a.id) })),
   };
