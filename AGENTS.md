@@ -22,6 +22,6 @@
 ## Validation and handoff
 
 - For implementation changes, run `npm run check` and `npm test`. Add or adjust focused behavioral tests where needed; documentation and cosmetic changes do not need new tests. Select the relevant existing integration/browser suites using the README's instructions.
-- Never run state-changing tests against the interactive server on port 3131 or its `var/` save. Use a free port and scratch `BLOKO_VAR`, or the suites that isolate their own server/data. Run one browser suite at a time.
+- Never run state-changing tests against the interactive server on port 3131 or its `var/` save. Use a free port and scratch `BLOKO_VAR`, or the suites that isolate their own server/data. When several agents share a machine, run every e2e suite through `scripts/e2e-slot.sh`, which runs up to three side by side; otherwise run one browser suite at a time.
 - Review the diff and remove unrelated changes or additions unnecessary for the requested outcome. Keep generated saves, screenshots, and dependencies out of commits.
 - Report the resulting behavior, checks run, and any checks that could not run. If work elsewhere already breaks a check, report it without expanding the task into unrelated fixes.

@@ -243,3 +243,5 @@ BLOKO_VAR="$(mktemp -d /tmp/itloe-agent.XXXXXX)" PORT=3199 npm run start:local -
 ```
 
 That instance is at `http://127.0.0.1:3199/sim/`. Keep port 3131 and its saved game for interactive testing. Run the existing checks with `npm run check` and `npm test`; the end-to-end scripts are described above.
+
+Several agents on devbox run end-to-end suites at the same time. Each suite goes through `scripts/e2e-slot.sh <command>`, which waits for one of three shared slots (`E2E_SLOTS` changes the number), so the suites run side by side without overloading the machine. Each command still picks its own free `PORT`, and `CDP` for the browser suites.
