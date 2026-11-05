@@ -34,7 +34,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Protocol differences](#protocol-differences) | `PROTOCOL.md` disagrees with the code in three places | P3 | Open | Trivial |
 | [Debug accessors show only the party room](#debug-accessors-show-only-the-party-room) | `bloko.drawOrder()` and `bloko.scene()` ignore the apartment and door #4's room | P3 | Open | Trivial |
 | [Apartment sofa sparkle](#apartment-sofa-sparkle) | The sofa's sparkle overlaps its "Comfy!" bubble in the apartment | P3 | Open | Trivial |
-| [Shared urgent keyframes](#shared-urgent-keyframes) | `blocks.css` and `quiz.css` both define `@keyframes urgent` | P3 | Open | Trivial |
 | [Minigame wording in shared folders](#minigame-wording-in-shared-folders) | Block and quiz files in `public/commun/`, block files with generic names | P3 | Open | Low |
 | [Debug view of a running screen](#debug-view-of-a-running-screen) | Nothing shows what a minigame's TV screen draws | P3 | Open | Low |
 | [GameStory.md frontmatter](#gamestorymd-frontmatter) | The story document lacks the standard frontmatter | P3 | Open | Trivial |
@@ -136,12 +135,6 @@ The TV's debug accessors `bloko.drawOrder()` and `bloko.scene()` report `PARTY_R
 The sofa's object-action sparkle is placed for the party room's narrow sofa. In the apartment, where the sofa is stretched 1.7×, it overlaps the "Comfy!" bubble.
 
 **Recommendation:** place the effect from the prop's box.
-
-### Shared urgent keyframes
-
-`public/screen/blocks.css` and the quiz's `quiz.css` both define `@keyframes urgent`. The quiz's, loaded last, also drives the block countdown's pulse. It looks as intended only because of the load order.
-
-**Recommendation:** give each its own name, scoped like the rest of the minigame's CSS.
 
 ### Minigame wording in shared folders
 
