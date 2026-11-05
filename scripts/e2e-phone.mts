@@ -132,7 +132,8 @@ async function phone(label: string) {
   const snap = (): Promise<Snap | null> => ev(`(() => {
     const t = document.getElementById('toast');
     return {
-      view: [...document.querySelectorAll('main > section')].find((e) => !e.hidden)?.id ?? null,
+      // the innermost screen showing: the frame's, or a minigame's screen inside the frame's root
+      view: [...document.querySelectorAll('main section[id^="view-"]')].filter((e) => !e.closest('[hidden]')).pop()?.id ?? null,
       banner: !document.getElementById('conn-banner').hidden,
       toast: t && !t.hidden ? t.textContent : null,
       id: localStorage.getItem('bloko-id'),
