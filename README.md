@@ -197,8 +197,8 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
   | `e2e-campaign.mts` | false start → unlocks → news acked by two TVs → doors, kill -9 at each step; chat, emotes and object actions (relay, history, rate limits, where interact works); `pos` during a round kept apart from the room's | `PORT` |
   | `e2e-inventory.mts` | rewards land in the right inventory (chooser / winner / all), survive kill -9 and a reclaim; host give/take, unknown items refused | `PORT` |
   | `e2e-quiz.mts` | quiz over real sockets: no answer on the wire before the reveal, judging, override, resume | `PORT` (plays a fixed copy of `placeholder.json`) |
-  | `e2e-tv.mts` | the TV page in headless Chrome, including the minigame screens' teardown | `PORT`, `CDP`, optional `SHOTS=<dir>` |
-  | `e2e-phone.mts` | phone pages in headless Chrome: session never lost, reclaim, host controls, campaign screens, quiz and the screens' teardown, room code | `PORT`, `CDP`, optional `LOCK_MS` (locked-phone time, default 5 min), `ONLY=1…5` (one part), `SHOTS=<dir>` |
+  | `e2e-tv.mts` | the TV page in headless Chrome, including the minigame screens' teardown and a stand-in minigame screen | `PORT`, `CDP`, optional `ONLY=connection\|campaign\|quiz\|standin` (one section), `SHOTS=<dir>` |
+  | `e2e-phone.mts` | phone pages in headless Chrome: session never lost, reclaim, host controls, campaign screens, quiz and the screens' teardown, room code, a stand-in minigame's joystick | `PORT`, `CDP`, optional `LOCK_MS` (locked-phone time, default 5 min), `ONLY=1…8` (one part), `SHOTS=<dir>` |
 
   The browser suites need Chrome started with `--remote-debugging-port=<CDP>`; run **one browser suite at a time** and stop that Chrome afterwards. On a busy machine, `E2E_SLOW=3` multiplies every wait.
 

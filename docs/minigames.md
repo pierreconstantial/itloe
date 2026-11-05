@@ -9,8 +9,6 @@ kind: reference
 
 A minigame is a few files of its own, registered in four lists. Everything around it (the party, joining, the host, the rooms, the screens between rounds) belongs to the RPG, which starts a round with its players and ends it when its podium closes. Blocks is the worked example throughout. The wire is in [PROTOCOL.md](../PROTOCOL.md); exact shapes are in the code linked below.
 
-> **Draft.** Sections marked *(draft)* are written from the agreed contract, ahead of the code; check them against it.
-
 ## Terms
 
 - **Evening**: one playthrough of the campaign, from the false start on, saved and resumed as one.
@@ -33,8 +31,8 @@ A minigame is a few files of its own, registered in four lists. Everything aroun
 |---|---|---|
 | Rules | A pure reducer over plain JSON state, run by the server and the browsers | [`shared/game.js`](../shared/game.js), `BLOCK_RULES` |
 | Server code | Messages to actions, server inputs, the view, change hooks | [`server/blocks.ts`](../server/blocks.ts) |
-| Phone screens *(draft)* | Its running screens on the phones | `public/play/blocks-ui.js`, `BLOCK_SCREEN` |
-| TV screens *(draft)* | Its running screens on the TV | in `public/screen/` |
+| Phone screens | Its running screens on the phones, with its settings wording and "How to play" | [`public/play/blocks-ui.js`](../public/play/blocks-ui.js), `BLOCK_SCREEN` |
+| TV screen | Its running screen on the TV | [`public/screen/blocks-screen.js`](../public/screen/blocks-screen.js), `BLOCK_SCREEN` |
 | Content | A tableau whose `activity` names it, with its settings | `activity: { kind: 'blocks', settings: { size: 9 } }` in [`shared/campaign/sample.js`](../shared/campaign/sample.js) |
 
 ### Registration lines
@@ -43,8 +41,8 @@ One import line and one entry in each list, under the minigame's kind:
 
 - the rules list, `MINIGAMES` in [`shared/minigames.js`](../shared/minigames.js);
 - the server list, `makeMinigameServers` in [`server/minigames.ts`](../server/minigames.ts);
-- the phone list, `SCREENS` in `public/play/minigames.js` *(draft)*;
-- the TV list in `public/screen/minigames.js` *(draft)*.
+- the phone list, `SCREENS` in [`public/play/minigames.js`](../public/play/minigames.js);
+- the TV list, `SCREENS` in [`public/screen/minigames.js`](../public/screen/minigames.js).
 
 Then its type entries in [`shared/campaign/types.js`](../shared/campaign/types.js): its state in `ActivityState`, its settings in `TableauSettings`, its content entry in `Activity`, and its actions in the `activity` case of `CampaignAction`. Nothing else outside its own files changes: `npm run check` finds what's missing.
 
@@ -53,8 +51,9 @@ Then its type entries in [`shared/campaign/types.js`](../shared/campaign/types.j
 `MinigameRules` in [`shared/minigames.js`](../shared/minigames.js) lists what the rules supply and what each function must do. What matters for the design:
 
 - **Pure and deterministic.** Time, randomness and ids come in through actions and the round start; the reducer does no I/O. A refused action returns the same state object: the server uses that identity to skip saving and broadcasting.
-- **A round starts running** with the players the campaign hands in (`init`): every party member who hasn't left the evening, online or not. There is no lobby and no `join`.
-- **The RPG's actions.** Besides its own actions, the reducer gets `leave` (a player left the evening), `endGame` (the host's "End game") and `retire` (the host's "Take a player out"). It decides what each means for its rules; `retire` usually works like `leave`. Blocks: a leaver's board freezes, and the last player out ends the round.
+- **A round starts running** with the players the campaign hands in (`init`): every party member who hasn't left the evening, online or not, as an id and a character. There is no lobby and no `join`.
+- **The round's players.** The state carries them as `RoundPlayers` (`shared/minigames.js`): `order`, and per player a `name` and `color` (the character's, from [`CHARACTERS`](../shared/characters.js)) and a `score`, plus `left`, `done` and `endReason` where they apply. The frame's podium, host controls and presence read them from every minigame's view, and the podium ranks them by score with the one shared rule ([`shared/ranking.js`](../shared/ranking.js)), which `result` uses too.
+- **The RPG's actions.** Besides its own actions, the reducer gets `leave` (a player left the evening) and `endGame` (the host's "End game"). The host's "Take a player out" reaches it as the target's `leave`, or as `retire` when the rules set `retire: true`. It decides what each means for its rules. Blocks: a player who leaves or is taken out stops playing but stays ranked, and the last player out ends the round.
 - **The host.** A minigame stores no host. Every action comes with the party's host id (`RoundCtx`), so the reducer can refuse its own host-only actions, as blocks does for `endGame` and the quiz for its next question.
 - **Deadlines.** `deadline` names the next one, and shared code arms a timer for it that fires `deadlineAction`. A timer is never cancelled, so the reducer must refuse a stale one: blocks compares the action's `deadline` with the state's. `shiftDeadline` moves the clock by a downtime, so a timed round keeps its remaining time across a restart or a sleeping laptop.
 - **The result.** Once the status turns `finished`, the campaign records `result` once, in the same save: the ranking and end reason make the common counters (`<kind>.played`, `<kind>.won.<character>`, `node.<id>.finished`, the totals per kind), plus any counters of the minigame's own under its name. Content decides unlocks and rewards from them.
@@ -75,22 +74,22 @@ Then its type entries in [`shared/campaign/types.js`](../shared/campaign/types.j
 
 Shared code draws everything outside a running round, the same for every minigame:
 
-- **The room at the tableau** before a round: on the TV the minigame's title on the band, its settings, who's in and the join QR; on the phones the joystick with the object button, the settings, and the host's Start.
-- **The settings sheet** *(draft)*, built from the phone entry's `settings` (its schema and wording), in the room and on the podium. The RPG keeps the host's choice until the party leaves the tableau.
-- **The podium** *(draft)*: ranking and medals, with the minigame's extras from its entry's `podium` (the quiz's right answers, blocks' "New best!"). The host gets "Play again" (a new round at once, with everyone present) and "Back to the room".
+- **The room at the tableau** before a round: on the TV the band with the TV entry's `title` and settings summary, who's in and the join QR; on the phones the joystick with the object button, the settings summary, and the host's Start.
+- **The settings sheet**, built from the phone entry's `settings` (its schema, wording and summary), in the room and on the podium. The RPG keeps the host's choice until the party leaves the tableau.
+- **The podium**: the round's players ranked, with medals, plus the minigame's extras from its entries' `podium` (the quiz's right answers, blocks' "New best!", the TV's delay while "Time's up!" plays). The host gets "Play again" (a new round at once, with everyone present) and "Back to the room".
 - **Host controls** in ☰ during a round: "End game" and "Take a player out".
-- **"How to play"** *(draft)*, from the phone entry's `rules`.
+- **"How to play"** in ☰, listing every minigame's `rules` from its phone entry, under its title.
 - Chat, emotes, object actions, cutscenes, the map, the game-master panel, the bag, the character picker and the connection.
 
-### Running screens *(draft)*
+### Running screens
 
-While its round runs, a minigame draws only its running screens. Each list entry has a `title` and `mount(root, io)`, which builds its screens inside `root` and returns:
+While its round runs, a minigame draws only its running screens: the frame mounts them when the round starts (or when a page loads or reconnects during it), and unmounts them when its podium shows or the party moves on. `mount(root, io)` builds them inside `root` and returns:
 
-- `update(round, campaign)`: every view while they show;
-- `message(msg)`: the server's messages for its round, including its unsaved messages and an `err` refusing this phone's message;
-- `unmount()`: removes its markup, listeners, loops, sounds and timers. The frame calls it when the round ends or the party moves on; anything left running stays running on that phone or TV.
+- `update(round, campaign)`: every view while they show, and the view that ends the round;
+- `message(msg)`: the server's messages for its round: its unsaved messages, as the whole `{ t: 'unsaved', data }`, and on the phone an `err` refusing this phone's message;
+- `unmount()`: removes its markup, listeners, loops, sounds and timers. Anything left running stays running on that phone or TV.
 
-The screens build their own markup and scope their CSS under `root`; they add nothing to `public/play/index.html`. The phone's `io` offers `send`, `meId`, `isHost`, `online`, `connected`, and the joystick on or off with a game area. The TV's `io` offers the avatar layer and the world-to-screen projection. `PhoneIo` and `PhoneScreen` in `public/play/minigames.js` are the exact shapes.
+The screens build their own markup and load their own CSS (`addStylesheet` in `public/play/dom.js` and `public/screen/dom.js`), scoped under `root`; they add nothing to `public/play/index.html`. `PhoneIo`, `PhoneScreen`, `TvIo` and `TvScreen` in the two lists are the exact shapes; the phone's `io` sends messages and says who this phone is and whether it's the host, and the TV's tells whether a view directly follows the last one (no sounds for missed events).
 
 ## What a minigame can and can't do
 
@@ -110,11 +109,11 @@ It can't:
 
 ## Avatars and unsaved messages
 
-- **Server.** `walks` decides who walks its game area during its round; anyone else's `pos` is dropped. Those positions are the round's own and are dropped with it, so the room resumes where everyone stood. `io.positions()` reads them, e.g. to place a fart, and `io.send` sends the effect as an unsaved message (the wire's `unsaved`, see [PROTOCOL.md](../PROTOCOL.md)). Unsaved messages are for effects, not fast-moving games: every one goes to every phone and TV.
-- **Phone** *(draft)*. A phone screen switches the joystick on with its game area and a start position, through its `io`.
-- **TV** *(draft)*. The avatar layer ([`public/screen/avatar-layer.js`](../public/screen/avatar-layer.js)) draws every avatar, with speech bubbles and emotes, whatever screen is showing. A TV screen draws it over its own canvas with its game area and the projection from `worldView`. Over a minigame's screen, avatars are always on top, so anything they must line up with is placed in world coordinates (16 × 9). A TV screen can show a bubble or an emote over an avatar from its own unsaved message.
+- **Server.** `walks` decides who walks its game area during its round; anyone else's `pos` is dropped. Those positions are the round's own and are dropped with it, so the room resumes where everyone stood. `io.positions()` reads them, e.g. to place a fart, and `io.send` sends the effect as an unsaved message to every phone and TV (the wire's `unsaved`, see [PROTOCOL.md](../PROTOCOL.md)). Unsaved messages are for effects, not fast-moving games.
+- **Phone.** `io.joystick({ area, start })` switches the frame's joystick on in the game area, from `start`; `io.joystick(null)` or unmounting switches it off. The stick sits at the end of `root`, so a screen that rebuilds its markup while the stick is on must not empty `root` (`replaceChildren()`): add to it, or rebuild an element of its own inside it.
+- **TV.** `io.avatars` is the avatar layer ([`public/screen/avatar-layer.js`](../public/screen/avatar-layer.js)), which gets `pos`, chat and emotes whatever screen shows. A screen with a game area steps it from its loop (`update(dt)`) and draws it over its own canvas (`draw(g, view, alpha, now, area, {}, ids)`, only the players in `ids`), with `view` from `io.worldView(w, h, dpr)`: size the canvas in CSS pixels times `devicePixelRatio` and pass the CSS size, as the party room does (`layout` in [`public/screen/party-room.js`](../public/screen/party-room.js)). Avatars are drawn on top, so anything they must line up with is placed in world coordinates (16 × 9). `say` and `emote` show a bubble or an emote over an avatar, e.g. from an unsaved message.
 
-A game area is a scene built with `room()` in [`shared/scene.js`](../shared/scene.js), without props.
+A game area is a scene built with `room()` in [`shared/scene.js`](../shared/scene.js), without props. Blocks and quiz use none of this; the stand-ins in the tests below do.
 
 ## Development start
 
@@ -130,5 +129,8 @@ Open `http://127.0.0.1:3199/sim/`: the TV and four phones side by side. Pick cha
 
 - **`npm run check` and `npm test`** for every change. `test/campaign.test.js` already checks that every registered minigame's development start validates and starts at its tableau.
 - **Rules:** unit tests in `test/<topic>.test.js` with `node:test`, small fixtures and explicit seeds and times, as [`test/shared.test.js`](../test/shared.test.js) does for blocks. Cover the RPG's actions, a stale deadline and the result.
-- **Server code:** [`test/round.test.js`](../test/round.test.js) drives a stand-in minigame's server code through a round's `io`, without a server: walking, positions, unsaved messages, and what's dropped after the round.
+- **Stand-ins** show how to test the minigame parts in isolation:
+  - [`test/round.test.js`](../test/round.test.js): server code through a round's `io`, without a server (walking, positions, unsaved messages, what's dropped after the round);
+  - [`test/avatar-layer.test.js`](../test/avatar-layer.test.js): the avatar layer over a game area;
+  - `e2e-tv.mts`'s `standin` section and `e2e-phone.mts`'s part 8: a TV screen and a phone screen swapped into the lists in the browser, with avatars, unsaved messages and the joystick.
 - **Over real sockets:** the `scripts/e2e-*.mts` suites start their own server on a scratch save folder; [`scripts/e2e-quiz.mts`](../scripts/e2e-quiz.mts) is the pattern for one minigame. The README's "Development commands and testing" lists them and how to run the browser suites.
