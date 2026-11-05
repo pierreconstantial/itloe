@@ -23,6 +23,7 @@
 ## Validation and handoff
 
 - For implementation changes, run `npm run check` and `npm test`. Add or adjust focused behavioral tests where needed; documentation and cosmetic changes do not need new tests. Select the relevant existing integration/browser suites using the README's instructions.
+- A permanent test guards a behaviour that matters on the evening and could plausibly break. Checks made to confirm a change (each branch of a validation, a refactor's equivalence, exact wording, the shape of a fix) go in the report, not the suite.
 - Never run state-changing tests against the interactive server on port 3131 or its `var/` save. Use a free port and scratch `BLOKO_VAR`.
 - Run e2e tests only with `npm run e2e [suites]`, in the foreground: a full run takes about 3 minutes. To check that screens didn't change, take a reference with `--shots` on the base, then `--compare` on your change (README, "Development commands and testing").
 - Review the diff and remove unrelated changes or additions unnecessary for the requested outcome. Keep generated saves, screenshots, and dependencies out of commits.

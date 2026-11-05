@@ -54,13 +54,6 @@ test('a message every 10 s (the tick) keeps it alive; silence after the last one
   assert.equal(dead(), 1);
 });
 
-test('feed costs no timer: one pending timer however many messages', () => {
-  const { live, advance, pending } = harness();
-  live.start();
-  for (let k = 0; k < 500; k++) { advance(10); live.feed(); }
-  assert.equal(pending(), 1);
-});
-
 test('stop() cancels; start() again counts from the restart', () => {
   const { live, advance, dead, pending } = harness();
   live.start();

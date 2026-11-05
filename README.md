@@ -168,14 +168,14 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 - Small functions, plain data, named exports, and closure-based `create…`/`make…` helpers are common. Existing tables describe pieces, settings, characters, campaign conditions/rewards, and scenes. Shared rule logic runs in Node and browsers; browser-specific common helpers live in `public/commun/`. Some shared assets, such as sprites, also provide rendering helpers.
 - Code, comments, docs, and interface wording use English. Quiz questions are intentionally French; story copy is content data. Existing `bloko` storage keys and `BLOKO_*` environment variables remain compatible despite the visible Itloe name.
 - UI uses the tokens in `public/commun/base.css` and existing DOM helpers. Boards use DOM/CSS grids; sprites and scenes use canvas. Phone layouts account for touch, keyboards, and safe areas; TV layouts prioritize readability.
-- Unit tests use `node:test` and `node:assert/strict` in `test/<topic>.test.js`, with small fixtures and explicit seeds/times. They cover shared rules and browser helper logic. Integration and browser scenarios live in `scripts/e2e-*.mts`.
+- Tests in `test/<topic>.test.js` use `node:test` and `node:assert/strict`, with small fixtures and explicit seeds/times. Most run rules without a server; a few start a real one. Browser scenarios and longer runs over real sockets live in `scripts/e2e-*.mts`.
 
 ### Development commands and testing
 
 | Command | What it does |
 |---|---|
 | `npm run check` | Type-checks everything (`tsc`, including the JSDoc-typed `shared/` and client JS) |
-| `npm test` | Unit tests of shared rules and client helpers (`node --test`) |
+| `npm test` | The tests in `test/` (`node --test`): rules without a server, and a few against a real one |
 | `npm start` | The real server (`server/main.ts`, run directly by Node, no build step) |
 
 - **Simulator:** open **/sim/** on a running server: the TV screen plus player phones side by side in one page. The phones get the room code from `/api/join`.

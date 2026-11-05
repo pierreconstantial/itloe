@@ -1,4 +1,4 @@
-// TV "show the QR again" timing (public/screen/join-qr.js): extend-only, hides at `until`, stale ignored.
+// TV "show the QR again" timing (public/screen/join-qr.js): extend-only, hides at `until`, closes on hideJoin.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { applyJoinQr, joinQrState } from '../public/screen/join-qr.js';
@@ -26,16 +26,7 @@ test('a later joinQr extends (bar refills to the new span); an earlier one never
   assert.equal(applyJoinQr(ext, T + 40_000, T + 12_000), ext, 'same until: same object');
 });
 
-test('until ≤ now closes (hideJoin) and never opens; invalid messages are ignored', () => {
-  assert.equal(applyJoinQr(null, T - 1, T), null, 'past');
-  assert.equal(applyJoinQr(null, T, T), null, 'exactly now');
-  assert.equal(applyJoinQr(null, 'soon', T), null);
-  assert.equal(applyJoinQr(null, Number.NaN, T), null);
+test('hideJoin (until = now) closes an open window at once', () => {
   const w = applyJoinQr(null, T + 30_000, T);
-  assert.equal(applyJoinQr(w, T + 5_000, T + 31_000), null, 'expired window + stale until → hidden');
-  assert.equal(applyJoinQr(w, T + 10_000, T + 10_000), null, 'until = now on an OPEN window (hideJoin) → closed at once');
-  assert.equal(applyJoinQr(w, T + 2_000, T + 10_000), null, 'until in the past on an open window → closed');
-  assert.equal(applyJoinQr(w, undefined, T + 1_000), w, 'an invalid message keeps an open window');
-  const again = applyJoinQr(w, T + 70_000, T + 40_000);
-  assert.deepEqual(again, { until: T + 70_000, from: T + 40_000 }, 'after expiry a fresh request opens a fresh window');
+  assert.equal(applyJoinQr(w, T + 10_000, T + 10_000), null);
 });

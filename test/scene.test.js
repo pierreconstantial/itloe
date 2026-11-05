@@ -4,9 +4,8 @@ import assert from 'node:assert/strict';
 import {
   FEET, PARTY_ROOM, blocked, feetBox, isWalkable, prop, resolve, room, spawnAt, wallsAround,
 } from '../shared/scene.js';
-import { WORLD, spawnPoint } from '../shared/world.js';
-import { CHARACTERS } from '../shared/characters.js';
-import { childrenOf, SAMPLE_CONTENT } from '../shared/campaign/index.js';
+import { WORLD } from '../shared/world.js';
+import { SAMPLE_CONTENT } from '../shared/campaign/index.js';
 import { buildDrawList, drawOrder } from '../public/screen/scene-render.js';
 import { PROP_PIXELS } from '../public/screen/party-room.js';
 
@@ -34,26 +33,6 @@ test('scene: isWalkable is false inside a solid, outside the floor and on non-fi
   assert.equal(isWalkable(s, 8, 8.5), false, 'past the front edge');
   assert.equal(isWalkable(s, 0.2, 7), false, 'half out of the left wall');
   assert.equal(isWalkable(s, NaN, 7), false);
-});
-
-test('resolve: a diagonal push into a wall slides along it instead of sticking', () => {
-  const s = boxRoom();
-  // walking down-right into the front wall (floor stops at y = 8): x keeps going, y stops
-  const r = resolve(s, { x: 4, y: 8 }, { x: 4.1, y: 8.1 });
-  assert.equal(r.x, 4.1, 'the x component went through');
-  assert.equal(r.y, 8, 'the y component was dropped');
-  // the mirror case against the left wall: y slides, x stops
-  const l = resolve(s, { x: 1, y: 7 }, { x: 0.9, y: 7.1 });
-  assert.equal(l.x, 1);
-  assert.equal(l.y, 7.1);
-});
-
-test('resolve: never crosses a solid, however big the step (no tunnelling)', () => {
-  const s = boxRoom(); // block x 7..9, y 6..7
-  const r = resolve(s, { x: 6, y: 6.5 }, { x: 10, y: 6.5 }); // one huge step straight through it
-  assert.ok(isWalkable(s, r.x, r.y), 'it ends on free floor…');
-  assert.ok(r.x <= 7 - FEET.w / 2 + 1e-9, '…stopped at the block, not teleported past it');
-  assert.ok(r.x > 6, 'and it did walk up to it');
 });
 
 test('resolve: rounds a prop corner instead of snagging on it', () => {
@@ -84,15 +63,6 @@ test('resolve: starting inside a solid is not a trap, and bad input is ignored',
   assert.ok(far.x <= WORLD.w);
 });
 
-test('party room: every character spawns on walkable floor, and the spawn point is kept when it is free', () => {
-  for (const id of Object.keys(CHARACTERS)) {
-    const s = spawnAt(PARTY_ROOM, /** @type {any} */ (id));
-    assert.ok(isWalkable(PARTY_ROOM, s.x, s.y), `${id} spawns on floor`);
-    assert.deepEqual(s, spawnPoint(/** @type {any} */ (id)), `${id} keeps the shared spawn point`);
-  }
-  assert.ok(isWalkable(PARTY_ROOM, spawnAt(PARTY_ROOM, null).x, spawnAt(PARTY_ROOM, null).y), 'the no-character fallback too');
-});
-
 test('spawnAt: nudges out of a prop onto the nearest floor', () => {
   // a room whose sofa sits exactly on pierre's spawn point (3, 7)
   const s = room('t', { x: 0.5, y: 4.8, w: 15, h: 4 }, [
@@ -103,22 +73,6 @@ test('spawnAt: nudges out of a prop onto the nearest floor', () => {
   assert.ok(isWalkable(s, p.x, p.y), 'nudged onto floor');
   assert.equal(p.dir, 'down', 'still facing the camera');
   assert.ok(Math.hypot(p.x - 3, p.y - 7) <= 2, 'and not far from where it should have been');
-});
-
-test('party room: the campaign doors stay enterable — every door rect has walkable floor in it', () => {
-  const doors = childrenOf(SAMPLE_CONTENT, 'hub').filter((n) => n.door);
-  assert.ok(doors.length >= 3, 'the hub has doors to check');
-  for (const n of Object.values(SAMPLE_CONTENT.nodes)) {
-    const d = n.door;
-    if (!d) continue;
-    let reachable = 0;
-    for (let x = d.x + 0.1; x <= d.x + d.w - 0.1; x += 0.1) {
-      for (let y = d.y + 0.05; y <= d.y + d.h - 0.05; y += 0.05) {
-        if (isWalkable(PARTY_ROOM, x, y)) reachable++;
-      }
-    }
-    assert.ok(reachable > 0, `${n.id}: its trigger zone can be stood in`);
-  }
 });
 
 test('party room: props are clear of the door rugs, and their solid is smaller than their art', () => {

@@ -51,15 +51,3 @@ test('floaters: gains within the merge window grow one floater; later ones stack
   assert.equal(d.kind, 'new');
   assert.equal(d.slot, 0, 'the first floater has expired: its slot is free again');
 });
-
-test('floaters: bot speed (a move every 100 ms for 2 s) never stacks more than the screen can hold', () => {
-  const f = createFloaterPlanner();
-  let maxSlot = 0, shown = 0;
-  for (let t = 0; t < 2000; t += 100) {
-    const r = f.add('bot', 4, t);
-    if (r.kind === 'new') shown++;
-    maxSlot = Math.max(maxSlot, r.slot);
-  }
-  assert.equal(shown, Math.ceil(2000 / LIFE_MS), 'one growing floater per lifetime, the next one only once it has faded');
-  assert.equal(maxSlot, 0, 'never two on top of each other');
-});

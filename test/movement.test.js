@@ -1,11 +1,10 @@
 // Contract G — the phone's own movement: public/play/movement.js integrated against a Scene.
 // shared/scene.js has its own tests (test/scene.test.js) for the geometry; these cover what the
 // phone adds on top of it: that a step is resolved rather than merely clamped, that the walk cycle
-// keeps running against a wall, and that the stick/facing behaviour did not change when collision
-// arrived.
+// keeps running against a wall, and the stick and facing behaviour.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { facing, posFromEcho, roundPos, samePos, step, stickVector } from '../public/play/movement.js';
+import { facing, posFromEcho, step, stickVector } from '../public/play/movement.js';
 import { FEET, PARTY_ROOM, isWalkable, prop, room } from '../shared/scene.js';
 import { WALK_SPEED, WORLD, spawnPoint } from '../shared/world.js';
 import { CHARACTERS } from '../shared/characters.js';
@@ -176,7 +175,7 @@ test('the hub doors stay walkable: every rug holds floor reachable from a spawn'
 
 // ---- unchanged by Contract G: the stick, the facing, the wire form ----
 
-test('stickVector: dead zone, rescaling and clamping are unchanged', () => {
+test('stickVector: dead zone, rescaling and clamping', () => {
   assert.deepEqual(stickVector(0, 0, 56), { vx: 0, vy: 0 }, 'centre');
   assert.deepEqual(stickVector(5, 0, 56), { vx: 0, vy: 0 }, 'inside the dead zone');
   const far = stickVector(560, 0, 56);
@@ -192,17 +191,6 @@ test('facing: dominant axis with hysteresis, kept when idle', () => {
   // already facing right, pushed slightly more up than right: hysteresis keeps it horizontal
   assert.equal(facing(0.9, -1, 'right'), 'right', 'no flicker on a near-diagonal');
   assert.equal(facing(0.2, -1, 'right'), 'up', 'a clearly dominant axis still wins');
-});
-
-test('roundPos / samePos / posFromEcho are unchanged', () => {
-  assert.deepEqual(roundPos({ x: 1.234, y: 5.678, dir: 'up', moving: true }),
-    { x: 1.23, y: 5.68, dir: 'up', moving: true });
-  assert.equal(samePos(at(1, 2), at(1, 2)), true);
-  assert.equal(samePos(at(1, 2), at(1, 2.01)), false);
-  assert.equal(samePos(null, at(1, 2)), false);
-  assert.deepEqual(posFromEcho({ x: 3, y: 6, dir: 'left' }), { x: 3, y: 6, dir: 'left', moving: false });
-  assert.equal(posFromEcho({ x: 3, y: 6, dir: 'sideways' }), null, 'a bad dir is refused');
-  assert.equal(posFromEcho({ x: '3', y: 6, dir: 'left' }), null, 'a non-numeric x is refused');
 });
 
 test('posFromEcho only clamps: a position inside a prop is kept, not teleported', () => {

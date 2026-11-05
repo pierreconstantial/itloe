@@ -21,7 +21,8 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 
 | Item | Description | Priority | Status | Complexity |
 |---|---|---|---|---|
-| [Phone lock on real phones](#phone-lock-on-real-phones) | Locking and unlocking a phone is never tested | P1 | Open | Low |
+| [Lock and invitation on real phones](#lock-and-invitation-on-real-phones) | Locking a phone, and the invitation in a phone's browser, are never tested | P1 | Open | Low |
+| [Story opening in a browser test](#story-opening-in-a-browser-test) | No test plays the birthday opening on a TV and phones | P1 | Open | Low |
 | [Apartment drawings cover avatars](#apartment-drawings-cover-avatars) | The cats, friends, keepsakes and key are always drawn over avatars | P2 | Open | Low |
 | [A room per character at the hub](#a-room-per-character-at-the-hub) | Should the others stay in the party room while Élodie is in the apartment? | P2 | Needs decision | Medium |
 | [Story rules in shared code](#story-rules-in-shared-code) | The opening's rules are spread through shared code | P2 | Needs decision | High |
@@ -43,11 +44,23 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 
 ## Items
 
-### Phone lock on real phones
+### Lock and invitation on real phones
 
 On the evening, phones lock and unlock all the time. The phone suite's "phone locked … → unlock resumes" check is skipped (`e2e-phone` part 1 prints a SKIP): headless Chrome doesn't freeze a page with `Page.setWebLifecycleState('frozen')`, so the unlock path, the `resume` probe on a stale socket, never runs. The other reconnect checks pass.
 
-**Recommendation:** test it by hand on real phones, an iPhone and an Android, during the next manual test: lock mid-game for a few minutes, with and without the server restarting meanwhile, then unlock. Automate it only if a way to freeze a page in headless Chrome turns up.
+Every guest also goes through the access gate of the hosted game: the invitation's token, then the access cookie. No browser test does: `test/hosting.test.js` checks the gate with plain HTTP requests and WebSocket connections, and the browser suites run without it.
+
+**Recommendation:** test both by hand on real phones, an iPhone and an Android, during the next manual test on the hosted game:
+- lock mid-game for a few minutes, with and without the server restarting meanwhile, then unlock;
+- open the invitation, close the browser completely, then reopen the game: it loads without the invitation.
+
+Automate the lock only if a way to freeze a page in headless Chrome turns up.
+
+### Story opening in a browser test
+
+Every e2e suite runs the sample content (`ITLOE_CONTENT=sample`). The birthday opening (the match, the portal, the apartment, the key, door #4 and back) has only the reducer tests in `test/story.test.js` and one happy path over raw sockets in `test/story-wire.test.js`, which puts the player on the portal instead of walking there. No test draws the apartment or door #4's room on a TV, plays the apparition cutscene, or restarts the server during the opening. The door reachability test in `test/movement.test.js` checks only the sample's doors in the party room.
+
+**Recommendation:** one browser scenario on the story content: a TV and four phones play the opening match, Élodie walks through the portal, picks up the key, enters door #4 and comes back, with a kill -9 in the middle. Point the door reachability test at the story's rooms too.
 
 ### Apartment drawings cover avatars
 

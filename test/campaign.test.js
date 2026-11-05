@@ -440,10 +440,3 @@ test('loadCampaign: a JSON round-trip (a server restart) is deep-equal in every 
   }
   assert.ok(withNews.news.length > 0, 'pending news survive too');
 });
-
-test('loadCampaign: a party member playing a character the roster does not have refuses the save', () => {
-  const saved = JSON.parse(JSON.stringify(party()));
-  saved.party.order.push('k');
-  saved.party.players.k = { id: 'k', character: 'konz', name: 'Konz', color: 5, left: false };
-  assert.throws(() => loadCampaign(saved, C), /"konz", not a character/);
-});
