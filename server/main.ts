@@ -418,9 +418,6 @@ function handleMessage(ws: WebSocket, m: any): void {
   if (m.t === 'join') {
     if (!roomOk.has(ws)) { sendErr(ws, 'bad-room'); return; }
     const character = m.character;
-    if (STORY_MODE && !game.campaign.facts.flags.includes('portal.ready') && !OPENING_PLAYERS.includes(character)) {
-      sendErr(ws, 'full'); return;
-    }
     // reclaim ("tap your character"): a character held by an OFFLINE member is taken back by this
     // socket, in any state — same playerId, so board, score, hand, facts and host role come along
     const holder = isCharacterId(character) ? holderOf(character) : undefined;

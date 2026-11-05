@@ -5,7 +5,7 @@
 /** @type {readonly import('../characters.js').CharacterId[]} */
 export const OPENING_PLAYERS = Object.freeze(['pierre', 'elodie', 'sol', 'anna']);
 export const INTRO_KEY = 'memory-key-intro';
-// mid-room, in the back half: the spawn row (shared/world.js) puts Sol right below it
+// mid-room, in the back half, behind the spawn row (shared/world.js)
 export const PORTAL = Object.freeze({ x: 8, y: 5.4, radius: 0.9 });
 export const INTRO_KEY_SPOT = Object.freeze({ x: 6.4, y: 6.6, radius: 0.8 });
 

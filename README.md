@@ -1,7 +1,7 @@
 # Itloe
 
 A party game for the living room, played as one long **evening**: it opens on a block puzzle (drop pieces on the board, fill rows and columns to clear them, chain clears for big combos), then a **hub** opens onto **worlds** to explore, with more games inside them, block games and **quizzes** in French, unlocked step by step.
-A laptop runs everything and shows it on the TV; 1 to 5 players play on their own phones, in the browser, with no app to install. Each player is a **character** (Pierre, Élodie, Sol, Anna, Konz).
+A laptop runs everything and shows it on the TV; 1 to 4 players play on their own phones, in the browser, with no app to install. Each player is a **character** (Pierre, Élodie, Sol, Anna).
 
 ## What you need
 
@@ -69,7 +69,7 @@ Either way, allow the port through the Windows firewall when asked.
 
 Infrastructure owns the LXC, Node 24 runtime, systemd service, public HTTPS/WebSocket proxy, secrets, backups and deployment timer. The game runs as an unprivileged user, with releases under `/opt/itloe/releases/<commit>`, `/opt/itloe/current` pointing at the active release, and `BLOKO_VAR=/var/lib/itloe` outside the release. The proxy forwards to the guest's private port `3131`; it must suppress URL/Referer-bearing access and error logs for this host.
 
-Open `https://itloe.kputnik.com/?token=<shared-secret>` to authorize a browser. The server exchanges the token for a Secure/HttpOnly cookie and redirects to a clean URL. All HTTP routes and WebSocket upgrades require authorization; WebSockets also require the configured public Origin. The token-bearing join links and QR codes authorize new phones. Everyone with the invitation joins the same evening, with the existing four-character roster. Rotating the configured secret invalidates existing cookies after a restart. Without either public setting, local LAN play stays open.
+Open `https://itloe.kputnik.com/?token=<shared-secret>` to authorize a browser. The server exchanges the token for a Secure/HttpOnly cookie and redirects to a clean URL. All HTTP routes and WebSocket upgrades require authorization; WebSockets also require the configured public Origin. The token-bearing join links and QR codes authorize new phones. Everyone with the invitation joins the same evening, with the four characters. Rotating the configured secret invalidates existing cookies after a restart. Without either public setting, local LAN play stays open.
 
 Pushing to `production` runs [the production workflow](.github/workflows/production.yml): locked dependency install, type-checking, tests, save/resume checks, packaging and an extracted-runtime access test. It then publishes a GitHub Release tagged `prod-<full-commit-sha>` with:
 
@@ -207,7 +207,7 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 - [BUILD-PLAN.md](BUILD-PLAN.md): implementation history, contracts, and milestone-specific working agreements.
 - [AGENTS.md](AGENTS.md): instructions for coding agents working in this repository.
 
-The spec and build plan include earlier designs and examples. The roster has grown beyond four players; quizzes introduce hidden answers and French content; the current wire format uses `t` messages as documented in `PROTOCOL.md`. Historical P1–P4 ownership and commit prefixes belong to those coordinated work packages. For a change to a shared contract, compare its documentation with the current implementation and tests and resolve any discrepancy explicitly. Draft proposals describe future work, not existing interfaces.
+The spec and build plan include earlier designs and examples. Quizzes introduce hidden answers and French content; the current wire format uses `t` messages as documented in `PROTOCOL.md`. Historical P1–P4 ownership and commit prefixes belong to those coordinated work packages. For a change to a shared contract, compare its documentation with the current implementation and tests and resolve any discrepancy explicitly. Draft proposals describe future work, not existing interfaces.
 
 ### Konstantin's devbox setup
 

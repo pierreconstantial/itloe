@@ -114,7 +114,7 @@ body.offline #offline-banner { display: flex; }
 
 .lobby .settings-line { font-size: calc(30 * var(--u)); }
 
-/* ---- game: layout 1 / 2 / 2×2 / 3+2 (one panel per player, see shared/characters.js) ---- */
+/* ---- game: layout 1 / 2 / 2×2 ---- */
 .arena {
   flex: 1;
   min-height: 0;
@@ -134,16 +134,6 @@ body.offline #offline-banner { display: flex; }
   justify-self: center;
   width: calc(50% - calc(12 * var(--u)));
 }
-/* five: three across the top, the last two centred under them. Six columns so a half-column offset
-   exists; every panel spans two, so all five are the same size. The boards do not shrink — at two
-   rows the limit is the row height, not the column width. */
-.arena[data-players="5"] {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.arena[data-players="5"] .panel { grid-column: span 2; }
-.arena[data-players="5"] .panel:nth-child(4) { grid-column: 2 / span 2; }
-.arena[data-players="5"] .panel:nth-child(5) { grid-column: 4 / span 2; }
 .arena[data-players="1"] .panel {
   justify-self: center;
   width: min(100%, calc(1280 * var(--u)));
@@ -154,8 +144,6 @@ body.offline #offline-banner { display: flex; }
 .arena[data-players="2"] { --head: calc(42 * var(--u)); --score: calc(52 * var(--u)); --pcell: calc(15 * var(--u)); --slot: calc(96 * var(--u)); }
 .arena[data-players="3"],
 .arena[data-players="4"] { --head: calc(34 * var(--u)); --score: calc(44 * var(--u)); --pcell: calc(14 * var(--u)); --slot: calc(88 * var(--u)); }
-/* five: same two rows, so the same board size — only the hand column narrows to pay for the third column */
-.arena[data-players="5"] { --head: calc(32 * var(--u)); --score: calc(42 * var(--u)); --pcell: calc(12 * var(--u)); --slot: calc(76 * var(--u)); }
 
 .panel {
   min-height: 0; min-width: 0;

@@ -1,16 +1,14 @@
 // Contract C (M3, 2026-11-04) — the character roster. The character IS the colour slot.
-// Insertion order = display order (phone picker, TV). The roster will grow later.
+// Insertion order = display order (phone picker, TV).
 
 /**
- * @typedef {'pierre' | 'elodie' | 'sol' | 'anna' | 'konz'} CharacterId
- * @typedef {{ id: CharacterId, name: string, color: number }} Character   // color 1..N → CSS --p1..--pN
+ * @typedef {'pierre' | 'elodie' | 'sol' | 'anna'} CharacterId
+ * @typedef {{ id: CharacterId, name: string, color: number }} Character   // color 1..4 → CSS --p1..--p4
  */
 
 /**
  * The roster sizes the game: nothing caps the player count on its own, the server refuses a join
- * only once every character is held. Adding one here makes the game one player bigger, so it also
- * needs its --pN colour (public/commun/base.css), its sprite (shared/sprites.js) and a look at the
- * TV layouts that place one panel per player.
+ * only once every character is held.
  * @type {Readonly<Record<CharacterId, Readonly<Character>>>}
  */
 export const CHARACTERS = Object.freeze({
@@ -18,7 +16,6 @@ export const CHARACTERS = Object.freeze({
   elodie: Object.freeze({ id: 'elodie', name: 'Élodie', color: 2 }),
   sol: Object.freeze({ id: 'sol', name: 'Sol', color: 3 }),
   anna: Object.freeze({ id: 'anna', name: 'Anna', color: 4 }),
-  konz: Object.freeze({ id: 'konz', name: 'Konz', color: 5 }),
 });
 
 /** How many players the game holds: one per character. */

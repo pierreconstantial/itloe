@@ -16,9 +16,7 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* `safe` keeps a menu taller than the screen scrollable to its top: plain `center` would overflow
-     both ways and put the logo out of reach (a five-card picker on a short phone). */
-  justify-content: safe center;
+  justify-content: center;
   gap: 14px;
   padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
   text-align: center;
@@ -103,7 +101,6 @@ button.primary:active { transform: scale(0.97); }
 .dot.c2 { background: var(--p2); }
 .dot.c3 { background: var(--p3); }
 .dot.c4 { background: var(--p4); }
-.dot.c5 { background: var(--p5); }
 
 /* ---------- game view ---------- */
 
@@ -178,7 +175,6 @@ button.primary:active { transform: scale(0.97); }
 .cell.c2 { background: var(--p2); }
 .cell.c3 { background: var(--p3); }
 .cell.c4 { background: var(--p4); }
-.cell.c5 { background: var(--p5); }
 
 /* drag ghost + preview of the lines that would clear */
 #board .ghost-ok {
@@ -341,18 +337,11 @@ canvas.avatar {
   display: block;
   flex: none;
 }
-/* As many cards per row as fit, so the roster can grow without the picker growing taller: five
-   characters land as 3 + 2 on a phone instead of 2 + 2 + 1, which kept the Continue button and the
-   "How to play" link on screen. A very narrow phone falls back to two columns. */
 #picker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  width: min(360px, 100%);
-}
-#picker-grid canvas.avatar {
-  max-width: 100%;
-  height: auto;
+  width: min(340px, 100%);
 }
 .pick-card {
   position: relative;
@@ -370,7 +359,6 @@ canvas.avatar {
 .pick-card.c2 { --pc: var(--p2); }
 .pick-card.c3 { --pc: var(--p3); }
 .pick-card.c4 { --pc: var(--p4); }
-.pick-card.c5 { --pc: var(--p5); }
 .pick-card:not(:disabled):active { transform: scale(0.97); border-color: var(--pc); }
 .pick-name { font-size: 18px; font-weight: 700; }
 .pick-badge {

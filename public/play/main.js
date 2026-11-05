@@ -414,9 +414,6 @@ function render() {
     const roster = campaign ? campaign.party : v;
     const joinable = (!v || v.phase === 'lobby') && (!q || q.phase === 'lobby');
     const states = roster ? pickStates(roster, joinable, online) : null;
-    if (states && isStory() && campaign && !campaign.facts.flags.includes('portal.ready')) {
-      for (const id of states.keys()) if (!OPENING_PLAYERS.includes(id)) states.set(id, 'taken');
-    }
     if (!states || (!anyPickable(states) && pendingPick === null)) {
       show('waiting');
       $('waiting-text').textContent = v?.phase === 'finished' ? 'A game just ended.' : 'A game is already running.';
@@ -425,8 +422,6 @@ function render() {
     show('pick');
     const last = load(KEYS.character);
     picker.render(states, pendingPick, isCharacterId(last) ? last : null);
-    const extra = /** @type {HTMLElement | null} */ (document.querySelector('#picker-grid [data-id="konz"]'));
-    if (extra) extra.hidden = isStory() && !!campaign && !campaign.facts.flags.includes('portal.ready');
     return;
   }
   if (q) {
