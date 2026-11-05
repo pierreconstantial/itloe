@@ -123,6 +123,24 @@ const firstPos = S2.msgs.findIndex((m) => m.t === 'pos'), lastView = S2.msgs.fin
 check(snap.x === 5 && snap.y === 4 && posOf(S2, 0, idB).length === 1 && lastView < firstPos, 'new screen gets view, then one pos per known player');
 S2.ws.close();
 
+// a phone dropped while its avatar walks in the room: the screen must see it stop (then it comes back to
+// leave the evening, so the round below seats A and B only)
+const W = new Client('W'); await W.open(); W.send({ t: 'hello', role: 'player', room });
+i = W.mark(); W.send({ t: 'join', character: 'pierre' });
+const idW = (await W.waitFor((m) => m.t === 'welcome', i)).playerId;
+W.send({ t: 'pos', x: 7, y: 6, dir: 'up', moving: true });
+await screen.waitFor((m) => m.t === 'pos' && m.playerId === idW && m.moving === true);
+is = screen.mark();
+W.ws.close();
+const stopped = await screen.waitFor((m) => m.t === 'pos' && m.playerId === idW, is).catch(() => null);
+check(stopped?.moving === false && stopped.x === 7 && stopped.y === 6, "a dropped phone's walking avatar is stopped on the screen, where it stood");
+const W2 = new Client('W2'); await W2.open();
+i = W2.mark(); W2.send({ t: 'hello', role: 'player', playerId: idW });
+await W2.waitFor((m) => m.t === 'welcome', i);
+i = A.mark(); W2.send({ t: 'leave' });
+await A.waitFor((m) => m.t === 'view' && !roomOf(m)?.players[idW], i);
+W2.ws.close();
+
 // --- start: host guard ---
 let ia = A.mark(); ib = B.mark();
 B.send({ t: 'start' });
@@ -184,8 +202,6 @@ const Acur = A3;
 
 // unknown playerId → fresh client
 const X = new Client('X'); await X.open();
-// A's socket died while its avatar was walking: the screen must see it stop
-check(screen.msgs.some((m) => m.t === 'pos' && m.playerId === idA && m.moving === false), "a dropped phone's walking avatar is stopped on the screen");
 i = X.mark(); X.send({ t: 'hello', role: 'player', room, playerId: 'p-nope' });
 await X.waitFor((m) => m.t === 'view', i); await sleep(150);
 check(!X.since(i).some((m) => m.t === 'welcome'), 'unknown playerId → no welcome (fresh client)');
