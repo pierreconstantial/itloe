@@ -50,7 +50,7 @@ Checked against `origin/master` at `ba3c3cd`: `npm run check` is clean and `npm 
 | `public/play/gm-panel.js`, `host-controls.js` | Read the block phase; host controls exist only for block games. |
 | `public/screen/party-room.js` | Avatar drawing, easing, labels, `pos` handling, speech bubbles and emotes are internal to `createPartyRoom`, as are the furniture effects of object actions. Avatars and the room's props are drawn in one depth-sorted list (`drawOrder`), which `e2e-tv` asserts. |
 
-`scripts/e2e-resume.mts`, `e2e-quiz.mts` and `e2e-campaign.mts` read and edit `campaign.at.activity` in the save file directly. The e2e suites read the block or quiz state from views in about 250 places, and several follow the lobby flow (`phase === 'lobby'`). Chat, emotes and object actions have unit tests (`test/social.test.js`, `test/interactions.test.js`) but no end-to-end test.
+`scripts/e2e-resume.mts`, `e2e-quiz.mts` and `e2e-campaign.mts` read and edit `campaign.at.activity` in the save file directly. The e2e suites read the block or quiz state from views in about 250 places, and several follow the lobby flow (`phase === 'lobby'`). `e2e-campaign.mts` tests chat, emotes and object actions over sockets, and `e2e-tv.mts` screenshots a speech bubble and an emote (`lobby-say-emote`); the TV's debug accessors can't see either, so only the screenshot covers their drawing.
 
 ## Decisions
 
@@ -164,7 +164,7 @@ Before phase 1, in this order, on today's code:
 
 Between 3 and 4:
 
-- Test-only commits fix two races in `e2e-phone.mts` (the typed quiz reads the next question before it shows; the reclaim check records the score before the server's answer), and add end-to-end tests of chat, emotes and object actions as they work today: a socket-level check, and a TV screenshot with a speech bubble and an emote. Behaviour change 4 extends the object-action check to the room at a quiz tableau.
+- Done: test-only commits fix two races in `e2e-phone.mts` and add end-to-end tests of chat, emotes and object actions as they work today. Behaviour change 4 flips the marked quiz-lobby line in `e2e-campaign.mts` ("in a quiz lobby") to expect object actions there.
 - **Found during the work: the phone's connection banner.** When the server is gone or the network drops, the phone's first reconnect attempt fails within the banner's 700 ms grace, and that second failure cancels the banner for good: the phone shows a frozen screen instead of "reconnecting". `e2e-phone` part 1's "server down: banner" check fails for this reason. An investigation is confirming the cause; once it does, the fix is its own behaviour-change commit, approved by Konstantin.
 
 Right after phase 3:
