@@ -23,10 +23,10 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 |---|---|---|---|---|
 | [Phone lock on real phones](#phone-lock-on-real-phones) | Locking and unlocking a phone is never tested | P1 | Open | Low |
 | [Apartment drawings cover avatars](#apartment-drawings-cover-avatars) | The cats, friends, keepsakes and key are always drawn over avatars | P2 | Open | Low |
-| [Fifth player after the opening](#fifth-player-after-the-opening) | Once the portal is ready, a fifth player can join | P2 | Needs decision | Low |
-| [A room per character at the hub](#a-room-per-character-at-the-hub) | Élodie walks the apartment while the others walk the party room | P2 | Needs decision | Medium |
+| [A room per character at the hub](#a-room-per-character-at-the-hub) | Should the others stay in the party room while Élodie is in the apartment? | P2 | Needs decision | Medium |
 | [Story rules in shared code](#story-rules-in-shared-code) | The opening's rules are spread through shared code | P2 | Needs decision | High |
 | [Ids in client code](#ids-in-client-code) | Node, character and item ids written into the clients | P2 | Open | Low |
+| [Other guests in other roles](#other-guests-in-other-roles) | Guests beyond the four players, e.g. controlling NPCs or in games | P3 | Needs decision | High |
 | [Unknown content setting](#unknown-content-setting) | An unknown `ITLOE_CONTENT` silently starts the story | P3 | Open | Trivial |
 | [Four-player check written twice](#four-player-check-written-twice) | The phone and the server each count the opening's players | P3 | Open | Trivial |
 | [Pickup handles one item](#pickup-handles-one-item) | `collect` only knows the first key | P3 | Open | Low |
@@ -51,17 +51,11 @@ In the apartment, the cats, friends, keepsakes and the key are drawn after the d
 
 **Recommendation:** make them props of the apartment's scene (`APARTMENT_ROOM`), so they sort with the avatars like the party room's furniture.
 
-### Fifth player after the opening
-
-The opening needs exactly four players before its first game. Once the portal is ready, the server lets a fifth player join, and the phone's character picker offers Konz again. `GameStory.md` speaks of four players.
-
-**Recommendation:** decide whether a fifth guest may join after the opening. If not, refuse the join while the story's opening runs, in the server's `join` check.
-
 ### A room per character at the hub
 
-After the portal, Élodie walks the apartment at the hub while the other players stay "in the old lobby": their phones walk the party room (`public/play/main.js`), and the TV hides them unless a game master sets `person.<id>.unlocked`. That amounts to a room per character, which a room chosen by node can't express.
+Before "a node's room" (phase 5 in `docs/minigame-brief.md`), Élodie walked the apartment at the hub after the portal, while the other players stayed "in the old lobby": their phones walked the party room, and the TV hid them unless a game master set `person.<id>.unlocked`. A node's room puts everyone at the hub in the apartment; who may walk and who is drawn stay the story's rules, so the others remain hidden as before.
 
-**Recommendation:** Pierre decides whether this is a story moment. If it is, the story needs a rule for who is in which room; if not, everyone at the hub is in the apartment.
+**Recommendation:** Pierre decides whether the others being somewhere else is a story moment. If it is, the story needs a rule for who is in which room, which a room chosen by node can't express.
 
 ### Story rules in shared code
 
@@ -83,6 +77,12 @@ Each new story step adds more branches in all three layers.
 The clients write content ids into code: node ids (`'hub.false-start'`, `'hub.door4'`), the character `'elodie'` where `content.chooser` exists, and the item `'memory-key-intro'`. Renaming a node or item in the content breaks the clients silently.
 
 **Recommendation:** read them from the content (`content.start`, `content.chooser`, item ids from the node that offers them). Do it together with [Story rules in shared code](#story-rules-in-shared-code) if that goes ahead.
+
+### Other guests in other roles
+
+The party is the four players Pierre, Élodie, Sol and Anna. Other guests may later join in other roles, e.g. controlling NPCs or taking part in games, but the details are undecided, so nothing prepares for it yet.
+
+**Recommendation:** decide the roles first, then design how such a guest joins, which phone screens they get, and what the server lets them do. The roster stays at the four players either way.
 
 ### Unknown content setting
 
