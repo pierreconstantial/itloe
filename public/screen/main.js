@@ -4,6 +4,7 @@
 
 import { renderLobby, fetchJoinInfo, fallbackJoinInfo } from './lobby-view.js';
 import { summarizeSettings } from '../commun/settings-text.js';
+import { summarizeQuiz } from '../commun/quiz-text.js';
 import { renderGame } from './game-view.js';
 import { renderPodium, revealSchedule } from './podium-view.js';
 import { detectEvents, calloutsFor } from './events.js';
@@ -21,7 +22,7 @@ import { createContentSource } from '../commun/content.js';
 import { doorStates, mapCopy, nameOf } from './doors.js';
 import { roomAt } from '../../shared/campaign/content.js';
 import { createCutscenes } from './cutscenes.js';
-import { renderQuiz, renderQuizRoom } from './quiz-view.js';
+import { renderQuiz } from './quiz-view.js';
 import { applyJoinQr, joinQrState } from './join-qr.js';
 import { INTRO_KEY, OPENING_PLAYERS, REUNIONS } from '../../shared/campaign/story.js';
 
@@ -50,6 +51,8 @@ const soundHint = /** @type {HTMLElement} */ (document.getElementById('sound-hin
 let current = null;
 /** After a reconnect the previous view is stale: render, but don't replay what was missed. */
 let stale = false;
+/** Who was in the room at a tableau when it was last drawn (newcomers get a sound); null: the room isn't showing. */
+let roomIds = /** @type {string[] | null} */ (null);
 /** performance.now() when the current game finished (podium sequence clock). */
 let finishedAt = -Infinity;
 /** @type {WebSocket | null} */
@@ -94,12 +97,6 @@ const tableauSettings = () => campaign?.at.settings ?? null;
 
 /** @type {Record<State['phase'], (s: State, prev: State | null) => HTMLElement>} */
 const VIEWS = {
-  lobby: (s, prev) => renderLobby(s, prev, joinInfo, { title: 'ITLOE', settings: summarizeSettings(tableauSettings()) }, portalReady()
-    ? { hostId: campaign?.party.hostId ?? null, status: 'A portal has appeared. Élodie, walk into it!' } : {
-      hostId: campaign?.party.hostId ?? null,
-      required: campaign?.facts.flags.includes('story.elo-50') && campaign.at.node === 'hub.false-start'
-        ? OPENING_PLAYERS.length : undefined,
-    }),
   playing: (s, prev) => renderGame(s, prev, { danger: playersInDanger(s) }),
   finished: (s) => renderPodium(s, performance.now() - finishedAt, { next: summarizeSettings(tableauSettings()), again: !portalReady() }),
 };
@@ -124,24 +121,25 @@ function playersInDanger(s) {
 function show(next) {
   leaveQuiz();
   const prev = stale ? null : current;
+  const fromRoom = roomIds !== null; // a round started from the room: its start sound plays
   stale = false;
+  roomIds = null;
   current = next;
-  const events = detectEvents(prev, next);
+  const events = prev ? detectEvents(prev, next) : fromRoom && next.phase === 'playing' ? [{ t: /** @type {const} */ ('start') }] : [];
   const finished = events.find((e) => e.t === 'finished');
   if (finished) finishedAt = performance.now() + (finished.t === 'finished' && finished.reason === 'time' ? TIMES_UP_MS : 0);
   if (next.phase !== 'finished') {
     finishedAt = -Infinity;
     cancelPodium();
   }
-  if (next.phase === 'lobby') fx.clearAll();
 
   app.replaceChildren(VIEWS[next.phase](next, prev));
   party.setRoom(roomAt(content.get(), campaign?.at.node));
-  party.setPortal(portalReady());
+  party.setPortal(false);
   party.setKey(false);
   party.setPlayers(next);
-  party.setVisible(next.phase === 'lobby');
-  document.body.classList.toggle('party', next.phase === 'lobby');
+  party.setVisible(false);
+  document.body.classList.remove('party');
   updateCountdown(next);
   applyPresence();
   // the game ending in this very view (bell, host's endGame) marks everyone done at once:
@@ -153,17 +151,62 @@ function show(next) {
 /** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
 
 /** Campaign content (titles, doors): fetched from the server, refreshed on a new contentVersion. */
-const content = createContentSource({ onChange: () => { if (campaign && !current) showMap(campaign); } });
+const content = createContentSource({ onChange: () => { if (campaign && !current) showPlace(campaign); } });
 /** Last campaign from the server (views carry it next to `round`). @type {Campaign | null} */
 let campaign = null;
 
+/** The band of the room at a tableau, by its minigame: the title and the settings line. */
+const ROOM_BANDS = {
+  blocks: { title: 'ITLOE', settings: (/** @type {any} */ s) => summarizeSettings(s) },
+  quiz: { title: 'Quiz!', settings: (/** @type {any} */ s) => summarizeQuiz(s) },
+};
+
 /**
- * Hub / world map (no block game on): the party room with one door per child node, avatars walking
- * as in the lobby, and a top band with where we are. The next block view starts fresh.
+ * The room at a tableau, between rounds: the party room under the minigame's band (title, the tableau's
+ * settings, who's in, the join QR); the guests are the avatars walking below it. A guest arriving gets a
+ * sound; the next round starts fresh, with its start sound.
+ * @param {Campaign} c
+ */
+function showRoom(c) {
+  leaveQuiz();
+  if (current) {
+    current = null;
+    finishedAt = -Infinity;
+    cancelPodium();
+  }
+  fx.clearAll();
+  const here = c.party.order.filter((id) => !c.party.players[id].left && c.party.players[id].character);
+  if (roomIds && !stale) for (const id of here) if (!roomIds.includes(id)) sfx.joined();
+  roomIds = here;
+  stale = true;
+  updateCountdown(null);
+  const kind = /** @type {keyof typeof ROOM_BANDS} */ (c.at.kind);
+  const opening = c.facts.flags.includes('story.elo-50') && c.at.node === 'hub.false-start';
+  app.replaceChildren(renderLobby({ order: here, players: c.party.players }, null, joinInfo,
+    { title: ROOM_BANDS[kind].title, settings: ROOM_BANDS[kind].settings(c.at.settings) },
+    portalReady() ? { hostId: c.party.hostId, status: 'A portal has appeared. Élodie, walk into it!' }
+      : { hostId: c.party.hostId, required: opening ? OPENING_PLAYERS.length : undefined }));
+  party.setRoom(roomAt(content.get(), c.at.node));
+  party.setPortal(portalReady());
+  party.setKey(false);
+  party.setPlayers({ order: here, players: c.party.players });
+  party.setDoors([]);
+  party.setVisible(true);
+  document.body.classList.add('party');
+  applyPresence();
+}
+
+/** Between rounds: the room at a minigame's tableau, else the hub / world map. @param {Campaign} c */
+const showPlace = (c) => (c.at.kind ? showRoom(c) : showMap(c));
+
+/**
+ * Hub / world map (no round on): the party room with one door per child node, avatars walking
+ * as in the room at a tableau, and a top band with where we are. The next block view starts fresh.
  * @param {Campaign} c
  */
 function showMap(c) {
   leaveQuiz();
+  roomIds = null;
   if (current) {
     current = null;
     finishedAt = -Infinity;
@@ -228,20 +271,19 @@ function showQuiz(q) {
     fx.clearAll();
   }
   stale = true;
+  roomIds = null;
   updateCountdown(null);
-  // the quiz's lobby is the party room, as in a block lobby: avatars walk under the band
-  const room = q.phase === 'lobby';
   party.setRoom(roomAt(content.get(), campaign?.at.node));
   party.setPortal(false);
   party.setKey(false);
   party.setPlayers(q);
-  party.setVisible(room);
+  party.setVisible(false);
   party.setDoors([]);
-  document.body.classList.toggle('party', room);
+  document.body.classList.remove('party');
   document.body.classList.add('in-quiz');
   const prev = quiz;
   quiz = q;
-  const roundChanged = q.round && (!prev?.round || prev.round.index !== q.round.index || prev.phase === 'lobby' || prev.phase === 'finished');
+  const roundChanged = q.round && (!prev?.round || prev.round.index !== q.round.index || prev.phase === 'finished');
   if (q.phase === 'question' && roundChanged) { lastQuizTick = Infinity; sfx.start(); }
   if (q.phase === 'reveal' && prev?.phase === 'question') sfx.reveal();
   if (q.phase === 'finished' && prev && prev.phase !== 'finished') {
@@ -250,8 +292,7 @@ function showQuiz(q) {
     podiumSequence(/** @type {any} */ (q));
   }
   if (q.phase !== 'finished' && prev?.phase === 'finished') cancelPodium();
-  app.replaceChildren(room ? renderQuizRoom(q, joinInfo, tableauSettings(), campaign?.party.hostId ?? null)
-    : renderQuiz(q, prev ? performance.now() - quizFinishedAt : Infinity, tableauSettings()));
+  app.replaceChildren(renderQuiz(q, prev ? performance.now() - quizFinishedAt : Infinity, tableauSettings()));
   drawQuizRing();
 }
 
@@ -334,9 +375,8 @@ let momentsPlayed = 0;
 function canPlayCutscene() {
   // a hidden TV tab plays nothing (and so never acks what nobody saw); it plays once shown again
   if (document.visibilityState !== 'visible') return false;
-  if (quiz) return quiz.phase === 'lobby' || quiz.phase === 'finished';
-  if (!current) return true;
-  if (current.phase === 'lobby') return true;
+  if (quiz) return quiz.phase === 'finished';
+  if (!current) return true; // between rounds: the room at a tableau, the hub, a world
   if (current.phase !== 'finished') return false;
   const reveal = Math.max(0, ...revealSchedule(current).map((r) => r.atMs));
   return performance.now() - finishedAt > reveal + 1800;
@@ -484,9 +524,9 @@ const HANDLERS = {
       presence.update(Array.isArray(msg.online) ? msg.online : [], round.view.order.filter((/** @type {string} */ id) => !round.view.players[id]?.left));
     } else if (round?.kind !== 'blocks') {
       if (!campaign) return;
-      // campaign hub / world: no block game on → the map; re-drawn once fresh content arrives
-      showMap(campaign);
-      ready.then(() => { if (campaign && !current) showMap(campaign); });
+      // between rounds: the room at a tableau, or the hub / world map (re-drawn once fresh content arrives)
+      showPlace(campaign);
+      ready.then(() => { if (campaign && !current) showPlace(campaign); });
       presence.update(Array.isArray(msg.online) ? msg.online : [], campaign.party.order.filter((id) => !campaign?.party.players[id].left));
     } else {
       party.setDoors([]);
@@ -593,8 +633,7 @@ onAudioState((st) => {
 connect();
 fetchJoinInfo().then((info) => {
   joinInfo = info;
-  if (current?.phase === 'lobby') app.replaceChildren(VIEWS.lobby(current, current));
-  else if (quiz?.phase === 'lobby') app.replaceChildren(renderQuizRoom(quiz, joinInfo, tableauSettings(), campaign?.party.hostId ?? null));
+  if (roomIds !== null && campaign) showRoom(campaign);
 });
 
 /** @type {any} */ (window).bloko = {

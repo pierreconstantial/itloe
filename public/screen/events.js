@@ -55,12 +55,9 @@ export function detectEvents(prev, next) {
   /** @type {ScreenEvent[]} */
   const events = [];
 
-  if (prev.phase === 'lobby' && next.phase === 'lobby') {
-    for (const id of next.order) if (!prev.order.includes(id)) events.push({ t: 'joined', id });
-  }
   if (prev.phase !== 'playing' && next.phase === 'playing') events.push({ t: 'start' });
 
-  const sameGame = prev.phase === 'playing' && next.phase !== 'lobby' && prev.seed === next.seed;
+  const sameGame = prev.phase === 'playing' && prev.seed === next.seed;
   if (sameGame) {
     for (const id of next.order) {
       const p = prev.players[id];

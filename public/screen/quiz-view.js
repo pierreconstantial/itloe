@@ -1,12 +1,11 @@
 // TV quiz screen (Contract E), rendered from view.quiz — the PUBLIC projection (shared/quiz/bank.js
-// projectQuiz): no answer before the reveal. Lobby (the party room, like the block lobby) → question →
-// reveal → … → finished (the shared podium).
+// projectQuiz): no answer before the reveal. Question → reveal → … → finished (the shared podium);
+// between quizzes the TV shows the room at the tableau (main.js).
 // Pure helpers (tested) + DOM builders; main.js owns timers and sounds.
 
 import { h, colorDot, playerColor, formatScore } from './dom.js';
 import { bindScore } from './score-ticker.js';
 import { renderPodium, revealSchedule } from './podium-view.js';
-import { renderLobby } from './lobby-view.js';
 import { summarizeQuiz } from '../commun/quiz-text.js';
 
 /** @typedef {import('../../shared/quiz/bank.js').QuizView} QuizView */
@@ -102,16 +101,6 @@ function scoreboard(q) {
 }
 
 /**
- * The room at a quiz tableau: the block lobby's band (join box, "Quiz!", the quiz settings, who's in); the
- * players are the avatars walking below the band. The dataset credits show during the quiz and on its podium.
- * @param {QuizView} q @param {import('./lobby-view.js').JoinInfo} join @param {QuizSettings} settings the tableau's
- * @param {string | null} hostId the party's host
- */
-export function renderQuizRoom(q, join, settings, hostId) {
-  return renderLobby(q, null, join, { title: 'Quiz!', settings: summarizeQuiz(settings) }, { hostId });
-}
-
-/**
  * Question: the text big, choices as lettered tiles (or the typed-answer prompt), the countdown ring
  * (main.js drives `--left`), and who has answered — never what.
  * @param {QuizView} q
@@ -192,7 +181,7 @@ export function renderQuizPodium(q, elapsedMs, settings) {
 export const quizRevealSchedule = (q) => revealSchedule(/** @type {any} */ (q));
 
 /**
- * A quiz under way or finished (its lobby is the room: renderQuizRoom).
+ * A quiz under way or finished (between quizzes the TV shows the room at the tableau: main.js).
  * @param {QuizView} q @param {number} podiumElapsedMs @param {QuizSettings} settings the tableau's
  */
 export function renderQuiz(q, podiumElapsedMs, settings) {

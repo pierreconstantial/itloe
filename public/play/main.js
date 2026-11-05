@@ -39,7 +39,7 @@ import { childMarks, content, onContentChange, syncContent, titleOf } from './ca
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
 /** @typedef {import('./movement.js').Pos} Pos */
 /** @typedef {{ score: number, previous: number | null }} Best */
-/** A seat in a block or quiz lobby. @typedef {{ id: string, name: string, color: number, character?: string | null, left?: boolean }} LobbyPlayer */
+/** A party member in the room at a tableau. @typedef {{ id: string, name: string, color: number, character?: string | null, left?: boolean }} LobbyPlayer */
 
 const RANK_BADGES = ['①', '②', '③', '④'];
 const MEDALS = ['🥇', '🥈', '🥉', ''];
@@ -57,9 +57,9 @@ const ERR_TOASTS = {
   'not-host': 'Only the host can do that.',
 };
 
-/** What the podium's choice became, told to everyone (the host picks, guests follow). @type {Record<string, string>} */
+/** What the podium's choice became, told to everyone (the host picks, guests follow); `room`: no round. @type {Record<string, string>} */
 const PHASE_TOASTS = {
-  'finished>lobby': 'Back to the room!',
+  'finished>room': 'Back to the room!',
   'finished>playing': 'Rematch! Go go go!',
 };
 
@@ -229,7 +229,9 @@ function receive(raw) {
     const next = lastView;
     const event = prev && next && playerId ? outcome(prev, next, playerId) : null;
     if (event) haptics.buzz(event);
-    const turn = prev && next && playerId && next.players[playerId] ? PHASE_TOASTS[`${prev.phase}>${next.phase}`] : undefined;
+    // a podium we were on became a new round, or the room at the same tableau
+    const turn = prev && playerId && prev.players[playerId] && (next ? next.players[playerId] : campaign?.at.node === prevNode && !round)
+      ? PHASE_TOASTS[`${prev.phase}>${next ? next.phase : 'room'}`] : undefined;
     // the party moved (a door, the host): say where we are now
     const moved = prevNode !== null && campaign !== null && campaign.at.node !== prevNode && member() ? `→ ${titleOf(campaign.at.node)}` : undefined;
     if (turn || moved) { menu.close(); toast(/** @type {string} */ (moved ?? turn)); }
@@ -239,7 +241,7 @@ function receive(raw) {
     const refusedPick = pendingPick;
     pendingPick = null;
     if (m.code === 'refused') toast("That can't be done right now.");
-    else if (m.code === 'full' && lastView && lastView.phase !== 'lobby') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} is back online on another phone.`);
+    else if (m.code === 'full' && round) toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} is back online on another phone.`);
     else if (m.code === 'full') showPickError(`Sorry, the game is full (${ROSTER_SIZE} players max).`);
     else if (m.code === 'taken') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} was just picked. Choose someone else!`);
     else if (m.code === 'bad-room') onBadRoom();
@@ -294,8 +296,8 @@ const roomHere = () => roomAt(content(), campaign?.at.node);
 const isGameMaster = () => campaign !== null && playerId !== null && campaign.party.hostId === playerId
   && !!member() && (!isStory() || campaign.facts.flags.includes('portal.entered'));
 
-/** Walking: a member, on the hub / in a world, or in an open block or quiz lobby. */
-const canWalk = () => member() !== null && (quizView ? quizView.phase === 'lobby' : !lastView || lastView.phase === 'lobby')
+/** Walking: a member, between rounds (on the hub, in a world, in the room at a tableau). */
+const canWalk = () => member() !== null && round === null
   && !(isStory() && campaign?.at.node === 'hub' && myCharacter() === 'elodie' && !campaign.facts.flags.includes('apparition.seen'));
 
 /** The latest accepted window from this phone. The server decides whether a request succeeded. */
@@ -392,16 +394,18 @@ function render() {
   const mem = member();
   const hostId = partyHost();
   const isHost = me !== null && v !== null && me.id === hostId;
-  const configurable = v !== null && v.phase !== 'playing';
   const q = quizView;
   const quizHost = q !== null && playerId !== null && hostId === playerId;
-  const quizConfigurable = q !== null && (q.phase === 'lobby' || q.phase === 'finished');
+  // the tableau's minigame (null on the hub, in a world, at a scene) and the room between its rounds
+  const kind = campaign?.at.kind ?? null;
+  const inRoom = kind !== null && round === null;
 
-  // the settings sheet follows the activity: the block game's schema, or the quiz's
-  if (v) settingsSheet.render(tableauSettings(), isHost && configurable);
-  else if (q) settingsSheet.render(tableauSettings(), quizHost && quizConfigurable, QUIZ_SETTINGS);
+  // the settings sheet follows the tableau's minigame: the block game's schema, or the quiz's; the host
+  // changes them except while a round runs
+  const configurable = kind !== null && mem !== null && hostId === playerId && round?.status !== 'running';
+  if (kind) settingsSheet.render(tableauSettings(), configurable, kind === 'quiz' ? QUIZ_SETTINGS : undefined);
   hostControls.render(v, q, online, playerId ?? '', hostId);
-  if (q ? !(quizHost && quizConfigurable) : (!isHost || !configurable)) menu.close('settings');
+  if (!configurable) menu.close('settings');
   if (campaign && isGameMaster()) gmPanel.render(campaign, round?.status ?? null);
   else menu.close('gm');
   // 🎒 my items (Contract F): they hang on my character, so they follow me to any phone
@@ -419,7 +423,7 @@ function render() {
     // the picker shows whenever there is something to tap: a free character while no block game is
     // under way, or (anytime) a character whose phone is offline, to continue as
     const roster = campaign ? campaign.party : v;
-    const joinable = (!v || v.phase === 'lobby') && (!q || q.phase === 'lobby');
+    const joinable = round === null;
     const states = roster ? pickStates(roster, joinable, online) : null;
     if (!states || (!anyPickable(states) && pendingPick === null)) {
       show('waiting');
@@ -431,14 +435,19 @@ function render() {
     picker.render(states, pendingPick, isCharacterId(last) ? last : null);
     return;
   }
+  if (inRoom && campaign) { // the room at the tableau: walk, the settings, the host's Start
+    const party = campaign.party;
+    const here = { order: party.order.filter((id) => !party.players[id].left && party.players[id].character), players: party.players };
+    show('lobby');
+    renderLobby(here, mem, hostId === playerId, kind === 'quiz' ? summarizeQuiz(tableauSettings()) : summarize(tableauSettings()));
+    return;
+  }
   if (q) {
     if (!playerId || !q.players[playerId]) { // in the evening, but this quiz started before we joined
       show('waiting');
       $('waiting-text').textContent = "A quiz is on. You'll play the next one!";
       return;
     }
-    // the quiz's lobby is the room, like the block lobby: walk, settings, the host's Start
-    if (q.phase === 'lobby') { show('lobby'); renderLobby(q, q.players[playerId], quizHost, summarizeQuiz(tableauSettings())); return; }
     show('quiz');
     quizUi.render(q, playerId, quizHost);
     return;
@@ -455,7 +464,6 @@ function render() {
     $('waiting-text').textContent = "A game is on. You'll play the next one!";
     return;
   }
-  if (v.phase === 'lobby') { show('lobby'); renderLobby(v, me, isHost, summarize(tableauSettings())); return; }
   if (v.phase === 'finished') { show('podium'); renderPodium(v, me, isHost); return; }
   if (me.done) { show('over'); renderGameOver(v, me); return; }
   show('game');
@@ -582,7 +590,7 @@ function renderPlace(c, mem) {
 }
 
 /**
- * The room at a tableau: the block game's lobby, or the quiz's.
+ * The room at a tableau, between rounds: who's here (the party), the settings, the host's Start.
  * @param {{ order: string[], players: Record<string, LobbyPlayer> }} v
  * @param {LobbyPlayer} me @param {boolean} isHost @param {string} settings the settings summary
  */
@@ -919,9 +927,9 @@ const joystick = createJoystick({
   onGrab: () => haptics.buzz('pickup'),
 });
 
-/** Turn the lobby header avatar to the facing we just sent. @param {Pos} pos */
+/** Turn the room's header avatar to the facing we just sent. @param {Pos} pos */
 function repaintMyAvatar(pos) {
-  const me = playerId ? (quizView ?? lastView)?.players[playerId] : undefined;
+  const me = member();
   const canvas = /** @type {HTMLCanvasElement | null} */ (document.querySelector('#lobby-me canvas'));
   if (me && canvas) paintAvatar(canvas, characterOf(me), pos.dir);
 }

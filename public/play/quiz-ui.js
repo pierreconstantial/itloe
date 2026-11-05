@@ -1,5 +1,5 @@
 // Phone quiz screen (Contract E): renders strictly from the view's PUBLIC quiz (shared/quiz/bank.js
-// projectQuiz), which never carries an answer before the reveal. Its lobby is the room (main.js); phases here:
+// projectQuiz), which never carries an answer before the reveal. Between quizzes the party is in the room (main.js); phases here:
 // question (4 big choices or a typed answer; one shot), reveal (my verdict + points, the answer, everyone's
 // answers; host: overrides + next), finished (ranking; host: Play again / Back to the room).
 // Controls are built once per question, so a view arriving mid-typing never resets the text field.
