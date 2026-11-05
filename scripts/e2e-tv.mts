@@ -294,6 +294,16 @@ try {
       && ['sofa', 'table', 'plant', idA, idB].every((id) => front.includes(id)),
       `the draw list holds every prop and every avatar exactly once (${front.join(' → ')})`);
     await tv.shot('hub-depth-front');
+
+    // a speech bubble and an emote over the avatars: screenshot only, since window.bloko exposes
+    // neither (they live inside the party room's drawing)
+    const a = A2.mark(), b = B.mark();
+    A2.send({ t: 'say', text: 'Joyeux anniversaire !' });
+    B.send({ t: 'emote', kind: 'victory' });
+    await A2.waitFor((m) => m.t === 'say', a);
+    await B.waitFor((m) => m.t === 'emote', b);
+    await sleep(400); // the TV got both with the phones: a few frames to draw them
+    await tv.shot('lobby-say-emote');
   }
 
   // ---------- playing: presence on boards, kill -9 ----------

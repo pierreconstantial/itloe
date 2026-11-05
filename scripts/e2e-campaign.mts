@@ -1,14 +1,15 @@
 // Campaign end-to-end (slice 3, server side): the false start → 3 block games → reward + two worlds
 // unlocked at once → news acked by seq with TWO TVs → doors (the chooser walks in, edge-triggered) →
 // host back/enter/gm — with a kill -9 + restart after every step that must resume the SAME evening and
-// never count a game twice. Uses the placeholder SAMPLE_CONTENT (shared/campaign/sample.js).
+// never count a game twice. Then chat, emotes and object actions: relay, history, rate limits, and where
+// interact works. Uses the placeholder SAMPLE_CONTENT (shared/campaign/sample.js).
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR) so it can kill -9 it.
 // Usage: PORT=3186 node scripts/e2e-campaign.mts      (never 3131: that's the live server)
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, Client, finish, HTTP, sleep } from './e2e-lib.mts';
+import { check, Client, finish, HTTP, sleep, SLOW } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -265,6 +266,137 @@ try {
   k = await until(P, (x) => x.at.activity?.phase === 'lobby', i);
   check(!!k.at.activity.players[idN], '…and is seated in the next block lobby');
   N.ws.close();
+
+  // ---------- chat, emotes and object actions, as they work today ----------
+  let N2 = await rejoin('N2', idN); // back online: the quiz below reveals once every seated player answered
+  const everyone = () => [P, E, N2, T1, T2];
+  const marks = () => everyone().map((c) => c.mark());
+  /** The first `t` event each client got since `from`, or null for a client that got none. */
+  const relayed = (t: string, from: number[]) =>
+    Promise.all(everyone().map((c, j) => c.waitFor((m) => m.t === t, from[j], 400).catch(() => null)));
+  const none = async (t: string, from: number[]) => {
+    await sleep(400 * SLOW);
+    return everyone().every((c, j) => !c.since(from[j]).some((m) => m.t === t));
+  };
+  const GAP = 700; // past the per-socket limits: say and emote one per 650 ms, interact one per 700 ms
+
+  let from = marks();
+  let t0 = Date.now();
+  E.send({ t: 'say', text: '  Bonne\n  fête\tÉlodie !  ' });
+  let got = await relayed('say', from);
+  check(got.every((m) => m?.playerId === idE && m.text === 'Bonne fête Élodie !' && m.at >= t0 && m.at <= Date.now()),
+    'say → relayed to every client, screens and phones (the sender too), with playerId, the cleaned text and at');
+  const stranger = new Client('stranger'); await stranger.open();
+  stranger.send({ t: 'hello', role: 'player', room });
+  await stranger.waitFor((m) => m.t === 'view');
+  await sleep(GAP);
+  from = marks();
+  stranger.send({ t: 'say', text: 'intrus' }); stranger.send({ t: 'emote', kind: 'victory' });
+  T1.send({ t: 'say', text: 'écran' }); T1.send({ t: 'emote', kind: 'victory' });
+  check(await none('say', from) && await none('emote', from), 'say and emote from a socket that is not a party member (a stranger, a TV) → dropped');
+  from = marks();
+  for (const text of ['é'.repeat(101), '', '   ', '\u0007\u0007', 42]) E.send({ t: 'say', text });
+  check(await none('say', from), 'say with over-long (101 characters), empty, blank, control-only or non-string text → dropped');
+  await sleep(GAP);
+  from = marks();
+  E.send({ t: 'say', text: '🎂'.repeat(100) });
+  got = await relayed('say', from);
+  check(got.every((m) => m?.text === '🎂'.repeat(100)), 'say with 100 characters (counted as code points) → relayed');
+
+  await sleep(GAP);
+  i = T1.mark();
+  E.send({ t: 'say', text: 'un' }); E.send({ t: 'say', text: 'deux' }); E.send({ t: 'emote', kind: 'victory' });
+  P.send({ t: 'say', text: 'trois' });
+  await sleep(400 * SLOW);
+  const burst = T1.since(i).filter((m) => m.t === 'say' || m.t === 'emote').map((m) => m.text ?? m.kind);
+  check(burst.join() === 'un,trois', `rate limit: one say or emote per 650 ms per socket; a second say and an emote right after are dropped, another phone is not held back (${burst.join()})`);
+  await sleep(GAP);
+  from = marks();
+  E.send({ t: 'say', text: 'quatre' });
+  check((await relayed('say', from)).every((m) => m?.text === 'quatre'), '…and after 650 ms the same phone speaks again');
+
+  await sleep(GAP);
+  from = marks();
+  t0 = Date.now();
+  N2.send({ t: 'emote', kind: 'annoy' });
+  got = await relayed('emote', from);
+  check(got.every((m) => m?.playerId === idN && m.kind === 'annoy' && m.at >= t0), 'emote → relayed to every client with playerId, kind and at');
+  await sleep(GAP);
+  from = marks();
+  N2.send({ t: 'emote', kind: 'dance' }); N2.send({ t: 'emote' });
+  check(await none('emote', from), 'emote of an unknown kind (or none) → dropped');
+
+  // the history keeps the last 30 lines: 33 lines from three phones, each at its own pace
+  for (let n = 0; n < 11; n++) {
+    await sleep(GAP);
+    for (const [j, c] of [P, E, N2].entries()) c.send({ t: 'say', text: `ligne ${n * 3 + j}` });
+  }
+  await T1.waitFor((m) => m.t === 'say' && m.text === 'ligne 32');
+  const last30 = JSON.stringify(T1.msgs.filter((m) => m.t === 'say').slice(-30));
+  N2.ws.close();
+  N2 = await rejoin('N3', idN);
+  const history = await N2.waitFor((m) => m.t === 'chatHistory');
+  check(JSON.stringify(history.messages) === last30 && history.messages[0].text === 'ligne 3',
+    `a reconnecting phone gets chatHistory on hello: the last 30 say events as relayed, oldest first (${history.messages.length}, from "${history.messages[0]?.text}")`);
+  const T3 = await screen('T3');
+  check(JSON.stringify((await T3.waitFor((m) => m.t === 'chatHistory')).messages) === last30, '…and so does a TV saying hello');
+  T3.ws.close();
+
+  // object actions: the sender's last pos near an object, checked against the party room
+  const TABLE = { x: 11.1, y: 7.5 }; // in front of the birthday table
+  check(Object.values<any>(content.nodes).every((n) => !n.door || n.door.y + n.door.h < TABLE.y), 'the table point is outside every door');
+  /** Élodie (just past her limit) asks for an object's action → the interact event each client got, or null. */
+  const interact = async (object = 'table') => {
+    await sleep(GAP);
+    const from = marks();
+    E.send({ t: 'interact', object });
+    return relayed('interact', from);
+  };
+  const isRelayed = (got: any[]) => got.every((m) => m?.playerId === idE && m.object === 'table' && typeof m.at === 'number');
+  const isDropped = (got: any[]) => got.every((m) => m === null);
+  /** One line per place: `relays` is whether interact works there today. */
+  const interactsHere = async (where: string, relays: boolean) => {
+    const got = await interact();
+    check(relays ? isRelayed(got) : isDropped(got), `${where}: interact at the table → ${relays ? 'relayed to every client with playerId, object and at' : 'dropped'}`);
+  };
+  await step(E, TABLE);
+  await interactsHere('in a block lobby', true);
+  await sleep(GAP);
+  i = T1.mark();
+  E.send({ t: 'interact', object: 'table' }); E.send({ t: 'interact', object: 'table' });
+  await sleep(400 * SLOW);
+  check(T1.since(i).filter((m) => m.t === 'interact').length === 1, 'rate limit: one interact per 700 ms per socket');
+  check(isDropped(await interact('sofa')), 'interact naming another object than the one nearby → dropped');
+  await step(E, floor);
+  check(isDropped(await interact()), 'interact far from every object → dropped');
+  await step(E, TABLE);
+
+  i = P.mark(); P.send({ t: 'start' });
+  await P.waitFor((m) => m.t === 'view' && m.state?.phase === 'playing', i);
+  await interactsHere('during a running block game', false);
+  i = P.mark(); P.send({ t: 'endGame' });
+  await until(P, (x) => x.at.activity?.phase === 'finished', i);
+  await interactsHere('on a block podium', false);
+  i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'hub' } });
+  await until(P, (x) => x.at.node === 'hub', i);
+  await interactsHere('on the hub', true);
+  i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'childhood' } });
+  await until(P, (x) => x.at.node === 'childhood', i);
+  await interactsHere('in a world', true);
+  i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'childhood.quiz' } });
+  await P.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'lobby', i);
+  await interactsHere('in a quiz lobby', false); // behaviour change 4 (the quiz's lobby becomes the room) flips this to true
+  i = P.mark(); P.send({ t: 'start' });
+  const question = (await P.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'question', i)).quiz;
+  await interactsHere('during a quiz question', false);
+  i = P.mark();
+  for (const c of [P, E, N2]) c.send(question.round.question.choices ? { t: 'answer', choice: 0 } : { t: 'answer', text: 'x' });
+  await P.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'reveal', i);
+  await interactsHere('on a quiz reveal', false);
+  i = P.mark(); P.send({ t: 'endGame' });
+  await P.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'finished', i);
+  await interactsHere('on a finished quiz', false);
+  for (const c of [N2, stranger]) c.ws.close();
 
   for (const c of [P, E, T1, T2]) c.ws.close();
 } catch (e) {
