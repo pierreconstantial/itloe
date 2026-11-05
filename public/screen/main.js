@@ -46,8 +46,6 @@ let shownRound = null;
 let running = null;
 /** No view shown since the page loaded or the socket reconnected: what happened in between is not replayed. */
 let gap = true;
-/** After a reconnect the previous view is stale (the room's newcomer sound). */
-let stale = false;
 /** Who was in the room at a tableau when it was last drawn (newcomers get a sound); null: the room isn't showing. */
 let roomIds = /** @type {string[] | null} */ (null);
 /** performance.now() when the shown podium's reveal starts (-Infinity: settled, shown without animation). */
@@ -174,9 +172,9 @@ function showRoom(c) {
   leaveRound();
   fx.clearAll();
   const here = c.party.order.filter((id) => !c.party.players[id].left && c.party.players[id].character);
-  if (roomIds && !stale) for (const id of here) if (!roomIds.includes(id)) sfx.joined();
+  // not after a page load or a reconnect: who arrived in between isn't announced
+  if (roomIds && io.continuous()) for (const id of here) if (!roomIds.includes(id)) sfx.joined();
   roomIds = here;
-  stale = true;
   const band = /** @type {import('./minigames.js').TvScreen} */ (screenOf(c.at.kind));
   const opening = c.facts.flags.includes('story.elo-50') && c.at.node === 'hub.false-start';
   app.replaceChildren(renderLobby({ order: here, players: c.party.players }, null, joinInfo,
@@ -204,7 +202,6 @@ const showPlace = (c) => (c.at.kind ? showRoom(c) : showMap(c));
 function showMap(c) {
   leaveRound();
   roomIds = null;
-  stale = true;
   const storyScene = c.facts.flags.includes('story.elo-50') && c.facts.flags.includes('portal.entered');
   const inApartment = storyScene && c.at.node === 'hub';
   const visibleIds = !storyScene ? c.party.order : c.party.order.filter((id) => {
@@ -460,7 +457,6 @@ function connect() {
     if (ws !== sock) return;
     console.info('[itloe] socket closed — retrying');
     document.body.classList.add('offline');
-    stale = true;
     setTimeout(connect, RECONNECT_MS);
   });
 }
@@ -479,7 +475,6 @@ function reconnectNow(why) {
   ws = null;
   console.info(`[itloe] reconnecting (${why})`);
   document.body.classList.add('offline');
-  stale = true;
   try { old?.close(); } catch { /* already closing */ }
   connect();
 }

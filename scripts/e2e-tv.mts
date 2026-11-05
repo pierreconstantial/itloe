@@ -170,6 +170,19 @@ const tvState = 'window.bloko.round()?.view';
 const tvRoom = "(window.bloko?.round() === null && !!window.bloko.campaign()?.at.kind && document.body.classList.contains('party') && !!document.querySelector('section.lobby'))";
 const tvOnlineBanner = "document.body.classList.contains('offline')";
 const tvOffline = 'JSON.stringify(window.bloko.offline().sort())';
+/** Records the frequency each of the TV's tones starts at (public/screen/audio.js), to hear which sounds played. */
+const SOUND_PROBE = `(() => {
+  const set = AudioParam.prototype.setValueAtTime;
+  window.__tones = [];
+  AudioParam.prototype.setValueAtTime = function (v, t) { if (v > 20) window.__tones.push(Math.round(v)); return set.call(this, v, t); };
+})()`;
+/** How many times the TV played the "joined" sound (sfx.joined: two notes, 784 then 1175 Hz). */
+const tvJoined = 'window.__tones.filter((f, k, all) => f === 784 && all[k + 1] === 1175).length';
+/** A key press on the TV unlocks its sound (a page load locks it again). */
+async function soundOn(tv: Page): Promise<boolean> {
+  for (const type of ['keyDown', 'keyUp']) await tv.cmd('Input.dispatchKeyEvent', { type, key: 'a' });
+  return tv.until(`document.getElementById('sound-hint').dataset.state === 'on'`, 'sound on');
+}
 const boardsOf = (s: any) => JSON.stringify(s.order.map((id: string) => [id, s.players[id].board, s.players[id].score, s.players[id].hand]));
 
 
@@ -227,8 +240,10 @@ try {
   room = (await (await fetch(`${HTTP}/api/join`)).json()).code;
   tv = await Page.open(`${HTTP}/screen/`);
   await tv.cmd('Page.addScriptToEvaluateOnNewDocument', { source: TEARDOWN_PROBE }); // the teardown checks
+  await tv.cmd('Page.addScriptToEvaluateOnNewDocument', { source: SOUND_PROBE });
   await tv.cmd('Page.reload');
   check(await tv.until(`${tvRoom} && !${tvOnlineBanner}`, 'tv room'), 'TV opens on the room at the false start');
+  check(await soundOn(tv), 'a key press turns the TV\'s sound on');
 
   const cardOn = `!document.querySelector('.join-qr-card').hidden`;
   const noOverlap = (sel: string) => `(() => { const c = document.querySelector('.join-qr-card').getBoundingClientRect();
@@ -236,11 +251,13 @@ try {
 
   // ---------- lobby, avatars, presence ----------
   const A = await device('A'); const idA = await tap(A, 'anna');
+  check(await tv.until(`${tvJoined} === 1`, 'joined sound'), 'the first guest arriving in the room gets the "joined" sound');
   if (SHOTS) { // the evening's first screen, with its first guest
     await tv.until('window.bloko.avatars().length === 1', '1 avatar');
     await tv.shot('start-room');
   }
   let B = await device('B'); const idB = await tap(B, 'sol');
+  check(await tv.until(`${tvJoined} === 2`, 'joined sound'), '…and so does the second');
   let A2 = A;
   let N: Client | undefined, E: Client | undefined;
   let i = 0;
@@ -277,6 +294,7 @@ try {
   B = B4;
 
   // ---------- kill -9 in the room ----------
+  const joinedBeforeKill = await tv.js(tvJoined);
   await killAndBackRoom(tv);
   A2 = await rejoin('A2', idA); B = await rejoin('B5', idB);
   const spawnOk = async () => tv!.js(`JSON.stringify(window.bloko.avatars().map((a) => [a.id, Math.round(a.x * 10), Math.round(a.y * 10)]))`);
@@ -284,6 +302,7 @@ try {
   await tv.until(`window.bloko.avatars().length === 2`, 'avatars back');
   await sleep(500);
   check((await spawnOk()) === exp, 'lobby restart: avatars back, at their spawn points');
+  check(await tv.js(tvJoined) === joinedBeforeKill, '…with no "joined" sound: the guests coming back are not newcomers');
 
   // ---------- Contract G: depth — the avatar goes behind or in front of the furniture ----------
   // `drawOrder()` is the ids painted this frame, back to front; an avatar listed BEFORE a prop is
@@ -467,9 +486,12 @@ try {
   A2.send({ t: 'pos', x: 6, y: 6, dir: 'left', moving: false });
   check(await tv.until(`(() => { const a = window.bloko.avatars().find((a) => a.id === '${idA}'); return a && Math.abs(a.x - 6) < 0.2; })()`, 'avatar moves'),
     '…and avatars resume walking (pos relayed)');
+  check(await soundOn(tv), "the TV's sound is on again (the page reloaded above)");
+  const joinedBefore = await tv.js(tvJoined);
   N = await device('N'); const idN = await tap(N, 'pierre');
   check(await tv.until(`window.bloko.avatars().some((a) => a.id === '${idN}') && document.querySelector('.lobby-count').textContent.includes('3/')`, 'newcomer'),
     'a newcomer joins after newGame and appears on the TV');
+  check(await tv.until(`${tvJoined} === ${joinedBefore + 1}`, 'joined sound'), '…with the "joined" sound, once');
   await tv.shot('newgame-lobby');
 
   } // connection
