@@ -1,20 +1,17 @@
 // Host controls: endGame + retire (a disconnected player can never block a game).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initState, ranking, reduce as reduceGame } from '../shared/game.js';
+import { BLOCK_RULES, ranking, reduce as reduceGame, startGame } from '../shared/game.js';
 
 /** @typedef {import('../shared/game.js').State} State */
 
-/** The reducer, with the tableau's settings and host the campaign passes: the ones the round was created with, and 'a'. */
-const reduce = (/** @type {State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { settings: s.rules, hostId: 'a' });
+/** The reducer, with the host the campaign passes: 'a'. */
+const reduce = (/** @type {State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { hostId: 'a' });
 
 /** Marathon game under way: a (host, anna), b (sol), c (pierre); a has made one move. @returns {State} */
 function game3() {
-  let s = initState(7);
-  s = reduce(s, { t: 'join', id: 'a', character: 'anna' });
-  s = reduce(s, { t: 'join', id: 'b', character: 'sol' });
-  s = reduce(s, { t: 'join', id: 'c', character: 'pierre' });
-  s = reduce(s, { t: 'start', id: 'a', now: 1 });
+  const players = /** @type {const} */ ([{ id: 'a', character: 'anna' }, { id: 'b', character: 'sol' }, { id: 'c', character: 'pierre' }]);
+  let s = /** @type {State} */ (startGame({ seed: 7, settings: {}, players: [...players], now: 1 }));
   assert.equal(s.phase, 'playing');
   const piece = s.players.a.hand.findIndex((h) => h !== null);
   s = reduce(s, { t: 'place', id: 'a', piece: /** @type {0|1|2} */ (piece), x: 0, y: 0 });
@@ -32,22 +29,16 @@ test('endGame freezes boards without marking players left', () => {
   assert.deepEqual(ranking(e).map((r) => r.id)[0], 'a', 'ranked as usual');
 });
 
-test('endGame: refused outside playing; host-ended game can go again / newGame', () => {
-  const lobby = initState(1);
-  assert.equal(reduce(lobby, { t: 'endGame', id: 'x' }), lobby);
-  const e = reduce(game3(), { t: 'endGame', id: 'a' });
+test('endGame: host only, refused outside playing; everyone ended plays again', () => {
+  const s = game3();
+  assert.equal(reduce(s, { t: 'endGame', id: 'b' }), s, 'not the host');
+  const e = reduce(s, { t: 'endGame', id: 'a' });
   assert.equal(reduce(e, { t: 'endGame', id: 'a' }), e, 'already finished');
-  const again = reduce(e, { t: 'again', id: 'a', now: 2 });
-  assert.equal(again.phase, 'playing');
-  assert.equal(again.endReason, null);
-  assert.ok(again.order.every((id) => !again.players[id].done && !again.players[id].retired));
-  assert.equal(reduce(e, { t: 'newGame', id: 'a' }).phase, 'lobby');
+  assert.deepEqual(BLOCK_RULES.seated(e), ['a', 'b', 'c']);
 });
 
 test('endGame on a timed game: the late bell is ignored', () => {
-  let s = initState(3, { mode: 'timed' });
-  s = reduce(s, { t: 'join', id: 'a', character: 'anna' });
-  s = reduce(s, { t: 'start', id: 'a', now: 1000 });
+  const s = /** @type {State} */ (startGame({ seed: 3, settings: { mode: 'timed' }, players: [{ id: 'a', character: 'anna' }], now: 1000 }));
   const d = /** @type {number} */ (s.deadline);
   const e = reduce(s, { t: 'endGame', id: 'a' });
   assert.equal(e.endReason, 'host');
@@ -69,8 +60,8 @@ test('retire: no-op (same ref) on unknown, already-done or left target, and outs
   assert.equal(reduce(r, { t: 'retire', id: 'a', target: 'b' }), r, 'already done');
   const left = reduce(s, { t: 'leave', id: 'c' });
   assert.equal(reduce(left, { t: 'retire', id: 'a', target: 'c' }), left, 'left');
-  const lobby = reduce(reduce(initState(1), { t: 'join', id: 'a', character: 'anna' }), { t: 'join', id: 'b', character: 'sol' });
-  assert.equal(reduce(lobby, { t: 'retire', id: 'a', target: 'b' }), lobby, 'lobby');
+  const podium = reduce(s, { t: 'endGame', id: 'a' });
+  assert.equal(reduce(podium, { t: 'retire', id: 'a', target: 'b' }), podium, 'podium');
 });
 
 test('retire: the last one out finishes the game (stuck), host may retire themself', () => {
@@ -83,11 +74,8 @@ test('retire: the last one out finishes the game (stuck), host may retire themse
   assert.equal(s.endReason, 'stuck');
 });
 
-test('newGame after a retire: the retired player is back, fresh', () => {
+test('a retired player plays the next round', () => {
   let s = reduce(game3(), { t: 'retire', id: 'a', target: 'b' });
   s = reduce(s, { t: 'endGame', id: 'a' });
-  const l = reduce(s, { t: 'newGame', id: 'a' });
-  assert.deepEqual(l.order, ['a', 'b', 'c']);
-  assert.equal(l.players.b.retired, false);
-  assert.equal(l.players.b.done, false);
+  assert.deepEqual(BLOCK_RULES.seated(s), ['a', 'b', 'c']);
 });

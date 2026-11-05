@@ -16,10 +16,10 @@ const runC = (C, c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a,
 function party(C) {
   return runC(C, newCampaign(C, 3), { t: 'join', id: 'e', character: 'elodie' }, { t: 'join', id: 's', character: 'sol' }, { t: 'join', id: 'a', character: 'anna' });
 }
-/** One block game ended by the host, then back to the lobby. @param {Content} C @param {Campaign} c */
+/** One block game ended by the host (from the room, or from the podium after going back to the room). @param {Content} C @param {Campaign} c */
 function game(C, c) {
-  if (c.at.activity?.phase === 'finished') c = runC(C, c, { t: 'activity', action: { t: 'newGame', id: 'e' } });
-  return runC(C, c, { t: 'activity', action: { t: 'start', id: 'e', now: 1 } }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
+  if (c.at.activity?.phase === 'finished') c = runC(C, c, { t: 'newGame', id: 'e' });
+  return runC(C, c, { t: 'start', id: 'e', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
 }
 
 /** A small content where the false start rewards with a given `to`. @param {any} reward @returns {Content} */

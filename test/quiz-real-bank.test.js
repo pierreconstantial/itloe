@@ -6,10 +6,8 @@ import assert from 'node:assert/strict';
 import { loadBank } from '../server/quiz.ts';
 import { projectQuiz, judgeAnswer, answerText } from '../shared/quiz/bank.js';
 import { expectedAnswers, judgeLocal } from '../shared/quiz/judge-local.js';
-import { initQuiz, reduceQuiz as reduceRound } from '../shared/quiz/index.js';
+import { startQuiz } from '../shared/quiz/index.js';
 
-/** The quiz reducer, with the tableau's settings and host the campaign passes: the ones the quiz was created with, and 'a'. */
-const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { settings: s.rules, hostId: 'a' });
 
 const bank = loadBank(); // the server's own loader: throws on any invalid question
 /** An anecdote shorter than this is an import accident, not a fun fact (e.g. a lone "P"). */
@@ -18,9 +16,8 @@ const T0 = 1_700_000_000_000;
 
 /** One question alone in a quiz, opened in `mode`; returns its question-phase projection (JSON) and round. */
 function open(/** @type {import('../shared/quiz/bank.js').Question} */ q, /** @type {'choice' | 'text'} */ mode) {
-  let s = initQuiz(1, { mode, count: 3 });
-  s = reduceQuiz(s, { t: 'join', id: 'a', character: 'anna' });
-  s = reduceQuiz(s, { t: 'start', id: 'a', now: T0, candidates: [{ id: q.id, choices: q.choices ? q.choices.length : 0 }] });
+  const s = /** @type {import('../shared/quiz/index.js').QuizState} */ (startQuiz({ seed: 1, settings: { mode, count: 3 }, now: T0,
+    players: [{ id: 'a', character: 'anna' }], inputs: [{ id: q.id, choices: q.choices ? q.choices.length : 0 }] }));
   return { s, json: JSON.stringify(projectQuiz(s, (id) => bank.byId.get(id), bank.credits)) };
 }
 

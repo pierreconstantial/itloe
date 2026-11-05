@@ -9,7 +9,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, HTTP, quizOf, sleep, SLOW } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, quizOf, roomOf, sleep, SLOW } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -136,7 +136,7 @@ const played = (k: any) => k.facts.counters['blocks.played'] ?? 0;
 /** Host starts a block game and ends it at once (endGame counts as a game played, A1). */
 async function playOne(n: number): Promise<void> {
   let i = P.mark();
-  P.send({ t: camp(P).at.activity.phase === 'lobby' ? 'start' : 'again' });
+  P.send({ t: camp(P).at.activity === null ? 'start' : 'again' });
   await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   i = P.mark();
   P.send({ t: 'endGame' });
@@ -154,16 +154,19 @@ try {
   T1 = await screen('T1');
   T2 = await screen('T2');
   let k = await until(T1, (x) => x.party.order.length === 2);
-  check(k.v === 1 && k.at.node === 'hub.false-start' && k.at.activity?.phase === 'lobby', 'new evening starts AT the false-start blocks tableau, block lobby open');
-  check(k.party.hostId === idP && k.at.activity.order.join() === `${idP},${idE}`, 'party = both phones, host = first in, both seated in the block lobby');
-  const v = T1.msgs.findLast((m) => m.t === 'view');
-  check(v.round?.kind === 'blocks' && v.round.status === 'lobby' && JSON.stringify(v.round.view) === JSON.stringify(saved().at.activity)
-    && !('activity' in v.campaign.at), 'view: the round carries the block game; the campaign on the wire carries no raw round state');
+  check(k.v === 1 && k.at.node === 'hub.false-start' && k.at.kind === 'blocks' && k.at.activity === null,
+    'new evening starts AT the false-start blocks tableau, in its room (no round yet)');
+  check(k.party.hostId === idP && roomOf(T1.msgs.findLast((m) => m.t === 'view')).order.join() === `${idP},${idE}`,
+    'party = both phones, host = first in, both in the room');
   check(!k.facts.unlocked.includes('childhood') && k.news.length === 0, 'worlds locked, no news yet');
-  await restartSame('in the false-start lobby');
+  await restartSame('in the room at the false start');
 
   // ---------- 3 block games; a kill -9 mid-game and on each podium never double-counts ----------
   await playOne(1);
+  const v = T1.msgs.findLast((m) => m.t === 'view');
+  check(v.round?.kind === 'blocks' && v.round.status === 'finished' && v.round.view.order.join() === `${idP},${idE}`
+    && JSON.stringify(v.round.view) === JSON.stringify(saved().at.activity) && !('activity' in v.campaign.at),
+    'view: the round carries the block game (both seated); the campaign on the wire carries no raw round state');
   await restartSame('on podium 1');
   check(played(camp(T1)) === 1, 'podium 1 after restart: still 1 game played (counted once)');
   let i = P.mark(); P.send({ t: 'again' });
@@ -251,10 +254,11 @@ try {
   await until(P, (x) => x.at.node === 'teens', i);
   i = P.mark(); P.send({ t: 'enter', node: 'teens.blocks' });
   k = await until(P, (x) => x.at.node === 'teens.blocks', i);
-  check(k.at.activity?.phase === 'lobby' && k.at.settings.mode === 'timed' && k.at.activity.order.length === 2,
-    "host enters a world's blocks tableau → its lobby with the node's settings (timed), the whole party seated");
+  check(k.at.activity === null && k.at.settings.mode === 'timed' && roomOf(P.msgs.findLast((m) => m.t === 'view')).order.length === 2,
+    "host enters a world's blocks tableau → its room with the node's settings (timed), the whole party there");
   i = P.mark(); P.send({ t: 'start' });
-  await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
+  const timedStart = await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
+  check(blocksOf(timedStart).order.length === 2, '…and the round starts with the whole party seated');
   const deadline = camp(T1).at.activity.deadline;
   await restartSame('in a timed world game');
   const after = camp(T1).at.activity;
@@ -266,8 +270,8 @@ try {
   check(!k.at.activity.players[idN], 'newcomer during a game joins the evening and watches (not seated)');
   i = P.mark(); P.send({ t: 'endGame' }); await until(P, (x) => x.at.activity?.phase === 'finished', i);
   i = P.mark(); P.send({ t: 'newGame' });
-  k = await until(P, (x) => x.at.activity?.phase === 'lobby', i);
-  check(!!k.at.activity.players[idN], '…and is seated in the next block lobby');
+  const roomView = await P.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
+  check(!!roomOf(roomView).players[idN], '…and is in the room after the round (seated by the next start, below)');
   N.ws.close();
 
   // ---------- chat, emotes and object actions, as they work today ----------
@@ -371,7 +375,7 @@ try {
     check(relays ? isRelayed(got) : isDropped(got), `${where}: interact at the table → ${relays ? 'relayed to every client with playerId, object and at' : 'dropped'}`);
   };
   await step(E, TABLE);
-  await interactsHere('in a block lobby', true);
+  await interactsHere('in the room at a block tableau', true);
   await cooldown(idE, 'interact');
   i = T1.mark();
   E.send({ t: 'interact', object: 'table' }); E.send({ t: 'interact', object: 'table' });
@@ -383,7 +387,8 @@ try {
   await step(E, TABLE);
 
   i = P.mark(); P.send({ t: 'start' });
-  await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
+  const next = await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
+  check(!!blocksOf(next).players[idN], 'the newcomer is seated in the round started from the room');
   await interactsHere('during a running block game', false);
   i = P.mark(); P.send({ t: 'endGame' });
   await until(P, (x) => x.at.activity?.phase === 'finished', i);
@@ -395,8 +400,8 @@ try {
   await until(P, (x) => x.at.node === 'childhood', i);
   await interactsHere('in a world', true);
   i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'childhood.quiz' } });
-  await P.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'lobby', i);
-  await interactsHere('in a quiz lobby', true);
+  await P.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz', i);
+  await interactsHere('in the room at a quiz tableau', true);
   i = P.mark(); P.send({ t: 'start' });
   const question = quizOf(await P.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'question', i));
   await interactsHere('during a quiz question', false);

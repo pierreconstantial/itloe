@@ -9,7 +9,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, HTTP, quizOf, settingsOf, sleep } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, quizOf, roomOf, settingsOf, sleep } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -169,7 +169,7 @@ try {
   gm(P, { op: 'unlock', node: 'childhood' });
   gm(P, { op: 'unlock', node: QUIZ });
   gm(P, { op: 'goto', node: QUIZ });
-  await T.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'lobby', i);
+  await T.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz', i);
   await playQuiz(P, [{ c: P, right: true }, { c: E, right: false }, { c: S, right: false }], T);
   k = await until(T, (x) => x.facts.done.includes(QUIZ));
   check(k.facts.inventory.pierre?.ticket === 1 && !k.facts.inventory.elodie?.ticket && !k.facts.inventory.sol?.ticket, 'quiz won by Pierre → the ticket to the winner only');
@@ -184,7 +184,7 @@ try {
   T = await screen();
   i = T.mark();
   gm(P, { op: 'unlock', node: 'childhood' }); gm(P, { op: 'unlock', node: QUIZ }); gm(P, { op: 'goto', node: QUIZ });
-  await T.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'lobby', i);
+  await T.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz', i);
   // P and E answer right at the same moment → same points → a tie at rank 1
   await playQuiz(P, [{ c: P, right: true }, { c: E, right: true }, { c: S, right: false }], T);
   k = await until(T, (x) => x.facts.done.includes(QUIZ));

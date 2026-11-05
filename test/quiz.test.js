@@ -1,11 +1,11 @@
 // Contract E — the quiz reducer (shared/quiz/index.js): pure, seeded, never sees an answer.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initQuiz, reduceQuiz as reduceRound, quizRanking, resolvePending, mergeQuizSettings, pointsFor, SCORING, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
+import { startQuiz, reduceQuiz as reduceRound, quizRanking, resolvePending, mergeQuizSettings, pointsFor, SCORING, QUIZ_DEFAULTS, QUIZ_RULES } from '../shared/quiz/index.js';
 
 /** @typedef {import('../shared/quiz/index.js').QuizState} QuizState */
-/** The reducer, with the tableau's settings and host the campaign passes: by default the ones the quiz was created with, and 'a'. */
-const reduceQuiz = (/** @type {QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a, settings = s.rules, hostId = 'a') => reduceRound(s, a, { settings, hostId });
+/** The reducer, with the host the campaign passes: 'a'. */
+const reduceQuiz = (/** @type {QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { hostId: 'a' });
 
 const T0 = 1_700_000_000_000;
 /** 6 candidates: 4 with choices, 2 text-only. */
@@ -14,14 +14,12 @@ const CANDIDATES = [
   { id: 'q4', choices: 4 }, { id: 'q5', choices: 0 }, { id: 'q6', choices: 4 },
 ];
 
-/** A lobby with Anna (host) and Sol, settings patched. */
-function lobby(patch = {}) {
-  let s = initQuiz(42, { count: 3, seconds: 20, ...patch });
-  s = reduceQuiz(s, { t: 'join', id: 'a', character: 'anna' });
-  s = reduceQuiz(s, { t: 'join', id: 'b', character: 'sol' });
-  return s;
-}
-const started = (patch = {}) => reduceQuiz(lobby(patch), { t: 'start', id: 'a', now: T0, candidates: CANDIDATES });
+/** A quiz with Anna (host) and Sol on its first question, settings patched; null when it can't start. */
+const start = (patch = {}, candidates = CANDIDATES) => startQuiz({
+  seed: 42, settings: { count: 3, seconds: 20, ...patch }, now: T0, inputs: candidates,
+  players: [{ id: 'a', character: 'anna' }, { id: 'b', character: 'sol' }],
+});
+const started = (patch = {}) => /** @type {QuizState} */ (start(patch));
 
 test('quiz settings reject invalid ranges and modes and preserve valid filters', () => {
   assert.equal(mergeQuizSettings(QUIZ_DEFAULTS, { count: 2 }).count, QUIZ_DEFAULTS.count, 'below the minimum → dropped');
@@ -30,8 +28,7 @@ test('quiz settings reject invalid ranges and modes and preserve valid filters',
 });
 
 test('start: seeded picks, candidate exhaustion and deadline from now', () => {
-  const s = lobby();
-  assert.equal(reduceQuiz(s, { t: 'start', id: 'a', now: T0, candidates: [] }), s, 'nothing to ask → refused');
+  assert.equal(start({}, []), null, 'nothing to ask → no quiz');
   const q = started();
   assert.equal(q.phase, 'question');
   assert.equal(q.questions.length, 3);
@@ -41,8 +38,9 @@ test('start: seeded picks, candidate exhaustion and deadline from now', () => {
   // deterministic: same seed + candidates → same pick
   assert.deepEqual(started().questions, q.questions);
   // fewer candidates than count → plays what there is
-  const few = reduceQuiz(lobby({ count: 10 }), { t: 'start', id: 'a', now: T0, candidates: CANDIDATES.slice(0, 2) });
-  assert.equal(few.questions.length, 2);
+  const few = start({ count: 10 }, CANDIDATES.slice(0, 2));
+  assert.equal(few?.questions.length, 2);
+  assert.deepEqual(q.order.map((id) => [q.players[id].name, q.players[id].score]), [['Anna', 0], ['Sol', 0]]);
 });
 
 test('modes: choice asks only questions with choices; text never shows choices; mixed follows the question', () => {
@@ -160,12 +158,11 @@ test('endGame: host, from question (round dropped) or reveal (kept)', () => {
   assert.equal(fromQuestion.players.a.score, 0, 'half a round is not credited');
   const fromReveal = reduceQuiz(reduceQuiz(s, { t: 'close', deadline: /** @type {any} */ (s.round).deadline }), { t: 'endGame', id: 'a' });
   assert.ok(fromReveal.players.a.score > 0);
-  assert.equal(reduceQuiz(lobby(), { t: 'endGame', id: 'a' }).phase, 'lobby', 'nothing to end in the lobby');
+  assert.equal(reduceQuiz(fromQuestion, { t: 'endGame', id: 'a' }), fromQuestion, 'nothing left to end');
+  assert.equal(reduceQuiz(s, { t: 'endGame', id: 'b' }), s, 'not the host');
 });
 
-test('leave: lobby drops; mid-quiz marks left, closes the round if they were the last awaited', () => {
-  const l = reduceQuiz(lobby(), { t: 'leave', id: 'a' });
-  assert.deepEqual(l.order, ['b']);
+test('leave: mid-quiz marks left, closes the round if they were the last awaited', () => {
   let s = choiceRound();
   s = reduceQuiz(s, { t: 'answer', id: 'a', choice: 1, now: T0 + 1000, verdict: 'right' });
   s = reduceQuiz(s, { t: 'leave', id: 'b' });
@@ -174,31 +171,14 @@ test('leave: lobby drops; mid-quiz marks left, closes the round if they were the
   assert.equal(reduceQuiz(s, { t: 'answer', id: 'b', choice: 1, now: T0 + 2000, verdict: 'right' }), s);
 });
 
-test('newGame: back to the lobby, scores reset, left players dropped; ranking shares ties', () => {
+test('ranking shares ties; seated (who plays again) drops the players who left', () => {
   let s = choiceRound();
   s = reduceQuiz(s, { t: 'answer', id: 'a', choice: 1, now: T0 + 1000, verdict: 'right' });
   s = reduceQuiz(s, { t: 'answer', id: 'b', choice: 1, now: T0 + 1000, verdict: 'right' });
-  s = reduceQuiz(s, { t: 'endGame', id: 'a' });
-  assert.deepEqual(quizRanking(s).map((r) => r.rank), [1, 1], 'same points → shared rank');
-  const n = reduceQuiz(s, { t: 'newGame', id: 'a' });
-  assert.equal(n.phase, 'lobby');
-  assert.ok(Object.values(n.players).every((p) => p.score === 0 && p.correct === 0));
-});
-
-test('again: refuses a lobby or empty bank, drops left players and resets the clock', () => {
-  let s = choiceRound();
-  s = reduceQuiz(s, { t: 'answer', id: 'a', choice: 1, now: T0 + 1000, verdict: 'right' });
-  s = reduceQuiz(s, { t: 'leave', id: 'b' });
-  s = reduceQuiz(s, { t: 'endGame', id: 'a' });
-  const again = { t: /** @type {const} */ ('again'), id: 'a', now: T0 + 60_000, candidates: CANDIDATES };
-  const l = lobby();
-  assert.equal(reduceQuiz(l, again), l, 'again is for the podium');
-  assert.equal(reduceQuiz(s, { ...again, candidates: [] }), s, 'nothing left to ask → refused');
-  const r = reduceQuiz(s, again);
-  assert.equal(r.round?.deadline, T0 + 60_000 + 20_000);
-  assert.notEqual(r.seed, s.seed);
-  assert.deepEqual(r.order, ['a'], 'the player who left is dropped');
-  assert.deepEqual([r.players.a.score, r.players.a.correct], [0, 0]);
+  const fin = reduceQuiz(s, { t: 'endGame', id: 'a' });
+  assert.deepEqual(quizRanking(fin).map((r) => r.rank), [1, 1], 'same points → shared rank');
+  assert.deepEqual(QUIZ_RULES.seated(fin), ['a', 'b']);
+  assert.deepEqual(QUIZ_RULES.seated(reduceQuiz(fin, { t: 'leave', id: 'b' })), ['a']);
 });
 
 test('resolvePending: a resumed quiz never re-judges, pending → wrong', () => {

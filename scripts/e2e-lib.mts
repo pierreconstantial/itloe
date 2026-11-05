@@ -21,6 +21,14 @@ export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export const blocksOf = (v: any): any => (v?.round?.kind === 'blocks' ? v.round.view : null);
 /** A view's quiz (its round's view while a quiz runs: the public projection), else null. */
 export const quizOf = (v: any): any => (v?.round?.kind === 'quiz' ? v.round.view : null);
+/** Who is in the room at a tableau, between rounds (the party members who haven't left), in a round's
+ *  { order, players } shape; null during a round or away from a minigame's tableau. */
+export const roomOf = (v: any): any => {
+  if (!v?.campaign?.at.kind || v.round) return null;
+  const party = v.campaign.party;
+  const order = party.order.filter((id: string) => !party.players[id].left);
+  return { order, players: Object.fromEntries(order.map((id: string) => [id, party.players[id]])) };
+};
 /** A view's tableau settings (the campaign keeps them), else null. */
 export const settingsOf = (v: any): any => v?.campaign?.at.settings ?? null;
 /** A view's host: the party's (a minigame stores none). */
@@ -48,6 +56,8 @@ export class Client {
   since(i: number): any[] { return this.msgs.slice(i); }
   /** The block game in the last view, or null. */
   lastView(): any { return blocksOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
+  /** Who is in the room in the last view (between rounds), or null. */
+  lastRoom(): any { return roomOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
   /** The tableau's settings in the last view, or null. */
   lastSettings(): any { return settingsOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
   /** The party's host in the last view. */

@@ -1,9 +1,9 @@
-// Contract E / E1 — a quiz tableau inside the campaign engine (shared/campaign): enter → quiz lobby
-// seeded from the party → finished exactly once → its result: counters, totals and the evening's asked ids.
+// Contract E / E1 — a quiz tableau inside the campaign engine (shared/campaign): enter → the room → a quiz
+// started with the party → finished exactly once → its result: counters, totals and the evening's asked ids.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { newCampaign, reduceCampaign, loadCampaign, roundStatus, SAMPLE_CONTENT, record, holds } from '../shared/campaign/index.js';
-import { initQuiz, QUIZ_COUNTER, QUIZ_RULES } from '../shared/quiz/index.js';
+import { startQuiz, QUIZ_COUNTER, QUIZ_RULES } from '../shared/quiz/index.js';
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
 /** @typedef {import('../shared/campaign/types.js').CampaignAction} CampaignAction */
@@ -19,7 +19,7 @@ const run = (c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a, C),
 const quiz = (c) => /** @type {any} */ (c.at.activity);
 const act = (/** @type {any} */ action) => /** @type {CampaignAction} */ ({ t: 'activity', action });
 
-/** Élodie (host) + Sol, standing in the World 1 quiz lobby. */
+/** Élodie (host) + Sol, standing in the room at the World 1 quiz. */
 function inQuiz() {
   let c = newCampaign(C, 5);
   c = run(c, { t: 'join', id: 'e', character: 'elodie' }, { t: 'join', id: 's', character: 'sol' });
@@ -32,7 +32,7 @@ function inQuiz() {
 
 /** Plays the whole quiz: Élodie right every time, Sol wrong. */
 function playThrough(/** @type {Campaign} */ c, now = 1000) {
-  c = run(c, act({ t: 'start', id: 'e', now, candidates: CANDIDATES }));
+  c = run(c, { t: 'start', id: 'e', now, inputs: CANDIDATES });
   while (quiz(c).phase === 'question') {
     const r = /** @type {any} */ (quiz(c).round);
     const given = r.asChoice ? { choice: 0 } : { text: 'x' };
@@ -44,8 +44,8 @@ function playThrough(/** @type {Campaign} */ c, now = 1000) {
   return c;
 }
 
-test('quiz under way: enter/back refused; a newcomer waits for the next lobby', () => {
-  let c = run(inQuiz(), act({ t: 'start', id: 'e', now: 1, candidates: CANDIDATES }));
+test('quiz under way: enter/back refused; a newcomer waits for the next round', () => {
+  let c = run(inQuiz(), { t: 'start', id: 'e', now: 1, inputs: CANDIDATES });
   assert.equal(roundStatus(c), 'running');
   assert.equal(run(c, { t: 'back', id: 'e' }), c, 'back refused while the quiz runs');
   c = run(c, { t: 'join', id: 'a', character: 'anna' });
@@ -73,7 +73,8 @@ test('the quiz result counts right answers per node (total and per character) fo
   const c = newCampaign(C, 1);
   /** @type {QuizState} */
   const q = {
-    ...initQuiz(1), phase: 'finished', endReason: 'done', order: ['e', 's'],
+    .../** @type {QuizState} */ (startQuiz({ seed: 1, settings: {}, now: 0, players: [{ id: 'e', character: 'elodie' }], inputs: CANDIDATES })),
+    phase: 'finished', endReason: 'done', order: ['e', 's'],
     players: {
       e: { id: 'e', character: 'elodie', name: 'Élodie', color: 1, score: 900, correct: 3, left: false },
       s: { id: 's', character: 'sol', name: 'Sol', color: 2, score: 400, correct: 2, left: false },

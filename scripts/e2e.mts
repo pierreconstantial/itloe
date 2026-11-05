@@ -3,7 +3,7 @@
 // (kill -9 / resume across phases: scripts/e2e-resume.mts, which runs its own server)
 import { PIECES } from '../shared/pieces.js';
 import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
-import { blocksOf, check, Client, finish, hostOf, HTTP, illegalMove, legalMoves, playToDone, sleep, URL_WS } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, hostOf, HTTP, illegalMove, roomOf, legalMoves, playToDone, sleep, URL_WS } from './e2e-lib.mts';
 
 let s = 12345;
 const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 4294967296);
@@ -47,14 +47,14 @@ check((await A.waitFor((m) => m.t === 'err', i)).code === 'unknown-player', 'sta
 // --- join ---
 i = A.mark(); A.send({ t: 'join', character: 'anna' });
 const idA = (await A.waitFor((m) => m.t === 'welcome', i)).playerId;
-await A.waitFor((m) => m.t === 'view' && blocksOf(m).players[idA], i);
+await A.waitFor((m) => m.t === 'view' && roomOf(m)?.players[idA], i);
 i = B.mark(); B.send({ t: 'join', character: 'sol' });
 const idB = (await B.waitFor((m) => m.t === 'welcome', i)).playerId;
-await B.waitFor((m) => m.t === 'view' && blocksOf(m).players[idB], i);
-await screen.waitFor((m) => m.t === 'view' && blocksOf(m).order.length === 2);
+await B.waitFor((m) => m.t === 'view' && roomOf(m)?.players[idB], i);
+await screen.waitFor((m) => m.t === 'view' && roomOf(m)?.order.length === 2);
 check(true, 'room code accepted (B typed it in lower case)');
-check(B.lastHost() === idA && B.lastView().order.join() === `${idA},${idB}`, 'two joins → welcome each, A is host, view broadcast to all (incl. screen)');
-const pA = B.lastView().players[idA];
+check(B.lastHost() === idA && B.lastRoom().order.join() === `${idA},${idB}`, 'two joins → welcome each, A is host, view broadcast to all (incl. screen)');
+const pA = B.lastRoom().players[idA];
 check(pA.character === 'anna' && pA.name === CHARACTERS.anna.name && pA.color === CHARACTERS.anna.color, 'join by character → name + colour from the roster');
 
 // --- character already picked / not a character / roster exhausted ---
@@ -64,29 +64,29 @@ check((await T.waitFor((m) => m.t === 'err', i)).code === 'taken', 'join with a 
 i = T.mark(); T.send({ t: 'join', character: 'bowser' });
 check((await T.waitFor((m) => m.t === 'err', i)).code === 'taken', 'join with an unknown character → err taken');
 
-// --- leave in the lobby: player removed, its id can no longer rejoin ---
+// --- leave in the room: player removed, its id can no longer rejoin ---
 const L = new Client('L'); await L.open(); L.send({ t: 'hello', role: 'player', room });
 i = L.mark(); L.send({ t: 'join', character: 'pierre' });
 const idL = (await L.waitFor((m) => m.t === 'welcome', i)).playerId;
 const M = new Client('M'); await M.open(); M.send({ t: 'hello', role: 'player', room });
 i = M.mark(); M.send({ t: 'join', character: 'elodie' });
 const idM = (await M.waitFor((m) => m.t === 'welcome', i)).playerId;
-await A.waitFor((m) => m.t === 'view' && blocksOf(m).players[idL] && blocksOf(m).players[idM]);
+await A.waitFor((m) => m.t === 'view' && roomOf(m)?.players[idL] && roomOf(m)?.players[idM]);
 
 i = T.mark(); T.send({ t: 'join', character: 'pierre' });
 check((await T.waitFor((m) => m.t === 'err', i)).code === 'full', `every character held (${ROSTER_SIZE}) → err full`);
 i = A.mark(); M.send({ t: 'leave' });
-await A.waitFor((m) => m.t === 'view' && !blocksOf(m).players[idM], i);
+await A.waitFor((m) => m.t === 'view' && !roomOf(m)?.players[idM], i);
 i = T.mark(); T.send({ t: 'join', character: 'elodie' });
 const idT = (await T.waitFor((m) => m.t === 'welcome', i)).playerId;
 check(!!idT, "a left player's character is free again");
 M.ws.close();
 i = A.mark(); T.send({ t: 'leave' });
-await A.waitFor((m) => m.t === 'view' && !blocksOf(m).players[idT], i);
+await A.waitFor((m) => m.t === 'view' && !roomOf(m)?.players[idT], i);
 T.ws.close();
 i = A.mark(); L.send({ t: 'leave' });
-const vl = blocksOf(await A.waitFor((m) => m.t === 'view', i));
-check(!vl.players[idL] && vl.order.join() === `${idA},${idB}`, 'lobby leave → player removed, broadcast');
+const vl = roomOf(await A.waitFor((m) => m.t === 'view', i));
+check(!vl.players[idL] && vl.order.join() === `${idA},${idB}`, 'leave in the room → player removed, broadcast');
 L.ws.close();
 const L2 = new Client('L2'); await L2.open();
 i = L2.mark(); L2.send({ t: 'hello', role: 'player', room, playerId: idL });
@@ -210,48 +210,47 @@ check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-host', 'again wh
 
 const nB = await playToDone(B, idB, Acur, rnd);
 const fin = Acur.lastView();
-await screen.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'finished');
+await screen.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished');
 check(fin.phase === 'finished', `B done after ${nB} moves → phase finished (scores A=${fin.players[idA].score}, B=${fin.players[idB].score})`);
 i = B.mark();
 B.send({ t: 'place', piece: 0, x: 0, y: 0 });
 check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-playing', 'place in finished → err not-playing');
 
-// --- newGame: podium → lobby, same players, newcomers can join, start works again ---
+// --- newGame: podium → the room, same players, newcomers can join, start works again ---
 ib = B.mark();
 B.send({ t: 'newGame' });
 check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-host', 'non-host newGame → err not-host');
 ia = Acur.mark(); ib = B.mark();
 Acur.send({ t: 'newGame' });
 const vnMsg = await B.waitFor((m) => m.t === 'view', ib);
-const vn = blocksOf(vnMsg);
-await screen.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'lobby');
-check(vn.phase === 'lobby' && hostOf(vnMsg) === idA && vn.order.join() === `${idA},${idB}` && vn.deadline === null && vn.endReason === null
-  && vn.order.every((id: string) => vn.players[id].score === 0 && vn.players[id].board.every((c: number) => c === 0)),
-  'host newGame → lobby, same players + host, fresh boards/scores, broadcast');
+const vn = roomOf(vnMsg);
+await screen.waitFor((m) => m.t === 'view' && !!roomOf(m));
+check(!!vn && hostOf(vnMsg) === idA && vn.order.join() === `${idA},${idB}`,
+  'host newGame → the room, same players + host, broadcast');
 check(vn.players[idA].character === 'anna' && vn.players[idB].character === 'sol', 'newGame keeps each character');
 const joinAfter = await (await fetch(`${HTTP}/api/join`)).json();
 check(joinAfter.code === room, 'newGame keeps the room code');
 ia = Acur.mark();
 Acur.send({ t: 'newGame' });
-check((await Acur.waitFor((m) => m.t === 'err', ia)).code === 'refused', 'host newGame outside finished (lobby) → err refused');
+check((await Acur.waitFor((m) => m.t === 'err', ia)).code === 'refused', 'host newGame outside finished (the room) → err refused');
 const N = new Client('N'); await N.open(); N.send({ t: 'hello', role: 'player', room });
 i = N.mark(); N.send({ t: 'join', character: 'pierre' });
 const idN = (await N.waitFor((m) => m.t === 'welcome', i)).playerId;
-await Acur.waitFor((m) => m.t === 'view' && blocksOf(m).players[idN]);
-check(Acur.lastView().order.join() === `${idA},${idB},${idN}`, 'a newcomer joins the lobby after newGame');
+await Acur.waitFor((m) => m.t === 'view' && roomOf(m)?.players[idN]);
+check(Acur.lastRoom().order.join() === `${idA},${idB},${idN}`, 'a newcomer joins the room after newGame');
 i = N.mark(); N.send({ t: 'start' });
 check((await N.waitFor((m) => m.t === 'err', i)).code === 'not-host', 'newcomer (non-host) start → err not-host');
 ia = Acur.mark();
 Acur.send({ t: 'start' });
-const vs = blocksOf(await Acur.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'playing', ia));
+const vs = blocksOf(await Acur.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', ia));
 check(vs.order.length === 3 && vs.seed !== fin.seed, 'host start after newGame → playing with 3 players, new seed');
 await playToDone(N, idN, Acur, rnd);
 await playToDone(B, idB, Acur, rnd);
 await playToDone(Acur, idA, B, rnd);
-await B.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'finished');
+await B.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished');
 check(B.lastView().phase === 'finished', 'second game played to the podium');
 N.send({ t: 'leave' });
-await B.waitFor((m) => m.t === 'view' && !blocksOf(m).players[idN]);
+await B.waitFor((m) => m.t === 'view' && !blocksOf(m)?.players[idN]);
 N.ws.close();
 
 // --- again ---

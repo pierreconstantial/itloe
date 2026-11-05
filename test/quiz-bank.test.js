@@ -5,10 +5,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { validateBank, candidatesFor, judgeAnswer, projectQuiz, answerText } from '../shared/quiz/bank.js';
 import { expectedAnswers } from '../shared/quiz/judge-local.js';
-import { initQuiz, reduceQuiz as reduceRound, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
+import { startQuiz, reduceQuiz as reduceRound, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
 
-/** The quiz reducer, with the tableau's settings and host the campaign passes: the ones the quiz was created with, and 'a'. */
-const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { settings: s.rules, hostId: 'a' });
+/** The quiz reducer, with the host the campaign passes: 'a'. */
+const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { hostId: 'a' });
 
 /** @type {import('../shared/quiz/bank.js').Question[]} */
 const BANK = JSON.parse(readFileSync(new URL('../data/quiz/placeholder.json', import.meta.url), 'utf8')).questions;
@@ -75,13 +75,16 @@ test('judgeAnswer: a displayed choice maps through the round permutation; text u
   assert.equal(judgeAnswer(/** @type {any} */ (lookup('ph-lit-miserables')), { asChoice: false, perm: null }, { text: 'Hugo' }), 'right', 'accept list');
 });
 
+/** A quiz started at T0 by Anna ('a', host) and the given others, on its first question. */
+const quizOf = (/** @type {Partial<import('../shared/quiz/index.js').QuizSettings>} */ settings, /** @type {import('../shared/quiz/index.js').Candidate[]} */ inputs, seed = 1, others = /** @type {[string, import('../shared/characters.js').CharacterId][]} */ ([])) =>
+  /** @type {import('../shared/quiz/index.js').QuizState} */ (startQuiz({ seed, settings, now: T0, inputs,
+    players: [{ id: 'a', character: 'anna' }, ...others.map(([id, character]) => ({ id, character }))] }));
+
 /** A whole quiz over the real bank: Anna answers right, Sol wrong, every round. */
 /** @param {'choice' | 'text' | 'mixed'} mode */
 function playAll(mode) {
-  let s = initQuiz(7, { mode, count: 10 });
-  s = reduceQuiz(s, { t: 'join', id: 'a', character: 'anna' });
-  s = reduceQuiz(s, { t: 'join', id: 'b', character: 'sol' });
-  s = reduceQuiz(s, { t: 'start', id: 'a', now: T0, candidates: candidatesFor(BANK, s.rules, []) });
+  const settings = { ...QUIZ_DEFAULTS, mode, count: 10 };
+  let s = quizOf(settings, candidatesFor(BANK, settings, []), 7, [['b', 'sol']]);
   /** @type {{ phase: string, json: string, q: import('../shared/quiz/bank.js').Question }[]} */
   const seen = [];
   let now = T0;
@@ -103,10 +106,8 @@ function playAll(mode) {
 
 test('credits in every phase; a question\'s source only from the reveal on', () => {
   const credits = ['OpenQuizzDB — CC BY-SA 4.0'];
-  let s = initQuiz(3, { mode: 'choice', count: 3 });
-  s = reduceQuiz(s, { t: 'join', id: 'a', character: 'anna' });
-  assert.deepEqual(projectQuiz(s, lookup, credits).credits, credits, 'lobby');
-  s = reduceQuiz(s, { t: 'start', id: 'a', now: T0, candidates: candidatesFor(BANK, s.rules, []) });
+  const settings = { ...QUIZ_DEFAULTS, mode: /** @type {const} */ ('choice'), count: 3 };
+  let s = quizOf(settings, candidatesFor(BANK, settings, []), 3);
   const question = projectQuiz(s, lookup, credits);
   assert.deepEqual(question.credits, credits, 'question');
   const src = /** @type {any} */ (lookup(/** @type {any} */ (s.round).questionId)).source;

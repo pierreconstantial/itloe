@@ -1,5 +1,5 @@
 // TV end-to-end (slice 2/2b, screen side): a real /screen/ page in headless Chrome (CDP), a real
-// server this script kill -9s, and phones as WebSocket clients. Checks lobby re-entry after newGame,
+// server this script kill -9s, and phones as WebSocket clients. Checks the room again after newGame,
 // auto-reconnect after a restart in every phase, presence dimming (debounced), screens never bumped,
 // and the wake-from-sleep reconnect. ONLY=connection|campaign|quiz runs just that section.
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
@@ -14,7 +14,7 @@ import { SAMPLE_CONTENT } from '../shared/campaign/index.js';
 
 /** A node's title (the server runs the sample content). @param {string} id */
 const C_TITLE = (id: string): string => SAMPLE_CONTENT.nodes[id].title;
-import { blocksOf, check, Client, finish, HTTP, legalMoves, quizOf, sleep, SLOW } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, legalMoves, quizOf, roomOf, sleep, SLOW } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -165,10 +165,25 @@ async function rejoin(label: string, playerId: string): Promise<Client> {
 const drop = async (c: Client) => { c.ws.close(); for (let k = 0; k < 100 && !c.closed; k++) await sleep(10); };
 
 const tvState = 'window.bloko.state()';
+/** The TV shows the room at a tableau: no round, a minigame's tableau, the party room under the band. */
+const tvRoom = "(window.bloko?.state() === null && !!window.bloko.campaign()?.at.kind && document.body.classList.contains('party') && !!document.querySelector('section.lobby'))";
 const tvOnlineBanner = "document.body.classList.contains('offline')";
 const tvOffline = 'JSON.stringify(window.bloko.offline().sort())';
 const boardsOf = (s: any) => JSON.stringify(s.order.map((id: string) => [id, s.players[id].board, s.players[id].score, s.players[id].hand]));
 
+
+/** kill -9 in the room at a tableau, check the TV shows the banner, restart, check the same room comes back. */
+async function killAndBackRoom(tv: Page): Promise<void> {
+  const partyJs = 'JSON.stringify(window.bloko.campaign().party)';
+  const before = await tv.js(partyJs);
+  await kill9();
+  check(await tv.until(tvOnlineBanner, 'banner'), 'room: kill -9 → TV shows the "Connecting…" banner');
+  await tv.shot('kill-lobby-banner');
+  await boot();
+  check(await tv.until(`!${tvOnlineBanner}`, 'reconnect', 6000), 'room: restart → TV reconnects by itself, banner gone');
+  check(await tv.until(tvRoom, 'room again') && await tv.js(partyJs) === before,
+    'room: the room at the tableau again, same party and host after the restart');
+}
 
 /** kill -9, check the TV shows the banner, restart, check it comes back with the same game. */
 async function killAndBack(tv: Page, phase: string, ref: Client): Promise<void> {
@@ -210,7 +225,7 @@ try {
   await boot(true);
   room = (await (await fetch(`${HTTP}/api/join`)).json()).code;
   tv = await Page.open(`${HTTP}/screen/`);
-  check(await tv.until(`window.bloko?.state()?.phase === 'lobby' && !${tvOnlineBanner}`, 'tv lobby'), 'TV opens on the lobby');
+  check(await tv.until(`${tvRoom} && !${tvOnlineBanner}`, 'tv room'), 'TV opens on the room at the false start');
 
   const cardOn = `!document.querySelector('.join-qr-card').hidden`;
   const noOverlap = (sel: string) => `(() => { const c = document.querySelector('.join-qr-card').getBoundingClientRect();
@@ -248,7 +263,7 @@ try {
 
   // ---------- screens are never bumped ----------
   tv2 = await Page.open(`${HTTP}/screen/`);
-  await tv2.until(`window.bloko?.state()?.phase === 'lobby'`, 'tv2');
+  await tv2.until(tvRoom, 'tv2');
   const B4 = await rejoin('B4', idB); // bumps B3 (replaced) — the TVs must not care
   await B.waitFor((m) => m.t === 'replaced');
   await sleep(300);
@@ -258,8 +273,8 @@ try {
   check(await tv.until("document.visibilityState === 'visible'", 'tv visible', 2000), 'TV tab is visible again (test setup)');
   B = B4;
 
-  // ---------- kill -9 in the lobby ----------
-  await killAndBack(tv, 'lobby', B);
+  // ---------- kill -9 in the room ----------
+  await killAndBackRoom(tv);
   A2 = await rejoin('A2', idA); B = await rejoin('B5', idB);
   const spawnOk = async () => tv!.js(`JSON.stringify(window.bloko.avatars().map((a) => [a.id, Math.round(a.x * 10), Math.round(a.y * 10)]))`);
   const exp = JSON.stringify([[idA, Math.round(spawnPoint('anna').x * 10), Math.round(spawnPoint('anna').y * 10)], [idB, Math.round(spawnPoint('sol').x * 10), Math.round(spawnPoint('sol').y * 10)]]);
@@ -325,7 +340,7 @@ try {
 
   // ---------- playing: presence on boards, kill -9 ----------
   i = A2.mark(); A2.send({ t: 'start' });
-  await A2.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'playing', i);
+  await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   check(await tv.until(`${tvState}.phase === 'playing'`, 'playing'), 'TV shows the game');
 
   // ---------- "show the QR again": any player asks → side card on the TVs, never over a board ----------
@@ -425,12 +440,12 @@ try {
 
   // ---------- host controls: retire shows "Out", endGame shows the podium with its line ----------
   i = A2.mark(); A2.send({ t: 'retire', target: idB });
-  await A2.waitFor((m) => m.t === 'view' && blocksOf(m).players[idB].retired, i);
+  await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.players[idB].retired, i);
   check(await tv.until(`document.querySelector('.panel[data-id="${idB}"] .done-overlay')?.textContent.includes('Out')`, 'out overlay'),
     'host retires a player → their board shows "🚪 Out" on the TV');
   await tv.shot('retired');
   i = A2.mark(); A2.send({ t: 'endGame' });
-  await A2.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'finished', i);
+  await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i);
   check(await tv.until(`${tvState}.phase === 'finished' && document.querySelector('.podium-ending')?.textContent === 'Game ended by the host'`, 'podium'),
     'host endGame → TV podium says "Game ended by the host"');
   check(await tv.js(`[...document.querySelectorAll('.rank-row')].some((r) => r.textContent.includes('Sol') && r.querySelector('.out-tag'))`),
@@ -442,8 +457,8 @@ try {
 
   // ---------- newGame: back to the party room, newcomer appears ----------
   i = A2.mark(); A2.send({ t: 'newGame' });
-  await A2.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'lobby', i);
-  check(await tv.until(`${tvState}.phase === 'lobby' && !document.getElementById('party-bg').hidden && document.body.classList.contains('party')`, 'party back'),
+  await A2.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
+  check(await tv.until(`${tvRoom} && !document.getElementById('party-bg').hidden`, 'party back'),
     'newGame → TV back in the party room');
   check(await tv.until('window.bloko.avatars().length === 2', 'avatars'), '…with both avatars');
   A2.send({ t: 'pos', x: 6, y: 6, dir: 'left', moving: false });
@@ -477,12 +492,12 @@ try {
 
   // play the false start until the 3rd game unlocks the worlds; a second TV is open for the last one
   i = A2.mark(); A2.send({ t: 'enter', node: 'hub.false-start' });
-  await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'lobby', i);
+  await A2.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
   tv2 = await Page.open(`${HTTP}/screen/`, true); // its own window: BOTH TVs visible, both play
-  await tv2.until(`window.bloko?.state()?.phase === 'lobby'`, 'tv2');
+  await tv2.until(tvRoom, 'tv2');
   check(await tv.visible() && await tv2.visible(), 'two TVs, both visible (separate windows)');
   for (let g = 0; g < 4 && !(cv()?.news ?? []).length; g++) {
-    if (A2.lastView().phase === 'finished') { i = A2.mark(); A2.send({ t: 'newGame' }); await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'lobby', i); }
+    if (A2.lastView()?.phase === 'finished') { i = A2.mark(); A2.send({ t: 'newGame' }); await A2.waitFor((m) => m.t === 'view' && !!roomOf(m), i); }
     i = A2.mark(); A2.send({ t: 'start' }); await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
     i = A2.mark(); A2.send({ t: 'endGame' }); await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i);
   }
@@ -540,21 +555,21 @@ try {
   }
 
   if (!ONLY || ONLY === 'quiz') {
-  // ---------- quiz: World 1's block game opens its quiz door; lobby → questions → reveals → podium ----------
+  // ---------- quiz: World 1's block game opens its quiz door; the room → questions → reveals → podium ----------
   const lastQuiz = (c: Client) => quizOf([...c.msgs].reverse().find((m) => m.t === 'view'));
   i = A2.mark(); A2.send({ t: 'enter', node: 'childhood.blocks' });
-  await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'lobby', i);
+  await A2.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
   i = A2.mark(); A2.send({ t: 'start' }); await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   i = A2.mark(); A2.send({ t: 'endGame' }); await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i);
   i = A2.mark(); A2.send({ t: 'back' }); await A2.waitFor((m) => m.t === 'view' && blocksOf(m) === null && m.campaign?.at.node === 'childhood', i);
   check(await tv.until(`JSON.parse(${doorsJs})['childhood.quiz'] !== 'locked'`, 'quiz door'), "World 1's block game done → its quiz door opens");
   i = A2.mark(); A2.send({ t: 'enter', node: 'childhood.quiz' });
-  const ql = await A2.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'lobby', i);
+  const ql = await A2.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz', i);
   check(await tv.until(`document.querySelector('.lobby .title')?.textContent === 'Quiz!' && document.body.classList.contains('party')
-    && !document.getElementById('party-bg').hidden && window.bloko.avatars().length === ${quizOf(ql).order.length}`, 'quiz room'),
-    `quiz lobby on the TV: the party room with the "Quiz!" band and the ${quizOf(ql).order.length} seated players' avatars`);
+    && !document.getElementById('party-bg').hidden && window.bloko.avatars().length === ${roomOf(ql).order.length}`, 'quiz room'),
+    `the room at the quiz tableau on the TV: the party room with the "Quiz!" band and the ${roomOf(ql).order.length} players' avatars`);
   check(/questions · \d+ s each/.test(await tv.js(`document.querySelector('.lobby .settings-line')?.textContent ?? ''`)), '…with the quiz settings summary');
-  check(await tv.js(`!!document.querySelector('.lobby .join-qr') && document.querySelector('.lobby-count')?.textContent.includes('${quizOf(ql).order.length}/')`), '…the join QR and who\'s in');
+  check(await tv.js(`!!document.querySelector('.lobby .join-qr') && document.querySelector('.lobby-count')?.textContent.includes('${roomOf(ql).order.length}/')`), '…the join QR and who\'s in');
   A2.send({ t: 'pos', x: 9, y: 6, dir: 'right', moving: false });
   check(await tv.until(`(() => { const a = window.bloko.avatars().find((a) => a.id === '${idA}'); return a && Math.abs(a.x - 9) < 0.2; })()`, 'quiz avatar moves'),
     '…and avatars walk there (pos relayed)');
@@ -563,7 +578,7 @@ try {
   await tv.shot('quiz-room');
 
   const phones = [A2, B, N, E!];
-  const seated: string[] = quizOf(ql).order;
+  const seated: string[] = roomOf(ql).order; // the quiz seats everyone in the room
   const phoneOf = (id: string) => phones.find((c) => [...c.msgs].some((m) => m.t === 'welcome' && m.playerId === id));
   i = A2.mark(); A2.send({ t: 'start' });
   let qv = quizOf(await A2.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'question', i));

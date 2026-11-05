@@ -11,7 +11,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, hostOf, HTTP, quizOf, settingsOf, sleep } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, hostOf, HTTP, quizOf, roomOf, settingsOf, sleep } from './e2e-lib.mts';
 import { expectedAnswers } from '../shared/quiz/judge-local.js';
 
 const PORT = process.env.PORT ?? '3141';
@@ -157,11 +157,9 @@ try {
   let i = P.mark();
   P.send({ t: 'gm', op: { op: 'unlock', node: 'childhood' } });
   P.send({ t: 'gm', op: { op: 'goto', node: QUIZ } });
-  let q = await untilQuiz(P, (x) => x.phase === 'lobby', i);
-  const v0 = lastView(P);
-  check(Array.isArray(q.credits) && q.credits.some((c: string) => /Itloe/.test(c)), `credits in the lobby view (${q.credits?.join(' | ')})`);
-  check(v0.campaign.at.node === QUIZ && blocksOf(v0) === null && q.order.length === 2 && hostOf(v0) === idP,
-    'quiz tableau → quiz lobby with the party seated; no block game in the view (block clients never see a quiz)');
+  const v0 = await P.waitFor((m) => m.t === 'view' && m.campaign.at.node === QUIZ, i);
+  check(v0.campaign.at.kind === 'quiz' && v0.round === null && roomOf(v0).order.length === 2 && hostOf(v0) === idP,
+    'quiz tableau → the room at it, with the party; no round yet, so no block game in the view (block clients never see a quiz)');
   check(await errOf(E, { t: 'config', patch: { count: 3 } }) === 'not-host', 'quiz config: host only');
   i = P.mark(); P.send({ t: 'config', patch: { count: 3, seconds: 10, mode: 'mixed' } });
   await P.waitFor((m) => m.t === 'view' && settingsOf(m)?.count === 3 && settingsOf(m).seconds === 10, i);
@@ -170,7 +168,9 @@ try {
   check(await errOf(E, { t: 'place', piece: 0, x: 0, y: 0 }) === 'not-playing', 'block messages during a quiz → not-playing');
 
   i = P.mark(); P.send({ t: 'start' });
-  q = await untilQuiz(P, (x) => x.phase === 'question', i);
+  let q = await untilQuiz(P, (x) => x.phase === 'question', i);
+  check(Array.isArray(q.credits) && q.credits.some((c: string) => /Itloe/.test(c)), `credits in the quiz view (${q.credits?.join(' | ')})`);
+  check(q.order.length === 2, 'the quiz starts with the party seated');
   const shown: Q[] = [];
 
   // ---------- round 1: P right, E wrong → the last answer reveals at once ----------
@@ -252,7 +252,7 @@ try {
 
   // ---------- a second quiz never repeats a question of the evening ----------
   i = T.mark(); P.send({ t: 'newGame' });
-  await untilQuiz(T, (x) => x.phase === 'lobby', i);
+  await T.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
   const second: string[] = [];
   i = T.mark(); P.send({ t: 'start' });
   q = await untilQuiz(T, (x) => x.phase === 'question', i);
@@ -267,7 +267,7 @@ try {
   check(second.every((id) => !shown.some((x) => x.id === id)), `second quiz: 3 new questions (${second.join(', ')}), none asked earlier`);
   check(lastView(T).campaign.facts.asked.length === 6, 'asked grows to 6');
   // play again from the podium: a new quiz at once, as in the block game
-  check(await errOf(P, { t: 'start' }) === 'refused', 'quiz start on the podium → refused (start is for the lobby)');
+  check(await errOf(P, { t: 'start' }) === 'refused', 'quiz start on the podium → refused (start is for the room)');
   check(await errOf(E, { t: 'again' }) === 'not-host', 'quiz again: host only');
   check(await errOf(E, { t: 'retire', target: idP }) === 'not-host' && await errOf(P, { t: 'retire', target: idE }) === 'refused',
     'quiz retire, like every round button: a guest → not-host, the host → refused');
@@ -295,7 +295,7 @@ try {
   T = await screen('T');
   P.send({ t: 'gm', op: { op: 'unlock', node: 'childhood' } });
   P.send({ t: 'gm', op: { op: 'goto', node: QUIZ } });
-  await untilQuiz(P, (x) => x.phase === 'lobby');
+  await P.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz');
   i = P.mark(); P.send({ t: 'config', patch: { count: 3, mode: 'text' } });
   await P.waitFor((m) => m.t === 'view' && settingsOf(m)?.count === 3 && settingsOf(m).mode === 'text', i);
   i = T.mark(); P.send({ t: 'start' });

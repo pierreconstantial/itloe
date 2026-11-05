@@ -64,7 +64,7 @@ test('wire: four-player match reveals portal, only Elo crosses and collects the 
   const finished = await until(host, (m) => m.t === 'view' && m.round?.status === 'finished');
   assert.ok(finished.campaign.facts.flags.includes('portal.ready'));
   host.send({ t: 'newGame' });
-  await until(host, (m) => m.t === 'view' && m.round?.status === 'lobby' && m.campaign.facts.flags.includes('portal.ready'));
+  await until(host, (m) => m.t === 'view' && m.round === null && m.campaign.facts.flags.includes('portal.ready'));
   const from = screen.messages.length;
   elo.send({ t: 'pos', x: 6.4, y: 7.6, dir: 'right', moving: false });
   await until(screen, (m) => m.t === 'pos' && m.playerId === elo.id, from);
