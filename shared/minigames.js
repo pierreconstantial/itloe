@@ -34,6 +34,7 @@ import { QUIZ_RULES } from './quiz/index.js';
  *   reduce: (s: S, a: A) => S,
  *   status: (s: S) => RoundStatus,
  *   result: (s: S, node: string) => RoundResult,   // once finished; node: the tableau it ran at
+ *   validateSettings: (settings: unknown) => string[],   // a content node's settings: problems, as readable lines
  * }} MinigameRules
  */
 

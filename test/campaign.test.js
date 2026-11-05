@@ -60,7 +60,7 @@ test('validateContent reports unknown parents, unknown refs, cycles, key/id mism
   assert.ok(validateContent(cyc).some((e) => e.includes('parent cycle')));
 });
 
-test('validateContent checks activities through the rules list: any minigame starts', () => {
+test('validateContent checks activities through the rules list: any minigame starts, settings are checked', () => {
   /** @type {any} */
   const quizStart = structuredClone(C);
   quizStart.start = 'childhood.quiz';
@@ -72,9 +72,12 @@ test('validateContent checks activities through the rules list: any minigame sta
   /** @type {any} */
   const bad = structuredClone(C);
   bad.start = 'childhood.scene';
+  bad.nodes['childhood.blocks'].activity.settings = { size: 11, colour: 'red' };
+  bad.nodes['childhood.quiz'].activity.settings = { seconds: 12 };
   bad.nodes['teens.scene'].activity = { kind: 'darts' };
   const errs = validateContent(bad).join('\n');
-  for (const want of ['start "childhood.scene" must be the tableau of a minigame', 'node "teens.scene": unknown activity "darts"']) {
+  for (const want of ['start "childhood.scene" must be the tableau of a minigame', 'node "childhood.blocks": setting "size" can\'t be 11',
+    'node "childhood.blocks": unknown setting "colour"', 'node "childhood.quiz": setting "seconds" can\'t be 12', 'node "teens.scene": unknown activity "darts"']) {
     assert.ok(errs.includes(want), `missing: ${want}\n${errs}`);
   }
 });

@@ -103,6 +103,9 @@ export function validateContent(content) {
     if (n.activity && n.kind !== 'tableau') errors.push(`${at}: only tableaux have an activity`);
     if (n.kind === 'tableau' && !n.activity) errors.push(`${at}: a tableau needs an activity`);
     if (n.activity && !isActivityKind(n.activity.kind)) errors.push(`${at}: unknown activity "${n.activity.kind}"`);
+    const rules = minigame(n.activity?.kind);
+    const settings = /** @type {{ settings?: unknown } | undefined} */ (n.activity)?.settings;
+    if (rules && settings !== undefined) for (const e of rules.validateSettings(settings)) errors.push(`${at}: ${e}`);
     if (typeof n.title !== 'string' || !n.title) errors.push(`${at}: missing title`);
     if (!isCondition(n.unlock)) errors.push(`${at}: invalid unlock condition`);
     if (n.complete !== undefined && !isCondition(n.complete)) errors.push(`${at}: invalid complete condition`);

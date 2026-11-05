@@ -123,6 +123,20 @@ export function normalizeSettings(patch, base = DEFAULT_SETTINGS) {
 }
 
 /**
+ * Problems in content settings, as readable lines (empty = valid): an unknown key, or a value the
+ * schema would change (normalizeSettings ignores or snaps it).
+ * @param {unknown} settings
+ * @returns {string[]}
+ */
+export function validateSettings(settings) {
+  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) return ['settings must be an object'];
+  return Object.entries(settings).flatMap(([key, v]) => {
+    if (!Object.hasOwn(SETTINGS_SCHEMA, key)) return [`unknown setting "${key}"`];
+    return normalizeSettings({ [key]: v })[/** @type {keyof Settings} */ (key)] === v ? [] : [`setting "${key}" can't be ${JSON.stringify(v)}`];
+  });
+}
+
+/**
  * @param {Settings} a
  * @param {Settings} b
  */
@@ -464,4 +478,5 @@ export const BLOCK_RULES = {
     ranking: ranking(s).map((r) => ({ character: s.players[r.id].character ?? null, score: r.score, rank: r.rank })),
     endReason: s.endReason,
   }),
+  validateSettings,
 };

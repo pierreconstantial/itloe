@@ -126,6 +126,20 @@ export function mergeQuizSettings(base, patch) {
 }
 
 /**
+ * Problems in content settings, as readable lines (empty = valid): an unknown key, or a value
+ * mergeQuizSettings would drop or change.
+ * @param {unknown} settings @returns {string[]}
+ */
+export function validateQuizSettings(settings) {
+  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) return ['settings must be an object'];
+  return Object.entries(settings).flatMap(([key, v]) => {
+    if (!Object.hasOwn(QUIZ_DEFAULTS, key)) return [`unknown setting "${key}"`];
+    const kept = /** @type {Record<string, unknown>} */ (mergeQuizSettings(QUIZ_DEFAULTS, { [key]: v }))[key];
+    return JSON.stringify(kept) === JSON.stringify(v) ? [] : [`setting "${key}" can't be ${JSON.stringify(v)}`];
+  });
+}
+
+/**
  * A fresh quiz in its lobby.
  * @param {number} seed @param {Partial<QuizSettings>} [settings] @returns {QuizState}
  */
@@ -413,4 +427,5 @@ export const QUIZ_RULES = {
       endReason: s.endReason, counters, asked: [...s.asked],
     };
   },
+  validateSettings: validateQuizSettings,
 };
