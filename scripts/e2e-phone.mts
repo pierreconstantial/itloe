@@ -315,12 +315,12 @@ try {
   await A.ev('location.reload()');
   await resumes(A, 'lobby: reload → silent resume', 'view-lobby', idA);
 
-  // game 1: timed 2:00 (default 3:00, two steps down) so it ends on its own
+  // game 1: timed 1:00 (default 3:00, four steps down) so it ends on its own
   await setMode(A, 'Timed');
   await sleep(400);
-  for (let i = 0; i < 2; i++) { await A.ev(`document.querySelector('#settings-body [aria-label^="Less"]')?.click()`); await sleep(250); }
+  for (let i = 0; i < 4; i++) { await A.ev(`document.querySelector('#settings-body [aria-label^="Less"]')?.click()`); await sleep(250); }
   await A.tap('#btn-start');
-  await resumes(A, 'host starts game 1 (timed 2:00)', 'view-game', idA);
+  await resumes(A, 'host starts game 1 (timed 1:00)', 'view-game', idA);
   await resumes(B, 'guest follows into game 1', 'view-game', idB);
 
   await A.ev('location.reload()');
@@ -393,7 +393,7 @@ try {
   expect((await B.snap())?.view === 'view-game' && (await C.snap())?.view !== 'view-game', 'C reloads: does not bump B');
 
   // ---- podium ----
-  const pa = await A.waitFor((x) => x.view === 'view-podium', 130_000);
+  const pa = await A.waitFor((x) => x.view === 'view-podium', 70_000);
   const pb = await B.waitFor((x) => x.view === 'view-podium', 5000);
   const hostSees = await A.ev(`[!document.getElementById('podium-actions').hidden, !document.getElementById('btn-again').hidden, !document.getElementById('btn-new-game').hidden]`);
   const guestSees = await B.ev(`[!document.getElementById('podium-actions').hidden, !document.getElementById('podium-hint').hidden]`);
@@ -407,8 +407,12 @@ try {
   await A.tap('#btn-again');
   const rematch = await B.waitFor((x) => x.view === 'view-game' && !!x.toast, 5000);
   expect(rematch?.view === 'view-game' && /rematch/i.test(rematch.toast ?? ''), 'Play again: guest follows with a "Rematch" toast', `toast="${rematch?.toast}"`);
-  await A.waitFor((x) => x.view === 'view-podium', 130_000);
+  await A.tap('#btn-menu');
+  await A.tap('#btn-end-game');
+  await A.tap('#btn-end-game');
+  await A.waitFor((x) => x.view === 'view-podium', 5000);
   await B.waitFor((x) => x.view === 'view-podium', 5000);
+  await A.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
 
   await A.tap('#btn-new-game');
   const room1 = await B.waitFor((x) => x.view === 'view-lobby' && !!x.toast, 5000);
