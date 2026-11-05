@@ -83,6 +83,10 @@ function applyPresence() {
   avatars.setOffline(off);
 }
 
+/** The story's start tableau after its first match: the portal stands in the room, and no round follows. */
+const portalReady = () => !!campaign?.facts.flags.includes('story.elo-50') && campaign.facts.flags.includes('portal.ready')
+  && campaign.at.node === 'hub.false-start';
+
 /** @type {Record<State['phase'], (s: State, prev: State | null) => HTMLElement>} */
 const VIEWS = {
   lobby: (s, prev) => renderLobby(s, prev, joinInfo, undefined, {
@@ -126,7 +130,7 @@ function show(next) {
 
   app.replaceChildren(VIEWS[next.phase](next, prev));
   party.setMode('lobby');
-  party.setPortal(!!campaign?.facts.flags.includes('story.elo-50') && campaign.facts.flags.includes('portal.ready') && campaign.at.node === 'hub.false-start');
+  party.setPortal(portalReady());
   party.setKey(false);
   party.setPlayers(next);
   party.setVisible(next.phase === 'lobby');
