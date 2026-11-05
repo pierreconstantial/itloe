@@ -547,13 +547,14 @@ try {
   expect((await R.snap())?.view === 'view-game', '3 players in a marathon game');
   expect((await G.hostButtons()).length === 0, 'guest menu has no host controls');
   await H.shot('blocks-game');
-  if (SHOTS) { // a new phone during a game: no free character to pick, it waits
-    const W = await phone('W');
-    await W.navigate(joinUrl());
-    await W.waitFor((x) => x.view === 'view-waiting', 5000);
-    await W.shot('blocks-waiting-newcomer');
-    await W.navigate('about:blank');
-  }
+  const W = await phone('W');
+  await W.navigate(joinUrl());
+  expect((await W.waitFor((x) => x.view === 'view-pick'))?.view === 'view-pick', 'a new phone during a round can pick a free character');
+  await W.tap('.pick-card[data-id="pierre"]');
+  const watcher = await W.waitFor((x) => x.view === 'view-waiting' && x.id !== null);
+  expect(watcher?.view === 'view-waiting' && !!watcher.id && /next one/.test(await W.text('waiting-text')),
+    'the newcomer joins the evening and waits for the next round');
+  await W.shot('blocks-waiting-newcomer');
 
   await R.navigate('about:blank'); // Anna's phone dies
   await sleep(1500);
@@ -594,6 +595,14 @@ try {
   expect(ranks.length === 3 && ranks.some((t) => t.includes('Anna')), 'podium ranks all 3, Anna included', JSON.stringify(ranks));
   await H.shot('blocks-podium-ended-host');
   await G.shot('blocks-podium-ended-guest');
+
+  expect((await W.snap())?.view === 'view-waiting', 'the newcomer waits through the podium');
+  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+  await H.tap('#btn-again');
+  const rematch = await W.waitFor((x) => x.view === 'view-game', 5000);
+  expect(rematch?.view === 'view-game' && rematch.id === watcher?.id, 'Play again seats the newcomer with the same identity');
+  await W.placeOne();
+  expect(Number(await W.text('my-score')) > 0, 'the newcomer can place a piece in the rematch');
 
   } // part 2
 

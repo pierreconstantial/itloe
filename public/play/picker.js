@@ -1,9 +1,9 @@
 // Character picker (M3; slice 2b: the character IS the identity). Built from the shared roster, so a
 // new character appears with no change here. Each card is in one of three states, live from each view:
-//  - free: nobody holds it and the lobby is open → a new player;
+//  - free: nobody holds it → a new party member (during a round, they watch);
 //  - continue: held by a player whose phone is offline → tapping takes that player back (same board,
 //    score, hand, host role), from any device and in any phase;
-//  - taken: held by an online player (or free while a game is on) → greyed.
+//  - taken: held by an online player → greyed.
 import { CHARACTERS } from '../../shared/characters.js';
 import { $ } from './dom.js';
 import { avatarCanvas } from './avatar.js';
@@ -22,11 +22,10 @@ const PICKER_SCALE = 5; // 16 px sprites → 80 px
 /**
  * The state of every character for a phone that is not (or no longer) a member.
  * @param {Roster} roster
- * @param {boolean} joinable newcomers can join now (no block game under way)
  * @param {readonly string[]} online member ids with a live socket
  * @returns {Map<CharacterId, PickState>}
  */
-export function pickStates(roster, joinable, online) {
+export function pickStates(roster, online) {
   const live = new Set(online);
   /** @type {Map<string, string>} character → holding id (left members hold nothing) */
   const holders = new Map();
@@ -39,7 +38,7 @@ export function pickStates(roster, joinable, online) {
   for (const c of Object.values(CHARACTERS)) {
     const holder = holders.get(c.id);
     if (holder) states.set(c.id, live.has(holder) ? 'taken' : 'continue');
-    else states.set(c.id, joinable ? 'free' : 'taken');
+    else states.set(c.id, 'free');
   }
   return states;
 }

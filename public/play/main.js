@@ -410,10 +410,9 @@ function render() {
 
   if (!mem) {
     if (roomPrompt) { show('room'); renderRoomPrompt(roomPrompt); return; }
-    // the picker shows whenever there is something to tap: a free character while no round is
-    // under way, or (anytime) a character whose phone is offline, to continue as
-    const joinable = round === null;
-    const states = campaign ? pickStates(campaign.party, joinable, online) : null;
+    // A free character joins the evening even during a round (and plays the next one); an offline
+    // character continues its existing seat.
+    const states = campaign ? pickStates(campaign.party, online) : null;
     if (!states || (!anyPickable(states) && pendingPick === null)) {
       show('waiting');
       $('waiting-text').textContent = round?.status === 'finished' ? 'A game just ended.' : 'A game is already running.';
