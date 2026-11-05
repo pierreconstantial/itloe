@@ -8,7 +8,7 @@
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3182 CDP=9222 [LOCK_MS=300000] node scripts/e2e-phone.mts    (never PORT 3131: the live server)
 // LOCK_MS is how long the "phone locked" case freezes the page (default 5 min, as in the acceptance list).
-// ONLY=3 … 7 runs just that part (campaign screens / quiz / refused room code / inventory / show the join QR);
+// ONLY=1 … 7 runs just that part (continuity / host controls / campaign / quiz / room code / inventory / QR);
 // a full run is the acceptance.
 // SHOTS=<dir> saves screenshots of the campaign screens.
 import { spawn, type ChildProcess } from 'node:child_process';
@@ -287,7 +287,7 @@ const ONLY = process.env.ONLY; // e.g. ONLY=3: just the campaign part (quick ite
 
 try {
   await boot(true);
-  if (!ONLY || ONLY === '1' || ONLY === '2') {
+  if (!ONLY || ONLY === '1') {
 
   // ================= part 1: the session is never lost =================
   console.log('\n— part 1: session continuity —');
@@ -488,6 +488,9 @@ try {
   await A.tap('#btn-continue');
   expect((await A.waitFor((x) => x.view === 'view-lobby'))?.view === 'view-lobby', '"Continue as Élodie" joins in one tap');
 
+  } // part 1
+
+  if (!ONLY || ONLY === '2') {
   // ================= part 2: host controls during a game =================
   console.log('\n— part 2: host controls —');
   await kill9();
@@ -539,7 +542,7 @@ try {
   const ranks: string[] = await H.ev(`[...document.querySelectorAll('#podium-list li')].map((e) => e.textContent)`);
   expect(ranks.length === 3 && ranks.some((t) => t.includes('Anna')), 'podium ranks all 3, Anna included', JSON.stringify(ranks));
 
-  } // parts 1–2
+  } // part 2
 
   if (!ONLY || ONLY === '3') {
   // ================= part 3: the campaign on the phone =================

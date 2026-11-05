@@ -1,7 +1,7 @@
 // TV end-to-end (slice 2/2b, screen side): a real /screen/ page in headless Chrome (CDP), a real
 // server this script kill -9s, and phones as WebSocket clients. Checks lobby re-entry after newGame,
 // auto-reconnect after a restart in every phase, presence dimming (debounced), screens never bumped,
-// and the wake-from-sleep reconnect.
+// and the wake-from-sleep reconnect. ONLY=connection|campaign|quiz runs just that section.
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3180 CDP=9222 [SHOTS=dir] node scripts/e2e-tv.mts       (never PORT 3131: the live server)
 import { spawn, type ChildProcess } from 'node:child_process';
@@ -19,6 +19,7 @@ const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const CDP = process.env.CDP ?? '9222';
 const SHOTS = process.env.SHOTS;
+const ONLY = process.env.ONLY;
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-tv-'));
 const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 
@@ -208,9 +209,18 @@ try {
   tv = await Page.open(`${HTTP}/screen/`);
   check(await tv.until(`window.bloko?.state()?.phase === 'lobby' && !${tvOnlineBanner}`, 'tv lobby'), 'TV opens on the lobby');
 
+  const cardOn = `!document.querySelector('.join-qr-card').hidden`;
+  const noOverlap = (sel: string) => `(() => { const c = document.querySelector('.join-qr-card').getBoundingClientRect();
+    return [...document.querySelectorAll('${sel}')].every((e) => { const r = e.getBoundingClientRect(); return r.right <= c.left || r.bottom <= c.top || r.left >= c.right || r.top >= c.bottom; }); })()`;
+
   // ---------- lobby, avatars, presence ----------
   const A = await device('A'); const idA = await tap(A, 'anna');
   let B = await device('B'); const idB = await tap(B, 'sol');
+  let A2 = A;
+  let N: Client | undefined, E: Client | undefined;
+  let i = 0;
+
+  if (!ONLY || ONLY === 'connection') {
   check(await tv.until('window.bloko.avatars().length === 2', '2 avatars'), 'two guests → two avatars in the party room');
   await drop(B);
   await sleep(1200);
@@ -243,7 +253,7 @@ try {
 
   // ---------- kill -9 in the lobby ----------
   await killAndBack(tv, 'lobby', B);
-  let A2 = await rejoin('A2', idA); B = await rejoin('B5', idB);
+  A2 = await rejoin('A2', idA); B = await rejoin('B5', idB);
   const spawnOk = async () => tv!.js(`JSON.stringify(window.bloko.avatars().map((a) => [a.id, Math.round(a.x * 10), Math.round(a.y * 10)]))`);
   const exp = JSON.stringify([[idA, Math.round(spawnPoint('anna').x * 10), Math.round(spawnPoint('anna').y * 10)], [idB, Math.round(spawnPoint('sol').x * 10), Math.round(spawnPoint('sol').y * 10)]]);
   await tv.until(`window.bloko.avatars().length === 2`, 'avatars back');
@@ -307,14 +317,11 @@ try {
   }
 
   // ---------- playing: presence on boards, kill -9 ----------
-  let i = A2.mark(); A2.send({ t: 'start' });
+  i = A2.mark(); A2.send({ t: 'start' });
   await A2.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'playing', i);
   check(await tv.until(`${tvState}.phase === 'playing'`, 'playing'), 'TV shows the game');
 
   // ---------- "show the QR again": any player asks → side card on the TVs, never over a board ----------
-  const cardOn = `!document.querySelector('.join-qr-card').hidden`;
-  const noOverlap = (sel: string) => `(() => { const c = document.querySelector('.join-qr-card').getBoundingClientRect();
-    return [...document.querySelectorAll('${sel}')].every((e) => { const r = e.getBoundingClientRect(); return r.right <= c.left || r.bottom <= c.top || r.left >= c.right || r.top >= c.bottom; }); })()`;
   let qrPhoneMark = B.mark();
   B.send({ t: 'showJoin', requestId: 1 }); // a non-host player
   const firstJoinAck = await B.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 1, qrPhoneMark);
@@ -435,15 +442,22 @@ try {
   A2.send({ t: 'pos', x: 6, y: 6, dir: 'left', moving: false });
   check(await tv.until(`(() => { const a = window.bloko.avatars().find((a) => a.id === '${idA}'); return a && Math.abs(a.x - 6) < 0.2; })()`, 'avatar moves'),
     '…and avatars resume walking (pos relayed)');
-  const N = await device('N'); const idN = await tap(N, 'pierre');
+  N = await device('N'); const idN = await tap(N, 'pierre');
   check(await tv.until(`window.bloko.avatars().some((a) => a.id === '${idN}') && document.querySelector('.lobby-count').textContent.includes('3/')`, 'newcomer'),
     'a newcomer joins after newGame and appears on the TV');
   await tv.shot('newgame-lobby');
 
+  } // connection
+
+  if (!ONLY || ONLY === 'campaign' || ONLY === 'quiz') {
+  if (!N) { N = await device('N'); await tap(N, 'pierre'); }
+
+  const doorsJs = `JSON.stringify(Object.fromEntries(window.bloko.doors().map((d) => [d.id, d.state])))`;
+
+  if (!ONLY || ONLY === 'campaign') {
   // ---------- campaign: hub map with doors, combined unlock cutscene, two TVs, chooser walks in ----------
   tv.errors.length = 0;
   const cv = () => [...A2.msgs].reverse().find((m) => m.t === 'view')?.campaign;
-  const doorsJs = `JSON.stringify(Object.fromEntries(window.bloko.doors().map((d) => [d.id, d.state])))`;
   i = A2.mark(); A2.send({ t: 'back' });
   const hubView = await A2.waitFor((m) => m.t === 'view' && blocksOf(m) === null, i);
   check(await tv.until(`window.bloko.state() === null && !!document.querySelector('.map-band') && !document.getElementById('party-bg').hidden && window.bloko.avatars().length === 3`, 'hub map'),
@@ -494,7 +508,7 @@ try {
   await tv.shot('hub-map-new');
 
   // the chooser (Élodie) joins and walks into the childhood door → the TV switches to that world
-  const E = await device('E'); await tap(E, 'elodie');
+  E = await device('E'); await tap(E, 'elodie');
   await tv.until('window.bloko.avatars().length === 4', 'elodie avatar');
   check(await tv.until(`[...document.querySelectorAll('.map-bag')].some((b) => b.textContent.includes('Élodie') && b.querySelector('[data-item="old-key"]'))`, 'bag'),
     "Élodie joins → the band shows her item icons (🗝️), the inventory hung on her character");
@@ -510,6 +524,15 @@ try {
   await tv.shot('world-map');
   check(tv.errors.length === 0, `no page exception through the campaign (${tv.errors.join(' | ') || 'none'})`);
 
+  } else {
+    i = A2.mark();
+    A2.send({ t: 'gm', op: { op: 'unlock', node: 'childhood' } });
+    A2.send({ t: 'gm', op: { op: 'goto', node: 'childhood' } });
+    await A2.waitFor((m) => m.t === 'view' && m.campaign?.at.node === 'childhood', i);
+    E = await device('E'); await tap(E, 'elodie');
+  }
+
+  if (!ONLY || ONLY === 'quiz') {
   // ---------- quiz: World 1's block game opens its quiz door; lobby → questions → reveals → podium ----------
   const lastQuiz = (c: Client) => quizOf([...c.msgs].reverse().find((m) => m.t === 'view'));
   i = A2.mark(); A2.send({ t: 'enter', node: 'childhood.blocks' });
@@ -536,7 +559,7 @@ try {
   await sleep(600);
   await tv.shot('quiz-room');
 
-  const phones = [A2, B, N, E];
+  const phones = [A2, B, N, E!];
   const seated: string[] = quizOf(ql).order;
   const phoneOf = (id: string) => phones.find((c) => [...c.msgs].some((m) => m.t === 'welcome' && m.playerId === id));
   i = A2.mark(); A2.send({ t: 'start' });
@@ -599,8 +622,10 @@ try {
   check(await tv.until(`!document.querySelector('.quiz') && !!document.querySelector('.map-band') && !document.body.classList.contains('in-quiz')`, 'out of quiz'),
     'host back → the world map again (quiz screen gone)');
   check(tv.errors.length === 0, `no page exception through the quiz (${tv.errors.join(' | ') || 'none'})`);
-  E.ws.close();
-  for (const c of [A2, B, N]) c.ws.close();
+  } // quiz
+  } // campaign / quiz
+
+  for (const c of [A2, B, N, E]) c?.ws.close();
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack}\n--- server log ---\n${log}`);
 } finally {
