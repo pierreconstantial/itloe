@@ -172,16 +172,21 @@ async function phone(label: string) {
     }
     await sleep(150);
   };
-  /** Drag the first tray piece onto the lower middle of the board (mouse: pointer events). */
+  /** Drag the first tray piece onto the lower middle of the board (mouse: pointer events), then wait
+   *  for the server's view: the board paints the placement at once, the score only from the view. */
   const placeOne = async () => {
     await cmd('Page.bringToFront', {}, s);
+    const score = () => ev(`document.getElementById('my-score').textContent`);
+    const before = await score();
     const r = await ev(`(() => { const s = document.getElementById('slot-0').getBoundingClientRect(); const b = document.getElementById('board').getBoundingClientRect(); return { sx: s.x + s.width / 2, sy: s.y + s.height / 2, bx: b.x + b.width / 2, by: b.y + b.height * 0.75 }; })()`);
     await cmd('Input.dispatchMouseEvent', { type: 'mousePressed', x: r.sx, y: r.sy, button: 'left', clickCount: 1 }, s);
     for (let i = 1; i <= 8; i++) {
       await cmd('Input.dispatchMouseEvent', { type: 'mouseMoved', x: r.sx + (r.bx - r.sx) * i / 8, y: r.sy + (r.by - r.sy) * i / 8, button: 'left' }, s);
     }
     await cmd('Input.dispatchMouseEvent', { type: 'mouseReleased', x: r.bx, y: r.by, button: 'left', clickCount: 1 }, s);
-    await sleep(600);
+    // every placement scores, so a refused or lost one times out and the caller's check fails
+    const end = Date.now() + 5000 * SLOW;
+    while (Date.now() < end && (await score()) === before) await sleep(100);
   };
   const watch = (on: boolean) => ev(`sessionStorage.setItem('t-watch', '${on ? 1 : 0}'); sessionStorage.removeItem('t-sawPick')`);
   const navigate = (url: string) => cmd('Page.navigate', { url }, s);
