@@ -321,9 +321,18 @@ try {
   await resumes(A, 'lobby: reload → silent resume', 'view-lobby', idA);
 
   // game 1: timed 1:00 (default 3:00, four steps down) so it ends on its own
+  // each step waits for the sheet to show the server's new value: a click on a stale stepper patches
+  // the value it was drawn with, and is lost
   await setMode(A, 'Timed');
-  await sleep(400);
-  for (let i = 0; i < 4; i++) { await A.ev(`document.querySelector('#settings-body [aria-label^="Less"]')?.click()`); await sleep(250); }
+  const less = `document.querySelector('#settings-body [aria-label="Less time limit"]')`;
+  const shown = () => A.ev(`${less} ? [${less}.parentElement.querySelector('output').textContent, ${less}.disabled] : null`);
+  for (let i = 0, at = await shown(); i < 20 && !at?.[1]; i++) {
+    if (at) await A.ev(`${less}.click()`);
+    const before = at?.[0];
+    for (const end = Date.now() + 3000 * SLOW; Date.now() < end; await sleep(50)) { at = await shown(); if (at && at[0] !== before) break; }
+  }
+  const timed = await shown();
+  expect(timed?.[1] === true && timed[0] === '1:00', 'lobby: game 1 set to timed 1:00', `shown=${JSON.stringify(timed)}`);
   if (SHOTS) {
     await A.tap('#btn-settings-lobby');
     await A.shot('blocks-settings');
