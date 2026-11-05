@@ -201,8 +201,8 @@ try {
   await onlineIs(screen, [idA, idG], 'controls: a player drops mid-game');
   const errOf = async (c: Client, msg: object) => {
     const k = c.mark(); c.send(msg);
-    const r = await c.waitFor((m) => m.t === 'err' || m.t === 'view', k).catch(() => null);
-    return r?.t === 'err' ? r.code : r ? 'view' : 'none';
+    const r = await c.waitFor((m) => m.t === 'err', k).catch(() => null);
+    return r?.code ?? 'none';
   };
   check(await errOf(G, { t: 'retire', target: idF }) === 'not-host', 'non-host retire → err not-host');
   check(await errOf(G, { t: 'endGame' }) === 'not-host', 'non-host endGame → err not-host');

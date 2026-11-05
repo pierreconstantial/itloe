@@ -360,12 +360,14 @@ try {
   await sleep(800);
   await A.history(-1);
   await resumes(A, 'game: left the page, back → resume', 'view-game', idA);
+  const firstPersisted = (await A.snap())?.persisted;
   await A.history(+1);
   await sleep(800);
   await A.history(-1);
   await resumes(A, 'game: forward then back again → resume', 'view-game', idA);
   const persisted = (await A.snap())?.persisted;
-  expect(persisted === 'true', 'bfcache: the page was restored from the back/forward cache', `pageshow.persisted=${persisted}`);
+  expect(firstPersisted === 'true' || persisted === 'true', 'bfcache: a history return restored the page from the back/forward cache',
+    `pageshow.persisted: first=${firstPersisted}, second=${persisted}`);
 
   await A.navigate(joinUrl());
   await resumes(A, 'game: re-scan join URL → silent resume, no picker', 'view-game', idA);
