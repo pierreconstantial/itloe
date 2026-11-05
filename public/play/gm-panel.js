@@ -1,4 +1,4 @@
-// Game-master panel (slice 3): Pierre, the party host, steers the evening from the ☰ sheet.
+// Game-master panel (slice 3): Pierre steers the birthday evening from the ☰ sheet.
 // Enter an unlocked child, go back up, and gm ops (goto / unlock / lock / reset-node / setFlag / count)
 // on ANY node, each confirmed by a second tap. Plus a progress readout (counters, flags, and why a
 // node is or is not unlocked). Everything comes from the content tree and the campaign facts: no node
@@ -133,7 +133,11 @@ export function createGmPanel(io) {
     if (typeof v === 'number') countInput.value = String(v); // start from the current value
   });
 
-  $('gm-back').addEventListener('click', () => io.send({ t: 'back' }));
+  $('gm-back').addEventListener('click', () => {
+    const parent = last && content().nodes[last.at.node]?.parent;
+    if (content().storyId === 'elo-50' && parent) gm({ op: 'goto', node: parent });
+    else io.send({ t: 'back' });
+  });
 
   function redraw() {
     const c = last;
@@ -161,7 +165,10 @@ export function createGmPanel(io) {
         b.dataset.enter = m.node.id;
         b.disabled = !m.unlocked || playing;
         b.textContent = `${m.unlocked ? '→' : '🔒'} ${m.node.title}${m.done ? ' ✓' : ''}${m.fresh ? ' ✨' : ''}`;
-        b.addEventListener('click', () => io.send({ t: 'enter', node: m.node.id }));
+        b.addEventListener('click', () => {
+          if (content().storyId === 'elo-50') gm({ op: 'goto', node: m.node.id });
+          else io.send({ t: 'enter', node: m.node.id });
+        });
         return b;
       }));
     }

@@ -22,12 +22,13 @@ export const WALK_SPEED = 4;
 const SPAWN_Y = 7.6;
 
 /**
- * Deterministic spawn point of a character: x = 3 + 3.33·(color − 1), on the spawn row, facing down.
+ * Deterministic spawn point on the row, facing down. The late-join slot fits at the right edge.
  * @param {CharacterId} characterId
  * @returns {Spawn}
  */
 export function spawnPoint(characterId) {
-  return { x: 3 + 3.33 * (CHARACTERS[characterId].color - 1), y: SPAWN_Y, dir: 'down' };
+  const x = Math.min(15.1, 3 + 3.33 * (CHARACTERS[characterId].color - 1));
+  return { x, y: SPAWN_Y, dir: 'down' };
 }
 
 /**

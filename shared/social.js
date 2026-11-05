@@ -1,5 +1,5 @@
 export const MAX_SAY_LENGTH = 100;
-export const EMOTES = ['victory', 'fart', 'annoy'];
+export const EMOTES = ['victory', 'fart', 'annoy', 'shine'];
 
 /** Short, printable speech for both the wire and the bubble. @param {unknown} value */
 export function cleanSpeech(value) {

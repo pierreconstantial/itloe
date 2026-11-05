@@ -45,15 +45,32 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 // dropped when it ends: the room's positions stay where everyone stood (no longer moving). A phone whose
 // minigame screen switches the joystick on (its game area) sends its start position at once.
 { "t": "say", "text": "Hello!" }                         // joined player; 1–100 printable characters
-{ "t": "emote", "kind": "victory" }                      // joined player; victory | fart | annoy
+{ "t": "emote", "kind": "victory" }                      // incarnated: victory | fart | annoy; wisp: shine
 { "t": "interact", "object": "table" }                    // near the sofa | table | plant in the party room
 // Speech and emotes are short lived, server relayed events, limited to one per 650 ms per socket.
 // A reconnecting client receives { t: "chatHistory", messages: [...] } with up to 30 recent
 // speech events. The history is in memory only and is cleared by a server restart.
 // Interaction is available while avatars are visible, between rounds (hub/world, the room at a tableau). The server
-// checks the sender's latest position against the closest object and relays an `interact` event
-// with playerId, object and at. It is limited to one per 700 ms per socket.
+// checks the sender's latest position and their statuses and inventory against the closest allowed object,
+// then relays an `interact` event with playerId, object, action, feedback and at. It is limited to one
+// per 700 ms per socket. Object rules live in shared/interactions.js: player override, character
+// override, first matching status/inventory condition, then the default. Each action has key, text,
+// feedback; null denies interaction. Wisps cannot use any object action, even a player override.
 ```
+
+For example, the table is a scene object with `id: "table"` and a `box`, `solid`, `anchorY` and `layer` in
+`shared/scene.js`. An action model keyed by that ID in `shared/interactions.js` can use conditions:
+
+```jsonc
+"table": {
+  "default": { "key": "blow-candles", "text": "🎂 Blow candles", "feedback": "Make a wish!" },
+  "variants": [{ "when": { "statuses": ["charged"], "items": { "memory-key-intro": 1 } },
+    "action": { "key": "make-wish", "text": "✨ Make a wish", "feedback": "The candles glow." } }]
+}
+```
+
+An optional `byPlayer` entry may define a different action for one player ID. Conditions can combine
+`statuses: ["charged"]` with `items: { "memory-key-intro": 1 }` to require a status and a key.
 
 Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `deadline`) are NEVER accepted from the wire: the server injects them itself and strips them from client messages.
 
@@ -103,9 +120,10 @@ messages (`unsaved` below) during its round.
 { "t": "back" }                         // host only: up one level (tableau → world → hub). Refused while a game is
                                         // played (endGame first) → err "refused"; non-host → err "not-host".
 { "t": "gm", "op": { "op": "unlock", "node": "teens" } }
-                                        // host only (game master), ops: goto / unlock / lock / setFlag / count /
-                                        // reset-node (shapes: shared/campaign/types.js GmOp). Non-host → err
-                                        // "not-host"; a host's no-op is silent, except give/take (Contract F:
+                                        // birthday story: Pierre only, even while he is a Wisp; sample content:
+                                        // host. Ops: goto / unlock / lock / setFlag / count / reset-node
+                                        // (shapes: shared/campaign/types.js GmOp). Other birthday players →
+                                        // err "not-gm"; a GM's no-op is silent, except give/take (Contract F:
                                         // { op:'give', item, to, count? } / { op:'take', item, from, count? }):
                                         // unknown item or character, or taking more than held → err "refused"
                                         // (no partial take).
@@ -128,8 +146,24 @@ The first match requires Pierre, Élodie, Sol and Anna. After it finishes, `camp
 `portal.ready`; the host sends `{ "t": "newGame" }` to return everyone to the room. A portal is then drawn
 in the middle of the room, behind the row where the guests start. Elo walks into it with the ordinary
 `pos` message; the server applies the portal transition only for her and queues
-`{ "seq": 1, "t": "apparition" }` in `campaign.news`. The other phones
-continue to show the room. The screen plays the apparition and sends the ordinary `ack` when it ends.
+`{ "seq": 1, "t": "apparition" }` in `campaign.news`. The other players gain the persisted `wisp`
+status and appear as small moving lights in the apartment. A later joiner who selects a predefined
+character starts in Wisp Mode unless that character has already been introduced. Wisps have no name
+label, keep a hint of their character's color, and pulse slightly while moving. They can move and send
+`{ "t": "emote", "kind": "shine" }`, which briefly brightens their light. The phone offers Shine
+beside nearby objects, but sends the same emote without interacting with the object. Wisps cannot speak,
+interact with objects or NPCs, or trigger zone/story events. They are excluded from round seats.
+Pierre may still use game-master commands while a Wisp; those commands are separate from Wisp actions.
+The server incarnates a wisp when the story grants its `person.<character>.unlocked` flag (for
+example `person.nico.unlocked`), or via its internal status action; no client message can change
+the status. The same internal action can return a character to Wisp Mode. When incarnation begins,
+the campaign persists `statuses: ["wisp", "incarnating"]` and the next `view` includes
+`incarnations: { "<playerId>": { "at": <server epoch ms>, "kind": <emote> } }`.
+Until `at`, the TV draws the wisp, the phone vibrates and displays **3, 2, 1**, and the server
+rejects character actions. At `at`, the server removes both statuses, broadcasts a new `view`,
+then broadcasts the chosen normal `emote`. A restart during the countdown reschedules it from
+the persisted pending status. The screen plays the
+apparition and sends the ordinary `ack` when it ends.
 That acknowledgement adds `apparition.seen` to the persisted facts and reveals the key.
 
 ```jsonc
@@ -238,7 +272,7 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 // round has ended (its podium closed, or Play again replaced it), the server drops what the server code
 // still sends. Messages on a socket keep their order, so one sent before the round ended arrives before
 // the view that ends it.
-{ "t": "err", "code": "full" | "bad-place" | "not-host" | "not-playing" | "unknown-player" | "locked" | "bad-room" | "taken" | "refused" }
+{ "t": "err", "code": "full" | "bad-place" | "not-host" | "not-gm" | "not-playing" | "unknown-player" | "locked" | "bad-room" | "taken" | "refused" }
 // "refused" (slice 3): enter/back not allowed here (locked node, game being played, one-shot already done)
 // Round buttons (start, again, newGame, endGame, retire) answer alike in every minigame: a guest's →
 // "not-host", the host's at the wrong moment → "refused"

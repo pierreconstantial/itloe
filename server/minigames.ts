@@ -10,7 +10,7 @@ import type { Pos } from './pos.ts';
 import { makeBlockServer } from './blocks.ts';
 import { makeQuizServer } from './quiz.ts';
 
-export type ErrCode = 'full' | 'bad-place' | 'not-host' | 'not-playing' | 'unknown-player' | 'locked' | 'bad-room' | 'taken' | 'refused';
+export type ErrCode = 'full' | 'bad-place' | 'not-host' | 'not-gm' | 'not-playing' | 'unknown-player' | 'locked' | 'bad-room' | 'taken' | 'refused';
 
 /** What a minigame's message handler gets with a message: the sender, the time, the party's host and
  *  the round's state. */

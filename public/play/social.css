@@ -20,6 +20,7 @@
 .chat-list li.mine { border-right: 3px solid var(--accent); }
 .chat-list strong { display: block; color: var(--accent); font-size: 13px; }
 .chat-form { display: flex; gap: 7px; }
+.chat-form[hidden] { display: none; }
 .chat-form input { min-width: 0; flex: 1; border: 1px solid var(--fg-dim); border-radius: 9px; padding: 10px; background: var(--bg-2); color: var(--fg); font: inherit; font-size: 16px; }
 .chat-form button { padding: 10px 12px; font-size: 16px; }
 .emote-actions { display: flex; flex-wrap: wrap; gap: 6px; }

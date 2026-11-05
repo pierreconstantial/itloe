@@ -6,12 +6,13 @@ import { KEYS, load, save, forget } from './storage.js';
 import { $, dotEl, toast } from './dom.js';
 import * as haptics from './haptics.js';
 import { initMenu } from './menu.js';
-import { syncClock } from '../commun/clock.js';
+import { syncClock, serverNow } from '../commun/clock.js';
 import { createSettingsSheet } from './settings-ui.js';
 import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.js';
-import { spawnPoint } from '../../shared/world.js';
+import { WORLD, spawnPoint } from '../../shared/world.js';
 import { roomAt } from '../../shared/campaign/content.js';
-import { nearbyObject, OBJECT_ACTIONS } from '../../shared/interactions.js';
+import { room as sceneRoom } from '../../shared/scene.js';
+import { interactionActor, nearbyObject, nearbyProp, objectAction } from '../../shared/interactions.js';
 import { INTRO_KEY, INTRO_KEY_SPOT, OPENING_PLAYERS } from '../../shared/campaign/story.js';
 import { createPicker, pickStates, anyPickable } from './picker.js';
 import { createJoystick } from './joystick.js';
@@ -44,6 +45,7 @@ const LOBBY_CHIP_SCALE = 2; // other players' avatars: 32 px
 const ERR_TOASTS = {
   locked: 'Settings are locked while a game is on.',
   'not-host': 'Only the host can do that.',
+  'not-gm': 'Only Pierre can do that.',
 };
 
 /** What the podium's choice became, told to everyone (the host picks, guests follow); `room`: no round. @type {Record<string, string>} */
@@ -96,6 +98,30 @@ let myPos = null;
 let gameArea = null;
 /** The game area the stick being held walks, from its grab (null: the room). @type {GameArea | null} */
 let heldIn = null;
+let incarnationAt = 0;
+let incarnationTimer = /** @type {ReturnType<typeof setInterval> | null} */ (null);
+
+function showIncarnation() {
+  const left = incarnationAt - serverNow();
+  $('incarnation').hidden = left <= 0;
+  if (left > 0) $('incarnation-count').textContent = String(Math.min(3, Math.max(1, Math.ceil(left / 1000))));
+  else if (incarnationTimer) {
+    clearInterval(incarnationTimer); incarnationTimer = null; incarnationAt = 0;
+    render();
+  }
+}
+
+/** @param {number} at */
+function setIncarnation(at) {
+  if (at === incarnationAt) return;
+  incarnationAt = at;
+  if (incarnationTimer) { clearInterval(incarnationTimer); incarnationTimer = null; }
+  if (at > serverNow()) {
+    haptics.buzz('incarnate');
+    incarnationTimer = setInterval(showIncarnation, 100);
+  }
+  showIncarnation();
+}
 
 // ---------- connection ----------
 
@@ -125,6 +151,7 @@ const conn = createConnection({
 /** Another device continues as our player. Let go of the id for good: a reload or a probe here must
  *  not take it back (no tug of war); the character stays stored, so "Play here" offers it again. */
 function onReplaced() {
+  setIncarnation(0);
   replaced = true;
   forget(KEYS.id);
   playerId = null;
@@ -165,14 +192,15 @@ function receive(raw) {
     running?.screen.message(m); // the running minigame's own; none running: ignored
   } else if (m.t === 'say' || m.t === 'chatHistory') {
     social.onMessage(m);
-  } else if (m.t === 'interact' && m.playerId === playerId && typeof m.object === 'string' && Object.hasOwn(OBJECT_ACTIONS, m.object)) {
-    toast(OBJECT_ACTIONS[/** @type {keyof typeof OBJECT_ACTIONS} */ (m.object)].feedback);
+  } else if (m.t === 'interact' && m.playerId === playerId && typeof m.feedback === 'string') {
+    toast(m.feedback);
   } else if (m.t === 'view') {
     syncClock(m.now);
     const prev = round;
     const prevNode = campaign?.at.node ?? null;
     round = m.round ?? null;
     campaign = m.campaign ?? null;
+    setIncarnation(Number(m.incarnations?.[playerId ?? '']?.at) || 0);
     viewed = true;
     syncContent(m.contentVersion); // fetches the content on the first view and whenever it changed
     online = Array.isArray(m.online) ? m.online.filter((/** @type {unknown} */ x) => typeof x === 'string') : [];
@@ -211,6 +239,7 @@ function join(character) {
 
 /** Tell the server, forget this phone's player and come back as a stranger. */
 function leaveGame() {
+  setIncarnation(0);
   send({ t: 'leave' });
   forget(KEYS.id);
   playerId = null;
@@ -237,16 +266,23 @@ const screensHere = () => screenOf(campaign?.at.kind);
 /** The party's host (a minigame stores none). */
 const partyHost = () => campaign?.party.hostId ?? null;
 
-/** The party host steers the evening (game-master panel). */
+/** Pierre steers the birthday story, even while a Wisp; sample content uses its host. */
 const isStory = () => campaign?.facts.flags.includes('story.elo-50') ?? false;
 /** The room where the party is: what the joystick walks in and the object button looks around. */
-const roomHere = () => roomAt(content(), campaign?.at.node);
-const isGameMaster = () => campaign !== null && playerId !== null && campaign.party.hostId === playerId
-  && !!member() && (!isStory() || campaign.facts.flags.includes('portal.entered'));
+/** @type {WeakMap<import('../../shared/scene.js').Scene, import('../../shared/scene.js').Scene>} */
+const wispRooms = new WeakMap();
+const roomHere = () => {
+  const base = roomAt(content(), campaign?.at.node);
+  if (!member()?.statuses.includes('wisp')) return base;
+  let scene = wispRooms.get(base);
+  if (!scene) { scene = sceneRoom(`${base.id}-wisp`, { x: 0, y: 0, w: WORLD.w, h: WORLD.h }, []); wispRooms.set(base, scene); }
+  return scene;
+};
+const isGameMaster = () => !!member() && (isStory() ? member()?.character === 'pierre' : partyHost() === playerId);
 
 /** Walking: a member, between rounds (on the hub, in a world, in the room at a tableau), or in a running
  *  round's game area while its screens have the stick on. */
-const canWalk = () => member() !== null && (round === null
+const canWalk = () => member() !== null && incarnationAt <= serverNow() && (member()?.statuses.includes('wisp') || round === null
   ? !(isStory() && campaign?.at.node === 'hub' && myCharacter() === 'elodie' && !campaign.facts.flags.includes('apparition.seen'))
   : round.status === 'running' && gameArea !== null);
 
@@ -430,6 +466,9 @@ function render() {
     renderLobby(here, mem, hostId === playerId, screensHere()?.settings.summarize(tableauSettings()) ?? '');
     return;
   }
+  if (round && mem.statuses.includes('wisp')) {
+    show('wait-lobby'); dockStick('wait-lobby'); return;
+  }
   if (round && campaign) { // a round: the minigame's screens while it runs, then the podium
     const screens = /** @type {import('./minigames.js').PhoneScreen} */ (screenOf(round.kind));
     if (!playerId || !round.view.players[playerId]) { // in the evening, but this round started before we joined
@@ -447,8 +486,7 @@ function render() {
     mountScreen(round.kind).update(round, campaign);
     return;
   }
-  if (isStory() && campaign?.at.node === 'hub' && mem.character !== 'elodie'
-    && !campaign.facts.flags.includes(`person.${mem.character}.unlocked`)) {
+  if (isStory() && campaign?.at.node === 'hub' && mem.statuses.includes('wisp')) {
     show('wait-lobby'); dockStick('wait-lobby'); return;
   }
   show('place'); if (campaign) renderPlace(campaign, mem);
@@ -498,20 +536,50 @@ function dockStick(view) {
   updateInteraction();
 }
 
+/** Wisps may shine near visible furniture or the intro key, without using either object.
+ * @param {{x: number, y: number}} pos */
+function wispNearObject(pos) {
+  if (!campaign) return false;
+  if (nearbyProp(roomAt(content(), campaign.at.node), pos)) return true;
+  return isStory() && campaign.at.node === 'hub' && campaign.facts.flags.includes('apparition.seen')
+    && !campaign.facts.inventory.elodie?.[INTRO_KEY]
+    && Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius;
+}
+
 /** Keep one contextual button in step with the avatar's feet, including while the stick is held. */
 function updateInteraction() {
   const character = myCharacter();
   const inHub = isStory() && campaign?.at.node === 'hub';
+  const mem = member();
+  const actor = mem ? interactionActor(mem, campaign?.facts) : null;
   const pos = character && canWalk() && !gameArea ? currentPos(character) : null; // a game area has no furniture
-  const canCollect = inHub && character === 'elodie' && pos && campaign?.facts.flags.includes('apparition.seen')
+  const canCollect = inHub && !!objectAction(INTRO_KEY, actor) && pos && campaign?.facts.flags.includes('apparition.seen')
     && !campaign.facts.inventory.elodie?.[INTRO_KEY]
     && Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius;
-  const object = pos && (!inHub || character === 'elodie') ? nearbyObject(roomHere(), pos) : null;
+  const object = pos ? nearbyObject(roomHere(), pos, actor) : null;
+  const action = canCollect ? objectAction(INTRO_KEY, actor) : object ? objectAction(object.id, actor) : null;
   const button = /** @type {HTMLButtonElement} */ ($('btn-interact'));
+  if (mem?.statuses.includes('wisp')) {
+    const near = pos && wispNearObject(pos);
+    button.dataset.object = '';
+    button.disabled = !near || !conn.isOnline() || incarnationAt > serverNow();
+    button.hidden = !near || incarnationAt > serverNow();
+    button.textContent = '✨ Shine';
+    $('object-actions').hidden = button.hidden;
+    return;
+  }
+  if (incarnationAt > serverNow()) {
+    button.dataset.object = '';
+    button.disabled = true;
+    button.hidden = true;
+    $('object-actions').hidden = true;
+    return;
+  }
+  button.hidden = false;
+  $('object-actions').hidden = false;
   button.dataset.object = canCollect ? INTRO_KEY : object?.id ?? '';
-  button.disabled = !(canCollect || object) || !conn.isOnline();
-  button.textContent = canCollect ? '🗝️ Pick up key'
-    : object ? OBJECT_ACTIONS[/** @type {keyof typeof OBJECT_ACTIONS} */ (object.id)].label : 'Walk to an object';
+  button.disabled = !action || !conn.isOnline();
+  button.textContent = action?.text ?? 'Walk to an object';
 }
 
 /** Hub, world or a scene tableau: where the party is, what is open from here, how to go on.
@@ -675,6 +743,8 @@ const bag = createBag();
 const social = createSocial({
   send,
   canSend: () => member() !== null && conn.isOnline(),
+  canSpeak: () => member() !== null && conn.isOnline() && !member()?.statuses.includes('wisp'),
+  isWisp: () => !!member()?.statuses.includes('wisp'),
   me: () => playerId,
   name: (id) => campaign?.party.players[id]?.name ?? 'Guest',
 });
@@ -730,9 +800,16 @@ $('btn-start').addEventListener('click', () => send({ t: 'start' }));
 $('btn-place-back').addEventListener('click', () => send({ t: 'back' }));
 $('btn-interact').addEventListener('click', () => {
   if (!canWalk() || gameArea || !conn.isOnline()) return;
+  if (member()?.statuses.includes('wisp')) {
+    const character = myCharacter();
+    if (character && incarnationAt <= serverNow() && wispNearObject(currentPos(character))) send({ t: 'emote', kind: 'shine' });
+    return;
+  }
   joystick.cancel(); // flush the exact position before the interaction on the same socket
   const character = myCharacter();
-  if (isStory() && character === 'elodie' && campaign?.at.node === 'hub'
+  const mem = member();
+  const actor = mem ? interactionActor(mem, campaign?.facts) : null;
+  if (isStory() && character && objectAction(INTRO_KEY, actor) && campaign?.at.node === 'hub'
     && !campaign.facts.inventory.elodie?.[INTRO_KEY]
     && campaign.facts.flags.includes('apparition.seen')) {
     const pos = currentPos(character);
@@ -740,7 +817,7 @@ $('btn-interact').addEventListener('click', () => {
       send({ t: 'interact', object: INTRO_KEY }); return;
     }
   }
-  const object = character ? nearbyObject(roomHere(), currentPos(character)) : null;
+  const object = character ? nearbyObject(roomHere(), currentPos(character), actor) : null;
   if (object) send({ t: 'interact', object: object.id });
   updateInteraction();
 });

@@ -482,11 +482,11 @@ export function createPartyRoom(bg, fg, avatars) {
 
   /**
    * Who is in the room: a block State (lobby) or the campaign party (map screens) — same roster shape.
-   * A fresh avatar starts at its spawn point in the party room.
+   * A fresh avatar starts at its spawn point in the current room.
    * @param {import('./avatar-layer.js').Roster} s
    */
   function setPlayers(s) {
-    avatars.setPlayers(s, PARTY_ROOM);
+    avatars.setPlayers(s, room);
   }
 
   /** @param {any} m a server-validated action at an object */
@@ -494,7 +494,7 @@ export function createPartyRoom(bg, fg, avatars) {
     if (typeof m.playerId !== 'string' || typeof m.object !== 'string' || !Object.hasOwn(OBJECT_ACTIONS, m.object)) return;
     const now = performance.now();
     objectEffects.set(m.object, { started: now, until: now + 2800 });
-    avatars.say(m.playerId, OBJECT_ACTIONS[/** @type {keyof typeof OBJECT_ACTIONS} */ (m.object)].feedback, 2000);
+    avatars.say(m.playerId, typeof m.feedback === 'string' ? m.feedback : OBJECT_ACTIONS[m.object]?.default?.feedback ?? '', 2000);
   }
 
   // ---- animation: the avatar layer's fixed-step simulation, interpolated drawing ----

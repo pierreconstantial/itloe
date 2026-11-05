@@ -270,6 +270,14 @@ const DESIGNS = {
   },
 };
 
+// Provisional Nico character art, ready for his story incarnation. His look can be refined with
+// character references; the wisp itself uses the shared light renderer.
+DESIGNS.nico = {
+  ...DESIGNS.pierre,
+  palette: { ...DESIGNS.pierre.palette, h: '#c9ab78', H: '#9a7648', c: '#177f72', C: '#0f5e55', a: '#3d756e', A: '#264f4a' },
+  down: ['...oooooooooo...', ...DESIGNS.pierre.down.slice(1)],
+};
+
 // ---- assembly ----------------------------------------------------------------------
 
 /** @param {string[]} rows */

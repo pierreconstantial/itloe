@@ -71,10 +71,10 @@
 
     <section id="view-wait-lobby" hidden>
       <div class="lobby-top">
-        <h2>The party room</h2>
-        <p>Élodie went through the portal. You're still here—watch her adventure on the TV.</p>
+        <h2>Wisp Mode</h2>
+        <p>Move your light on the TV. Tap Shine in the reactions to glow brighter.</p>
       </div>
-      <!-- the walking pad docks here for players who stayed in the lobby -->
+      <!-- the walking pad docks here for wisps in the current scene -->
     </section>
 
     <section id="view-place" hidden>
@@ -126,6 +126,7 @@
         <button type="button" data-emote="victory">✌ Victory</button>
         <button type="button" data-emote="fart">💨 Fart</button>
         <button type="button" data-emote="annoy">💢 Annoyed</button>
+        <button type="button" data-emote="shine" hidden>✨ Shine</button>
       </div>
       <button type="button" class="link" data-close>Close</button>
     </div>
@@ -234,6 +235,9 @@
   </div>
 
   <div id="toast" role="status" hidden></div>
+  <div id="incarnation" role="status" aria-live="assertive" hidden>
+    <span>Becoming your character</span><strong id="incarnation-count">3</strong>
+  </div>
   <div id="conn-banner" hidden>Reconnecting…</div>
   <script type="module" src="./main.js"></script>
 </body>

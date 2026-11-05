@@ -1,7 +1,7 @@
 import { $, toast } from './dom.js';
 import { cleanSpeech, isEmote } from '../../shared/social.js';
 
-/** @param {{send: (message: object) => void, canSend: () => boolean, me: () => string | null, name: (id: string) => string}} hooks */
+/** @param {{send: (message: object) => void, canSend: () => boolean, canSpeak: () => boolean, isWisp: () => boolean, me: () => string | null, name: (id: string) => string}} hooks */
 export function createSocial(hooks) {
   /** @type {{playerId: string, text: string, at: number}[]} */
   let messages = [];
@@ -10,6 +10,12 @@ export function createSocial(hooks) {
 
   function render() {
     $('btn-chat').hidden = !hooks.canSend();
+    $('chat-form').hidden = !hooks.canSpeak();
+    for (const button of document.querySelectorAll('[data-emote]')) {
+      const emoteButton = /** @type {HTMLButtonElement} */ (button);
+      emoteButton.hidden = hooks.isWisp() ? emoteButton.dataset.emote !== 'shine' : emoteButton.dataset.emote === 'shine';
+    }
+    $('chat-empty').textContent = hooks.canSpeak() ? 'Say hello to the room!' : 'Make your light shine.';
     const list = $('chat-list');
     list.replaceChildren();
     for (const message of messages) {
@@ -40,7 +46,7 @@ export function createSocial(hooks) {
   $('chat-form').addEventListener('submit', (event) => {
     event.preventDefault();
     const text = cleanSpeech(input.value);
-    if (!text || !hooks.canSend()) return;
+    if (!text || !hooks.canSpeak()) return;
     if (Date.now() - lastSent < 700) return;
     lastSent = Date.now();
     hooks.send({ t: 'say', text });
@@ -50,11 +56,11 @@ export function createSocial(hooks) {
   for (const button of document.querySelectorAll('[data-emote]')) {
     button.addEventListener('click', () => {
       const kind = /** @type {HTMLElement} */ (button).dataset.emote;
-      if (!isEmote(kind) || !hooks.canSend()) return;
+      if (!isEmote(kind) || !hooks.canSend() || (hooks.isWisp() ? kind !== 'shine' : kind === 'shine')) return;
       if (Date.now() - lastSent < 700) return;
       lastSent = Date.now();
       hooks.send({ t: 'emote', kind });
-      toast(kind === 'victory' ? '✌ Victory!' : kind === 'fart' ? '💨 Pfft!' : '💢 Hmph!');
+      toast(kind === 'shine' ? '✨ Shine!' : kind === 'victory' ? '✌ Victory!' : kind === 'fart' ? '💨 Pfft!' : '💢 Hmph!');
     });
   }
   return { render, onMessage };

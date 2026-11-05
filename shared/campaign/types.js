@@ -113,7 +113,7 @@ export {};
 
 // ---------------------------------------------------------------- the campaign (persisted state)
 
-/** @typedef {{ id: string, character: CharacterId, name: string, color: number, left: boolean }} PartyMember */
+/** @typedef {{ id: string, character: CharacterId, name: string, color: number, left: boolean, statuses: string[] }} PartyMember */
 
 /**
  * The evening's roster, owned by reduceCampaign (A1). A round starts with its members present.
@@ -162,6 +162,8 @@ export {};
  *   | { t: 'enter', id: string, node: string }
  *   | { t: 'portal', id: string }
  *   | { t: 'collect', id: string, item: string }
+ *   | { t: 'status', id: string, status: string, on: boolean } // internal: add or remove a player status
+ *   | { t: 'incarnate', id: string }                            // internal: finish the Wisp countdown
  *   | { t: 'back', id: string }
  *   | { t: 'start' | 'again', id: string, now: number, inputs?: unknown }    // host: a round from the room / the podium
  *   | { t: 'newGame', id: string }                                         // host, on the podium: back to the room

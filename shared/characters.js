@@ -2,8 +2,8 @@
 // Insertion order = display order (phone picker, TV).
 
 /**
- * @typedef {'pierre' | 'elodie' | 'sol' | 'anna'} CharacterId
- * @typedef {{ id: CharacterId, name: string, color: number }} Character   // color 1..4 → CSS --p1..--p4
+ * @typedef {'pierre' | 'elodie' | 'sol' | 'anna' | 'nico'} CharacterId
+ * @typedef {{ id: CharacterId, name: string, color: number }} Character
  */
 
 /**
@@ -16,6 +16,7 @@ export const CHARACTERS = Object.freeze({
   elodie: Object.freeze({ id: 'elodie', name: 'Élodie', color: 2 }),
   sol: Object.freeze({ id: 'sol', name: 'Sol', color: 3 }),
   anna: Object.freeze({ id: 'anna', name: 'Anna', color: 4 }),
+  nico: Object.freeze({ id: 'nico', name: 'Nico', color: 5 }),
 });
 
 /** How many players the game holds: one per character. */

@@ -21,14 +21,14 @@ import { minigame, type MinigameKind } from '../shared/minigames.js';
 import { makeMinigameServers, type ErrCode, type MinigameServer } from './minigames.ts';
 import { makeRound, roundOf, type Round } from './round.ts';
 import { JOIN_QR_GAP_MS, JOIN_QR_MS } from '../shared/join-qr.js';
-import { cleanSpeech, isEmote } from '../shared/social.js';
+import { cleanSpeech, isEmote, EMOTES } from '../shared/social.js';
 import { CHARACTERS, isCharacterId } from '../shared/characters.js';
 import { INTRO_KEY, INTRO_KEY_SPOT, OPENING_PLAYERS, PORTAL } from '../shared/campaign/story.js';
 import type { CharacterId } from '../shared/campaign/types.js';
 import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
 import { holding } from '../shared/campaign/index.js';
 import { PARTY_ROOM, spawnAt } from '../shared/scene.js';
-import { nearbyObject } from '../shared/interactions.js';
+import { interactionActor, nearbyObject, objectAction } from '../shared/interactions.js';
 import { loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import {
   CONTENT, CONTENT_VERSION, assertContent, reduceCampaign, isUnlocked, roundStatus, zoneAt, roomAt,
@@ -61,6 +61,24 @@ const clock = makeClock((kind, deadline) => {
 
 /** The room's avatar positions: in memory only, outside the reducer (see pos.ts). A round keeps its own. */
 const positions = makePositions<WebSocket>();
+/** A server-timed presentation window after a Wisp gains playable status. */
+const incarnations = new Map<string, { at: number, kind: string }>();
+const isIncarnating = (id: string) => !!party().players[id] && !party().players[id].left
+  && party().players[id].statuses.includes('incarnating');
+
+/** A persisted pending status can be scheduled again after a server restart. */
+function scheduleIncarnation(id: string): void {
+  if (incarnations.has(id) || !isIncarnating(id)) return;
+  const at = Date.now() + 3000;
+  const kinds = EMOTES.filter((kind) => kind !== 'shine');
+  const kind = kinds[Math.floor(Math.random() * kinds.length)];
+  incarnations.set(id, { at, kind });
+  setTimeout(() => {
+    if (incarnations.get(id)?.at !== at) return;
+    incarnations.delete(id);
+    if (apply({ t: 'incarnate', id })) sendAll({ t: 'emote', playerId: id, kind, at: Date.now() });
+  }, 3000);
+}
 
 /** The running round's in-memory side (round.ts): its server code's io, with unsaved messages, and its
  *  positions. Null between rounds. */
@@ -110,6 +128,13 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   },
   (_prev, next) => { positions.prune(next.party); round?.positions.prune(next.party); },
   (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
+  (prev, next) => {
+    for (const id of next.party.order) {
+      const before = prev.party.players[id], after = next.party.players[id];
+      if (!after || after.left || !after.statuses.includes('incarnating')) incarnations.delete(id);
+      else if (!before?.statuses.includes('incarnating')) scheduleIncarnation(id);
+    }
+  },
   () => broadcast(),
 ];
 
@@ -216,7 +241,7 @@ const viewMsg = () => {
   const { activity: _raw, ...at } = game.campaign.at;
   return JSON.stringify({
     t: 'view', round: roundView(), campaign: { ...game.campaign, at }, contentVersion: CONTENT_VERSION,
-    online: online(), now: Date.now(),
+    online: online(), incarnations: Object.fromEntries(incarnations), now: Date.now(),
   });
 };
 
@@ -237,6 +262,8 @@ function broadcast(): void {
 /** A screen's snapshot of the positions it draws: the round's during a round, else the room's. */
 function sendPositions(ws: WebSocket): void {
   for (const [playerId, pos] of (round?.positions ?? positions).entries()) send(ws, posMsg(playerId, pos));
+  if (round) for (const [playerId, pos] of positions.entries())
+    if (party().players[playerId]?.statuses.includes('wisp')) send(ws, posMsg(playerId, pos));
 }
 
 function relayPos(playerId: string, pos: Pos): void {
@@ -309,7 +336,6 @@ const isPlainObject = (x: unknown): x is Record<string, unknown> => !!x && typeo
 function walk(id: string, pos: Pos): void {
   const c = game.campaign;
   const character = c.party.players[id]?.character;
-  if (STORY_MODE && c.at.node === 'hub' && character !== CONTENT.chooser) return; // the others still occupy the old lobby
   const portalOpen = STORY_MODE && c.at.node === CONTENT.start && c.at.activity === null && c.facts.flags.includes('portal.ready');
   const inPortal = portalOpen && Math.hypot(pos.x - PORTAL.x, pos.y - PORTAL.y) < PORTAL.radius;
   const zone = inPortal ? '@portal' : zoneAt(CONTENT, c.at.node, pos.x, pos.y);
@@ -320,6 +346,7 @@ function walk(id: string, pos: Pos): void {
   zones.set(id, zone);
   if (!known || !zone || zone === before) return;
   if (!character) return;
+  if (c.party.players[id].statuses.includes('wisp') || isIncarnating(id)) return;
   if (zone === '@portal') {
     if (character !== CONTENT.chooser || !apply({ t: 'portal', id })) return;
     const arrival: Pos = { x: 6.2, y: 7.3, dir: 'up', moving: false };
@@ -366,9 +393,13 @@ function handleMessage(ws: WebSocket, m: any): void {
     // ephemeral avatar movement: bypasses the engine (doors aside); malformed, unjoined or flooding senders dropped silently
     const id = who.get(ws);
     if (!id || !canMove(party(), id) || !positions.allow(ws)) return;
+    if (isIncarnating(id)) return;
     if (round) { // the round's game area: kept apart from the room, walking as its minigame allows, no doors
       const pos = parsePos(m);
-      if (pos) round.walk(id, pos);
+      if (pos && party().players[id].statuses.includes('wisp')) {
+        positions.set(id, pos);
+        relayPos(id, pos);
+      } else if (pos) round.walk(id, pos);
       return;
     }
     if (STORY_MODE && game.campaign.at.node === 'hub' && party().players[id].character === CONTENT.chooser
@@ -387,6 +418,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     const now = Date.now();
     if (now - (socialAt.get(ws) ?? 0) < 650) return;
     if (m.t === 'say') {
+      if (party().players[id].statuses.includes('wisp') || isIncarnating(id)) return;
       const text = cleanSpeech(m.text);
       if (!text) return;
       socialAt.set(ws, now);
@@ -394,7 +426,7 @@ function handleMessage(ws: WebSocket, m: any): void {
       chat.push(event);
       if (chat.length > 30) chat.shift();
       sendAll(event);
-    } else if (isEmote(m.kind)) {
+    } else if (isEmote(m.kind) && !isIncarnating(id) && (party().players[id].statuses.includes('wisp') ? m.kind === 'shine' : m.kind !== 'shine')) {
       socialAt.set(ws, now);
       const event = { t: 'emote', playerId: id, kind: m.kind, at: now };
       sendAll(event);
@@ -407,9 +439,11 @@ function handleMessage(ws: WebSocket, m: any): void {
     // the furniture of the room where the party is (roomAt): wherever avatars walk, between rounds (hub, world,
     // the room at a tableau)
     if (!id || !isMember(id) || game.campaign.at.activity) return;
-    if (STORY_MODE && game.campaign.at.node === 'hub' && party().players[id].character !== CONTENT.chooser) return;
-    if (STORY_MODE && m.object === INTRO_KEY && game.campaign.at.node === 'hub'
-      && party().players[id].character === CONTENT.chooser && game.campaign.facts.flags.includes('apparition.seen')) {
+    const member = party().players[id];
+    if (member.statuses.includes('wisp') || isIncarnating(id)) return;
+    const actor = interactionActor(member, game.campaign.facts);
+    if (STORY_MODE && m.object === INTRO_KEY && game.campaign.at.node === 'hub') {
+      if (!objectAction(INTRO_KEY, actor) || !game.campaign.facts.flags.includes('apparition.seen')) return;
       const pos = positions.get(id);
       if (pos && Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius
         && holding(game.campaign.facts, CONTENT.chooser, INTRO_KEY) === 0) {
@@ -419,12 +453,14 @@ function handleMessage(ws: WebSocket, m: any): void {
     }
     const now = Date.now();
     if (now - (interactionAt.get(ws) ?? 0) < 700) return;
-    const member = party().players[id];
-    const position = positions.get(id) ?? spawnAt(PARTY_ROOM, member.character);
-    const object = nearbyObject(roomAt(CONTENT, game.campaign.at.node), position);
+    const scene = roomAt(CONTENT, game.campaign.at.node);
+    const position = positions.get(id) ?? spawnAt(scene, member.character);
+    const object = nearbyObject(scene, position, actor);
     if (!object || object.id !== m.object) return;
+    const action = objectAction(object.id, actor);
+    if (!action) return;
     interactionAt.set(ws, now);
-    const event = { t: 'interact', playerId: id, object: object.id, at: now };
+    const event = { t: 'interact', playerId: id, object: object.id, action: action.key, feedback: action.feedback, at: now };
     sendAll(event);
     return;
   }
@@ -488,6 +524,7 @@ function handleMessage(ws: WebSocket, m: any): void {
   // are injected here or by the minigame, never taken from the wire
   const id = who.get(ws);
   if (!id) { sendErr(ws, 'unknown-player'); return; }
+  if (isIncarnating(id) && m.t !== 'leave' && m.t !== 'gm') return;
 
   switch (m.t) {
     case 'leave':
@@ -507,11 +544,13 @@ function handleMessage(ws: WebSocket, m: any): void {
       return;
 
     case 'gm': {
-      // game master: host only; the engine validates the op. A host's no-op is silent, EXCEPT a refused
+      // Pierre steers the birthday story, even as a Wisp; sample content keeps the host as GM.
+      // The engine validates the op. A GM's no-op is silent, EXCEPT a refused
       // give/take (Contract F: unknown item or character, or taking more than held) → 'refused'
       if (!isPlainObject(m.op)) return;
       if (apply({ t: 'gm', id, op: m.op as GmOp })) return;
-      if (id !== party().hostId) sendErr(ws, 'not-host');
+      const gm = STORY_MODE ? party().players[id]?.character === 'pierre' && !party().players[id]?.left : id === party().hostId;
+      if (!gm) sendErr(ws, STORY_MODE ? 'not-gm' : 'not-host');
       else if (m.op.op === 'give' || m.op.op === 'take') sendErr(ws, 'refused');
       return;
     }
@@ -556,7 +595,8 @@ function handleMessage(ws: WebSocket, m: any): void {
 function storyRefusesRound(t: 'start' | 'again'): boolean {
   if (!STORY_MODE || game.campaign.at.node !== CONTENT.start) return false;
   if (game.campaign.facts.flags.includes('portal.ready')) return true;
-  return t === 'start' && !OPENING_PLAYERS.every((character) => party().order.some((playerId) => !party().players[playerId].left && party().players[playerId].character === character));
+  return t === 'start' && !OPENING_PLAYERS.every((character) => party().order.some((playerId) => !party().players[playerId].left
+    && party().players[playerId].character === character && !party().players[playerId].statuses.includes('wisp')));
 }
 
 /**
@@ -636,6 +676,7 @@ wss.on('connection', (ws) => {
 // ---------- start ----------
 
 saveGame(game); // a --new start must not let the next plain start resume the old game (and a v1 save is now v2)
+for (const id of party().order) scheduleIncarnation(id);
 // resumed timed game or open quiz question: re-arm (fires at once if the deadline passed while down)
 clock.onChange(null, game.campaign.at);
 

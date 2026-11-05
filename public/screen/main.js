@@ -15,6 +15,7 @@ import { h } from './dom.js';
 import { createContentSource } from '../commun/content.js';
 import { doorStates, mapCopy, nameOf } from './doors.js';
 import { roomAt } from '../../shared/campaign/content.js';
+import { room as sceneRoom } from '../../shared/scene.js';
 import { createCutscenes } from './cutscenes.js';
 import { screenOf } from './minigames.js';
 import { applyJoinQr, joinQrState } from './join-qr.js';
@@ -32,6 +33,33 @@ const WAKE_GAP_MS = 5000;
 const app = /** @type {HTMLElement} */ (document.getElementById('app'));
 /** Every player's avatar, whatever screen is showing. */
 const avatars = createAvatarLayer();
+const wispAvatars = createAvatarLayer();
+const wispOverlay = /** @type {HTMLCanvasElement} */ (document.getElementById('wisp-overlay'));
+const wispContext = /** @type {CanvasRenderingContext2D} */ (wispOverlay.getContext('2d'));
+let wispFrame = 0;
+let lastWispFrame = 0;
+
+/** @param {number} now */
+function drawRoundWisps(now) {
+  if (!shownRound || !campaign) { wispFrame = 0; return; }
+  const c = campaign;
+  const r = shownRound;
+  const dpr = devicePixelRatio || 1;
+  const w = window.innerWidth, h = window.innerHeight;
+  if (wispOverlay.width !== Math.round(w * dpr) || wispOverlay.height !== Math.round(h * dpr)) {
+    wispOverlay.width = Math.round(w * dpr); wispOverlay.height = Math.round(h * dpr);
+  }
+  wispContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+  wispContext.clearRect(0, 0, w, h);
+  const ids = c.party.order.filter((id) => !c.party.players[id].left && !r.view.players[id]);
+  if (!ids.length) { wispFrame = 0; return; }
+  const base = roomAt(content.get(), c.at.node);
+  wispAvatars.update(Math.min(.05, (now - lastWispFrame) / 1000 || .016));
+  wispAvatars.draw(wispContext, worldView(w, h, dpr), 1, now, sceneRoom('wisp-overlay', base.floor, []), {}, ids);
+  lastWispFrame = now;
+  wispFrame = requestAnimationFrame(drawRoundWisps);
+}
+
 const party = createPartyRoom(
   /** @type {HTMLCanvasElement} */ (document.getElementById('party-bg')),
   /** @type {HTMLCanvasElement} */ (document.getElementById('party-fg')),
@@ -106,6 +134,9 @@ function leaveRound() {
   unmountScreen();
   if (!shownRound) return;
   shownRound = null;
+  wispOverlay.hidden = true;
+  if (wispFrame) cancelAnimationFrame(wispFrame);
+  wispFrame = 0;
   avatars.settle();
   finishedAt = -Infinity;
   cancelPodium();
@@ -125,8 +156,13 @@ function showRound(r, c) {
   party.setPortal(false);
   party.setKey(false);
   party.setPlayers(r.view);
+  wispAvatars.setPlayers(c.party, roomAt(content.get(), c.at.node));
+  wispAvatars.setStatuses(c.party.players);
+  avatars.setStatuses(c.party.players);
   party.setDoors([]);
   party.setVisible(false);
+  wispOverlay.hidden = false;
+  if (!wispFrame) wispFrame = requestAnimationFrame(drawRoundWisps);
   document.body.classList.remove('party');
   if (r.status === 'running') {
     if (prev?.status === 'finished') { finishedAt = -Infinity; cancelPodium(); } // Play again
@@ -187,6 +223,7 @@ function showRoom(c) {
   party.setPortal(portalReady());
   party.setKey(false);
   party.setPlayers({ order: here, players: c.party.players });
+  avatars.setStatuses(c.party.players);
   party.setDoors([]);
   party.setVisible(true);
   document.body.classList.add('party');
@@ -206,12 +243,9 @@ function showMap(c) {
   roomIds = null;
   const storyScene = c.facts.flags.includes('story.elo-50') && c.facts.flags.includes('portal.entered');
   const inApartment = storyScene && c.at.node === 'hub';
-  const visibleIds = !storyScene ? c.party.order : c.party.order.filter((id) => {
-    const member = c.party.players[id];
-    return member?.character === 'elodie' || c.facts.flags.includes(`person.${member?.character}.unlocked`);
-  });
-  party.setPlayers({ ...c.party, order: visibleIds });
   party.setRoom(roomAt(content.get(), c.at.node));
+  party.setPlayers(c.party);
+  avatars.setStatuses(c.party.players);
   party.setPortal(false);
   party.setKey(inApartment && c.facts.flags.includes('apparition.seen') && !(c.facts.inventory.elodie?.[INTRO_KEY] > 0));
   party.setHubPeople(inApartment ? REUNIONS.filter((person) => c.facts.flags.includes(person.flag)
@@ -414,10 +448,10 @@ const HANDLERS = {
     gap = false;
     if (campaign) cutscenes.update(campaign.news, campaign.newsSeq);
   },
-  pos: (msg) => avatars.onPos(msg),
+  pos: (msg) => { avatars.onPos(msg); wispAvatars.onPos(msg); },
   unsaved: (msg) => running?.screen.message(msg), // the running minigame's own; none running: ignored
   say: (msg) => avatars.onSocial(msg),
-  emote: (msg) => avatars.onSocial(msg),
+  emote: (msg) => { avatars.onSocial(msg); wispAvatars.onSocial(msg); },
   interact: (msg) => party.onInteract(msg),
   tick: (msg) => syncClock(msg.now), // liveness (any message feeds the watchdog) + clock skew
   joinQr: (msg) => { syncClock(msg.now); onJoinQr(msg.until); },
