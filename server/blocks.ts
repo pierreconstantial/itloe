@@ -26,24 +26,26 @@ export function makeBlockServer(game: Game): MinigameServer<State, ServerAction>
     // actions are rebuilt field by field: server-only inputs (now, deadline, timeUp) never come from the wire
     message(m, { id, now, state: s }) {
       const host = id === s.hostId;
+      // a round button answers alike in every minigame: a guest's → not-host, the host's at the wrong moment → refused
+      const refusal = host ? 'refused' : 'not-host';
       switch (m.t) {
         case 'start':
         case 'again':
-          return { action: { t: m.t, id, now }, refused: 'not-host' };
+          return { action: { t: m.t, id, now }, refused: refusal };
 
         case 'endGame':
-          // host stops the game (someone dropped while not stuck); refused (non-host / not playing) → not-host, like again
-          return { action: { t: 'endGame', id }, refused: 'not-host' };
+          // host stops the game (someone dropped while not stuck)
+          return { action: { t: 'endGame', id }, refused: refusal };
 
         case 'retire':
-          // host takes one player out (done, still ranked, keeps seat + character). Non-host or not playing →
-          // not-host; a host's no-op (unknown / already done / left target) is not an error, like config
+          // host takes one player out (done, still ranked, keeps seat + character); a host's no-op while
+          // playing (unknown / already done / left target) is not an error, like config
           if (typeof m.target !== 'string') return null;
-          return { action: { t: 'retire', id, target: m.target }, refused: host && s.phase === 'playing' ? undefined : 'not-host' };
+          return { action: { t: 'retire', id, target: m.target }, refused: !host ? 'not-host' : s.phase === 'playing' ? undefined : 'refused' };
 
         case 'newGame':
-          // podium → block lobby inside the same tableau; refused (non-host or not finished) → not-host, like again
-          return { action: { t: 'newGame', id }, refused: 'not-host' };
+          // podium → block lobby inside the same tableau
+          return { action: { t: 'newGame', id }, refused: refusal };
 
         case 'place':
           if ((m.piece !== 0 && m.piece !== 1 && m.piece !== 2) || typeof m.x !== 'number' || typeof m.y !== 'number') {

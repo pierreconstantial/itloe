@@ -29,11 +29,11 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 { "t": "newGame" }                                          // host only, phase finished → back to the LOBBY: players kept (minus left),
                                                             // scores/boards reset, room code kept, newcomers can join again (M3 slice 2)
 { "t": "endGame" }                                          // host only, phase playing → finished: every not-done player is marked
-                                                            // done (board frozen, score kept), endReason "host". Refused → err "not-host"
+                                                            // done (board frozen, score kept), endReason "host"
 { "t": "retire", "target": "p-abc123" }                     // host only, phase playing: the target is marked done + retired (board frozen,
                                                             // still ranked, NOT left: keeps seat + character, can reconnect). Everyone
-                                                            // done → finished, endReason "stuck". Non-host / not playing → err "not-host";
-                                                            // unknown, done or left target → silent no-op. The host may retire themself.
+                                                            // done → finished, endReason "stuck". Unknown, done or left target →
+                                                            // silent no-op. The host may retire themself.
 { "t": "pos", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
 // M3 avatar movement — EPHEMERAL, never enters the reducer State. Client-authoritative:
 // the phone integrates its joystick locally and sends throttled updates (≤ 15/s, only when
@@ -122,7 +122,8 @@ memory-world entrances and reunion mini-games are not wired yet; their story spe
 ### Quiz (Contract E + addendum E1): a tableau `activity: { kind: 'quiz', settings }`
 
 The bank (`data/quiz/*.json`) stays on the server and is never served. While a quiz runs, its messages
-below go to the quiz (Routing above); block-only messages (`place`, `retire`) get `err "not-playing"`.
+below go to the quiz (Routing above); block-only messages (`place`) get `err "not-playing"`, and `retire`
+is refused like any round button at the wrong moment.
 
 ```jsonc
 { "t": "start" }                       // host, quiz lobby: picks `count` questions among the bank (filtered by the
@@ -209,6 +210,8 @@ below go to the quiz (Routing above); block-only messages (`place`, `retire`) ge
 // must NOT auto-reconnect; it shows "Continued on another device" and offers the picker.
 { "t": "err", "code": "full" | "bad-place" | "not-host" | "not-playing" | "unknown-player" | "locked" | "bad-room" | "taken" | "refused" }
 // "refused" (slice 3): enter/back not allowed here (locked node, game being played, one-shot already done)
+// Round buttons (start, again, newGame, endGame, retire) answer alike in every minigame: a guest's →
+// "not-host", the host's at the wrong moment → "refused"
 // "locked": config refused because a game is in progress
 // "bad-room": join refused — wrong or missing room code (phone shows "ask for the code on the TV")
 // "taken": join refused — that character is already picked by an active player (M3)

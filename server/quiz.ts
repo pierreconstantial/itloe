@@ -130,7 +130,12 @@ export function makeQuizServer(): MinigameServer<QuizState, QuizAction, Candidat
             refused: !host ? 'not-host' : q.phase === 'question' || q.phase === 'reveal' ? 'locked' : undefined,
           };
 
-        default: // not a quiz thing (place, retire, …)
+        case 'retire':
+          // a round button, answered like in every minigame; the quiz has no "take out" yet (phase 4)
+          if (typeof m.target !== 'string') return null;
+          return { refused: refusal };
+
+        default: // not a quiz thing (place, …)
           return { refused: 'not-playing' };
       }
     },
