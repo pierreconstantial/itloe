@@ -179,28 +179,22 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 | `npm start` | The real server (`server/main.ts`, run directly by Node, no build step) |
 
 - **Simulator:** open **/sim/** on a running server: the TV screen plus player phones side by side in one page. The phones get the room code from `/api/join`.
-- **End-to-end tests** (exit code 0 = all pass, the last line says `ALL PASS`). Never use port 3131: that's the live server.
+- **End-to-end tests:** `npm run e2e` runs every suite; `npm run e2e -- quiz phone:4` runs the named ones. Run it in the foreground: it blocks until all are done (a full run takes about 3 minutes), then prints one line per suite (pass or fail, duration, log file), the FAIL lines of a failed suite, and an overall line; it exits non-zero on a failure. It runs the suites in parallel through the machine's shared slots, and does the setup for you: free ports, headless Chrome for the browser suites, a server for `base`, scratch data folders, all removed afterwards, also after Ctrl-C.
 
-  `e2e.mts` needs a separate server with a fresh evening, on the sample content:
+  | Suite | Covers |
+  |---|---|
+  | `base` | a running server over sockets: room code, join, avatar positions, moves, rejoin and replaced sockets, new game, leaving |
+  | `resume` | kill -9 in every phase, timed clock kept, v1 save migration |
+  | `presence` | reclaim a character, newest device wins, host controls |
+  | `campaign` | false start → unlocks → news acked by two TVs → doors, kill -9 at each step; chat, emotes and object actions (relay, history, rate limits, where interact works); `pos` during a round kept apart from the room's |
+  | `inventory` | rewards land in the right inventory (chooser / winner / all), survive kill -9 and a reclaim; host give/take, unknown items refused |
+  | `quiz` | quiz over real sockets: no answer on the wire before the reveal, judging, override, resume (plays a fixed copy of `placeholder.json`) |
+  | `tv` | the TV page in headless Chrome, including the minigame screens' teardown and a stand-in minigame screen; one section: `tv:connection`, `tv:campaign`, `tv:quiz`, `tv:standin` |
+  | `phone` | phone pages in headless Chrome: session never lost, reclaim, host controls, campaign screens, quiz and the screens' teardown, room code, a stand-in minigame's joystick; one part: `phone:1` … `phone:8` (continuity, host controls, campaign, quiz, room code, inventory, QR, stand-in) |
 
-  ```sh
-  ITLOE_CONTENT=sample BLOKO_VAR=/tmp/bloko-e2e PORT=3199 npm start -- --new
-  PORT=3199 node scripts/e2e.mts     # in a second terminal
-  ```
+  `--shots <dir>` saves the TV and phone screens, each with its visible text, to `<dir>/<suite>`. `LOCK_MS` (how long the phone suite freezes a locked phone: 20 s in the runner, 5 min in the suite alone) and `E2E_SLOW=3` (multiplies every wait on a busy machine) pass through. The `e2e:<suite>` scripts run one suite bare, as CI does, with the caller's `PORT`.
 
-  All the others start their OWN server on the sample content (scratch data folder, removed at the end) on `PORT`, and refuse a busy port:
-
-  | Script | Covers | Needs |
-  |---|---|---|
-  | `e2e-resume.mts` | kill -9 in every phase, timed clock kept, v1 save migration | `PORT` |
-  | `e2e-presence.mts` | reclaim a character, newest device wins, host controls | `PORT` |
-  | `e2e-campaign.mts` | false start → unlocks → news acked by two TVs → doors, kill -9 at each step; chat, emotes and object actions (relay, history, rate limits, where interact works); `pos` during a round kept apart from the room's | `PORT` |
-  | `e2e-inventory.mts` | rewards land in the right inventory (chooser / winner / all), survive kill -9 and a reclaim; host give/take, unknown items refused | `PORT` |
-  | `e2e-quiz.mts` | quiz over real sockets: no answer on the wire before the reveal, judging, override, resume | `PORT` (plays a fixed copy of `placeholder.json`) |
-  | `e2e-tv.mts` | the TV page in headless Chrome, including the minigame screens' teardown and a stand-in minigame screen | `PORT`, `CDP`, optional `ONLY=connection\|campaign\|quiz\|standin` (one section), `SHOTS=<dir>` |
-  | `e2e-phone.mts` | phone pages in headless Chrome: session never lost, reclaim, host controls, campaign screens, quiz and the screens' teardown, room code, a stand-in minigame's joystick | `PORT`, `CDP`, optional `LOCK_MS` (locked-phone time, default 5 min), `ONLY=1…8` (one part), `SHOTS=<dir>` |
-
-  The browser suites need Chrome started with `--remote-debugging-port=<CDP>`; run **one browser suite at a time** and stop that Chrome afterwards. On a busy machine, `E2E_SLOW=3` multiplies every wait.
+  To check that screens didn't change: take a reference with `npm run e2e -- --shots <ref> tv phone` on the base, then `npm run e2e -- --shots <dir> --compare <ref> tv phone` on your change. It lists each screen that differs, most changed first, with its share of changed pixels and its text diff, and saves `<screen>.diff.png` next to the new screenshot. It judges nothing: two runs of the same code also differ in random content (room codes, QR codes, quiz questions, scores, animation phases), so look at what differs.
 
 ### Further reading
 
@@ -247,4 +241,4 @@ BLOKO_VAR="$(mktemp -d /tmp/itloe-agent.XXXXXX)" PORT=3199 npm run start:local -
 
 That instance is at `http://127.0.0.1:3199/sim/`. Keep port 3131 and its saved game for interactive testing. Run the existing checks with `npm run check` and `npm test`; the end-to-end scripts are described above.
 
-Several agents on devbox run end-to-end suites at the same time. Each suite goes through `scripts/e2e-slot.sh <command>`, which waits for one of three shared slots (`E2E_SLOTS` changes the number), so the suites run side by side without overloading the machine. Each command still picks its own free `PORT`, and `CDP` for the browser suites.
+Several agents on devbox run end-to-end suites at the same time. `npm run e2e` runs each suite through `scripts/e2e-slot.sh`, which waits for one of three slots shared by every run on the machine (`E2E_SLOTS` changes the number), so the suites run side by side without overloading it.
