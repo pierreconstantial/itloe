@@ -13,6 +13,9 @@ import { MINIGAMES } from '../shared/minigames.js';
 /** @typedef {import('../shared/campaign/types.js').CampaignAction} CampaignAction */
 /** @typedef {import('../shared/campaign/types.js').Content} Content */
 
+/** The seed of a campaign's block game (these tests' rounds are block games). @param {Campaign} c */
+const blockSeed = (c) => /** @type {import('../shared/game.js').State | null} */ (c.at.activity)?.seed;
+
 /** @param {Campaign} c @param {CampaignAction[]} actions */
 const run = (c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a, C), c);
 
@@ -412,7 +415,7 @@ test('determinism: same actions → same campaign (seeds advance on every round 
   assert.deepEqual(a, b);
   const r1 = run(party(), { t: 'start', id: 'e', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
   const r2 = run(r1, { t: 'again', id: 'e', now: 2 });
-  assert.notEqual(r1.at.activity?.seed, r2.at.activity?.seed);
+  assert.notEqual(blockSeed(r1), blockSeed(r2));
 });
 
 test('loadCampaign: a JSON round-trip (a server restart) is deep-equal in every phase — no reshuffled seed', () => {
@@ -431,8 +434,8 @@ test('loadCampaign: a JSON round-trip (a server restart) is deep-equal in every 
     assert.deepEqual(back, JSON.parse(JSON.stringify(c)), `${name}: deep-equal after load`);
     assert.equal(back.seed, c.seed, `${name}: seed kept`);
     // and the NEXT block game is the same one as without the restart
-    const next = (/** @type {Campaign} */ x) => run(x, { t: 'back', id: 'e' }, { t: 'gm', id: 'e', op: { op: 'goto', node: 'teens.blocks' } },
-      { t: 'start', id: 'e', now: 5 }).at.activity?.seed;
+    const next = (/** @type {Campaign} */ x) => blockSeed(run(x, { t: 'back', id: 'e' }, { t: 'gm', id: 'e', op: { op: 'goto', node: 'teens.blocks' } },
+      { t: 'start', id: 'e', now: 5 }));
     assert.equal(next(back), next(c), `${name}: next block game unchanged by the restart`);
   }
   assert.ok(withNews.news.length > 0, 'pending news survive too');
