@@ -2,7 +2,7 @@
 // PUBLIC quiz (shared/quiz/bank.js projectQuiz), which never carries an answer before the reveal. Between
 // quizzes the party is in the room (main.js); phases here:
 // question (4 big choices or a typed answer; one shot), reveal (my verdict + points, the answer, everyone's
-// answers; host: overrides + next), finished (ranking; host: Play again / Back to the room).
+// answers; host: overrides + next). The finished quiz is the frame's podium, with each player's right answers.
 // Controls are built once per question, so a view arriving mid-typing never resets the text field.
 import { $, addStylesheet } from './dom.js';
 import * as haptics from './haptics.js';
@@ -16,7 +16,7 @@ import { QUIZ_SETTINGS } from './quiz-text.js';
 
 const URGENT_SECONDS = 5;
 const TICK_MS = 250; // the countdown's refresh
-const PHASES = ['question', 'reveal', 'finished'];
+const PHASES = ['question', 'reveal'];
 
 /** French typography: a narrow no-break space before ? ! : ; » (never orphaned at a line start). @param {string} s */
 const frenchSpaces = (s) => s.replace(/\s+([?!:;»])/g, '\u202f$1').replace(/«\s+/g, '«\u202f');
@@ -58,8 +58,6 @@ export function createQuizUi(io) {
     render(/** @type {QuizView} */ (last), meId);
   });
   $('quiz-next').addEventListener('click', () => io.send({ t: 'next' }));
-  $('quiz-again').addEventListener('click', () => io.send({ t: 'again' }));
-  $('quiz-back').addEventListener('click', () => io.send({ t: 'newGame' }));
 
   /** @param {number} choice @param {RoundView} r */
   function pick(choice, r) {
@@ -180,26 +178,6 @@ export function createQuizUi(io) {
     $('quiz-reveal-hint').hidden = host || v.phase !== 'reveal';
   }
 
-  /** @param {QuizView} v */
-  function renderFinished(v) {
-    const ranking = [...v.order].sort((a, b) => v.players[b].score - v.players[a].score || v.order.indexOf(a) - v.order.indexOf(b));
-    let prevScore = NaN, prevRank = 0;
-    const ol = $('quiz-ranking');
-    ol.replaceChildren(...ranking.map((id, i) => {
-      const p = v.players[id];
-      const rank = p.score === prevScore ? prevRank : i + 1;
-      prevScore = p.score;
-      prevRank = rank;
-      const li = el('li', id === meId ? 'me' : '', `${['🥇', '🥈', '🥉'][rank - 1] ?? `${rank}.`} ${p.name} — ${p.score} (${p.correct} ✓)`);
-      return li;
-    }));
-    $('quiz-finished-kicker').textContent = v.endReason === 'host' ? 'The host ended the quiz.' : '';
-    const host = amHost;
-    $('quiz-again').hidden = !host;
-    $('quiz-back').hidden = !host;
-    $('quiz-finished-hint').hidden = host;
-  }
-
   /** @param {QuizView} v @param {string} id @param {boolean} [host] am I the party's host (default: as last time) */
   function render(v, id, host = amHost) {
     last = v;
@@ -207,13 +185,12 @@ export function createQuizUi(io) {
     amHost = host;
     for (const ph of PHASES) $(`quiz-${ph}`).hidden = v.phase !== ph;
     const r = v.round;
-    $('quiz-progress').textContent = v.phase === 'finished' ? 'Results' : r ? `Question ${r.index + 1}/${r.total}` : 'Quiz';
+    $('quiz-progress').textContent = r ? `Question ${r.index + 1}/${r.total}` : 'Quiz';
     const me = v.players[id];
     $('quiz-score').textContent = me ? `${me.score} pts` : '';
 
     if (v.phase === 'question' && r) renderQuestion(v, r);
     if (v.phase === 'reveal' && r) renderReveal(v, r);
-    if (v.phase === 'finished') renderFinished(v);
     tick();
   }
 
@@ -264,17 +241,6 @@ const MARKUP = `
       <button id="quiz-next" type="button" class="primary" hidden>Next question</button>
       <p id="quiz-reveal-hint" class="dim">Waiting for the host…</p>
     </div>
-
-    <div id="quiz-finished" class="quiz-pane" hidden>
-      <p id="quiz-finished-kicker" class="kicker"></p>
-      <h2>Quiz over!</h2>
-      <ol id="quiz-ranking" class="quiz-ranking"></ol>
-      <div class="lobby-actions">
-        <button id="quiz-again" type="button" class="primary" hidden>Play again</button>
-        <button id="quiz-back" type="button" hidden>Back to the room</button>
-      </div>
-      <p id="quiz-finished-hint" class="dim">Waiting for the host…</p>
-    </div>
   </section>
 `;
 
@@ -294,6 +260,14 @@ export const QUIZ_SCREEN = {
         ui.stop();
         root.replaceChildren();
       },
+    };
+  },
+  /** Each player's right answers; the host's end in the quiz's words. */
+  podium(round) {
+    const v = /** @type {QuizView} */ (round.view);
+    return {
+      ...(v.endReason === 'host' ? { kicker: 'The host ended the quiz.' } : {}),
+      rowExtra: (id) => ` (${v.players[id].correct} ✓)`,
     };
   },
 };

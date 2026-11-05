@@ -831,16 +831,17 @@ try {
     // the next round reads the host's question: wait until both phones show it, not the reveal
     if (round < 2) expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), `Next → question ${round + 2}`);
   }
-  expect(await phaseIs(H, 'quiz-finished') && await phaseIs(Q, 'quiz-finished'), 'after the last question: finished on both phones');
-  const rank: string = await Q.text('quiz-ranking');
-  expect(/🥇 Pierre/.test(rank) && /Élodie/.test(rank), 'mini ranking', rank);
+  expect(await phaseIs(H, 'view-podium') && await phaseIs(Q, 'view-podium'), 'after the last question: finished on both phones');
+  const rank: string = await Q.text('podium-list');
+  expect(/🥇\s+Pierre — \d+ \(\d ✓\)/.test(rank) && /Élodie/.test(rank), 'the podium ranks the quiz, with each player\'s right answers', rank);
   await H.shot('quiz-finished-host');
-  expect(await H.visible('quiz-again') && await H.visible('quiz-back') && !(await Q.visible('quiz-again')) && !(await Q.visible('quiz-back')),
-    'host: Play again / Back to the room; guests wait');
-  expect(await H.text('quiz-back') === 'Back to the room', 'the host\'s second button says "Back to the room"', await H.text('quiz-back'));
+  expect(await H.visible('btn-again') && await H.visible('btn-new-game') && await H.visible('btn-settings-podium')
+    && !(await Q.visible('btn-again')) && !(await Q.visible('btn-new-game')) && await Q.visible('podium-hint'),
+    'the shared podium: the host has Play again / Back to the room and the settings; guests wait');
+  expect(await H.text('btn-new-game') === 'Back to the room', 'the host\'s second button says "Back to the room"', await H.text('btn-new-game'));
 
   // ---- quiz 2 (Back to the room, new settings): typed answers, really typed ----
-  await H.tap('#quiz-back');
+  await H.tap('#btn-new-game');
   expect(await phaseIs(H, 'view-lobby') && await phaseIs(Q, 'view-lobby'), 'Back to the room → both phones in the room at the tableau');
   await setQuiz(3, 'Typed');
   await H.tap('#btn-start');
@@ -872,11 +873,11 @@ try {
   await H.tap('#btn-menu');
   await H.tap('#btn-end-game');
   await H.tap('#btn-end-game');
-  expect(await phaseIs(H, 'quiz-finished'), 'typed quiz finished');
+  expect(await phaseIs(H, 'view-podium'), 'typed quiz finished');
   await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
 
   // ---- quiz 3 (Play again): straight into a new quiz; the host ends it from the ☰ menu during a question ----
-  await H.tap('#quiz-again');
+  await H.tap('#btn-again');
   expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question') && /^Question 1\//.test(await Q.text('quiz-progress')),
     'Play again → question 1 of a new quiz at once, on both phones', await Q.text('quiz-progress'));
   expect((await Q.hostButtons()).length === 0, 'quiz: guest menu has no host controls');
@@ -895,12 +896,12 @@ try {
   const qArmed: string = await H.ev(`document.getElementById('btn-end-game').textContent`);
   expect(/Tap again/.test(qArmed) && await Q.visible('quiz-question'), 'quiz End game: first tap arms, nothing ends yet', qArmed);
   await H.tap('#btn-end-game');
-  expect(await phaseIs(H, 'quiz-finished') && await phaseIs(Q, 'quiz-finished'), 'quiz End game: second tap → finished on both phones');
-  expect(await Q.text('quiz-finished-kicker') === 'The host ended the quiz.' && (await H.hostButtons()).length === 0,
-    'quiz ended: "The host ended the quiz.", no host controls left', await Q.text('quiz-finished-kicker'));
+  expect(await phaseIs(H, 'view-podium') && await phaseIs(Q, 'view-podium'), 'quiz End game: second tap → finished on both phones');
+  expect(await Q.text('podium-kicker') === 'The host ended the quiz.' && (await H.hostButtons()).length === 0,
+    'quiz ended: "The host ended the quiz.", no host controls left', await Q.text('podium-kicker'));
   await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
   await Q.shot('quiz-finished-guest');
-  await H.tap('#quiz-back');
+  await H.tap('#btn-new-game');
   expect(await phaseIs(H, 'view-lobby') && await phaseIs(Q, 'view-lobby') && await H.visible('btn-start') && await Q.visible('stick-pad'),
     'Back to the room → the room again: the host\'s Start, the joystick');
   } // part 4

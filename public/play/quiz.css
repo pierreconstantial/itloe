@@ -79,7 +79,7 @@
 .quiz-correct { font-size: 18px; }
 .quiz-anecdote { font-size: 15px; color: var(--fg-dim); text-align: left; padding: 8px 12px; border-radius: 10px; background: var(--bg-2); }
 
-.quiz-results, .quiz-ranking { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.quiz-results { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; text-align: left; }
 .quiz-results li {
   display: grid;
   grid-template-columns: 1.4em auto 1fr auto auto;
@@ -89,7 +89,7 @@
   border-radius: 10px;
   background: var(--bg-2);
 }
-.quiz-results li.me, .quiz-ranking li.me { outline: 2px solid var(--accent); }
+.quiz-results li.me { outline: 2px solid var(--accent); }
 .quiz-results .mark.right { color: #6fdc8c; }
 .quiz-results .mark.wrong { color: var(--bad); }
 .quiz-results .who { font-weight: 700; }
@@ -97,4 +97,3 @@
 .quiz-results .pts { font-variant-numeric: tabular-nums; }
 .quiz-results .override { font-size: 13px; padding: 6px 8px; background: var(--bg); touch-action: manipulation; }
 .quiz-results .override.armed { background: var(--accent); color: #201a08; }
-.quiz-ranking li { padding: 10px 12px; border-radius: 10px; background: var(--bg-2); font-size: 18px; }

@@ -170,7 +170,7 @@ function receive(raw) {
     online = Array.isArray(m.online) ? m.online.filter((/** @type {unknown} */ x) => typeof x === 'string') : [];
     // a podium we were on became a new round, or the room at the same tableau
     const next = round;
-    const turn = prev && screenOf(prev.kind)?.podium && playerId && prev.view.players[playerId]
+    const turn = prev && playerId && prev.view.players[playerId]
       && (next ? next.view.players[playerId] : campaign?.at.node === prevNode)
       ? PHASE_TOASTS[`${prev.status}>${next ? next.status : 'room'}`] : undefined;
     // the party moved (a door, the host): say where we are now
@@ -385,7 +385,7 @@ function render() {
     const states = campaign ? pickStates(campaign.party, joinable, online) : null;
     if (!states || (!anyPickable(states) && pendingPick === null)) {
       show('waiting');
-      $('waiting-text').textContent = round?.status === 'finished' && screenOf(round.kind)?.podium ? 'A game just ended.' : 'A game is already running.';
+      $('waiting-text').textContent = round?.status === 'finished' ? 'A game just ended.' : 'A game is already running.';
       return;
     }
     show('pick');
@@ -407,7 +407,7 @@ function render() {
       $('waiting-text').textContent = "A game is on. You'll play the next one!";
       return;
     }
-    if (round.status === 'finished' && screens.podium) {
+    if (round.status === 'finished') {
       if (running?.kind === round.kind) running.screen.update(round, campaign); // the screens see their round end
       show('podium');
       renderPodium(round, screens, playerId, hostId === playerId);
