@@ -16,7 +16,7 @@ import { INTRO_KEY, INTRO_KEY_SPOT, OPENING_PLAYERS } from '../../shared/campaig
 import { createPicker, pickStates, anyPickable } from './picker.js';
 import { createJoystick } from './joystick.js';
 import { avatarCanvas, paintAvatar } from './avatar.js';
-import { posFromEcho } from './movement.js';
+import { posFromEcho, roundPos } from './movement.js';
 import { createConnection } from './connection.js';
 import { installBackGuard } from './back-guard.js';
 import { createHostControls } from './host-controls.js';
@@ -32,6 +32,7 @@ import { childMarks, content, onContentChange, syncContent, titleOf } from './ca
 /** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
 /** @typedef {import('./movement.js').Pos} Pos */
+/** A minigame's game area our avatar walks, and where it stands there. @typedef {{ area: import('../../shared/scene.js').Scene, pos: Pos }} GameArea */
 /** The round's players, as every minigame's view carries them (shared/minigames.js). @typedef {import('../../shared/minigames.js').RoundPlayers} RoundPlayers */
 /** A party member in the room at a tableau. @typedef {{ id: string, name: string, color: number, character?: string | null, left?: boolean }} LobbyPlayer */
 
@@ -90,6 +91,11 @@ let wantedCharacter = null;
 let pendingPick = null;
 /** Where our avatar stands: from the server's echo after welcome, else our spawn point. @type {Pos | null} */
 let myPos = null;
+/** The running minigame's game area, where its phone screen lets our avatar walk; null: none (our place in
+ *  the room, myPos, waits apart). @type {GameArea | null} */
+let gameArea = null;
+/** The game area the stick being held walks, from its grab (null: the room). @type {GameArea | null} */
+let heldIn = null;
 
 // ---------- connection ----------
 
@@ -155,6 +161,8 @@ function receive(raw) {
     // the one pos a phone receives: our own last position, echoed right after welcome
     const echoed = m.playerId === playerId ? posFromEcho(m) : null;
     if (echoed) { myPos = echoed; render(); }
+  } else if (m.t === 'unsaved') {
+    running?.screen.message(m); // the running minigame's own; none running: ignored
   } else if (m.t === 'say' || m.t === 'chatHistory') {
     social.onMessage(m);
   } else if (m.t === 'interact' && m.playerId === playerId && typeof m.object === 'string' && Object.hasOwn(OBJECT_ACTIONS, m.object)) {
@@ -236,9 +244,11 @@ const roomHere = () => roomAt(content(), campaign?.at.node);
 const isGameMaster = () => campaign !== null && playerId !== null && campaign.party.hostId === playerId
   && !!member() && (!isStory() || campaign.facts.flags.includes('portal.entered'));
 
-/** Walking: a member, between rounds (on the hub, in a world, in the room at a tableau). */
-const canWalk = () => member() !== null && round === null
-  && !(isStory() && campaign?.at.node === 'hub' && myCharacter() === 'elodie' && !campaign.facts.flags.includes('apparition.seen'));
+/** Walking: a member, between rounds (on the hub, in a world, in the room at a tableau), or in a running
+ *  round's game area while its screens have the stick on. */
+const canWalk = () => member() !== null && (round === null
+  ? !(isStory() && campaign?.at.node === 'hub' && myCharacter() === 'elodie' && !campaign.facts.flags.includes('apparition.seen'))
+  : round.status === 'running' && gameArea !== null);
 
 /** The latest accepted window from this phone. The server decides whether a request succeeded. */
 let joinShownUntil = 0;
@@ -331,7 +341,27 @@ const io = {
   isHost: () => playerId !== null && partyHost() === playerId,
   online: () => online,
   connected: () => conn.isOnline(),
+  joystick: (on) => setGameArea(on && { area: on.area, pos: { x: on.start.x, y: on.start.y, dir: on.start.dir ?? 'down', moving: false } }),
 };
+
+/**
+ * The stick walks a minigame's game area (under its screens, without the object button) or, null, the room
+ * again. A hold ends with its area; its last position lands only while the round runs.
+ * @param {GameArea | null} next
+ */
+function setGameArea(next) {
+  if (!gameArea && !next) return;
+  joystick.cancel();
+  gameArea = next;
+  const pad = $('stick-pad');
+  if (next) {
+    $('view-round').append(pad);
+    if (round?.status === 'running') send({ t: 'pos', ...roundPos(next.pos) }); // the TVs place our avatar at once
+  } else if (pad.parentElement === $('view-round')) {
+    dockStick('lobby'); // back where the room's stick waits, hidden until the room shows
+  }
+  updateInteraction();
+}
 
 /** The screens of a round of `kind`, mounted in #view-round (kept while the kind stays). @param {string} kind */
 function mountScreen(kind) {
@@ -346,6 +376,7 @@ function mountScreen(kind) {
 function unmountScreen() {
   const r = running;
   running = null;
+  setGameArea(null);
   r?.screen.unmount();
 }
 
@@ -457,8 +488,10 @@ function myCharacter() {
   return m && isCharacterId(m.character) ? m.character : null;
 }
 
-/** The avatar's current position: joystick while held, else the echoed/spawn position. @param {CharacterId} character @returns {Pos} */
+/** The avatar's current position: joystick while held, else the echoed/spawn position (in the game area: its
+ *  start, then where we left it). @param {CharacterId} character @returns {Pos} */
 function currentPos(character) {
+  if (gameArea) return joystick.current() ?? gameArea.pos;
   if (!myPos) myPos = { ...spawnPoint(character), moving: false };
   return joystick.current() ?? myPos;
 }
@@ -476,7 +509,7 @@ function dockStick(view) {
 function updateInteraction() {
   const character = myCharacter();
   const inHub = isStory() && campaign?.at.node === 'hub';
-  const pos = character && canWalk() ? currentPos(character) : null;
+  const pos = character && canWalk() && !gameArea ? currentPos(character) : null; // a game area has no furniture
   const canCollect = inHub && character === 'elodie' && pos && campaign?.facts.flags.includes('apparition.seen')
     && !campaign.facts.inventory.elodie?.[INTRO_KEY]
     && Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius;
@@ -660,10 +693,14 @@ const joystick = createJoystick({
   knob: $('stick-knob'),
   start: () => {
     const character = myCharacter();
+    heldIn = gameArea;
     return character && canWalk() ? currentPos(character) : null;
   },
-  scene: roomHere,
+  scene: () => gameArea?.area ?? roomHere(),
   send: (pos) => {
+    // the hold's area went away under it (the round ended): its position belongs nowhere else
+    if (heldIn !== gameArea || (heldIn && round?.status !== 'running')) return;
+    if (heldIn) { heldIn.pos = pos; send({ t: 'pos', ...pos }); return; }
     const turned = myPos?.dir !== pos.dir;
     myPos = pos;
     send({ t: 'pos', ...pos });
@@ -699,7 +736,7 @@ $('room-form').addEventListener('submit', (e) => {
 $('btn-start').addEventListener('click', () => send({ t: 'start' }));
 $('btn-place-back').addEventListener('click', () => send({ t: 'back' }));
 $('btn-interact').addEventListener('click', () => {
-  if (!canWalk() || !conn.isOnline()) return;
+  if (!canWalk() || gameArea || !conn.isOnline()) return;
   joystick.cancel(); // flush the exact position before the interaction on the same socket
   const character = myCharacter();
   if (isStory() && character === 'elodie' && campaign?.at.node === 'hub'

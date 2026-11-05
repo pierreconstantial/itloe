@@ -42,7 +42,8 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 // (until its podium closes), pos belongs to the round's minigame and its game area: kept only from the
 // players its server code lets walk (`walks`, server/minigames.ts; blocks and quiz: nobody), else
 // dropped silently; no doors. Those positions are the round's own, apart from the room's, and are
-// dropped when it ends: the room's positions stay where everyone stood (no longer moving).
+// dropped when it ends: the room's positions stay where everyone stood (no longer moving). A phone whose
+// minigame screen switches the joystick on (its game area) sends its start position at once.
 { "t": "say", "text": "Hello!" }                         // joined player; 1–100 printable characters
 { "t": "emote", "kind": "victory" }                      // joined player; victory | fart | annoy
 { "t": "interact", "object": "table" }                    // near the sofa | table | plant in the party room
