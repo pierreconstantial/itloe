@@ -38,8 +38,9 @@ export function revealSchedule(s) {
  * Any finished activity with a scored roster (the block game, a quiz) uses this podium.
  * @param {State} s  a block State, or any state with the same order / players{name,color,score} / endReason
  * @param {number} elapsedMs time since the game finished (Infinity = no animation)
- * @param {{ title?: string, next?: string, rowExtra?: (id: string) => (Node | string)[] }} [opts]
- *   next: the "Next game: …" line (default: the block settings); rowExtra: cells after the score
+ * @param {{ title?: string, next?: string, again?: boolean, rowExtra?: (id: string) => (Node | string)[] }} [opts]
+ *   next: the "Next game: …" line (default: the block settings); again: false when no round follows,
+ *   only the way back to the room; rowExtra: cells after the score
  */
 export function renderPodium(s, elapsedMs = Infinity, opts = {}) {
   const schedule = revealSchedule(s);
@@ -66,9 +67,10 @@ export function renderPodium(s, elapsedMs = Infinity, opts = {}) {
   const ending = s.endReason ? ENDINGS[s.endReason] : undefined;
   const sub = ending ? [h('p', 'podium-ending reveal', [ending])] : [];
   for (const el of sub) delay(el, 0);
-  const hint = h('p', 'podium-hint reveal', ["Play again on the host's phone"]);
+  const again = opts.again ?? true;
+  const hint = h('p', 'podium-hint reveal', [again ? "Play again on the host's phone" : "Back to the room on the host's phone"]);
   delay(hint, lastAt + 1200);
-  const next = h('p', 'settings-line reveal', [`Next game: ${opts.next ?? summarizeSettings(s.settings)}`]);
-  delay(next, lastAt + 1200);
-  return h('section', 'podium', [title, ...sub, list, hint, next]);
+  const next = again ? [h('p', 'settings-line reveal', [`Next game: ${opts.next ?? summarizeSettings(s.settings)}`])] : [];
+  for (const el of next) delay(el, lastAt + 1200);
+  return h('section', 'podium', [title, ...sub, list, hint, ...next]);
 }

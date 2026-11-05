@@ -95,7 +95,7 @@ const VIEWS = {
         ? OPENING_PLAYERS.length : undefined,
     }),
   playing: (s, prev) => renderGame(s, prev, { danger: playersInDanger(s) }),
-  finished: (s) => renderPodium(s, performance.now() - finishedAt),
+  finished: (s) => renderPodium(s, performance.now() - finishedAt, { again: !portalReady() }),
 };
 
 /** Fewer legal placements than this (and more than 0) → the board frame pulses. */
