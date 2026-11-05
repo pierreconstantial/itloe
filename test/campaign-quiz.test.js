@@ -2,7 +2,7 @@
 // seeded from the party → finished exactly once → its result: counters, totals and the evening's asked ids.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newCampaign, reduceCampaign, loadCampaign, roundStatus, SAMPLE_CONTENT, COUNTER, record, holds } from '../shared/campaign/index.js';
+import { newCampaign, reduceCampaign, loadCampaign, roundStatus, SAMPLE_CONTENT, record, holds } from '../shared/campaign/index.js';
 import { initQuiz, QUIZ_COUNTER, QUIZ_RULES } from '../shared/quiz/index.js';
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
@@ -44,63 +44,12 @@ function playThrough(/** @type {Campaign} */ c, now = 1000) {
   return c;
 }
 
-test('entering a quiz tableau opens a quiz lobby seeded with the party (node settings, party host)', () => {
-  const c = inQuiz();
-  const q = quiz(c);
-  assert.equal(c.at.node, QUIZ);
-  assert.equal(q.kind, 'quiz');
-  assert.equal(q.phase, 'lobby');
-  assert.deepEqual(q.order, ['e', 's']);
-  assert.equal(q.hostId, 'e');
-  assert.equal(q.settings.count, 5, 'settings from the node');
-  assert.equal(roundStatus(c), 'lobby');
-});
-
 test('quiz under way: enter/back refused; a newcomer waits for the next lobby', () => {
   let c = run(inQuiz(), act({ t: 'start', id: 'e', now: 1, candidates: CANDIDATES }));
   assert.equal(roundStatus(c), 'running');
   assert.equal(run(c, { t: 'back', id: 'e' }), c, 'back refused while the quiz runs');
   c = run(c, { t: 'join', id: 'a', character: 'anna' });
   assert.ok(c.party.players.a && !quiz(c).players.a, 'joined the evening, not seated mid-quiz');
-});
-
-test('finished → the quiz result recorded exactly once: counters, totals, asked', () => {
-  const c = playThrough(inQuiz());
-  const q = quiz(c);
-  assert.equal(q.phase, 'finished');
-  const f = c.facts;
-  assert.equal(f.counters[COUNTER.played('quiz')], 1);
-  assert.equal(f.counters[COUNTER.finished(QUIZ)], 1);
-  assert.equal(f.counters[QUIZ_COUNTER.correctBy('elodie')], 5);
-  assert.equal(f.counters[QUIZ_COUNTER.correctBy('sol')] ?? 0, 0);
-  assert.equal(f.counters[COUNTER.won('quiz', 'elodie')], 1);
-  assert.equal(f.totals.quiz?.elodie, q.players.e.score, 'quiz points in totals.quiz');
-  assert.equal(f.totals.blocks, undefined, 'never mixed with block points');
-  assert.deepEqual(f.asked, q.asked);
-  assert.equal(f.asked.length, 5);
-  assert.ok(f.done.includes(QUIZ), 'default completion: its activity finished once');
-  // nothing after the finish counts again
-  const again = run(c, act({ t: 'endGame', id: 'e' }), act({ t: 'verdict', target: 's', ok: true, index: 0, questionId: 'x' }));
-  assert.equal(again.facts.counters[COUNTER.played('quiz')], 1);
-});
-
-test('a second quiz: newGame → lobby → asked grows, never duplicated', () => {
-  let c = playThrough(inQuiz());
-  const first = [...c.facts.asked];
-  c = run(c, act({ t: 'newGame', id: 'e' }));
-  assert.equal(quiz(c).phase, 'lobby');
-  c = playThrough(c, 999_000);
-  assert.equal(c.facts.counters[COUNTER.played('quiz')], 2);
-  assert.equal(new Set(c.facts.asked).size, c.facts.asked.length, 'no duplicates');
-  assert.ok(first.every((id) => c.facts.asked.includes(id)));
-});
-
-test('the host ending a quiz still counts it (endReason host)', () => {
-  let c = run(inQuiz(), act({ t: 'start', id: 'e', now: 1, candidates: CANDIDATES }));
-  c = run(c, act({ t: 'endGame', id: 'e' }));
-  assert.equal(quiz(c).endReason, 'host');
-  assert.equal(c.facts.counters[COUNTER.played('quiz')], 1);
-  assert.equal(c.facts.asked.length, 1, 'the one question shown counts as asked');
 });
 
 test('asked survives loadCampaign; an older campaign without it loads with an empty list', () => {

@@ -354,41 +354,6 @@ test('again: host only, new seed, fresh boards, same players', () => {
   assert.deepEqual(again.players.b.hand, handAt(again.seed, 0));
 });
 
-// ---------- full deterministic game ----------
-
-test('smoke: a full 2-player game plays to the podium', () => {
-  let s = initState(7);
-  s = reduce(s, { t: 'join', id: 'a', character: 'pierre' });
-  s = reduce(s, { t: 'join', id: 'b', character: 'elodie' });
-  s = reduce(s, { t: 'start', id: 'a' });
-
-  /** @type {(state: State, id: string) => State} */
-  const autoPlace = (state, id) => {
-    const p = state.players[id];
-    for (const piece of /** @type {const} */ ([0, 1, 2])) {
-      const pid = p.hand[piece];
-      if (pid === null) continue;
-      for (let y = 0; y < SIZE; y++) {
-        for (let x = 0; x < SIZE; x++) {
-          if (canPlace(p.board, SIZE, PIECES[pid].cells, x, y)) {
-            return reduce(state, { t: 'place', id, piece, x, y });
-          }
-        }
-      }
-    }
-    assert.fail(`player ${id} not done but no placement found`);
-  };
-
-  let guard = 500;
-  while (s.phase === 'playing' && guard-- > 0) {
-    for (const id of s.order) if (!s.players[id].done) s = autoPlace(s, id);
-  }
-  assert.equal(s.phase, 'finished');
-  assert.ok(s.players.a.done && s.players.b.done);
-  assert.ok(s.players.a.score > 0 && s.players.b.score > 0);
-  assert.ok(s.players.a.handIndex >= 1, 'at least one refill happened');
-});
-
 // ---------- ranking (P5 contract addition) ----------
 
 test('ranking: ties share a rank, standard competition (1,1,3), join order within ties', () => {

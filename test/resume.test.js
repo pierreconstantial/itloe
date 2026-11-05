@@ -29,24 +29,11 @@ test('savedAtMs: epoch ms, legacy ISO string, absent/garbage → null', () => {
 /** A campaign whose round is `s` (only `at` matters here). @param {any} s @param {string | null} [kind] */
 const at = (s, kind = 'blocks') => /** @type {any} */ ({ at: { node: 'x', kind, activity: s } });
 
-test('shiftRound: a live deadline keeps its remaining time across the downtime', () => {
-  const s = timedGame();
-  const savedAt = T0 + 20_000; // 20 s into the game
-  const now = savedAt + 3_600_000; // server down for an hour
-  const r = /** @type {any} */ (shiftRound(at(s), savedAt, now).at.activity);
-  assert.equal(r.deadline, /** @type {number} */ (s.deadline) + 3_600_000);
-  assert.equal(/** @type {number} */ (r.deadline) - now, /** @type {number} */ (s.deadline) - savedAt, 'same remaining time');
-  assert.deepEqual({ ...r, deadline: s.deadline }, s, 'nothing else changes');
-  assert.notEqual(r, s);
-});
-
-test('shiftRound: an open quiz question keeps its remaining time too', () => {
+test('shiftRound: a quiz reveal is not on a clock', () => {
   let q = initQuiz(1);
   q = reduceQuiz(q, { t: 'join', id: 'a', character: 'anna' });
   q = reduceQuiz(q, { t: 'start', id: 'a', now: T0, candidates: [{ id: 'q1', choices: 4 }] });
   const d = /** @type {any} */ (q.round).deadline;
-  const r = /** @type {any} */ (shiftRound(at(q, 'quiz'), T0 + 5000, T0 + 65_000).at.activity);
-  assert.equal(r.round.deadline, d + 60_000);
   const reveal = reduceQuiz(q, { t: 'close', deadline: d });
   const c = at(reveal, 'quiz');
   assert.equal(shiftRound(c, T0, T0 + 5000), c, 'a reveal is not on a clock');

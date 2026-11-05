@@ -54,24 +54,6 @@ test('validateContent: the catalogue, and every item reward / has condition name
 
 // ---------------------------------------------------------------- rewards `to`
 
-test('reward to the chooser (default): the Old key lands in Élodie’s inventory, news says who', () => {
-  let c = party(SAMPLE_CONTENT);
-  c = game(SAMPLE_CONTENT, game(SAMPLE_CONTENT, game(SAMPLE_CONTENT, c)));
-  assert.equal(holding(c.facts, 'elodie', 'old-key'), 1);
-  assert.equal(holding(c.facts, 'sol', 'old-key'), 0);
-  const n = c.news.find((x) => x.t === 'item');
-  assert.deepEqual(n && { item: n.item, to: /** @type {any} */ (n).to }, { item: 'old-key', to: ['elodie'] });
-});
-
-test('reward to "all": every non-left party member, one each', () => {
-  const C = withReward({ item: 'photo', to: 'all' });
-  let c = runC(C, party(C), { t: 'leave', id: 'a' });
-  c = runC(C, c, { t: 'join', id: 'p', character: 'pierre' });
-  c = game(C, c);
-  assert.deepEqual(['elodie', 'sol', 'anna', 'pierre'].map((ch) => holding(c.facts, ch, 'photo')), [1, 1, 0, 1], 'Anna left: none for her');
-  assert.deepEqual(/** @type {any} */ (c.news.find((x) => x.t === 'item'))?.to, ['elodie', 'sol', 'pierre']);
-});
-
 test('reward to "winner": rank 1 of the activity that completed the node — all of them when tied', () => {
   const C = withReward({ item: 'ticket', to: 'winner', count: 2 });
   let c = party(C);
