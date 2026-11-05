@@ -61,7 +61,7 @@ Before "a node's room" (phase 5 in `docs/minigame-brief.md`), Élodie walked the
 ### Story rules in shared code
 
 The opening's rules are branches on `STORY_MODE` / `storyId === 'elo-50'` spread through shared code:
-- `server/main.ts`: `walk`, `pos`, `interact`, `join`, `back`, `start`, `again`;
+- `server/main.ts`: `walk`, `pos`, `interact`, `back`, `start`, `again`;
 - the campaign reducer, `shared/campaign/index.js`: who may `enter` and `back`, `portal`, `collect`, the `portal.ready` given to older saves in `loadCampaign`, and `ack` setting `apparition.seen`;
 - `public/play/main.js` (about ten places), `public/screen/main.js`, and the hints in `public/screen/doors.js`.
 
