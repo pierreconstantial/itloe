@@ -117,3 +117,6 @@
   width: max-content; max-width: calc(1200 * var(--u)); text-align: center;
   padding: calc(6 * var(--u)) calc(16 * var(--u)); border-radius: calc(12 * var(--u)); background: rgba(14, 16, 22, 0.75);
 }
+
+/* make room for the join QR card: the question reflows to the left of it */
+body.join-qr-open .quiz { padding-right: calc(var(--join-card-w) + 48 * var(--u)); transition: padding-right 0.3s ease; }

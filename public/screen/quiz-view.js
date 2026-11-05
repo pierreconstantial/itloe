@@ -1,16 +1,12 @@
-// TV quiz screen (Contract E), rendered from view.quiz — the PUBLIC projection (shared/quiz/bank.js
-// projectQuiz): no answer before the reveal. Question → reveal → … → finished (the shared podium);
-// between quizzes the TV shows the room at the tableau (main.js).
-// Pure helpers (tested) + DOM builders; main.js owns timers and sounds.
+// TV quiz screen (Contract E), rendered from the round's view — the PUBLIC projection (shared/quiz/bank.js
+// projectQuiz): no answer before the reveal. Question → reveal → …; the finished quiz is the frame's podium.
+// Pure helpers (tested) + DOM builders; quiz-screen.js owns timers and sounds.
 
 import { h, colorDot, playerColor, formatScore } from './dom.js';
 import { bindScore } from './score-ticker.js';
-import { renderPodium, revealSchedule } from './podium-view.js';
-import { summarizeQuiz } from '../commun/quiz-text.js';
 
 /** @typedef {import('../../shared/quiz/bank.js').QuizView} QuizView */
 /** @typedef {import('../../shared/quiz/bank.js').RoundView} RoundView */
-/** @typedef {import('../../shared/quiz/index.js').QuizSettings} QuizSettings */
 
 export const CHOICE_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -65,12 +61,6 @@ export const sourceOf = (q) => {
   const s = q.round?.answer?.source;
   return typeof s === 'string' && s.trim() ? s.trim() : null;
 };
-
-/** Small attribution line for the room's band and the podium. @param {QuizView} q */
-function creditsLine(q) {
-  const lines = creditsOf(q);
-  return lines.length ? [h('p', 'quiz-credits', [lines.join(' · ')])] : []; // the lines say what they credit
-}
 
 /** The reveal's anecdote, when the projection carries one (only ever from the reveal on). @param {QuizView} q */
 export const anecdoteOf = (q) => {
@@ -160,32 +150,4 @@ export function renderReveal(q) {
     scoreboard(q),
     ...(sourceOf(q) ? [h('p', 'quiz-source', [`Source: ${sourceOf(q)}`])] : []),
   ]);
-}
-
-/**
- * Finished: the shared podium, with each player's right answers.
- * @param {QuizView} q @param {number} elapsedMs @param {QuizSettings} settings the tableau's (the next quiz)
- */
-export function renderQuizPodium(q, elapsedMs, settings) {
-  const s = /** @type {any} */ (q);
-  const podium = renderPodium(s, elapsedMs, {
-    title: 'Quiz podium',
-    next: summarizeQuiz(settings),
-    rowExtra: (id) => [h('span', 'rank-correct', [`${q.players[id].correct}/${q.total} ✓`])],
-  });
-  podium.append(...creditsLine(q));
-  return podium;
-}
-
-/** The podium's reveal steps for a finished quiz (sounds / confetti in main.js). @param {QuizView} q */
-export const quizRevealSchedule = (q) => revealSchedule(/** @type {any} */ (q));
-
-/**
- * A quiz under way or finished (between quizzes the TV shows the room at the tableau: main.js).
- * @param {QuizView} q @param {number} podiumElapsedMs @param {QuizSettings} settings the tableau's
- */
-export function renderQuiz(q, podiumElapsedMs, settings) {
-  if (q.phase === 'question' && q.round) return renderQuestion(q);
-  if (q.phase === 'reveal' && q.round) return renderReveal(q);
-  return renderQuizPodium(q, podiumElapsedMs, settings);
 }

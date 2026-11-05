@@ -1,24 +1,5 @@
-/* Player status on the TV: offline (presence.js, debounced: dims the board + tag, so the host
-   can say "tap your character"; avatars are dimmed on the canvas) and out (retired by the host). */
-.panel.is-offline { opacity: 0.55; }
-.panel.is-offline .board { filter: grayscale(0.8) brightness(0.75); }
-.panel.is-offline .panel-head::after {
-  content: '📵 offline';
-  margin-left: 0.5em;
-  padding: 0.1em 0.6em;
-  border-radius: 999px;
-  background: rgba(12, 14, 18, 0.8);
-  color: #d7dae1;
-  font-size: 0.6em;
-  font-weight: 800;
-  white-space: nowrap;
-  align-self: center;
-}
-.panel { transition: opacity 0.4s; }
-/* the tag sits right after the name; the score keeps its place at the far right */
-.panel.is-offline .panel-head::after { order: 1; }
-.panel.is-offline .panel-head .score { order: 2; }
-
+/* Player status on the TV: offline (presence.js, debounced; a minigame's screen dims its own players, see
+   blocks.css; avatars are dimmed on the canvas) and out (retired by the host), on the podium. */
 /* Host controls: a retired player ("out") on the podium, and how the game ended. */
 .out-tag {
   margin-left: 0.5em;

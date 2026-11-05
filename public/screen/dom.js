@@ -32,3 +32,9 @@ export function colorDot(color) {
 export function formatScore(n) {
   return n.toLocaleString('en-US');
 }
+
+/** Loads a stylesheet once, after the page's own (a minigame's screens bring theirs). @param {URL} url */
+export function addStylesheet(url) {
+  if (typeof document === 'undefined' || document.querySelector(`link[href="${url.href}"]`)) return;
+  document.head.append(Object.assign(document.createElement('link'), { rel: 'stylesheet', href: url.href }));
+}
