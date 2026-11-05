@@ -19,6 +19,7 @@ import { makeClock } from './clock.ts';
 import { roundDeadline, shiftRound } from './resume.ts';
 import { minigame, type MinigameKind } from '../shared/minigames.js';
 import { makeMinigameServers, type ErrCode, type MinigameServer } from './minigames.ts';
+import { makeRound, roundOf, type Round } from './round.ts';
 import { JOIN_QR_GAP_MS, JOIN_QR_MS } from '../shared/join-qr.js';
 import { cleanSpeech, isEmote } from '../shared/social.js';
 import { CHARACTERS, isCharacterId } from '../shared/characters.js';
@@ -58,6 +59,12 @@ const clock = makeClock((kind, deadline) => {
   if (game.campaign.at.kind === kind) apply({ t: 'activity', action: minigame(kind)!.deadlineAction(deadline) });
 });
 
+/** The running round's in-memory side (round.ts): its server code's io. Null between rounds. */
+let round: Round<unknown> | null = null;
+const openRound = (c: Campaign): Round<unknown> | null =>
+  c.at.activity ? makeRound({ apply: (action) => apply({ t: 'activity', action: action as any }) }) : null;
+round = openRound(game.campaign); // a resumed round
+
 /** Avatar positions: in memory only, outside the reducer (see pos.ts). */
 const positions = makePositions<WebSocket>();
 /** Door each walker currently stands in (edge trigger: entering a door fires once). In memory only. */
@@ -74,6 +81,11 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   },
   () => saveGame(game), // ONE atomic save per step: a finished game and its recorded facts land together
   (prev, next) => clock.onChange(prev.at, next.at),
+  (prev, next) => {
+    if (roundOf(prev) === roundOf(next)) return;
+    round?.end(); // the old round's io goes quiet before the next round opens
+    round = openRound(next);
+  },
   (_prev, next) => positions.prune(next.party),
   (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
   () => broadcast(),
@@ -521,11 +533,10 @@ function storyRefusesRound(t: 'start' | 'again'): boolean {
  */
 function roundMessage(ws: WebSocket, id: string, m: any): void {
   const { kind, activity: state } = game.campaign.at;
-  if (kind === null || !state) { sendErr(ws, 'not-playing'); return; }
-  const server = serverOf(kind);
-  // a later action (the quiz's verdict) lands only while a round of this minigame runs
-  const io = { apply: (action: unknown) => game.campaign.at.kind === kind && apply({ t: 'activity', action: action as any }) };
-  const reply = server.message(m, { id, now: Date.now(), hostId: party().hostId, state }, io);
+  if (kind === null || !state || !round) { sendErr(ws, 'not-playing'); return; }
+  // the round's own io: a later action (the quiz's verdict) lands only while this round runs
+  const { io } = round;
+  const reply = serverOf(kind).message(m, { id, now: Date.now(), hostId: party().hostId, state }, io);
   if (!reply) return;
   if (!('action' in reply)) sendErr(ws, reply.refused);
   else if (!io.apply(reply.action) && reply.refused) sendErr(ws, reply.refused);
