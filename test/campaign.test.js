@@ -5,7 +5,9 @@ import {
   SAMPLE_CONTENT as C, COUNTER, emptyFacts, fromLegacyState, holds, loadCampaign, newCampaign,
   record, reduceCampaign, settle, validateContent, zoneAt, holding,
 } from '../shared/campaign/index.js';
+import { minigameContent } from '../shared/campaign/sample.js';
 import { initState, reduce } from '../shared/game.js';
+import { MINIGAMES } from '../shared/minigames.js';
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
 /** @typedef {import('../shared/campaign/types.js').CampaignAction} CampaignAction */
@@ -80,6 +82,15 @@ test('validateContent checks activities through the rules list: any minigame sta
     'node "childhood.blocks": unknown setting "colour"', 'node "childhood.quiz": setting "seconds" can\'t be 12', 'node "teens.scene": unknown activity "darts"']) {
     assert.ok(errs.includes(want), `missing: ${want}\n${errs}`);
   }
+});
+
+test('the development start: every registered minigame gets valid content that starts at its tableau', () => {
+  for (const kind of Object.keys(MINIGAMES)) {
+    const content = /** @type {Content} */ (minigameContent(kind));
+    assert.deepEqual(validateContent(content), [], kind);
+    assert.equal(newCampaign(content, 1).at.kind, kind);
+  }
+  assert.equal(minigameContent('darts'), null);
 });
 
 test('zoneAt: the child whose door contains the point, else null', () => {

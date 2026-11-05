@@ -7,13 +7,27 @@ import {
   validateContent, zoneAt, UnknownMinigameError, SAMPLE_CONTENT,
 } from '../shared/campaign/index.js';
 import { STORY_CONTENT } from '../shared/campaign/story.js';
+import { minigameContent } from '../shared/campaign/sample.js';
+import { MINIGAMES } from '../shared/minigames.js';
 import type { Campaign, CampaignAction, CampaignEvent, Content, GmOp } from '../shared/campaign/types.js';
 
 export { newCampaign, fromLegacyState, loadCampaign, reduceCampaign, activityOf, isUnlocked, roundStatus, validateContent, zoneAt, UnknownMinigameError };
 export type { Campaign, CampaignAction, CampaignEvent, Content, GmOp };
 
-/** The birthday campaign; SAMPLE_CONTENT remains an isolated engine fixture. */
-export const CONTENT: Content = process.env.ITLOE_CONTENT === 'sample' ? SAMPLE_CONTENT : STORY_CONTENT;
+/** The content ITLOE_CONTENT names: the birthday story by default, `sample` for the engine's fixture,
+ *  `minigame:<kind>` for one minigame's development start. An unknown minigame refuses to boot. */
+function contentFor(setting: string | undefined): Content {
+  if (setting === 'sample') return SAMPLE_CONTENT;
+  if (setting?.startsWith('minigame:')) {
+    const kind = setting.slice('minigame:'.length);
+    const content = minigameContent(kind);
+    if (!content) throw new Error(`ITLOE_CONTENT=${setting}: no minigame "${kind}" (registered: ${Object.keys(MINIGAMES).join(', ')})`);
+    return content;
+  }
+  return STORY_CONTENT;
+}
+
+export const CONTENT: Content = contentFor(process.env.ITLOE_CONTENT);
 
 /** Short hash of the content, computed once at boot: views carry it as `contentVersion`, GET /api/content
  *  serves it (body + ETag), so clients re-fetch the content only when it changed (an edit + restart). */

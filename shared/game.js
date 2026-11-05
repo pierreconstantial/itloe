@@ -479,6 +479,7 @@ export const BLOCK_RULES = {
     endReason: s.endReason,
   }),
   validateSettings,
+  sampleSettings: { mode: 'timed', timedSeconds: 60 },
   deadline: (s) => (s.phase === 'playing' && typeof s.deadline === 'number' ? s.deadline : null),
   deadlineAction: (deadline) => ({ t: 'timeUp', deadline }),
   shiftDeadline: (s, by) => (s.phase === 'playing' && typeof s.deadline === 'number' ? { ...s, deadline: s.deadline + by } : s),

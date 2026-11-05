@@ -41,6 +41,7 @@ import { QUIZ_RULES } from './quiz/index.js';
  *   status: (s: S) => RoundStatus,
  *   result: (s: S, node: string) => RoundResult,   // once finished; node: the tableau it ran at
  *   validateSettings: (settings: unknown) => string[],   // a content node's settings: problems, as readable lines
+ *   sampleSettings: object,                     // the development start's settings (ITLOE_CONTENT=minigame:<kind>)
  *   deadline: (s: S) => number | null,          // the next deadline (epoch ms), or null: nothing on a clock
  *   deadlineAction: (deadline: number) => A,    // fired when it passes; a stale one must be refused
  *   shiftDeadline: (s: S, by: number) => S,     // deadlines moved by a downtime (ms): resume, sleep

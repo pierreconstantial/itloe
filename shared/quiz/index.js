@@ -431,6 +431,7 @@ export const QUIZ_RULES = {
     };
   },
   validateSettings: validateQuizSettings,
+  sampleSettings: { count: 3, seconds: 20, mode: 'mixed' },
   deadline: (s) => (s.phase === 'question' && s.round ? s.round.deadline : null),
   deadlineAction: (deadline) => ({ t: 'close', deadline }),
   shiftDeadline: (s, by) => (s.phase === 'question' && s.round ? { ...s, round: { ...s.round, deadline: s.round.deadline + by } } : s),

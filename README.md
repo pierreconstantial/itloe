@@ -56,6 +56,7 @@ Set them in front of `npm start`, e.g. `PORT=8080 npm start`.
 | `BLOKO_VAR` | Folder for saved data (default `var/`). |
 | `BLOKO_QUIZ_DIR` | Folder of the quiz question bank (default `data/quiz/`). |
 | `ITLOE_CONTENT=sample` | Play the sample content (`shared/campaign/sample.js`) instead of the birthday story (`shared/campaign/story.js`). The end-to-end suites run on it. |
+| `ITLOE_CONTENT=minigame:<kind>` | Start a hub and one tableau running that minigame with its sample settings (`sampleSettings` in its rules), without the story's opening, e.g. `ITLOE_CONTENT=minigame:quiz BLOKO_VAR="$(mktemp -d)" PORT=3199 npm start -- --new`. An unknown kind refuses to boot. |
 
 If the laptop has several network connections (Wi-Fi + Ethernet, VPN…), `npm start` asks which one the phones are on. Press Enter for the first one.
 
