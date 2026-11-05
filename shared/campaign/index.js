@@ -18,8 +18,9 @@
 // step as the nested playing → finished, so a single atomic save persists both or neither.
 
 import { CHARACTERS, isCharacterId } from '../characters.js';
-import { initState, ranking, reduce } from '../game.js';
-import { initQuiz, reduceQuiz, quizRanking, quizRunning } from '../quiz/index.js';
+import { ranking } from '../game.js';
+import { quizRanking } from '../quiz/index.js';
+import { minigame } from '../minigames.js';
 import { emptyFacts, holds, record, settle, migrateTotals, migrateInventory, addItem, holding, recipients, COUNTER } from './rules.js';
 import { validateContent, zoneAt, childrenOf } from './content.js';
 import { SAMPLE_CONTENT } from './sample.js';
@@ -38,6 +39,7 @@ export { holds, record, settle, emptyFacts, holding, recipients, COUNTER, valida
 /** @typedef {import('../game.js').State} BlockState */
 /** @typedef {import('../quiz/index.js').QuizState} QuizState */
 /** @typedef {import('./types.js').ActivityState} ActivityState */
+/** @typedef {import('../minigames.js').MinigameKind} MinigameKind */
 
 /** Deterministic seed step (same LCG family as the game's own). @param {number} s */
 const nextSeed = (s) => (Math.imul(s >>> 0, 1103515245) + 12345) >>> 0;
@@ -64,43 +66,24 @@ const emptyParty = () => ({ order: [], players: {}, hostId: null });
 const quietSettle = (facts, content) => settle(facts, content, 0).facts;
 
 /**
- * What the engine needs from each kind of nested activity (Contract E: blocks and quiz). A new kind of
- * game plugs in here: how it starts (a lobby), how actions drive it, when it is under way, and the
- * event it reports when it finishes (derived HERE, in the same step: exactly once).
- * @typedef {{
- *   init: (seed: number, settings: any) => ActivityState,
- *   reduce: (s: any, action: any) => ActivityState,
- *   running: (s: any) => boolean,
- *   finished: (s: any, node: string) => CampaignEvent,
- *   finishedEvent: CampaignEvent['t'],   // its t: derived by the engine ONLY, refused from outside
- * }} ActivityKind
+ * The event each minigame reports when a round finishes (derived HERE, in the same step: exactly once).
+ * @type {Record<MinigameKind, { finished: (s: any, node: string) => CampaignEvent, finishedEvent: CampaignEvent['t'] }>}
  */
-/** @type {Record<'blocks' | 'quiz', ActivityKind>} */
-const ACTIVITIES = {
-  blocks: {
-    init: (seed, settings) => initState(seed, settings),
-    reduce: (s, a) => reduce(s, a),
-    running: (s) => s.phase === 'playing',
-    finished: (s, node) => finishedEvent(s, node),
-    finishedEvent: 'game.finished',
-  },
-  quiz: {
-    init: (seed, settings) => initQuiz(seed, settings),
-    reduce: (s, a) => reduceQuiz(s, a),
-    running: (s) => quizRunning(s),
-    finished: (s, node) => quizFinishedEvent(s, node),
-    finishedEvent: 'quiz.finished',
-  },
+const FINISHED = {
+  blocks: { finished: (s, node) => finishedEvent(s, node), finishedEvent: 'game.finished' },
+  quiz: { finished: (s, node) => quizFinishedEvent(s, node), finishedEvent: 'quiz.finished' },
 };
 
 /** Events only the engine may produce (an activity's end): an external copy could count a game twice. */
-const DERIVED_EVENTS = new Set(Object.values(ACTIVITIES).map((k) => k.finishedEvent));
+const DERIVED_EVENTS = new Set(Object.values(FINISHED).map((k) => k.finishedEvent));
 
-/** @param {ActivityState} s @returns {ActivityKind} */
-const kindOf = (s) => ACTIVITIES['kind' in s && s.kind === 'quiz' ? 'quiz' : 'blocks'];
+/** @param {ActivityState} s @returns {MinigameKind} */
+const kindNameOf = (s) => ('kind' in s && s.kind === 'quiz' ? 'quiz' : 'blocks');
+/** @param {ActivityState} s */
+const kindOf = (s) => /** @type {import('../minigames.js').MinigameRules<any, any>} */ (minigame(kindNameOf(s)));
 
 /** A game or quiz is under way (no enter/back until it ends). @param {ActivityState | null} s */
-export const activityRunning = (s) => !!s && kindOf(s).running(s);
+export const activityRunning = (s) => !!s && kindOf(s).status(s) === 'running';
 
 /**
  * The lobby of a tableau's activity (blocks or quiz), seeded with every non-left party member (host =
@@ -109,9 +92,8 @@ export const activityRunning = (s) => !!s && kindOf(s).running(s);
  * @returns {ActivityState | null}
  */
 function activityLobby(node, party, seed) {
-  const kind = node?.activity?.kind;
-  if (kind !== 'blocks' && kind !== 'quiz') return null;
-  const spec = ACTIVITIES[kind];
+  const spec = minigame(node?.activity?.kind);
+  if (!spec) return null;
   let s = spec.init(seed, /** @type {any} */ (node?.activity)?.settings);
   for (const id of party.order) {
     const m = party.players[id];
@@ -251,7 +233,7 @@ function moveTo(c, node, content) {
 function withActivity(c, next, content) {
   const prev = c.at.activity;
   const spec = kindOf(next);
-  if (next.phase === 'lobby') {
+  if (spec.status(next) === 'lobby') {
     for (const id of c.party.order) {
       const m = c.party.players[id];
       if (!m.left && m.character && !next.players[id]) next = spec.reduce(next, { t: 'join', id, character: m.character });
@@ -260,8 +242,8 @@ function withActivity(c, next, content) {
   next = syncHost(next, c.party);
   if (next === prev) return c;
   const moved = { ...c, at: { ...c.at, activity: next } };
-  if (prev && spec.running(prev) && next.phase === 'finished') {
-    const ev = spec.finished(next, c.at.node);
+  if (prev && spec.status(prev) === 'running' && spec.status(next) === 'finished') {
+    const ev = FINISHED[kindNameOf(next)].finished(next, c.at.node);
     return withFacts(moved, record(c.facts, ev), content, ev);
   }
   return moved;

@@ -451,3 +451,13 @@ function nextHost(state, leaverId) {
 function nextSeed(seed) {
   return Math.floor(mulberry32(seed)() * 4294967296) >>> 0;
 }
+
+/**
+ * The block game's entry in the rules list (shared/minigames.js).
+ * @type {import('./minigames.js').MinigameRules<State, Action>}
+ */
+export const BLOCK_RULES = {
+  init: initState,
+  reduce,
+  status: (s) => (s.phase === 'playing' ? 'running' : s.phase),
+};

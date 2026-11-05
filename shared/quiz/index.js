@@ -375,3 +375,13 @@ export function quizRanking(s) {
     return { id, rank, score, correct };
   });
 }
+
+/**
+ * The quiz's entry in the rules list (shared/minigames.js).
+ * @type {import('../minigames.js').MinigameRules<QuizState, QuizAction>}
+ */
+export const QUIZ_RULES = {
+  init: initQuiz,
+  reduce: reduceQuiz,
+  status: (s) => (quizRunning(s) ? 'running' : s.phase === 'lobby' ? 'lobby' : 'finished'),
+};
