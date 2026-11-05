@@ -5,12 +5,13 @@
 // id is written here. Static controls are built once, so a view arriving mid-typing keeps inputs intact.
 import { $ } from './dom.js';
 import { createConfirm } from './confirm.js';
-import { roundStatus, holds, holding } from '../../shared/campaign/index.js';
+import { holds, holding } from '../../shared/campaign/index.js';
 import { childMarks, content, explain, nodeTree, onContentChange, titleOf } from './campaign-view.js';
 import { catalogue } from './bag.js';
 import { CHARACTERS } from '../../shared/characters.js';
 
-/** @typedef {import('../../shared/campaign/types.js').Campaign} Campaign */
+/** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
+/** @typedef {import('../../shared/minigames.js').RoundStatus} RoundStatus */
 /** @typedef {import('../../shared/campaign/types.js').GmOp} GmOp */
 /** @typedef {import('../../shared/campaign/types.js').Condition} Condition */
 
@@ -48,6 +49,7 @@ function fillDatalist(list, values) {
 /** @param {{ send: (msg: unknown) => void }} io */
 export function createGmPanel(io) {
   /** @type {Campaign | null} */ let last = null;
+  /** @type {RoundStatus | null} */ let lastStatus = null;
   const confirm = createConfirm(() => redraw());
   let names = contentNames();
 
@@ -141,7 +143,7 @@ export function createGmPanel(io) {
     const here = nodes[c.at.node];
     $('gm-where').textContent = `The party is at: ${titleOf(c.at.node)}`;
     // the campaign's own rule (the one the server refuses enter/back by): a block game or quiz under way
-    const playing = roundStatus(c) === 'running';
+    const playing = lastStatus === 'running';
     const back = /** @type {HTMLButtonElement} */ ($('gm-back'));
     back.hidden = !here?.parent;
     back.disabled = playing;
@@ -203,9 +205,10 @@ export function createGmPanel(io) {
   }
 
   return {
-    /** @param {Campaign} c */
-    render(c) {
+    /** @param {Campaign} c @param {RoundStatus | null} status  the view's round status (null between rounds) */
+    render(c, status) {
       last = c;
+      lastStatus = status;
       redraw();
     },
   };

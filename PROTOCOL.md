@@ -113,13 +113,13 @@ The bank (`data/quiz/*.json`) stays on the server and is never served. While a q
                                        // categories: string[] | null, level: 1 | 2 | 3 | null)
 ```
 
-- **Never the answer before the reveal:** during a quiz `view.state` is null (block clients never see a quiz),
-  `view.quiz` is the PUBLIC projection (shared/quiz/bank.js `projectQuiz`), and `view.campaign.at.activity`
-  carries the same projection. During `question`: the question text, category, level, the displayed choices
-  (choice rounds), and `answered` (who answered, never what). From `reveal` on: `answers` (choice/text, ok,
-  points) and `answer` `{ choice: displayed index | null, text, anecdote? }`. The anecdote (a bank question's
+- **Never the answer before the reveal:** during a quiz the round's view is the PUBLIC projection
+  (shared/quiz/bank.js `projectQuiz`), and the campaign on the wire carries no round state. During
+  `question`: the question text, category, level, the displayed choices (choice rounds), and `answered`
+  (who answered, never what). From `reveal` on: `answers` (choice/text, ok, points) and `answer`
+  `{ choice: displayed index | null, text, anecdote? }`. The anecdote (a bank question's
   optional fun fact) is part of the answer: it often gives it away, so it never travels before the reveal.
-  `answer.source` (the question's dataset + licence) comes with it, and `view.quiz.credits` (every phase) lists
+  `answer.source` (the question's dataset + licence) comes with it, and the view's `credits` (every phase) lists
   one attribution line per loaded bank file (`dataset.attribution`, else "name — licence"): CC BY-SA datasets
   must stay credited in the game.
 - **Scoring:** right = 100 + up to 50 for speed (linear on the time left); wrong or none = 0.
@@ -145,13 +145,19 @@ The bank (`data/quiz/*.json`) stays on the server and is never served. While a q
 
 ```jsonc
 { "t": "welcome", "playerId": "p-abc123" }   // to a player client after join or successful rejoin
-{ "t": "view", "state": { /* full State, see shared/game.js */ }, "campaign": { /* Campaign, see shared/campaign/types.js */ },
+{ "t": "view", "round": { "kind": "blocks", "status": "running", "view": { /* the minigame's view */ } },
+  "campaign": { /* CampaignView, see shared/campaign/types.js */ }, "contentVersion": "3f9a1c0b2d4e",
   "online": ["p-abc123"], "now": 1730700000000 }
-// slice 3: "campaign" = the whole evening (at.node, party, facts, news, …); "state" = campaign.at.activity
-// (the block game), null on the hub or in a world. "online" lists party members. "contentVersion": the
+// "round" = the running round (shared/minigames.js RoundView), null between rounds (the hub, a world, a
+// scene): its minigame "kind", its "status" (lobby | running | finished: the podium) and its minigame's
+// "view" of its state, the same for everyone. blocks: the full State (shared/game.js),
+// plus "best" in solo games (below); quiz: the public projection (below).
+// "campaign" = the whole evening (at.node, at.kind, party, facts, news, …) WITHOUT the round's raw state
+// (`at.activity`): that travels only through "round". The saved campaign keeps it.
+// "online" lists party members. "contentVersion": the
 // hash served by GET /api/content: re-fetch the content when it changes (content edited + server restarted).
 // broadcast to ALL after every change; "now" = server epoch ms (M2 Q4): clients compute
-// clock skew = now - Date.now() on receive and render timed-mode countdowns from state.deadline - (Date.now() + skew)
+// clock skew = now - Date.now() on receive and render timed-mode countdowns from the view's deadline - (Date.now() + skew)
 // "online" (slice 2b): playerIds with a live socket, in seat order. EPHEMERAL: never in State or on
 // disk, empty after a server restart until phones reconnect. The view is re-broadcast whenever a
 // player socket attaches or closes. Dead sockets are detected by ping/pong within ~10 s.
@@ -194,7 +200,7 @@ The bank (`data/quiz/*.json`) stays on the server and is never served. While a q
 
 ## Solo best scores (M2 Q3)
 
-In solo games the view gains an optional sibling: `{ "t": "view", "state": …, "now": …, "best": { "score": 4210, "previous": 3980 } }` for the current (size, mode) — `previous` is the record before this game, so a client shows "New best!" when its score exceeds it. Absent in multiplayer.
+In solo games the block view gains an optional field: `"round": { "kind": "blocks", …, "view": { …, "best": { "score": 4210, "previous": 3980 } } }` for the current (size, mode) — `previous` is the record before this game, so a client shows "New best!" when its score exceeds it. Absent in multiplayer.
 
 ## HTTP API (M2 Q2)
 

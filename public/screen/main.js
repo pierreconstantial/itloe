@@ -128,11 +128,11 @@ function show(next) {
   for (const e of events) if (!(endsNow && e.t === 'done')) react(e, next);
 }
 
-/** @typedef {import('../../shared/campaign/types.js').Campaign} Campaign */
+/** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
 
 /** Campaign content (titles, doors): fetched from the server, refreshed on a new contentVersion. */
 const content = createContentSource({ onChange: () => { if (campaign && !current) showMap(campaign); } });
-/** Last campaign from the server (views carry it next to `state`). @type {Campaign | null} */
+/** Last campaign from the server (views carry it next to `round`). @type {Campaign | null} */
 let campaign = null;
 
 /**
@@ -175,7 +175,7 @@ function showMap(c) {
   ]));
 }
 
-// ---------- quiz (view.quiz: the public projection — never the answer before the reveal) ----------
+// ---------- quiz (the round's view: the public projection — never the answer before the reveal) ----------
 
 /** @typedef {import('../../shared/quiz/bank.js').QuizView} QuizView */
 /** @type {QuizView | null} */
@@ -294,8 +294,7 @@ let momentsPlayed = 0;
 function canPlayCutscene() {
   // a hidden TV tab plays nothing (and so never acks what nobody saw); it plays once shown again
   if (document.visibilityState !== 'visible') return false;
-  const quiz = /** @type {{ kind?: string, phase?: string } | null | undefined} */ (campaign?.at.activity);
-  if (quiz?.kind === 'quiz') return quiz.phase === 'lobby' || quiz.phase === 'finished';
+  if (quiz) return quiz.phase === 'lobby' || quiz.phase === 'finished';
   if (!current) return true;
   if (current.phase === 'lobby') return true;
   if (current.phase !== 'finished') return false;
@@ -402,10 +401,12 @@ const HANDLERS = {
     syncClock(msg.now);
     if (msg.campaign) campaign = msg.campaign;
     const ready = content.sync(msg.contentVersion);
-    if (!msg.state && msg.quiz) {
-      showQuiz(msg.quiz);
-      presence.update(Array.isArray(msg.online) ? msg.online : [], msg.quiz.order.filter((/** @type {string} */ id) => !msg.quiz.players[id]?.left));
-    } else if (!msg.state) {
+    /** @type {import('../../shared/minigames.js').RoundView | null} */
+    const round = msg.round ?? null;
+    if (round?.kind === 'quiz') {
+      showQuiz(round.view);
+      presence.update(Array.isArray(msg.online) ? msg.online : [], round.view.order.filter((/** @type {string} */ id) => !round.view.players[id]?.left));
+    } else if (round?.kind !== 'blocks') {
       if (!campaign) return;
       // campaign hub / world: no block game on → the map; re-drawn once fresh content arrives
       showMap(campaign);
@@ -413,8 +414,8 @@ const HANDLERS = {
       presence.update(Array.isArray(msg.online) ? msg.online : [], campaign.party.order.filter((id) => !campaign?.party.players[id].left));
     } else {
       party.setDoors([]);
-      show(msg.state);
-      presence.update(Array.isArray(msg.online) ? msg.online : [], seated(msg.state));
+      show(round.view);
+      presence.update(Array.isArray(msg.online) ? msg.online : [], seated(round.view));
     }
     if (campaign) cutscenes.update(campaign.news, campaign.newsSeq);
   },

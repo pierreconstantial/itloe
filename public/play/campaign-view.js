@@ -6,7 +6,7 @@ import { childrenOf, holds } from '../../shared/campaign/index.js';
 import { createContentSource } from '../commun/content.js';
 import { CHARACTERS } from '../../shared/characters.js';
 
-/** @typedef {import('../../shared/campaign/types.js').Campaign} Campaign */
+/** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
 /** @typedef {import('../../shared/campaign/types.js').Content} Content */
 /** @typedef {import('../../shared/campaign/types.js').Condition} Condition */
 /** @typedef {import('../../shared/campaign/types.js').Facts} Facts */

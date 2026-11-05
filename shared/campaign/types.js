@@ -127,6 +127,12 @@ export {};
  * }} Campaign
  */
 
+/**
+ * The campaign as views carry it: without the round's raw state (`at.activity`), which travels only
+ * through its minigame's view (the view's `round`).
+ * @typedef {Omit<Campaign, 'at'> & { at: Omit<Campaign['at'], 'activity'> }} CampaignView
+ */
+
 // ---------------------------------------------------------------- actions (reduceCampaign)
 
 /**

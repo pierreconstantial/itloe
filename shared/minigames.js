@@ -13,6 +13,12 @@ import { QUIZ_RULES } from './quiz/index.js';
  */
 
 /**
+ * The running round as views carry it (`view.round`, null between rounds): its kind, its status, and its
+ * minigame's view of its state, the same for everyone (server/minigames.ts).
+ * @typedef {{ kind: MinigameKind, status: RoundStatus, view: any }} RoundView
+ */
+
+/**
  * What a finished round reports; the campaign records it once. `ranking`: every seated player in display
  * order (character null only in saves from before characters), ties sharing a rank. `counters`: the
  * minigame's own counters, added to the facts. `asked`: content ids the round used up for the evening

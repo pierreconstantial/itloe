@@ -154,7 +154,7 @@ Rule reducers are deterministic: time and seeds are explicit inputs, and reducer
 
 Positions, presence, and temporary join-QR display state are held in memory rather than saved. Avatar movement is client-authoritative under the protocol; game results and campaign progression are server-authoritative. Reconnection and character reclaim preserve the player's game and host role; the newest socket wins, and a replaced device stops reconnecting.
 
-Both `public/` and `shared/` are publicly served. Quiz bank data stays on the server; outgoing quiz views use `projectQuiz`, including inside the campaign, to hide answers and submitted answers/verdicts until reveal. Question IDs and campaign content IDs are stable; inventory and campaign totals follow characters rather than devices. Player capacity comes from the character roster in `shared/characters.js`.
+Both `public/` and `shared/` are publicly served. Quiz bank data stays on the server; the quiz's view uses `projectQuiz`, and the campaign on the wire carries no round state, to hide answers and submitted answers/verdicts until reveal. Question IDs and campaign content IDs are stable; inventory and campaign totals follow characters rather than devices. Player capacity comes from the character roster in `shared/characters.js`.
 
 ### Code conventions
 

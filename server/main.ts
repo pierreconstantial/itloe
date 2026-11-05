@@ -187,21 +187,26 @@ const joinQrMsg = () => JSON.stringify({ t: 'joinQr', until: joinQrUntil, now: D
 /** Presence (ephemeral, never in State or on disk): party members with a live socket, in party order. */
 const online = (): string[] => party().order.filter((id) => sockets.get(id)?.readyState === WebSocket.OPEN);
 
-/** `state` = the nested block game (null outside one), kept for clients that read it directly;
- *  `campaign` = the whole evening (TV hub/cutscenes, phone host panel). */
 /** The public quiz (never an answer before the reveal: shared/quiz/bank.js projectQuiz). */
 const publicQuiz = (s: QuizState) => projectQuiz(s, (id) => bank.byId.get(id), bank.credits);
 
-/** `state` stays the BLOCK game only (null during a quiz: block clients never see a quiz); `quiz` is the
- *  projected quiz; the campaign travels with its quiz projected the same way (raw verdicts would leak). */
-const viewMsg = () => {
+/** The running round as the view carries it: its kind, status and its minigame's view (the block game
+ *  with its solo best score; the quiz projected), the same for everyone. Null between rounds. */
+const roundView = () => {
+  const { kind } = game.campaign.at;
   const b = blocks();
   const q = quiz();
-  const pq = q ? publicQuiz(q) : null;
-  const campaign = pq ? { ...game.campaign, at: { ...game.campaign.at, activity: pq } } : game.campaign;
+  const view = b ? { ...b, best: bests.view(b) } : q ? publicQuiz(q) : null;
+  return kind && view ? { kind, status: roundStatus(game.campaign), view } : null;
+};
+
+/** `round`: the running round; `campaign`: the whole evening (TV hub/cutscenes, phone host panel), without
+ *  the round's raw state, which travels only through its minigame's view (raw quiz verdicts would leak). */
+const viewMsg = () => {
+  const { activity: _raw, ...at } = game.campaign.at;
   return JSON.stringify({
-    t: 'view', state: b, quiz: pq, campaign, contentVersion: CONTENT_VERSION,
-    online: online(), now: Date.now(), best: b ? bests.view(b) : undefined,
+    t: 'view', round: roundView(), campaign: { ...game.campaign, at }, contentVersion: CONTENT_VERSION,
+    online: online(), now: Date.now(),
   });
 };
 

@@ -31,8 +31,9 @@ import { childMarks, content, onContentChange, syncContent, titleOf } from './ca
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('../../shared/game.js').Player} Player */
-/** @typedef {import('../../shared/campaign/types.js').Campaign} Campaign */
+/** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
 /** @typedef {import('../../shared/campaign/types.js').PartyMember} PartyMember */
+/** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
 /** @typedef {import('../../shared/pieces.js').PieceId} PieceId */
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
 /** @typedef {import('./movement.js').Pos} Pos */
@@ -96,16 +97,18 @@ function outcome(prev, next, id) {
 
 // ---------- client state ----------
 
-/** The block game (the view's `state`): null on the hub / in a world, or before the first view. @type {State | null} */
+/** The view's running round, null between rounds or before the first view. @type {RoundView | null} */
+let round = null;
+/** The block game (the round's view when blocks runs): null on the hub / in a world, or before the first view. @type {State | null} */
 let lastView = null;
 /** The whole evening (slice 3), null from a pre-campaign server. @type {Campaign | null} */
 let campaign = null;
-/** The quiz running here (the view's PUBLIC projection: no answer before the reveal), else null.
+/** The quiz running here (the round's view, the PUBLIC projection: no answer before the reveal), else null.
  *  @type {import('../../shared/quiz/bank.js').QuizView | null} */
 let quizView = null;
 /** At least one view arrived. */
 let viewed = false;
-/** Solo record for the current (size, mode), sent with views in solo games. @type {Best | null} */
+/** Solo record for the current (size, mode), inside the block view in solo games. @type {Best | null} */
 let lastBest = null;
 /** @type {string | null} */ let playerId = load(KEYS.id);
 /** playerIds with a live socket, from the last view (slice 2b presence). @type {string[]} */
@@ -213,12 +216,13 @@ function receive(raw) {
     syncClock(m.now);
     const prev = lastView;
     const prevNode = campaign?.at.node ?? null;
-    lastView = m.state ?? null;
+    round = m.round ?? null;
+    lastView = round?.kind === 'blocks' ? round.view : null;
     campaign = m.campaign ?? null;
-    quizView = m.quiz ?? null;
+    quizView = round?.kind === 'quiz' ? round.view : null;
     viewed = true;
     syncContent(m.contentVersion); // fetches the content on the first view and whenever it changed
-    lastBest = m.best ?? null;
+    lastBest = lastView ? /** @type {State & { best?: Best }} */ (lastView).best ?? null : null;
     online = Array.isArray(m.online) ? m.online.filter((/** @type {unknown} */ x) => typeof x === 'string') : [];
     pending = null;
     const next = lastView;
@@ -385,7 +389,7 @@ function render() {
   else if (q) settingsSheet.render(q.settings, quizHost && quizConfigurable, QUIZ_SETTINGS);
   hostControls.render(v, q, online, playerId ?? '');
   if (q ? !(quizHost && quizConfigurable) : (!isHost || !configurable)) menu.close('settings');
-  if (campaign && isGameMaster()) gmPanel.render(campaign);
+  if (campaign && isGameMaster()) gmPanel.render(campaign, round?.status ?? null);
   else menu.close('gm');
   // 🎒 my items (Contract F): they hang on my character, so they follow me to any phone
   bag.render(campaign && mem ? campaign.facts : null, mem ? myCharacter() : null);
