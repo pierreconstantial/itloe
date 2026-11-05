@@ -80,7 +80,8 @@ The round messages, the same for every minigame, at a minigame's tableau (elsewh
 questions among the bank's candidates, none left → refused), `again` (on the podium: a new round at once with
 the round's players who have not left), `newGame` (on the podium: back to the room at the tableau),
 `endGame` (a running round → its podium, endReason "host") and `retire { target }` (the minigame decides what
-taking a player out means; the quiz has none yet, so it refuses). A guest's round message → `err "not-host"`;
+taking a player out means; a minigame without its own rule, like the quiz, takes the player out of the round as
+if they had left it: no more answers, the score kept). A guest's round message → `err "not-host"`;
 the host's at the wrong moment → `err "refused"`, except a host's `retire` of an unknown, done or left player
 while the round runs, which is a silent no-op. Every round starts with a new seed.
 
@@ -144,7 +145,7 @@ memory-world entrances and reunion mini-games are not wired yet; their story spe
 
 The bank (`data/quiz/*.json`) stays on the server and is never served. While a quiz runs, its messages
 below go to the quiz (Routing above); block-only messages (`place`) get `err "not-playing"`, and `retire`
-is refused like any round button at the wrong moment.
+marks the target `left` in the running quiz (the round stops waiting for their answer).
 
 ```jsonc
 { "t": "start" }                       // host, in the room: picks `count` questions among the bank (filtered by the

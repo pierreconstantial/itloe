@@ -152,6 +152,8 @@ The application runs locally on Node.js 24+, with HTTP and WebSocket traffic on 
 
 Phones send actions; the server binds them to a player, validates them, runs the shared reducers, and saves and broadcasts accepted changes. The server handles the evening's own messages and passes every other one to the running minigame's server code, listed in `server/minigames.ts` beside the rules list in `shared/minigames.js`. The campaign owns the party and progression, with the current block game or quiz nested inside it. Phone placement previews use the same rules as the server and reconcile with its next view.
 
+The phone and the TV each have a frame (`public/play/main.js`, `public/screen/main.js`) around the minigames: the room at a tableau, the map, the podium, the host controls, the settings sheet and the cutscenes. While a round runs, the frame mounts that minigame's screens, listed in `public/play/minigames.js` and `public/screen/minigames.js` (blocks: `blocks-ui.js`, `blocks-screen.js`; quiz: `quiz-ui.js`, `quiz-screen.js`). The screens build their own markup, load their own CSS, and remove their listeners, loops, sounds and timers when the frame unmounts them.
+
 Rule reducers are deterministic: time and seeds are explicit inputs, and reducers perform no I/O. Refused/no-op actions return the same state object; the server uses object identity to skip change hooks. Accepted state changes flow through `apply`/`commit` in `server/main.ts`, including atomic JSON persistence. Activity completion and the resulting campaign facts are saved together. Timed games retain their remaining time across restart or laptop suspension.
 
 Positions, presence, and temporary join-QR display state are held in memory rather than saved. Avatar movement is client-authoritative under the protocol; game results and campaign progression are server-authoritative. Reconnection and character reclaim preserve the player's game and host role; the newest socket wins, and a replaced device stops reconnecting.
@@ -195,8 +197,8 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
   | `e2e-campaign.mts` | false start → unlocks → news acked by two TVs → doors, kill -9 at each step; chat, emotes and object actions (relay, history, rate limits, where interact works); `pos` during a round kept apart from the room's | `PORT` |
   | `e2e-inventory.mts` | rewards land in the right inventory (chooser / winner / all), survive kill -9 and a reclaim; host give/take, unknown items refused | `PORT` |
   | `e2e-quiz.mts` | quiz over real sockets: no answer on the wire before the reveal, judging, override, resume | `PORT` (plays a fixed copy of `placeholder.json`) |
-  | `e2e-tv.mts` | the TV page in headless Chrome | `PORT`, `CDP`, optional `SHOTS=<dir>` |
-  | `e2e-phone.mts` | phone pages in headless Chrome: session never lost, reclaim, host controls, campaign screens, quiz, room code | `PORT`, `CDP`, optional `LOCK_MS` (locked-phone time, default 5 min), `ONLY=1…5` (one part), `SHOTS=<dir>` |
+  | `e2e-tv.mts` | the TV page in headless Chrome, including the minigame screens' teardown | `PORT`, `CDP`, optional `SHOTS=<dir>` |
+  | `e2e-phone.mts` | phone pages in headless Chrome: session never lost, reclaim, host controls, campaign screens, quiz and the screens' teardown, room code | `PORT`, `CDP`, optional `LOCK_MS` (locked-phone time, default 5 min), `ONLY=1…5` (one part), `SHOTS=<dir>` |
 
   The browser suites need Chrome started with `--remote-debugging-port=<CDP>`; run **one browser suite at a time** and stop that Chrome afterwards. On a busy machine, `E2E_SLOW=3` multiplies every wait.
 
