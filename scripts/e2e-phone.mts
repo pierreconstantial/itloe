@@ -15,7 +15,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, Client, finish, HTTP, sleep, SLOW } from './e2e-lib.mts';
+import { check, Client, finish, HTTP, sleep, SLOW, TEARDOWN_PROBE } from './e2e-lib.mts';
 import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
 import { FEET, PARTY_ROOM } from '../shared/scene.js';
 
@@ -118,6 +118,7 @@ async function phone(label: string) {
   await cmd('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 }, s);
   await cmd('Emulation.setFocusEmulationEnabled', { enabled: true }, s); // background tabs stay "focused"
   await cmd('Page.addScriptToEvaluateOnNewDocument', { source: PROBE }, s);
+  await cmd('Page.addScriptToEvaluateOnNewDocument', { source: TEARDOWN_PROBE }, s);
   events.push((m) => {
     if (m.sessionId !== s || m.method !== 'Runtime.exceptionThrown') return;
     const text = m.params.exceptionDetails.exception?.description ?? m.params.exceptionDetails.text;
@@ -733,6 +734,40 @@ try {
   await joinAs(Q, 'elodie');
   const idQ = (await Q.snap())?.id;
   const quizNode = 'childhood.quiz';
+  const showing = async (p: Phone, view: string) => { for (let k = 0; k < 60; k++) { if ((await p.snap())?.view === view) return true; await sleep(100); } return false; };
+  /** What a minigame's phone screens left behind: timers, loops and window/document listeners its module
+   *  made, and its markup. Waits a little: a timer already firing may still end on its own. */
+  const leftOver = async (p: Phone, module: string, markup: string) => {
+    let left: string[] = [];
+    for (let k = 0; k < 30; k++) {
+      left = await p.ev(`[...window.__live([${JSON.stringify(module)}]), ...(document.querySelector(${JSON.stringify(markup)}) ? ['its markup'] : [])]`);
+      if (left.length === 0) break;
+      await sleep(100);
+    }
+    return left;
+  };
+  // ---- teardown: a block game → the map → the quiz leaves nothing of the block game running ----
+  await H.tap('#btn-start');
+  expect(await showing(H, 'view-game') && await showing(Q, 'view-game'), 'teardown: a block game runs on both phones');
+  // Élodie lifts a piece and is still holding it when the game ends
+  await Q.ev(`document.getElementById('slot-0').dispatchEvent(new PointerEvent('pointerdown', { pointerId: 7, clientX: 100, clientY: 700, bubbles: true }))`);
+  expect(await Q.ev(`!!document.getElementById('floating-piece') && window.__live(['blocks-ui.js']).some((l) => l.includes('pointermove'))`),
+    'teardown: mid-drag, the block screen listens on the window');
+  await H.tap('#btn-menu');
+  await H.tap('#btn-end-game');
+  await H.tap('#btn-end-game');
+  expect(await showing(H, 'view-podium') && await showing(Q, 'view-podium'), 'teardown: the host ends it → the podium');
+  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+  await H.tap('#btn-new-game');
+  await H.tap('#btn-menu');
+  await H.tap('#btn-gm');
+  await H.tap('#gm-back');
+  await H.ev(`document.querySelector('#sheet-gm [data-close]').click()`);
+  expect(await showing(H, 'view-place') && await showing(Q, 'view-place'), 'teardown: Back → the map on both phones');
+  const blockMarkup = '#view-game, #view-over, #floating-piece';
+  const leftH = await leftOver(H, 'blocks-ui.js', blockMarkup), leftQ = await leftOver(Q, 'blocks-ui.js', blockMarkup);
+  expect(leftH.length === 0 && leftQ.length === 0, 'teardown: on the map, nothing of the block screens is left (timers, listeners, markup)',
+    JSON.stringify({ H: leftH, Q: leftQ }));
   // the game master takes the party to the quiz (Go there: no unlock needed)
   await H.tap('#btn-menu');
   await H.tap('#btn-gm');
@@ -904,6 +939,15 @@ try {
   await H.tap('#btn-new-game');
   expect(await phaseIs(H, 'view-lobby') && await phaseIs(Q, 'view-lobby') && await H.visible('btn-start') && await Q.visible('stick-pad'),
     'Back to the room → the room again: the host\'s Start, the joystick');
+  // ---- teardown: the quiz → the map leaves nothing of the quiz running ----
+  await H.tap('#btn-menu');
+  await H.tap('#btn-gm');
+  await H.tap('#gm-back');
+  await H.ev(`document.querySelector('#sheet-gm [data-close]').click()`);
+  expect(await showing(H, 'view-place') && await showing(Q, 'view-place'), 'teardown: Back → the world map on both phones');
+  const quizH = await leftOver(H, 'quiz-ui.js', '#view-quiz'), quizQ = await leftOver(Q, 'quiz-ui.js', '#view-quiz');
+  expect(quizH.length === 0 && quizQ.length === 0, 'teardown: on the map, nothing of the quiz screens is left (timers, listeners, markup)',
+    JSON.stringify({ H: quizH, Q: quizQ }));
   } // part 4
 
   if (!ONLY || ONLY === '5') {

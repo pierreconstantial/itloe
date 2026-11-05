@@ -14,7 +14,7 @@ import { SAMPLE_CONTENT } from '../shared/campaign/index.js';
 
 /** A node's title (the server runs the sample content). @param {string} id */
 const C_TITLE = (id: string): string => SAMPLE_CONTENT.nodes[id].title;
-import { blocksOf, check, Client, finish, HTTP, legalMoves, quizOf, roomOf, sleep, SLOW } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, legalMoves, quizOf, roomOf, sleep, SLOW, TEARDOWN_PROBE } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -226,6 +226,8 @@ try {
   await boot(true);
   room = (await (await fetch(`${HTTP}/api/join`)).json()).code;
   tv = await Page.open(`${HTTP}/screen/`);
+  await tv.cmd('Page.addScriptToEvaluateOnNewDocument', { source: TEARDOWN_PROBE }); // the teardown checks
+  await tv.cmd('Page.reload');
   check(await tv.until(`${tvRoom} && !${tvOnlineBanner}`, 'tv room'), 'TV opens on the room at the false start');
 
   const cardOn = `!document.querySelector('.join-qr-card').hidden`;
@@ -564,6 +566,11 @@ try {
   i = A2.mark(); A2.send({ t: 'endGame' }); await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i);
   i = A2.mark(); A2.send({ t: 'back' }); await A2.waitFor((m) => m.t === 'view' && blocksOf(m) === null && m.campaign?.at.node === 'childhood', i);
   check(await tv.until(`JSON.parse(${doorsJs})['childhood.quiz'] !== 'locked'`, 'quiz door'), "World 1's block game done → its quiz door opens");
+  // teardown: on the map, nothing of the block game's screen runs (its timers, loops, listeners, markup)
+  const blockLeft = `[...window.__live(['blocks-screen.js', 'countdown.js', 'game-view.js']), ...(document.querySelector('.arena, #countdown') ? ['its markup'] : [])]`;
+  await tv.until(`${blockLeft}.length === 0`, 'block screen gone', 3000);
+  const left = await tv.js(blockLeft);
+  check(left.length === 0, `teardown: block game → the map leaves nothing of the block screen running (${JSON.stringify(left)})`);
   i = A2.mark(); A2.send({ t: 'enter', node: 'childhood.quiz' });
   const ql = await A2.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz', i);
   check(await tv.until(`document.querySelector('.lobby .title')?.textContent === 'Quiz!' && document.body.classList.contains('party')
@@ -640,6 +647,10 @@ try {
   await A2.waitFor((m) => m.t === 'view' && !quizOf(m) && m.campaign?.at.node === 'childhood', i);
   check(await tv.until(`!document.querySelector('.quiz') && !!document.querySelector('.map-band') && !document.body.classList.contains('in-quiz')`, 'out of quiz'),
     'host back → the world map again (quiz screen gone)');
+  const quizLeft = `[...window.__live(['quiz-screen.js', 'quiz-view.js', 'blocks-screen.js', 'countdown.js', 'game-view.js']), ...(document.querySelector('.quiz, .arena') ? ['its markup'] : [])]`;
+  await tv.until(`${quizLeft}.length === 0`, 'quiz screen gone', 3000);
+  const qLeft = await tv.js(quizLeft);
+  check(qLeft.length === 0, `teardown: block game → map → quiz → map leaves nothing of either screen running (${JSON.stringify(qLeft)})`);
   check(tv.errors.length === 0, `no page exception through the quiz (${tv.errors.join(' | ') || 'none'})`);
   } // quiz
   } // campaign / quiz
