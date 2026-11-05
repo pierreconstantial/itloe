@@ -11,7 +11,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, Client, finish, HTTP, sleep } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, hostOf, HTTP, quizOf, roomOf, settingsOf, sleep } from './e2e-lib.mts';
 import { expectedAnswers } from '../shared/quiz/judge-local.js';
 
 const PORT = process.env.PORT ?? '3141';
@@ -33,7 +33,7 @@ let log = '';
 async function boot(fresh = false, env: Record<string, string> = {}): Promise<void> {
   log = '';
   server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK, ...env },
+    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK, ITLOE_CONTENT: 'sample', ...env },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   server.stdout!.on('data', (d) => { log += d; });
@@ -60,9 +60,9 @@ function tap(c: Client): Client {
   return c;
 }
 const lastView = (c: Client) => [...c.msgs].reverse().find((m) => m.t === 'view');
-const qv = (c: Client) => lastView(c)?.quiz;
+const qv = (c: Client) => quizOf(lastView(c));
 const untilQuiz = async (c: Client, pred: (q: any) => boolean, from = 0, ms = 4000) =>
-  (await c.waitFor((m) => m.t === 'view' && !!m.quiz && pred(m.quiz), from, ms)).quiz;
+  quizOf(await c.waitFor((m) => m.t === 'view' && !!quizOf(m) && pred(quizOf(m)), from, ms));
 const errOf = async (c: Client, msg: object): Promise<string | null> => {
   const i = c.mark();
   c.send(msg);
@@ -102,9 +102,9 @@ function leakFree(question: Q): { ok: boolean, frames: number, leak?: string } {
     for (const raw of list) {
       if (!raw.includes(JSON.stringify(question.q))) continue;
       const m = JSON.parse(raw);
-      if (m.t !== 'view' || m.quiz?.phase !== 'question') continue;
+      if (m.t !== 'view' || quizOf(m)?.phase !== 'question') continue;
       frames++;
-      const shown = new Set<string>(m.quiz.round.question.choices ?? []);
+      const shown = new Set<string>(quizOf(m).round.question.choices ?? []);
       for (const text of expectedAnswers(question)) {
         if (!shown.has(text) && raw.includes(JSON.stringify(text))) return { ok: false, frames, leak: text };
       }
@@ -157,20 +157,20 @@ try {
   let i = P.mark();
   P.send({ t: 'gm', op: { op: 'unlock', node: 'childhood' } });
   P.send({ t: 'gm', op: { op: 'goto', node: QUIZ } });
-  let q = await untilQuiz(P, (x) => x.phase === 'lobby', i);
-  const v0 = lastView(P);
-  check(Array.isArray(q.credits) && q.credits.some((c: string) => /Itloe/.test(c)), `credits in the lobby view (${q.credits?.join(' | ')})`);
-  check(v0.campaign.at.node === QUIZ && v0.state === null && q.order.length === 2 && q.hostId === idP,
-    'quiz tableau → quiz lobby with the party seated; view.state null (block clients never see a quiz)');
+  const v0 = await P.waitFor((m) => m.t === 'view' && m.campaign.at.node === QUIZ, i);
+  check(v0.campaign.at.kind === 'quiz' && v0.round === null && roomOf(v0).order.length === 2 && hostOf(v0) === idP,
+    'quiz tableau → the room at it, with the party; no round yet, so no block game in the view (block clients never see a quiz)');
   check(await errOf(E, { t: 'config', patch: { count: 3 } }) === 'not-host', 'quiz config: host only');
   i = P.mark(); P.send({ t: 'config', patch: { count: 3, seconds: 10, mode: 'mixed' } });
-  q = await untilQuiz(P, (x) => x.settings.count === 3 && x.settings.seconds === 10, i);
+  await P.waitFor((m) => m.t === 'view' && settingsOf(m)?.count === 3 && settingsOf(m).seconds === 10, i);
   check(true, 'host configures the quiz (3 questions, 10 s)');
   check(await errOf(E, { t: 'start' }) === 'not-host', 'quiz start: host only');
   check(await errOf(E, { t: 'place', piece: 0, x: 0, y: 0 }) === 'not-playing', 'block messages during a quiz → not-playing');
 
   i = P.mark(); P.send({ t: 'start' });
-  q = await untilQuiz(P, (x) => x.phase === 'question', i);
+  let q = await untilQuiz(P, (x) => x.phase === 'question', i);
+  check(Array.isArray(q.credits) && q.credits.some((c: string) => /Itloe/.test(c)), `credits in the quiz view (${q.credits?.join(' | ')})`);
+  check(q.order.length === 2, 'the quiz starts with the party seated');
   const shown: Q[] = [];
 
   // ---------- round 1: P right, E wrong → the last answer reveals at once ----------
@@ -221,7 +221,22 @@ try {
   q = await untilQuiz(T, (x) => x.phase === 'question' && x.round.index === 2, i);
   question = byText.get(q.round.question.q)!;
   shown.push(question);
+
+  // A new device has only the room code and character, not the old device's stored id.
+  const scoreBeforeReclaim = q.players[idP].score;
+  i = T.mark(); P.ws.close();
+  await T.waitFor((m) => m.t === 'view' && !m.online.includes(idP), i);
+  const reclaimed = await player('P-new-device', 'pierre');
+  P = reclaimed.c;
+  q = await untilQuiz(P, (x) => x.phase === 'question' && x.round.index === 2);
+  check(reclaimed.id === idP && scoreBeforeReclaim > 0 && q.players[idP].score === scoreBeforeReclaim,
+    `offline quiz character reclaimed on another device → same id and score (${scoreBeforeReclaim})`);
+  i = T.mark();
   P.send(answerFor(q.round, question, true));
+  q = await untilQuiz(T, (x) => x.phase === 'question' && x.round?.answered.includes(idP), i);
+  check(q.round.answers === null, 'reclaimed device can answer; verdicts stay hidden while the question is open');
+  leak = leakFree(question);
+  check(leak.ok && leak.frames > 0, `no answer on the wire across the reclaim (${leak.frames} question frames grepped)${leak.leak ? ` LEAK: ${leak.leak}` : ''}`);
   E.send(answerFor(q.round, question, true));
   q = await untilQuiz(T, (x) => x.phase === 'reveal' && x.round.index === 2, i);
   i = T.mark(); P.send({ t: 'next' });
@@ -237,7 +252,7 @@ try {
 
   // ---------- a second quiz never repeats a question of the evening ----------
   i = T.mark(); P.send({ t: 'newGame' });
-  await untilQuiz(T, (x) => x.phase === 'lobby', i);
+  await T.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
   const second: string[] = [];
   i = T.mark(); P.send({ t: 'start' });
   q = await untilQuiz(T, (x) => x.phase === 'question', i);
@@ -251,9 +266,14 @@ try {
   }
   check(second.every((id) => !shown.some((x) => x.id === id)), `second quiz: 3 new questions (${second.join(', ')}), none asked earlier`);
   check(lastView(T).campaign.facts.asked.length === 6, 'asked grows to 6');
-  i = T.mark(); P.send({ t: 'newGame' }); await untilQuiz(T, (x) => x.phase === 'lobby', i);
-  i = T.mark(); P.send({ t: 'start' });
+  // play again from the podium: a new quiz at once, as in the block game
+  check(await errOf(P, { t: 'start' }) === 'refused', 'quiz start on the podium → refused (start is for the room)');
+  check(await errOf(E, { t: 'again' }) === 'not-host', 'quiz again: host only');
+  check(await errOf(E, { t: 'retire', target: idP }) === 'not-host' && await errOf(P, { t: 'retire', target: idE }) === 'refused',
+    'quiz retire, like every round button: a guest → not-host, the host → refused');
+  i = T.mark(); P.send({ t: 'again' });
   q = await untilQuiz(T, (x) => x.phase === 'question', i);
+  check(q.round.index === 0 && q.order.length === 2 && Object.values<any>(q.players).every((p) => p.score === 0), 'host again on the podium → question 1 of a new quiz, same players, scores reset');
   i = T.mark(); P.send({ t: 'endGame' });
   q = await untilQuiz(T, (x) => x.phase === 'finished', i);
   check(q.endReason === 'host' && lastView(T).campaign.facts.counters['quiz.played'] === 3, 'host endGame finishes a quiz (counts as played)');
@@ -275,9 +295,9 @@ try {
   T = await screen('T');
   P.send({ t: 'gm', op: { op: 'unlock', node: 'childhood' } });
   P.send({ t: 'gm', op: { op: 'goto', node: QUIZ } });
-  await untilQuiz(P, (x) => x.phase === 'lobby');
+  await P.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz');
   i = P.mark(); P.send({ t: 'config', patch: { count: 3, mode: 'text' } });
-  await untilQuiz(P, (x) => x.settings.count === 3 && x.settings.mode === 'text', i);
+  await P.waitFor((m) => m.t === 'view' && settingsOf(m)?.count === 3 && settingsOf(m).mode === 'text', i);
   i = T.mark(); P.send({ t: 'start' });
   q = await untilQuiz(T, (x) => x.phase === 'question', i);
   const tq = tiny.find((x) => x.q === q.round.question.q)!;

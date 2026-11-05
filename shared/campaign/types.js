@@ -8,8 +8,11 @@ export {};
 /** @typedef {import('../quiz/index.js').QuizAction} QuizAction */
 /** The nested activity a tableau runs: the block game, or a quiz (Contract E: `kind: 'quiz'`). */
 /** @typedef {BlockState | QuizState} ActivityState */
+/** A tableau's settings, by its minigame: the content's, then the host's choice until the party leaves. */
+/** @typedef {import('../game.js').Settings | QuizSettings} TableauSettings */
 /** @typedef {import('../game.js').Settings} Settings */
 /** @typedef {import('../characters.js').CharacterId} CharacterId */
+/** @typedef {import('../minigames.js').MinigameKind} MinigameKind */
 
 // ---------------------------------------------------------------- content (data, user-edited)
 
@@ -62,12 +65,14 @@ export {};
  *   rewards?: Effect[],         // applied ONCE, the first time the node completes
  *   replayable?: boolean,       // can be entered again once done (games: yes)
  *   door?: Door,                // where its door is on the parent's map (hub/world children)
+ *   room?: string,              // the room the TV draws here, an id in ROOMS (shared/scene.js); default: the party room
  * }} Node
  */
 
 /**
  * @typedef {{
- *   start: string,              // where a NEW campaign starts (the false-start blocks tableau)
+ *   start: string,              // where a NEW campaign starts: a minigame's tableau (the false-start block game)
+ *   storyId?: string,            // optional live-story marker; absent from the engine's sample fixture
  *   chooser: CharacterId,       // whose walking opens doors ('elodie')
  *   nodes: Record<string, Node>,
  *   items: Record<string, Item>, // the item catalogue (keys = ids)
@@ -92,12 +97,8 @@ export {};
 // ---------------------------------------------------------------- events (what activities report)
 
 /**
- * @typedef {{ t: 'game.finished', kind: 'blocks', node: string,
- *     ranking: { character: CharacterId | null, score: number, rank: number }[],
- *     mode: string, size: number, endReason: 'stuck' | 'time' | 'host' | null }
- *   | { t: 'quiz.finished', node: string,
- *       ranking: { character: CharacterId | null, score: number, rank: number, correct: number }[],
- *       asked: string[], endReason: 'done' | 'host' | null }
+ * round.finished: a round's result, derived by the engine only (exactly once), never from outside.
+ * @typedef {({ t: 'round.finished', kind: MinigameKind, node: string } & import('../minigames.js').RoundResult)
  *   | { t: 'scene.seen', sceneId: string, node?: string }
  *   | { t: 'zone.entered', zone: string, character: CharacterId }} CampaignEvent
  */
@@ -106,7 +107,8 @@ export {};
 
 /**
  * @typedef {{ seq: number, t: 'unlocked', node: string }
- *   | { seq: number, t: 'item', item: string, to: CharacterId[] }} News   // who got it
+ *   | { seq: number, t: 'item', item: string, to: CharacterId[] }
+ *   | { seq: number, t: 'apparition' }} News   // who got it
  */
 
 // ---------------------------------------------------------------- the campaign (persisted state)
@@ -114,7 +116,7 @@ export {};
 /** @typedef {{ id: string, character: CharacterId | null, name: string, color: number, left: boolean }} PartyMember */
 
 /**
- * The evening's roster, owned by reduceCampaign (A1). Activities seed their players from it.
+ * The evening's roster, owned by reduceCampaign (A1). A round starts with its members present.
  * @typedef {{ order: string[], players: Record<string, PartyMember>, hostId: string | null }} Party
  */
 
@@ -122,12 +124,19 @@ export {};
  * @typedef {{
  *   v: 1,
  *   seed: number,                                   // advanced on every block game created (deterministic)
- *   at: { node: string, activity: ActivityState | null },
+ *   at: { node: string, kind: MinigameKind | null, activity: ActivityState | null,   // kind: the tableau's minigame;
+ *         settings: TableauSettings | null },     // activity: its round, null between rounds (the room); settings: the tableau's
  *   party: Party,
  *   facts: Facts,
  *   news: News[],                                   // not yet celebrated on the TV
  *   newsSeq: number,                                // last seq handed out (news seq are 1, 2, 3…)
  * }} Campaign
+ */
+
+/**
+ * The campaign as views carry it: without the round's raw state (`at.activity`), which travels only
+ * through its minigame's view (the view's `round`).
+ * @typedef {Omit<Campaign, 'at'> & { at: Omit<Campaign['at'], 'activity'> }} CampaignView
  */
 
 // ---------------------------------------------------------------- actions (reduceCampaign)
@@ -146,12 +155,18 @@ export {};
 
 /**
  * Ids are injected by the server (socket → playerId; ack: 'screen'). `activity` carries a game
- * ServerAction already rebuilt field by field by the server (now/deadline/timeUp server-only).
+ * ServerAction already rebuilt field by field by the server (now/deadline/timeUp server-only); `now` and
+ * `inputs` (the minigame's server inputs, e.g. the quiz's candidates) of start/again too.
  * @typedef {{ t: 'join', id: string, character: CharacterId }
  *   | { t: 'leave', id: string }
  *   | { t: 'enter', id: string, node: string }
+ *   | { t: 'portal', id: string }
+ *   | { t: 'collect', id: string, item: string }
  *   | { t: 'back', id: string }
+ *   | { t: 'start' | 'again', id: string, now: number, inputs?: unknown }    // host: a round from the room / the podium
+ *   | { t: 'newGame', id: string }                                         // host, on the podium: back to the room
  *   | { t: 'activity', action: import('../game.js').Action | QuizAction }   // routed by the activity's kind
+ *   | { t: 'config', id: string, patch: unknown }                            // host: the tableau's settings
  *   | { t: 'event', event: CampaignEvent }
  *   | { t: 'ack', id: 'screen', upTo: number }
  *   | { t: 'gm', id: string, op: GmOp }} CampaignAction

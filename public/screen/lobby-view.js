@@ -2,7 +2,6 @@
 
 import { h, colorDot } from './dom.js';
 import { ROSTER_SIZE } from '../../shared/characters.js';
-import { summarizeSettings } from '../commun/settings-text.js';
 
 /** The game holds one player per character: the roster is the cap (the server refuses a join
  *  only once every character is held). */
@@ -12,7 +11,7 @@ const QR_SRC = '/api/join-qr.svg';
 /** @typedef {import('../../shared/game.js').State} State */
 
 /**
- * How phones join. `code` / `qr` are null/false when the server has no join API (e.g. the mock).
+ * How phones join. `code` / `qr` are null/false when /api/join is unavailable.
  * @typedef {{ url: string, code: string | null, qr: boolean }} JoinInfo
  */
 
@@ -93,21 +92,26 @@ function renderJoin(join) {
 /**
  * Party-room lobby: a top band (join box + title, next-game settings, status); the guests
  * themselves are the avatars walking below it (party-room.js), so there are no slot cards.
- * @param {State} s
- * @param {State | null} _prev
+ * Every minigame's tableau shows the same band with its own title and settings line.
+ * @param {Pick<State, 'order'> & { players: Record<string, { name: string, color: number }> }} s
+ * @param {unknown} _prev
  * @param {JoinInfo} join
+ * @param {{ title: string, settings: string }} band the minigame's title and the tableau's settings, summarized
+ * @param {{ hostId: string | null, required?: number, status?: string }} options hostId: the party's host;
+ *   required: the guests a round needs; status: replaces the guest count when no round starts here
  */
-export function renderLobby(s, _prev, join) {
+export function renderLobby(s, _prev, join, band, options) {
   const n = s.order.length;
-  const host = s.hostId ? s.players[s.hostId] : undefined;
-  const status = n === 0
+  const max = options.required ?? MAX_PLAYERS;
+  const host = options.hostId ? s.players[options.hostId] : undefined;
+  const status = options.status ?? (n === 0
     ? 'Waiting for the first guest…'
-    : `${n}/${MAX_PLAYERS} guest${n === 1 ? '' : 's'}${host ? ` · ${host.name} starts the game from their phone` : ''}`;
+    : `${n}/${max} guest${n === 1 ? '' : 's'}${host ? ` · ${host.name} starts the game from their phone` : ''}`);
   const side = h('div', 'lobby-side', [
-    h('h1', 'title', ['ITLOE']),
-    h('p', 'settings-line', [summarizeSettings(s.settings)]),
+    h('h1', 'title', [band.title]),
+    h('p', 'settings-line', [band.settings]),
     h('p', 'lobby-count', [status]),
   ]);
-  if (host) side.querySelector('.lobby-count')?.prepend(colorDot(host.color), ' ');
+  if (host && !options.status) side.querySelector('.lobby-count')?.prepend(colorDot(host.color), ' ');
   return h('section', 'lobby', [renderJoin(join), side]);
 }

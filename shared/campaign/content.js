@@ -1,13 +1,18 @@
-// Content helpers: validation (run by a test, so a content edit fails fast) and door hit-testing.
+// Content helpers: validation (run by a test, so a content edit fails fast), door hit-testing and
+// a node's room.
 
 import { isCharacterId } from '../characters.js';
+import { minigame } from '../minigames.js';
+import { PARTY_ROOM, ROOMS } from '../scene.js';
 
 /** @typedef {import('./types.js').Condition} Condition */
 /** @typedef {import('./types.js').Content} Content */
 /** @typedef {import('./types.js').Node} Node */
+/** @typedef {import('../scene.js').Scene} Scene */
 
 const KINDS = new Set(['hub', 'world', 'tableau']);
-const ACTIVITY_KINDS = new Set(['blocks', 'scene', 'quiz']);
+/** A tableau's activity: a registered minigame, or a scene (a content kind without rules). @param {unknown} kind */
+const isActivityKind = (kind) => kind === 'scene' || !!minigame(kind);
 
 /** Children of a node, in content order. @param {Content} content @param {string} id @returns {Node[]} */
 export function childrenOf(content, id) {
@@ -76,7 +81,7 @@ export function validateContent(content) {
   if (!isCharacterId(content.chooser)) errors.push(`chooser "${content.chooser}" is not a character`);
   const start = nodes[content.start];
   if (!start) errors.push(`start "${content.start}" is not a node`);
-  else if (start.activity?.kind !== 'blocks') errors.push(`start "${content.start}" must be a blocks tableau`);
+  else if (!minigame(start.activity?.kind)) errors.push(`start "${content.start}" must be the tableau of a minigame`);
   // the item catalogue: only these can exist
   const items = content.items;
   if (!items || typeof items !== 'object' || Array.isArray(items)) errors.push('content needs an item catalogue: items: { [id]: { id, name, icon, description } }');
@@ -100,7 +105,10 @@ export function validateContent(content) {
     if (n.kind === 'hub' && n.parent !== null) errors.push(`${at}: a hub must be the root`);
     if (n.activity && n.kind !== 'tableau') errors.push(`${at}: only tableaux have an activity`);
     if (n.kind === 'tableau' && !n.activity) errors.push(`${at}: a tableau needs an activity`);
-    if (n.activity && !ACTIVITY_KINDS.has(n.activity.kind)) errors.push(`${at}: unknown activity "${n.activity.kind}"`);
+    if (n.activity && !isActivityKind(n.activity.kind)) errors.push(`${at}: unknown activity "${n.activity.kind}"`);
+    const rules = minigame(n.activity?.kind);
+    const settings = /** @type {{ settings?: unknown } | undefined} */ (n.activity)?.settings;
+    if (rules && settings !== undefined) for (const e of rules.validateSettings(settings)) errors.push(`${at}: ${e}`);
     if (typeof n.title !== 'string' || !n.title) errors.push(`${at}: missing title`);
     if (!isCondition(n.unlock)) errors.push(`${at}: invalid unlock condition`);
     if (n.complete !== undefined && !isCondition(n.complete)) errors.push(`${at}: invalid complete condition`);
@@ -119,6 +127,7 @@ export function validateContent(content) {
       if ('unlock' in e && !nodes[e.unlock]) errors.push(`${at}: reward unlocks unknown node "${e.unlock}"`);
       if (!('unlock' in e) && !('item' in e) && !('flag' in e)) errors.push(`${at}: invalid reward ${JSON.stringify(e)}`);
     }
+    if (n.room !== undefined && !Object.hasOwn(ROOMS, n.room)) errors.push(`${at}: unknown room "${n.room}"`);
     if (n.door) {
       const d = n.door;
       if (![d.x, d.y, d.w, d.h].every((v) => typeof v === 'number' && Number.isFinite(v)) || d.w <= 0 || d.h <= 0) {
@@ -155,4 +164,16 @@ export function zoneAt(content, nodeId, x, y) {
     if (d && x >= d.x && x <= d.x + d.w && y >= d.y && y <= d.y + d.h) return n.id;
   }
   return null;
+}
+
+/**
+ * The room at a node: what the TV draws there, and what avatars walk in and use objects of. The
+ * node's own (`room`), else the party room. The server, the phone and the TV all choose it here.
+ * @param {Content} content
+ * @param {string | null | undefined} nodeId
+ * @returns {Scene}
+ */
+export function roomAt(content, nodeId) {
+  const room = nodeId ? content.nodes[nodeId]?.room : undefined;
+  return room && Object.hasOwn(ROOMS, room) ? ROOMS[room] : PARTY_ROOM;
 }

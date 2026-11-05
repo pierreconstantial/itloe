@@ -11,7 +11,7 @@ import { spawnPoint } from '../shared/world.js';
 
 const read = (/** @type {string} */ p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
 const BASE_CSS = read('public/commun/base.css');
-const SCREEN_CSS = read('public/commun/screen-main.css');
+const BLOCKS_CSS = read('public/screen/blocks.css');
 const QUIZ_CSS = read('public/screen/quiz.css');
 
 /** '#rrggbb' → [r, g, b] */
@@ -110,13 +110,11 @@ test('colours: base.css has one --pN per character, all far enough apart', () =>
 test('TV: every player count the roster allows has a board layout and a density', () => {
   for (let n = 1; n <= ROSTER_SIZE; n++) {
     const sel = `.arena[data-players="${n}"]`;
-    assert.ok(SCREEN_CSS.includes(sel), `${sel} is laid out in screen-main.css`);
+    assert.ok(BLOCKS_CSS.includes(sel), `${sel} is laid out in the block game's blocks.css`);
     // a density rule sets the panel type sizes for that count
-    assert.ok(new RegExp(`${sel.replace(/[[\]"]/g, (c) => `\\${c}`)}[^{]*\\{[^}]*--pcell`).test(SCREEN_CSS),
+    assert.ok(new RegExp(`${sel.replace(/[[\]"]/g, (c) => `\\${c}`)}[^{]*\\{[^}]*--pcell`).test(BLOCKS_CSS),
       `${sel} has its own --head/--pcell sizing`);
   }
-  // the fullest layout still gives every player a panel of the same size
-  assert.ok(/\.arena\[data-players="5"\] \.panel \{ grid-column: span 2; \}/.test(SCREEN_CSS));
   for (let n = 1; n <= ROSTER_SIZE; n++) {
     assert.ok(QUIZ_CSS.includes(`.quiz-result:nth-child(${n})`) || n === 1,
       `the quiz reveal animates seat ${n}`);

@@ -9,11 +9,11 @@ import { composeMoment, createCutscenes } from '../public/screen/cutscenes.js';
 /** @param {Campaign} c @param {any[]} actions */
 const run = (c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a, C), c);
 /** @param {Campaign} c */
-const game = (c) => run(c, { t: 'activity', action: { t: 'newGame', id: 'e' } }, { t: 'activity', action: { t: 'start', id: 'e', now: 1 } }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
+const game = (c) => run(c, { t: 'newGame', id: 'e' }, { t: 'start', id: 'e', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
 
 function threeGames() {
   let c = run(newCampaign(C, 3), { t: 'join', id: 'e', character: 'elodie' });
-  c = run(c, { t: 'activity', action: { t: 'start', id: 'e', now: 1 } }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
+  c = run(c, { t: 'start', id: 'e', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
   return game(game(c));
 }
 

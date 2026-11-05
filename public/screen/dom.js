@@ -14,7 +14,7 @@ export function h(tag, className = '', children = []) {
 }
 
 /**
- * CSS colour of a player colour index (1..N → --p1..--pN in base.css, one per character).
+ * CSS colour of a player colour index (1..4 → --p1..--p4 in base.css).
  * @param {number} color
  */
 export function playerColor(color) {
@@ -31,4 +31,10 @@ export function colorDot(color) {
 /** @param {number} n */
 export function formatScore(n) {
   return n.toLocaleString('en-US');
+}
+
+/** Loads a stylesheet once, after the page's own (a minigame's screens bring theirs). @param {URL} url */
+export function addStylesheet(url) {
+  if (typeof document === 'undefined' || document.querySelector(`link[href="${url.href}"]`)) return;
+  document.head.append(Object.assign(document.createElement('link'), { rel: 'stylesheet', href: url.href }));
 }

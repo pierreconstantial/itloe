@@ -1,11 +1,9 @@
-// TV quiz screen (Contract E), rendered from view.quiz — the PUBLIC projection (shared/quiz/bank.js
-// projectQuiz): no answer before the reveal. Lobby → question → reveal → … → finished (the shared podium).
-// Pure helpers (tested) + DOM builders; main.js owns timers and sounds.
+// TV quiz screen (Contract E), rendered from the round's view — the PUBLIC projection (shared/quiz/bank.js
+// projectQuiz): no answer before the reveal. Question → reveal → …; the finished quiz is the frame's podium.
+// Pure helpers (tested) + DOM builders; quiz-screen.js owns timers and sounds.
 
 import { h, colorDot, playerColor, formatScore } from './dom.js';
 import { bindScore } from './score-ticker.js';
-import { renderPodium, revealSchedule } from './podium-view.js';
-import { summarizeQuiz } from '../commun/quiz-text.js';
 
 /** @typedef {import('../../shared/quiz/bank.js').QuizView} QuizView */
 /** @typedef {import('../../shared/quiz/bank.js').RoundView} RoundView */
@@ -64,12 +62,6 @@ export const sourceOf = (q) => {
   return typeof s === 'string' && s.trim() ? s.trim() : null;
 };
 
-/** Small attribution line for the lobby and the podium. @param {QuizView} q */
-function creditsLine(q) {
-  const lines = creditsOf(q);
-  return lines.length ? [h('p', 'quiz-credits', [lines.join(' · ')])] : []; // the lines say what they credit
-}
-
 /** The reveal's anecdote, when the projection carries one (only ever from the reveal on). @param {QuizView} q */
 export const anecdoteOf = (q) => {
   const a = /** @type {{ anecdote?: unknown } | null | undefined} */ (q.round?.answer);
@@ -96,18 +88,6 @@ function scoreboard(q) {
     row.dataset.id = id;
     return row;
   }));
-}
-
-/** @param {QuizView} q */
-export function renderQuizLobby(q) {
-  const n = seatedIds(q).length;
-  return h('section', 'quiz quiz-lobby', [
-    h('h1', 'quiz-title', ['Quiz!']),
-    h('p', 'settings-line', [summarizeQuiz(q.settings)]),
-    h('div', 'quiz-chips', seatedIds(q).map((id) => chip(q, id))),
-    h('p', 'podium-hint', [n ? 'The host starts the quiz from their phone' : 'Waiting for players…']),
-    ...creditsLine(q),
-  ]);
 }
 
 /**
@@ -170,30 +150,4 @@ export function renderReveal(q) {
     scoreboard(q),
     ...(sourceOf(q) ? [h('p', 'quiz-source', [`Source: ${sourceOf(q)}`])] : []),
   ]);
-}
-
-/**
- * Finished: the shared podium, with each player's right answers.
- * @param {QuizView} q @param {number} elapsedMs
- */
-export function renderQuizPodium(q, elapsedMs) {
-  const s = /** @type {any} */ (q);
-  const podium = renderPodium(s, elapsedMs, {
-    title: 'Quiz podium',
-    next: summarizeQuiz(q.settings),
-    rowExtra: (id) => [h('span', 'rank-correct', [`${q.players[id].correct}/${q.total} ✓`])],
-  });
-  podium.append(...creditsLine(q));
-  return podium;
-}
-
-/** The podium's reveal steps for a finished quiz (sounds / confetti in main.js). @param {QuizView} q */
-export const quizRevealSchedule = (q) => revealSchedule(/** @type {any} */ (q));
-
-/** @param {QuizView} q @param {number} podiumElapsedMs */
-export function renderQuiz(q, podiumElapsedMs = Infinity) {
-  if (q.phase === 'question' && q.round) return renderQuestion(q);
-  if (q.phase === 'reveal' && q.round) return renderReveal(q);
-  if (q.phase === 'finished') return renderQuizPodium(q, podiumElapsedMs);
-  return renderQuizLobby(q);
 }

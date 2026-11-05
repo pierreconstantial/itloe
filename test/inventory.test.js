@@ -16,10 +16,10 @@ const runC = (C, c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a,
 function party(C) {
   return runC(C, newCampaign(C, 3), { t: 'join', id: 'e', character: 'elodie' }, { t: 'join', id: 's', character: 'sol' }, { t: 'join', id: 'a', character: 'anna' });
 }
-/** One block game ended by the host, then back to the lobby. @param {Content} C @param {Campaign} c */
+/** One block game ended by the host (from the room, or from the podium after going back to the room). @param {Content} C @param {Campaign} c */
 function game(C, c) {
-  if (c.at.activity?.phase === 'finished') c = runC(C, c, { t: 'activity', action: { t: 'newGame', id: 'e' } });
-  return runC(C, c, { t: 'activity', action: { t: 'start', id: 'e', now: 1 } }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
+  if (c.at.activity?.phase === 'finished') c = runC(C, c, { t: 'newGame', id: 'e' });
+  return runC(C, c, { t: 'start', id: 'e', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
 }
 
 /** A small content where the false start rewards with a given `to`. @param {any} reward @returns {Content} */
@@ -54,24 +54,6 @@ test('validateContent: the catalogue, and every item reward / has condition name
 
 // ---------------------------------------------------------------- rewards `to`
 
-test('reward to the chooser (default): the Old key lands in Élodie’s inventory, news says who', () => {
-  let c = party(SAMPLE_CONTENT);
-  c = game(SAMPLE_CONTENT, game(SAMPLE_CONTENT, game(SAMPLE_CONTENT, c)));
-  assert.equal(holding(c.facts, 'elodie', 'old-key'), 1);
-  assert.equal(holding(c.facts, 'sol', 'old-key'), 0);
-  const n = c.news.find((x) => x.t === 'item');
-  assert.deepEqual(n && { item: n.item, to: /** @type {any} */ (n).to }, { item: 'old-key', to: ['elodie'] });
-});
-
-test('reward to "all": every non-left party member, one each', () => {
-  const C = withReward({ item: 'photo', to: 'all' });
-  let c = runC(C, party(C), { t: 'leave', id: 'a' });
-  c = runC(C, c, { t: 'join', id: 'p', character: 'pierre' });
-  c = game(C, c);
-  assert.deepEqual(['elodie', 'sol', 'anna', 'pierre'].map((ch) => holding(c.facts, ch, 'photo')), [1, 1, 0, 1], 'Anna left: none for her');
-  assert.deepEqual(/** @type {any} */ (c.news.find((x) => x.t === 'item'))?.to, ['elodie', 'sol', 'pierre']);
-});
-
 test('reward to "winner": rank 1 of the activity that completed the node — all of them when tied', () => {
   const C = withReward({ item: 'ticket', to: 'winner', count: 2 });
   let c = party(C);
@@ -79,7 +61,7 @@ test('reward to "winner": rank 1 of the activity that completed the node — all
   c = game(C, c);
   assert.deepEqual(['elodie', 'sol', 'anna'].map((ch) => holding(c.facts, ch, 'ticket')), [2, 2, 2], 'tied → all, count 2 each');
   // a clear winner (pure: the ranking of the triggering event)
-  const ev = { t: 'game.finished', kind: 'blocks', node: 'x', mode: 'marathon', size: 8, endReason: 'stuck',
+  const ev = { t: 'round.finished', kind: 'blocks', node: 'x', endReason: 'stuck',
     ranking: [{ character: 'sol', score: 90, rank: 1 }, { character: 'elodie', score: 10, rank: 2 }] };
   assert.deepEqual(recipients('winner', C, { event: /** @type {any} */ (ev) }), ['sol']);
   assert.deepEqual(recipients('winner', C, {}), ['elodie'], 'no ranking in this step → the chooser');

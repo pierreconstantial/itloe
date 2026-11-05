@@ -1,17 +1,19 @@
 // Host controls during a game (slice 2b): a disconnected player must never block the podium.
-// Lives in the ☰ menu sheet, host only, phase playing: "Take <name> out" per player still playing
-// (offline ones first and flagged), and "End game". Both are irreversible, so each needs a second
-// tap to confirm (same pattern as "Leave game"); an armed button disarms after a few seconds.
+// Lives in the ☰ menu sheet, host only, while a round runs, the same for every minigame: "Take <name> out"
+// per player still playing (offline ones first and flagged), and "End game". Both are
+// irreversible, so each needs a second tap to confirm (same pattern as "Leave game"); an armed button
+// disarms after a few seconds.
 // Its buttons are inserted as direct children of the sheet panel, just before the #host-controls
 // marker, so they get the panel's button styles.
 import { $ } from './dom.js';
 import { createConfirm } from './confirm.js';
 
-/** @typedef {import('../../shared/game.js').State} State */
+/** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
+/** @typedef {import('../../shared/minigames.js').RoundPlayers} RoundPlayers */
 
 /** @param {{ send: (msg: unknown) => void }} io */
 export function createHostControls(io) {
-  /** @type {{ v: State | null, online: readonly string[], meId: string } | null} */ let last = null;
+  /** @type {{ round: RoundView | null, online: readonly string[], meId: string, hostId: string | null } | null} */ let last = null;
   // armed key: 'end' or a playerId
   const confirm = createConfirm(() => redraw());
   const tap = confirm.tap;
@@ -42,11 +44,11 @@ export function createHostControls(io) {
 
   function redraw() {
     const ctx = last;
-    const v = ctx?.v ?? null;
-    if (!ctx || !v || v.phase !== 'playing' || v.hostId !== ctx.meId) { place([]); confirm.disarm(); return; }
-    const { online } = ctx;
-    const live = new Set(online);
-    const playing = v.order.filter((id) => !v.players[id].done);
+    // exactly when the server accepts endGame: the party's host, while a round runs
+    const v = ctx && ctx.hostId === ctx.meId && ctx.round?.status === 'running' ? /** @type {RoundPlayers} */ (ctx.round.view) : null;
+    if (!ctx || !v) { place([]); confirm.disarm(); return; }
+    const live = new Set(ctx.online);
+    const playing = v.order.filter((id) => !v.players[id].done && !v.players[id].left);
     // offline first: they are the ones blocking the podium
     playing.sort((a, b) => Number(live.has(a)) - Number(live.has(b)));
 
@@ -69,9 +71,12 @@ export function createHostControls(io) {
   }
 
   return {
-    /** @param {State | null} v the block game, null when none @param {readonly string[]} online @param {string} meId */
-    render(v, online, meId) {
-      last = { v, online, meId };
+    /**
+     * @param {RoundView | null} round the running round, null between rounds
+     * @param {readonly string[]} online @param {string} meId @param {string | null} hostId the party's host
+     */
+    render(round, online, meId, hostId) {
+      last = { round, online, meId, hostId };
       redraw();
     },
   };

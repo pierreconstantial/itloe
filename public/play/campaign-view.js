@@ -1,12 +1,12 @@
 // Phone-side reading of the campaign (slice 3): helpers over the view's `campaign` and the content.
 // The view carries the campaign (facts, party, where we are) and a `contentVersion`; the content itself
 // (titles, tree, doors) comes from GET /api/content through the shared content source, re-fetched when
-// the version changes. Until it loads (or on the mock) the bundled sample stands in: never null.
+// the version changes. Until it loads (or when the request fails) the bundled sample stands in: never null.
 import { childrenOf, holds } from '../../shared/campaign/index.js';
 import { createContentSource } from '../commun/content.js';
 import { CHARACTERS } from '../../shared/characters.js';
 
-/** @typedef {import('../../shared/campaign/types.js').Campaign} Campaign */
+/** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
 /** @typedef {import('../../shared/campaign/types.js').Content} Content */
 /** @typedef {import('../../shared/campaign/types.js').Condition} Condition */
 /** @typedef {import('../../shared/campaign/types.js').Facts} Facts */

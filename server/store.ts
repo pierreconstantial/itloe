@@ -8,9 +8,9 @@ import { copyFileSync, existsSync } from 'node:fs';
 import { randomInt } from 'node:crypto';
 import { quarantine, readJson, varPath, writeJsonAtomic } from './persist.ts';
 import type { State } from './rules.ts';
-import { activityDeadline, isQuiz, savedAtMs, shiftActivityDeadline } from './resume.ts';
-import { resolvePending } from '../shared/quiz/index.js';
-import { fromLegacyState, loadCampaign, newCampaign, type Campaign, type Content } from './campaign.ts';
+import { roundDeadline, savedAtMs, shiftRound } from './resume.ts';
+import { minigame } from '../shared/minigames.js';
+import { fromLegacyState, loadCampaign, newCampaign, UnknownMinigameError, type Campaign, type Content } from './campaign.ts';
 
 export const STATE_FILE = varPath('bloko.state.json');
 export const BESTS_FILE = varPath('bests.json');
@@ -31,8 +31,8 @@ function isV1(x: unknown): x is SavedV1 {
   return ['lobby', 'playing', 'finished'].includes(s.phase)
     && typeof s.seed === 'number' && typeof s.size === 'number'
     && Array.isArray(s.order) && !!s.players && typeof s.players === 'object'
-    && !!s.settings && !!s.rules
-    && s.order.every((id) => !!s.players[id] && Array.isArray(s.players[id].board));
+    && !!(s as State & { settings?: unknown }).settings && !!s.rules
+    && s.order.every((id: string) => !!s.players[id] && Array.isArray(s.players[id].board));
 }
 
 /** Shape guard only; loadCampaign then makes the content safe (unknown ids dropped, re-settled). */
@@ -55,24 +55,22 @@ export function freshGame(content: Content): Game {
   return { campaign: newCampaign(content, Date.now() >>> 0), room: newRoomCode(), bestPrevious: null };
 }
 
-/** The live activity keeps its REMAINING time across the downtime (a timed block game, an open quiz
- *  question); a quiz's answers still waiting for the judge are never re-judged: they become wrong (E1). */
-function resumeActivity(c: Campaign, since: number | null, now: number): Campaign {
-  const s = c.at.activity;
-  if (!s) return c;
-  let next = shiftActivityDeadline(s, since, now);
-  if (isQuiz(next)) next = resolvePending(next);
-  return next === s ? c : { ...c, at: { ...c.at, activity: next } };
+/** The round keeps its REMAINING time across the downtime (a timed block game, an open quiz question),
+ *  then its minigame's resume step runs (the quiz: answers still waiting for the judge become wrong, E1). */
+function resumeRound(c: Campaign, since: number | null, now: number): Campaign {
+  const shifted = shiftRound(c, since, now);
+  const rules = minigame(shifted.at.kind);
+  const s = shifted.at.activity;
+  const next = rules?.resume && s ? rules.resume(s) : s;
+  return next === s ? shifted : { ...shifted, at: { ...shifted.at, activity: next } };
 }
 
 /** One line for the boot log. */
 function describe(c: Campaign, room: string): string {
   const s = c.at.activity;
+  const rules = minigame(c.at.kind);
   const party = c.party.order.filter((id) => !c.party.players[id].left).map((id) => c.party.players[id].name).join(', ') || 'nobody yet';
-  const scores = s && s.order.length ? ` (${s.order.map((id) => `${s.players[id].name} ${s.players[id].score}`).join(', ')})` : '';
-  const game = !s ? '' : isQuiz(s)
-    ? `, quiz ${s.phase}${s.round ? ` q${s.round.index + 1}/${s.questions.length}` : ''}${scores}`
-    : `, block game ${s.phase}${scores}`;
+  const game = s && rules ? `, ${rules.describe(s)}` : '';
   return `at ${c.at.node}${game}, room ${room}, party: ${party}, unlocked ${c.facts.unlocked.length}, news ${c.news.length}`;
 }
 
@@ -86,7 +84,8 @@ function keepV1(): string {
 /**
  * The saved evening in any state → resume it (room code, party, host, nested game, facts, news kept);
  * missing/corrupt/--new → a fresh campaign at content.start. A timed game keeps its remaining time.
- * A corrupt save is quarantined (kept for inspection), never deleted.
+ * A corrupt save is quarantined (kept for inspection), never deleted. A round of a minigame this release
+ * does not have throws: the boot stops and the save stays as it is, for the release that has it.
  */
 export function loadGame(forceNew: boolean, content: Content, now = Date.now()): Game & { how: string } {
   const fresh = (why: string) => {
@@ -110,13 +109,16 @@ export function loadGame(forceNew: boolean, content: Content, now = Date.now()):
       how = `MIGRATED a v1 save (original kept as ${keepV1()}) and resumed`;
     }
   } catch (e: any) {
+    if (e instanceof UnknownMinigameError) {
+      throw new Error(`cannot resume ${STATE_FILE}: ${e.message}. Boot stopped; the save is left untouched for a release that has "${e.kind}".`);
+    }
     return fresh(`save could not be loaded: ${e?.message ?? e}; moved to ${quarantine(STATE_FILE)}`);
   }
 
   const since = savedAtMs(env.savedAt);
-  const shiftedCampaign = resumeActivity(campaign, since, now);
-  const deadline = activityDeadline(shiftedCampaign.at.activity);
-  const shifted = activityDeadline(campaign.at.activity) !== deadline && typeof deadline === 'number'
+  const shiftedCampaign = resumeRound(campaign, since, now);
+  const deadline = roundDeadline(shiftedCampaign.at);
+  const shifted = roundDeadline(campaign.at) !== deadline && typeof deadline === 'number'
     ? `, timed clock paused ${Math.round((now - (since as number)) / 1000)} s while down (${Math.round((deadline - now) / 1000)} s left)`
     : '';
   const at = since === null ? 'at an unknown time' : new Date(since).toISOString();

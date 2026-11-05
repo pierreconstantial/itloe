@@ -1,10 +1,13 @@
 // TV quiz screen helpers (public/screen/quiz-view.js) over the real reducer + public projection.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initQuiz, reduceQuiz } from '../shared/quiz/index.js';
+import { startQuiz, reduceQuiz as reduceRound } from '../shared/quiz/index.js';
 import { projectQuiz } from '../shared/quiz/bank.js';
 import { anecdoteOf, pickedBy, questionHeader, revealRows, seatedIds } from '../public/screen/quiz-view.js';
 import { summarizeQuiz } from '../public/commun/quiz-text.js';
+
+/** The quiz reducer, with the host the campaign passes: 'a'. */
+const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { hostId: 'a' });
 
 const T0 = 1_700_000_000_000;
 /** @type {Record<string, any>} */
@@ -16,10 +19,9 @@ const lookup = (/** @type {string} */ id) => BANK[id];
 
 /** A three-player quiz on its first (choice) question. */
 function question() {
-  let s = initQuiz(7, { count: 2, seconds: 20, mode: 'mixed' });
-  for (const [id, c] of [['a', 'anna'], ['b', 'sol'], ['c', 'pierre']]) s = reduceQuiz(s, { t: 'join', id, character: /** @type {any} */ (c) });
-  s = reduceQuiz(s, { t: 'start', id: 'a', now: T0, candidates: [{ id: 'q1', choices: 4 }, { id: 'q2', choices: 0 }] });
-  return s;
+  return /** @type {import('../shared/quiz/index.js').QuizState} */ (startQuiz({ seed: 7, settings: { count: 2, seconds: 20, mode: 'mixed' }, now: T0,
+    players: [{ id: 'a', character: 'anna' }, { id: 'b', character: 'sol' }, { id: 'c', character: 'pierre' }],
+    inputs: [{ id: 'q1', choices: 4 }, { id: 'q2', choices: 0 }] }));
 }
 
 test('question: header, seated players, no answers leaked before the reveal', () => {

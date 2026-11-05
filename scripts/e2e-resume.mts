@@ -1,11 +1,11 @@
-// P2 end-to-end: kill -9 + restart in every phase (lobby / playing / finished / timed playing).
+// P2 end-to-end: kill -9 + restart in every phase (the room at a tableau / playing / finished / timed playing).
 // Runs its OWN server (a child process on PORT, scratch BLOKO_VAR) so it can SIGKILL it.
 // Usage: PORT=3178 node scripts/e2e-resume.mts      (never 3131: that's the live server)
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, Client, finish, HTTP, legalMoves, playToDone, sleep } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, legalMoves, playToDone, roomOf, settingsOf, sleep } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -19,7 +19,7 @@ let log = '';
 async function boot(fresh = false): Promise<void> {
   log = '';
   server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1' },
+    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', ITLOE_CONTENT: 'sample' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   server.stdout!.on('data', (d) => { log += d; });
@@ -58,7 +58,7 @@ let s = 777;
 const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 4294967296);
 
 try {
-  // ---------- lobby ----------
+  // ---------- the room at the tableau ----------
   await boot(true);
   const room = await roomCode();
   let A = new Client('A'); await A.open(); A.send({ t: 'hello', role: 'player', room });
@@ -67,23 +67,28 @@ try {
   let B = new Client('B'); await B.open(); B.send({ t: 'hello', role: 'player', room });
   i = B.mark(); B.send({ t: 'join', character: 'sol' });
   const idB = (await B.waitFor((m) => m.t === 'welcome', i)).playerId;
-  await A.waitFor((m) => m.t === 'view' && m.state.order.length === 2);
+  await A.waitFor((m) => m.t === 'view' && roomOf(m)?.order.length === 2);
   A.send({ t: 'pos', x: 4, y: 4, dir: 'up', moving: false });
   await sleep(100);
-  const lobby = A.lastView();
+  i = A.mark(); A.send({ t: 'config', patch: { grace: 2 } }); // settings changed in the room
+  await A.waitFor((m) => m.t === 'view' && settingsOf(m)?.grace === 2, i);
+  const inRoom = A.lastRoom();
+  const roomSettings = JSON.stringify(A.lastSettings());
   check(!readFileSync(join(VAR, 'bloko.state.json'), 'utf8').includes('"pos"'), 'avatar positions are never persisted');
 
   await kill9(); await boot();
-  check((await roomCode()) === room, `lobby kill -9 → same room code (${room})`);
+  check((await roomCode()) === room, `kill -9 in the room → same room code (${room})`);
   A = await rejoin('A', idA); B = await rejoin('B', idB);
-  check(core(A.lastView()) === core(lobby) && A.lastView().phase === 'lobby' && A.lastView().hostId === idA,
-    'lobby kill -9 → same players, host and settings; stored ids rejoin');
+  check(JSON.stringify(A.lastRoom()) === JSON.stringify(inRoom) && A.lastView() === null && A.lastHost() === idA
+    && JSON.stringify(A.lastSettings()) === roomSettings && A.lastSettings().grace === 2,
+    'kill -9 in the room at the tableau → the room again: same players, host and settings (changed there); stored ids rejoin');
   check(!A.msgs.some((m) => m.t === 'pos'), 'positions are ephemeral: none replayed after a restart');
-  check(/RESUMED .* block game lobby/.test(log), 'server log says it resumed the lobby');
+  check(/RESUMED .* at hub\.false-start, room /.test(log), 'server log says it resumed the room at the tableau');
 
   // ---------- playing (marathon) ----------
   i = A.mark(); A.send({ t: 'start' });
-  await A.waitFor((m) => m.t === 'view' && m.state.phase === 'playing', i);
+  await A.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
+  await B.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing');
   i = B.mark(); const iA = A.mark(); A.send({ t: 'place', ...legalMoves(A.lastView(), idA)[0] });
   await B.waitFor((m) => m.t === 'view', i);
   await A.waitFor((m) => m.t === 'view', iA); // the snapshot is read from A: wait for A's copy too
@@ -99,29 +104,34 @@ try {
   // ---------- finished ----------
   await playToDone(A, idA, B, rnd);
   await playToDone(B, idB, A, rnd);
-  await A.waitFor((m) => m.t === 'view' && m.state.phase === 'finished');
+  await A.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished');
+  i = A.mark(); A.send({ t: 'config', patch: { cleanBoardBonus: 450 } }); // the next game's settings, set on the podium
+  await A.waitFor((m) => m.t === 'view' && settingsOf(m)?.cleanBoardBonus === 450, i);
   const podium = A.lastView();
+  const podiumSettings = JSON.stringify(A.lastSettings());
 
   await kill9(); await boot();
   A = await rejoin('A', idA); B = await rejoin('B', idB);
   check(core(A.lastView()) === core(podium) && A.lastView().phase === 'finished', 'finished kill -9 → same podium');
+  check(JSON.stringify(A.lastSettings()) === podiumSettings && A.lastSettings().grace === 2 && A.lastSettings().cleanBoardBonus === 450,
+    'finished kill -9 → the settings changed in the room and on the podium are kept');
   i = B.mark(); B.send({ t: 'newGame' });
   check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-host', 'after resume: non-host newGame → err not-host');
   i = A.mark(); A.send({ t: 'newGame' });
-  const back = (await A.waitFor((m) => m.t === 'view' && m.state.phase === 'lobby', i)).state;
-  check(back.order.join() === `${idA},${idB}` && back.hostId === idA && (await roomCode()) === room, 'after resume: host newGame → lobby, same players + room');
+  const back = roomOf(await A.waitFor((m) => m.t === 'view' && !!roomOf(m), i));
+  check(back.order.join() === `${idA},${idB}` && A.lastHost() === idA && (await roomCode()) === room, 'after resume: host newGame → the room, same players + room code');
 
-  // newGame lobby survives a kill too (the case of the first playtest)
+  // the room after newGame survives a kill too (the case of the first playtest)
   await kill9(); await boot();
   A = await rejoin('A', idA); B = await rejoin('B', idB);
-  check(core(A.lastView()) === core(back), 'newGame lobby kill -9 → same lobby');
+  check(JSON.stringify(A.lastRoom()) === JSON.stringify(back), 'kill -9 in the room after newGame → the same room');
 
   // ---------- playing (timed): the clock keeps its REMAINING time ----------
   A.send({ t: 'config', patch: { mode: 'timed', timedSeconds: 60 } });
-  await A.waitFor((m) => m.t === 'view' && m.state.settings.mode === 'timed');
+  await A.waitFor((m) => m.t === 'view' && settingsOf(m)?.mode === 'timed');
   i = A.mark(); A.send({ t: 'start' });
-  const tv = await A.waitFor((m) => m.t === 'view' && m.state.phase === 'playing', i);
-  const deadline0 = tv.state.deadline as number;
+  const tv = await A.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
+  const deadline0 = blocksOf(tv).deadline as number;
   await sleep(2200); // > 1 heartbeat: savedAt is fresh even though nobody moved
   const killedAt = Date.now();
   const left = deadline0 - killedAt;
@@ -132,13 +142,13 @@ try {
   await boot();
   A = await rejoin('A', idA);
   const rv = [...A.msgs].reverse().find((m) => m.t === 'view');
-  const leftAfter = rv.state.deadline - rv.now;
-  const shift = rv.state.deadline - deadline0;
-  check(rv.state.phase === 'playing' && core(rv.state) === core(timedBefore), 'timed kill -9 → same game, still playing');
+  const leftAfter = blocksOf(rv).deadline - rv.now;
+  const shift = blocksOf(rv).deadline - deadline0;
+  check(blocksOf(rv).phase === 'playing' && core(blocksOf(rv)) === core(timedBefore), 'timed kill -9 → same game, still playing');
   check(shift >= DOWN && shift <= DOWN + 1500, `timed deadline shifted by the downtime (${shift} ms for ≥ ${DOWN} ms down)`);
   check(Math.abs(leftAfter - left) <= 1500, `remaining time kept (${Math.round(left / 100) / 10} s before → ${Math.round(leftAfter / 100) / 10} s after)`);
   check(/timed clock paused \d+ s while down/.test(log), 'server log reports the paused clock');
-  i = A.mark(); A.send({ t: 'place', ...legalMoves(rv.state, idA)[0] });
+  i = A.mark(); A.send({ t: 'place', ...legalMoves(blocksOf(rv), idA)[0] });
   check((await A.waitFor((m) => m.t === 'view' || m.t === 'err', i)).t === 'view', 'resumed timed game accepts moves (not expired)');
 
   // ---------- suspended process (laptop lid closed): SIGSTOP → SIGCONT, no restart ----------
@@ -148,11 +158,11 @@ try {
   server!.kill('SIGSTOP');
   await sleep(DOWN);
   server!.kill('SIGCONT');
-  const sv = (await A.waitFor((m) => m.t === 'view' && m.state.deadline !== beforeStop.deadline, i, 4000));
-  const leftCont = sv.state.deadline - sv.now;
-  check(sv.state.phase === 'playing' && Math.abs(leftCont - leftStop) <= 1500,
+  const sv = (await A.waitFor((m) => m.t === 'view' && blocksOf(m)?.deadline !== beforeStop.deadline, i, 4000));
+  const leftCont = blocksOf(sv).deadline - sv.now;
+  check(blocksOf(sv).phase === 'playing' && Math.abs(leftCont - leftStop) <= 1500,
     `suspended ${DOWN / 1000} s → clock paused, still playing (${Math.round(leftStop / 100) / 10} s → ${Math.round(leftCont / 100) / 10} s left)`);
-  check(!A.since(i).some((m) => m.t === 'view' && m.state.phase === 'finished'), 'the overdue bell did not end the game on wake');
+  check(!A.since(i).some((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished'), 'the overdue bell did not end the game on wake');
 
   // ---------- older envelopes: ISO savedAt, or none at all ----------
   const FILE = join(VAR, 'bloko.state.json');
@@ -185,16 +195,17 @@ try {
   server!.kill('SIGCONT');
   await sleep(800);
   const woke = A.lastView();
-  check(woke.phase === 'playing' && woke.deadline > dueSoon && !A.since(i).some((m) => m.t === 'view' && m.state.phase === 'finished'),
+  check(woke.phase === 'playing' && woke.deadline > dueSoon && !A.since(i).some((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished'),
     `overdue bell on wake → ignored, clock paused (${Math.round((woke.deadline - Date.now()) / 100) / 10} s left)`);
-  const ended = await A.waitFor((m) => m.t === 'view' && m.state.phase === 'finished', i, 6000);
-  check(ended.state.endReason === 'time', `…and the bell still rings at the shifted deadline (endReason ${ended.state.endReason})`);
+  const ended = await A.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i, 6000);
+  check(blocksOf(ended).endReason === 'time', `…and the bell still rings at the shifted deadline (endReason ${blocksOf(ended).endReason})`);
 
   // ---------- a pre-campaign (v1) save: migrated into the campaign, never lost ----------
   await kill9();
   const v2 = JSON.parse(readFileSync(FILE, 'utf8'));
   check(v2.v === 2 && !!v2.campaign && typeof v2.savedAt === 'number', 'the save is an envelope v2 { v:2, campaign, room, savedAt }');
-  const legacy = { v: 1, savedAt: Date.now(), state: v2.campaign.at.activity, room: v2.room, bestPrevious: null };
+  // a v1 save is a bare block State, which kept its settings and its host
+  const legacy = { v: 1, savedAt: Date.now(), state: { ...v2.campaign.at.activity, settings: v2.campaign.at.settings, hostId: v2.campaign.party.hostId }, room: v2.room, bestPrevious: null };
   writeFileSync(FILE, JSON.stringify(legacy));
   await boot();
   check(/MIGRATED a v1 save/.test(log), 'v1 save → migrated (server log says so)');

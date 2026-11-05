@@ -1,6 +1,6 @@
 // Campaign content for the clients (titles, doors, conditions), fetched once from the server and
 // refreshed when a view's `contentVersion` changes (a server restarted with edited content).
-// Without the route (the mock server) the bundled SAMPLE_CONTENT stands in, so clients still render.
+// Until it loads, or when the request fails, the bundled SAMPLE_CONTENT stands in, so clients still render.
 //   const content = createContentSource();
 //   on every view: content.sync(msg.contentVersion);   …   content.get() → Content
 import { SAMPLE_CONTENT } from '../../shared/campaign/index.js';
@@ -38,7 +38,7 @@ export function createContentSource({ fetch = globalThis.fetch.bind(globalThis),
       version = v;
       if (changed) onChange?.(content);
     } catch {
-      // no route (mock) or offline: keep what we have
+      // request failed or offline: keep what we have
     }
   }
 

@@ -114,139 +114,6 @@ body.offline #offline-banner { display: flex; }
 
 .lobby .settings-line { font-size: calc(30 * var(--u)); }
 
-/* ---- game: layout 1 / 2 / 2×2 / 3+2 (one panel per player, see shared/characters.js) ---- */
-.arena {
-  flex: 1;
-  min-height: 0;
-  display: grid;
-  gap: calc(24 * var(--u));
-  padding: calc(24 * var(--u));
-}
-.arena[data-players="1"] { grid-template-columns: 1fr; }
-.arena[data-players="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.arena[data-players="3"],
-.arena[data-players="4"] {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.arena[data-players="3"] .panel:nth-child(3) {
-  grid-column: 1 / -1;
-  justify-self: center;
-  width: calc(50% - calc(12 * var(--u)));
-}
-/* five: three across the top, the last two centred under them. Six columns so a half-column offset
-   exists; every panel spans two, so all five are the same size. The boards do not shrink — at two
-   rows the limit is the row height, not the column width. */
-.arena[data-players="5"] {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.arena[data-players="5"] .panel { grid-column: span 2; }
-.arena[data-players="5"] .panel:nth-child(4) { grid-column: 2 / span 2; }
-.arena[data-players="5"] .panel:nth-child(5) { grid-column: 4 / span 2; }
-.arena[data-players="1"] .panel {
-  justify-self: center;
-  width: min(100%, calc(1280 * var(--u)));
-}
-
-/* sizes by density */
-.arena[data-players="1"] { --head: calc(48 * var(--u)); --score: calc(60 * var(--u)); --pcell: calc(22 * var(--u)); --slot: calc(140 * var(--u)); }
-.arena[data-players="2"] { --head: calc(42 * var(--u)); --score: calc(52 * var(--u)); --pcell: calc(15 * var(--u)); --slot: calc(96 * var(--u)); }
-.arena[data-players="3"],
-.arena[data-players="4"] { --head: calc(34 * var(--u)); --score: calc(44 * var(--u)); --pcell: calc(14 * var(--u)); --slot: calc(88 * var(--u)); }
-/* five: same two rows, so the same board size — only the hand column narrows to pay for the third column */
-.arena[data-players="5"] { --head: calc(32 * var(--u)); --score: calc(42 * var(--u)); --pcell: calc(12 * var(--u)); --slot: calc(76 * var(--u)); }
-
-.panel {
-  min-height: 0; min-width: 0;
-  display: flex; flex-direction: column;
-  background: var(--bg-2);
-  border: 3px solid var(--pc);
-  border-radius: calc(18 * var(--u));
-  padding: calc(14 * var(--u)) calc(20 * var(--u)) calc(12 * var(--u));
-}
-.panel.is-done { opacity: 0.8; }
-.panel.is-done .board { filter: grayscale(0.65) brightness(0.8); }
-
-.panel-head {
-  display: flex; align-items: center; gap: calc(14 * var(--u));
-  font-size: var(--head);
-}
-.name { font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.crown { font-size: calc(var(--head) * 0.9); }
-.score {
-  margin-left: auto;
-  font-size: var(--score);
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  color: var(--accent);
-}
-
-/* body: board + side (hand, streak). Side goes right of the board except at 2 players (tall panels). */
-.panel-body {
-  flex: 1;
-  min-height: 0;
-  display: flex; flex-direction: row; gap: calc(20 * var(--u));
-}
-.arena[data-players="2"] .panel-body { flex-direction: column; gap: 0; }
-
-.board-wrap {
-  flex: 1;
-  min-height: 0; min-width: 0;
-  display: flex; align-items: center; justify-content: center;
-  padding: calc(10 * var(--u)) 0;
-  container-type: size;
-}
-.board {
-  position: relative;
-  width: min(100cqw, 100cqh);
-  height: min(100cqw, 100cqh);
-  display: grid;
-  grid-auto-rows: 1fr;
-  gap: 4px;
-}
-.cell { background: var(--cell); border-radius: 4px; }
-.cell.filled { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.12); }
-
-.done-overlay {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(8, 10, 13, 0.72);
-  border-radius: calc(10 * var(--u));
-  font-size: calc(var(--head) * 1.4);
-  font-weight: 900;
-  letter-spacing: 0.04em;
-}
-
-.panel-side {
-  display: flex; flex-direction: column; justify-content: center; align-items: center;
-  gap: calc(18 * var(--u));
-}
-.arena[data-players="2"] .panel-side { flex-direction: row; justify-content: flex-start; margin-top: calc(6 * var(--u)); }
-.hand { display: flex; flex-direction: column; gap: calc(12 * var(--u)); }
-.arena[data-players="2"] .hand { flex-direction: row; }
-.hand-slot {
-  width: var(--slot); height: var(--slot);
-  background: var(--bg);
-  border-radius: calc(10 * var(--u));
-  display: flex; align-items: center; justify-content: center;
-}
-.hand-slot.is-placed { opacity: 0.22; }
-.piece { display: grid; gap: 2px; }
-.piece-cell { border-radius: 2px; }
-
-.streak {
-  font-size: calc(var(--head) * 0.9);
-  font-weight: 800;
-  color: #ff9f43;
-  animation: flame 0.9s ease-in-out infinite;
-}
-.arena[data-players="2"] .streak { margin-left: auto; }
-@keyframes flame {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
-
 /* ---- podium ---- */
 .podium {
   flex: 1;
@@ -297,20 +164,6 @@ body.offline #offline-banner { display: flex; }
 @keyframes pop-in {
   0% { transform: scale(0.6); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
-}
-
-/* danger: frame pulses when the player has very few legal placements left */
-.panel.is-danger { animation: danger 0.9s ease-in-out infinite; }
-@keyframes danger {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0); border-color: var(--pc); }
-  50% { box-shadow: 0 0 calc(36 * var(--u)) calc(6 * var(--u)) rgba(229, 57, 53, 0.55); border-color: var(--bad); }
-}
-
-/* player just got stuck: overlay slams in */
-.panel.just-done .done-overlay { animation: done-in 0.6s cubic-bezier(0.2, 1.4, 0.4, 1); }
-@keyframes done-in {
-  0% { opacity: 0; transform: scale(1.4); }
-  100% { opacity: 1; transform: scale(1); }
 }
 
 /* screen shake on 2+ lines (class toggled on #app) */
@@ -444,11 +297,11 @@ body.offline #offline-banner { display: flex; }
 #sound-hint[data-state="on"] { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  #app.fx-shake, #app.fx-shake-big, .panel.is-danger { animation: none; }
+  #app.fx-shake, #app.fx-shake-big { animation: none; }
 }
 
 /* ======================================================================
-   Q4 timed mode — countdown band, "Time's up!", lobby settings line
+   Q4 timed mode — "Time's up!", lobby settings line
    ====================================================================== */
 
 .settings-line {
@@ -459,35 +312,6 @@ body.offline #offline-banner { display: flex; }
   padding: calc(8 * var(--u)) calc(26 * var(--u));
   border-radius: calc(999 * var(--u));
   background: var(--bg-2);
-}
-
-/* a band above the boards keeps the countdown clear of panel headers */
-body.has-countdown .arena { padding-top: calc(118 * var(--u)); }
-#countdown {
-  position: fixed;
-  top: calc(18 * var(--u)); left: 50%;
-  transform: translateX(-50%);
-  z-index: 4;
-  padding: calc(4 * var(--u)) calc(34 * var(--u));
-  border-radius: calc(999 * var(--u));
-  background: var(--bg-2);
-  border: 3px solid var(--accent);
-  font-size: calc(68 * var(--u));
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.15;
-  color: var(--accent);
-}
-#countdown[hidden] { display: none; }
-#countdown.is-urgent {
-  color: #fff;
-  background: var(--bad);
-  border-color: #fff;
-  animation: urgent 1s ease-in-out infinite;
-}
-@keyframes urgent {
-  0%, 100% { transform: translateX(-50%) scale(1); }
-  50% { transform: translateX(-50%) scale(1.12); }
 }
 
 .fx-times-up {
@@ -515,6 +339,5 @@ body.has-countdown .arena { padding-top: calc(118 * var(--u)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #countdown.is-urgent { animation: none; }
   .fx-times-up-text { animation: none; }
 }

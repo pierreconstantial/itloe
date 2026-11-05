@@ -7,7 +7,10 @@
 //   World 1 also has a quiz, opening once its block game is done
 //   both worlds done → 'adult' unlocks
 
+import { minigame } from '../minigames.js';
+
 /** @typedef {import('./types.js').Content} Content */
+/** @typedef {import('./types.js').Activity} Activity */
 
 /** @type {Content} */
 export const SAMPLE_CONTENT = {
@@ -84,3 +87,30 @@ export const SAMPLE_CONTENT = {
     },
   },
 };
+
+/**
+ * The development start's content (ITLOE_CONTENT=minigame:<kind>): a hub and one start tableau running
+ * that minigame with its sample settings, so a minigame can be tested without playing the opening. No
+ * `storyId`: the opening keys on it. A kind not in the rules list → null.
+ * @param {string} kind
+ * @returns {Content | null}
+ */
+export function minigameContent(kind) {
+  const rules = minigame(kind);
+  if (!rules) return null;
+  const start = `hub.${kind}`;
+  return {
+    start,
+    chooser: 'elodie',
+    items: {},
+    nodes: {
+      hub: { id: 'hub', kind: 'hub', parent: null, title: 'Hub', unlock: { always: true } },
+      [start]: {
+        id: start, kind: 'tableau', parent: 'hub', title: `Development start: ${kind}`,
+        activity: /** @type {Activity} */ ({ kind, settings: rules.sampleSettings }), replayable: true,
+        unlock: { always: true },
+        door: { x: 7, y: 4.7, w: 2, h: 1.2 },
+      },
+    },
+  };
+}

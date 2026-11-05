@@ -8,14 +8,15 @@
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3182 CDP=9222 [LOCK_MS=300000] node scripts/e2e-phone.mts    (never PORT 3131: the live server)
 // LOCK_MS is how long the "phone locked" case freezes the page (default 5 min, as in the acceptance list).
-// ONLY=3 … 7 runs just that part (campaign screens / quiz / refused room code / inventory / show the join QR);
+// ONLY=1 … 8 runs just that part (continuity / host controls / campaign / quiz / room code / inventory / QR /
+// a stand-in minigame's phone screen walking its game area); an unknown part is refused.
 // a full run is the acceptance.
-// SHOTS=<dir> saves screenshots of the campaign screens.
+// SHOTS=<dir> saves screenshots of the block, quiz and campaign screens, each with its visible text (<name>.txt).
 import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, Client, finish, HTTP, sleep, SLOW } from './e2e-lib.mts';
+import { check, Client, finish, HTTP, onlyPart, sleep, SLOW, SOCKET_PROBE, TEARDOWN_PROBE } from './e2e-lib.mts';
 import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
 import { FEET, PARTY_ROOM } from '../shared/scene.js';
 
@@ -23,7 +24,8 @@ const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const CDP = process.env.CDP ?? '9222';
 const LOCK_MS = Number(process.env.LOCK_MS ?? 5 * 60_000);
-const SHOTS = process.env.SHOTS; // a folder: screenshots of the campaign screens land there
+const SHOTS = process.env.SHOTS; // a folder: screenshots of the screens land there
+const ONLY = onlyPart(['1', '2', '3', '4', '5', '6', '7', '8']); // e.g. ONLY=3: just the campaign part (quick iteration)
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-phone-'));
 // the quiz part plays a FIXED bank (a copy of the placeholder file), whatever the real bank holds
 const FIXED_BANK = join(VAR, 'fixed-bank');
@@ -41,7 +43,7 @@ let room = '';
 async function boot(fresh = false): Promise<void> {
   log = '';
   server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK },
+    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK, ITLOE_CONTENT: 'sample' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   server.stdout!.on('data', (d) => { log += d; });
@@ -107,7 +109,8 @@ const PROBE = `(() => {
 type Snap = { view: string | null, banner: boolean, toast: string | null, id: string | null, sawPick: boolean, persisted: string | null };
 const contexts: string[] = [];
 
-async function phone(label: string) {
+/** @param probes more test-only scripts the page runs before its own (e.g. SOCKET_PROBE) */
+async function phone(label: string, probes: string[] = []) {
   const { browserContextId } = await cmd('Target.createBrowserContext');
   contexts.push(browserContextId);
   const { targetId } = await cmd('Target.createTarget', { url: 'about:blank', browserContextId });
@@ -118,6 +121,8 @@ async function phone(label: string) {
   await cmd('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 }, s);
   await cmd('Emulation.setFocusEmulationEnabled', { enabled: true }, s); // background tabs stay "focused"
   await cmd('Page.addScriptToEvaluateOnNewDocument', { source: PROBE }, s);
+  await cmd('Page.addScriptToEvaluateOnNewDocument', { source: TEARDOWN_PROBE }, s);
+  for (const source of probes) await cmd('Page.addScriptToEvaluateOnNewDocument', { source }, s);
   events.push((m) => {
     if (m.sessionId !== s || m.method !== 'Runtime.exceptionThrown') return;
     const text = m.params.exceptionDetails.exception?.description ?? m.params.exceptionDetails.text;
@@ -132,7 +137,8 @@ async function phone(label: string) {
   const snap = (): Promise<Snap | null> => ev(`(() => {
     const t = document.getElementById('toast');
     return {
-      view: [...document.querySelectorAll('main > section')].find((e) => !e.hidden)?.id ?? null,
+      // the innermost screen showing: the frame's, or a minigame's screen inside the frame's root
+      view: [...document.querySelectorAll('main section[id^="view-"]')].filter((e) => !e.closest('[hidden]')).pop()?.id ?? null,
       banner: !document.getElementById('conn-banner').hidden,
       toast: t && !t.hidden ? t.textContent : null,
       id: localStorage.getItem('bloko-id'),
@@ -172,16 +178,21 @@ async function phone(label: string) {
     }
     await sleep(150);
   };
-  /** Drag the first tray piece onto the lower middle of the board (mouse: pointer events). */
+  /** Drag the first tray piece onto the lower middle of the board (mouse: pointer events), then wait
+   *  for the server's view: the board paints the placement at once, the score only from the view. */
   const placeOne = async () => {
     await cmd('Page.bringToFront', {}, s);
+    const score = () => ev(`document.getElementById('my-score').textContent`);
+    const before = await score();
     const r = await ev(`(() => { const s = document.getElementById('slot-0').getBoundingClientRect(); const b = document.getElementById('board').getBoundingClientRect(); return { sx: s.x + s.width / 2, sy: s.y + s.height / 2, bx: b.x + b.width / 2, by: b.y + b.height * 0.75 }; })()`);
     await cmd('Input.dispatchMouseEvent', { type: 'mousePressed', x: r.sx, y: r.sy, button: 'left', clickCount: 1 }, s);
     for (let i = 1; i <= 8; i++) {
       await cmd('Input.dispatchMouseEvent', { type: 'mouseMoved', x: r.sx + (r.bx - r.sx) * i / 8, y: r.sy + (r.by - r.sy) * i / 8, button: 'left' }, s);
     }
     await cmd('Input.dispatchMouseEvent', { type: 'mouseReleased', x: r.bx, y: r.by, button: 'left', clickCount: 1 }, s);
-    await sleep(600);
+    // every placement scores, so a refused or lost one times out and the caller's check fails
+    const end = Date.now() + 5000 * SLOW;
+    while (Date.now() < end && (await score()) === before) await sleep(100);
   };
   const watch = (on: boolean) => ev(`sessionStorage.setItem('t-watch', '${on ? 1 : 0}'); sessionStorage.removeItem('t-sawPick')`);
   const navigate = (url: string) => cmd('Page.navigate', { url }, s);
@@ -251,6 +262,7 @@ async function phone(label: string) {
     await cmd('Page.bringToFront', {}, s);
     const { data } = await cmd('Page.captureScreenshot', { format: 'png' }, s);
     writeFileSync(join(SHOTS, `${name}.png`), Buffer.from(data, 'base64'));
+    writeFileSync(join(SHOTS, `${name}.txt`), await ev('document.body.innerText')); // the words on screen, for a text diff
   };
   return { label, ev, snap, waitFor, tap, placeOne, watch, navigate, history, lifecycle, board, card, continueButton, hostButtons, steer, push, text, visible, shot, type, vibes };
 }
@@ -278,11 +290,10 @@ async function joinAs(p: Phone, character: string): Promise<string | null> {
 const setMode = (p: Phone, mode: 'Timed' | 'Marathon') =>
   p.ev(`document.querySelectorAll('#settings-body .seg button').forEach((b) => { if (b.textContent === '${mode}') b.click(); })`);
 
-const ONLY = process.env.ONLY; // e.g. ONLY=3: just the campaign part (quick iteration)
 
 try {
   await boot(true);
-  if (!ONLY || ONLY === '1' || ONLY === '2') {
+  if (!ONLY || ONLY === '1') {
 
   // ================= part 1: the session is never lost =================
   console.log('\n— part 1: session continuity —');
@@ -306,17 +317,34 @@ try {
   const idA = a0?.id ?? null;
   const idB = await joinAs(B, 'sol');
   expect(idB !== null, 'B joins as Sol');
+  await A.shot('blocks-room-host');
+  await B.shot('blocks-room-guest');
 
   await A.ev('location.reload()');
   await resumes(A, 'lobby: reload → silent resume', 'view-lobby', idA);
 
-  // game 1: timed 2:00 (default 3:00, two steps down) so it ends on its own
+  // game 1: timed 1:00 (default 3:00, four steps down) so it ends on its own
+  // each step waits for the sheet to show the server's new value: a click on a stale stepper patches
+  // the value it was drawn with, and is lost
   await setMode(A, 'Timed');
-  await sleep(400);
-  for (let i = 0; i < 2; i++) { await A.ev(`document.querySelector('#settings-body [aria-label^="Less"]')?.click()`); await sleep(250); }
+  const less = `document.querySelector('#settings-body [aria-label="Less time limit"]')`;
+  const shown = () => A.ev(`${less} ? [${less}.parentElement.querySelector('output').textContent, ${less}.disabled] : null`);
+  for (let i = 0, at = await shown(); i < 20 && !at?.[1]; i++) {
+    if (at) await A.ev(`${less}.click()`);
+    const before = at?.[0];
+    for (const end = Date.now() + 3000 * SLOW; Date.now() < end; await sleep(50)) { at = await shown(); if (at && at[0] !== before) break; }
+  }
+  const timed = await shown();
+  expect(timed?.[1] === true && timed[0] === '1:00', 'lobby: game 1 set to timed 1:00', `shown=${JSON.stringify(timed)}`);
+  if (SHOTS) {
+    await A.tap('#btn-settings-lobby');
+    await A.shot('blocks-settings');
+    await A.ev(`document.querySelector('#sheet-settings [data-close]').click()`);
+  }
   await A.tap('#btn-start');
-  await resumes(A, 'host starts game 1 (timed 2:00)', 'view-game', idA);
+  await resumes(A, 'host starts game 1 (timed 1:00)', 'view-game', idA);
   await resumes(B, 'guest follows into game 1', 'view-game', idB);
+  await A.shot('blocks-game-timed');
 
   await A.ev('location.reload()');
   await resumes(A, 'game: reload → silent resume', 'view-game', idA);
@@ -332,12 +360,14 @@ try {
   await sleep(800);
   await A.history(-1);
   await resumes(A, 'game: left the page, back → resume', 'view-game', idA);
+  const firstPersisted = (await A.snap())?.persisted;
   await A.history(+1);
   await sleep(800);
   await A.history(-1);
   await resumes(A, 'game: forward then back again → resume', 'view-game', idA);
   const persisted = (await A.snap())?.persisted;
-  expect(persisted === 'true', 'bfcache: the page was restored from the back/forward cache', `pageshow.persisted=${persisted}`);
+  expect(firstPersisted === 'true' || persisted === 'true', 'bfcache: a history return restored the page from the back/forward cache',
+    `pageshow.persisted: first=${firstPersisted}, second=${persisted}`);
 
   await A.navigate(joinUrl());
   await resumes(A, 'game: re-scan join URL → silent resume, no picker', 'view-game', idA);
@@ -388,12 +418,14 @@ try {
   expect((await B.snap())?.view === 'view-game' && (await C.snap())?.view !== 'view-game', 'C reloads: does not bump B');
 
   // ---- podium ----
-  const pa = await A.waitFor((x) => x.view === 'view-podium', 130_000);
+  const pa = await A.waitFor((x) => x.view === 'view-podium', 70_000);
   const pb = await B.waitFor((x) => x.view === 'view-podium', 5000);
   const hostSees = await A.ev(`[!document.getElementById('podium-actions').hidden, !document.getElementById('btn-again').hidden, !document.getElementById('btn-new-game').hidden]`);
   const guestSees = await B.ev(`[!document.getElementById('podium-actions').hidden, !document.getElementById('podium-hint').hidden]`);
   expect(pa?.view === 'view-podium' && hostSees.every(Boolean), 'podium: host has Play again + Back to the room');
   expect(pb?.view === 'view-podium' && guestSees[0] === false && guestSees[1] === true, 'podium: guest has no buttons, a waiting hint');
+  await A.shot('blocks-podium-time-host');
+  await B.shot('blocks-podium-time-guest');
   await B.ev('location.reload()');
   await resumes(B, 'podium: guest reload → podium again', 'view-podium', idB);
   await B.navigate(joinUrl());
@@ -402,8 +434,12 @@ try {
   await A.tap('#btn-again');
   const rematch = await B.waitFor((x) => x.view === 'view-game' && !!x.toast, 5000);
   expect(rematch?.view === 'view-game' && /rematch/i.test(rematch.toast ?? ''), 'Play again: guest follows with a "Rematch" toast', `toast="${rematch?.toast}"`);
-  await A.waitFor((x) => x.view === 'view-podium', 130_000);
+  await A.tap('#btn-menu');
+  await A.tap('#btn-end-game');
+  await A.tap('#btn-end-game');
+  await A.waitFor((x) => x.view === 'view-podium', 5000);
   await B.waitFor((x) => x.view === 'view-podium', 5000);
+  await A.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
 
   await A.tap('#btn-new-game');
   const room1 = await B.waitFor((x) => x.view === 'view-lobby' && !!x.toast, 5000);
@@ -411,6 +447,7 @@ try {
   expect(hostRoom?.view === 'view-lobby' && hostRoom.id === idA, 'Back to the room: host in the lobby, same id');
   expect(room1?.view === 'view-lobby' && /back to the room/i.test(room1.toast ?? '') && room1.id === idB, 'Back to the room: guest follows with a toast, same id', `toast="${room1?.toast}"`);
   expect(!(await A.snap())?.sawPick && !(await B.snap())?.sawPick, 'Back to the room: picker never shown');
+  await B.shot('blocks-room-back');
 
   // ---- dead links ----
   freeze(true); // idle lobby, Wi-Fi silently gone: only the liveness watchdog can notice
@@ -434,19 +471,33 @@ try {
   await resumes(A, 'mid-game silent dead link: heals by itself, same game', 'view-game', idA, 15_000);
 
   console.log(`  (locking A for ${LOCK_MS / 1000} s: frozen page, the server restarts meanwhile so its socket is dead)`);
+  // a page timer and a count of opened sockets: did the page really freeze, and did the unlock reconnect?
+  await A.ev(`window.__ticks = 0; setInterval(() => window.__ticks++, 100); window.__opens = 0;
+    window.WebSocket = class extends WebSocket { constructor(...a) { super(...a); this.addEventListener('open', () => window.__opens++); } }`);
   await A.lifecycle('frozen');
+  const ticksAt = (): Promise<number> => Promise.race([A.ev('window.__ticks'), sleep(1000).then(() => -1)]); // -1: no answer, frozen
+  const ticks0 = await ticksAt();
   const restartAt = Math.min(5000, LOCK_MS / 2);
   await sleep(restartAt);
+  const froze = ticks0 === -1 || [ticks0, -1].includes(await ticksAt());
   await kill9();
   await boot();
-  await sleep(Math.max(0, LOCK_MS - restartAt));
+  if (froze) await sleep(Math.max(0, LOCK_MS - restartAt)); // a page that never froze has nothing to wait out: the check below is skipped
   await A.lifecycle('active');
-  await resumes(A, `phone locked ${(LOCK_MS / 60_000).toFixed(1)} min mid-game → unlock resumes`, 'view-game', idA, 10_000);
+  const lockLabel = `phone locked ${(LOCK_MS / 60_000).toFixed(1)} min mid-game → unlock resumes`;
+  if (!froze) {
+    console.log(`SKIP  ${lockLabel}  — Chrome did not freeze the page (its timers kept running), so the unlock path is not exercised`);
+    await A.waitFor((x) => x.view === 'view-game' && !x.banner, 10_000);
+  } else {
+    let opens = 0;
+    for (const end = Date.now() + 10_000 * SLOW; !opens && Date.now() < end; await sleep(100)) opens = await A.ev('window.__opens');
+    expect(opens > 0, `${lockLabel}: a fresh socket after the unlock`, `${opens} opened`);
+    await resumes(A, lockLabel, 'view-game', idA, 10_000);
+  }
 
   await kill9();
   const down = await A.waitFor((x) => x.banner, 5000);
   expect(down?.banner === true && down.view === 'view-game', 'server down: banner, never dumped to a menu', `view=${down?.view}`);
-  await sleep(2000);
   await boot();
   await resumes(A, 'server back: phone A in the same game', 'view-game', idA, 10_000);
   await resumes(B, 'server back: phone B in the same game', 'view-game', idB, 10_000);
@@ -464,12 +515,31 @@ try {
   await A.tap('#btn-continue');
   expect((await A.waitFor((x) => x.view === 'view-lobby'))?.view === 'view-lobby', '"Continue as Élodie" joins in one tap');
 
+  } // part 1
+
+  if (!ONLY || ONLY === '2') {
   // ================= part 2: host controls during a game =================
   console.log('\n— part 2: host controls —');
   await kill9();
   await boot(true);
   const H = await phone('H'), G = await phone('G'), R = await phone('R');
   await joinAs(H, 'elodie');
+  // a solo game on a fresh server, ended by the host after one placement: a first record, "New best!"
+  await setMode(H, 'Marathon');
+  await sleep(400);
+  await H.tap('#btn-start');
+  await H.waitFor((x) => x.view === 'view-game');
+  await H.placeOne();
+  await H.tap('#btn-menu');
+  await H.tap('#btn-end-game');
+  await H.tap('#btn-end-game');
+  await H.waitFor((x) => x.view === 'view-podium', 5000);
+  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+  const solo: string = await H.text('podium-title');
+  expect(/New best/.test(solo), 'solo game ended after one placement: the podium says "New best!"', solo);
+  await H.shot('blocks-podium-solo-best');
+  await H.tap('#btn-new-game');
+  await H.waitFor((x) => x.view === 'view-lobby', 5000);
   await joinAs(G, 'sol');
   await joinAs(R, 'anna');
   await setMode(H, 'Marathon');
@@ -478,6 +548,15 @@ try {
   for (const p of [H, G, R]) await p.waitFor((x) => x.view === 'view-game');
   expect((await R.snap())?.view === 'view-game', '3 players in a marathon game');
   expect((await G.hostButtons()).length === 0, 'guest menu has no host controls');
+  await H.shot('blocks-game');
+  const W = await phone('W');
+  await W.navigate(joinUrl());
+  expect((await W.waitFor((x) => x.view === 'view-pick'))?.view === 'view-pick', 'a new phone during a round can pick a free character');
+  await W.tap('.pick-card[data-id="pierre"]');
+  const watcher = await W.waitFor((x) => x.view === 'view-waiting' && x.id !== null);
+  expect(watcher?.view === 'view-waiting' && !!watcher.id && /next one/.test(await W.text('waiting-text')),
+    'the newcomer joins the evening and waits for the next round');
+  await W.shot('blocks-waiting-newcomer');
 
   await R.navigate('about:blank'); // Anna's phone dies
   await sleep(1500);
@@ -488,6 +567,7 @@ try {
   let hb = await H.hostButtons();
   expect(!(await H.ev(`document.getElementById('sheet-menu').hidden`)) && /Take Anna out \(offline\)/.test(hb[1]) && /End game/.test(hb[hb.length - 1]),
     'menu: offline Anna listed first, End game last', JSON.stringify(hb));
+  await H.shot('blocks-host-menu');
   await H.tap('[data-retire]');
   hb = await H.hostButtons();
   chip = await annaChip();
@@ -502,6 +582,7 @@ try {
   const over = await R.waitFor((x) => x.view === 'view-over', 8000);
   const overTitle: string = await R.ev(`document.getElementById('over-title').textContent`);
   expect(over?.view === 'view-over' && /took you out.*score counts/.test(overTitle), 'retired phone: calm "taken out" screen, no board', overTitle);
+  await R.shot('blocks-over-retired');
 
   await H.tap('#btn-menu');
   await H.tap('#btn-end-game');
@@ -514,8 +595,18 @@ try {
   expect((await H.hostButtons()).length === 0, 'podium: no in-game host controls left');
   const ranks: string[] = await H.ev(`[...document.querySelectorAll('#podium-list li')].map((e) => e.textContent)`);
   expect(ranks.length === 3 && ranks.some((t) => t.includes('Anna')), 'podium ranks all 3, Anna included', JSON.stringify(ranks));
+  await H.shot('blocks-podium-ended-host');
+  await G.shot('blocks-podium-ended-guest');
 
-  } // parts 1–2
+  expect((await W.snap())?.view === 'view-waiting', 'the newcomer waits through the podium');
+  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+  await H.tap('#btn-again');
+  const rematch = await W.waitFor((x) => x.view === 'view-game', 5000);
+  expect(rematch?.view === 'view-game' && rematch.id === watcher?.id, 'Play again seats the newcomer with the same identity');
+  await W.placeOne();
+  expect(Number(await W.text('my-score')) > 0, 'the newcomer can place a piece in the rematch');
+
+  } // part 2
 
   if (!ONLY || ONLY === '3') {
   // ================= part 3: the campaign on the phone =================
@@ -652,7 +743,7 @@ try {
 
   if (!ONLY || ONLY === '4') {
   // ================= part 4: the quiz on the phone =================
-  console.log('\n— part 4: quiz (choices, typed answers, reveal, override, finished) —');
+  console.log('\n— part 4: quiz (choices, typed answers, reveal, override, finished, ended by the host) —');
   await kill9();
   await boot(true);
   const bank: { id: string, q: string, choices?: string[], answer: string | number, accept?: string[] }[] =
@@ -666,6 +757,40 @@ try {
   await joinAs(Q, 'elodie');
   const idQ = (await Q.snap())?.id;
   const quizNode = 'childhood.quiz';
+  const showing = async (p: Phone, view: string) => { for (let k = 0; k < 60; k++) { if ((await p.snap())?.view === view) return true; await sleep(100); } return false; };
+  /** What a minigame's phone screens left behind: timers, loops and window/document listeners its module
+   *  made, and its markup. Waits a little: a timer already firing may still end on its own. */
+  const leftOver = async (p: Phone, module: string, markup: string) => {
+    let left: string[] = [];
+    for (let k = 0; k < 30; k++) {
+      left = await p.ev(`[...window.__live([${JSON.stringify(module)}]), ...(document.querySelector(${JSON.stringify(markup)}) ? ['its markup'] : [])]`);
+      if (left.length === 0) break;
+      await sleep(100);
+    }
+    return left;
+  };
+  // ---- teardown: a block game → the map → the quiz leaves nothing of the block game running ----
+  await H.tap('#btn-start');
+  expect(await showing(H, 'view-game') && await showing(Q, 'view-game'), 'teardown: a block game runs on both phones');
+  // Élodie lifts a piece and is still holding it when the game ends
+  await Q.ev(`document.getElementById('slot-0').dispatchEvent(new PointerEvent('pointerdown', { pointerId: 7, clientX: 100, clientY: 700, bubbles: true }))`);
+  expect(await Q.ev(`!!document.getElementById('floating-piece') && window.__live(['blocks-ui.js']).some((l) => l.includes('pointermove'))`),
+    'teardown: mid-drag, the block screen listens on the window');
+  await H.tap('#btn-menu');
+  await H.tap('#btn-end-game');
+  await H.tap('#btn-end-game');
+  expect(await showing(H, 'view-podium') && await showing(Q, 'view-podium'), 'teardown: the host ends it → the podium');
+  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+  await H.tap('#btn-new-game');
+  await H.tap('#btn-menu');
+  await H.tap('#btn-gm');
+  await H.tap('#gm-back');
+  await H.ev(`document.querySelector('#sheet-gm [data-close]').click()`);
+  expect(await showing(H, 'view-place') && await showing(Q, 'view-place'), 'teardown: Back → the map on both phones');
+  const blockMarkup = '#view-game, #view-over, #floating-piece';
+  const leftH = await leftOver(H, 'blocks-ui.js', blockMarkup), leftQ = await leftOver(Q, 'blocks-ui.js', blockMarkup);
+  expect(leftH.length === 0 && leftQ.length === 0, 'teardown: on the map, nothing of the block screens is left (timers, listeners, markup)',
+    JSON.stringify({ H: leftH, Q: leftQ }));
   // the game master takes the party to the quiz (Go there: no unlock needed)
   await H.tap('#btn-menu');
   await H.tap('#btn-gm');
@@ -673,16 +798,32 @@ try {
   await H.tap('[data-gm="goto"]');
   await H.tap('[data-gm="goto"]');
   await H.ev(`document.querySelector('#sheet-gm [data-close]').click()`);
-  const inQuiz = async (p: Phone) => { for (let k = 0; k < 40; k++) { if ((await p.snap())?.view === 'view-quiz') return true; await sleep(100); } return false; };
-  expect(await inQuiz(H) && await inQuiz(Q), 'Go there → both phones on the quiz screen');
-  expect(await Q.visible('quiz-lobby') && /Waiting for the host/.test(await Q.text('quiz-lobby-hint')) && !(await Q.visible('quiz-start')),
-    'guest: "Quiz! Waiting for the host…", no Start', await Q.text('quiz-lobby-hint'));
-  expect(await H.visible('quiz-start') && await H.visible('btn-settings-quiz'), 'host: Start + ⚙ Settings');
-  await H.shot('quiz-lobby-host');
+  // the quiz's lobby is the room, like a block lobby: the walking screen
+  const inRoom = async (p: Phone) => { for (let k = 0; k < 40; k++) { if ((await p.snap())?.view === 'view-lobby') return true; await sleep(100); } return false; };
+  expect(await inRoom(H) && await inRoom(Q), 'Go there → both phones in the room (the walking screen)');
+  expect(/Waiting for the host/.test(await Q.text('lobby-hint')) && !(await Q.visible('btn-start')) && !(await Q.visible('btn-settings-lobby')),
+    'guest: "Waiting for the host to start…", no Start, no Settings', await Q.text('lobby-hint'));
+  expect(await H.visible('btn-start') && await H.visible('btn-settings-lobby'), 'host: Start + ⚙ Settings');
+  expect(await Q.visible('stick-pad') && await Q.visible('btn-interact') && await H.visible('stick-pad'), 'the joystick and the object button');
+  // Élodie walks to the birthday table (the TV socket sees her relayed pos) and blows the candles
+  const qtv = new Client('qtv'); await qtv.open(); qtv.send({ t: 'hello', role: 'screen' });
+  const qPos = () => { const m = [...qtv.msgs].reverse().find((x) => x.t === 'pos' && x.playerId === idQ); return m ? { x: m.x, y: m.y } : null; };
+  const TABLE = { x: 11.1, y: 7.5 }; // in front of the table
+  await Q.steer(TABLE, () => { const p = qPos(); return !!p && Math.hypot(p.x - TABLE.x, p.y - TABLE.y) < 0.35; }, qPos, 15_000);
+  const label = await Q.text('btn-interact');
+  expect(/Blow candles/.test(label) && !(await Q.ev(`document.getElementById('btn-interact').disabled`)), 'near the table: the object button offers it', label);
+  const mark = qtv.msgs.length;
+  await Q.tap('#btn-interact');
+  const blown = await qtv.waitFor((m) => m.t === 'interact' && m.playerId === idQ && m.object === 'table', mark, 3000).catch(() => null);
+  const qToast = await Q.waitFor((x) => !!x.toast, 3000);
+  expect(!!blown && /Make a wish/.test(qToast?.toast ?? ''), 'object action in the quiz room: relayed to the TV, feedback toast on the phone', qToast?.toast ?? '');
+  qtv.ws.close();
+  await H.shot('quiz-room-host');
+  await Q.shot('quiz-room-guest');
 
   /** Host settings through the real sheet (data-driven from QUIZ_SETTINGS_SCHEMA). */
   const setQuiz = async (count: number, mode: 'Choices' | 'Typed') => {
-    await H.tap('#btn-settings-quiz');
+    await H.tap('#btn-settings-lobby');
     const labels: string = await H.ev(`[...document.querySelectorAll('#settings-body .setting-label')].map((e) => e.textContent).join('|')`);
     for (let k = 0; k < 30; k++) {
       const now = Number(/\d+/.exec(await H.ev(`document.querySelector('#settings-body .stepper output').textContent`))?.[0]);
@@ -692,17 +833,24 @@ try {
     }
     await H.ev(`[...document.querySelectorAll('#settings-body .seg button')].find((b) => b.textContent === ${JSON.stringify(mode)})?.click()`);
     await sleep(300);
+    if (mode === 'Choices') await H.shot('quiz-settings');
     await H.ev(`document.querySelector('#sheet-settings [data-close]').click()`);
     return labels;
   };
   const labels = await setQuiz(3, 'Choices');
   expect(labels === 'Questions|Time per question|Answers', 'quiz settings sheet from the quiz schema', labels);
-  expect(/^3 questions .* multiple choice$/.test(await Q.text('quiz-summary')), 'guests see the settings summary', await Q.text('quiz-summary'));
+  expect(/^3 questions .* multiple choice$/.test(await Q.text('lobby-settings')), 'guests see the settings summary', await Q.text('lobby-settings'));
 
   const phaseIs = async (p: Phone, id: string) => { for (let k = 0; k < 60; k++) { if (await p.visible(id)) return true; await sleep(100); } return false; };
-  await H.tap('#quiz-start');
+  await H.tap('#btn-start');
   expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), 'Start → the first question on both phones');
   expect(/\d:\d\d/.test(await Q.text('quiz-clock')), 'countdown shown', await Q.text('quiz-clock'));
+  // the game master's Back follows the server: refused while the quiz runs, so shown disabled
+  await H.tap('#btn-menu');
+  await H.tap('#btn-gm');
+  const gmBack = await H.ev(`(() => { const b = document.getElementById('gm-back'); return { disabled: b.disabled, text: b.textContent }; })()`);
+  expect(gmBack.disabled && /end the game first/.test(gmBack.text), 'game master during a question: Back disabled ("end the game first")', JSON.stringify(gmBack));
+  await H.ev(`document.querySelector('#sheet-gm [data-close]').click()`);
 
   // ---- quiz 1: choices. H taps the right one, Élodie a wrong one; override on the first reveal ----
   for (let round = 0; round < 3; round++) {
@@ -738,47 +886,91 @@ try {
       expect(v.includes('[25]') && v.includes('[30,50,30]') && w.includes('[160]'), 'haptics: send, right, wrong', `${v.join(' ')} / ${w.join(' ')}`);
     }
     await H.tap('#quiz-next');
-    if (round < 2) expect(await phaseIs(Q, 'quiz-question'), `Next → question ${round + 2}`);
+    // the next round reads the host's question: wait until both phones show it, not the reveal
+    if (round < 2) expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), `Next → question ${round + 2}`);
   }
-  expect(await phaseIs(H, 'quiz-finished') && await phaseIs(Q, 'quiz-finished'), 'after the last question: finished on both phones');
-  const rank: string = await Q.text('quiz-ranking');
-  expect(/🥇 Pierre/.test(rank) && /Élodie/.test(rank), 'mini ranking', rank);
+  expect(await phaseIs(H, 'view-podium') && await phaseIs(Q, 'view-podium'), 'after the last question: finished on both phones');
+  const rank: string = await Q.text('podium-list');
+  expect(/🥇\s+Pierre — \d+ \(\d ✓\)/.test(rank) && /Élodie/.test(rank), 'the podium ranks the quiz, with each player\'s right answers', rank);
   await H.shot('quiz-finished-host');
-  expect(await H.visible('quiz-again') && await H.visible('quiz-back') && !(await Q.visible('quiz-again')), 'host: Play again / Back; guests wait');
+  expect(await H.visible('btn-again') && await H.visible('btn-new-game') && await H.visible('btn-settings-podium')
+    && !(await Q.visible('btn-again')) && !(await Q.visible('btn-new-game')) && await Q.visible('podium-hint'),
+    'the shared podium: the host has Play again / Back to the room and the settings; guests wait');
+  expect(await H.text('btn-new-game') === 'Back to the room', 'the host\'s second button says "Back to the room"', await H.text('btn-new-game'));
 
-  // ---- quiz 2 (Play again): typed answers, really typed ----
-  await H.tap('#quiz-again');
-  expect(await phaseIs(H, 'quiz-lobby'), 'Play again → the quiz lobby');
+  // ---- quiz 2 (Back to the room, new settings): typed answers, really typed ----
+  await H.tap('#btn-new-game');
+  expect(await phaseIs(H, 'view-lobby') && await phaseIs(Q, 'view-lobby'), 'Back to the room → both phones in the room at the tableau');
   await setQuiz(3, 'Typed');
-  await H.tap('#quiz-start');
-  expect(await phaseIs(Q, 'quiz-question') && await Q.visible('quiz-text-form') && !(await Q.visible('quiz-choices')), 'typed round: a text field, no choices');
+  await H.tap('#btn-start');
+  expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question') && await Q.visible('quiz-text-form') && !(await Q.visible('quiz-choices')),
+    'typed round: a text field, no choices');
   const attrs = await Q.ev(`(() => { const i = document.getElementById('quiz-text'); return [i.getAttribute('autocorrect'), i.getAttribute('autocapitalize'), i.spellcheck, i.lang].join(','); })()`);
   expect(attrs === 'off,off,false,fr', 'the field never "fixes" names (autocorrect/autocapitalize/spellcheck off, French)', attrs);
   const top0: number = await Q.ev(`document.getElementById('quiz-q').getBoundingClientRect().top`);
   await Q.tap('#quiz-text');
   const top1: number = await Q.ev(`document.getElementById('quiz-q').getBoundingClientRect().top`);
   expect(top0 === top1, 'focusing the field does not move the question', `${top0} → ${top1}`);
-  for (let round = 0; round < 3; round++) {
+  {
     const bq = byQ.get(plain(await H.text('quiz-q')))!;
     // a name typed in lower case, without accents: the server's French matcher accepts it
     const typed = rightText(bq).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
     await H.type('#quiz-text', typed);
-    if (round === 0) await H.shot('quiz-question-typed');
+    await H.shot('quiz-question-typed');
     await H.tap('#quiz-send');
     await Q.type('#quiz-text', 'zzz');
     await Q.tap('#quiz-send');
-    expect(await phaseIs(H, 'quiz-reveal'), `typed round ${round + 1}: reveal`);
+    expect(await phaseIs(H, 'quiz-reveal'), 'typed round: reveal');
     const hv = await H.text('quiz-verdict');
     expect(/^✓ Right!/.test(hv) && /^✗ Wrong/.test(await Q.text('quiz-verdict')), `"${typed}" judged right on the server; "zzz" wrong`, hv);
     const results: string = await Q.text('quiz-results');
     expect(results.includes(typed) && results.includes('zzz'), 'the reveal lists what everyone typed', results);
     await H.tap('#quiz-next');
+    expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), 'Next → typed question 2');
   }
-  expect(await phaseIs(H, 'quiz-finished'), 'typed quiz finished');
-  await H.tap('#quiz-back');
-  let back = false;
-  for (let k = 0; k < 40 && !back; k++) { back = (await H.snap())?.view === 'view-place'; if (!back) await sleep(100); }
-  expect(back && (await H.text('place-title')).length > 0, 'host Back → the world screen', await H.text('place-title'));
+  await H.tap('#btn-menu');
+  await H.tap('#btn-end-game');
+  await H.tap('#btn-end-game');
+  expect(await phaseIs(H, 'view-podium'), 'typed quiz finished');
+  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+
+  // ---- quiz 3 (Play again): straight into a new quiz; the host ends it from the ☰ menu during a question ----
+  await H.tap('#btn-again');
+  expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question') && /^Question 1\//.test(await Q.text('quiz-progress')),
+    'Play again → question 1 of a new quiz at once, on both phones', await Q.text('quiz-progress'));
+  expect((await Q.hostButtons()).length === 0, 'quiz: guest menu has no host controls');
+  await H.tap('#btn-menu');
+  const qhb = await H.hostButtons();
+  expect(qhb.length === 4 && qhb.slice(1, 3).every((t) => /^Take .+ out$/.test(t)) && /End game/.test(qhb[3]), 'quiz: the host menu offers "take out" per player, and End game', JSON.stringify(qhb));
+  await H.shot('quiz-host-menu');
+  const qGuest = `[data-retire="${await Q.ev(`localStorage.getItem('bloko-id')`)}"]`;
+  await H.tap(qGuest);
+  await H.tap(qGuest);
+  let outLine = '';
+  for (let k = 0; k < 50 && !/took you out/.test(outLine); k++) { await sleep(100); outLine = await Q.text('quiz-sent'); }
+  expect(/took you out/.test(outLine) && await Q.ev(`[...document.querySelectorAll('#quiz-choices button, #quiz-send')].every((b) => b.disabled)`)
+    && (await H.hostButtons()).length === 3, 'quiz: the host takes the guest out (second tap): their answers close, End game stays', outLine);
+  await H.tap('#btn-end-game');
+  const qArmed: string = await H.ev(`document.getElementById('btn-end-game').textContent`);
+  expect(/Tap again/.test(qArmed) && await Q.visible('quiz-question'), 'quiz End game: first tap arms, nothing ends yet', qArmed);
+  await H.tap('#btn-end-game');
+  expect(await phaseIs(H, 'view-podium') && await phaseIs(Q, 'view-podium'), 'quiz End game: second tap → finished on both phones');
+  expect(await Q.text('podium-kicker') === 'The host ended the quiz.' && (await H.hostButtons()).length === 0,
+    'quiz ended: "The host ended the quiz.", no host controls left', await Q.text('podium-kicker'));
+  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+  await Q.shot('quiz-finished-guest');
+  await H.tap('#btn-new-game');
+  expect(await phaseIs(H, 'view-lobby') && await phaseIs(Q, 'view-lobby') && await H.visible('btn-start') && await Q.visible('stick-pad'),
+    'Back to the room → the room again: the host\'s Start, the joystick');
+  // ---- teardown: the quiz → the map leaves nothing of the quiz running ----
+  await H.tap('#btn-menu');
+  await H.tap('#btn-gm');
+  await H.tap('#gm-back');
+  await H.ev(`document.querySelector('#sheet-gm [data-close]').click()`);
+  expect(await showing(H, 'view-place') && await showing(Q, 'view-place'), 'teardown: Back → the world map on both phones');
+  const quizH = await leftOver(H, 'quiz-ui.js', '#view-quiz'), quizQ = await leftOver(Q, 'quiz-ui.js', '#view-quiz');
+  expect(quizH.length === 0 && quizQ.length === 0, 'teardown: on the map, nothing of the quiz screens is left (timers, listeners, markup)',
+    JSON.stringify({ H: quizH, Q: quizQ }));
   } // part 4
 
   if (!ONLY || ONLY === '5') {
@@ -921,6 +1113,72 @@ try {
   expect(!!close2 && close2.until <= close2.now, 'closing the QR sheet → the TV closes it too');
   tv7.ws.close();
   } // part 7
+
+  if (!ONLY || ONLY === '8') {
+  // ================= part 8: a minigame's phone screen with the joystick in its game area =================
+  // A stand-in screen, put in the phone's list (public/play/minigames.js) in place of the block game's by this
+  // test only; the round itself is a block game's, whose server code lets nobody walk, so the phone's own
+  // socket (SOCKET_PROBE) shows what it sends.
+  console.log('\n— part 8: a stand-in minigame\'s joystick in its game area —');
+  await kill9();
+  await boot(true);
+  const S = await phone('S', [SOCKET_PROBE]);
+  const idS = await joinAs(S, 'anna');
+  const tv8 = new Client('tv8'); await tv8.open(); tv8.send({ t: 'hello', role: 'screen' });
+  await tv8.waitFor((m) => m.t === 'view');
+  await S.push(1, 0, 500); // a few steps in the room
+  await sleep(300);
+  const inRoom = [...tv8.msgs].reverse().find((m) => m.t === 'pos' && m.playerId === idS);
+  expect(!!inRoom && inRoom.y > 4.8, 'walking in the room: the TV gets our position', JSON.stringify(inRoom));
+  await S.ev(`(async () => {
+    const [{ SCREENS }, { room }] = await Promise.all([import('/play/minigames.js'), import('/shared/scene.js')]);
+    const area = room('stand-in-area', { x: 0.5, y: 0.5, w: 15, h: 3 }, []); // above the party room's floor
+    const s = window.__standIn = { messages: [], unmounted: false, real: SCREENS.blocks };
+    SCREENS.blocks = { ...s.real, mount(root, io) {
+      root.insertAdjacentHTML('beforeend', '<section id="view-stand-in"><p>Walk!</p></section>');
+      io.joystick({ area, start: { x: 3, y: 2, dir: 'right' } });
+      return {
+        update() {},
+        message(msg) { s.messages.push(msg); },
+        unmount() { s.unmounted = true; root.replaceChildren(); },
+      };
+    } };
+  })()`);
+  const sentPos = (from: number) => S.ev(`window.__sent.slice(${from}).filter((m) => m.t === 'pos')`);
+  let from8: number = await S.ev('window.__sent.length');
+  await S.tap('#btn-start');
+  const roundUp = await S.waitFor((x) => x.view === 'view-stand-in', 5000);
+  expect(roundUp?.view === 'view-stand-in', 'Start → the frame mounts the stand-in screen');
+  expect(await S.ev(`document.getElementById('stick-pad').parentElement.id === 'view-round'`) && await S.visible('stick-pad')
+    && !(await S.visible('btn-interact')), 'its joystick shows under its screen, without the object button');
+  const first = (await sentPos(from8))[0];
+  expect(JSON.stringify(first) === JSON.stringify({ t: 'pos', x: 3, y: 2, dir: 'right', moving: false }),
+    'switching the joystick on sends the start position at once', JSON.stringify(first));
+  from8 = await S.ev('window.__sent.length');
+  await S.push(1, 0, 600);
+  const walked = await sentPos(from8);
+  expect(walked.length > 1 && walked.every((p: any) => p.y === 2 && p.x >= 3) && walked.at(-1).x > 3 && walked.at(-1).moving === false,
+    'walking the game area: from the start, in its bounds (y 2, above the room\'s floor), a final stop', JSON.stringify(walked.at(-1)));
+  const fart = { t: 'unsaved', data: { t: 'fart', x: 3, y: 2 } };
+  await S.ev(`window.__receive(${JSON.stringify(fart)})`);
+  expect(JSON.stringify(await S.ev('window.__standIn.messages')) === JSON.stringify([fart]), "an unsaved message reaches the running screen's message()");
+  from8 = await S.ev('window.__sent.length');
+  await S.ev(`window.__ws.send(JSON.stringify({ t: 'endGame' }))`);
+  await S.waitFor((x) => x.view === 'view-podium', 5000);
+  expect(await S.ev('window.__standIn.unmounted') && !(await S.visible('stick-pad')), 'the round ends → the screen is unmounted, its joystick goes');
+  await S.tap('#btn-new-game');
+  await S.waitFor((x) => x.view === 'view-lobby', 5000);
+  expect(await S.visible('stick-pad') && await S.visible('btn-interact'), 'back in the room: the room\'s joystick and the object button');
+  expect((await sentPos(from8)).length === 0, 'nothing of the game area reaches the server after the round');
+  const i8 = tv8.mark();
+  await S.push(-1, 0, 300);
+  await sleep(500);
+  const back = tv8.since(i8).filter((m) => m.t === 'pos' && m.playerId === idS).at(-1);
+  expect(!!back && back.y === inRoom.y && back.x < inRoom.x && back.x > inRoom.x - 1.5,
+    'walking on from where we stood in the room', `${JSON.stringify(inRoom)} → ${JSON.stringify(back)}`);
+  await S.ev('(async () => { (await import("/play/minigames.js")).SCREENS.blocks = window.__standIn.real; })()');
+  tv8.ws.close();
+  } // part 8
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}`);
   if (log) console.log(`--- server log ---\n${log}`);

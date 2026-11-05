@@ -24,6 +24,8 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: PORT=3199 npm run e2e:resume
+      - run: PORT=3200 npm run e2e:campaign
+      - run: PORT=3201 npm run e2e:quiz
       - run: npm run release
       - name: Test packaged runtime
         shell: bash

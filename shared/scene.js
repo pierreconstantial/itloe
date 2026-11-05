@@ -243,3 +243,15 @@ export const PARTY_ROOM = room('party-room', PARTY_FLOOR, [
   // a tall plant in the back-right corner, past the last door rug: it hides whoever stands behind it
   prop('plant', { x: 14.81, y: 4, w: 0.98, h: 1.5 }, { anchorY: 5.5, solid: { x: 14.95, y: 4.95, w: 0.65, h: 0.55 } }),
 ]);
+
+/** Elo's apartment uses the same movement engine but has its own furniture and collision map. */
+export const APARTMENT_ROOM = room('apartment-room', PARTY_FLOOR, [
+  prop('sofa', { x: 0.65, y: 4.65, w: 3.05, h: 1.2 }, { anchorY: 5.85, solid: { x: 0.72, y: 4.8, w: 2.9, h: 1.05 } }),
+  prop('plant', { x: 5.2, y: 4.1, w: 0.98, h: 1.5 }, { anchorY: 5.6, solid: { x: 5.34, y: 4.95, w: 0.65, h: 0.55 } }),
+]);
+
+/** Neutral second room beyond door #4; its story and furnishings have not been specified. */
+export const DOOR_FOUR_ROOM = room('door-four-room', PARTY_FLOOR, []);
+
+/** Every room by its id, which a content node names as its `room` (roomAt in shared/campaign/content.js). */
+export const ROOMS = Object.freeze(Object.fromEntries([PARTY_ROOM, APARTMENT_ROOM, DOOR_FOUR_ROOM].map((r) => [r.id, r])));

@@ -1,20 +1,22 @@
-// Phone quiz screen (Contract E): renders strictly from the view's PUBLIC quiz (shared/quiz/bank.js
-// projectQuiz), which never carries an answer before the reveal. Phases: lobby (host: settings + start),
+// Phone quiz screens (Contract E), mounted by the frame (./minigames.js): render strictly from the view's
+// PUBLIC quiz (shared/quiz/bank.js projectQuiz), which never carries an answer before the reveal. Between
+// quizzes the party is in the room (main.js); phases here:
 // question (4 big choices or a typed answer; one shot), reveal (my verdict + points, the answer, everyone's
-// answers; host: overrides + next), finished (ranking; host: again / back).
+// answers; host: overrides + next). The finished quiz is the frame's podium, with each player's right answers.
 // Controls are built once per question, so a view arriving mid-typing never resets the text field.
-import { $ } from './dom.js';
+import { $, addStylesheet } from './dom.js';
 import * as haptics from './haptics.js';
 import { createConfirm } from './confirm.js';
 import { secondsLeft, mmss } from '../commun/clock.js';
-import { summarizeQuiz } from './quiz-text.js';
 import { SCORING, MAX_TEXT } from '../../shared/quiz/index.js';
+import { QUIZ_SETTINGS } from './quiz-text.js';
 
 /** @typedef {import('../../shared/quiz/bank.js').QuizView} QuizView */
 /** @typedef {import('../../shared/quiz/bank.js').RoundView} RoundView */
 
 const URGENT_SECONDS = 5;
-const PHASES = ['lobby', 'question', 'reveal', 'finished'];
+const TICK_MS = 250; // the countdown's refresh
+const PHASES = ['question', 'reveal'];
 
 /** French typography: a narrow no-break space before ? ! : ; » (never orphaned at a line start). @param {string} s */
 const frenchSpaces = (s) => s.replace(/\s+([?!:;»])/g, '\u202f$1').replace(/«\s+/g, '«\u202f');
@@ -34,6 +36,7 @@ function el(tag, cls, text) {
 export function createQuizUi(io) {
   /** @type {QuizView | null} */ let last = null;
   /** @type {string} */ let meId = '';
+  /** Am I the party's host (the quiz stores no host)? */ let amHost = false;
   /** What I sent this round (the view only says THAT I answered). @type {{ key: string, choice?: number, text?: string } | null} */
   let mine = null;
   /** Round whose question controls are built. */ let builtKey = '';
@@ -54,10 +57,7 @@ export function createQuizUi(io) {
     input.blur(); // the keyboard goes away: the answer is sent
     render(/** @type {QuizView} */ (last), meId);
   });
-  $('quiz-start').addEventListener('click', () => io.send({ t: 'start' }));
   $('quiz-next').addEventListener('click', () => io.send({ t: 'next' }));
-  $('quiz-again').addEventListener('click', () => io.send({ t: 'newGame' }));
-  $('quiz-back').addEventListener('click', () => io.send({ t: 'back' }));
 
   /** @param {number} choice @param {RoundView} r */
   function pick(choice, r) {
@@ -98,7 +98,8 @@ export function createQuizUi(io) {
     buildQuestion(r);
     $('quiz-category').textContent = r.question.category ? `${r.question.category}${r.question.level ? ` · ${'★'.repeat(r.question.level)}` : ''}` : '';
     $('quiz-q').textContent = frenchSpaces(r.question.q);
-    const sent = r.answered.includes(meId) || mine?.key === roundKey(r);
+    const out = !!v.players[meId]?.left; // taken out by the host: no more answers, the score counts
+    const sent = out || r.answered.includes(meId) || mine?.key === roundKey(r);
     const asChoice = !!r.question.choices;
     $('quiz-choices').hidden = !asChoice;
     $('quiz-text-form').hidden = asChoice;
@@ -110,6 +111,7 @@ export function createQuizUi(io) {
     /** @type {HTMLButtonElement} */ ($('quiz-send')).disabled = sent;
     if (sent && mine?.text !== undefined && mine.key === roundKey(r)) input.value = mine.text;
     $('quiz-sent').hidden = !sent;
+    $('quiz-sent').textContent = out ? 'The host took you out — your score counts' : 'Answer sent ✓';
     renderAnswered(v, r);
   }
 
@@ -145,7 +147,7 @@ export function createQuizUi(io) {
     anecdote.hidden = !r.answer?.anecdote;
     anecdote.textContent = r.answer?.anecdote ? `💡 ${frenchSpaces(r.answer.anecdote)}` : '';
 
-    const host = v.hostId === meId;
+    const host = amHost;
     const ul = $('quiz-results');
     ul.replaceChildren(...v.order.map((id) => {
       const p = v.players[id];
@@ -176,47 +178,19 @@ export function createQuizUi(io) {
     $('quiz-reveal-hint').hidden = host || v.phase !== 'reveal';
   }
 
-  /** @param {QuizView} v */
-  function renderFinished(v) {
-    const ranking = [...v.order].sort((a, b) => v.players[b].score - v.players[a].score || v.order.indexOf(a) - v.order.indexOf(b));
-    let prevScore = NaN, prevRank = 0;
-    const ol = $('quiz-ranking');
-    ol.replaceChildren(...ranking.map((id, i) => {
-      const p = v.players[id];
-      const rank = p.score === prevScore ? prevRank : i + 1;
-      prevScore = p.score;
-      prevRank = rank;
-      const li = el('li', id === meId ? 'me' : '', `${['🥇', '🥈', '🥉'][rank - 1] ?? `${rank}.`} ${p.name} — ${p.score} (${p.correct} ✓)`);
-      return li;
-    }));
-    $('quiz-finished-kicker').textContent = v.endReason === 'host' ? 'The host ended the quiz.' : '';
-    const host = v.hostId === meId;
-    $('quiz-again').hidden = !host;
-    $('quiz-back').hidden = !host;
-    $('quiz-finished-hint').hidden = host;
-  }
-
-  /** @param {QuizView} v @param {string} id */
-  function render(v, id) {
+  /** @param {QuizView} v @param {string} id @param {boolean} [host] am I the party's host (default: as last time) */
+  function render(v, id, host = amHost) {
     last = v;
     meId = id;
-    const host = v.hostId === id;
+    amHost = host;
     for (const ph of PHASES) $(`quiz-${ph}`).hidden = v.phase !== ph;
     const r = v.round;
-    $('quiz-progress').textContent = v.phase === 'lobby' ? 'Quiz' : v.phase === 'finished' ? 'Results' : r ? `Question ${r.index + 1}/${r.total}` : 'Quiz';
+    $('quiz-progress').textContent = r ? `Question ${r.index + 1}/${r.total}` : 'Quiz';
     const me = v.players[id];
-    $('quiz-score').textContent = me && v.phase !== 'lobby' ? `${me.score} pts` : '';
+    $('quiz-score').textContent = me ? `${me.score} pts` : '';
 
-    if (v.phase === 'lobby') {
-      $('quiz-summary').textContent = summarizeQuiz(v.settings);
-      $('quiz-players').replaceChildren(...v.order.map((pid) => el('li', '', `${v.players[pid].name}${pid === v.hostId ? ' 👑' : ''}`)));
-      $('quiz-start').hidden = !host;
-      $('btn-settings-quiz').hidden = !host;
-      $('quiz-lobby-hint').textContent = host ? 'Set it up, then start when everyone is here.' : 'Quiz! Waiting for the host…';
-    }
     if (v.phase === 'question' && r) renderQuestion(v, r);
     if (v.phase === 'reveal' && r) renderReveal(v, r);
-    if (v.phase === 'finished') renderFinished(v);
     tick();
   }
 
@@ -232,5 +206,68 @@ export function createQuizUi(io) {
     clock.classList.toggle('urgent', left <= URGENT_SECONDS);
   }
 
-  return { render, tick };
+  return { render, tick, stop: confirm.disarm };
 }
+
+addStylesheet(new URL('./quiz.css', import.meta.url));
+
+const MARKUP = `
+  <section id="view-quiz">
+    <header class="quiz-top">
+      <span id="quiz-progress" class="kicker">Quiz</span>
+      <span id="quiz-clock" class="clock" hidden></span>
+      <span id="quiz-score" class="quiz-score"></span>
+    </header>
+
+    <div id="quiz-question" class="quiz-pane" hidden>
+      <p id="quiz-category" class="dim"></p>
+      <h2 id="quiz-q"></h2>
+      <div id="quiz-choices" class="quiz-choices"></div>
+      <form id="quiz-text-form" class="quiz-text-form" hidden>
+        <input id="quiz-text" type="text" lang="fr" inputmode="text" enterkeyhint="send" placeholder="Your answer"
+               autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" aria-label="Your answer">
+        <button id="quiz-send" type="submit" class="primary">Send</button>
+      </form>
+      <p id="quiz-sent" class="quiz-sent" hidden>Answer sent ✓</p>
+      <ul id="quiz-answered" class="quiz-chips"></ul>
+    </div>
+
+    <div id="quiz-reveal" class="quiz-pane" hidden>
+      <p id="quiz-verdict" class="quiz-verdict"></p>
+      <p id="quiz-reveal-q" class="dim"></p>
+      <p class="quiz-correct">Answer: <strong id="quiz-answer"></strong></p>
+      <p id="quiz-anecdote" class="quiz-anecdote" hidden></p>
+      <ul id="quiz-results" class="quiz-results"></ul>
+      <button id="quiz-next" type="button" class="primary" hidden>Next question</button>
+      <p id="quiz-reveal-hint" class="dim">Waiting for the host…</p>
+    </div>
+  </section>
+`;
+
+/** The quiz's entry in the phone's list (./minigames.js). @type {import('./minigames.js').PhoneScreen} */
+export const QUIZ_SCREEN = {
+  title: 'Quiz!',
+  settings: QUIZ_SETTINGS,
+  mount(root, io) {
+    root.insertAdjacentHTML('beforeend', MARKUP);
+    const ui = createQuizUi(io);
+    const clock = setInterval(ui.tick, TICK_MS);
+    return {
+      update: (round) => ui.render(round.view, io.meId(), io.isHost()),
+      message: () => {},
+      unmount() {
+        clearInterval(clock);
+        ui.stop();
+        root.replaceChildren();
+      },
+    };
+  },
+  /** Each player's right answers; the host's end in the quiz's words. */
+  podium(round) {
+    const v = /** @type {QuizView} */ (round.view);
+    return {
+      ...(v.endReason === 'host' ? { kicker: 'The host ended the quiz.' } : {}),
+      rowExtra: (id) => ` (${v.players[id].correct} ✓)`,
+    };
+  },
+};

@@ -4,7 +4,7 @@
 import { childrenOf } from '../../shared/campaign/index.js';
 import { CHARACTERS } from '../../shared/characters.js';
 
-/** @typedef {import('../../shared/campaign/types.js').Campaign} Campaign */
+/** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
 /** @typedef {import('../../shared/campaign/types.js').Content} Content */
 /** @typedef {import('../../shared/campaign/types.js').Door} Rect */
 
@@ -74,9 +74,15 @@ export function bags(c, content) {
 export function mapCopy(c, content) {
   const node = content.nodes[c.at.node];
   const chooser = Object.values(c.party.players).find((m) => !m.left && m.character === content.chooser);
+  const hint = c.at.node === 'hub' && c.facts.flags.includes('portal.entered')
+    ? !c.facts.flags.includes('apparition.seen') ? 'A visitor is appearing…'
+      : !c.facts.inventory.elodie?.['memory-key-intro'] ? 'Élodie, pick up the key.'
+        : 'Élodie, enter door #4.'
+    : c.at.node === 'hub.door4' ? 'Élodie can return to the apartment.'
+      : chooser ? `${chooser.name}, walk through a door — or the host picks one` : 'The host picks a door';
   return {
     title: node?.title ?? c.at.node,
-    hint: chooser ? `${chooser.name}, walk through a door — or the host picks one` : 'The host picks a door',
+    hint,
     bags: bags(c, content),
   };
 }

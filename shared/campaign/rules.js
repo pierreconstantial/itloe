@@ -11,24 +11,16 @@
 
 /** Counter keys the engine itself maintains (content conditions may read them). */
 export const COUNTER = {
-  blocksPlayed: 'blocks.played',
-  /** @param {string} character */
-  blocksWon: (character) => `blocks.won.${character}`,
+  /** @param {string} kind — rounds of that minigame finished */
+  played: (kind) => `${kind}.played`,
+  /** @param {string} kind @param {string} character — rounds of that minigame won (rank 1, two or more players) */
+  won: (kind, character) => `${kind}.won.${character}`,
   /** @param {string} node */
   finished: (node) => `node.${node}.finished`,
   /** @param {string} node — set by gm lock: settle never re-unlocks it */
   locked: (node) => `node.${node}.locked`,
   /** @param {string} node — set when its rewards were applied: they never apply twice */
   rewarded: (node) => `node.${node}.rewarded`,
-  quizPlayed: 'quiz.played',
-  /** @param {string} character */
-  quizWon: (character) => `quiz.won.${character}`,
-  /** @param {string} character — right answers across every quiz of the evening */
-  correctBy: (character) => `quiz.correct.${character}`,
-  /** @param {string} node — right answers in that quiz tableau, everyone together (content: "≥ 4 right") */
-  nodeCorrect: (node) => `node.${node}.correct`,
-  /** @param {string} node @param {string} character — right answers in that quiz tableau by one character */
-  nodeCorrectBy: (node, character) => `node.${node}.correct.${character}`,
   /** @param {string} sceneId */
   sceneSeen: (sceneId) => `scene.${sceneId}.seen`,
   /** @param {string} zone @param {string} character */
@@ -87,7 +79,7 @@ export function holds(c, f) {
 }
 
 /**
- * Adds counters, and points to `totals[kind]` (per activity kind: block and quiz points have
+ * Adds counters, and points to `totals[kind]` (per minigame: block and quiz points have
  * different scales, so they are never summed here — an "evening total" is a presentation choice).
  * @param {Facts} f @param {Record<string, number>} add @param {string} [kind] @param {Record<string, number>} [points]
  * @returns {Facts}
@@ -120,35 +112,19 @@ export function migrateTotals(totals) {
  */
 export function record(f, e) {
   switch (e.t) {
-    case 'game.finished': {
+    case 'round.finished': {
+      // the common result: played, won, the tableau finished, points; then the minigame's own counters
       /** @type {Record<string, number>} */
-      const add = { [COUNTER.blocksPlayed]: 1, [COUNTER.finished(e.node)]: 1 };
-      /** @type {Record<string, number>} */
-      const totals = {};
-      for (const r of e.ranking) {
-        if (!r.character) continue;
-        totals[r.character] = (totals[r.character] ?? 0) + r.score;
-        if (r.rank === 1 && e.ranking.length > 1) add[COUNTER.blocksWon(r.character)] = 1;
-      }
-      return bump(f, add, e.kind, totals);
-    }
-    case 'quiz.finished': {
-      /** @type {Record<string, number>} */
-      const add = { [COUNTER.quizPlayed]: 1, [COUNTER.finished(e.node)]: 1 };
+      const add = { [COUNTER.played(e.kind)]: 1, [COUNTER.finished(e.node)]: 1 };
       /** @type {Record<string, number>} */
       const totals = {};
       for (const r of e.ranking) {
         if (!r.character) continue;
         totals[r.character] = (totals[r.character] ?? 0) + r.score;
-        if (r.correct > 0) {
-          add[COUNTER.correctBy(r.character)] = r.correct;
-          add[COUNTER.nodeCorrectBy(e.node, r.character)] = r.correct;
-        }
-        if (r.rank === 1 && e.ranking.length > 1) add[COUNTER.quizWon(r.character)] = 1;
+        if (r.rank === 1 && e.ranking.length > 1) add[COUNTER.won(e.kind, r.character)] = 1;
       }
-      const right = e.ranking.reduce((n, r) => n + (r.correct > 0 ? r.correct : 0), 0);
-      if (right > 0) add[COUNTER.nodeCorrect(e.node)] = right;
-      const bumped = bump(f, add, 'quiz', totals);
+      for (const [k, n] of Object.entries(e.counters ?? {})) add[k] = (add[k] ?? 0) + n;
+      const bumped = bump(f, add, e.kind, totals);
       const known = new Set(f.asked ?? []);
       const fresh = (e.asked ?? []).filter((id) => typeof id === 'string' && !known.has(id));
       return fresh.length ? { ...bumped, asked: [...(f.asked ?? []), ...fresh] } : bumped;

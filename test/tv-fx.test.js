@@ -1,10 +1,13 @@
 // TV effects logic: the clear ghost includes the completing piece's cells; "+N" floaters merge / stack.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initState, newPlayer, reduce } from '../shared/game.js';
+import { startGame, newPlayer, reduce as reduceGame } from '../shared/game.js';
 import { detectMove } from '../public/screen/events.js';
 import { clearedCells } from '../public/screen/game-view.js';
 import { createFloaterPlanner, MERGE_MS, LIFE_MS } from '../public/screen/floaters.js';
+
+/** The block reducer, with the host the campaign passes: 'a'. */
+const reduce = (/** @type {import('../shared/game.js').State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { hostId: 'a' });
 
 const SIZE = 8;
 
@@ -14,7 +17,7 @@ test('clear ghost: a piece completing a row → every cell of that row, the piec
   for (let x = 0; x < 6; x++) board[x] = 3;
   const p = { ...newPlayer('a', 'Ana', 1, SIZE), board, hand: /** @type {any} */ (['h2', 'dot', 'dot']) };
   /** @type {import('../shared/game.js').State} */
-  const s = { ...initState(42), phase: 'playing', hostId: 'a', order: ['a'], players: { a: p } };
+  const s = { .../** @type {import('../shared/game.js').State} */ (startGame({ seed: 42, settings: {}, players: [{ id: 'a', character: 'pierre' }], now: 0 })), order: ['a'], players: { a: p } };
   const s2 = reduce(s, { t: 'place', id: 'a', piece: 0, x: 6, y: 0 });
   assert.deepEqual(s2.players.a.last?.rows, [0], 'the row cleared');
   const m = detectMove(p, s2.players.a);

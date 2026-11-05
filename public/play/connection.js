@@ -43,12 +43,12 @@ export function createConnection(hooks) {
 
   /** @param {boolean} up */
   function setOnline(up) {
-    clearTimeout(bannerTimer);
     if (up) {
+      clearTimeout(bannerTimer);
       if (!online) { online = true; hooks.onStatus(true); }
       return;
     }
-    if (!online) return;
+    if (!online) return; // already down: keep the pending banner (a failed retry inside the grace must not cancel it)
     online = false;
     bannerTimer = setTimeout(() => { if (!online) hooks.onStatus(false); }, BANNER_GRACE_MS);
   }

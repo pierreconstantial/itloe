@@ -1,4 +1,4 @@
-// P0 — static file serving shared by mock.ts and main.ts.
+// P0 — static file serving for main.ts.
 // Serves public/ at /, and shared/ at /shared/ (browser clients import the game logic).
 
 import { readFile } from 'node:fs/promises';

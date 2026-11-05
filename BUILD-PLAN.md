@@ -289,6 +289,7 @@ campaign as the current activity.
 //   complete?: Condition,                       // when it counts as done (default: its activity finished once)
 //   rewards?: Effect[],                         // applied ONCE, the first time the node completes
 //   replayable?: boolean,                       // games: yes; one-shot reveals: no
+//   room?: roomId,                              // the room the TV draws here (ROOMS in shared/scene.js); default: the party room
 // }
 // Condition (data, evaluated by holds(cond, facts)):
 //   { always: true } | { flag: 'x' } | { done: nodeId } | { unlocked: nodeId }

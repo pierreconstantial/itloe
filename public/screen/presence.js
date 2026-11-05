@@ -40,12 +40,12 @@ export function createPresence({ onChange, graceMs = GRACE_MS, now = () => perfo
 
   return {
     /**
-     * Feed every view. `online` undefined (a server without presence, e.g. the mock) → nobody is offline.
-     * @param {string[] | undefined} online
+     * Feed every view.
+     * @param {string[]} online
      * @param {string[]} players  ids that can be offline (seated, not left)
      */
     update(online, players) {
-      const on = new Set(online ?? players);
+      const on = new Set(online);
       const t = now();
       for (const id of [...missingSince.keys()]) if (on.has(id) || !players.includes(id)) missingSince.delete(id);
       for (const id of players) if (!on.has(id) && !missingSince.has(id)) missingSince.set(id, t);

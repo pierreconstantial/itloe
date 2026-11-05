@@ -5,11 +5,16 @@ import {
   SAMPLE_CONTENT as C, COUNTER, emptyFacts, fromLegacyState, holds, loadCampaign, newCampaign,
   record, reduceCampaign, settle, validateContent, zoneAt, holding,
 } from '../shared/campaign/index.js';
-import { initState, reduce } from '../shared/game.js';
+import { minigameContent } from '../shared/campaign/sample.js';
+import { DEFAULT_SETTINGS, startGame, reduce as reduceGame } from '../shared/game.js';
+import { MINIGAMES } from '../shared/minigames.js';
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
 /** @typedef {import('../shared/campaign/types.js').CampaignAction} CampaignAction */
 /** @typedef {import('../shared/campaign/types.js').Content} Content */
+
+/** The seed of a campaign's block game (these tests' rounds are block games). @param {Campaign} c */
+const blockSeed = (c) => /** @type {import('../shared/game.js').State | null} */ (c.at.activity)?.seed;
 
 /** @param {Campaign} c @param {CampaignAction[]} actions */
 const run = (c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a, C), c);
@@ -21,10 +26,9 @@ function party() {
 
 /** One block game in the current tableau, ended by the host (counts as played). @param {Campaign} c */
 function playOnce(c) {
-  const phase = c.at.activity?.phase;
-  if (phase === 'finished') c = run(c, { t: 'activity', action: { t: 'newGame', id: c.party.hostId ?? '' } });
+  if (c.at.activity) c = run(c, { t: 'newGame', id: c.party.hostId ?? '' }); // the podium → the room
   return run(c,
-    { t: 'activity', action: { t: 'start', id: c.party.hostId ?? '', now: 1000 } },
+    { t: 'start', id: c.party.hostId ?? '', now: 1000 },
     { t: 'activity', action: { t: 'endGame', id: c.party.hostId ?? '' } });
 }
 
@@ -37,7 +41,7 @@ test('the sample content is valid', () => {
   assert.deepEqual(validateContent(C), []);
 });
 
-test('validateContent reports unknown parents, unknown refs, cycles, key/id mismatch, bad start', () => {
+test('validateContent reports unknown parents, unknown refs, cycles, key/id mismatch, bad start, unknown room', () => {
   /** @type {any} */
   const bad = structuredClone(C);
   bad.nodes['teens.blocks'].parent = 'nowhere';
@@ -48,9 +52,10 @@ test('validateContent reports unknown parents, unknown refs, cycles, key/id mism
   bad.nodes['teens.scene'].rewards = [{ unlock: 'nope' }];
   bad.start = 'adult';
   bad.chooser = 'bowser';
+  bad.nodes.teens.room = 'ballroom';
   const errs = validateContent(bad).join('\n');
   for (const want of ['unknown parent "nowhere"', 'unknown node "ghost"', 'a tableau cannot have children', 'differs from its key',
-    'unlocks unknown node "nope"', 'start "adult" must be a blocks tableau', 'chooser "bowser"']) {
+    'unlocks unknown node "nope"', 'start "adult" must be the tableau of a minigame', 'chooser "bowser"', 'unknown room "ballroom"']) {
     assert.ok(errs.includes(want), `missing: ${want}\n${errs}`);
   }
   /** @type {any} */
@@ -58,6 +63,36 @@ test('validateContent reports unknown parents, unknown refs, cycles, key/id mism
   cyc.nodes.childhood.parent = 'teens';
   cyc.nodes.teens.parent = 'childhood';
   assert.ok(validateContent(cyc).some((e) => e.includes('parent cycle')));
+});
+
+test('validateContent checks activities through the rules list: any minigame starts, settings are checked', () => {
+  /** @type {any} */
+  const quizStart = structuredClone(C);
+  quizStart.start = 'childhood.quiz';
+  assert.deepEqual(validateContent(quizStart), []);
+  const c = newCampaign(quizStart, 1);
+  assert.deepEqual([c.at.kind, c.at.activity], ['quiz', null], 'the room at the quiz tableau');
+
+  /** @type {any} */
+  const bad = structuredClone(C);
+  bad.start = 'childhood.scene';
+  bad.nodes['childhood.blocks'].activity.settings = { size: 11, colour: 'red' };
+  bad.nodes['childhood.quiz'].activity.settings = { seconds: 12 };
+  bad.nodes['teens.scene'].activity = { kind: 'darts' };
+  const errs = validateContent(bad).join('\n');
+  for (const want of ['start "childhood.scene" must be the tableau of a minigame', 'node "childhood.blocks": setting "size" can\'t be 11',
+    'node "childhood.blocks": unknown setting "colour"', 'node "childhood.quiz": setting "seconds" can\'t be 12', 'node "teens.scene": unknown activity "darts"']) {
+    assert.ok(errs.includes(want), `missing: ${want}\n${errs}`);
+  }
+});
+
+test('the development start: every registered minigame gets valid content that starts at its tableau', () => {
+  for (const kind of Object.keys(MINIGAMES)) {
+    const content = /** @type {Content} */ (minigameContent(kind));
+    assert.deepEqual(validateContent(content), [], kind);
+    assert.equal(newCampaign(content, 1).at.kind, kind);
+  }
+  assert.equal(minigameContent('darts'), null);
 });
 
 test('zoneAt: the child whose door contains the point, else null', () => {
@@ -80,15 +115,15 @@ test('holds: every condition shape; unknown shapes are false', () => {
   assert.equal(holds(/** @type {any} */ ({ typo: 1 }), f), false);
 });
 
-test('record: game.finished counts plays, per-node finishes, wins and totals by character', () => {
+test('record: round.finished counts plays, per-node finishes, wins and totals by character', () => {
   const f = record(emptyFacts(), {
-    t: 'game.finished', kind: 'blocks', node: 'hub.false-start', mode: 'marathon', size: 8, endReason: 'host',
+    t: 'round.finished', kind: 'blocks', node: 'hub.false-start', endReason: 'host',
     ranking: [{ character: 'elodie', score: 30, rank: 1 }, { character: 'sol', score: 10, rank: 2 }],
   });
-  assert.equal(f.counters[COUNTER.blocksPlayed], 1);
+  assert.equal(f.counters[COUNTER.played('blocks')], 1);
   assert.equal(f.counters[COUNTER.finished('hub.false-start')], 1);
-  assert.equal(f.counters[COUNTER.blocksWon('elodie')], 1);
-  assert.equal(f.counters[COUNTER.blocksWon('sol')], undefined);
+  assert.equal(f.counters[COUNTER.won('blocks', 'elodie')], 1);
+  assert.equal(f.counters[COUNTER.won('blocks', 'sol')], undefined);
   assert.deepEqual(f.totals, { blocks: { elodie: 30, sol: 10 } }, 'block points kept apart from quiz points');
 });
 
@@ -110,10 +145,10 @@ test('settle: a child never unlocks before its parent', () => {
 
 // ---------------------------------------------------------------- the story chain
 
-test('new campaign starts AT the false-start blocks lobby, no news', () => {
+test('new campaign starts in the room at the false-start block tableau, no news', () => {
   const c = newCampaign(C, 1);
   assert.equal(c.at.node, 'hub.false-start');
-  assert.equal(c.at.activity?.phase, 'lobby');
+  assert.deepEqual([c.at.kind, c.at.activity], ['blocks', null]);
   assert.deepEqual(c.news, []);
   assert.ok(c.facts.seen.includes('hub.false-start'));
 });
@@ -121,11 +156,11 @@ test('new campaign starts AT the false-start blocks lobby, no news', () => {
 test('3 block games → reward item + two worlds unlock AT ONCE (one step), seq increasing', () => {
   let c = party();
   c = playOnce(c); c = playOnce(c);
-  assert.equal(c.facts.counters[COUNTER.blocksPlayed], 2);
+  assert.equal(c.facts.counters[COUNTER.played('blocks')], 2);
   assert.deepEqual(c.news, []);
   const before = c;
   c = playOnce(c);
-  assert.equal(c.facts.counters[COUNTER.blocksPlayed], 3);
+  assert.equal(c.facts.counters[COUNTER.played('blocks')], 3);
   assert.ok(c.facts.done.includes('hub.false-start'));
   assert.equal(holding(c.facts, 'elodie', 'old-key'), 1, 'the Old key, to the chooser');
   assert.ok(c.facts.flags.includes('false-start-over'));
@@ -135,22 +170,22 @@ test('3 block games → reward item + two worlds unlock AT ONCE (one step), seq 
   assert.equal(c.newsSeq, seqs.at(-1));
 });
 
-test('game.finished is derived exactly once per game, in the same step, any end reason', () => {
+test('round.finished is derived exactly once per game, in the same step, any end reason', () => {
   let c = party();
-  c = run(c, { t: 'activity', action: { t: 'start', id: 'e', now: 1 } });
+  c = run(c, { t: 'start', id: 'e', now: 1 });
   const playing = c;
   c = run(c, { t: 'activity', action: { t: 'endGame', id: 'e' } });
-  assert.equal(c.facts.counters[COUNTER.blocksPlayed], 1);
-  // replays of the finished state, or an injected game.finished event, never count twice
+  assert.equal(c.facts.counters[COUNTER.played('blocks')], 1);
+  // replays of the finished state, or an injected round.finished event, never count twice
   assert.equal(run(c, { t: 'activity', action: { t: 'endGame', id: 'e' } }), c);
-  assert.equal(run(c, { t: 'event', event: { t: 'game.finished', kind: 'blocks', node: 'hub.false-start', ranking: [], mode: 'marathon', size: 8, endReason: 'stuck' } }), c);
+  assert.equal(run(c, { t: 'event', event: { t: 'round.finished', kind: 'blocks', node: 'hub.false-start', ranking: [], endReason: 'stuck' } }), c);
   // the bell
   const timed = run(newCampaign(C, 5), { t: 'join', id: 'e', character: 'elodie' },
-    { t: 'activity', action: { t: 'config', id: 'e', patch: { mode: 'timed' } } },
-    { t: 'activity', action: { t: 'start', id: 'e', now: 1000 } });
+    { t: 'config', id: 'e', patch: { mode: 'timed' } },
+    { t: 'start', id: 'e', now: 1000 });
   const d = /** @type {number} */ (/** @type {any} */ (timed.at.activity)?.deadline);
   const rung = run(timed, { t: 'activity', action: { t: 'timeUp', deadline: d } });
-  assert.equal(rung.facts.counters[COUNTER.blocksPlayed], 1);
+  assert.equal(rung.facts.counters[COUNTER.played('blocks')], 1);
   assert.notEqual(playing.facts, c.facts);
 });
 
@@ -163,8 +198,7 @@ test('chain: both tableaux done → world done → third world unlocks', () => {
     c = run(c, { t: 'enter', id: 'e', node: w });
     assert.equal(c.at.node, w);
     c = run(c, { t: 'enter', id: 'e', node: `${w}.blocks` });
-    assert.equal(c.at.activity?.phase, 'lobby');
-    assert.deepEqual(c.at.activity?.order, ['e', 's'], 'block lobby seeded with the party');
+    assert.deepEqual([c.at.kind, c.at.activity], ['blocks', null], 'the room at the block tableau');
     c = playOnce(c);
     c = run(c, { t: 'back', id: 'e' }, { t: 'enter', id: 'e', node: `${w}.scene` });
     assert.equal(c.at.activity, null, 'scene stub: no block state');
@@ -177,12 +211,31 @@ test('chain: both tableaux done → world done → third world unlocks', () => {
   assert.ok(unlockedNews(c).includes('adult'));
 });
 
-test('node settings reach the block lobby (teens.blocks is timed)', () => {
+test('node settings reach the room at the tableau (teens.blocks is timed)', () => {
   let c = run(playOnce(playOnce(playOnce(party()))), { t: 'back', id: 'e' }, { t: 'enter', id: 'e', node: 'teens' }, { t: 'enter', id: 'e', node: 'teens.blocks' });
-  assert.equal(c.at.activity?.settings.mode, 'timed');
-  assert.equal(c.at.activity?.settings.timedSeconds, 120);
+  assert.equal(/** @type {any} */ (c.at.settings).mode, 'timed');
+  assert.equal(/** @type {any} */ (c.at.settings).timedSeconds, 120);
   c = run(c, { t: 'back', id: 'e' }, { t: 'enter', id: 'e', node: 'childhood' });
   assert.equal(c.at.node, 'teens', 'enter only a child of where the party is (childhood is a sibling)');
+});
+
+test('config: the host sets the tableau settings, not while a round runs; a round locks them in; leaving resets them', () => {
+  const c = party();
+  const timed = run(c, { t: 'config', id: 'e', patch: { mode: 'timed', size: 11 } });
+  assert.deepEqual(/** @type {any} */ (timed.at.settings), { ...DEFAULT_SETTINGS, mode: 'timed' }, 'invalid values ignored');
+  assert.equal(run(timed, { t: 'config', id: 's', patch: { size: 9 } }), timed, 'guest → refused');
+  assert.equal(run(timed, { t: 'config', id: 'e', patch: { mode: 'timed' } }), timed, 'no change → same campaign');
+  const playing = run(timed, { t: 'start', id: 'e', now: 1000 });
+  assert.equal(/** @type {any} */ (playing.at.activity).rules.mode, 'timed', 'start locks them in');
+  assert.equal(run(playing, { t: 'config', id: 'e', patch: { size: 9 } }), playing, 'running → refused');
+  const podium = run(playing, { t: 'activity', action: { t: 'endGame', id: 'e' } });
+  const next = run(podium, { t: 'config', id: 'e', patch: { size: 9 } });
+  assert.equal(/** @type {any} */ (next.at.settings).size, 9, 'the podium takes the next settings');
+  assert.equal(/** @type {any} */ (next.at.activity).rules.size, 8, '…and keeps showing the game played');
+  const again = run(next, { t: 'again', id: 'e', now: 2000 });
+  assert.equal(/** @type {any} */ (again.at.activity).rules.size, 9, 'again locks them in');
+  const back = run(next, { t: 'gm', id: 'e', op: { op: 'goto', node: 'hub' } }, { t: 'gm', id: 'e', op: { op: 'goto', node: C.start } });
+  assert.deepEqual(back.at.settings, DEFAULT_SETTINGS, 'leaving the tableau resets them to the content');
 });
 
 test('rewards apply once; replayable games re-enter, one-shot scenes do not', () => {
@@ -201,7 +254,7 @@ test('rewards apply once; replayable games re-enter, one-shot scenes do not', ()
 test('enter: host or the chooser only; locked nodes refused; back is host only and refused while playing', () => {
   let c = run(party(), { t: 'join', id: 'p', character: 'pierre' });
   c = playOnce(playOnce(playOnce(c)));
-  c = run(c, { t: 'activity', action: { t: 'newGame', id: 'e' } }, { t: 'activity', action: { t: 'start', id: 'e', now: 1 } });
+  c = run(c, { t: 'newGame', id: 'e' }, { t: 'start', id: 'e', now: 1 });
   assert.equal(run(c, { t: 'back', id: 'e' }), c, 'back refused while playing');
   c = run(c, { t: 'activity', action: { t: 'endGame', id: 'e' } });
   assert.equal(run(c, { t: 'back', id: 's' }), c, 'back: host only');
@@ -215,24 +268,36 @@ test('enter: host or the chooser only; locked nodes refused; back is host only a
   assert.equal(run(c, { t: 'enter', id: 's', node: 'childhood' }).at.node, 'childhood', 'the host overrides');
 });
 
-test('party: join in an open lobby seats them; mid-game they watch and join at the next lobby', () => {
-  let c = party();
-  assert.deepEqual(c.at.activity?.order, ['e', 's']);
-  assert.equal(c.at.activity?.hostId, 'e');
-  c = run(c, { t: 'activity', action: { t: 'start', id: 'e', now: 1 } }, { t: 'join', id: 'p', character: 'pierre' });
-  assert.ok(c.party.players.p && !c.at.activity?.players.p, 'mid-game joiner watches');
-  c = run(c, { t: 'activity', action: { t: 'endGame', id: 'e' } }, { t: 'activity', action: { t: 'newGame', id: 'e' } });
-  assert.deepEqual(c.at.activity?.order, ['e', 's', 'p'], 'seated at the next lobby');
+test('party: a round starts with every member present; mid-round joiners watch and play the next round from the room', () => {
+  let c = run(party(), { t: 'join', id: 'g', character: 'anna' }, { t: 'leave', id: 'g' });
+  assert.equal(c.at.activity, null, 'the room: no round');
+  assert.equal(run(c, { t: 'start', id: 's', now: 1 }), c, 'start: host only');
+  c = run(c, { t: 'start', id: 'e', now: 1 });
+  assert.deepEqual(c.at.activity?.order, ['e', 's'], 'every member who has not left, online or not');
+  assert.equal(run(c, { t: 'start', id: 'e', now: 2 }), c, 'a round already runs');
+  c = run(c, { t: 'join', id: 'p', character: 'pierre' });
+  assert.ok(c.party.players.p && !c.at.activity?.players.p, 'mid-round joiner watches');
+  c = run(c, { t: 'activity', action: { t: 'endGame', id: 'e' } });
+  const again = run(c, { t: 'again', id: 'e', now: 3 });
+  assert.deepEqual(again.at.activity?.order, ['e', 's', 'p'], 'again: everyone present, the newcomer included');
+  assert.notEqual(again.seed, c.seed, 'a new seed for every round');
+  assert.equal(run(c, { t: 'newGame', id: 's' }), c, 'back to the room: host only');
+  c = run(c, { t: 'newGame', id: 'e' });
+  assert.equal(c.at.activity, null);
+  assert.equal(run(c, { t: 'newGame', id: 'e' }), c, 'back to the room: from the podium only');
+  c = run(c, { t: 'start', id: 'e', now: 4 });
+  assert.deepEqual(c.at.activity?.order, ['e', 's', 'p'], 'the newcomer plays the round started from the room');
   assert.equal(run(c, { t: 'join', id: 'x', character: 'sol' }), c, 'character held → refused');
   assert.equal(run(c, { t: 'join', id: 'e', character: 'anna' }), c, 'id already in the party');
 });
 
 test('party: leave forwards to the game, passes the host, frees the character', () => {
-  let c = run(party(), { t: 'activity', action: { t: 'start', id: 'e', now: 1 } }, { t: 'leave', id: 'e' });
+  let c = run(party(), { t: 'start', id: 'e', now: 1 }, { t: 'leave', id: 'e' });
   assert.equal(c.party.players.e.left, true);
   assert.equal(c.party.hostId, 's');
   assert.equal(c.at.activity?.players.e.left, true, 'forwarded: marked left in the game');
-  assert.equal(c.at.activity?.hostId, 's');
+  assert.equal(run(c, { t: 'activity', action: { t: 'endGame', id: 's' } }).at.activity?.phase, 'finished',
+    'the game takes the party\'s new host');
   c = run(c, { t: 'join', id: 'e2', character: 'elodie' });
   assert.ok(c.party.players.e2, 'a left member\'s character is free');
   assert.equal(run(c, { t: 'leave', id: 'e' }), c, 'already left');
@@ -274,7 +339,7 @@ test('gm: host only; goto / unlock / lock (sticks) / setFlag / count / reset-nod
   assert.ok(c.facts.unlocked.includes('teens'));
   c = run(c, { t: 'gm', id: 'e', op: { op: 'goto', node: 'teens.blocks' } });
   assert.equal(c.at.node, 'teens.blocks');
-  assert.equal(c.at.activity?.phase, 'lobby');
+  assert.deepEqual([c.at.kind, c.at.activity], ['blocks', null]);
   c = run(c, { t: 'gm', id: 'e', op: { op: 'setFlag', flag: 'met-x', on: true } });
   assert.ok(c.facts.flags.includes('met-x'));
   c = run(c, { t: 'gm', id: 'e', op: { op: 'setFlag', flag: 'met-x', on: false } });
@@ -293,11 +358,10 @@ test('gm: host only; goto / unlock / lock (sticks) / setFlag / count / reset-nod
 // ---------------------------------------------------------------- migration + tolerance
 
 test('fromLegacyState: party rebuilt from the State, State kept as is, at the false start', () => {
-  let s = initState(9);
-  s = reduce(s, { t: 'join', id: 'a', character: 'anna' });
-  s = reduce(s, { t: 'join', id: 'b', character: 'sol' });
-  s = reduce(s, { t: 'start', id: 'a', now: 1 });
-  s = reduce(s, { t: 'leave', id: 'b' });
+  let s = /** @type {import('../shared/game.js').State} */ (startGame({ seed: 9, settings: {}, now: 1,
+    players: [{ id: 'a', character: 'anna' }, { id: 'b', character: 'sol' }] }));
+  s = reduceGame(s, { t: 'leave', id: 'b' }, { hostId: 'a' });
+  s = /** @type {any} */ ({ ...s, hostId: 'a', settings: s.rules }); // a v1 State kept its host and settings
   const c = fromLegacyState(s, C);
   assert.equal(c.at.node, C.start);
   assert.equal(c.at.activity, s);
@@ -306,7 +370,17 @@ test('fromLegacyState: party rebuilt from the State, State kept as is, at the fa
   assert.deepEqual(c.party.players.b, { id: 'b', character: 'sol', name: s.players.b.name, color: s.players.b.color, left: true });
   assert.deepEqual(c.news, []);
   const ended = reduceCampaign(c, { t: 'activity', action: { t: 'endGame', id: 'a' } }, C);
-  assert.equal(ended.facts.counters[COUNTER.blocksPlayed], 1, 'the migrated game counts when it ends');
+  assert.equal(ended.facts.counters[COUNTER.played('blocks')], 1, 'the migrated game counts when it ends');
+  assert.throws(() => fromLegacyState(/** @type {any} */ ({ ...s, phase: 'lobby' }), C), /can resume/, 'a v1 lobby: not resumable');
+});
+
+test('loadCampaign: a round its minigame cannot give a status (a lobby from an earlier version) is refused', () => {
+  const c = run(party(), { t: 'start', id: 'e', now: 1 });
+  const lobby = JSON.parse(JSON.stringify(c));
+  lobby.at.activity.phase = 'lobby';
+  assert.throws(() => loadCampaign(lobby, C), /can resume/);
+  const quiz = { ...lobby, at: { ...lobby.at, kind: 'quiz', activity: { kind: 'quiz', phase: 'lobby' } } };
+  assert.throws(() => loadCampaign(quiz, C), /can resume/);
 });
 
 test('content tolerance: unknown ids dropped, settle re-runs, nothing re-locked', () => {
@@ -330,38 +404,46 @@ test('content tolerance: unknown ids dropped, settle re-runs, nothing re-locked'
   assert.ok(l2.facts.unlocked.includes('bonus'));
   assert.ok(l2.news.some((n) => n.t === 'unlocked' && n.node === 'bonus' && n.seq > raw.newsSeq));
   // the party stood in a node that no longer exists → back at the start
-  const lost = loadCampaign({ ...raw, at: { node: 'removed.world', activity: null } }, C);
+  const lost = loadCampaign({ ...raw, at: { node: 'removed.world', kind: null, activity: null, settings: null } }, C);
   assert.equal(lost.at.node, C.start);
-  assert.equal(lost.at.activity?.phase, 'lobby');
+  assert.deepEqual([lost.at.kind, lost.at.activity], ['blocks', null], 'the room at the start');
 });
 
-test('determinism: same actions → same campaign (seeds advance on every block game created)', () => {
+test('determinism: same actions → same campaign (seeds advance on every round started)', () => {
   const a = playOnce(playOnce(party()));
   const b = playOnce(playOnce(party()));
   assert.deepEqual(a, b);
-  const c1 = run(playOnce(playOnce(playOnce(party()))), { t: 'back', id: 'e' }, { t: 'enter', id: 'e', node: 'teens' }, { t: 'enter', id: 'e', node: 'teens.blocks' });
-  const c2 = run(c1, { t: 'back', id: 'e' }, { t: 'enter', id: 'e', node: 'teens.blocks' });
-  assert.notEqual(c1.at.activity?.seed, c2.at.activity?.seed);
+  const r1 = run(party(), { t: 'start', id: 'e', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
+  const r2 = run(r1, { t: 'again', id: 'e', now: 2 });
+  assert.notEqual(blockSeed(r1), blockSeed(r2));
 });
 
 test('loadCampaign: a JSON round-trip (a server restart) is deep-equal in every phase — no reshuffled seed', () => {
-  const lobby = party();
-  const playing = run(lobby, { t: 'activity', action: { t: 'start', id: 'e', now: 1 } });
+  const room = party();
+  const playing = run(room, { t: 'start', id: 'e', now: 1 });
   const finished = run(playing, { t: 'activity', action: { t: 'endGame', id: 'e' } });
-  const withNews = playOnce(playOnce(playOnce(lobby)));
+  const withNews = playOnce(playOnce(playOnce(room)));
   const hub = run(withNews, { t: 'back', id: 'e' });
   const world = run(hub, { t: 'enter', id: 'e', node: 'childhood' });
   const scene = run(world, { t: 'enter', id: 'e', node: 'childhood.scene' });
   const fresh = newCampaign(C, 42);
   /** @type {Record<string, Campaign>} */
-  const cases = { fresh, lobby, playing, finished, withNews, hub, world, scene };
+  const cases = { fresh, room, playing, finished, withNews, hub, world, scene };
   for (const [name, c] of Object.entries(cases)) {
     const back = loadCampaign(JSON.parse(JSON.stringify(c)), C);
     assert.deepEqual(back, JSON.parse(JSON.stringify(c)), `${name}: deep-equal after load`);
     assert.equal(back.seed, c.seed, `${name}: seed kept`);
     // and the NEXT block game is the same one as without the restart
-    const next = (/** @type {Campaign} */ x) => run(x, { t: 'back', id: 'e' }, { t: 'gm', id: 'e', op: { op: 'goto', node: 'teens.blocks' } }).at.activity?.seed;
+    const next = (/** @type {Campaign} */ x) => blockSeed(run(x, { t: 'back', id: 'e' }, { t: 'gm', id: 'e', op: { op: 'goto', node: 'teens.blocks' } },
+      { t: 'start', id: 'e', now: 5 }));
     assert.equal(next(back), next(c), `${name}: next block game unchanged by the restart`);
   }
   assert.ok(withNews.news.length > 0, 'pending news survive too');
+});
+
+test('loadCampaign: a party member playing a character the roster does not have refuses the save', () => {
+  const saved = JSON.parse(JSON.stringify(party()));
+  saved.party.order.push('k');
+  saved.party.players.k = { id: 'k', character: 'konz', name: 'Konz', color: 5, left: false };
+  assert.throws(() => loadCampaign(saved, C), /"konz", not a character/);
 });

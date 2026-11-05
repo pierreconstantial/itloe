@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="/commun/base.css">
   <link rel="stylesheet" href="/commun/play-base.css">
   <link rel="stylesheet" href="./campaign.css">
-  <link rel="stylesheet" href="./quiz.css">
   <link rel="stylesheet" href="./social.css">
 </head>
 <body>
@@ -47,13 +46,13 @@
     <section id="view-waiting" class="menu" hidden>
       <h1 class="logo">Itloe</h1>
       <p id="waiting-text">A game is already running.</p>
-      <p class="dim">Watch it on the big screen! You can join when the host goes back to the room.</p>
+      <p class="dim">Watch it on the big screen!</p>
     </section>
 
     <section id="view-lobby" hidden>
       <div class="lobby-top">
         <div id="lobby-me"></div>
-        <ul id="lobby-players"></ul>
+        <ul id="lobby-players" class="player-list"></ul>
         <p id="lobby-settings" class="settings-summary"></p>
         <div class="lobby-actions">
           <button id="btn-settings-lobby" type="button" data-open="settings" hidden>⚙ Settings</button>
@@ -70,6 +69,14 @@
       </div>
     </section>
 
+    <section id="view-wait-lobby" hidden>
+      <div class="lobby-top">
+        <h2>The party room</h2>
+        <p>Élodie went through the portal. You're still here—watch her adventure on the TV.</p>
+      </div>
+      <!-- the walking pad docks here for players who stayed in the lobby -->
+    </section>
+
     <section id="view-place" hidden>
       <div class="place-top">
         <p id="place-kind" class="kicker"></p>
@@ -77,97 +84,21 @@
         <p id="place-intro" class="dim" hidden></p>
         <ul id="place-children"></ul>
         <p id="place-hint" class="place-hint" hidden>Walk into a door to enter</p>
+        <button id="btn-place-back" type="button" hidden>← Back to the apartment</button>
         <button type="button" class="bag-open" data-open="bag" hidden>🎒 Bag</button>
         <p id="place-wait" class="dim"></p>
       </div>
       <!-- #stick-pad moves here from the lobby while the party is on the hub or in a world -->
     </section>
 
-    <section id="view-quiz" hidden>
-      <header class="quiz-top">
-        <span id="quiz-progress" class="kicker">Quiz</span>
-        <span id="quiz-clock" class="clock" hidden></span>
-        <span id="quiz-score" class="quiz-score"></span>
-      </header>
-
-      <div id="quiz-lobby" class="quiz-pane">
-        <h2>Quiz!</h2>
-        <ul id="quiz-players" class="quiz-chips"></ul>
-        <p id="quiz-summary" class="settings-summary"></p>
-        <div class="lobby-actions">
-          <button id="btn-settings-quiz" type="button" data-open="settings" hidden>⚙ Settings</button>
-          <button id="quiz-start" type="button" class="primary" hidden>Start the quiz</button>
-        </div>
-        <p id="quiz-lobby-hint" class="dim"></p>
-      </div>
-
-      <div id="quiz-question" class="quiz-pane" hidden>
-        <p id="quiz-category" class="dim"></p>
-        <h2 id="quiz-q"></h2>
-        <div id="quiz-choices" class="quiz-choices"></div>
-        <form id="quiz-text-form" class="quiz-text-form" hidden>
-          <input id="quiz-text" type="text" lang="fr" inputmode="text" enterkeyhint="send" placeholder="Your answer"
-                 autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" aria-label="Your answer">
-          <button id="quiz-send" type="submit" class="primary">Send</button>
-        </form>
-        <p id="quiz-sent" class="quiz-sent" hidden>Answer sent ✓</p>
-        <ul id="quiz-answered" class="quiz-chips"></ul>
-      </div>
-
-      <div id="quiz-reveal" class="quiz-pane" hidden>
-        <p id="quiz-verdict" class="quiz-verdict"></p>
-        <p id="quiz-reveal-q" class="dim"></p>
-        <p class="quiz-correct">Answer: <strong id="quiz-answer"></strong></p>
-        <p id="quiz-anecdote" class="quiz-anecdote" hidden></p>
-        <ul id="quiz-results" class="quiz-results"></ul>
-        <button id="quiz-next" type="button" class="primary" hidden>Next question</button>
-        <p id="quiz-reveal-hint" class="dim">Waiting for the host…</p>
-      </div>
-
-      <div id="quiz-finished" class="quiz-pane" hidden>
-        <p id="quiz-finished-kicker" class="kicker"></p>
-        <h2>Quiz over!</h2>
-        <ol id="quiz-ranking" class="quiz-ranking"></ol>
-        <div class="lobby-actions">
-          <button id="quiz-again" type="button" class="primary" hidden>Play again</button>
-          <button id="quiz-back" type="button" hidden>Back</button>
-        </div>
-        <p id="quiz-finished-hint" class="dim">Waiting for the host…</p>
-      </div>
-    </section>
-
-    <section id="view-game" hidden>
-      <header id="topbar">
-        <div id="me-chip">
-          <span id="my-rank">①</span>
-          <span id="my-score">0</span>
-        </div>
-        <span id="clock-game" class="clock" hidden></span>
-        <div id="opponents"></div>
-      </header>
-      <div id="board-zone"><div id="board"></div></div>
-      <div id="tray">
-        <div class="slot" id="slot-0"></div>
-        <div class="slot" id="slot-1"></div>
-        <div class="slot" id="slot-2"></div>
-      </div>
-    </section>
-
-    <section id="view-over" class="menu" hidden>
-      <p id="over-icon" class="skull">💀</p>
-      <h2 id="over-title">Out of moves!</h2>
-      <p>Final score <strong id="final-score"></strong></p>
-      <p id="final-rank"></p>
-      <p id="over-clock-line" hidden>The others have <strong class="clock"></strong> left.</p>
-      <ul id="final-others"></ul>
-      <p class="dim">Eyes on the big screen!</p>
-    </section>
+    <!-- the running round: a minigame's screens, mounted here by the frame (minigames.js) -->
+    <div id="view-round" hidden></div>
 
     <section id="view-podium" class="menu" hidden>
       <p id="podium-kicker" class="kicker" hidden></p>
       <h2 id="podium-title">Podium</h2>
-      <p id="podium-best" class="dim" hidden></p>
-      <ol id="podium-list"></ol>
+      <div id="podium-lines" hidden></div>
+      <ol id="podium-list" class="player-list"></ol>
       <p id="podium-settings" class="settings-summary"></p>
       <button id="btn-settings-podium" type="button" data-open="settings" hidden>⚙ Settings</button>
       <div id="podium-actions" class="lobby-actions" hidden>

@@ -1,12 +1,11 @@
 // ☰ menu and the bottom sheets (menu, rules, invite, settings). Sheets are overlays outside
 // the view switcher in main.js, so a re-render from a new `view` never closes them.
 // Any element with data-open="<sheet>" opens that sheet; data-close closes them all.
-import { $, pieceEl } from './dom.js';
+import { $ } from './dom.js';
 import * as haptics from './haptics.js';
-import { RULES } from './rules.js';
+import { SCREENS } from './minigames.js';
 
 const SHEETS = ['menu', 'rules', 'invite', 'settings', 'gm', 'bag', 'chat'];
-const RULE_CELL = 10; // px per cell for rule illustrations
 
 /**
  * @param {{
@@ -111,17 +110,22 @@ async function loadInvite() {
   }
 }
 
+/** "How to play": every minigame's rules, under its title when more than one has some. */
 function renderRules() {
   const ul = $('rules-list');
   ul.replaceChildren();
-  RULES.forEach(({ piece, text }, i) => {
-    const li = document.createElement('li');
-    const icon = document.createElement('div');
-    icon.className = 'rule-icon';
-    icon.append(pieceEl(piece, (i % 4) + 1, RULE_CELL));
-    const p = document.createElement('p');
-    p.textContent = text;
-    li.append(icon, p);
-    ul.append(li);
-  });
+  const withRules = Object.values(SCREENS).filter((m) => m.rules?.length);
+  for (const m of withRules) {
+    if (withRules.length > 1) ul.append(Object.assign(document.createElement('li'), { className: 'rules-title', textContent: m.title }));
+    for (const { icon, text } of m.rules ?? []) {
+      const li = document.createElement('li');
+      const box = document.createElement('div');
+      box.className = 'rule-icon';
+      box.append(icon());
+      const p = document.createElement('p');
+      p.textContent = text;
+      li.append(box, p);
+      ul.append(li);
+    }
+  }
 }

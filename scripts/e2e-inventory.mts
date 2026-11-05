@@ -9,7 +9,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, Client, finish, HTTP, sleep } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, quizOf, roomOf, settingsOf, sleep } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -27,7 +27,7 @@ let log = '';
 async function boot(fresh = false): Promise<void> {
   log = '';
   server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK },
+    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK, ITLOE_CONTENT: 'sample' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   server.stdout!.on('data', (d) => { log += d; });
@@ -83,17 +83,17 @@ const gm = (c: Client, op: object) => c.send({ t: 'gm', op });
 async function playQuiz(host: Client, players: { c: Client, right: boolean }[], T: Client): Promise<void> {
   let i = T.mark();
   host.send({ t: 'config', patch: { count: 3, mode: 'choice' } });
-  await T.waitFor((m) => m.t === 'view' && m.quiz?.settings.mode === 'choice' && m.quiz.settings.count === 3, i);
+  await T.waitFor((m) => m.t === 'view' && settingsOf(m)?.mode === 'choice' && settingsOf(m).count === 3, i);
   i = T.mark(); host.send({ t: 'start' });
-  let q = (await T.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'question', i)).quiz;
+  let q = quizOf(await T.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'question', i));
   for (let r = 0; r < 3; r++) {
     const bq = BANK.find((x) => x.q === q.round.question.q)!;
     const right = q.round.question.choices.indexOf(bq.choices![bq.answer as number]);
     i = T.mark();
     for (const p of players) p.c.send({ t: 'answer', choice: p.right ? right : (right + 1) % 4 });
-    await T.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'reveal' && m.quiz.round.index === r, i);
+    await T.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'reveal' && quizOf(m).round.index === r, i);
     i = T.mark(); host.send({ t: 'next' });
-    q = (await T.waitFor((m) => m.t === 'view' && (m.quiz?.phase === 'finished' || (m.quiz?.phase === 'question' && m.quiz.round.index === r + 1)), i)).quiz;
+    q = quizOf(await T.waitFor((m) => m.t === 'view' && (quizOf(m)?.phase === 'finished' || (quizOf(m)?.phase === 'question' && quizOf(m).round.index === r + 1)), i));
   }
 }
 
@@ -117,9 +117,9 @@ try {
   for (let n = 1; n <= 3; n++) {
     let i = P.mark();
     P.send({ t: n === 1 ? 'start' : 'again' });
-    await P.waitFor((m) => m.t === 'view' && m.state?.phase === 'playing', i);
+    await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
     i = P.mark(); P.send({ t: 'endGame' });
-    await P.waitFor((m) => m.t === 'view' && m.state?.phase === 'finished', i);
+    await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i);
   }
   let k = await until(T, (x) => !!x.facts.inventory.elodie?.['old-key']);
   check(k.facts.inventory.elodie['old-key'] === 1 && !k.facts.inventory.pierre && !k.facts.inventory.sol, 'false start done → the old key to the chooser only');
@@ -169,7 +169,7 @@ try {
   gm(P, { op: 'unlock', node: 'childhood' });
   gm(P, { op: 'unlock', node: QUIZ });
   gm(P, { op: 'goto', node: QUIZ });
-  await T.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'lobby', i);
+  await T.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz', i);
   await playQuiz(P, [{ c: P, right: true }, { c: E, right: false }, { c: S, right: false }], T);
   k = await until(T, (x) => x.facts.done.includes(QUIZ));
   check(k.facts.inventory.pierre?.ticket === 1 && !k.facts.inventory.elodie?.ticket && !k.facts.inventory.sol?.ticket, 'quiz won by Pierre → the ticket to the winner only');
@@ -184,11 +184,11 @@ try {
   T = await screen();
   i = T.mark();
   gm(P, { op: 'unlock', node: 'childhood' }); gm(P, { op: 'unlock', node: QUIZ }); gm(P, { op: 'goto', node: QUIZ });
-  await T.waitFor((m) => m.t === 'view' && m.quiz?.phase === 'lobby', i);
+  await T.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz', i);
   // P and E answer right at the same moment → same points → a tie at rank 1
   await playQuiz(P, [{ c: P, right: true }, { c: E, right: true }, { c: S, right: false }], T);
   k = await until(T, (x) => x.facts.done.includes(QUIZ));
-  const ranks = [...T.msgs].reverse().find((m) => m.t === 'view' && m.quiz)?.quiz;
+  const ranks = quizOf([...T.msgs].reverse().find((m) => m.t === 'view' && quizOf(m)));
   const tie = ranks.players[idP].score === ranks.players[idE].score;
   const tickets = [k.facts.inventory.pierre?.ticket ?? 0, k.facts.inventory.elodie?.ticket ?? 0, k.facts.inventory.sol?.ticket ?? 0];
   check(tie ? tickets.join() === '1,1,0' : tickets.filter((n) => n === 1).length === 1,
