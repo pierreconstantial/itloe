@@ -1,5 +1,6 @@
-// Saves written before the minigame kind was stored next to the round still resume, and a save whose
-// minigame this release does not have stops the boot and is left untouched. Real server, scratch data.
+// Saves written before the minigame kind was stored next to the round still resume, a save whose
+// minigame this release does not have stops the boot and is left untouched, and a save it cannot resume (a
+// lobby from an earlier version) starts a fresh evening and is quarantined. Real server, scratch data.
 // The fixtures in test/fixtures/ are saves as the server wrote them before the kind was stored.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -153,4 +154,19 @@ test('a save with a minigame this release does not have stops the boot and is le
     assert.equal(await readFile(join(app.varDir, 'bloko.state.json'), 'utf8'), text, `${label}: the save is untouched`);
     assert.deepEqual(await readdir(app.varDir), ['bloko.state.json'], `${label}: nothing quarantined or written next to it`);
   }
+});
+
+test('a save holding a round in a lobby (an earlier version) starts a fresh evening and is quarantined, not deleted', { timeout: 20_000 }, async (t) => {
+  const v2 = JSON.parse(await fixture('save-v2-blocks.json'));
+  v2.campaign.at.activity.phase = 'lobby';
+  const text = JSON.stringify(v2);
+  const app = await boot(t, text);
+  const view = await firstView(app.port, app.running, app.log);
+  assert.equal(view.round, null, 'a fresh evening: the room at the start, no round');
+  assert.deepEqual(view.campaign.party.order, [], '…with nobody in it yet');
+  assert.match(app.log(), /new evening \(save could not be loaded: the saved round is not one this release can resume/);
+  const files = await readdir(app.varDir);
+  const kept = files.filter((f) => f.startsWith('bloko.state.json.corrupt-'));
+  assert.equal(kept.length, 1, `the old save is quarantined next to the new one (${files.join(', ')})`);
+  assert.equal(await readFile(join(app.varDir, kept[0]), 'utf8'), text, 'byte-identical');
 });
