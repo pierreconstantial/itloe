@@ -15,7 +15,7 @@ import { SAMPLE_CONTENT } from '../shared/campaign/index.js';
 
 /** A node's title (the server runs the sample content). @param {string} id */
 const C_TITLE = (id: string): string => SAMPLE_CONTENT.nodes[id].title;
-import { blocksOf, check, Client, finish, HTTP, legalMoves, quizOf, roomOf, sleep, SLOW, SOCKET_PROBE, TEARDOWN_PROBE } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, legalMoves, quizOf, roomOf, settled, sleep, SLOW, SOCKET_PROBE, TEARDOWN_PROBE } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -566,7 +566,16 @@ try {
   await sleep(2500);
   const c1 = await tv.js('window.bloko.cutscene()'), c2 = await tv2.js('window.bloko.cutscene()');
   check(c1.moments === 1 && c2.moments === 1 && !c1.playing && !c2.playing, `both TVs played the moment exactly once, no replay (TV1 ${c1.moments}, TV2 ${c2.moments})`);
-  check(c1.acks + c2.acks === 1, `ack sent once across the two TVs (TV1 ${c1.acks}, TV2 ${c2.acks})`);
+  // usually one TV acks and the other sees it land (a random delay each, cutscenes.js); under load both may
+  check(c1.acks + c2.acks >= 1 && c1.acks <= 1 && c2.acks <= 1, `the moment was acked, at most once per TV (TV1 ${c1.acks}, TV2 ${c2.acks})`);
+  const ackTv = new Client('ack-tv'); await ackTv.open(); ackTv.send({ t: 'hello', role: 'screen' });
+  await ackTv.waitFor((m) => m.t === 'view');
+  const evening = JSON.stringify(cv());
+  i = A2.mark(); ackTv.send({ t: 'ack', upTo: pending.at(-1)?.seq });
+  await settled([ackTv], [A2]);
+  check(!A2.since(i).some((m) => m.t === 'view') && JSON.stringify(cv()) === evening,
+    'another ack of the same news changes nothing on the server (no view, news and newsSeq kept)');
+  ackTv.ws.close();
   check(c1.maxShown === pending.at(-1)?.seq && c2.maxShown === pending.at(-1)?.seq, `both remember the last seq shown (${c1.maxShown}, ${c2.maxShown})`);
   await tv2.close(); tv2 = null;
   await tv.front();

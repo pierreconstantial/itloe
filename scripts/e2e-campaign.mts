@@ -9,7 +9,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, HTTP, quizOf, roomOf, sleep } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, quizOf, roomOf, roundTrip, settled, sleep } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -59,20 +59,6 @@ const errOf = async (c: Client, msg: object): Promise<string | null> => {
   c.send(msg);
   try { return (await c.waitFor((m) => m.t === 'err', i, 5000)).code; } catch { return null; }
 };
-
-/** A round trip on one socket: an `enter` of no node changes nothing and is answered with an err, after
- *  everything the server sent this socket before. */
-async function roundTrip(c: Client): Promise<void> {
-  const i = c.mark();
-  c.send({ t: 'enter', node: '' });
-  await c.waitFor((m) => m.t === 'err', i, 5000);
-}
-/** Everything the senders sent has been handled, and the receivers have got whatever it caused: what a
- *  check reads then is final, with no fixed wait (a round trip per sender, then per receiver). */
-async function settled(senders: Client[], receivers: Client[]): Promise<void> {
-  await Promise.all(senders.map(roundTrip));
-  await Promise.all(receivers.filter((c) => !senders.includes(c)).map(roundTrip));
-}
 
 let room = '';
 async function player(label: string, character: string): Promise<{ c: Client, id: string }> {

@@ -128,6 +128,20 @@ export class Client {
   }
 }
 
+/** A round trip on one socket: an `enter` of no node changes nothing and is answered with an err, after
+ *  everything the server sent this socket before. */
+export async function roundTrip(c: Client): Promise<void> {
+  const i = c.mark();
+  c.send({ t: 'enter', node: '' });
+  await c.waitFor((m) => m.t === 'err', i, 5000);
+}
+/** Everything the senders sent has been handled, and the receivers have got whatever it caused: what a
+ *  check reads then is final, with no fixed wait (a round trip per sender, then per receiver). */
+export async function settled(senders: Client[], receivers: Client[]): Promise<void> {
+  await Promise.all(senders.map(roundTrip));
+  await Promise.all(receivers.filter((c) => !senders.includes(c)).map(roundTrip));
+}
+
 export function legalMoves(state: any, id: string): { piece: number; x: number; y: number }[] {
   const p = state.players[id];
   const out: { piece: number; x: number; y: number }[] = [];
