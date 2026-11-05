@@ -221,7 +221,22 @@ try {
   q = await untilQuiz(T, (x) => x.phase === 'question' && x.round.index === 2, i);
   question = byText.get(q.round.question.q)!;
   shown.push(question);
+
+  // A new device has only the room code and character, not the old device's stored id.
+  const scoreBeforeReclaim = q.players[idP].score;
+  i = T.mark(); P.ws.close();
+  await T.waitFor((m) => m.t === 'view' && !m.online.includes(idP), i);
+  const reclaimed = await player('P-new-device', 'pierre');
+  P = reclaimed.c;
+  q = await untilQuiz(P, (x) => x.phase === 'question' && x.round.index === 2);
+  check(reclaimed.id === idP && scoreBeforeReclaim > 0 && q.players[idP].score === scoreBeforeReclaim,
+    `offline quiz character reclaimed on another device → same id and score (${scoreBeforeReclaim})`);
+  i = T.mark();
   P.send(answerFor(q.round, question, true));
+  q = await untilQuiz(T, (x) => x.phase === 'question' && x.round?.answered.includes(idP), i);
+  check(q.round.answers === null, 'reclaimed device can answer; verdicts stay hidden while the question is open');
+  leak = leakFree(question);
+  check(leak.ok && leak.frames > 0, `no answer on the wire across the reclaim (${leak.frames} question frames grepped)${leak.leak ? ` LEAK: ${leak.leak}` : ''}`);
   E.send(answerFor(q.round, question, true));
   q = await untilQuiz(T, (x) => x.phase === 'reveal' && x.round.index === 2, i);
   i = T.mark(); P.send({ t: 'next' });
