@@ -9,7 +9,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, HTTP, quizOf, roomOf, sleep, SLOW } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, HTTP, quizOf, roomOf, sleep } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -58,6 +58,20 @@ const errOf = async (c: Client, msg: object): Promise<string | null> => {
   c.send(msg);
   try { return (await c.waitFor((m) => m.t === 'err', i, 600)).code; } catch { return null; }
 };
+
+/** A round trip on one socket: an `enter` of no node changes nothing and is answered with an err, after
+ *  everything the server sent this socket before. */
+async function roundTrip(c: Client): Promise<void> {
+  const i = c.mark();
+  c.send({ t: 'enter', node: '' });
+  await c.waitFor((m) => m.t === 'err', i, 5000);
+}
+/** Everything the senders sent has been handled, and the receivers have got whatever it caused: what a
+ *  check reads then is final, with no fixed wait (a round trip per sender, then per receiver). */
+async function settled(senders: Client[], receivers: Client[]): Promise<void> {
+  await Promise.all(senders.map(roundTrip));
+  await Promise.all(receivers.filter((c) => !senders.includes(c)).map(roundTrip));
+}
 
 let room = '';
 async function player(label: string, character: string): Promise<{ c: Client, id: string }> {
@@ -194,15 +208,15 @@ try {
 
   // ---------- acks by seq, two TVs ----------
   const all = camp(T1).news.length;
-  i = T1.mark(); P.send({ t: 'ack', upTo: 99 }); await sleep(300);
+  i = T1.mark(); P.send({ t: 'ack', upTo: 99 }); await settled([P], [T1]);
   check(camp(T1).news.length === all, 'ack from a phone → ignored (screens only)');
-  T1.send({ t: 'ack' }); await sleep(300);
+  T1.send({ t: 'ack' }); await settled([T1], [T1]);
   check(camp(T1).news.length === all, 'ack without upTo → ignored');
   i = T1.mark(); T1.send({ t: 'ack', upTo: 1 });
   k = await until(T1, (x) => x.news.length === all - 1, i);
   check(k.news.every((n: any) => n.seq > 1), 'TV 1 acks upTo 1 → only seq 1 leaves the queue');
   await restartSame('between two acks');
-  i = T2.mark(); T2.send({ t: 'ack', upTo: 1 }); await sleep(300);
+  i = T2.mark(); T2.send({ t: 'ack', upTo: 1 }); await settled([T2], [T2]);
   check(camp(T2).news.length === all - 1, 'TV 2 acks the same seq again → no-op (nothing lost)');
   i = T2.mark(); T2.send({ t: 'ack', upTo: all });
   k = await until(T2, (x) => x.news.length === 0, i);
@@ -217,7 +231,8 @@ try {
   await restartSame('on the hub');
 
   const at = () => camp(T1).at.node;
-  const step = async (c: Client, p: { x: number, y: number }) => { c.send({ t: 'pos', ...p, dir: 'up', moving: true }); await sleep(250); };
+  /** A walker's step; what it caused (a door entered, a zone counted) has reached T1 when it returns. */
+  const step = async (c: Client, p: { x: number, y: number }) => { c.send({ t: 'pos', ...p, dir: 'up', moving: true }); await settled([c], [T1]); };
   // door points come from the served content, so a content edit never breaks this test
   const content = await (await fetch(`${HTTP}/api/content`)).json();
   const door = (id: string, fx = 0.5, fy = 0.5) => { const d = content.nodes[id].door; return { x: d.x + d.w * fx, y: d.y + d.h * fy }; };
@@ -278,13 +293,13 @@ try {
   let N2 = await rejoin('N2', idN); // back online: the quiz below reveals once every seated player answered
   const everyone = () => [P, E, N2, T1, T2];
   const marks = () => everyone().map((c) => c.mark());
-  /** The first `t` event each client got since `from`, or null for a client that got none. */
-  const relayed = (t: string, from: number[]) =>
-    Promise.all(everyone().map((c, j) => c.waitFor((m) => m.t === t, from[j], 400).catch(() => null)));
-  const none = async (t: string, from: number[]) => {
-    await sleep(400 * SLOW);
-    return everyone().every((c, j) => !c.since(from[j]).some((m) => m.t === t));
+  /** Once what `senders` sent has settled: the first `t` event each client got since `from`, or null for a
+   *  client that got none. */
+  const relayed = async (t: string, from: number[], senders: Client[]) => {
+    await settled(senders, everyone());
+    return everyone().map((c, j) => c.since(from[j]).find((m) => m.t === t) ?? null);
   };
+  const none = async (t: string, from: number[], senders: Client[]) => (await relayed(t, from, senders)).every((m) => m === null);
   const GAP = 700; // past the per-socket limits: say and emote one per 650 ms, interact one per 700 ms
   const cooldown = async (playerId: string, kind: 'social' | 'interact') => {
     const last = T1.msgs.findLast((m) => m.playerId === playerId
@@ -296,7 +311,7 @@ try {
   let from = marks();
   let t0 = Date.now();
   E.send({ t: 'say', text: '  Bonne\n  fête\tÉlodie !  ' });
-  let got = await relayed('say', from);
+  let got = await relayed('say', from, [E]);
   check(got.every((m) => m?.playerId === idE && m.text === 'Bonne fête Élodie !' && m.at >= t0 && m.at <= Date.now()),
     'say → relayed to every client, screens and phones (the sender too), with playerId, the cleaned text and at');
   const stranger = new Client('stranger'); await stranger.open();
@@ -306,38 +321,38 @@ try {
   from = marks();
   stranger.send({ t: 'say', text: 'intrus' }); stranger.send({ t: 'emote', kind: 'victory' });
   T1.send({ t: 'say', text: 'écran' }); T1.send({ t: 'emote', kind: 'victory' });
-  check(await none('say', from) && await none('emote', from), 'say and emote from a socket that is not a party member (a stranger, a TV) → dropped');
+  check(await none('say', from, [stranger, T1]) && await none('emote', from, [stranger, T1]), 'say and emote from a socket that is not a party member (a stranger, a TV) → dropped');
   from = marks();
   for (const text of ['é'.repeat(101), '', '   ', '\u0007\u0007', 42]) E.send({ t: 'say', text });
-  check(await none('say', from), 'say with over-long (101 characters), empty, blank, control-only or non-string text → dropped');
+  check(await none('say', from, [E]), 'say with over-long (101 characters), empty, blank, control-only or non-string text → dropped');
   await cooldown(idE, 'social');
   from = marks();
   E.send({ t: 'say', text: '🎂'.repeat(100) });
-  got = await relayed('say', from);
+  got = await relayed('say', from, [E]);
   check(got.every((m) => m?.text === '🎂'.repeat(100)), 'say with 100 characters (counted as code points) → relayed');
 
   await cooldown(idE, 'social');
   i = T1.mark();
   E.send({ t: 'say', text: 'un' }); E.send({ t: 'say', text: 'deux' }); E.send({ t: 'emote', kind: 'victory' });
   P.send({ t: 'say', text: 'trois' });
-  await sleep(400 * SLOW);
+  await settled([E, P], [T1]);
   const burst = T1.since(i).filter((m) => m.t === 'say' || m.t === 'emote').map((m) => m.text ?? m.kind);
   check(burst.join() === 'un,trois', `rate limit: one say or emote per 650 ms per socket; a second say and an emote right after are dropped, another phone is not held back (${burst.join()})`);
   await cooldown(idE, 'social');
   from = marks();
   E.send({ t: 'say', text: 'quatre' });
-  check((await relayed('say', from)).every((m) => m?.text === 'quatre'), '…and after 650 ms the same phone speaks again');
+  check((await relayed('say', from, [E])).every((m) => m?.text === 'quatre'), '…and after 650 ms the same phone speaks again');
 
   await cooldown(idN, 'social');
   from = marks();
   t0 = Date.now();
   N2.send({ t: 'emote', kind: 'annoy' });
-  got = await relayed('emote', from);
+  got = await relayed('emote', from, [N2]);
   check(got.every((m) => m?.playerId === idN && m.kind === 'annoy' && m.at >= t0), 'emote → relayed to every client with playerId, kind and at');
   await cooldown(idN, 'social');
   from = marks();
   N2.send({ t: 'emote', kind: 'dance' }); N2.send({ t: 'emote' });
-  check(await none('emote', from), 'emote of an unknown kind (or none) → dropped');
+  check(await none('emote', from, [N2]), 'emote of an unknown kind (or none) → dropped');
 
   // the history keeps the last 30 lines: 33 lines from three phones, each at its own pace
   for (let n = 0; n < 11; n++) {
@@ -365,7 +380,7 @@ try {
     await cooldown(idE, 'interact');
     const from = marks();
     E.send({ t: 'interact', object });
-    return relayed('interact', from);
+    return relayed('interact', from, [E]);
   };
   const isRelayed = (got: any[]) => got.every((m) => m?.playerId === idE && m.object === 'table' && typeof m.at === 'number');
   const isDropped = (got: any[]) => got.every((m) => m === null);
@@ -379,7 +394,7 @@ try {
   await cooldown(idE, 'interact');
   i = T1.mark();
   E.send({ t: 'interact', object: 'table' }); E.send({ t: 'interact', object: 'table' });
-  await sleep(400 * SLOW);
+  await settled([E], [T1]);
   check(T1.since(i).filter((m) => m.t === 'interact').length === 1, 'rate limit: one interact per 700 ms per socket');
   check(isDropped(await interact('sofa')), 'interact naming another object than the one nearby → dropped');
   await step(E, floor);
@@ -393,12 +408,12 @@ try {
   // during a round, pos belongs to its minigame's game area, apart from the room's positions; blocks lets nobody walk
   i = T1.mark();
   E.send({ t: 'pos', ...floor, dir: 'up', moving: true });
-  await sleep(400 * SLOW);
+  await settled([E], [T1]);
   check(!T1.since(i).some((m) => m.t === 'pos'), 'during a running block game, a pos is dropped (blocks lets nobody walk)');
   const T4 = new Client('T4'); await T4.open();
   T4.send({ t: 'hello', role: 'screen' });
   await T4.waitFor((m) => m.t === 'chatHistory');
-  await sleep(200 * SLOW);
+  await roundTrip(T4); // after the positions a hello sends
   check(!T4.msgs.some((m) => m.t === 'pos'), "a TV saying hello during the round gets the round's positions: none in a block game");
   T4.ws.close();
   i = P.mark(); P.send({ t: 'endGame' });
