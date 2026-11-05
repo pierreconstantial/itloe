@@ -16,7 +16,7 @@ const PICKER_SCALE = 5; // 16 px sprites → 80 px
 /**
  * Who holds which character: the campaign party (slice 3, exists on the hub too) or, without a
  * campaign, the block State's players. Both have this shape.
- * @typedef {{ order: string[], players: Record<string, { character?: string | null, left?: boolean }> }} Roster
+ * @typedef {{ order: string[], players: Record<string, { character: CharacterId, left?: boolean }> }} Roster
  */
 
 /**
@@ -31,7 +31,7 @@ export function pickStates(roster, online) {
   const holders = new Map();
   for (const id of roster.order) {
     const p = roster.players[id];
-    if (p && !p.left && p.character) holders.set(p.character, id);
+    if (p && !p.left) holders.set(p.character, id);
   }
   /** @type {Map<CharacterId, PickState>} */
   const states = new Map();

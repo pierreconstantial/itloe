@@ -114,12 +114,8 @@ test('gm give/take: host only; unknown item, unknown character, bad count or tak
 
 // ---------------------------------------------------------------- migration + tolerance
 
-test('loadCampaign: old shared facts.items → the chooser, one each; items no longer in the catalogue dropped', () => {
+test('loadCampaign: items no longer in the catalogue dropped', () => {
   const c = newCampaign(SAMPLE_CONTENT, 1);
-  const old = JSON.parse(JSON.stringify({ ...c, facts: { ...c.facts, inventory: undefined, items: ['old-key', 'reward-1', 'old-key'] } }));
-  const l = loadCampaign(old, SAMPLE_CONTENT);
-  assert.deepEqual(l.facts.inventory, { elodie: { 'old-key': 1 } });
-  assert.equal(/** @type {any} */ (l.facts).items, undefined, 'facts.items is gone');
   const later = JSON.parse(JSON.stringify({ ...c, facts: { ...c.facts, inventory: { sol: { photo: 2, removed: 1 }, anna: { gone: 3 } } } }));
   assert.deepEqual(loadCampaign(later, SAMPLE_CONTENT).facts.inventory, { sol: { photo: 2 } }, 'unknown items dropped, empty characters too');
   // a JSON round trip of a campaign with an inventory is unchanged

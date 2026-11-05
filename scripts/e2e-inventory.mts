@@ -1,12 +1,12 @@
 // Inventory end-to-end (Contract F, server side) over real sockets and a server this script kill -9s:
 // rewards land in the right inventory (chooser / winner incl. a tie / all non-left members), survive
 // kill -9 and a reclaim from another device, the host's gm give/take work and are refused for an unknown
-// item or character, for taking more than held, and for a non-host; an older save's flat `items` migrates
-// to the chooser. Uses the sample content (old key → chooser, ticket → quiz winner, photo → all).
+// item or character, for taking more than held, and for a non-host. Uses the sample content (old key →
+// chooser, ticket → quiz winner, photo → all).
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR, a fixed quiz bank). Usage:
 //   PORT=3197 node scripts/e2e-inventory.mts      (never 3131: that's the live server)
 import { spawn, type ChildProcess } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { blocksOf, check, Client, finish, HTTP, quizOf, roomOf, settingsOf, sleep } from './e2e-lib.mts';
@@ -194,20 +194,7 @@ try {
   check(tie ? tickets.join() === '1,1,0' : tickets.filter((n) => n === 1).length === 1,
     tie ? `a tie at rank 1 → a ticket for EVERY co-winner (${tickets})` : `no exact tie this run (speed bonus differed by a ms): one winner, one ticket (${tickets})`);
 
-  // ---------- an older save: flat facts.items migrate to the chooser ----------
   for (const c of [P, E, S, T]) c.ws.close();
-  await kill9();
-  const FILE = join(VAR, 'bloko.state.json');
-  const env = JSON.parse(readFileSync(FILE, 'utf8'));
-  delete env.campaign.facts.inventory;
-  env.campaign.facts.items = ['old-key', 'unicorn']; // pre-Contract F shape; an unknown item is dropped
-  writeFileSync(FILE, JSON.stringify(env));
-  await boot();
-  T = await screen();
-  const migrated = inv(T);
-  check(migrated.elodie?.['old-key'] === 1 && !JSON.stringify(migrated).includes('unicorn') && !('items' in camp(T).facts),
-    `old save: flat items → the chooser's inventory, unknown items dropped (${JSON.stringify(migrated)})`);
-  T.ws.close();
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${log}`);
 } finally {

@@ -37,7 +37,7 @@ import { ranking } from '../ranking.js';
  *   deadline: number, answers: Record<string, Answer>, credited: boolean }} Round
  * perm: displayed position → the bank's choice index (choices shuffled per round); null for text
  */
-/** @typedef {{ id: string, character: CharacterId | null, name: string, color: number, score: number, correct: number, left: boolean }} QuizPlayer */
+/** @typedef {{ id: string, character: CharacterId, name: string, color: number, score: number, correct: number, left: boolean }} QuizPlayer */
 /**
  * @typedef {{
  *   kind: 'quiz',
@@ -372,7 +372,7 @@ export const QUIZ_RULES = {
     }
     if (right > 0) counters[QUIZ_COUNTER.nodeCorrect(node)] = right;
     return {
-      ranking: ranking.map((r) => ({ character: s.players[r.id].character ?? null, score: r.score, rank: r.rank })),
+      ranking: ranking.map((r) => ({ character: s.players[r.id].character, score: r.score, rank: r.rank })),
       endReason: s.endReason, counters, asked: [...s.asked],
     };
   },

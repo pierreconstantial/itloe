@@ -43,7 +43,7 @@ function fullExcept(empties) {
  * @returns {State}
  */
 function playing(over = {}, seed = 42) {
-  const p = { ...newPlayer('a', 'Ana', 1, SIZE), ...over };
+  const p = { ...newPlayer('a', 'Ana', 1, SIZE, 'pierre'), ...over };
   return { ...started(['pierre']), seed, order: ['a'], players: { a: p } };
 }
 
@@ -264,8 +264,8 @@ test('stuck → done; last player done → finished', () => {
 });
 
 test('one player stuck, the other alive → still playing', () => {
-  const a = { ...newPlayer('a', 'Ana', 1, SIZE), board: isolatedHolesBoard(), hand: /** @type {(string|null)[]} */ (['dot', 'h2', null]) };
-  const b = newPlayer('b', 'Bob', 2, SIZE);
+  const a = { ...newPlayer('a', 'Ana', 1, SIZE, 'pierre'), board: isolatedHolesBoard(), hand: /** @type {(string|null)[]} */ (['dot', 'h2', null]) };
+  const b = newPlayer('b', 'Bob', 2, SIZE, 'elodie');
   b.hand = ['dot', 'dot', 'dot'];
   /** @type {State} */
   const s = { ...started(['pierre']), order: ['a', 'b'], players: { a, b } };
@@ -288,10 +288,10 @@ test('ranking: ties share a rank, standard competition (1,1,3), join order withi
   const s = started(['pierre']);
   s.order = ['a', 'b', 'c', 'd'];
   s.players = {
-    a: { ...newPlayer('a', 'Ana', 1, SIZE), score: 10 },
-    b: { ...newPlayer('b', 'Bob', 2, SIZE), score: 30 },
-    c: { ...newPlayer('c', 'Cal', 3, SIZE), score: 30 },
-    d: { ...newPlayer('d', 'Dan', 4, SIZE), score: 5 },
+    a: { ...newPlayer('a', 'Ana', 1, SIZE, 'pierre'), score: 10 },
+    b: { ...newPlayer('b', 'Bob', 2, SIZE, 'elodie'), score: 30 },
+    c: { ...newPlayer('c', 'Cal', 3, SIZE, 'sol'), score: 30 },
+    d: { ...newPlayer('d', 'Dan', 4, SIZE, 'anna'), score: 5 },
   };
   assert.deepEqual(ranking(s), [
     { id: 'b', rank: 1, score: 30 },

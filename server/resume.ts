@@ -4,14 +4,9 @@
 import { minigame } from '../shared/minigames.js';
 import type { Campaign } from './campaign.ts';
 
-/** Envelope `savedAt` → epoch ms. Current envelopes store a number; older ones an ISO string or nothing. */
+/** Envelope `savedAt` → epoch ms, or null when it isn't one. */
 export function savedAtMs(savedAt: unknown): number | null {
-  if (typeof savedAt === 'number') return Number.isFinite(savedAt) ? savedAt : null;
-  if (typeof savedAt === 'string') {
-    const ms = Date.parse(savedAt);
-    return Number.isFinite(ms) ? ms : null;
-  }
-  return null;
+  return typeof savedAt === 'number' && Number.isFinite(savedAt) ? savedAt : null;
 }
 
 /** The round's live deadline (a timed block game being played, an open quiz question), or null. */

@@ -40,11 +40,3 @@ test('fetches once per version; a new version refetches and notifies', async () 
   assert.equal(src.get(), edited);
   assert.equal(changes.length, 2);
 });
-
-test('a server without contentVersion: fetched once', async () => {
-  const s = server({ v1: SAMPLE_CONTENT });
-  const src = createContentSource({ fetch: s.fetch });
-  await src.sync(undefined);
-  await src.sync(undefined);
-  assert.equal(s.calls(), 1);
-});

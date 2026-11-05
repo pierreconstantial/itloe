@@ -67,6 +67,8 @@ Either way, allow the port through the Windows firewall when asked.
 
 ## Hosted production
 
+Until the evening this is a development deployment; a change may break it.
+
 Infrastructure owns the LXC, Node 24 runtime, systemd service, public HTTPS/WebSocket proxy, secrets, backups and deployment timer. The game runs as an unprivileged user, with releases under `/opt/itloe/releases/<commit>`, `/opt/itloe/current` pointing at the active release, and `BLOKO_VAR=/var/lib/itloe` outside the release. The proxy forwards to the guest's private port `3131`; it must suppress URL/Referer-bearing access and error logs for this host.
 
 Open `https://itloe.kputnik.com/?token=<shared-secret>` to authorize a browser. The server exchanges the token for a 30-day Secure/HttpOnly cookie and redirects to a clean URL. All HTTP routes and WebSocket upgrades require authorization; WebSockets also require the configured public Origin. The token-bearing join links and QR codes authorize new phones. Everyone with the invitation joins the same evening, with the four characters. Rotating the configured secret invalidates existing cookies after a restart. Without either public setting, local LAN play stays open.
@@ -80,7 +82,7 @@ Pushing to `production` runs [the production workflow](.github/workflows/product
 
 Publishing the completed release is the handover to Infrastructure. Its guest-local timer checks the `production` branch every two minutes and downloads that commit's release by its exact URL, without a GitHub token or public deployment webhook. Failed builds or missing releases leave the current game running; rapid pushes may coalesce into deployment of the newest commit. GitHub Actions uses its built-in `GITHUB_TOKEN` with `contents: write`, with no server credentials.
 
-Infrastructure verifies checksums and the manifest, rechecks the branch head before activation, stops the process, copies the current saves, switches `current`, and restarts. Authenticated `/api/join` (a read-only route), a WebSocket connection and saved-room comparison validate startup. On failure, restore both the previous release and its saved data: startup can migrate or replace an incompatible save. Deployments briefly disconnect clients; they reconnect, though application changes may require a browser refresh.
+Infrastructure verifies checksums and the manifest, switches `current`, and restarts. Authenticated `/api/join` (a read-only route), a WebSocket connection and saved-room comparison check startup and report the result; nothing is rolled back on failure. Deployments briefly disconnect clients; they reconnect, though application changes may require a browser refresh.
 
 For deployment readiness, derive the cookie value as hex HMAC-SHA256 with the UTF-8 access token as key and `itloe-access-v1` as message. Send it as `Cookie: __Host-itloe_access=<value>`. The `/ws` upgrade also needs `Origin: https://itloe.kputnik.com`; its first message is a `view`. Never log the `/api/join` response: its `url` contains the invitation token.
 
@@ -110,7 +112,6 @@ Everything lives in `var/` (or `BLOKO_VAR`):
 | File | Contents |
 |---|---|
 | `bloko.state.json` | The evening (party, where you are, the game in progress, what is unlocked), for resuming |
-| `bloko.state.json.v1-….json` | Only after an upgrade: the save from before the campaign, kept untouched |
 | `bests.json` | Solo best scores, per board size and mode |
 
 Delete `bests.json` to reset the best scores, or the whole `var/` folder to reset everything (with the server stopped).
@@ -166,7 +167,7 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 - Vanilla HTML/CSS/JavaScript clients and locally served assets. Runtime dependencies are kept small; `package.json` is the current dependency list.
 - Two-space indentation, semicolons, and single-quoted JS/TS strings. Functions and variables use `camelCase`, types use `PascalCase`, constants/tables use `UPPER_SNAKE_CASE`, and multiword filenames, CSS classes, and DOM IDs generally use hyphens. Formatting follows neighboring code; there is no configured formatter or linter.
 - Small functions, plain data, named exports, and closure-based `create…`/`make…` helpers are common. Existing tables describe pieces, settings, characters, campaign conditions/rewards, and scenes. Shared rule logic runs in Node and browsers; browser-specific common helpers live in `public/commun/`. Some shared assets, such as sprites, also provide rendering helpers.
-- Code, comments, docs, and interface wording use English. Quiz questions are intentionally French; story copy is content data. Existing `bloko` storage keys and `BLOKO_*` environment variables remain compatible despite the visible Itloe name.
+- Code, comments, docs, and interface wording use English. Quiz questions are intentionally French; story copy is content data. Storage keys and environment variables still use the old `bloko` name.
 - UI uses the tokens in `public/commun/base.css` and existing DOM helpers. Boards use DOM/CSS grids; sprites and scenes use canvas. Phone layouts account for touch, keyboards, and safe areas; TV layouts prioritize readability.
 - Tests in `test/<topic>.test.js` use `node:test` and `node:assert/strict`, with small fixtures and explicit seeds/times. Most run rules without a server; a few start a real one. Browser scenarios and longer runs over real sockets live in `scripts/e2e-*.mts`.
 
@@ -184,7 +185,7 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
   | Suite | Covers |
   |---|---|
   | `base` | a running server over sockets: room code, join, avatar positions, moves, rejoin and replaced sockets, new game, leaving |
-  | `resume` | kill -9 in every phase, timed clock kept, v1 save migration |
+  | `resume` | kill -9 in every phase, timed clock kept |
   | `presence` | reclaim a character, newest device wins, host controls |
   | `campaign` | false start → unlocks → news acked by two TVs → doors, kill -9 at each step; chat, emotes and object actions (relay, history, rate limits, where interact works); `pos` during a round kept apart from the room's |
   | `inventory` | rewards land in the right inventory (chooser / winner / all), survive kill -9 and a reclaim; host give/take, unknown items refused |

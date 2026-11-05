@@ -12,11 +12,11 @@
 import { drawSprite, SPRITE_SIZE, WALK_FRAMES, WALK_FPS } from '../../shared/sprites.js';
 import { WORLD } from '../../shared/world.js';
 import { spawnAt } from '../../shared/scene.js';
-import { CHARACTERS } from '../../shared/characters.js';
 import { isEmote } from '../../shared/social.js';
 import { makeView, renderScene, drawOrder, lerp } from './scene-render.js';
 
 /** @typedef {import('../../shared/world.js').Dir} Dir */
+/** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
 /** @typedef {import('../../shared/scene.js').Scene} Scene */
 /** @typedef {import('./scene-render.js').View} View */
 /** @typedef {import('./scene-render.js').PropArt} PropArt */
@@ -31,7 +31,7 @@ import { makeView, renderScene, drawOrder, lerp } from './scene-render.js';
  * }} Avatar
  */
 /** A speech bubble (`text`) or an emote (`kind`) over an avatar. @typedef {{text?: string, kind?: string, until: number, started: number}} Expression */
-/** Who is shown: same roster shape as the campaign party. @typedef {{ order: string[], players: Record<string, { name: string, color: number, character?: string | null, left?: boolean }> }} Roster */
+/** Who is shown: same roster shape as the campaign party. @typedef {{ order: string[], players: Record<string, { name: string, color: number, character: CharacterId, left?: boolean }> }} Roster */
 
 const AVATAR_UNITS = 1.2;   // avatar height in world units
 const OFFLINE_ALPHA = 0.4;  // a dropped player's avatar fades (presence.js decides when)
@@ -41,7 +41,6 @@ const ARRIVED = 0.04;       // units: closer than this counts as standing still
 const SAY_MS = 5500;        // how long a speech bubble stays
 const EMOTE_MS = 2200;      // how long an emote plays
 const DIRS = new Set(['up', 'down', 'left', 'right']);
-const FALLBACK_CHARACTERS = Object.keys(CHARACTERS); // by colour, for players without a character
 
 /**
  * The world-to-screen projection of the TV: the 16 × 9 world letterboxed into a `w × h` CSS-pixel
@@ -84,13 +83,11 @@ export function createAvatarLayer() {
       const p = s.players[id];
       if (!p || /** @type {{ left?: boolean }} */ (p).left) continue;
       present.add(id);
-      const character = (p.character && CHARACTERS[/** @type {keyof typeof CHARACTERS} */ (p.character)])
-        ? p.character
-        : FALLBACK_CHARACTERS[(p.color - 1 + FALLBACK_CHARACTERS.length) % FALLBACK_CHARACTERS.length];
+      const character = p.character;
       let a = avatars.get(id);
       if (!a) {
         // a fresh avatar starts on walkable floor: the shared spawn point, nudged out of a prop
-        const spawn = spawnAt(scene, /** @type {import("../../shared/characters.js").CharacterId | null} */ (p.character ?? null));
+        const spawn = spawnAt(scene, character);
         const known = lastPos.get(id);
         const start = known ?? { x: spawn.x, y: spawn.y, dir: spawn.dir, moving: false, at: 0 };
         a = {

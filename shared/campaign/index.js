@@ -3,7 +3,6 @@
 //
 // PUBLIC API (types in ./types.js; reducers return the SAME object when they refuse an action)
 //   newCampaign(content, seed)               → Campaign in the room at content.start, empty party
-//   fromLegacyState(state, content)          → Campaign wrapping a saved bare block State (any phase)
 //   loadCampaign(raw, content)               → Campaign; drops ids the content no longer has, re-settles
 //   reduceCampaign(campaign, action, content)→ Campaign; actions: join leave enter back start again newGame
 //                                              activity config event ack gm
@@ -22,7 +21,7 @@
 
 import { CHARACTERS, isCharacterId } from '../characters.js';
 import { minigame } from '../minigames.js';
-import { emptyFacts, holds, record, settle, migrateTotals, migrateInventory, addItem, holding, recipients, COUNTER } from './rules.js';
+import { emptyFacts, holds, record, settle, safeInventory, addItem, holding, recipients, COUNTER } from './rules.js';
 import { validateContent, zoneAt, roomAt, childrenOf } from './content.js';
 import { SAMPLE_CONTENT } from './sample.js';
 
@@ -95,8 +94,9 @@ export class UnknownMinigameError extends Error {
 function savedKind(at) {
   const s = at?.activity;
   if (!s) return null;
-  const kind = at.kind ?? ('kind' in s ? s.kind : 'blocks');
-  if (!minigame(kind)) throw new UnknownMinigameError(String(kind));
+  const kind = at.kind;
+  if (typeof kind !== 'string') throw new Error('the saved round names no minigame');
+  if (!minigame(kind)) throw new UnknownMinigameError(kind);
   return /** @type {MinigameKind} */ (kind);
 }
 
@@ -130,7 +130,7 @@ function betweenRoundsAt(node) {
 function present(party) {
   return party.order.flatMap((id) => {
     const m = party.players[id];
-    return !m.left && m.character ? [{ id, character: m.character }] : [];
+    return !m.left ? [{ id, character: m.character }] : [];
   });
 }
 
@@ -158,33 +158,11 @@ function assertResumable(kind, activity) {
   if (!minigame(kind)?.status(activity)) throw new Error('the saved round is not one this release can resume (a lobby from an earlier version)');
 }
 
-/** An older party without current characters cannot be reclaimed or seated in a new round.
+/** A party member whose character the roster doesn't have cannot be reclaimed or seated in a new round.
  *  Refuse the save so the server starts fresh and keeps the old file aside. @param {Party} party */
 function assertPartyCharacters(party) {
   const stray = Object.values(party.players).find((p) => !isCharacterId(p.character));
   if (stray) throw new Error(`party member ${stray.id} plays "${stray.character}", not a character of the roster`);
-}
-
-/**
- * A saved bare block State (pre-campaign envelope) → a campaign at the false-start tableau, the
- * State kept AS IS (a game under way or its podium; a lobby throws, see assertResumable), the party
- * rebuilt from its players.
- * @param {BlockState} state
- * @param {Content} content
- * @returns {Campaign}
- */
-export function fromLegacyState(state, content) {
-  assertResumable('blocks', state);
-  /** @type {Party} */
-  const party = { order: [...state.order], players: {}, hostId: /** @type {{ hostId?: string | null }} */ (state).hostId ?? null }; // a v1 State kept its host
-  for (const id of state.order) {
-    const p = state.players[id];
-    party.players[id] = { id, character: p.character ?? null, name: p.name, color: p.color, left: !!p.left };
-  }
-  assertPartyCharacters(party);
-  const facts = quietSettle({ ...emptyFacts(), seen: [content.start],
-    flags: content.storyId ? [`story.${content.storyId}`] : [] }, content);
-  return { v: 1, seed: nextSeed(state.seed), party, facts, news: [], newsSeq: 0, at: { node: content.start, kind: 'blocks', activity: state, settings: minigame('blocks')?.settings(/** @type {any} */ (state).settings) ?? null } };
 }
 
 /**
@@ -197,20 +175,16 @@ export function fromLegacyState(state, content) {
  */
 export function loadCampaign(raw, content) {
   const known = (/** @type {string} */ id) => !!content.nodes[id];
-  const { items: _legacyItems, ...f } = /** @type {Facts & { items?: unknown }} */ (raw.facts ?? emptyFacts());
+  const f = raw.facts ?? emptyFacts();
   /** @type {Facts} */
   const facts = {
     ...emptyFacts(), ...f,
-    inventory: migrateInventory(/** @type {any} */ (raw.facts ?? {}), content), // older saves: shared facts.items → the chooser's
+    inventory: safeInventory(f, content),
     unlocked: (f.unlocked ?? []).filter(known),
     done: (f.done ?? []).filter(known),
     seen: (f.seen ?? []).filter(known),
-    totals: migrateTotals(f.totals), // older saves: flat block totals → { blocks: … }
   };
   if (content.storyId) facts.flags = withId(facts.flags, `story.${content.storyId}`);
-  // A pre-story save may already have finished the same opening block node. Give it the portal
-  // instead of trapping the resumed party in a completed opening without its new reward flag.
-  if (content.storyId === 'elo-50' && facts.done.includes(content.start)) facts.flags = withId(facts.flags, 'portal.ready');
   const news = (raw.news ?? []).filter((n) => n.t !== 'unlocked' || known(n.node));
   const newsSeq = raw.newsSeq ?? Math.max(0, ...news.map((n) => n.seq));
   const party = raw.party ?? emptyParty();

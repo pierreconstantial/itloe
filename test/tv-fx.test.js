@@ -15,7 +15,7 @@ test('clear ghost: a piece completing a row → every cell of that row, the piec
   // row 0 holds colour 3 except (6,0),(7,0); an h2 at (6,0) completes it
   const board = new Array(SIZE * SIZE).fill(0);
   for (let x = 0; x < 6; x++) board[x] = 3;
-  const p = { ...newPlayer('a', 'Ana', 1, SIZE), board, hand: /** @type {any} */ (['h2', 'dot', 'dot']) };
+  const p = { ...newPlayer('a', 'Ana', 1, SIZE, 'pierre'), board, hand: /** @type {any} */ (['h2', 'dot', 'dot']) };
   /** @type {import('../shared/game.js').State} */
   const s = { .../** @type {import('../shared/game.js').State} */ (startGame({ seed: 42, settings: {}, players: [{ id: 'a', character: 'pierre' }], now: 0 })), order: ['a'], players: { a: p } };
   const s2 = reduce(s, { t: 'place', id: 'a', piece: 0, x: 6, y: 0 });
