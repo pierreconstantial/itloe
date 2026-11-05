@@ -92,12 +92,15 @@ injected by the server (socket → playerId; screens: `"screen"`), never taken f
 
 ### Quiz (Contract E + addendum E1): a tableau `activity: { kind: 'quiz', settings }`
 
-The bank (`data/quiz/*.json`) stays on the server and is never served. While a quiz runs, `start`, `endGame`,
-`newGame` and `config` (host) go to the quiz; block-only messages get `err "not-playing"`.
+The bank (`data/quiz/*.json`) stays on the server and is never served. While a quiz runs, `start`, `again`,
+`endGame`, `newGame` and `config` (host) go to the quiz, as in the block game; block-only messages get `err "not-playing"`.
 
 ```jsonc
-{ "t": "start" }                       // host, quiz lobby/finished: picks `count` questions among the bank (filtered by the
+{ "t": "start" }                       // host, quiz lobby: picks `count` questions among the bank (filtered by the
                                        // settings, minus every question asked this evening); none left → err "refused"
+{ "t": "again" }                       // host, quiz finished: a new quiz at once, same players minus those who left,
+                                       // questions picked as for start
+{ "t": "newGame" }                     // host, quiz finished → back to the quiz lobby (the room at the tableau)
 { "t": "answer", "choice": 2 }         // a choice round: the DISPLAYED index (choices are shuffled per round)
 { "t": "answer", "text": "Victor Hugo" } // a text round. Once per round, before the deadline; else err "refused".
                                        // The server judges it (choice: index; text: local French matcher; 'uncertain' →

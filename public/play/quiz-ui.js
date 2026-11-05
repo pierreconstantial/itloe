@@ -1,7 +1,7 @@
 // Phone quiz screen (Contract E): renders strictly from the view's PUBLIC quiz (shared/quiz/bank.js
 // projectQuiz), which never carries an answer before the reveal. Its lobby is the room (main.js); phases here:
 // question (4 big choices or a typed answer; one shot), reveal (my verdict + points, the answer, everyone's
-// answers; host: overrides + next), finished (ranking; host: again / back).
+// answers; host: overrides + next), finished (ranking; host: Play again / Back to the room).
 // Controls are built once per question, so a view arriving mid-typing never resets the text field.
 import { $ } from './dom.js';
 import * as haptics from './haptics.js';
@@ -54,8 +54,8 @@ export function createQuizUi(io) {
     render(/** @type {QuizView} */ (last), meId);
   });
   $('quiz-next').addEventListener('click', () => io.send({ t: 'next' }));
-  $('quiz-again').addEventListener('click', () => io.send({ t: 'newGame' }));
-  $('quiz-back').addEventListener('click', () => io.send({ t: 'back' }));
+  $('quiz-again').addEventListener('click', () => io.send({ t: 'again' }));
+  $('quiz-back').addEventListener('click', () => io.send({ t: 'newGame' }));
 
   /** @param {number} choice @param {RoundView} r */
   function pick(choice, r) {

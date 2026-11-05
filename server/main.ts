@@ -439,7 +439,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     'answer', 'next', 'override'].includes(m.t)) return;
   const id = who.get(ws);
   if (!id) { sendErr(ws, 'unknown-player'); return; }
-  // a quiz runs here: its own messages, and the shared names (start, endGame, newGame, config) go to it
+  // a quiz runs here: its own messages, and the shared names (start, again, endGame, newGame, config) go to it
   const q = quiz();
   if (q && !['leave', 'enter', 'back', 'gm'].includes(m.t)) { handleQuiz(ws, id, m, q); return; }
   if (['answer', 'next', 'override'].includes(m.t)) { sendErr(ws, 'not-playing'); return; }
@@ -528,10 +528,11 @@ function handleQuiz(ws: WebSocket, id: string, m: any, q: QuizState): void {
   const host = id === q.hostId;
   const refusal = (): ErrCode => (host ? 'refused' : 'not-host');
   switch (m.t) {
-    case 'start': {
+    case 'start':
+    case 'again': {
       // candidates: the bank filtered by the quiz settings, minus every question asked this evening
       const candidates = candidatesFor(bank.questions, q.settings, game.campaign.facts.asked ?? []);
-      if (!applyQuiz({ t: 'start', id, now: Date.now(), candidates })) sendErr(ws, refusal());
+      if (!applyQuiz({ t: m.t, id, now: Date.now(), candidates })) sendErr(ws, refusal());
       return;
     }
 
@@ -579,7 +580,7 @@ function handleQuiz(ws: WebSocket, id: string, m: any, q: QuizState): void {
       }
       return;
 
-    default: // block-only (again, place, retire): not a quiz thing
+    default: // block-only (place, retire): not a quiz thing
       sendErr(ws, 'not-playing');
   }
 }

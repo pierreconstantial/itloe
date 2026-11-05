@@ -3,11 +3,12 @@
 //
 // The reducer NEVER sees the bank or an answer: the server judges each answer as it arrives and
 // injects the verdict (choice → index compare, text → judge-local, 'uncertain' → a later `verdict`).
-// Phases: lobby → question → reveal → question → … → finished.
+// Phases: lobby → question → reveal → question → … → finished → question (again) or lobby (newGame).
 //
 // Actions (ids, now, deadline, candidates and verdicts are injected by the server, never from the wire):
 //   join { id, character } · leave { id } · config { id, patch }       (lobby; config also on finished)
-//   start { id, now, candidates }   host: lobby/finished → question 1 (seeded pick among candidates)
+//   start { id, now, candidates }   host: lobby → question 1 (seeded pick among candidates)
+//   again { id, now, candidates }   host: finished → question 1 of a new quiz (same players minus left)
 //   answer { id, choice | text, now, verdict }   once per round, before the deadline
 //   close { deadline }              server: the round's timer rang (stale deadlines are ignored)
 //   verdict { target, ok }          server: the async judge decided an 'uncertain' answer (null = wrong)
@@ -57,6 +58,7 @@ import { mulberry32 } from '../rng.js';
  *   | { t: 'leave', id: string }
  *   | { t: 'config', id: string, patch: Partial<QuizSettings> }
  *   | { t: 'start', id: string, now: number, candidates: Candidate[] }
+ *   | { t: 'again', id: string, now: number, candidates: Candidate[] }
  *   | { t: 'answer', id: string, choice?: number, text?: string, now: number, verdict: Verdict }
  *   | { t: 'close', deadline: number }
  *   | { t: 'verdict', target: string, ok: boolean | null }
@@ -254,18 +256,21 @@ export function reduceQuiz(s, a) {
       return JSON.stringify(settings) === JSON.stringify(s.settings) ? s : { ...s, settings };
     }
 
-    case 'start': {
-      if (!isHost(s, a.id) || (s.phase !== 'lobby' && s.phase !== 'finished') || !Number.isFinite(a.now)) return s;
+    case 'start':
+    case 'again': {
+      // like the block game: start from the lobby, again (a rematch) from the podium
+      if (!isHost(s, a.id) || s.phase !== (a.t === 'start' ? 'lobby' : 'finished') || !Number.isFinite(a.now)) return s;
       if (active(s).length === 0 || !Array.isArray(a.candidates)) return s;
       const rules = s.settings;
       const pool = askable(a.candidates, rules.mode);
       if (pool.length === 0) return s; // nothing left to ask
       const seed = nextSeed(s.seed);
       const questions = shuffle(pool, mulberry32(seed)).slice(0, rules.count);
+      const order = active(s); // a rematch drops the players who left, as newGame does
       /** @type {Record<string, QuizPlayer>} */
       const players = {};
-      for (const id of s.order) players[id] = { ...s.players[id], score: 0, correct: 0 };
-      return openRound({ ...s, seed, rules, players, questions, endReason: null }, 0, a.now);
+      for (const id of order) players[id] = { ...s.players[id], score: 0, correct: 0 };
+      return openRound({ ...s, seed, rules, order, players, questions, endReason: null }, 0, a.now);
     }
 
     case 'answer': {

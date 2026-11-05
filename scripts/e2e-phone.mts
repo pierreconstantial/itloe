@@ -772,11 +772,13 @@ try {
   const rank: string = await Q.text('quiz-ranking');
   expect(/🥇 Pierre/.test(rank) && /Élodie/.test(rank), 'mini ranking', rank);
   await H.shot('quiz-finished-host');
-  expect(await H.visible('quiz-again') && await H.visible('quiz-back') && !(await Q.visible('quiz-again')), 'host: Play again / Back; guests wait');
+  expect(await H.visible('quiz-again') && await H.visible('quiz-back') && !(await Q.visible('quiz-again')) && !(await Q.visible('quiz-back')),
+    'host: Play again / Back to the room; guests wait');
+  expect(await H.text('quiz-back') === 'Back to the room', 'the host\'s second button says "Back to the room"', await H.text('quiz-back'));
 
-  // ---- quiz 2 (Play again): typed answers, really typed ----
-  await H.tap('#quiz-again');
-  expect(await phaseIs(H, 'view-lobby'), 'Play again → the room');
+  // ---- quiz 2 (Back to the room, new settings): typed answers, really typed ----
+  await H.tap('#quiz-back');
+  expect(await phaseIs(H, 'view-lobby') && await phaseIs(Q, 'view-lobby'), 'Back to the room → both phones in the room at the tableau');
   await setQuiz(3, 'Typed');
   await H.tap('#btn-start');
   expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question') && await Q.visible('quiz-text-form') && !(await Q.visible('quiz-choices')),
@@ -806,11 +808,10 @@ try {
   }
   expect(await phaseIs(H, 'quiz-finished'), 'typed quiz finished');
 
-  // ---- quiz 3: the host ends it from the ☰ menu during a question ----
+  // ---- quiz 3 (Play again): straight into a new quiz; the host ends it from the ☰ menu during a question ----
   await H.tap('#quiz-again');
-  expect(await phaseIs(H, 'view-lobby'), 'Play again → the room');
-  await H.tap('#btn-start');
-  expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), 'Start → a question on both phones');
+  expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question') && /^Question 1\//.test(await Q.text('quiz-progress')),
+    'Play again → question 1 of a new quiz at once, on both phones', await Q.text('quiz-progress'));
   expect((await Q.hostButtons()).length === 0, 'quiz: guest menu has no host controls');
   await H.tap('#btn-menu');
   const qhb = await H.hostButtons();
@@ -823,10 +824,10 @@ try {
   expect(await Q.text('quiz-finished-kicker') === 'The host ended the quiz.' && (await H.hostButtons()).length === 0,
     'quiz ended: "The host ended the quiz.", no host controls left', await Q.text('quiz-finished-kicker'));
   await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+  await Q.shot('quiz-finished-guest');
   await H.tap('#quiz-back');
-  let back = false;
-  for (let k = 0; k < 40 && !back; k++) { back = (await H.snap())?.view === 'view-place'; if (!back) await sleep(100); }
-  expect(back && (await H.text('place-title')).length > 0, 'host Back → the world screen', await H.text('place-title'));
+  expect(await phaseIs(H, 'view-lobby') && await phaseIs(Q, 'view-lobby') && await H.visible('btn-start') && await Q.visible('stick-pad'),
+    'Back to the room → the room again: the host\'s Start, the joystick');
   } // part 4
 
   if (!ONLY || ONLY === '5') {

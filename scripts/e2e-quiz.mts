@@ -251,9 +251,12 @@ try {
   }
   check(second.every((id) => !shown.some((x) => x.id === id)), `second quiz: 3 new questions (${second.join(', ')}), none asked earlier`);
   check(lastView(T).campaign.facts.asked.length === 6, 'asked grows to 6');
-  i = T.mark(); P.send({ t: 'newGame' }); await untilQuiz(T, (x) => x.phase === 'lobby', i);
-  i = T.mark(); P.send({ t: 'start' });
+  // play again from the podium: a new quiz at once, as in the block game
+  check(await errOf(P, { t: 'start' }) === 'refused', 'quiz start on the podium → refused (start is for the lobby)');
+  check(await errOf(E, { t: 'again' }) === 'not-host', 'quiz again: host only');
+  i = T.mark(); P.send({ t: 'again' });
   q = await untilQuiz(T, (x) => x.phase === 'question', i);
+  check(q.round.index === 0 && q.order.length === 2 && Object.values<any>(q.players).every((p) => p.score === 0), 'host again on the podium → question 1 of a new quiz, same players, scores reset');
   i = T.mark(); P.send({ t: 'endGame' });
   q = await untilQuiz(T, (x) => x.phase === 'finished', i);
   check(q.endReason === 'host' && lastView(T).campaign.facts.counters['quiz.played'] === 3, 'host endGame finishes a quiz (counts as played)');
