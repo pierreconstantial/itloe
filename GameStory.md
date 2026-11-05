@@ -1,3 +1,10 @@
+---
+purpose: The birthday story Itloe tells, from the opening to the reunions, and how much of it the game implements.
+audience: Pierre, Konstantin, and the agents building the story
+maintainer: Pierre
+kind: reference
+---
+
 # Itloe — Élodie's 50th birthday story
 
 ## Premise and tone

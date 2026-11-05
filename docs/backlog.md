@@ -35,7 +35,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Apartment sofa sparkle](#apartment-sofa-sparkle) | The sofa's sparkle overlaps its "Comfy!" bubble in the apartment | P3 | Open | Trivial |
 | [Minigame wording in shared folders](#minigame-wording-in-shared-folders) | Block and quiz files in `public/commun/`, block files with generic names | P3 | Open | Low |
 | [Debug view of a running screen](#debug-view-of-a-running-screen) | Nothing shows what a minigame's TV screen draws | P3 | Open | Low |
-| [GameStory.md frontmatter](#gamestorymd-frontmatter) | The story document lacks the standard frontmatter | P3 | Open | Trivial |
 
 ## Items
 
@@ -139,9 +138,3 @@ The block game's TV files also have generic names that hide whose they are: `pub
 The TV's debug accessors (`window.bloko`) show the round, the room's draw order and its avatars, but nothing about what a running minigame screen draws. When the contributor guide's stand-in minigame drew its avatars off-screen, finding out took an extra run.
 
 **Recommendation:** let a running screen expose what it draws (e.g. the avatars it passed to the layer and its canvas size) through the existing accessors.
-
-### GameStory.md frontmatter
-
-`GameStory.md` has no frontmatter, unlike the other documents.
-
-**Recommendation:** add the four fields (purpose, audience, maintainer, kind), with Pierre as maintainer.
