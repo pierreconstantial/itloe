@@ -7,7 +7,7 @@ import { $, dotEl, toast } from './dom.js';
 import * as haptics from './haptics.js';
 import { initMenu } from './menu.js';
 import { syncClock } from '../commun/clock.js';
-import { createSettingsSheet, summarize } from './settings-ui.js';
+import { createSettingsSheet } from './settings-ui.js';
 import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.js';
 import { spawnPoint } from '../../shared/world.js';
 import { roomAt } from '../../shared/campaign/content.js';
@@ -25,7 +25,6 @@ import { screenOf } from './minigames.js';
 import { createBag } from './bag.js';
 import { createSocial } from './social.js';
 import { JOIN_QR_MS } from '../../shared/join-qr.js';
-import { QUIZ_SETTINGS, summarizeQuiz } from './quiz-text.js';
 import { childMarks, content, onContentChange, syncContent, titleOf } from './campaign-view.js';
 
 /** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
@@ -224,6 +223,9 @@ function member() {
 /** The tableau's settings: the campaign keeps them (null where no minigame is). @returns {any} */
 const tableauSettings = () => campaign?.at.settings ?? null;
 
+/** The screens of the tableau's minigame (null on the hub, in a world, at a scene). */
+const screensHere = () => screenOf(campaign?.at.kind);
+
 /** The party's host (a minigame stores none). */
 const partyHost = () => campaign?.party.hostId ?? null;
 
@@ -355,17 +357,16 @@ function render() {
   if (!viewed) { show('loading'); return; }
   const mem = member();
   const hostId = partyHost();
-  const v = round?.kind === 'blocks' ? round.view : null;
-  const q = round?.kind === 'quiz' ? round.view : null;
   // the tableau's minigame (null on the hub, in a world, at a scene) and the room between its rounds
   const kind = campaign?.at.kind ?? null;
   const inRoom = kind !== null && round === null;
 
-  // the settings sheet follows the tableau's minigame: the block game's schema, or the quiz's; the host
-  // changes them except while a round runs
-  const configurable = kind !== null && mem !== null && hostId === playerId && round?.status !== 'running';
-  if (kind) settingsSheet.render(tableauSettings(), configurable, kind === 'quiz' ? QUIZ_SETTINGS : undefined);
-  hostControls.render(v, q, online, playerId ?? '', hostId);
+  // the settings sheet follows the tableau's minigame (its schema and wording); the host changes them
+  // except while a round runs
+  const tableau = screensHere();
+  const configurable = tableau !== null && mem !== null && hostId === playerId && round?.status !== 'running';
+  if (tableau) settingsSheet.render(tableauSettings(), configurable, tableau.settings);
+  hostControls.render(round?.kind === 'blocks' ? round.view : null, round?.kind === 'quiz' ? round.view : null, online, playerId ?? '', hostId);
   if (!configurable) menu.close('settings');
   if (campaign && isGameMaster()) gmPanel.render(campaign, round?.status ?? null);
   else menu.close('gm');
@@ -396,7 +397,7 @@ function render() {
     const party = campaign.party;
     const here = { order: party.order.filter((id) => !party.players[id].left && party.players[id].character), players: party.players };
     show('lobby');
-    renderLobby(here, mem, hostId === playerId, kind === 'quiz' ? summarizeQuiz(tableauSettings()) : summarize(tableauSettings()));
+    renderLobby(here, mem, hostId === playerId, screensHere()?.settings.summarize(tableauSettings()) ?? '');
     return;
   }
   if (round && campaign) { // a round: the minigame's screens while it runs, then the podium
@@ -614,7 +615,7 @@ function renderPodium(r, screens, meId, isHost) {
     ol.append(li);
   }
   $('podium-settings').textContent = portalReady ? 'Return to the room together.'
-    : `Next game: ${r.kind === 'quiz' ? summarizeQuiz(tableauSettings()) : summarize(tableauSettings())}`;
+    : `Next game: ${screens.settings.summarize(tableauSettings())}`;
   $('btn-settings-podium').hidden = !isHost || !!portalReady;
   $('btn-again').hidden = !!portalReady;
   $('podium-hint').textContent = portalReady ? 'Waiting for the host to return to the room…'

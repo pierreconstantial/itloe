@@ -8,6 +8,8 @@ import { ranking } from '../../shared/ranking.js';
 import { $, addStylesheet, bounds, pieceEl, dotEl } from './dom.js';
 import * as haptics from './haptics.js';
 import { secondsLeft, mmss } from '../commun/clock.js';
+import { SETTINGS_SCHEMA } from '../../shared/game.js';
+import { formatSetting, settingText, summarizeSettings } from '../commun/settings-text.js';
 
 /** @typedef {import('../../shared/game.js').State} State */
 /** @typedef {import('../../shared/game.js').Player} Player */
@@ -353,6 +355,7 @@ function mount(root, io) {
 /** The block game's entry in the phone's list (./minigames.js). @type {import('./minigames.js').PhoneScreen} */
 export const BLOCK_SCREEN = {
   title: 'ITLOE',
+  settings: { schema: SETTINGS_SCHEMA, text: settingText, format: formatSetting, summarize: summarizeSettings },
   mount,
   /** The solo podium: a new best, or the best to beat. */
   podium(round) {

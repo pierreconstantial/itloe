@@ -32,10 +32,12 @@ import { QUIZ_SCREEN } from './quiz-ui.js';
  */
 
 /**
- * One minigame's phone screens. `title`: the minigame's name; `mount`: builds its screens inside `root`
- * (CSS scoped under them, nothing added to index.html); `podium`: its extras on the frame's podium.
+ * One minigame's phone screens. `title`: the minigame's name; `settings`: its settings schema and wording, for
+ * the frame's settings sheet and summaries; `mount`: builds its screens inside `root` (CSS scoped under them,
+ * nothing added to index.html); `podium`: its extras on the frame's podium.
  * @typedef {{
  *   title: string,
+ *   settings: import('./settings-ui.js').SettingsKind,
  *   mount: (root: HTMLElement, io: PhoneIo) => Mounted,
  *   podium?: (round: RoundView) => PodiumExtras,
  * }} PhoneScreen

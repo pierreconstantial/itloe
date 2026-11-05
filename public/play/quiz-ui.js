@@ -9,6 +9,7 @@ import * as haptics from './haptics.js';
 import { createConfirm } from './confirm.js';
 import { secondsLeft, mmss } from '../commun/clock.js';
 import { SCORING, MAX_TEXT } from '../../shared/quiz/index.js';
+import { QUIZ_SETTINGS } from './quiz-text.js';
 
 /** @typedef {import('../../shared/quiz/bank.js').QuizView} QuizView */
 /** @typedef {import('../../shared/quiz/bank.js').RoundView} RoundView */
@@ -278,6 +279,7 @@ const MARKUP = `
 /** The quiz's entry in the phone's list (./minigames.js). @type {import('./minigames.js').PhoneScreen} */
 export const QUIZ_SCREEN = {
   title: 'Quiz!',
+  settings: QUIZ_SETTINGS,
   mount(root, io) {
     root.insertAdjacentHTML('beforeend', MARKUP);
     const ui = createQuizUi(io);
