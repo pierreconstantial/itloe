@@ -445,7 +445,7 @@ function render() {
   if (q) {
     if (!playerId || !q.players[playerId]) { // in the evening, but this quiz started before we joined
       show('waiting');
-      $('waiting-text').textContent = "A quiz is on. You'll play the next one!";
+      $('waiting-text').textContent = "A game is on. You'll play the next one!";
       return;
     }
     show('quiz');
