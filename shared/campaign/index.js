@@ -158,6 +158,13 @@ function assertResumable(kind, activity) {
   if (!minigame(kind)?.status(activity)) throw new Error('the saved round is not one this release can resume (a lobby from an earlier version)');
 }
 
+/** An older party without current characters cannot be reclaimed or seated in a new round.
+ *  Refuse the save so the server starts fresh and keeps the old file aside. @param {Party} party */
+function assertPartyCharacters(party) {
+  const stray = Object.values(party.players).find((p) => !isCharacterId(p.character));
+  if (stray) throw new Error(`party member ${stray.id} plays "${stray.character}", not a character of the roster`);
+}
+
 /**
  * A saved bare block State (pre-campaign envelope) → a campaign at the false-start tableau, the
  * State kept AS IS (a game under way or its podium; a lobby throws, see assertResumable), the party
@@ -174,6 +181,7 @@ export function fromLegacyState(state, content) {
     const p = state.players[id];
     party.players[id] = { id, character: p.character ?? null, name: p.name, color: p.color, left: !!p.left };
   }
+  assertPartyCharacters(party);
   const facts = quietSettle({ ...emptyFacts(), seen: [content.start],
     flags: content.storyId ? [`story.${content.storyId}`] : [] }, content);
   return { v: 1, seed: nextSeed(state.seed), party, facts, news: [], newsSeq: 0, at: { node: content.start, kind: 'blocks', activity: state, settings: minigame('blocks')?.settings(/** @type {any} */ (state).settings) ?? null } };
@@ -206,10 +214,7 @@ export function loadCampaign(raw, content) {
   const news = (raw.news ?? []).filter((n) => n.t !== 'unlocked' || known(n.node));
   const newsSeq = raw.newsSeq ?? Math.max(0, ...news.map((n) => n.seq));
   const party = raw.party ?? emptyParty();
-  // a member playing a character the roster does not have could not be drawn, reclaimed or seated:
-  // refuse the save, so the server starts a fresh evening (and keeps the file aside)
-  const stray = Object.values(party.players).find((p) => p.character !== null && !isCharacterId(p.character));
-  if (stray) throw new Error(`party member ${stray.id} plays "${stray.character}", not a character of the roster`);
+  assertPartyCharacters(party);
   const seed = raw.seed ?? 1;
   const kind = savedKind(raw.at); // first: a round of an unknown minigame stops the load even where the node is gone
   const activity = raw.at?.activity ?? null;

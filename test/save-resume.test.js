@@ -170,3 +170,24 @@ test('a save holding a round in a lobby (an earlier version) starts a fresh even
   assert.equal(kept.length, 1, `the old save is quarantined next to the new one (${files.join(', ')})`);
   assert.equal(await readFile(join(app.varDir, kept[0]), 'utf8'), text, 'byte-identical');
 });
+
+test('older saves with missing or removed characters start fresh and keep the old file', { timeout: 30_000 }, async (t) => {
+  for (const file of ['save-v1.json', 'save-v2-blocks.json']) {
+    for (const character of [null, undefined, 'konz']) {
+      await t.test(`${file}: ${String(character)}`, async (t) => {
+        const save = JSON.parse(await fixture(file));
+        const players = (save.v === 1 ? save.state : save.campaign.party).players;
+        players[Object.keys(players)[0]].character = character;
+        const text = JSON.stringify(save);
+        const app = await boot(t, text);
+        const view = await firstView(app.port, app.running, app.log);
+        assert.equal(view.round, null);
+        assert.deepEqual(view.campaign.party.order, []);
+        assert.match(app.log(), /save could not be loaded: party member .*not a character of the roster/);
+        const kept = (await readdir(app.varDir)).filter((f) => f.startsWith('bloko.state.json.corrupt-'));
+        assert.equal(kept.length, 1);
+        assert.equal(await readFile(join(app.varDir, kept[0]), 'utf8'), text);
+      });
+    }
+  }
+});
