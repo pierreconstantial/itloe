@@ -105,24 +105,6 @@ button.primary:active { transform: scale(0.97); }
 .dot.c3 { background: var(--p3); }
 .dot.c4 { background: var(--p4); }
 
-/* ---------- pieces (the block game's screens and the rules sheet) ---------- */
-
-.cell {
-  background: var(--cell);
-  border-radius: 3px;
-}
-.cell.c1 { background: var(--p1); }
-.cell.c2 { background: var(--p2); }
-.cell.c3 { background: var(--p3); }
-.cell.c4 { background: var(--p4); }
-
-.piece {
-  display: grid;
-  gap: 2px;
-  pointer-events: none;
-}
-.piece > div { border-radius: 2px; }
-
 /* ---------- ☰ menu + sheets ---------- */
 
 #btn-menu {
@@ -206,6 +188,7 @@ button.danger {
   font-size: 15px;
   line-height: 1.35;
 }
+#rules-list li.rules-title { display: block; font-weight: 800; background: none; padding: 0; }
 .rule-icon {
   display: grid;
   place-items: center;

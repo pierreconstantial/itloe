@@ -5,7 +5,7 @@
 import { canPlace, place, findClears, applyClears } from '../../shared/board.js';
 import { PIECES } from '../../shared/pieces.js';
 import { ranking } from '../../shared/ranking.js';
-import { $, addStylesheet, bounds, pieceEl, dotEl } from './dom.js';
+import { $, addStylesheet, dotEl } from './dom.js';
 import * as haptics from './haptics.js';
 import { secondsLeft, mmss } from '../commun/clock.js';
 import { SETTINGS_SCHEMA } from '../../shared/game.js';
@@ -22,6 +22,45 @@ const TRAY_CELL = 13; // px per cell for tray miniatures
 const LIFT = 1.5; // the dragged piece floats this many cells above the finger
 const URGENT_SECONDS = 10; // the countdown turns red from here
 const CLOCK_TICK_MS = 250;
+const RULE_CELL = 10; // px per cell for the rules' illustrations
+
+/** "How to play": one short line per rule, each illustrated by a piece. */
+/** @type {{ piece: import('../../shared/pieces.js').PieceId, text: string }[]} */
+const RULES = [
+  { piece: 't_down', text: 'Drag a piece onto your board. No rotating!' },
+  { piece: 'h4', text: 'Fill a whole row or column to clear it.' },
+  { piece: 'sq2', text: 'Clear several lines at once, or clear on every move, for combo points.' },
+  { piece: 'c_nw', text: 'Everyone gets the same pieces, in the same order.' },
+  { piece: 'dot', text: "No room for any piece you hold? You're out. Top score wins!" },
+];
+
+/** Bounding box of a piece's cells. @param {[number, number][]} cells @returns {{ w: number, h: number }} */
+export function bounds(cells) {
+  let w = 0, h = 0;
+  for (const [x, y] of cells) { if (x + 1 > w) w = x + 1; if (y + 1 > h) h = y + 1; }
+  return { w, h };
+}
+
+/**
+ * A piece drawn as a grid of cells.
+ * @param {PieceId} id @param {number} color 1..4 @param {number} cellPx
+ * @returns {HTMLElement}
+ */
+export function pieceEl(id, color, cellPx) {
+  const { cells } = PIECES[id];
+  const { w, h } = bounds(cells);
+  const el = document.createElement('div');
+  el.className = 'piece';
+  el.style.gridTemplateColumns = `repeat(${w}, ${cellPx}px)`;
+  el.style.gridTemplateRows = `repeat(${h}, ${cellPx}px)`;
+  const filled = new Set(cells.map(([x, y]) => y * w + x));
+  for (let i = 0; i < w * h; i++) {
+    const cell = document.createElement('div');
+    if (filled.has(i)) cell.className = `cell c${color}`;
+    el.append(cell);
+  }
+  return el;
+}
 
 addStylesheet(new URL('./blocks.css', import.meta.url));
 
@@ -355,6 +394,7 @@ function mount(root, io) {
 /** The block game's entry in the phone's list (./minigames.js). @type {import('./minigames.js').PhoneScreen} */
 export const BLOCK_SCREEN = {
   title: 'ITLOE',
+  rules: RULES.map(({ piece, text }, i) => ({ icon: () => pieceEl(piece, (i % 4) + 1, RULE_CELL), text })),
   settings: { schema: SETTINGS_SCHEMA, text: settingText, format: formatSetting, summarize: summarizeSettings },
   mount,
   /** The solo podium: a new best, or the best to beat. */

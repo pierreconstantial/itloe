@@ -1,5 +1,6 @@
 /* The block game's phone screens (blocks-ui.js): rules for ids only its screens use (view-game, view-over,
-   the floating piece). Builds on /commun/play-base.css (tokens, .menu, .player-list, .cell, .piece, .clock). */
+   the floating piece), and the pieces, on the board and in "How to play".
+   Builds on /commun/play-base.css (tokens, .menu, .player-list, .clock). */
 
 /* ---------- the board (view-game) ---------- */
 
@@ -119,3 +120,21 @@
   border-radius: 8px;
   background: rgb(255 255 255 / 6%);
 }
+
+/* ---------- pieces (the board, the tray, "How to play") ---------- */
+
+.cell {
+  background: var(--cell);
+  border-radius: 3px;
+}
+.cell.c1 { background: var(--p1); }
+.cell.c2 { background: var(--p2); }
+.cell.c3 { background: var(--p3); }
+.cell.c4 { background: var(--p4); }
+
+.piece {
+  display: grid;
+  gap: 2px;
+  pointer-events: none;
+}
+.piece > div { border-radius: 2px; }
