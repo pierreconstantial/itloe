@@ -348,7 +348,6 @@ export const BLOCK_RULES = {
   init: startGame,
   reduce,
   status: (s) => (s.phase === 'playing' ? 'running' : s.phase === 'finished' ? 'finished' : null),
-  seated: (s) => s.order.filter((id) => !s.players[id].left),
   result: (s) => ({
     ranking: ranking(s).map((r) => ({ character: s.players[r.id].character ?? null, score: r.score, rank: r.rank })),
     endReason: s.endReason,

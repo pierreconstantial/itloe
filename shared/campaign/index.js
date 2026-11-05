@@ -353,15 +353,13 @@ export function reduceCampaign(c, a, content) {
 
     case 'start':
     case 'again': {
-      // the host starts a round of the tableau's minigame: from the room (start) with every party member
-      // present, or from the podium (again) with the round's players who have not left
+      // the host starts a round of the tableau's minigame, with every party member present (players who
+      // joined during the last round included): from the room (start), or at once from the podium (again)
       const spec = minigame(c.at.kind);
       const s = c.at.activity;
       if (!isHost(c, a.id) || !spec) return c;
       if (a.t === 'start' ? s !== null : !s || spec.status(s) !== 'finished') return c;
-      const seated = a.t === 'again' && s ? spec.seated(s) : null;
-      const players = present(c.party).filter((p) => !seated || seated.includes(p.id));
-      const next = spec.init({ seed: c.seed, settings: c.at.settings, players, now: a.now, inputs: a.inputs });
+      const next = spec.init({ seed: c.seed, settings: c.at.settings, players: present(c.party), now: a.now, inputs: a.inputs });
       return next ? { ...c, seed: nextSeed(c.seed), at: { ...c.at, activity: next } } : c;
     }
 

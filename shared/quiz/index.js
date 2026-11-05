@@ -364,7 +364,6 @@ export const QUIZ_RULES = {
   init: startQuiz,
   reduce: reduceQuiz,
   status: (s) => (quizRunning(s) ? 'running' : s.phase === 'finished' ? 'finished' : null),
-  seated: (s) => active(s),
   result: (s, node) => {
     const ranking = quizRanking(s);
     /** @type {Record<string, number>} */

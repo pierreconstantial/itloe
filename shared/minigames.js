@@ -54,7 +54,6 @@ import { QUIZ_RULES } from './quiz/index.js';
  *   init: (start: RoundStart<T>) => S | null,  // a new round, running; null: it cannot start (nothing to ask)
  *   reduce: (s: S, a: A, ctx: RoundCtx) => S,
  *   status: (s: S) => RoundStatus | null,       // null: not a round this release can resume (an older save)
- *   seated: (s: S) => string[],                 // the round's players who have not left: who plays again
  *   result: (s: S, node: string) => RoundResult,   // once finished; node: the tableau it ran at
  *   settings: (patch: unknown, base?: T) => T,  // `base` (default: the minigame's defaults) with every valid key of `patch`
  *   validateSettings: (settings: unknown) => string[],   // a content node's settings: problems, as readable lines
