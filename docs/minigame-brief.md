@@ -192,6 +192,7 @@ Between 3 and 4:
 
 - Done: test-only commits fix two races in `e2e-phone.mts` and add end-to-end tests of chat, emotes and object actions as they work today. Behaviour change 4 flips the marked quiz-lobby line in `e2e-campaign.mts` ("in a quiz lobby") to expect object actions there.
 - **Found during the work: the phone's connection banner.** When the server is gone or the network drops, the phone's first reconnect attempt fails within the banner's 700 ms grace, and that second failure cancels the banner for good: the phone shows a frozen screen instead of "reconnecting". `e2e-phone` part 1's "server down: banner" check fails for this reason. Fixed in its own behaviour-change commit (`8e9c855`).
+- **Found in Pierre's merged opening, to fix as behaviour changes, each its own commit:** the solo hint "Play solo, or wait for friends to join." is gone for all content; once the portal is ready the TV lobby reads "4/5 guests"; the TV podium offers "Play again on the host's phone" while the server refuses it once the portal is ready; the portal is drawn where Sol's avatar stands. Larger follow-ups go to `docs/backlog.md`.
 - **Found during the work: the "phone locked" check tests nothing.** In headless Chrome 156, `Page.setWebLifecycleState('frozen')` doesn't freeze the page, so "phone locked … → unlock resumes" passes without exercising the unlock. A test-only commit makes it report a visible skip when the page didn't freeze, and require a fresh socket after the unlock.
 
 Before phase 3c:
@@ -295,7 +296,7 @@ Done when:
 
 ### Phase 5: unsaved messages and avatars for minigames
 
-Scope: unsaved messages; the avatar layer extracted from `createPartyRoom`, with speech bubbles and emotes; the joystick for minigame phone screens; `pos` per round; the server-code hooks for who may walk and for reading positions; `PROTOCOL.md`.
+Scope: unsaved messages; the avatar layer extracted from `createPartyRoom`, with speech bubbles and emotes; a node's room as content data, so the server, the phone's joystick and the TV choose a node's room by one rule instead of three; the joystick for minigame phone screens; `pos` per round; the server-code hooks for who may walk and for reading positions; `PROTOCOL.md`.
 
 Done when:
 
