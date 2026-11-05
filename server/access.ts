@@ -2,6 +2,8 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 const COOKIE = '__Host-itloe_access';
+// Outlives browser sessions: a phone whose browser was closed in the background must still reconnect.
+const COOKIE_MAX_AGE = 30 * 24 * 60 * 60;
 
 function equal(actual: string, expected: string): boolean {
   const a = Buffer.from(actual), b = Buffer.from(expected);
@@ -12,8 +14,9 @@ function equal(actual: string, expected: string): boolean {
 export function makeAccess(publicOrigin?: string, token?: string) {
   let origin: string | null = null;
   if (publicOrigin || token) {
-    if (!publicOrigin || !token || token.length < 32) {
-      throw new Error('Public hosting requires BLOKO_PUBLIC_ORIGIN and BLOKO_ACCESS_TOKEN (at least 32 characters)');
+    // Guests may type the token from the TV.
+    if (!publicOrigin || !token || !/^[A-Za-z0-9]{6}$/.test(token)) {
+      throw new Error('Public hosting requires BLOKO_PUBLIC_ORIGIN and BLOKO_ACCESS_TOKEN (6 letters or digits)');
     }
     const url = new URL(publicOrigin);
     if (url.protocol !== 'https:' || url.username || url.password || url.pathname !== '/' || url.search || url.hash) {
@@ -51,7 +54,7 @@ export function makeAccess(publicOrigin?: string, token?: string) {
         if (url.searchParams.getAll('token').length === 1 && equal(url.searchParams.get('token')!, token!)) {
           url.searchParams.delete('token');
           res.writeHead(302, {
-            'set-cookie': `${COOKIE}=${cookie}; Path=/; Secure; HttpOnly; SameSite=Lax`,
+            'set-cookie': `${COOKIE}=${cookie}; Path=/; Max-Age=${COOKIE_MAX_AGE}; Secure; HttpOnly; SameSite=Lax`,
             location: origin + url.pathname + url.search,
           });
           res.end();

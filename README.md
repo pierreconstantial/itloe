@@ -51,7 +51,7 @@ Set them in front of `npm start`, e.g. `PORT=8080 npm start`.
 | `BLOKO_BIND` | Listen address. Use `127.0.0.1` for a local tunnel, or the guest's private IP in production. Default: all interfaces. `npm run start:local` sets this and `BLOKO_HOST` to `127.0.0.1` on Linux/macOS. |
 | `BLOKO_HOST` | The address phones should use: an interface name (`wlan0`) or an IP address. Use it when the printed address is wrong. |
 | `BLOKO_PUBLIC_ORIGIN` | Public HTTPS origin, e.g. `https://itloe.kputnik.com`. Requires `BLOKO_ACCESS_TOKEN`; replaces LAN address detection for invitations. |
-| `BLOKO_ACCESS_TOKEN` | Shared invitation secret, at least 32 characters. Requires `BLOKO_PUBLIC_ORIGIN`. Never put it in Git, release files or logs. |
+| `BLOKO_ACCESS_TOKEN` | Shared invitation secret of 6 letters or digits, short enough for guests to type from the TV. Requires `BLOKO_PUBLIC_ORIGIN`. Never put it in Git, release files or logs. |
 | `BLOKO_NEW=1` | Start a brand-new game instead of resuming the saved one. Same as `npm start -- --new`. |
 | `BLOKO_VAR` | Folder for saved data (default `var/`). |
 | `BLOKO_QUIZ_DIR` | Folder of the quiz question bank (default `data/quiz/`). |
@@ -69,7 +69,7 @@ Either way, allow the port through the Windows firewall when asked.
 
 Infrastructure owns the LXC, Node 24 runtime, systemd service, public HTTPS/WebSocket proxy, secrets, backups and deployment timer. The game runs as an unprivileged user, with releases under `/opt/itloe/releases/<commit>`, `/opt/itloe/current` pointing at the active release, and `BLOKO_VAR=/var/lib/itloe` outside the release. The proxy forwards to the guest's private port `3131`; it must suppress URL/Referer-bearing access and error logs for this host.
 
-Open `https://itloe.kputnik.com/?token=<shared-secret>` to authorize a browser. The server exchanges the token for a Secure/HttpOnly cookie and redirects to a clean URL. All HTTP routes and WebSocket upgrades require authorization; WebSockets also require the configured public Origin. The token-bearing join links and QR codes authorize new phones. Everyone with the invitation joins the same evening, with the four characters. Rotating the configured secret invalidates existing cookies after a restart. Without either public setting, local LAN play stays open.
+Open `https://itloe.kputnik.com/?token=<shared-secret>` to authorize a browser. The server exchanges the token for a 30-day Secure/HttpOnly cookie and redirects to a clean URL. All HTTP routes and WebSocket upgrades require authorization; WebSockets also require the configured public Origin. The token-bearing join links and QR codes authorize new phones. Everyone with the invitation joins the same evening, with the four characters. Rotating the configured secret invalidates existing cookies after a restart. Without either public setting, local LAN play stays open.
 
 Pushing to `production` runs [the production workflow](.github/workflows/production.yml): locked dependency install, type-checking, tests, save/resume checks, packaging and an extracted-runtime access test. It then publishes a GitHub Release tagged `prod-<full-commit-sha>` with:
 
