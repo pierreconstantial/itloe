@@ -5,8 +5,8 @@ import { initState, ranking, reduce as reduceGame } from '../shared/game.js';
 
 /** @typedef {import('../shared/game.js').State} State */
 
-/** The reducer, with the tableau's settings the campaign passes: the ones the round was created with. */
-const reduce = (/** @type {State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { settings: s.rules });
+/** The reducer, with the tableau's settings and host the campaign passes: the ones the round was created with, and 'a'. */
+const reduce = (/** @type {State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { settings: s.rules, hostId: 'a' });
 
 /** Marathon game under way: a (host, anna), b (sol), c (pierre); a has made one move. @returns {State} */
 function game3() {
@@ -54,11 +54,10 @@ test('endGame on a timed game: the late bell is ignored', () => {
   assert.equal(reduce(e, { t: 'timeUp', deadline: d }), e);
 });
 
-test('a retired player keeps their board and host, and cannot place', () => {
+test('a retired player keeps their board, and cannot place', () => {
   const s = game3();
   const r = reduce(s, { t: 'retire', id: 'a', target: 'b' });
   assert.deepEqual(r.players.b.board, s.players.b.board);
-  assert.equal(r.hostId, 'a');
   // its character stays held (a reconnect / reclaim finds it)
   assert.equal(reduce(r, { t: 'place', id: 'b', piece: 0, x: 0, y: 0 }), r, 'a retired player cannot place');
 });
@@ -82,7 +81,6 @@ test('retire: the last one out finishes the game (stuck), host may retire themse
   s = reduce(s, { t: 'retire', id: 'a', target: 'a' });
   assert.equal(s.phase, 'finished');
   assert.equal(s.endReason, 'stuck');
-  assert.equal(s.hostId, 'a', 'host stays host');
 });
 
 test('newGame after a retire: the retired player is back, fresh', () => {

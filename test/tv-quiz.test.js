@@ -6,8 +6,8 @@ import { projectQuiz } from '../shared/quiz/bank.js';
 import { anecdoteOf, pickedBy, questionHeader, revealRows, seatedIds } from '../public/screen/quiz-view.js';
 import { summarizeQuiz } from '../public/commun/quiz-text.js';
 
-/** The quiz reducer, with the tableau's settings the campaign passes: the ones the quiz was created with. */
-const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { settings: s.rules });
+/** The quiz reducer, with the tableau's settings and host the campaign passes: the ones the quiz was created with, and 'a'. */
+const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { settings: s.rules, hostId: 'a' });
 
 const T0 = 1_700_000_000_000;
 /** @type {Record<string, any>} */

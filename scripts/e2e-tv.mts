@@ -176,6 +176,7 @@ async function killAndBack(tv: Page, phase: string, ref: Client): Promise<void> 
   const want = boardsOf(ref.lastView());
   await tv.until(`(() => { const s = window.bloko.state(); return !!s && JSON.stringify(s.order.map((id) => [id, s.players[id].board, s.players[id].score, s.players[id].hand])) === ${JSON.stringify(want)}; })()`, 'tv converged');
   const before = await tv.js(`JSON.stringify(${tvState})`);
+  const hostBefore = await tv.js('window.bloko.campaign()?.party.hostId ?? null');
   await kill9();
   check(await tv.until(tvOnlineBanner, 'banner'), `${phase}: kill -9 → TV shows the "Connecting…" banner`);
   await tv.shot(`kill-${phase}-banner`);
@@ -190,11 +191,12 @@ async function killAndBack(tv: Page, phase: string, ref: Client): Promise<void> 
   check(back, `${phase}: restart → TV reconnects by itself, banner gone`);
   await tv.until(`(() => { const s = window.bloko.state(); return s?.phase === ${JSON.stringify(phase)} && JSON.stringify(s.order.map((id) => [id, s.players[id].board, s.players[id].score, s.players[id].hand])) === ${JSON.stringify(want)}; })()`, 'resumed view');
   const after = await tv.js(`JSON.stringify(${tvState})`);
+  const hostAfter = await tv.js('window.bloko.campaign()?.party.hostId ?? null');
   const a = JSON.parse(after), b = JSON.parse(before);
-  const same = a.phase === phase && boardsOf(a) === boardsOf(b) && a.hostId === b.hostId;
+  const same = a.phase === phase && boardsOf(a) === boardsOf(b) && hostAfter === hostBefore && hostAfter !== null;
   if (!same) {
     const diff = a.order.map((id: string) => `${id}: score ${b.players[id]?.score}→${a.players[id]?.score} hand ${JSON.stringify(b.players[id]?.hand)}→${JSON.stringify(a.players[id]?.hand)} done ${b.players[id]?.done}→${a.players[id]?.done}`);
-    console.log(`      diff: phase ${b.phase}→${a.phase} host ${b.hostId}→${a.hostId} seed ${b.seed}→${a.seed} | ${diff.join(' | ')}`);
+    console.log(`      diff: phase ${b.phase}→${a.phase} host ${hostBefore}→${hostAfter} seed ${b.seed}→${a.seed} | ${diff.join(' | ')}`);
   }
   check(same, `${phase}: same phase, boards/scores/hands, host after the restart`);
 }

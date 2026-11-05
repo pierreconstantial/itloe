@@ -8,8 +8,8 @@ import { projectQuiz, judgeAnswer, answerText } from '../shared/quiz/bank.js';
 import { expectedAnswers, judgeLocal } from '../shared/quiz/judge-local.js';
 import { initQuiz, reduceQuiz as reduceRound } from '../shared/quiz/index.js';
 
-/** The quiz reducer, with the tableau's settings the campaign passes: the ones the quiz was created with. */
-const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { settings: s.rules });
+/** The quiz reducer, with the tableau's settings and host the campaign passes: the ones the quiz was created with, and 'a'. */
+const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { settings: s.rules, hostId: 'a' });
 
 const bank = loadBank(); // the server's own loader: throws on any invalid question
 /** An anecdote shorter than this is an import accident, not a fun fact (e.g. a lone "P"). */

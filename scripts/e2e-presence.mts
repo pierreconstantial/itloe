@@ -118,7 +118,7 @@ try {
   await onlineIs(screen, [idB], 'host phone dies → offline');
   const A3 = await device('A3');
   check((await tap(A3, 'anna')).id === idA, 'host character reclaimed on a new device → same playerId');
-  check(screen.lastView().hostId === idA, 'reclaimed host is still host');
+  check(screen.lastHost() === idA, 'reclaimed host is still host');
   let i = A3.mark(); A3.send({ t: 'start' });
   await A3.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'playing', i);
   check(A3.lastView().phase === 'playing', 'reclaimed host can start the game');
@@ -173,7 +173,7 @@ try {
   await onlineIs(screen, [], 'podium: host offline');
   const Ehost = await device('Ehost');
   check((await tap(Ehost, 'anna')).id === idA, 'podium: offline host reclaimed by character');
-  check(Ehost.lastView().hostId === idA && Ehost.lastView().phase === 'finished', '…still host, still on the podium');
+  check(Ehost.lastHost() === idA && Ehost.lastView().phase === 'finished', '…still host, still on the podium');
   i = Ehost.mark(); Ehost.send({ t: 'newGame' });
   const lob = blocksOf(await Ehost.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'lobby', i));
   check(!lob.players[idB], 'newGame drops the left player');
@@ -191,7 +191,7 @@ try {
   const F2 = await device('F2');
   check((await tap(F2, 'sol')).id === idF, 'after restart: no stored id → tap the character → reclaim');
   await onlineIs(screen, [idA, idF], 'everyone back online');
-  check(screen.lastView().hostId === idA, 'host kept through the restart');
+  check(screen.lastHost() === idA, 'host kept through the restart');
   // ---------- host controls: a dropped player can never block the game ----------
   const G = await device('G'); const idG = (await tap(G, 'pierre')).id!;
   i = E2.mark(); E2.send({ t: 'start' });

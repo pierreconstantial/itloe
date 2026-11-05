@@ -155,7 +155,7 @@ try {
   T2 = await screen('T2');
   let k = await until(T1, (x) => x.party.order.length === 2);
   check(k.v === 1 && k.at.node === 'hub.false-start' && k.at.activity?.phase === 'lobby', 'new evening starts AT the false-start blocks tableau, block lobby open');
-  check(k.party.hostId === idP && k.at.activity.hostId === idP && k.at.activity.order.join() === `${idP},${idE}`, 'party = both phones, host = first in, both seated in the block lobby');
+  check(k.party.hostId === idP && k.at.activity.order.join() === `${idP},${idE}`, 'party = both phones, host = first in, both seated in the block lobby');
   const v = T1.msgs.findLast((m) => m.t === 'view');
   check(v.round?.kind === 'blocks' && v.round.status === 'lobby' && JSON.stringify(v.round.view) === JSON.stringify(saved().at.activity)
     && !('activity' in v.campaign.at), 'view: the round carries the block game; the campaign on the wire carries no raw round state');

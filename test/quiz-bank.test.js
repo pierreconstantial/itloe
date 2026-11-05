@@ -7,8 +7,8 @@ import { validateBank, candidatesFor, judgeAnswer, projectQuiz, answerText } fro
 import { expectedAnswers } from '../shared/quiz/judge-local.js';
 import { initQuiz, reduceQuiz as reduceRound, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
 
-/** The quiz reducer, with the tableau's settings the campaign passes: the ones the quiz was created with. */
-const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { settings: s.rules });
+/** The quiz reducer, with the tableau's settings and host the campaign passes: the ones the quiz was created with, and 'a'. */
+const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { settings: s.rules, hostId: 'a' });
 
 /** @type {import('../shared/quiz/bank.js').Question[]} */
 const BANK = JSON.parse(readFileSync(new URL('../data/quiz/placeholder.json', import.meta.url), 'utf8')).questions;

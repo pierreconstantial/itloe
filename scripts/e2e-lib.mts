@@ -23,6 +23,8 @@ export const blocksOf = (v: any): any => (v?.round?.kind === 'blocks' ? v.round.
 export const quizOf = (v: any): any => (v?.round?.kind === 'quiz' ? v.round.view : null);
 /** A view's tableau settings (the campaign keeps them), else null. */
 export const settingsOf = (v: any): any => v?.campaign?.at.settings ?? null;
+/** A view's host: the party's (a minigame stores none). */
+export const hostOf = (v: any): string | null => v?.campaign?.party.hostId ?? null;
 
 export class Client {
   ws!: WebSocket;
@@ -48,6 +50,8 @@ export class Client {
   lastView(): any { return blocksOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
   /** The tableau's settings in the last view, or null. */
   lastSettings(): any { return settingsOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
+  /** The party's host in the last view. */
+  lastHost(): string | null { return hostOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
   async waitFor(pred: (m: any) => boolean, from = 0, ms = 2000): Promise<any> {
     const end = Date.now() + ms * SLOW;
     while (Date.now() < end) {

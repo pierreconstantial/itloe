@@ -3,7 +3,7 @@
 // (kill -9 / resume across phases: scripts/e2e-resume.mts, which runs its own server)
 import { PIECES } from '../shared/pieces.js';
 import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
-import { blocksOf, check, Client, finish, HTTP, illegalMove, legalMoves, playToDone, sleep, URL_WS } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, hostOf, HTTP, illegalMove, legalMoves, playToDone, sleep, URL_WS } from './e2e-lib.mts';
 
 let s = 12345;
 const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 4294967296);
@@ -53,7 +53,7 @@ const idB = (await B.waitFor((m) => m.t === 'welcome', i)).playerId;
 await B.waitFor((m) => m.t === 'view' && blocksOf(m).players[idB], i);
 await screen.waitFor((m) => m.t === 'view' && blocksOf(m).order.length === 2);
 check(true, 'room code accepted (B typed it in lower case)');
-check(B.lastView().hostId === idA && B.lastView().order.join() === `${idA},${idB}`, 'two joins → welcome each, A is host, view broadcast to all (incl. screen)');
+check(B.lastHost() === idA && B.lastView().order.join() === `${idA},${idB}`, 'two joins → welcome each, A is host, view broadcast to all (incl. screen)');
 const pA = B.lastView().players[idA];
 check(pA.character === 'anna' && pA.name === CHARACTERS.anna.name && pA.color === CHARACTERS.anna.color, 'join by character → name + colour from the roster');
 
@@ -222,9 +222,10 @@ B.send({ t: 'newGame' });
 check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-host', 'non-host newGame → err not-host');
 ia = Acur.mark(); ib = B.mark();
 Acur.send({ t: 'newGame' });
-const vn = blocksOf(await B.waitFor((m) => m.t === 'view', ib));
+const vnMsg = await B.waitFor((m) => m.t === 'view', ib);
+const vn = blocksOf(vnMsg);
 await screen.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'lobby');
-check(vn.phase === 'lobby' && vn.hostId === idA && vn.order.join() === `${idA},${idB}` && vn.deadline === null && vn.endReason === null
+check(vn.phase === 'lobby' && hostOf(vnMsg) === idA && vn.order.join() === `${idA},${idB}` && vn.deadline === null && vn.endReason === null
   && vn.order.every((id: string) => vn.players[id].score === 0 && vn.players[id].board.every((c: number) => c === 0)),
   'host newGame → lobby, same players + host, fresh boards/scores, broadcast');
 check(vn.players[idA].character === 'anna' && vn.players[idB].character === 'sol', 'newGame keeps each character');

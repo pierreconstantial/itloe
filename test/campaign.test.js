@@ -9,8 +9,8 @@ import { minigameContent } from '../shared/campaign/sample.js';
 import { DEFAULT_SETTINGS, initState, reduce as reduceGame } from '../shared/game.js';
 import { MINIGAMES } from '../shared/minigames.js';
 
-/** The block reducer, with the tableau's settings the campaign passes: the ones the game was created with. */
-const reduce = (/** @type {import('../shared/game.js').State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { settings: s.rules });
+/** The block reducer, with the tableau's settings and host the campaign passes: the ones the game was created with, and 'a'. */
+const reduce = (/** @type {import('../shared/game.js').State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { settings: s.rules, hostId: 'a' });
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
 /** @typedef {import('../shared/campaign/types.js').CampaignAction} CampaignAction */
@@ -274,7 +274,6 @@ test('enter: host or the chooser only; locked nodes refused; back is host only a
 test('party: join in an open lobby seats them; mid-game they watch and join at the next lobby', () => {
   let c = party();
   assert.deepEqual(c.at.activity?.order, ['e', 's']);
-  assert.equal(c.at.activity?.hostId, 'e');
   c = run(c, { t: 'activity', action: { t: 'start', id: 'e', now: 1 } }, { t: 'join', id: 'p', character: 'pierre' });
   assert.ok(c.party.players.p && !c.at.activity?.players.p, 'mid-game joiner watches');
   c = run(c, { t: 'activity', action: { t: 'endGame', id: 'e' } }, { t: 'activity', action: { t: 'newGame', id: 'e' } });
@@ -288,7 +287,8 @@ test('party: leave forwards to the game, passes the host, frees the character', 
   assert.equal(c.party.players.e.left, true);
   assert.equal(c.party.hostId, 's');
   assert.equal(c.at.activity?.players.e.left, true, 'forwarded: marked left in the game');
-  assert.equal(c.at.activity?.hostId, 's');
+  assert.equal(run(c, { t: 'activity', action: { t: 'endGame', id: 's' } }).at.activity?.phase, 'finished',
+    'the game takes the party\'s new host');
   c = run(c, { t: 'join', id: 'e2', character: 'elodie' });
   assert.ok(c.party.players.e2, 'a left member\'s character is free');
   assert.equal(run(c, { t: 'leave', id: 'e' }), c, 'already left');
@@ -354,6 +354,7 @@ test('fromLegacyState: party rebuilt from the State, State kept as is, at the fa
   s = reduce(s, { t: 'join', id: 'b', character: 'sol' });
   s = reduce(s, { t: 'start', id: 'a', now: 1 });
   s = reduce(s, { t: 'leave', id: 'b' });
+  s = /** @type {any} */ ({ ...s, hostId: 'a' }); // a v1 State kept its host
   const c = fromLegacyState(s, C);
   assert.equal(c.at.node, C.start);
   assert.equal(c.at.activity, s);

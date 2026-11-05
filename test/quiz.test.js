@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import { initQuiz, reduceQuiz as reduceRound, quizRanking, resolvePending, mergeQuizSettings, pointsFor, SCORING, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
 
 /** @typedef {import('../shared/quiz/index.js').QuizState} QuizState */
-/** The reducer, with the tableau's settings the campaign passes: by default the ones the quiz was created with. */
-const reduceQuiz = (/** @type {QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a, settings = s.rules) => reduceRound(s, a, { settings });
+/** The reducer, with the tableau's settings and host the campaign passes: by default the ones the quiz was created with, and 'a'. */
+const reduceQuiz = (/** @type {QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a, settings = s.rules, hostId = 'a') => reduceRound(s, a, { settings, hostId });
 
 const T0 = 1_700_000_000_000;
 /** 6 candidates: 4 with choices, 2 text-only. */
@@ -163,10 +163,9 @@ test('endGame: host, from question (round dropped) or reveal (kept)', () => {
   assert.equal(reduceQuiz(lobby(), { t: 'endGame', id: 'a' }).phase, 'lobby', 'nothing to end in the lobby');
 });
 
-test('leave: lobby drops; mid-quiz marks left, closes the round if they were the last awaited; host passes on', () => {
+test('leave: lobby drops; mid-quiz marks left, closes the round if they were the last awaited', () => {
   const l = reduceQuiz(lobby(), { t: 'leave', id: 'a' });
   assert.deepEqual(l.order, ['b']);
-  assert.equal(l.hostId, 'b');
   let s = choiceRound();
   s = reduceQuiz(s, { t: 'answer', id: 'a', choice: 1, now: T0 + 1000, verdict: 'right' });
   s = reduceQuiz(s, { t: 'leave', id: 'b' });

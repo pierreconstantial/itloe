@@ -79,7 +79,7 @@ try {
   await kill9(); await boot();
   check((await roomCode()) === room, `lobby kill -9 → same room code (${room})`);
   A = await rejoin('A', idA); B = await rejoin('B', idB);
-  check(core(A.lastView()) === core(lobby) && A.lastView().phase === 'lobby' && A.lastView().hostId === idA
+  check(core(A.lastView()) === core(lobby) && A.lastView().phase === 'lobby' && A.lastHost() === idA
     && JSON.stringify(A.lastSettings()) === lobbySettings && A.lastSettings().grace === 2,
     'lobby kill -9 → same players, host and settings (changed in the lobby); stored ids rejoin');
   check(!A.msgs.some((m) => m.t === 'pos'), 'positions are ephemeral: none replayed after a restart');
@@ -118,7 +118,7 @@ try {
   check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-host', 'after resume: non-host newGame → err not-host');
   i = A.mark(); A.send({ t: 'newGame' });
   const back = blocksOf(await A.waitFor((m) => m.t === 'view' && blocksOf(m).phase === 'lobby', i));
-  check(back.order.join() === `${idA},${idB}` && back.hostId === idA && (await roomCode()) === room, 'after resume: host newGame → lobby, same players + room');
+  check(back.order.join() === `${idA},${idB}` && A.lastHost() === idA && (await roomCode()) === room, 'after resume: host newGame → lobby, same players + room');
 
   // newGame lobby survives a kill too (the case of the first playtest)
   await kill9(); await boot();
@@ -203,8 +203,8 @@ try {
   await kill9();
   const v2 = JSON.parse(readFileSync(FILE, 'utf8'));
   check(v2.v === 2 && !!v2.campaign && typeof v2.savedAt === 'number', 'the save is an envelope v2 { v:2, campaign, room, savedAt }');
-  // a v1 save is a bare block State, which kept its settings
-  const legacy = { v: 1, savedAt: Date.now(), state: { ...v2.campaign.at.activity, settings: v2.campaign.at.settings }, room: v2.room, bestPrevious: null };
+  // a v1 save is a bare block State, which kept its settings and its host
+  const legacy = { v: 1, savedAt: Date.now(), state: { ...v2.campaign.at.activity, settings: v2.campaign.at.settings, hostId: v2.campaign.party.hostId }, room: v2.room, bestPrevious: null };
   writeFileSync(FILE, JSON.stringify(legacy));
   await boot();
   check(/MIGRATED a v1 save/.test(log), 'v1 save → migrated (server log says so)');

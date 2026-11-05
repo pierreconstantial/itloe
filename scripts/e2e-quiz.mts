@@ -11,7 +11,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, HTTP, quizOf, settingsOf, sleep } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, hostOf, HTTP, quizOf, settingsOf, sleep } from './e2e-lib.mts';
 import { expectedAnswers } from '../shared/quiz/judge-local.js';
 
 const PORT = process.env.PORT ?? '3141';
@@ -160,7 +160,7 @@ try {
   let q = await untilQuiz(P, (x) => x.phase === 'lobby', i);
   const v0 = lastView(P);
   check(Array.isArray(q.credits) && q.credits.some((c: string) => /Itloe/.test(c)), `credits in the lobby view (${q.credits?.join(' | ')})`);
-  check(v0.campaign.at.node === QUIZ && blocksOf(v0) === null && q.order.length === 2 && q.hostId === idP,
+  check(v0.campaign.at.node === QUIZ && blocksOf(v0) === null && q.order.length === 2 && hostOf(v0) === idP,
     'quiz tableau → quiz lobby with the party seated; no block game in the view (block clients never see a quiz)');
   check(await errOf(E, { t: 'config', patch: { count: 3 } }) === 'not-host', 'quiz config: host only');
   i = P.mark(); P.send({ t: 'config', patch: { count: 3, seconds: 10, mode: 'mixed' } });
