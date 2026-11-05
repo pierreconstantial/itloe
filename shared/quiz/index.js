@@ -48,7 +48,6 @@ import { mulberry32 } from '../rng.js';
  *   rules: QuizSettings,          // the tableau's settings, locked at start
  *   order: string[],
  *   players: Record<string, QuizPlayer>,
- *   hostId: string | null,
  *   questions: Candidate[],       // picked at start, in play order
  *   round: Round | null,
  *   asked: string[],              // ids of the questions actually shown (reported to the campaign)
@@ -148,7 +147,7 @@ export function initQuiz(seed, settings) {
   const s = mergeQuizSettings(QUIZ_DEFAULTS, settings);
   return {
     kind: 'quiz', phase: 'lobby', seed: seed >>> 0, rules: s,
-    order: [], players: {}, hostId: null, questions: [], round: null, asked: [], endReason: null,
+    order: [], players: {}, questions: [], round: null, asked: [], endReason: null,
   };
 }
 
@@ -239,16 +238,14 @@ export function resolvePending(s) {
   return r === s.round ? s : { ...s, round: r };
 }
 
-/** @param {QuizState} s @param {string} id */
-const isHost = (s, id) => s.hostId !== null && s.hostId === id;
-
-/** @param {Record<string, QuizPlayer>} players @param {string[]} order @param {string} goneId */
-const nextHost = (players, order, goneId) => order.find((id) => id !== goneId && !players[id].left) ?? null;
+/** The party's host, passed in by the campaign. @param {{ hostId: string | null }} ctx @param {string} id */
+const isHost = (ctx, id) => ctx.hostId !== null && ctx.hostId === id;
 
 /**
  * @param {QuizState} s
  * @param {QuizAction} a
- * @param {import('../minigames.js').RoundCtx<QuizSettings>} ctx  the tableau's settings: start and again lock them in
+ * @param {import('../minigames.js').RoundCtx<QuizSettings>} ctx  the tableau's settings (start and again lock them in)
+ *   and the party's host (the host-only actions)
  * @returns {QuizState}  the SAME object when the action is refused
  */
 export function reduceQuiz(s, a, ctx) {
@@ -258,7 +255,7 @@ export function reduceQuiz(s, a, ctx) {
       if (s.order.some((id) => s.players[id].character === a.character)) return s;
       const { name, color } = CHARACTERS[a.character];
       return {
-        ...s, order: [...s.order, a.id], hostId: s.hostId ?? a.id,
+        ...s, order: [...s.order, a.id],
         players: { ...s.players, [a.id]: { id: a.id, character: a.character, name, color, score: 0, correct: 0, left: false } },
       };
     }
@@ -266,12 +263,11 @@ export function reduceQuiz(s, a, ctx) {
     case 'leave': {
       const p = s.players[a.id];
       if (!p || p.left) return s;
-      const hostId = s.hostId === a.id ? nextHost(s.players, s.order, a.id) : s.hostId;
       if (s.phase === 'lobby') {
         const { [a.id]: _gone, ...players } = s.players;
-        return { ...s, hostId, order: s.order.filter((id) => id !== a.id), players };
+        return { ...s, order: s.order.filter((id) => id !== a.id), players };
       }
-      const next = { ...s, hostId, players: { ...s.players, [a.id]: { ...p, left: true } } };
+      const next = { ...s, players: { ...s.players, [a.id]: { ...p, left: true } } };
       // the leaver was the last one we were waiting for: the round closes
       return next.phase === 'question' && everyoneAnswered(next) ? reveal(next) : next;
     }
@@ -279,7 +275,7 @@ export function reduceQuiz(s, a, ctx) {
     case 'start':
     case 'again': {
       // like the block game: start from the lobby, again (a rematch) from the podium
-      if (!isHost(s, a.id) || s.phase !== (a.t === 'start' ? 'lobby' : 'finished') || !Number.isFinite(a.now)) return s;
+      if (!isHost(ctx, a.id) || s.phase !== (a.t === 'start' ? 'lobby' : 'finished') || !Number.isFinite(a.now)) return s;
       if (active(s).length === 0 || !Array.isArray(a.candidates)) return s;
       const rules = ctx.settings;
       const pool = askable(a.candidates, rules.mode);
@@ -338,7 +334,7 @@ export function reduceQuiz(s, a, ctx) {
     case 'override': {
       const r = s.round;
       const ans = r?.answers[a.target];
-      if (!isHost(s, a.id) || s.phase !== 'reveal' || !r || !ans || typeof a.ok !== 'boolean') return s;
+      if (!isHost(ctx, a.id) || s.phase !== 'reveal' || !r || !ans || typeof a.ok !== 'boolean') return s;
       if (ans.ok === a.ok) return s;
       let players = s.players;
       if (ans.ok === true) players = credit(players, a.target, ans, -1);
@@ -347,27 +343,26 @@ export function reduceQuiz(s, a, ctx) {
     }
 
     case 'next': {
-      if (!isHost(s, a.id) || s.phase !== 'reveal' || !s.round || !Number.isFinite(a.now)) return s;
+      if (!isHost(ctx, a.id) || s.phase !== 'reveal' || !s.round || !Number.isFinite(a.now)) return s;
       const done = { ...s, round: settlePending(s.round) };
       const index = s.round.index + 1;
       return index < s.questions.length ? openRound(done, index, a.now) : { ...done, phase: 'finished', endReason: 'done' };
     }
 
     case 'endGame': {
-      if (!isHost(s, a.id) || !quizRunning(s)) return s;
+      if (!isHost(ctx, a.id) || !quizRunning(s)) return s;
       // a round still open is dropped (nobody is credited for half a question); a reveal keeps its credit
       const round = s.round && s.phase === 'reveal' ? settlePending(s.round) : s.round;
       return { ...s, phase: 'finished', endReason: 'host', round };
     }
 
     case 'newGame': {
-      if (!isHost(s, a.id) || s.phase !== 'finished') return s;
+      if (!isHost(ctx, a.id) || s.phase !== 'finished') return s;
       const order = s.order.filter((id) => !s.players[id].left);
       /** @type {Record<string, QuizPlayer>} */
       const players = {};
       for (const id of order) players[id] = { ...s.players[id], score: 0, correct: 0 };
-      const hostId = s.hostId !== null && order.includes(s.hostId) ? s.hostId : (order[0] ?? null);
-      return { ...s, phase: 'lobby', seed: nextSeed(s.seed), order, players, hostId, questions: [], round: null, endReason: null };
+      return { ...s, phase: 'lobby', seed: nextSeed(s.seed), order, players, questions: [], round: null, endReason: null };
     }
 
     default:

@@ -504,7 +504,7 @@ function roundMessage(ws: WebSocket, id: string, m: any): void {
   // a later action (the quiz's verdict) lands only while a round of this minigame runs
   const io = { apply: (action: unknown) => game.campaign.at.kind === kind && apply({ t: 'activity', action: action as any }) };
   const inputs = () => server.inputs?.(game.campaign.at.settings, game.campaign.facts);
-  const reply = server.message(m, { id, now: Date.now(), state, inputs }, io);
+  const reply = server.message(m, { id, now: Date.now(), hostId: party().hostId, state, inputs }, io);
   if (!reply) return;
   if (!('action' in reply)) sendErr(ws, reply.refused);
   else if (!io.apply(reply.action) && reply.refused) sendErr(ws, reply.refused);

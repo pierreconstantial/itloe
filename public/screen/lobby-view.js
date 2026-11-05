@@ -93,17 +93,17 @@ function renderJoin(join) {
  * Party-room lobby: a top band (join box + title, next-game settings, status); the guests
  * themselves are the avatars walking below it (party-room.js), so there are no slot cards.
  * A quiz tableau shows the same band with its own title and settings line.
- * @param {Pick<State, 'order' | 'hostId'> & { players: Record<string, { name: string, color: number }> }} s
+ * @param {Pick<State, 'order'> & { players: Record<string, { name: string, color: number }> }} s
  * @param {unknown} _prev
  * @param {JoinInfo} join
  * @param {{ title: string, settings: string }} band the minigame's title and the tableau's settings, summarized
- * @param {{required?: number, status?: string}} [options] required: the guests a round needs;
- *   status: replaces the guest count when no round starts here
+ * @param {{ hostId: string | null, required?: number, status?: string }} options hostId: the party's host;
+ *   required: the guests a round needs; status: replaces the guest count when no round starts here
  */
-export function renderLobby(s, _prev, join, band, options = {}) {
+export function renderLobby(s, _prev, join, band, options) {
   const n = s.order.length;
   const max = options.required ?? MAX_PLAYERS;
-  const host = s.hostId ? s.players[s.hostId] : undefined;
+  const host = options.hostId ? s.players[options.hostId] : undefined;
   const status = options.status ?? (n === 0
     ? 'Waiting for the first guest…'
     : `${n}/${max} guest${n === 1 ? '' : 's'}${host ? ` · ${host.name} starts the game from their phone` : ''}`);

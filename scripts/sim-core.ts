@@ -170,7 +170,7 @@ export function playGame(
   seed: number, settings: Partial<Settings>, policy: Policy, weights?: Weights, salt = 0
 ): GameResult {
   let s: State = initState(seed, settings);
-  const ctx = { settings: s.rules }; // the settings the game is played with
+  const ctx = { settings: s.rules, hostId: 'a' }; // the settings the game is played with; 'a' plays and hosts
   s = reduce(s, { t: 'join', id: 'a', character: 'pierre' }, ctx);
   s = reduce(s, { t: 'start', id: 'a', now: 0 }, ctx);
   const { rules } = s;

@@ -14,7 +14,7 @@ import { quizRunning } from '../../shared/quiz/index.js';
 
 /** @param {{ send: (msg: unknown) => void }} io */
 export function createHostControls(io) {
-  /** @type {{ v: State | null, q: QuizView | null, online: readonly string[], meId: string } | null} */ let last = null;
+  /** @type {{ v: State | null, q: QuizView | null, online: readonly string[], meId: string, hostId: string | null } | null} */ let last = null;
   // armed key: 'end' or a playerId
   const confirm = createConfirm(() => redraw());
   const tap = confirm.tap;
@@ -46,9 +46,10 @@ export function createHostControls(io) {
   function redraw() {
     const ctx = last;
     const v = ctx?.v ?? null, q = ctx?.q ?? null;
-    // exactly when the server accepts endGame: the game's host, while it runs
-    const blocks = ctx && v && v.phase === 'playing' && v.hostId === ctx.meId ? v : null;
-    const quiz = !!ctx && !!q && quizRunning(q) && q.hostId === ctx.meId;
+    // exactly when the server accepts endGame: the party's host, while a round runs
+    const host = !!ctx && ctx.hostId === ctx.meId;
+    const blocks = host && v && v.phase === 'playing' ? v : null;
+    const quiz = host && !!q && quizRunning(q);
     if (!ctx || (!blocks && !quiz)) { place([]); confirm.disarm(); return; }
     const live = new Set(ctx.online);
     // a quiz has no "take out" (the server refuses retire there)
@@ -77,10 +78,10 @@ export function createHostControls(io) {
   return {
     /**
      * @param {State | null} v the block game, null when none @param {QuizView | null} q the quiz, null when none
-     * @param {readonly string[]} online @param {string} meId
+     * @param {readonly string[]} online @param {string} meId @param {string | null} hostId the party's host
      */
-    render(v, q, online, meId) {
-      last = { v, q, online, meId };
+    render(v, q, online, meId, hostId) {
+      last = { v, q, online, meId, hostId };
       redraw();
     },
   };

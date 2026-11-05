@@ -56,7 +56,8 @@ Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `dead
 ### Campaign (slice 3, Contract D v2 + A1): the evening around the block game
 
 The server runs the campaign engine (`shared/campaign/`). The party (who is in the evening, their characters,
-the host) lives in `campaign.party`; a minigame's round (the block game, a quiz) is `campaign.at.activity`,
+the host) lives in `campaign.party`; the party's host is the only host (a minigame stores none: the server passes
+it with every action, and the round's view carries none); a minigame's round (the block game, a quiz) is `campaign.at.activity`,
 nested in its tableau, with its kind in `campaign.at.kind` and the tableau's settings in `campaign.at.settings`
 (the content's, then the host's choice until the party leaves the tableau; a round locks them in when it starts).
 `join` and `leave` act on the EVENING: `join` adds a party member (seated at once in an open block lobby;

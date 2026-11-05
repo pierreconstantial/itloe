@@ -34,8 +34,9 @@ import { QUIZ_RULES } from './quiz/index.js';
 /**
  * What the campaign passes with every action of a round. `settings`: the tableau's settings, kept by the
  * campaign (the host's choice until the party leaves the tableau); a round locks them in when it starts.
+ * `hostId`: the party's host (a minigame stores none), for the minigame's own host-only actions.
  * @template [T=any]
- * @typedef {{ settings: T }} RoundCtx
+ * @typedef {{ settings: T, hostId: string | null }} RoundCtx
  */
 
 /**

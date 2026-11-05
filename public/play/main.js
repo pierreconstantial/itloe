@@ -284,6 +284,9 @@ function member() {
 /** The tableau's settings: the campaign keeps them (null where no minigame is). @returns {any} */
 const tableauSettings = () => campaign?.at.settings ?? null;
 
+/** The party's host (a minigame stores none). */
+const partyHost = () => campaign?.party.hostId ?? null;
+
 /** The party host steers the evening (game-master panel). */
 const isStory = () => campaign?.facts.flags.includes('story.elo-50') ?? false;
 /** The room where the party is: what the joystick walks in and the object button looks around. */
@@ -387,16 +390,17 @@ function render() {
   const v = lastView;
   const me = v && playerId ? v.players[playerId] ?? null : null;
   const mem = member();
-  const isHost = me !== null && v !== null && me.id === v.hostId;
+  const hostId = partyHost();
+  const isHost = me !== null && v !== null && me.id === hostId;
   const configurable = v !== null && v.phase !== 'playing';
   const q = quizView;
-  const quizHost = q !== null && playerId !== null && q.hostId === playerId;
+  const quizHost = q !== null && playerId !== null && hostId === playerId;
   const quizConfigurable = q !== null && (q.phase === 'lobby' || q.phase === 'finished');
 
   // the settings sheet follows the activity: the block game's schema, or the quiz's
   if (v) settingsSheet.render(tableauSettings(), isHost && configurable);
   else if (q) settingsSheet.render(tableauSettings(), quizHost && quizConfigurable, QUIZ_SETTINGS);
-  hostControls.render(v, q, online, playerId ?? '');
+  hostControls.render(v, q, online, playerId ?? '', hostId);
   if (q ? !(quizHost && quizConfigurable) : (!isHost || !configurable)) menu.close('settings');
   if (campaign && isGameMaster()) gmPanel.render(campaign, round?.status ?? null);
   else menu.close('gm');
@@ -436,7 +440,7 @@ function render() {
     // the quiz's lobby is the room, like the block lobby: walk, settings, the host's Start
     if (q.phase === 'lobby') { show('lobby'); renderLobby(q, q.players[playerId], quizHost, summarizeQuiz(tableauSettings())); return; }
     show('quiz');
-    quizUi.render(q, playerId);
+    quizUi.render(q, playerId, quizHost);
     return;
   }
   if (!v) {
@@ -579,7 +583,7 @@ function renderPlace(c, mem) {
 
 /**
  * The room at a tableau: the block game's lobby, or the quiz's.
- * @param {{ order: string[], players: Record<string, LobbyPlayer>, hostId: string | null }} v
+ * @param {{ order: string[], players: Record<string, LobbyPlayer> }} v
  * @param {LobbyPlayer} me @param {boolean} isHost @param {string} settings the settings summary
  */
 function renderLobby(v, me, isHost, settings) {
@@ -589,7 +593,7 @@ function renderLobby(v, me, isHost, settings) {
     avatarCanvas(characterOf(me), LOBBY_ME_SCALE, currentPos(characterOf(me)).dir),
     Object.assign(document.createElement('span'), {
       className: 'lobby-me-name',
-      textContent: `You're ${me.name}${me.id === v.hostId ? ' 👑' : ''}`,
+      textContent: `You're ${me.name}${me.id === partyHost() ? ' 👑' : ''}`,
     }),
   );
 
@@ -600,7 +604,7 @@ function renderLobby(v, me, isHost, settings) {
     if (id === me.id || p.left) continue;
     const li = document.createElement('li');
     li.append(avatarCanvas(characterOf(p), LOBBY_CHIP_SCALE), document.createTextNode(
-      p.name + (id === v.hostId ? ' 👑' : '')));
+      p.name + (id === partyHost() ? ' 👑' : '')));
     ul.append(li);
   }
   ul.hidden = ul.childElementCount === 0;
@@ -632,7 +636,7 @@ function renderGame(v, me) {
     const off = !p.done && !online.includes(id);
     chip.append(dotEl(p.color), document.createTextNode(`${p.name} ${p.done ? (p.retired ? '👋' : '💀') : p.score}${off ? ' 📴' : ''}`));
     // the host can act on an offline player right from the bar: the chip opens the host menu
-    if (off && v.hostId === me.id) { chip.dataset.open = 'menu'; chip.classList.add('offline'); }
+    if (off && partyHost() === me.id) { chip.dataset.open = 'menu'; chip.classList.add('offline'); }
     opp.append(chip);
   }
 

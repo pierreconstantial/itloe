@@ -23,8 +23,8 @@ export function makeBlockServer(game: Game): MinigameServer<State, ServerAction>
 
   return {
     // actions are rebuilt field by field: server-only inputs (now, deadline, timeUp) never come from the wire
-    message(m, { id, now, state: s }) {
-      const host = id === s.hostId;
+    message(m, { id, now, hostId, state: s }) {
+      const host = id === hostId;
       // a round button answers alike in every minigame: a guest's → not-host, the host's at the wrong moment → refused
       const refusal = host ? 'refused' : 'not-host';
       switch (m.t) {

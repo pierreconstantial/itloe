@@ -81,8 +81,8 @@ export function makeQuizServer(): MinigameServer<QuizState, QuizAction, Candidat
   console.log(`[itloe] quiz bank: ${bank.questions.length} questions (${bank.files.join(', ') || 'no files'}), judge: none (uncertain typed answers → wrong, host overrides)`);
 
   return {
-    message(m, { id, now, state: q, inputs }, io) {
-      const host = id === q.hostId;
+    message(m, { id, now, hostId, state: q, inputs }, io) {
+      const host = id === hostId;
       const refusal: ErrCode = host ? 'refused' : 'not-host';
       switch (m.t) {
         case 'start':

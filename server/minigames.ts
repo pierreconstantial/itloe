@@ -11,9 +11,10 @@ import { makeQuizServer } from './quiz.ts';
 
 export type ErrCode = 'full' | 'bad-place' | 'not-host' | 'not-playing' | 'unknown-player' | 'locked' | 'bad-room' | 'taken' | 'refused';
 
-/** What a minigame's message handler gets with a message: the sender, the time, the round's state, and
- *  the round's server inputs (until the RPG starts rounds, a minigame's own start messages need them). */
-export type MessageCtx<S, I> = { id: string, now: number, state: S, inputs: () => I };
+/** What a minigame's message handler gets with a message: the sender, the time, the party's host, the
+ *  round's state, and the round's server inputs (until the RPG starts rounds, a minigame's own start
+ *  messages need them). */
+export type MessageCtx<S, I> = { id: string, now: number, hostId: string | null, state: S, inputs: () => I };
 
 /** `apply`: runs an action on the round now, false when refused or when the round is over (e.g. the
  *  quiz's verdict, arriving later). */

@@ -33,6 +33,7 @@ function el(tag, cls, text) {
 export function createQuizUi(io) {
   /** @type {QuizView | null} */ let last = null;
   /** @type {string} */ let meId = '';
+  /** Am I the party's host (the quiz stores no host)? */ let amHost = false;
   /** What I sent this round (the view only says THAT I answered). @type {{ key: string, choice?: number, text?: string } | null} */
   let mine = null;
   /** Round whose question controls are built. */ let builtKey = '';
@@ -143,7 +144,7 @@ export function createQuizUi(io) {
     anecdote.hidden = !r.answer?.anecdote;
     anecdote.textContent = r.answer?.anecdote ? `💡 ${frenchSpaces(r.answer.anecdote)}` : '';
 
-    const host = v.hostId === meId;
+    const host = amHost;
     const ul = $('quiz-results');
     ul.replaceChildren(...v.order.map((id) => {
       const p = v.players[id];
@@ -188,16 +189,17 @@ export function createQuizUi(io) {
       return li;
     }));
     $('quiz-finished-kicker').textContent = v.endReason === 'host' ? 'The host ended the quiz.' : '';
-    const host = v.hostId === meId;
+    const host = amHost;
     $('quiz-again').hidden = !host;
     $('quiz-back').hidden = !host;
     $('quiz-finished-hint').hidden = host;
   }
 
-  /** @param {QuizView} v @param {string} id */
-  function render(v, id) {
+  /** @param {QuizView} v @param {string} id @param {boolean} [host] am I the party's host (default: as last time) */
+  function render(v, id, host = amHost) {
     last = v;
     meId = id;
+    amHost = host;
     for (const ph of PHASES) $(`quiz-${ph}`).hidden = v.phase !== ph;
     const r = v.round;
     $('quiz-progress').textContent = v.phase === 'finished' ? 'Results' : r ? `Question ${r.index + 1}/${r.total}` : 'Quiz';

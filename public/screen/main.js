@@ -95,7 +95,8 @@ const tableauSettings = () => campaign?.at.settings ?? null;
 /** @type {Record<State['phase'], (s: State, prev: State | null) => HTMLElement>} */
 const VIEWS = {
   lobby: (s, prev) => renderLobby(s, prev, joinInfo, { title: 'ITLOE', settings: summarizeSettings(tableauSettings()) }, portalReady()
-    ? { status: 'A portal has appeared. Élodie, walk into it!' } : {
+    ? { hostId: campaign?.party.hostId ?? null, status: 'A portal has appeared. Élodie, walk into it!' } : {
+      hostId: campaign?.party.hostId ?? null,
       required: campaign?.facts.flags.includes('story.elo-50') && campaign.at.node === 'hub.false-start'
         ? OPENING_PLAYERS.length : undefined,
     }),
@@ -249,7 +250,7 @@ function showQuiz(q) {
     podiumSequence(/** @type {any} */ (q));
   }
   if (q.phase !== 'finished' && prev?.phase === 'finished') cancelPodium();
-  app.replaceChildren(room ? renderQuizRoom(q, joinInfo, tableauSettings())
+  app.replaceChildren(room ? renderQuizRoom(q, joinInfo, tableauSettings(), campaign?.party.hostId ?? null)
     : renderQuiz(q, prev ? performance.now() - quizFinishedAt : Infinity, tableauSettings()));
   drawQuizRing();
 }
@@ -593,7 +594,7 @@ connect();
 fetchJoinInfo().then((info) => {
   joinInfo = info;
   if (current?.phase === 'lobby') app.replaceChildren(VIEWS.lobby(current, current));
-  else if (quiz?.phase === 'lobby') app.replaceChildren(renderQuizRoom(quiz, joinInfo, tableauSettings()));
+  else if (quiz?.phase === 'lobby') app.replaceChildren(renderQuizRoom(quiz, joinInfo, tableauSettings(), campaign?.party.hostId ?? null));
 });
 
 /** @type {any} */ (window).bloko = {

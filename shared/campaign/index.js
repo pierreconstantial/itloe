@@ -108,11 +108,11 @@ function settingsAt(node) {
 }
 
 /** What the campaign passes with every action of its round. @param {Campaign} c */
-const ctxOf = (c) => ({ settings: c.at.settings });
+const ctxOf = (c) => ({ settings: c.at.settings, hostId: c.party.hostId });
 
 /**
- * The round of a tableau's minigame, in its lobby, seeded with every non-left party member (host =
- * party host), and the tableau's settings. No minigame (a scene, a hub or a world) → no round.
+ * The round of a tableau's minigame, in its lobby, seeded with every non-left party member, and the
+ * tableau's settings. No minigame (a scene, a hub or a world) → no round.
  * @param {Node | undefined} node @param {Party} party @param {number} seed
  * @returns {{ kind: MinigameKind | null, activity: ActivityState | null, settings: TableauSettings | null }}
  */
@@ -124,17 +124,9 @@ function roundAt(node, party, seed) {
   let s = spec.init(seed, settings);
   for (const id of party.order) {
     const m = party.players[id];
-    if (!m.left && m.character) s = spec.reduce(s, { t: 'join', id, character: m.character }, { settings });
+    if (!m.left && m.character) s = spec.reduce(s, { t: 'join', id, character: m.character }, { settings, hostId: party.hostId });
   }
-  return { kind: /** @type {MinigameKind} */ (kind), activity: syncHost(s, party), settings };
-}
-
-/** The party is the authority on who hosts: mirror it into the nested game when that player is seated. */
-/** @template {ActivityState} S @param {S} s @param {Party} party @returns {S} */
-function syncHost(s, party) {
-  const h = party.hostId;
-  if (h !== null && s.players[h] && !s.players[h].left && s.hostId !== h) return { ...s, hostId: h };
-  return s;
+  return { kind: /** @type {MinigameKind} */ (kind), activity: s, settings };
 }
 
 /**
@@ -161,7 +153,7 @@ export function newCampaign(content, seed) {
  */
 export function fromLegacyState(state, content) {
   /** @type {Party} */
-  const party = { order: [...state.order], players: {}, hostId: state.hostId };
+  const party = { order: [...state.order], players: {}, hostId: /** @type {{ hostId?: string | null }} */ (state).hostId ?? null }; // a v1 State kept its host
   for (const id of state.order) {
     const p = state.players[id];
     party.players[id] = { id, character: p.character ?? null, name: p.name, color: p.color, left: !!p.left };
@@ -259,7 +251,6 @@ function withActivity(c, next, content) {
       if (!m.left && m.character && !next.players[id]) next = spec.reduce(next, { t: 'join', id, character: m.character }, ctxOf(c));
     }
   }
-  next = syncHost(next, c.party);
   if (next === prev) return c;
   const moved = { ...c, at: { ...c.at, activity: next } };
   if (prev && spec.status(prev) === 'running' && spec.status(next) === 'finished') {
@@ -303,7 +294,7 @@ export function reduceCampaign(c, a, content) {
       const moved = { ...c, party: { ...c.party, hostId, players: { ...c.party.players, [a.id]: { ...m, left: true } } } };
       const s = c.at.activity;
       if (!s) return moved;
-      const next = s.players[a.id] ? kindOf(c).reduce(s, { t: 'leave', id: a.id }, ctxOf(c)) : s;
+      const next = s.players[a.id] ? kindOf(c).reduce(s, { t: 'leave', id: a.id }, ctxOf(moved)) : s;
       return withActivity(moved, next, content); // a lobby drops them, a game marks them done (left)
     }
 

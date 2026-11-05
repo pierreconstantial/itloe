@@ -105,9 +105,10 @@ function scoreboard(q) {
  * The room at a quiz tableau: the block lobby's band (join box, "Quiz!", the quiz settings, who's in),
  * and the dataset credits along the bottom; the players are the avatars walking below the band.
  * @param {QuizView} q @param {import('./lobby-view.js').JoinInfo} join @param {QuizSettings} settings the tableau's
+ * @param {string | null} hostId the party's host
  */
-export function renderQuizRoom(q, join, settings) {
-  const room = renderLobby(q, null, join, { title: 'Quiz!', settings: summarizeQuiz(settings) });
+export function renderQuizRoom(q, join, settings, hostId) {
+  const room = renderLobby(q, null, join, { title: 'Quiz!', settings: summarizeQuiz(settings) }, { hostId });
   room.append(...creditsLine(q));
   return room;
 }

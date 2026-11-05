@@ -48,7 +48,6 @@ import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
  *   phase: 'lobby' | 'playing' | 'finished',
  *   seed: number,
  *   size: number,               // === rules.size (kept for existing readers)
- *   hostId: string | null,
  *   order: string[],
  *   players: Record<string, Player>,
  *   rules: Settings,            // locked snapshot used by the game being played / shown (choice: the campaign)
@@ -142,7 +141,7 @@ export function validateSettings(settings) {
 export function initState(seed, settings) {
   const s = normalizeSettings(settings ?? {});
   return {
-    phase: 'lobby', seed, size: s.size, hostId: null, order: [], players: {},
+    phase: 'lobby', seed, size: s.size, order: [], players: {},
     rules: { ...s }, deadline: null, endReason: null,
   };
 }
@@ -212,7 +211,8 @@ export function ranking(state) {
  * Rules: BUILD-PLAN.md «Contract A», normative paragraph, + Q4 addendum.
  * @param {State} state
  * @param {Action} action
- * @param {import('./minigames.js').RoundCtx<Settings>} ctx  the tableau's settings: start, again and newGame lock them in
+ * @param {import('./minigames.js').RoundCtx<Settings>} ctx  the tableau's settings (start, again and newGame lock them
+ *   in) and the party's host (the host-only actions)
  * @returns {State}
  */
 export function reduce(state, action, ctx) {
@@ -225,7 +225,6 @@ export function reduce(state, action, ctx) {
       const { name, color } = CHARACTERS[action.character];
       return {
         ...state,
-        hostId: state.hostId ?? action.id,
         order: [...state.order, action.id],
         players: {
           ...state.players,
@@ -236,7 +235,7 @@ export function reduce(state, action, ctx) {
 
     case 'start': {
       if (state.phase !== 'lobby') return state;
-      if (action.id !== state.hostId || state.hostId === null) return state;
+      if (!isHost(ctx, action.id)) return state;
       if (state.order.length < 1) return state;
       return beginPlay(state, state.seed, action.now, ctx.settings);
     }
@@ -303,14 +302,14 @@ export function reduce(state, action, ctx) {
 
     case 'endGame': {
       // host stops the game (e.g. someone dropped while not stuck): everyone still playing is frozen, scores kept
-      if (state.phase !== 'playing' || !isHost(state, action.id)) return state;
+      if (state.phase !== 'playing' || !isHost(ctx, action.id)) return state;
       return { ...state, players: allMarkedDone(state), phase: 'finished', endReason: 'host' };
     }
 
     case 'retire': {
       // host takes one player out: done (board frozen, still ranked) but NOT left — the seat, the
       // character and a reconnect stay theirs. The last one out ends the game like getting stuck.
-      if (state.phase !== 'playing' || !isHost(state, action.id)) return state;
+      if (state.phase !== 'playing' || !isHost(ctx, action.id)) return state;
       const t = state.players[action.target];
       if (!t || t.done || t.left) return state;
       return finishIfAllDone(state, { ...state.players, [t.id]: { ...t, done: true, retired: true } });
@@ -319,17 +318,16 @@ export function reduce(state, action, ctx) {
     case 'leave': {
       const p = state.players[action.id];
       if (!p || p.left) return state;
-      const hostId = state.hostId === p.id ? nextHost(state, p.id) : state.hostId;
       if (state.phase !== 'playing') {
         const { [p.id]: _gone, ...players } = state.players;
-        return { ...state, hostId, order: state.order.filter((id) => id !== p.id), players };
+        return { ...state, order: state.order.filter((id) => id !== p.id), players };
       }
-      return finishIfAllDone({ ...state, hostId }, { ...state.players, [p.id]: { ...p, done: true, left: true } });
+      return finishIfAllDone(state, { ...state.players, [p.id]: { ...p, done: true, left: true } });
     }
 
     case 'again': {
       if (state.phase !== 'finished') return state;
-      if (action.id !== state.hostId || state.hostId === null) return state;
+      if (!isHost(ctx, action.id)) return state;
       if (state.order.length < 1) return state;
       return beginPlay(state, nextSeed(state.seed), action.now, ctx.settings);
     }
@@ -337,7 +335,7 @@ export function reduce(state, action, ctx) {
     case 'newGame': {
       // Podium → lobby: same players minus those who left, fresh, joins/config/start open again.
       if (state.phase !== 'finished') return state;
-      if (action.id !== state.hostId || state.hostId === null) return state;
+      if (!isHost(ctx, action.id)) return state;
       const rules = { ...ctx.settings };
       const order = state.order.filter((id) => !state.players[id].left);
       /** @type {Record<string, Player>} */
@@ -346,9 +344,8 @@ export function reduce(state, action, ctx) {
         const old = state.players[id];
         players[id] = newPlayer(id, old.name, old.color, rules.size, rules.grace, old.character ?? null);
       }
-      const hostId = order.includes(state.hostId) ? state.hostId : (order[0] ?? null);
       return {
-        ...state, phase: 'lobby', seed: nextSeed(state.seed), hostId, order, players,
+        ...state, phase: 'lobby', seed: nextSeed(state.seed), order, players,
         rules, size: rules.size, deadline: null, endReason: null,
       };
     }
@@ -358,8 +355,8 @@ export function reduce(state, action, ctx) {
   }
 }
 
-/** @param {State} state @param {string} id */
-const isHost = (state, id) => state.hostId !== null && id === state.hostId;
+/** The party's host, passed in by the campaign. @param {{ hostId: string | null }} ctx @param {string} id */
+const isHost = (ctx, id) => ctx.hostId !== null && id === ctx.hostId;
 
 /** Every seated player done (already-done ones kept as is). @param {State} state @returns {Record<string, Player>} */
 function allMarkedDone(state) {
@@ -415,20 +412,6 @@ function beginPlay(state, seed, now, settings) {
     deadline: timed ? /** @type {number} */ (now) + rules.timedSeconds * 1000 : null,
     endReason: null,
   };
-}
-
-/**
- * Who inherits the host role when `leaverId` leaves: the next player after them in join order
- * (wrapping) who has not left — a stuck player still holds a phone and can press «Replay».
- * null if nobody is left.
- * @param {State} state
- * @param {string} leaverId
- * @returns {string | null}
- */
-function nextHost(state, leaverId) {
-  const i = state.order.indexOf(leaverId);
-  const others = [...state.order.slice(i + 1), ...state.order.slice(0, i)];
-  return others.find((id) => !state.players[id].left) ?? null;
 }
 
 /**
