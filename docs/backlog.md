@@ -34,7 +34,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Protocol differences](#protocol-differences) | `PROTOCOL.md` disagrees with the code in three places | P3 | Open | Trivial |
 | [Debug accessors show only the party room](#debug-accessors-show-only-the-party-room) | `bloko.drawOrder()` and `bloko.scene()` ignore the apartment and door #4's room | P3 | Open | Trivial |
 | [Apartment sofa sparkle](#apartment-sofa-sparkle) | The sofa's sparkle overlaps its "Comfy!" bubble in the apartment | P3 | Open | Trivial |
-| [Portal drawn after use](#portal-drawn-after-use) | The TV still draws the used portal at the false start | P3 | Open | Trivial |
 | [Shared urgent keyframes](#shared-urgent-keyframes) | `blocks.css` and `quiz.css` both define `@keyframes urgent` | P3 | Open | Trivial |
 | [Minigame wording in shared folders](#minigame-wording-in-shared-folders) | Block and quiz files in `public/commun/`, block files with generic names | P3 | Open | Low |
 | [Debug view of a running screen](#debug-view-of-a-running-screen) | Nothing shows what a minigame's TV screen draws | P3 | Open | Low |
@@ -137,12 +136,6 @@ The TV's debug accessors `bloko.drawOrder()` and `bloko.scene()` report `PARTY_R
 The sofa's object-action sparkle is placed for the party room's narrow sofa. In the apartment, where the sofa is stretched 1.7×, it overlaps the "Comfy!" bubble.
 
 **Recommendation:** place the effect from the prop's box.
-
-### Portal drawn after use
-
-If a game master sends the party back to the false start after Élodie went through the portal, the TV still draws the portal there (`public/screen/main.js`, `show`), but the server refuses to let anyone through it.
-
-**Recommendation:** draw the portal only while it can be entered: `portal.ready` set and `portal.entered` not set.
 
 ### Shared urgent keyframes
 

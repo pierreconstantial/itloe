@@ -83,9 +83,11 @@ function applyPresence() {
   avatars.setOffline(off);
 }
 
-/** The story's start tableau after its first match: the portal stands in the room, and no round follows. */
+/** The story's start tableau after its first match: no round follows. */
 const portalReady = () => !!campaign?.facts.flags.includes('story.elo-50') && campaign.facts.flags.includes('portal.ready')
   && campaign.at.node === 'hub.false-start';
+/** The portal stands in the room until Élodie went through it. */
+const portalOpen = () => portalReady() && !campaign?.facts.flags.includes('portal.entered');
 
 /** The tableau's settings: the campaign keeps them (null where no minigame is). @returns {any} */
 const tableauSettings = () => campaign?.at.settings ?? null;
@@ -181,10 +183,11 @@ function showRoom(c) {
   const opening = c.facts.flags.includes('story.elo-50') && c.at.node === 'hub.false-start';
   app.replaceChildren(renderLobby({ order: here, players: c.party.players }, null, joinInfo,
     { title: band.title, settings: band.settings.summarize(c.at.settings) },
-    portalReady() ? { hostId: c.party.hostId, status: 'A portal has appeared. Élodie, walk into it!' }
-      : { hostId: c.party.hostId, required: opening ? OPENING_PLAYERS.length : undefined }));
+    portalOpen() ? { hostId: c.party.hostId, status: 'A portal has appeared. Élodie, walk into it!' }
+      : portalReady() ? { hostId: c.party.hostId, status: 'Élodie went through the portal.' }
+        : { hostId: c.party.hostId, required: opening ? OPENING_PLAYERS.length : undefined }));
   party.setRoom(roomAt(content.get(), c.at.node));
-  party.setPortal(portalReady());
+  party.setPortal(portalOpen());
   party.setKey(false);
   party.setPlayers({ order: here, players: c.party.players });
   party.setDoors([]);

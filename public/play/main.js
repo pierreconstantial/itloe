@@ -601,7 +601,8 @@ function renderLobby(v, me, isHost, settings) {
   $('btn-settings-lobby').hidden = !isHost || !!portalReady;
   $('btn-start').hidden = !isHost || !!portalReady;
   /** @type {HTMLButtonElement} */ ($('btn-start')).disabled = !!opening && !quartetReady;
-  $('lobby-hint').textContent = portalReady ? 'A portal has appeared. Élodie, walk into it!'
+  $('lobby-hint').textContent = portalReady ? (campaign?.facts.flags.includes('portal.entered')
+    ? 'Élodie went through the portal.' : 'A portal has appeared. Élodie, walk into it!')
     : opening && !quartetReady ? 'Wait for all four players.'
       : isHost ? (v.order.length === 1 ? 'Play solo, or wait for friends to join.' : 'Everyone in? Hit start!')
         : 'Waiting for the host to start…';
