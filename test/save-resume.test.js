@@ -39,7 +39,7 @@ async function boot(t, save) {
   const port = await freePort();
   const child = spawn(process.execPath, [join(ROOT, 'server/main.ts')], {
     env: { ...process.env, PORT: String(port), BLOKO_BIND: '127.0.0.1', BLOKO_HOST: '127.0.0.1',
-      BLOKO_VAR: varDir, BLOKO_QUIZ_DIR: quizDir, BLOKO_NEW: '0' },
+      BLOKO_VAR: varDir, BLOKO_QUIZ_DIR: quizDir, BLOKO_NEW: '0', ITLOE_CONTENT: 'sample' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let log = '';

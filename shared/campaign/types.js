@@ -69,6 +69,7 @@ export {};
 /**
  * @typedef {{
  *   start: string,              // where a NEW campaign starts: a minigame's tableau (the false-start block game)
+ *   storyId?: string,            // optional live-story marker; absent from the engine's sample fixture
  *   chooser: CharacterId,       // whose walking opens doors ('elodie')
  *   nodes: Record<string, Node>,
  *   items: Record<string, Item>, // the item catalogue (keys = ids)
@@ -103,7 +104,8 @@ export {};
 
 /**
  * @typedef {{ seq: number, t: 'unlocked', node: string }
- *   | { seq: number, t: 'item', item: string, to: CharacterId[] }} News   // who got it
+ *   | { seq: number, t: 'item', item: string, to: CharacterId[] }
+ *   | { seq: number, t: 'apparition' }} News   // who got it
  */
 
 // ---------------------------------------------------------------- the campaign (persisted state)
@@ -153,6 +155,8 @@ export {};
  * @typedef {{ t: 'join', id: string, character: CharacterId }
  *   | { t: 'leave', id: string }
  *   | { t: 'enter', id: string, node: string }
+ *   | { t: 'portal', id: string }
+ *   | { t: 'collect', id: string, item: string }
  *   | { t: 'back', id: string }
  *   | { t: 'activity', action: import('../game.js').Action | QuizAction }   // routed by the activity's kind
  *   | { t: 'event', event: CampaignEvent }

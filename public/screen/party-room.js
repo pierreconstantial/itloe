@@ -13,7 +13,8 @@
 
 import { drawSprite, SPRITE_SIZE, WALK_FRAMES, WALK_FPS } from '../../shared/sprites.js';
 import { WORLD } from '../../shared/world.js';
-import { PARTY_ROOM, spawnAt } from '../../shared/scene.js';
+import { PARTY_ROOM, APARTMENT_ROOM, DOOR_FOUR_ROOM, spawnAt } from '../../shared/scene.js';
+import { INTRO_KEY, INTRO_KEY_SPOT, PORTAL } from '../../shared/campaign/story.js';
 import { CHARACTERS } from '../../shared/characters.js';
 import { OBJECT_ACTIONS } from '../../shared/interactions.js';
 import { makeView, renderScene, drawOrder, createLoop, lerp, py as snapY } from './scene-render.js';
@@ -184,6 +185,11 @@ export function createPartyRoom(bg, fg) {
   const expressions = new Map();
   let geo = makeView(1, 1, 1, WORLD, AVATAR_UNITS, SPRITE_SIZE);
   let visible = false;
+  /** @type {'lobby' | 'apartment' | 'second-room'} */ let mode = 'lobby';
+  let portalVisible = false;
+  let keyVisible = false;
+  /** @type {string[]} */ let hubPeople = [];
+  /** @type {{id: string, icon: string}[]} */ let decorations = [];
   let frameNow = 0;                    // the timestamp of the frame being drawn (walk cycle, door sparkles)
   let frameAlpha = 0;                  // …and how far it sits between the last two updates
   /** Reused between frames so a steady room allocates nothing. @type {import('./scene-render.js').Item[]} */
@@ -221,15 +227,52 @@ export function createPartyRoom(bg, fg) {
     const Y = (/** @type {number} */ u) => snap(geo.oy + u * unit, p);
     const floorTop = Y(SCENE.floorTop);
 
+    if (mode === 'second-room') {
+      rect(g, 0, 0, w, floorTop, '#b8a998');
+      rect(g, 0, floorTop, w, h - floorTop, '#8a6951');
+      rect(g, 0, floorTop - p * 3, w, p * 3, PAL.stucco);
+      paintDoor(g, X(6.6), X(9.4), Y(1.15), floorTop, p);
+      return;
+    }
+
     paintWall(g, w, floorTop, p, Y);
     paintFloor(g, floorTop, w, h, p);
     paintWindow(g, X(SCENE.window.x0), X(SCENE.window.x1), Y(SCENE.window.top), floorTop - Y(SCENE.sill) + Y(0), p);
+    if (mode === 'apartment') {
+      paintTerrace(g, X, Y, w, h, floorTop, p);
+      paintChandelier(g, X(5.4), Y(SCENE.cornice), Y(SCENE.chandelier.y), p, unit);
+      paintLight(g, X(5.4), Y(SCENE.chandelier.y), X(10.5), h, unit);
+      return;
+    }
     paintDoor(g, X(SCENE.door.x0), X(SCENE.door.x1), Y(SCENE.door.top), floorTop, p);
     const cx = X(SCENE.chandelier.x), cy = Y(SCENE.chandelier.y);
     paintBunting(g, [[0, Y(0.3)], [cx - p * 7, cy], [cx + p * 7, cy], [w, Y(0.3)]], p);
     paintChandelier(g, cx, Y(SCENE.cornice), cy, p, unit);
     for (const b of SCENE.balloons) balloon(g, geo.ox + b.x * unit, geo.oy + b.y * unit, b.color, p);
     paintLight(g, cx, cy, w, h, unit);
+  }
+
+  /** Sunny terrace on the right third; an indoor-outdoor threshold keeps the apartment airy. */
+  /** @param {CanvasRenderingContext2D} g @param {(u: number) => number} X @param {(u: number) => number} Y
+   * @param {number} w @param {number} h @param {number} floorTop @param {number} p */
+  function paintTerrace(g, X, Y, w, h, floorTop, p) {
+    const edge = X(10.7);
+    rect(g, edge, 0, w - edge, floorTop, '#a9dbee');
+    rect(g, edge, Y(2.9), w - edge, floorTop - Y(2.9), '#d7eef3');
+    g.fillStyle = '#fff0a2';
+    g.beginPath(); g.arc(X(14.1), Y(1.2), p * 10, 0, Math.PI * 2); g.fill();
+    rect(g, edge, floorTop, w - edge, h - floorTop, '#d8b18b');
+    for (let x = edge; x < w; x += p * 9) rect(g, x, floorTop, p, h - floorTop, '#bc9272');
+    rect(g, edge, Y(4.25), w - edge, p * 2, '#efe6d3');
+    for (let x = edge + p * 4; x < w; x += p * 12) rect(g, x, Y(3.65), p * 2, Y(4.25) - Y(3.65), '#f5eee3');
+    rect(g, edge - p * 3, 0, p * 6, h, '#f4efe4');
+    // terrace café table, ashtray and beer
+    rect(g, X(13.15), Y(6.7), p * 16, p * 2, '#694c3d');
+    rect(g, X(13.55), Y(6.7) + p * 2, p * 2, p * 14, '#694c3d');
+    rect(g, X(13.35), Y(6.7) + p * 16, p * 7, p * 2, '#694c3d');
+    rect(g, X(13.28), Y(6.7) - p * 2, p * 5, p * 2, '#bcc5c5');
+    rect(g, X(13.95), Y(6.7) - p * 8, p * 3, p * 8, '#e8b74a');
+    rect(g, X(13.95), Y(6.7) - p * 8, p * 3, p, '#fff4cc');
   }
 
   /** @param {CanvasRenderingContext2D} g @param {number} w @param {number} floorTop @param {number} p @param {(u: number) => number} Y */
@@ -427,6 +470,11 @@ export function createPartyRoom(bg, fg) {
       } else if (active && prop.id === 'sofa') {
         g.translate(0, Math.abs(Math.sin(elapsed / 110)) * v.scale * 1.5);
       }
+      if (mode === 'apartment' && prop.id === 'sofa') {
+        g.translate(cx, 0);
+        g.scale(1.7, 1);
+        g.translate(-cx, 0);
+      }
       // The birthday candles go dark for a moment when blown out.
       paintGrid(g, grid, active && prop.id === 'table' ? { ...pal, A: '' } : pal, cx, bottom, v.scale);
       g.restore();
@@ -556,7 +604,100 @@ export function createPartyRoom(bg, fg) {
     g.clearRect(0, 0, geo.w, geo.h);
     g.imageSmoothingEnabled = false;
     for (const d of doors) drawDoorway(g, d, now); // the doorways lie flat on the back wall, under everything
-    renderScene(g, PARTY_ROOM, avatars.values(), PROP_ART, drawActor, geo, drawList);
+    if (portalVisible && mode === 'lobby') drawPortal(g, now);
+    renderScene(g, mode === 'second-room' ? DOOR_FOUR_ROOM : mode === 'apartment' ? APARTMENT_ROOM : PARTY_ROOM,
+      avatars.values(), PROP_ART, drawActor, geo, drawList);
+    if (mode === 'apartment') {
+      drawCats(g, now);
+      drawHubPeople(g, now);
+      drawDecorations(g);
+      if (keyVisible) drawIntroKey(g, now);
+    }
+  }
+
+  /** Friends without a player avatar gather here after their reunion has been earned. */
+  /** @param {CanvasRenderingContext2D} g @param {number} now */
+  function drawHubPeople(g, now) {
+    const spots = {
+      nico: { x: 3.9, y: 7.2, color: '#577aa4', name: 'Nico' },
+      father: { x: 5.25, y: 7.6, color: '#8c6650', name: 'Father' },
+      mother: { x: 9.2, y: 7.2, color: '#a86a82', name: 'Mother' },
+    };
+    for (const id of hubPeople) {
+      const person = spots[/** @type {keyof typeof spots} */ (id)];
+      if (!person) continue;
+      const { sx, sy } = toScreen(person.x, person.y);
+      const p = geo.scale;
+      const bob = Math.sin(now / 700 + person.x) * p;
+      g.fillStyle = '#e2b899';
+      g.fillRect(sx - p * 4, sy - p * 16 + bob, p * 8, p * 7);
+      g.fillStyle = person.color;
+      g.fillRect(sx - p * 6, sy - p * 9 + bob, p * 12, p * 9);
+      g.fillStyle = '#303047';
+      g.fillRect(sx - p * 5, sy - p * 1 + bob, p * 4, p * 3);
+      g.fillRect(sx + p, sy - p * 1 + bob, p * 4, p * 3);
+      g.fillStyle = '#fff4da';
+      g.font = `800 ${Math.round(geo.unit * 0.2)}px system-ui, sans-serif`;
+      g.textAlign = 'center';
+      g.fillText(person.name, sx, sy + p * 7);
+    }
+  }
+
+  /** Catalogue objects collected by Elo become small keepsakes on the apartment wall. */
+  /** @param {CanvasRenderingContext2D} g */
+  function drawDecorations(g) {
+    decorations.slice(0, 8).forEach((item, index) => {
+      const { sx, sy } = toScreen(1.4 + index * 1.05, 3.65);
+      const p = geo.scale;
+      rect(g, sx - p * 8, sy - p * 7, p * 16, p * 14, '#6d4a38');
+      rect(g, sx - p * 6, sy - p * 5, p * 12, p * 10, '#e9d9b3');
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.font = `${Math.round(geo.unit * 0.4)}px system-ui, sans-serif`;
+      g.fillText(item.icon, sx, sy);
+    });
+  }
+
+  /** @param {CanvasRenderingContext2D} g @param {number} now */
+  function drawPortal(g, now) {
+    const { sx, sy } = toScreen(PORTAL.x, PORTAL.y);
+    const pulse = 1 + Math.sin(now / 230) * 0.08;
+    g.save();
+    g.translate(sx, sy); g.scale(pulse, pulse);
+    const glow = g.createRadialGradient(0, 0, 2, 0, 0, geo.unit * 1.25);
+    glow.addColorStop(0, '#fff7b8'); glow.addColorStop(0.3, '#ce8cff'); glow.addColorStop(0.7, '#7047ccaa'); glow.addColorStop(1, '#7047cc00');
+    g.fillStyle = glow; g.beginPath(); g.ellipse(0, 0, geo.unit * 1.25, geo.unit * 0.9, 0, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#e3aaff'; g.lineWidth = geo.scale * 2;
+    g.beginPath(); g.ellipse(0, 0, geo.unit * 0.78, geo.unit * 0.61, 0, 0, Math.PI * 2); g.stroke();
+    g.restore();
+  }
+
+  /** @param {CanvasRenderingContext2D} g @param {number} now */
+  function drawCats(g, now) {
+    for (const cat of [{ name: 'Silex', x: 3.4, y: 7.8, color: '#4d555d' }, { name: 'Taïga', x: 8.5, y: 7.1, color: '#c69057' }]) {
+      const { sx, sy } = toScreen(cat.x, cat.y);
+      const p = geo.scale;
+      const sway = Math.sin(now / 350 + cat.x) * p;
+      g.fillStyle = cat.color;
+      g.fillRect(sx - p * 5, sy - p * 4, p * 9, p * 4);
+      g.fillRect(sx - p * 3, sy - p * 8, p * 6, p * 5);
+      g.beginPath(); g.moveTo(sx - p * 3, sy - p * 7); g.lineTo(sx - p * 2, sy - p * 11); g.lineTo(sx, sy - p * 8);
+      g.moveTo(sx + p, sy - p * 8); g.lineTo(sx + p * 3, sy - p * 11); g.lineTo(sx + p * 3, sy - p * 7); g.fill();
+      g.fillRect(sx + p * 4, sy - p * 6 + sway, p * 2, p * 4);
+      g.fillStyle = '#fff6d8'; g.fillRect(sx - p * 2, sy - p * 6, p, p); g.fillRect(sx + p, sy - p * 6, p, p);
+      g.font = `800 ${Math.round(geo.unit * 0.22)}px system-ui, sans-serif`;
+      g.textAlign = 'center'; g.fillText(cat.name, sx, sy + p * 3);
+    }
+  }
+
+  /** @param {CanvasRenderingContext2D} g @param {number} now */
+  function drawIntroKey(g, now) {
+    const { sx, sy } = toScreen(INTRO_KEY_SPOT.x, INTRO_KEY_SPOT.y);
+    const bob = Math.sin(now / 250) * geo.scale * 2;
+    g.font = `${Math.round(geo.unit * 0.55)}px system-ui, sans-serif`;
+    g.textAlign = 'center'; g.fillText('🗝️', sx, sy - geo.unit * 0.3 + bob);
+    g.font = `800 ${Math.round(geo.unit * 0.2)}px system-ui, sans-serif`;
+    g.fillStyle = '#fff3d6'; g.fillText('PICK UP', sx, sy + geo.scale * 2);
   }
 
   const loop = createLoop(update, draw, UPDATE_HZ);
@@ -723,8 +864,9 @@ export function createPartyRoom(bg, fg) {
     for (let x = rx0 + p * 4; x < rx1 - p * 4; x += p * 4) rect(g, x, ry0 + p, p * 2, p, locked ? '#7a6858' : '#e9c46a');
 
     // doorway standing on the rug's back edge
-    const dw = Math.max(p * 14, snap((rx1 - rx0) * 0.7, p));
-    const dh = snap(unit * 1.75, p);
+    const grand = d.id === 'hub.door4';
+    const dw = Math.max(p * 14, snap((rx1 - rx0) * (grand ? 0.92 : 0.7), p));
+    const dh = snap(unit * (grand ? 2.65 : 1.75), p);
     const dx0 = snap((rx0 + rx1) / 2 - dw / 2, p), dy1 = ry0 + p * 2, dy0 = dy1 - dh;
     rect(g, dx0 - p * 3, dy0 - p * 3, dw + p * 6, p * 2, PAL.stucco);            // cornice
     rect(g, dx0 - p * 2, dy0 - p, dw + p * 4, dh + p, PAL.frame);                // architrave
@@ -827,6 +969,13 @@ export function createPartyRoom(bg, fg) {
     }
   }
 
+  /** @param {'lobby' | 'apartment' | 'second-room'} next */
+  function setMode(next) {
+    if (mode === next) return;
+    mode = next;
+    if (visible) paintScene();
+  }
+
   /** Forget every avatar and position (reconnect): the next view and pos snapshot rebuild the room. */
   function reset() {
     avatars.clear();
@@ -838,7 +987,12 @@ export function createPartyRoom(bg, fg) {
   addEventListener('resize', () => { if (visible) layout(); });
 
   return {
-    setPlayers, setOffline, setDoors, onPos, onSocial, onInteract, setVisible, reset,
+    setPlayers, setOffline, setDoors, onPos, onSocial, onInteract, setVisible, setMode,
+    setPortal: (/** @type {boolean} */ on) => { portalVisible = on; },
+    setKey: (/** @type {boolean} */ on) => { keyVisible = on; },
+    setHubPeople: (/** @type {string[]} */ people) => { hubPeople = people; },
+    setDecorations: (/** @type {{id: string, icon: string}[]} */ items) => { decorations = items; },
+    reset,
     /** Debug / tests: the doors drawn. */
     doors: () => doors.map((d) => ({ id: d.id, state: d.state, title: d.title })),
     /** Debug / tests: the drawn state of every avatar. */

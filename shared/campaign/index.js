@@ -129,7 +129,8 @@ function syncHost(s, party) {
  */
 export function newCampaign(content, seed) {
   const party = emptyParty();
-  const facts = quietSettle({ ...emptyFacts(), seen: [content.start] }, content);
+  const facts = quietSettle({ ...emptyFacts(), seen: [content.start],
+    flags: content.storyId ? [`story.${content.storyId}`] : [] }, content);
   return {
     v: 1, seed: nextSeed(seed), party, facts, news: [], newsSeq: 0,
     at: { node: content.start, ...roundAt(content.nodes[content.start], party, seed) },
@@ -150,7 +151,8 @@ export function fromLegacyState(state, content) {
     const p = state.players[id];
     party.players[id] = { id, character: p.character ?? null, name: p.name, color: p.color, left: !!p.left };
   }
-  const facts = quietSettle({ ...emptyFacts(), seen: [content.start] }, content);
+  const facts = quietSettle({ ...emptyFacts(), seen: [content.start],
+    flags: content.storyId ? [`story.${content.storyId}`] : [] }, content);
   return { v: 1, seed: nextSeed(state.seed), party, facts, news: [], newsSeq: 0, at: { node: content.start, kind: 'blocks', activity: state } };
 }
 
@@ -174,6 +176,10 @@ export function loadCampaign(raw, content) {
     seen: (f.seen ?? []).filter(known),
     totals: migrateTotals(f.totals), // older saves: flat block totals → { blocks: … }
   };
+  if (content.storyId) facts.flags = withId(facts.flags, `story.${content.storyId}`);
+  // A pre-story save may already have finished the same opening block node. Give it the portal
+  // instead of trapping the resumed party in a completed opening without its new reward flag.
+  if (content.storyId === 'elo-50' && facts.done.includes(content.start)) facts.flags = withId(facts.flags, 'portal.ready');
   const news = (raw.news ?? []).filter((n) => n.t !== 'unlocked' || known(n.node));
   const newsSeq = raw.newsSeq ?? Math.max(0, ...news.map((n) => n.seq));
   const party = raw.party ?? emptyParty();
@@ -286,7 +292,7 @@ export function reduceCampaign(c, a, content) {
       // the host, or the chooser's character (walking into a door), opens an unlocked child
       const actor = c.party.players[a.id];
       const chooser = actor && !actor.left && actor.character === content.chooser;
-      if (!isHost(c, a.id) && !chooser) return c;
+      if (content.storyId === 'elo-50' && c.facts.flags.includes('portal.entered') ? !chooser : (!isHost(c, a.id) && !chooser)) return c;
       const n = content.nodes[a.node];
       if (!n || n.parent !== c.at.node || !isUnlocked(c, n.id)) return c;
       if (roundStatus(c) === 'running') return c;
@@ -294,8 +300,31 @@ export function reduceCampaign(c, a, content) {
       return moveTo(c, n.id, content);
     }
 
+    case 'portal': {
+      const actor = c.party.players[a.id];
+      if (content.storyId !== 'elo-50' || actor?.left || actor?.character !== content.chooser || c.at.node !== content.start
+        || roundStatus(c) !== 'lobby' || !c.facts.flags.includes('portal.ready')
+        || c.facts.flags.includes('portal.entered')) return c;
+      const facts = { ...c.facts, flags: withId(c.facts.flags, 'portal.entered'), seen: withId(c.facts.seen, 'hub') };
+      const moved = withFacts({ ...c, at: { node: 'hub', kind: null, activity: null } }, facts, content);
+      const seq = moved.newsSeq + 1;
+      return { ...moved, news: [...moved.news, { seq, t: 'apparition' }], newsSeq: seq };
+    }
+
+    case 'collect': {
+      const actor = c.party.players[a.id];
+      if (content.storyId !== 'elo-50' || actor?.left || actor?.character !== content.chooser || c.at.node !== 'hub'
+        || a.item !== 'memory-key-intro' || !content.items[a.item]
+        || !c.facts.flags.includes('apparition.seen') || holding(c.facts, content.chooser, a.item) > 0) return c;
+      const facts = { ...c.facts, inventory: addItem(c.facts.inventory, content.chooser, a.item, 1) };
+      const moved = withFacts(c, facts, content);
+      const seq = moved.newsSeq + 1;
+      return { ...moved, news: [...moved.news, { seq, t: 'item', item: a.item, to: [content.chooser] }], newsSeq: seq };
+    }
+
     case 'back': {
-      if (!isHost(c, a.id)) return c;
+      const chooser = c.party.players[a.id]?.character === content.chooser && !c.party.players[a.id]?.left;
+      if (content.storyId === 'elo-50' && c.facts.flags.includes('portal.entered') ? !chooser : !isHost(c, a.id)) return c;
       const n = content.nodes[c.at.node];
       if (!n || n.parent === null || roundStatus(c) === 'running') return c; // endGame first
       return moveTo(c, n.parent, content);
@@ -316,7 +345,12 @@ export function reduceCampaign(c, a, content) {
     case 'ack': {
       if (typeof a.upTo !== 'number') return c;
       const news = c.news.filter((x) => x.seq > a.upTo);
-      return news.length === c.news.length ? c : { ...c, news };
+      if (news.length === c.news.length) return c;
+      const apparitionShown = c.news.some((x) => x.t === 'apparition' && x.seq <= a.upTo);
+      const next = { ...c, news };
+      return apparitionShown
+        ? withFacts(next, { ...c.facts, flags: withId(c.facts.flags, 'apparition.seen') }, content)
+        : next;
     }
 
     case 'gm':

@@ -57,3 +57,29 @@
 @keyframes cutscene-line { from { opacity: 0; transform: translateY(calc(16 * var(--u))); } to { opacity: 1; transform: none; } }
 @keyframes gift-pop { 0% { transform: scale(0) rotate(-30deg); } 70% { transform: scale(1.5) rotate(8deg); } 100% { transform: scale(1) rotate(0); } }
 .cutscene-item-icon { display: inline-block; font-size: 1.15em; animation: gift-pop 0.9s 1.4s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+
+/* The visitor is a stylized, floating silhouette, kept legible across the room. */
+.apparition { position: fixed; inset: 0; z-index: 25; overflow: hidden; background: rgba(8, 8, 19, .78); }
+.apparition-light { position: absolute; left: 22%; top: 8%; width: 42%; height: 75%; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,221,145,.8), rgba(159,114,221,.24) 45%, transparent 72%); animation: apparition-light 3s ease-out both; }
+.apparition-figure { position: absolute; left: 29%; top: 17%; width: 23%; height: 58%; animation: apparition-float 2.5s ease-in-out infinite alternate, apparition-arrive 3s ease-out both; filter: drop-shadow(0 0 calc(25 * var(--u)) #f7dcac); }
+.apparition-hair { position: absolute; left: 29%; top: 4%; width: 42%; height: 31%; border-radius: 48% 48% 35% 35%; background: #e9e2d5; box-shadow: 0 0 calc(24 * var(--u)) #fff; }
+.apparition-face { position: absolute; left: 36%; top: 13%; width: 28%; height: 20%; border-radius: 42%; background: #d9b693; box-shadow: inset 0 calc(-10 * var(--u)) #b6886f; }
+.apparition-beard { position: absolute; left: 35%; top: 26%; width: 30%; height: 17%; border-radius: 20% 20% 55% 55%; background: #f7f1e7; }
+.apparition-robe { position: absolute; left: 13%; top: 35%; width: 74%; height: 61%; border-radius: 32% 32% 8% 8%; background: linear-gradient(100deg, #7e5f9a, #e2d6c8 40%, #bca6d2 70%, #59446a); clip-path: polygon(27% 0, 73% 0, 100% 100%, 0 100%); }
+.apparition-guitar { position: absolute; top: 38%; left: 40%; font-size: calc(155 * var(--u)); opacity: 0; transform: rotate(-25deg); }
+.apparition-speech { position: absolute; right: 5%; top: 17%; width: 42%; color: #fff9e9; font-size: calc(38 * var(--u)); line-height: 1.2; font-weight: 700; text-shadow: 0 3px 10px #17111e; }
+.apparition-speech p { opacity: 0; margin: 0 0 calc(26 * var(--u)); }
+.apparition.speaking .apparition-speech p { animation: apparition-words .7s ease-out forwards; }
+.apparition.speaking .apparition-speech p:nth-child(2) { animation-delay: 3s; }
+.apparition.speaking .apparition-speech p:nth-child(3) { animation-delay: 6s; }
+.apparition.riffing .apparition-guitar { opacity: 1; animation: apparition-shred .22s linear infinite alternate; }
+.apparition.riffing .apparition-speech { opacity: 0; }
+.apparition-smoke { position: absolute; left: 22%; top: 40%; font-size: calc(170 * var(--u)); opacity: 0; }
+.apparition.vanishing .apparition-smoke { animation: apparition-smoke 2s ease-out forwards; }
+.apparition.vanishing .apparition-figure { opacity: 0; transition: opacity .7s; }
+@keyframes apparition-light { from { opacity: 0; transform: scale(.25); } to { opacity: 1; transform: scale(1); } }
+@keyframes apparition-arrive { from { opacity: 0; transform: translateY(calc(100 * var(--u))) scale(.45); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes apparition-float { from { translate: 0 0; } to { translate: 0 calc(-26 * var(--u)); } }
+@keyframes apparition-words { to { opacity: 1; } }
+@keyframes apparition-shred { to { transform: rotate(16deg) translateY(calc(15 * var(--u))); } }
+@keyframes apparition-smoke { 20% { opacity: 1; } to { opacity: 0; transform: scale(2) translateY(calc(-70 * var(--u))); } }

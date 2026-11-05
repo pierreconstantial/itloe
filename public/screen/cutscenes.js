@@ -12,6 +12,7 @@
  *   unlocked: { id: string, title: string, kind: string }[],  // a world's own tableaux are folded into it
  *   items: { item: string, icon: string, name: string, to: string[] }[],   // to: display names
  *   headline: string,
+ *   apparition: boolean,
  * }} Moment
  */
 
@@ -35,9 +36,10 @@ export function composeMoment(entries, content, nameOf = (c) => c) {
     to: (Array.isArray(e.to) ? e.to : []).map(nameOf),
   }] : []));
   const worlds = unlocked.filter((u) => u.kind === 'world').length;
+  const apparition = entries.some((e) => e.t === 'apparition');
   const headline = worlds > 1 ? 'New worlds unlocked!' : worlds === 1 ? 'New world unlocked!'
     : unlocked.length ? 'Unlocked!' : items.length ? 'Reward!' : '';
-  return { upTo: Math.max(0, ...entries.map((e) => e.seq)), unlocked, items, headline };
+  return { upTo: Math.max(0, ...entries.map((e) => e.seq)), unlocked, items, headline, apparition };
 }
 
 /**

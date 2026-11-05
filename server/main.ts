@@ -22,9 +22,11 @@ import { makeMinigameServers, type ErrCode, type MinigameServer } from './miniga
 import { JOIN_QR_GAP_MS, JOIN_QR_MS } from '../shared/join-qr.js';
 import { cleanSpeech, isEmote } from '../shared/social.js';
 import { CHARACTERS, isCharacterId } from '../shared/characters.js';
+import { INTRO_KEY, INTRO_KEY_SPOT, OPENING_PLAYERS, PORTAL } from '../shared/campaign/story.js';
 import type { CharacterId } from '../shared/campaign/types.js';
 import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
-import { PARTY_ROOM, spawnAt } from '../shared/scene.js';
+import { holding } from '../shared/campaign/index.js';
+import { PARTY_ROOM, APARTMENT_ROOM, spawnAt } from '../shared/scene.js';
 import { nearbyObject } from '../shared/interactions.js';
 import { loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import {
@@ -36,6 +38,7 @@ const PORT = Number(process.env.PORT ?? 3131);
 const ROOT = new URL('..', import.meta.url).pathname;
 const FORCE_NEW = process.argv.includes('--new') || process.env.BLOKO_NEW === '1';
 const access = makeAccess(process.env.BLOKO_PUBLIC_ORIGIN, process.env.BLOKO_ACCESS_TOKEN);
+const STORY_MODE = CONTENT.storyId === 'elo-50';
 
 // ---------- the evening + change hooks (wrap the engine, never inside it) ----------
 
@@ -262,15 +265,27 @@ const isPlainObject = (x: unknown): x is Record<string, unknown> => !!x && typeo
  *  unlocked door, `enter` (A1: Élodie walks into a door; the host can always enter directly). */
 function walk(id: string, pos: Pos): void {
   const c = game.campaign;
-  const zone = zoneAt(CONTENT, c.at.node, pos.x, pos.y);
+  const character = c.party.players[id]?.character;
+  if (STORY_MODE && c.at.node === 'hub' && character !== CONTENT.chooser) return; // the others still occupy the old lobby
+  const portalOpen = STORY_MODE && c.at.node === CONTENT.start && roundStatus(c) === 'lobby' && c.facts.flags.includes('portal.ready');
+  const inPortal = portalOpen && Math.hypot(pos.x - PORTAL.x, pos.y - PORTAL.y) < PORTAL.radius;
+  const zone = inPortal ? '@portal' : zoneAt(CONTENT, c.at.node, pos.x, pos.y);
   // a walker's first known position (new phone, or after a restart wiped this memory) only sets the
   // baseline: standing in a door is not stepping into it
   const known = zones.has(id);
   const before = zones.get(id) ?? null;
   zones.set(id, zone);
   if (!known || !zone || zone === before) return;
-  const character = c.party.players[id]?.character;
   if (!character) return;
+  if (zone === '@portal') {
+    if (character !== CONTENT.chooser || !apply({ t: 'portal', id })) return;
+    const arrival: Pos = { x: 6.2, y: 7.3, dir: 'up', moving: false };
+    positions.set(id, arrival);
+    const echo = posMsg(id, arrival);
+    send(sockets.get(id)!, echo);
+    relayPos(id, arrival);
+    return;
+  }
   apply({ t: 'event', event: { t: 'zone.entered', zone, character } });
   if (character === CONTENT.chooser && isUnlocked(game.campaign, zone)) apply({ t: 'enter', id, node: zone });
 }
@@ -308,6 +323,8 @@ function handleMessage(ws: WebSocket, m: any): void {
     // ephemeral avatar movement: bypasses the engine (doors aside); malformed, unjoined or flooding senders dropped silently
     const id = who.get(ws);
     if (!id || !canMove(party(), id) || !positions.allow(ws)) return;
+    if (STORY_MODE && game.campaign.at.node === 'hub' && party().players[id].character === CONTENT.chooser
+      && !game.campaign.facts.flags.includes('apparition.seen')) return;
     const pos = parsePos(m);
     if (!pos) return;
     positions.set(id, pos);
@@ -341,11 +358,22 @@ function handleMessage(ws: WebSocket, m: any): void {
     const id = who.get(ws);
     // the party room's furniture: wherever avatars walk there (hub, world, a block or quiz lobby)
     if (!id || !isMember(id) || (game.campaign.at.activity && roundStatus(game.campaign) !== 'lobby')) return;
+    if (STORY_MODE && game.campaign.at.node === 'hub' && party().players[id].character !== CONTENT.chooser) return;
+    if (STORY_MODE && m.object === INTRO_KEY && game.campaign.at.node === 'hub'
+      && party().players[id].character === CONTENT.chooser && game.campaign.facts.flags.includes('apparition.seen')) {
+      const pos = positions.get(id);
+      if (pos && Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius
+        && holding(game.campaign.facts, CONTENT.chooser, INTRO_KEY) === 0) {
+        apply({ t: 'collect', id, item: INTRO_KEY });
+      }
+      return;
+    }
     const now = Date.now();
     if (now - (interactionAt.get(ws) ?? 0) < 700) return;
     const member = party().players[id];
     const position = positions.get(id) ?? spawnAt(PARTY_ROOM, member.character);
-    const object = nearbyObject(PARTY_ROOM, position);
+    const scene = STORY_MODE && game.campaign.at.node === 'hub' ? APARTMENT_ROOM : PARTY_ROOM;
+    const object = nearbyObject(scene, position);
     if (!object || object.id !== m.object) return;
     interactionAt.set(ws, now);
     const event = { t: 'interact', playerId: id, object: object.id, at: now };
@@ -391,6 +419,9 @@ function handleMessage(ws: WebSocket, m: any): void {
   if (m.t === 'join') {
     if (!roomOk.has(ws)) { sendErr(ws, 'bad-room'); return; }
     const character = m.character;
+    if (STORY_MODE && !game.campaign.facts.flags.includes('portal.ready') && !OPENING_PLAYERS.includes(character)) {
+      sendErr(ws, 'full'); return;
+    }
     // reclaim ("tap your character"): a character held by an OFFLINE member is taken back by this
     // socket, in any state — same playerId, so board, score, hand, facts and host role come along
     const holder = isCharacterId(character) ? holderOf(character) : undefined;
@@ -427,7 +458,7 @@ function handleMessage(ws: WebSocket, m: any): void {
 
     case 'back':
       // host only, up one level; refused while a game is being played (endGame first) → 'refused'
-      if (!apply({ t: 'back', id })) sendErr(ws, id === party().hostId ? 'refused' : 'not-host');
+      if (!apply({ t: 'back', id })) sendErr(ws, id === party().hostId || (STORY_MODE && party().players[id]?.character === CONTENT.chooser) ? 'refused' : 'not-host');
       return;
 
     case 'gm': {
@@ -439,6 +470,19 @@ function handleMessage(ws: WebSocket, m: any): void {
       else if (m.op.op === 'give' || m.op.op === 'take') sendErr(ws, 'refused');
       return;
     }
+
+    // the story's opening: its first round needs the four opening players, and none follows once the
+    // portal is ready; any other start or again goes on to the round's minigame
+    case 'start':
+    case 'again':
+      if (STORY_MODE && game.campaign.at.node === CONTENT.start && game.campaign.facts.flags.includes('portal.ready')) {
+        sendErr(ws, 'refused'); return;
+      }
+      if (STORY_MODE && m.t === 'start' && game.campaign.at.node === CONTENT.start && !game.campaign.facts.flags.includes('portal.ready')
+        && !OPENING_PLAYERS.every((character) => party().order.some((playerId) => !party().players[playerId].left && party().players[playerId].character === character))) {
+        sendErr(ws, 'refused'); return;
+      }
+      break;
   }
 
   roundMessage(ws, id, m);

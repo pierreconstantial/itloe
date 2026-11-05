@@ -160,4 +160,14 @@ export const sfx = {
     }
     whoosh({ dur: 1.2, from: 400, to: 7000, gain: 0.12, at: 0.45 });
   },
+  /** The solemn visitor's deliberately excessive rock break. */
+  guitarRiff() {
+    whoosh({ dur: 0.45, from: 900, to: 4000, gain: 0.18 });
+    const riff = [0, 0, 3, 5, 7, 5, 3, 0, -2, 0, 7, 10, 12, 7, 5, 0];
+    riff.forEach((step, i) => {
+      tone({ freq: 110 * 2 ** (step / 12), to: 110 * 2 ** (step / 12) * 0.94,
+        dur: i === riff.length - 1 ? 0.72 : 0.21, type: 'sawtooth', gain: 0.12, at: i * 0.23 });
+      if (i % 4 === 0) tone({ freq: 55, to: 42, dur: 0.14, type: 'square', gain: 0.11, at: i * 0.23 });
+    });
+  },
 };

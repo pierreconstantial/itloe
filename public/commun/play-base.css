@@ -387,7 +387,7 @@ canvas.avatar {
 
 /* ---------- lobby: header + virtual stick ---------- */
 
-#view-lobby {
+#view-lobby, #view-wait-lobby {
   height: 100%;
   display: flex;
   flex-direction: column;
