@@ -46,13 +46,15 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
 // minigame screen switches the joystick on (its game area) sends its start position at once.
 { "t": "say", "text": "Hello!" }                         // joined player; 1–100 printable characters
 { "t": "emote", "kind": "victory" }                      // joined player; victory | fart | annoy
-{ "t": "interact", "object": "table" }                    // near the sofa | table | plant in the party room
+{ "t": "interact", "object": "table" }                    // near an object of the room where the party is (roomAt)
 // Speech and emotes are short lived, server relayed events, limited to one per 650 ms per socket.
-// A reconnecting client receives { t: "chatHistory", messages: [...] } with up to 30 recent
-// speech events. The history is in memory only and is cleared by a server restart.
-// Interaction is available while avatars are visible, between rounds (hub/world, the room at a tableau). The server
-// checks the sender's latest position against the closest object and relays an `interact` event
-// with playerId, object and at. It is limited to one per 700 ms per socket.
+// Every `hello` (phones, new devices and screens alike) is answered with { t: "chatHistory", messages: [...] }
+// holding up to 30 recent speech events. The history is in memory only and is cleared by a server restart.
+// Interaction is available between rounds, wherever the party is (hub/world, a scene tableau, the room at a
+// tableau), not during a round or on its podium. The server checks the sender's latest position (none yet:
+// their spawn point in the party room) against the closest object and relays an `interact` event with
+// playerId, object and at. It is limited to one per 700 ms per socket. In the story, `interact` at the hub
+// from anyone but the chooser (Élodie) is ignored.
 ```
 
 Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `deadline`) are NEVER accepted from the wire: the server injects them itself and strips them from client messages.

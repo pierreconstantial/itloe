@@ -31,7 +31,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Room before the content arrives](#room-before-the-content-arrives) | A reloaded phone walks the party room until the content loads | P3 | Open | Low |
 | [Pickup handles one item](#pickup-handles-one-item) | `collect` only knows the first key | P3 | Open | Low |
 | [TV lobby band parameters](#tv-lobby-band-parameters) | `renderLobby` takes two option objects side by side | P3 | Open | Trivial |
-| [Protocol differences](#protocol-differences) | `PROTOCOL.md` disagrees with the code in three places | P3 | Open | Trivial |
 | [Debug accessors show only the party room](#debug-accessors-show-only-the-party-room) | `bloko.drawOrder()` and `bloko.scene()` ignore the apartment and door #4's room | P3 | Open | Trivial |
 | [Apartment sofa sparkle](#apartment-sofa-sparkle) | The sofa's sparkle overlaps its "Comfy!" bubble in the apartment | P3 | Open | Trivial |
 | [Minigame wording in shared folders](#minigame-wording-in-shared-folders) | Block and quiz files in `public/commun/`, block files with generic names | P3 | Open | Low |
@@ -114,15 +113,6 @@ The campaign's `collect` action accepts only `memory-key-intro`, at the hub. Eac
 `renderLobby` in `public/screen/lobby-view.js` takes the band (title and settings line) and Pierre's `{ required }` options as two parameters side by side, and one caller passes `undefined` for the band.
 
 **Recommendation:** fold `required` into the band object.
-
-### Protocol differences
-
-`PROTOCOL.md` and the code disagree; the end-to-end tests follow the code:
-- `chatHistory` goes to every `hello`, screens and new devices included, not only to reconnecting phones;
-- `interact` from a sender with no known position counts as standing at their spawn point;
-- `interact` also works at a scene tableau.
-
-**Recommendation:** update `PROTOCOL.md` to match the code; the code's behaviour is fine.
 
 ### Debug accessors show only the party room
 
