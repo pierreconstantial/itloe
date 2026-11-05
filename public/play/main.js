@@ -1,14 +1,12 @@
-// P3 — phone client /play. Renders strictly from the last `view` (PROTOCOL.md);
-// the only optimistic paint (local placement) is reconciled by the next `view`/`err`.
+// P3 — phone client /play: the frame around every minigame. Renders strictly from the last `view`
+// (PROTOCOL.md); a running round's screens are the minigame's own (./minigames.js), mounted in #view-round.
 // Path ../../shared: resolved on disk by tsc, normalized to /shared/ by the browser.
-import { canPlace, place, findClears, applyClears } from '../../shared/board.js';
-import { PIECES } from '../../shared/pieces.js';
 import { ranking } from '../../shared/ranking.js';
 import { KEYS, load, save, forget } from './storage.js';
-import { $, bounds, pieceEl, dotEl, toast } from './dom.js';
+import { $, dotEl, toast } from './dom.js';
 import * as haptics from './haptics.js';
 import { initMenu } from './menu.js';
-import { syncClock, secondsLeft, mmss } from '../commun/clock.js';
+import { syncClock } from '../commun/clock.js';
 import { createSettingsSheet, summarize } from './settings-ui.js';
 import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.js';
 import { spawnPoint } from '../../shared/world.js';
@@ -30,24 +28,15 @@ import { JOIN_QR_MS } from '../../shared/join-qr.js';
 import { QUIZ_SETTINGS, summarizeQuiz } from './quiz-text.js';
 import { childMarks, content, onContentChange, syncContent, titleOf } from './campaign-view.js';
 
-/** @typedef {import('../../shared/game.js').State} State */
-/** @typedef {import('../../shared/game.js').Player} Player */
 /** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
 /** @typedef {import('../../shared/campaign/types.js').PartyMember} PartyMember */
 /** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
-/** @typedef {import('../../shared/pieces.js').PieceId} PieceId */
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
 /** @typedef {import('./movement.js').Pos} Pos */
-/** @typedef {{ score: number, previous: number | null }} Best */
+/** The round's players, as every minigame's view carries them (shared/minigames.js). @typedef {import('../../shared/minigames.js').RoundPlayers} RoundPlayers */
 /** A party member in the room at a tableau. @typedef {{ id: string, name: string, color: number, character?: string | null, left?: boolean }} LobbyPlayer */
 
-const RANK_BADGES = ['①', '②', '③', '④'];
 const MEDALS = ['🥇', '🥈', '🥉', ''];
-const GAP = 2; // px between cells, = the `gap` value in play-base.css
-const TRAY_CELL = 13; // px per cell for tray miniatures
-const LIFT = 1.5; // the dragged piece floats this many cells above the finger
-const URGENT_SECONDS = 10; // the countdown turns red from here
-const CLOCK_TICK_MS = 250;
 const LOBBY_ME_SCALE = 4; // own avatar in the lobby header: 64 px
 const LOBBY_CHIP_SCALE = 2; // other players' avatars: 32 px
 
@@ -60,48 +49,23 @@ const ERR_TOASTS = {
 /** What the podium's choice became, told to everyone (the host picks, guests follow); `room`: no round. @type {Record<string, string>} */
 const PHASE_TOASTS = {
   'finished>room': 'Back to the room!',
-  'finished>playing': 'Rematch! Go go go!',
+  'finished>running': 'Rematch! Go go go!',
 };
 
+/** The podium's kicker, by how the round ended. @type {Record<string, string>} */
+const ENDINGS = { time: "⏰ Time's up!", host: 'The host ended the game.' };
+
 // ---------- pure helpers ----------
-
-/** @param {number} rank 1-based @returns {string} */
-function ordinal(rank) {
-  return rank === 1 ? '1st' : rank === 2 ? '2nd' : rank === 3 ? '3rd' : `${rank}th`;
-}
-
-/** @param {State} v @param {string} id @returns {number} 1-based, shared with ties */
-function rankOf(v, id) {
-  return ranking(v).find((r) => r.id === id)?.rank ?? v.order.length;
-}
 
 /** Room codes are typed loosely on phones: "ab cd" → "ABCD". @param {string} raw */
 function normalizeRoom(raw) {
   return raw.replace(/\s+/g, '').toUpperCase();
 }
 
-/**
- * End-of-run event this view brings to the player, for haptics.
- * @param {State} prev @param {State} next @param {string} id
- * @returns {'win' | 'bell' | 'death' | null}
- */
-function outcome(prev, next, id) {
-  const before = prev.players[id];
-  const after = next.players[id];
-  if (!before || !after) return null;
-  const justFinished = prev.phase === 'playing' && next.phase === 'finished';
-  if (justFinished && next.order.length > 1 && rankOf(next, id) === 1) return 'win';
-  if (justFinished && next.endReason === 'time' && !before.done) return 'bell';
-  if (!before.done && after.done) return 'death';
-  return null;
-}
-
 // ---------- client state ----------
 
 /** The view's running round, null between rounds or before the first view. @type {RoundView | null} */
 let round = null;
-/** The block game (the round's view when blocks runs): null on the hub / in a world, or before the first view. @type {State | null} */
-let lastView = null;
 /** The whole evening (slice 3), null from a pre-campaign server. @type {Campaign | null} */
 let campaign = null;
 /** The minigame screens mounted in #view-round while a round runs: their kind and handle, else null.
@@ -109,17 +73,11 @@ let campaign = null;
 let running = null;
 /** At least one view arrived. */
 let viewed = false;
-/** Solo record for the current (size, mode), inside the block view in solo games. @type {Best | null} */
-let lastBest = null;
 /** @type {string | null} */ let playerId = load(KEYS.id);
 /** playerIds with a live socket, from the last view (slice 2b presence). @type {string[]} */
 let online = [];
 /** Another device took our player (`replaced`): this phone stays offline until "Play here". */
 let replaced = false;
-/** Placement sent but not yet confirmed: simulated board + tray slot hidden.
- * @type {{ index: number, board: number[] } | null} */
-let pending = null;
-
 /** Room code: the join URL's ?room= wins over the stored one (the TV may show a new code). */
 const urlRoom = new URLSearchParams(location.search).get('room');
 if (urlRoom) save(KEYS.room, normalizeRoom(urlRoom));
@@ -133,16 +91,6 @@ let wantedCharacter = null;
 let pendingPick = null;
 /** Where our avatar stands: from the server's echo after welcome, else our spawn point. @type {Pos | null} */
 let myPos = null;
-
-/** @type {{
- *   pointerId: number, index: number, pieceId: PieceId,
- *   cells: [number, number][], w: number, h: number,
- *   el: HTMLElement, gx: number, gy: number, valid: boolean
- * } | null} */
-let drag = null;
-
-/** Board cell elements, rebuilt on every render. @type {HTMLElement[]} */
-let cellEls = [];
 
 // ---------- connection ----------
 
@@ -164,8 +112,7 @@ const conn = createConnection({
     $('conn-banner').hidden = up;
     updateInteraction();
     if (!up) resetJoinRequest();
-    if (!up && drag) { endDrag(); render(); } // a drop can't be sent while offline
-    else if (running) render(); // the minigame's screens hear of it
+    if (running) render(); // the minigame's screens hear of it
   },
   onReplaced,
 });
@@ -177,10 +124,9 @@ function onReplaced() {
   forget(KEYS.id);
   playerId = null;
   myPos = null;
-  pending = null;
   pendingPick = null;
   joystick.cancel();
-  if (drag) endDrag();
+  unmountScreen();
   menu.close();
   $('conn-banner').hidden = true;
   render();
@@ -216,28 +162,23 @@ function receive(raw) {
     toast(OBJECT_ACTIONS[/** @type {keyof typeof OBJECT_ACTIONS} */ (m.object)].feedback);
   } else if (m.t === 'view') {
     syncClock(m.now);
-    const prev = lastView;
+    const prev = round;
     const prevNode = campaign?.at.node ?? null;
     round = m.round ?? null;
-    lastView = round?.kind === 'blocks' ? round.view : null;
     campaign = m.campaign ?? null;
     viewed = true;
     syncContent(m.contentVersion); // fetches the content on the first view and whenever it changed
-    lastBest = lastView ? /** @type {State & { best?: Best }} */ (lastView).best ?? null : null;
     online = Array.isArray(m.online) ? m.online.filter((/** @type {unknown} */ x) => typeof x === 'string') : [];
-    pending = null;
-    const next = lastView;
-    const event = prev && next && playerId ? outcome(prev, next, playerId) : null;
-    if (event) haptics.buzz(event);
     // a podium we were on became a new round, or the room at the same tableau
-    const turn = prev && playerId && prev.players[playerId] && (next ? next.players[playerId] : campaign?.at.node === prevNode && !round)
-      ? PHASE_TOASTS[`${prev.phase}>${next ? next.phase : 'room'}`] : undefined;
+    const next = round;
+    const turn = prev && screenOf(prev.kind)?.podium && playerId && prev.view.players[playerId]
+      && (next ? next.view.players[playerId] : campaign?.at.node === prevNode)
+      ? PHASE_TOASTS[`${prev.status}>${next ? next.status : 'room'}`] : undefined;
     // the party moved (a door, the host): say where we are now
     const moved = prevNode !== null && campaign !== null && campaign.at.node !== prevNode && member() ? `→ ${titleOf(campaign.at.node)}` : undefined;
     if (turn || moved) { menu.close(); toast(/** @type {string} */ (moved ?? turn)); }
     render();
   } else if (m.t === 'err') {
-    pending = null;
     const refusedPick = pendingPick;
     pendingPick = null;
     if (m.code === 'refused') toast("That can't be done right now.");
@@ -247,7 +188,7 @@ function receive(raw) {
     else if (m.code === 'bad-room') onBadRoom();
     else if (ERR_TOASTS[m.code]) toast(ERR_TOASTS[m.code]);
     running?.screen.message(m);
-    render(); // bad-place and friends: repaint from the last view
+    render();
   }
 }
 
@@ -268,20 +209,16 @@ function leaveGame() {
   playerId = null;
   myPos = null;
   joystick.cancel();
-  if (drag) endDrag();
-  pending = null;
+  unmountScreen();
   conn.restart(); // a fresh socket: the old one stays bound to the removed id on the server
   render();
 }
 
-/** Our party member (slice 3: the evening's roster), or without a campaign our block-game player. @returns {PartyMember | Player | null} */
+/** Our party member (the evening's roster), null when we aren't one. @returns {PartyMember | null} */
 function member() {
-  if (!playerId) return null;
-  if (campaign) {
-    const m = campaign.party.players[playerId];
-    return m && !m.left ? m : null;
-  }
-  return lastView?.players[playerId] ?? null;
+  if (!playerId || !campaign) return null;
+  const m = campaign.party.players[playerId];
+  return m && !m.left ? m : null;
 }
 
 /** The tableau's settings: the campaign keeps them (null where no minigame is). @returns {any} */
@@ -377,7 +314,7 @@ function onBack() {
 
 // ---------- rendering ----------
 
-const VIEWS = ['loading', 'pick', 'room', 'replaced', 'waiting', 'wait-lobby', 'place', 'round', 'lobby', 'game', 'over', 'podium'];
+const VIEWS = ['loading', 'pick', 'room', 'replaced', 'waiting', 'wait-lobby', 'place', 'round', 'lobby', 'podium'];
 
 /** Shows one screen; the running minigame's screens go whenever another one shows. @param {string} name */
 function show(name) {
@@ -416,11 +353,9 @@ function render() {
   if (!member()) menu.close('chat');
   if (replaced) { show('replaced'); return; }
   if (!viewed) { show('loading'); return; }
-  const v = lastView;
-  const me = v && playerId ? v.players[playerId] ?? null : null;
   const mem = member();
   const hostId = partyHost();
-  const isHost = me !== null && v !== null && me.id === hostId;
+  const v = round?.kind === 'blocks' ? round.view : null;
   const q = round?.kind === 'quiz' ? round.view : null;
   // the tableau's minigame (null on the hub, in a world, at a scene) and the room between its rounds
   const kind = campaign?.at.kind ?? null;
@@ -437,10 +372,7 @@ function render() {
   // 🎒 my items (Contract F): they hang on my character, so they follow me to any phone
   bag.render(campaign && mem ? campaign.facts : null, mem ? myCharacter() : null);
   if (!mem) menu.close('bag');
-  updateClock();
 
-  // the piece being dragged left our hand → the drag is stale
-  if (drag && (!me || me.hand[drag.index] !== drag.pieceId)) endDrag();
   // walking stops where it is not allowed (a game under way): final moving:false
   if (!canWalk()) joystick.cancel();
 
@@ -448,12 +380,11 @@ function render() {
     if (roomPrompt) { show('room'); renderRoomPrompt(roomPrompt); return; }
     // the picker shows whenever there is something to tap: a free character while no block game is
     // under way, or (anytime) a character whose phone is offline, to continue as
-    const roster = campaign ? campaign.party : v;
     const joinable = round === null;
-    const states = roster ? pickStates(roster, joinable, online) : null;
+    const states = campaign ? pickStates(campaign.party, joinable, online) : null;
     if (!states || (!anyPickable(states) && pendingPick === null)) {
       show('waiting');
-      $('waiting-text').textContent = v?.phase === 'finished' ? 'A game just ended.' : 'A game is already running.';
+      $('waiting-text').textContent = round?.status === 'finished' && screenOf(round.kind)?.podium ? 'A game just ended.' : 'A game is already running.';
       return;
     }
     show('pick');
@@ -468,32 +399,28 @@ function render() {
     renderLobby(here, mem, hostId === playerId, kind === 'quiz' ? summarizeQuiz(tableauSettings()) : summarize(tableauSettings()));
     return;
   }
-  if (round && screenOf(round.kind)) { // a minigame's screens, mounted by the frame
+  if (round && campaign) { // a round: the minigame's screens while it runs, then the podium
+    const screens = /** @type {import('./minigames.js').PhoneScreen} */ (screenOf(round.kind));
     if (!playerId || !round.view.players[playerId]) { // in the evening, but this round started before we joined
       show('waiting');
       $('waiting-text').textContent = "A game is on. You'll play the next one!";
       return;
     }
-    show('round');
-    mountScreen(round.kind).update(round, /** @type {Campaign} */ (campaign));
-    return;
-  }
-  if (!v) {
-    if (isStory() && campaign?.at.node === 'hub' && mem.character !== 'elodie'
-      && !campaign.facts.flags.includes(`person.${mem.character}.unlocked`)) {
-      show('wait-lobby'); dockStick('wait-lobby'); return;
+    if (round.status === 'finished' && screens.podium) {
+      if (running?.kind === round.kind) running.screen.update(round, campaign); // the screens see their round end
+      show('podium');
+      renderPodium(round, screens, playerId, hostId === playerId);
+      return;
     }
-    show('place'); if (campaign) renderPlace(campaign, mem); return;
-  }
-  if (!me) { // in the evening, but this game started before we joined: we play the next one
-    show('waiting');
-    $('waiting-text').textContent = "A game is on. You'll play the next one!";
+    show('round');
+    mountScreen(round.kind).update(round, campaign);
     return;
   }
-  if (v.phase === 'finished') { show('podium'); renderPodium(v, me, isHost); return; }
-  if (me.done) { show('over'); renderGameOver(v, me); return; }
-  show('game');
-  renderGame(v, me);
+  if (isStory() && campaign?.at.node === 'hub' && mem.character !== 'elodie'
+    && !campaign.facts.flags.includes(`person.${mem.character}.unlocked`)) {
+    show('wait-lobby'); dockStick('wait-lobby'); return;
+  }
+  show('place'); if (campaign) renderPlace(campaign, mem);
 }
 
 /**
@@ -523,12 +450,10 @@ function characterOf(p) {
   return /** @type {CharacterId} */ (Object.values(CHARACTERS).find((c) => c.color === p.color)?.id ?? 'pierre');
 }
 
-/** Our character: from the party (slice 3), else from our block-game player. @returns {CharacterId | null} */
+/** Our character, from the party. @returns {CharacterId | null} */
 function myCharacter() {
   const m = member();
-  if (!m) return null;
-  if (isCharacterId(m.character)) return m.character;
-  return 'board' in m ? characterOf(m) : null;
+  return m && isCharacterId(m.character) ? m.character : null;
 }
 
 /** The avatar's current position: joystick while held, else the echoed/spawn position. @param {CharacterId} character @returns {Pos} */
@@ -563,7 +488,7 @@ function updateInteraction() {
 }
 
 /** Hub, world or a scene tableau: where the party is, what is open from here, how to go on.
- *  @param {Campaign} c @param {PartyMember | Player} mem */
+ *  @param {Campaign} c @param {PartyMember} mem */
 function renderPlace(c, mem) {
   const here = content().nodes[c.at.node];
   $('place-kind').textContent = here?.kind === 'hub' ? 'The hub' : here?.kind === 'world' ? 'A world' : '';
@@ -655,128 +580,41 @@ function renderLobby(v, me, isHost, settings) {
         : 'Waiting for the host to start…';
 }
 
-/** @param {State} v @param {Player} me */
-function renderGame(v, me) {
-  $('my-rank').textContent = RANK_BADGES[rankOf(v, me.id) - 1] ?? '';
-  $('my-score').textContent = String(me.score);
-
-  const opp = $('opponents');
-  opp.replaceChildren();
-  for (const id of v.order) {
-    if (id === me.id) continue;
-    const p = v.players[id];
-    const chip = document.createElement('span');
-    chip.className = 'opp';
-    const off = !p.done && !online.includes(id);
-    chip.append(dotEl(p.color), document.createTextNode(`${p.name} ${p.done ? (p.retired ? '👋' : '💀') : p.score}${off ? ' 📴' : ''}`));
-    // the host can act on an offline player right from the bar: the chip opens the host menu
-    if (off && partyHost() === me.id) { chip.dataset.open = 'menu'; chip.classList.add('offline'); }
-    opp.append(chip);
-  }
-
-  renderBoard(pending ? pending.board : me.board, v.size);
-  renderTray(me);
-  if (drag) paintGhost();
-}
-
-/** @param {number[]} board @param {number} size */
-function renderBoard(board, size) {
-  const el = $('board');
-  el.style.setProperty('--n', String(size));
-  const frag = document.createDocumentFragment();
-  cellEls = [];
-  for (let i = 0; i < size * size; i++) {
-    const cell = document.createElement('div');
-    cell.className = board[i] ? `cell c${board[i]}` : 'cell';
-    frag.append(cell);
-    cellEls.push(cell);
-  }
-  el.replaceChildren(frag);
-}
-
-/** @param {Player} me */
-function renderTray(me) {
-  for (let i = 0; i < 3; i++) {
-    const slot = $(`slot-${i}`);
-    slot.replaceChildren();
-    const id = me.hand[i];
-    const hidden = (pending !== null && pending.index === i) || (drag !== null && drag.index === i);
-    if (id != null && !hidden) slot.append(pieceEl(id, me.color, TRAY_CELL));
-  }
-}
-
-/** @param {State} v @param {Player} me */
-function renderGameOver(v, me) {
-  // taken out by the host (slice 2b): calm, the run still counts
-  $('over-icon').textContent = me.retired ? '👋' : '💀';
-  $('over-title').textContent = me.retired ? 'The host took you out — your score counts' : 'Out of moves!';
-  $('final-score').textContent = String(me.score);
-  $('final-rank').textContent = v.order.length > 1
-    ? `You're ${ordinal(rankOf(v, me.id))} of ${v.order.length} so far.`
-    : '';
-  const ul = $('final-others');
-  ul.replaceChildren();
-  for (const { id, score } of ranking(v)) {
-    if (id === me.id) continue;
-    const p = v.players[id];
-    const li = document.createElement('li');
-    li.append(dotEl(p.color), document.createTextNode(`${p.name} — ${score}${p.done ? ' 💀' : ''}`));
-    ul.append(li);
-  }
-}
-
-/** Countdown text in the top bar (and on the Done screen while the others still play). */
-function updateClock() {
-  const v = lastView;
-  const deadline = v !== null && v.phase === 'playing' ? v.deadline : null;
-  $('clock-game').hidden = deadline === null;
-  $('over-clock-line').hidden = deadline === null || v === null || v.order.length < 2;
-  if (deadline === null) return;
-  const left = secondsLeft(deadline);
-  for (const el of document.querySelectorAll('.clock')) {
-    el.textContent = mmss(left);
-    el.classList.toggle('urgent', left <= URGENT_SECONDS);
-  }
-}
-
-/** @param {State} v @param {Player} me */
-function podiumTitle(v, me) {
-  if (v.order.length === 1) return isNewBest(me) ? 'New best! 🎉' : 'Nice run!';
-  if (rankOf(v, me.id) !== 1) return 'Podium';
-  return ranking(v).filter((r) => r.rank === 1).length > 1 ? "It's a tie! 🎉" : 'You win! 🎉';
-}
-
-/** @param {Player} me */
-function isNewBest(me) {
-  return lastBest !== null && (lastBest.previous === null || me.score > lastBest.previous);
-}
-
-/** @param {State} v @param {Player} me @param {boolean} isHost */
-function renderPodium(v, me, isHost) {
+/**
+ * The podium, the same for every minigame: the round's players ranked, with the minigame's extras (./minigames.js).
+ * @param {RoundView} r @param {import('./minigames.js').PhoneScreen} screens @param {string} meId @param {boolean} isHost
+ */
+function renderPodium(r, screens, meId, isHost) {
+  const v = /** @type {RoundPlayers} */ (r.view);
+  const extras = screens.podium?.(r) ?? {};
   const portalReady = isStory() && campaign?.at.node === content().start && campaign.facts.flags.includes('portal.ready');
-  const kicker = v.endReason === 'time' ? "⏰ Time's up!" : v.endReason === 'host' ? 'The host ended the game.' : '';
+  const kicker = extras.kicker ?? (v.endReason ? ENDINGS[v.endReason] ?? '' : '');
   $('podium-kicker').hidden = kicker === '';
   $('podium-kicker').textContent = kicker;
-  $('podium-title').textContent = podiumTitle(v, me);
-  const best = $('podium-best');
-  best.hidden = v.order.length !== 1 || lastBest === null || isNewBest(me);
-  if (lastBest) best.textContent = `Your best: ${lastBest.score}`;
+  const ranked = ranking(v);
+  const myRank = ranked.find((x) => x.id === meId)?.rank;
+  $('podium-title').textContent = extras.title ?? (myRank !== 1 ? 'Podium'
+    : ranked.filter((x) => x.rank === 1).length > 1 ? "It's a tie! 🎉" : 'You win! 🎉');
+  const lines = $('podium-lines');
+  lines.replaceChildren(...(extras.lines ?? []).map((text) => Object.assign(document.createElement('p'), { className: 'dim', textContent: text })));
+  lines.hidden = lines.childElementCount === 0;
 
   const ol = $('podium-list');
   ol.replaceChildren();
-  for (const { id, rank, score } of ranking(v)) {
+  for (const { id, rank, score } of ranked) {
     const p = v.players[id];
     const li = document.createElement('li');
     if (rank === 1) li.className = 'champion'; // ties share rank 1: co-champions
-    if (id === me.id) li.classList.add('me');
+    if (id === meId) li.classList.add('me');
     li.append(
       document.createTextNode(`${MEDALS[rank - 1] || `${rank}.`} `),
       dotEl(p.color),
-      document.createTextNode(` ${p.name} — ${score}`),
+      document.createTextNode(` ${p.name} — ${score}${extras.rowExtra?.(id) ?? ''}`),
     );
     ol.append(li);
   }
-  $('podium-settings').textContent = portalReady ? 'Return to the room together.' : `Next game: ${summarize(tableauSettings())}`;
+  $('podium-settings').textContent = portalReady ? 'Return to the room together.'
+    : `Next game: ${r.kind === 'quiz' ? summarizeQuiz(tableauSettings()) : summarize(tableauSettings())}`;
   $('btn-settings-podium').hidden = !isHost || !!portalReady;
   $('btn-again').hidden = !!portalReady;
   $('podium-hint').textContent = portalReady ? 'Waiting for the host to return to the room…'
@@ -790,124 +628,6 @@ function showPickError(text) {
   const el = $('pick-error');
   el.textContent = text;
   el.hidden = false;
-}
-
-// ---------- drag & drop ----------
-
-/** @param {PointerEvent} e @param {number} index */
-function startDrag(e, index) {
-  if (drag || pending || !lastView || !playerId || !conn.isOnline()) return;
-  const me = lastView.players[playerId];
-  if (!me || lastView.phase !== 'playing' || me.done) return;
-  const pieceId = me.hand[index];
-  if (pieceId == null || cellEls.length === 0) return;
-  e.preventDefault();
-
-  const { cells } = PIECES[pieceId];
-  const { w, h } = bounds(cells);
-  const el = pieceEl(pieceId, me.color, cellSize());
-  el.id = 'floating-piece';
-  document.body.append(el);
-
-  drag = { pointerId: e.pointerId, index, pieceId, cells, w, h, el, gx: -99, gy: -99, valid: false };
-  window.addEventListener('pointermove', onDragMove, { passive: false });
-  window.addEventListener('pointerup', onDragDrop);
-  window.addEventListener('pointercancel', onDragCancel);
-  haptics.buzz('pickup');
-  onDragMove(e);
-  renderTray(me); // hide the lifted piece
-}
-
-/** Side of one board cell in px (measured, follows screen and board size). */
-function cellSize() {
-  return cellEls[0].getBoundingClientRect().width;
-}
-
-/** @param {PointerEvent} e */
-function onDragMove(e) {
-  const d = drag;
-  if (!d || e.pointerId !== d.pointerId || !lastView || cellEls.length === 0) return;
-  e.preventDefault();
-
-  const cell = cellSize();
-  const pitch = cell + GAP;
-  const width = d.w * pitch - GAP;
-  const height = d.h * pitch - GAP;
-  const left = e.clientX - width / 2;
-  const top = e.clientY - LIFT * cell - height;
-  d.el.style.transform = `translate(${left}px, ${top}px)`;
-
-  const origin = cellEls[0].getBoundingClientRect();
-  d.gx = Math.round((left - origin.left) / pitch);
-  d.gy = Math.round((top - origin.top) / pitch);
-  const me = playerId ? lastView.players[playerId] : null;
-  d.valid = me != null && canPlace(me.board, lastView.size, d.cells, d.gx, d.gy);
-  paintGhost();
-}
-
-/** Ghost under the piece: green/red + preview of the lines that would clear. */
-function paintGhost() {
-  const d = drag;
-  const v = lastView;
-  clearGhost();
-  if (!d || !v || !playerId) return;
-  const n = v.size;
-  const cls = d.valid ? 'ghost-ok' : 'ghost-bad';
-  let onBoard = false;
-  for (const [cx, cy] of d.cells) {
-    const x = d.gx + cx, y = d.gy + cy;
-    if (x < 0 || y < 0 || x >= n || y >= n) continue;
-    cellEls[y * n + x].classList.add(cls);
-    onBoard = true;
-  }
-  if (!onBoard || !d.valid) return;
-  const me = v.players[playerId];
-  const after = place(me.board, n, d.cells, d.gx, d.gy, me.color);
-  const { rows, cols } = findClears(after, n);
-  for (const r of rows) for (let c = 0; c < n; c++) cellEls[r * n + c].classList.add('clear-preview');
-  for (const c of cols) for (let r = 0; r < n; r++) cellEls[r * n + c].classList.add('clear-preview');
-}
-
-function clearGhost() {
-  for (const cell of cellEls) cell.classList.remove('ghost-ok', 'ghost-bad', 'clear-preview');
-}
-
-/** @param {PointerEvent} e */
-function onDragDrop(e) {
-  const d = drag;
-  if (!d || e.pointerId !== d.pointerId) return;
-  const v = lastView;
-  endDrag();
-  if (d.valid && v && playerId) {
-    const me = v.players[playerId];
-    send({ t: 'place', piece: d.index, x: d.gx, y: d.gy });
-    // optimistic paint: same simulation as the server, reconciled by the next view/err
-    const after = place(me.board, v.size, d.cells, d.gx, d.gy, me.color);
-    const clears = findClears(after, v.size);
-    const lines = clears.rows.length + clears.cols.length;
-    pending = { index: d.index, board: applyClears(after, v.size, clears) };
-    if (lines > 0) haptics.buzzClear(lines);
-    else haptics.buzz('place');
-  }
-  render();
-}
-
-/** @param {PointerEvent} e */
-function onDragCancel(e) {
-  if (!drag || e.pointerId !== drag.pointerId) return;
-  endDrag();
-  render();
-}
-
-/** Removes floating piece, ghost and listeners. Does not re-render. */
-function endDrag() {
-  if (!drag) return;
-  drag.el.remove();
-  drag = null;
-  window.removeEventListener('pointermove', onDragMove);
-  window.removeEventListener('pointerup', onDragDrop);
-  window.removeEventListener('pointercancel', onDragCancel);
-  clearGhost();
 }
 
 // ---------- wiring ----------
@@ -929,7 +649,7 @@ const social = createSocial({
   send,
   canSend: () => member() !== null && conn.isOnline(),
   me: () => playerId,
-  name: (id) => campaign?.party.players[id]?.name ?? lastView?.players[id]?.name ?? 'Guest',
+  name: (id) => campaign?.party.players[id]?.name ?? 'Guest',
 });
 const picker = createPicker({ onPick: join });
 
@@ -1001,12 +721,7 @@ $('btn-play-here').addEventListener('click', () => {
   render();
 });
 
-for (let i = 0; i < 3; i++) {
-  $(`slot-${i}`).addEventListener('pointerdown', (e) => startDrag(e, i));
-}
-
 installBackGuard({ onBack });
 onContentChange(render); // titles, doors and the tree come with the content
-setInterval(updateClock, CLOCK_TICK_MS);
 show('loading');
 conn.start();

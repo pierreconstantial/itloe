@@ -1,6 +1,7 @@
 // The phone's running screens: one entry per minigame, by kind (shared/minigames.js). Adding a minigame is
 // one import line and one entry here. The frame (main.js) mounts an entry's screens into its root while a
 // round of that kind runs, and replaces them with its own screens when the round ends.
+import { BLOCK_SCREEN } from './blocks-ui.js';
 import { QUIZ_SCREEN } from './quiz-ui.js';
 
 /** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
@@ -25,16 +26,24 @@ import { QUIZ_SCREEN } from './quiz-ui.js';
  */
 
 /**
+ * What a minigame adds to the frame's podium: a title in place of the frame's (win, tie, Podium), a kicker in
+ * place of the ending's, lines under the title, and text after each player's score.
+ * @typedef {{ title?: string, kicker?: string, lines?: string[], rowExtra?: (id: string) => string }} PodiumExtras
+ */
+
+/**
  * One minigame's phone screens. `title`: the minigame's name; `mount`: builds its screens inside `root`
- * (CSS scoped under them, nothing added to index.html).
+ * (CSS scoped under them, nothing added to index.html); `podium`: its extras on the frame's podium.
  * @typedef {{
  *   title: string,
  *   mount: (root: HTMLElement, io: PhoneIo) => Mounted,
+ *   podium?: (round: RoundView) => PodiumExtras,
  * }} PhoneScreen
  */
 
 /** @type {Record<string, PhoneScreen>} */
 export const SCREENS = {
+  blocks: BLOCK_SCREEN,
   quiz: QUIZ_SCREEN,
 };
 

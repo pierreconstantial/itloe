@@ -19,6 +19,18 @@ import { QUIZ_RULES } from './quiz/index.js';
  */
 
 /**
+ * The round's players, as every minigame's view carries them: the frame's podium, host controls and presence
+ * read them, whatever the minigame. `order`: the seated players in party order; `score`: ranked by the shared
+ * rule (shared/ranking.js); `left`: gone from the evening; `done`: out of this round (stuck, or taken out:
+ * `retired`); `endReason`: how a finished round ended (`time`, `host`, or the minigame's own).
+ * @typedef {{
+ *   order: string[],
+ *   players: Record<string, { name: string, color: number, score: number, left?: boolean, done?: boolean, retired?: boolean }>,
+ *   endReason?: string | null,
+ * }} RoundPlayers
+ */
+
+/**
  * What a finished round reports; the campaign records it once. `ranking`: every seated player in display
  * order (character null only in saves from before characters), ties sharing a rank. `counters`: the
  * minigame's own counters, added to the facts. `asked`: content ids the round used up for the evening

@@ -52,7 +52,7 @@
     <section id="view-lobby" hidden>
       <div class="lobby-top">
         <div id="lobby-me"></div>
-        <ul id="lobby-players"></ul>
+        <ul id="lobby-players" class="player-list"></ul>
         <p id="lobby-settings" class="settings-summary"></p>
         <div class="lobby-actions">
           <button id="btn-settings-lobby" type="button" data-open="settings" hidden>⚙ Settings</button>
@@ -94,38 +94,11 @@
     <!-- the running round: a minigame's screens, mounted here by the frame (minigames.js) -->
     <div id="view-round" hidden></div>
 
-    <section id="view-game" hidden>
-      <header id="topbar">
-        <div id="me-chip">
-          <span id="my-rank">①</span>
-          <span id="my-score">0</span>
-        </div>
-        <span id="clock-game" class="clock" hidden></span>
-        <div id="opponents"></div>
-      </header>
-      <div id="board-zone"><div id="board"></div></div>
-      <div id="tray">
-        <div class="slot" id="slot-0"></div>
-        <div class="slot" id="slot-1"></div>
-        <div class="slot" id="slot-2"></div>
-      </div>
-    </section>
-
-    <section id="view-over" class="menu" hidden>
-      <p id="over-icon" class="skull">💀</p>
-      <h2 id="over-title">Out of moves!</h2>
-      <p>Final score <strong id="final-score"></strong></p>
-      <p id="final-rank"></p>
-      <p id="over-clock-line" hidden>The others have <strong class="clock"></strong> left.</p>
-      <ul id="final-others"></ul>
-      <p class="dim">Eyes on the big screen!</p>
-    </section>
-
     <section id="view-podium" class="menu" hidden>
       <p id="podium-kicker" class="kicker" hidden></p>
       <h2 id="podium-title">Podium</h2>
-      <p id="podium-best" class="dim" hidden></p>
-      <ol id="podium-list"></ol>
+      <div id="podium-lines" hidden></div>
+      <ol id="podium-list" class="player-list"></ol>
       <p id="podium-settings" class="settings-summary"></p>
       <button id="btn-settings-podium" type="button" data-open="settings" hidden>⚙ Settings</button>
       <div id="podium-actions" class="lobby-actions" hidden>
