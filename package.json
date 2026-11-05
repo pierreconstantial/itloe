@@ -9,7 +9,7 @@
     "check": "tsc",
     "test": "node --test",
     "sim": "node scripts/simulate.mts",
-    "e2e": "node scripts/e2e.mts",
+    "e2e": "node scripts/e2e-run.mts",
     "e2e:resume": "node scripts/e2e-resume.mts",
     "e2e:presence": "node scripts/e2e-presence.mts",
     "e2e:campaign": "node scripts/e2e-campaign.mts",
