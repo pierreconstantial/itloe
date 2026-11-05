@@ -744,7 +744,8 @@ try {
       expect(v.includes('[25]') && v.includes('[30,50,30]') && w.includes('[160]'), 'haptics: send, right, wrong', `${v.join(' ')} / ${w.join(' ')}`);
     }
     await H.tap('#quiz-next');
-    if (round < 2) expect(await phaseIs(Q, 'quiz-question'), `Next → question ${round + 2}`);
+    // the next round reads the host's question: wait until both phones show it, not the reveal
+    if (round < 2) expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), `Next → question ${round + 2}`);
   }
   expect(await phaseIs(H, 'quiz-finished') && await phaseIs(Q, 'quiz-finished'), 'after the last question: finished on both phones');
   const rank: string = await Q.text('quiz-ranking');
@@ -757,7 +758,8 @@ try {
   expect(await phaseIs(H, 'quiz-lobby'), 'Play again → the quiz lobby');
   await setQuiz(3, 'Typed');
   await H.tap('#quiz-start');
-  expect(await phaseIs(Q, 'quiz-question') && await Q.visible('quiz-text-form') && !(await Q.visible('quiz-choices')), 'typed round: a text field, no choices');
+  expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question') && await Q.visible('quiz-text-form') && !(await Q.visible('quiz-choices')),
+    'typed round: a text field, no choices');
   const attrs = await Q.ev(`(() => { const i = document.getElementById('quiz-text'); return [i.getAttribute('autocorrect'), i.getAttribute('autocapitalize'), i.spellcheck, i.lang].join(','); })()`);
   expect(attrs === 'off,off,false,fr', 'the field never "fixes" names (autocorrect/autocapitalize/spellcheck off, French)', attrs);
   const top0: number = await Q.ev(`document.getElementById('quiz-q').getBoundingClientRect().top`);
@@ -779,6 +781,7 @@ try {
     const results: string = await Q.text('quiz-results');
     expect(results.includes(typed) && results.includes('zzz'), 'the reveal lists what everyone typed', results);
     await H.tap('#quiz-next');
+    if (round < 2) expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), `Next → typed question ${round + 2}`);
   }
   expect(await phaseIs(H, 'quiz-finished'), 'typed quiz finished');
 
