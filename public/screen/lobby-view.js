@@ -98,20 +98,21 @@ function renderJoin(join) {
  * @param {unknown} _prev
  * @param {JoinInfo} join
  * @param {{ title: string, settings: string }} [band] default: the block game's
- * @param {{required?: number}} [options]
+ * @param {{required?: number, status?: string}} [options] required: the guests a round needs;
+ *   status: replaces the guest count when no round starts here
  */
 export function renderLobby(s, _prev, join, band = { title: 'ITLOE', settings: summarizeSettings(/** @type {State} */ (s).settings) }, options = {}) {
   const n = s.order.length;
   const max = options.required ?? MAX_PLAYERS;
   const host = s.hostId ? s.players[s.hostId] : undefined;
-  const status = n === 0
+  const status = options.status ?? (n === 0
     ? 'Waiting for the first guest…'
-    : `${n}/${max} guest${n === 1 ? '' : 's'}${host ? ` · ${host.name} starts the game from their phone` : ''}`;
+    : `${n}/${max} guest${n === 1 ? '' : 's'}${host ? ` · ${host.name} starts the game from their phone` : ''}`);
   const side = h('div', 'lobby-side', [
     h('h1', 'title', [band.title]),
     h('p', 'settings-line', [band.settings]),
     h('p', 'lobby-count', [status]),
   ]);
-  if (host) side.querySelector('.lobby-count')?.prepend(colorDot(host.color), ' ');
+  if (host && !options.status) side.querySelector('.lobby-count')?.prepend(colorDot(host.color), ' ');
   return h('section', 'lobby', [renderJoin(join), side]);
 }

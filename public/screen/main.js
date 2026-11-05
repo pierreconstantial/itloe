@@ -89,10 +89,11 @@ const portalReady = () => !!campaign?.facts.flags.includes('story.elo-50') && ca
 
 /** @type {Record<State['phase'], (s: State, prev: State | null) => HTMLElement>} */
 const VIEWS = {
-  lobby: (s, prev) => renderLobby(s, prev, joinInfo, undefined, {
-    required: campaign?.facts.flags.includes('story.elo-50') && campaign.at.node === 'hub.false-start'
-      && !campaign.facts.flags.includes('portal.ready') ? OPENING_PLAYERS.length : undefined,
-  }),
+  lobby: (s, prev) => renderLobby(s, prev, joinInfo, undefined, portalReady()
+    ? { status: 'A portal has appeared. Élodie, walk into it!' } : {
+      required: campaign?.facts.flags.includes('story.elo-50') && campaign.at.node === 'hub.false-start'
+        ? OPENING_PLAYERS.length : undefined,
+    }),
   playing: (s, prev) => renderGame(s, prev, { danger: playersInDanger(s) }),
   finished: (s) => renderPodium(s, performance.now() - finishedAt),
 };
