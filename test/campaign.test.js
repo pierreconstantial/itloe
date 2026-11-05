@@ -276,7 +276,7 @@ test('party: a round starts with every member present; mid-round joiners watch a
   assert.ok(c.party.players.p && !c.at.activity?.players.p, 'mid-round joiner watches');
   c = run(c, { t: 'activity', action: { t: 'endGame', id: 'e' } });
   const again = run(c, { t: 'again', id: 'e', now: 3 });
-  assert.deepEqual(again.at.activity?.order, ['e', 's'], 'again: the round\'s players (newcomers wait)');
+  assert.deepEqual(again.at.activity?.order, ['e', 's', 'p'], 'again: everyone present, the newcomer included');
   assert.notEqual(again.seed, c.seed, 'a new seed for every round');
   assert.equal(run(c, { t: 'newGame', id: 's' }), c, 'back to the room: host only');
   c = run(c, { t: 'newGame', id: 'e' });

@@ -1,7 +1,7 @@
 // Contract E — the quiz reducer (shared/quiz/index.js): pure, seeded, never sees an answer.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { startQuiz, reduceQuiz as reduceRound, quizRanking, resolvePending, mergeQuizSettings, pointsFor, SCORING, QUIZ_DEFAULTS, QUIZ_RULES } from '../shared/quiz/index.js';
+import { startQuiz, reduceQuiz as reduceRound, quizRanking, resolvePending, mergeQuizSettings, pointsFor, SCORING, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
 
 /** @typedef {import('../shared/quiz/index.js').QuizState} QuizState */
 /** The reducer, with the host the campaign passes: 'a'. */
@@ -171,14 +171,12 @@ test('leave: mid-quiz marks left, closes the round if they were the last awaited
   assert.equal(reduceQuiz(s, { t: 'answer', id: 'b', choice: 1, now: T0 + 2000, verdict: 'right' }), s);
 });
 
-test('ranking shares ties; seated (who plays again) drops the players who left', () => {
+test('ranking shares ties', () => {
   let s = choiceRound();
   s = reduceQuiz(s, { t: 'answer', id: 'a', choice: 1, now: T0 + 1000, verdict: 'right' });
   s = reduceQuiz(s, { t: 'answer', id: 'b', choice: 1, now: T0 + 1000, verdict: 'right' });
   const fin = reduceQuiz(s, { t: 'endGame', id: 'a' });
   assert.deepEqual(quizRanking(fin).map((r) => r.rank), [1, 1], 'same points → shared rank');
-  assert.deepEqual(QUIZ_RULES.seated(fin), ['a', 'b']);
-  assert.deepEqual(QUIZ_RULES.seated(reduceQuiz(fin, { t: 'leave', id: 'b' })), ['a']);
 });
 
 test('resolvePending: a resumed quiz never re-judges, pending → wrong', () => {

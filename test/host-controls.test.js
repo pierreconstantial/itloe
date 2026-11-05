@@ -1,7 +1,7 @@
 // Host controls: endGame + retire (a disconnected player can never block a game).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BLOCK_RULES, ranking, reduce as reduceGame, startGame } from '../shared/game.js';
+import { ranking, reduce as reduceGame, startGame } from '../shared/game.js';
 
 /** @typedef {import('../shared/game.js').State} State */
 
@@ -29,12 +29,11 @@ test('endGame freezes boards without marking players left', () => {
   assert.deepEqual(ranking(e).map((r) => r.id)[0], 'a', 'ranked as usual');
 });
 
-test('endGame: host only, refused outside playing; everyone ended plays again', () => {
+test('endGame: host only, refused outside playing', () => {
   const s = game3();
   assert.equal(reduce(s, { t: 'endGame', id: 'b' }), s, 'not the host');
   const e = reduce(s, { t: 'endGame', id: 'a' });
   assert.equal(reduce(e, { t: 'endGame', id: 'a' }), e, 'already finished');
-  assert.deepEqual(BLOCK_RULES.seated(e), ['a', 'b', 'c']);
 });
 
 test('endGame on a timed game: the late bell is ignored', () => {
@@ -72,10 +71,4 @@ test('retire: the last one out finishes the game (stuck), host may retire themse
   s = reduce(s, { t: 'retire', id: 'a', target: 'a' });
   assert.equal(s.phase, 'finished');
   assert.equal(s.endReason, 'stuck');
-});
-
-test('a retired player plays the next round', () => {
-  let s = reduce(game3(), { t: 'retire', id: 'a', target: 'b' });
-  s = reduce(s, { t: 'endGame', id: 'a' });
-  assert.deepEqual(BLOCK_RULES.seated(s), ['a', 'b', 'c']);
 });

@@ -6,7 +6,7 @@ import { PIECES, PIECE_SETS, handAt } from '../shared/pieces.js';
 import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
 import { WORLD, WALK_SPEED, spawnPoint, clampToWorld } from '../shared/world.js';
 import {
-  BLOCK_RULES, DEFAULT_SETTINGS, SETTINGS_SCHEMA, startGame, newPlayer, normalizeSettings, placementScore, ranking, reduce as reduceGame,
+  DEFAULT_SETTINGS, SETTINGS_SCHEMA, startGame, newPlayer, normalizeSettings, placementScore, ranking, reduce as reduceGame,
 } from '../shared/game.js';
 
 /** @typedef {import('../shared/game.js').State} State */
@@ -586,17 +586,6 @@ test('mid-game leave marks left + done, keeps board/score/last; double leave is 
   assert.equal(b.score, before.score);
   assert.equal(b.last, before.last);
   assert.equal(reduce(left, { t: 'leave', id: 'b' }), left);
-});
-
-test('seated (who plays again): the players who have not left, a stuck one included, a podium leaver gone', () => {
-  let s = reduce(game3(), { t: 'leave', id: 'b' }); // b leaves mid-game: still on the boards, not seated
-  s = { ...s, players: { ...s.players, c: { ...s.players.c, done: true } } }; // c stuck, still connected
-  assert.deepEqual(s.order, ['a', 'b', 'c']);
-  assert.deepEqual(BLOCK_RULES.seated(s), ['a', 'c']);
-  const fin = reduce(s, { t: 'leave', id: 'a' }); // a was the last one playing
-  assert.equal(fin.phase, 'finished');
-  assert.deepEqual(BLOCK_RULES.seated(fin), ['c']);
-  assert.deepEqual(BLOCK_RULES.seated(reduce(fin, { t: 'leave', id: 'c' })), []);
 });
 
 // ---------- world geometry ----------
