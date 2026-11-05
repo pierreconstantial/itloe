@@ -184,6 +184,10 @@ export function loadCampaign(raw, content) {
   const news = (raw.news ?? []).filter((n) => n.t !== 'unlocked' || known(n.node));
   const newsSeq = raw.newsSeq ?? Math.max(0, ...news.map((n) => n.seq));
   const party = raw.party ?? emptyParty();
+  // a member playing a character the roster does not have could not be drawn, reclaimed or seated:
+  // refuse the save, so the server starts a fresh evening (and keeps the file aside)
+  const stray = Object.values(party.players).find((p) => p.character !== null && !isCharacterId(p.character));
+  if (stray) throw new Error(`party member ${stray.id} plays "${stray.character}", not a character of the roster`);
   const seed = raw.seed ?? 1;
   const kind = savedKind(raw.at); // first: a round of an unknown minigame stops the load even where the node is gone
   const keep = known(raw.at?.node); // else a fresh lobby is built at the start, which consumes a seed
