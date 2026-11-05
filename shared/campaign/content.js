@@ -1,13 +1,15 @@
 // Content helpers: validation (run by a test, so a content edit fails fast) and door hit-testing.
 
 import { isCharacterId } from '../characters.js';
+import { minigame } from '../minigames.js';
 
 /** @typedef {import('./types.js').Condition} Condition */
 /** @typedef {import('./types.js').Content} Content */
 /** @typedef {import('./types.js').Node} Node */
 
 const KINDS = new Set(['hub', 'world', 'tableau']);
-const ACTIVITY_KINDS = new Set(['blocks', 'scene', 'quiz']);
+/** A tableau's activity: a registered minigame, or a scene (a content kind without rules). @param {unknown} kind */
+const isActivityKind = (kind) => kind === 'scene' || !!minigame(kind);
 
 /** Children of a node, in content order. @param {Content} content @param {string} id @returns {Node[]} */
 export function childrenOf(content, id) {
@@ -100,7 +102,7 @@ export function validateContent(content) {
     if (n.kind === 'hub' && n.parent !== null) errors.push(`${at}: a hub must be the root`);
     if (n.activity && n.kind !== 'tableau') errors.push(`${at}: only tableaux have an activity`);
     if (n.kind === 'tableau' && !n.activity) errors.push(`${at}: a tableau needs an activity`);
-    if (n.activity && !ACTIVITY_KINDS.has(n.activity.kind)) errors.push(`${at}: unknown activity "${n.activity.kind}"`);
+    if (n.activity && !isActivityKind(n.activity.kind)) errors.push(`${at}: unknown activity "${n.activity.kind}"`);
     if (typeof n.title !== 'string' || !n.title) errors.push(`${at}: missing title`);
     if (!isCondition(n.unlock)) errors.push(`${at}: invalid unlock condition`);
     if (n.complete !== undefined && !isCondition(n.complete)) errors.push(`${at}: invalid complete condition`);
