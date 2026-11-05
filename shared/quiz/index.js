@@ -428,4 +428,10 @@ export const QUIZ_RULES = {
     };
   },
   validateSettings: validateQuizSettings,
+  deadline: (s) => (s.phase === 'question' && s.round ? s.round.deadline : null),
+  deadlineAction: (deadline) => ({ t: 'close', deadline }),
+  shiftDeadline: (s, by) => (s.phase === 'question' && s.round ? { ...s, round: { ...s.round, deadline: s.round.deadline + by } } : s),
+  resume: resolvePending, // an answer still waiting for the judge is never re-judged (E1)
+  describe: (s) => `quiz ${s.phase}${s.round ? ` q${s.round.index + 1}/${s.questions.length}` : ''}`
+    + `${s.order.length ? ` (${s.order.map((id) => `${s.players[id].name} ${s.players[id].score}`).join(', ')})` : ''}`,
 };

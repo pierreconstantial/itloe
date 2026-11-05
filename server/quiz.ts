@@ -1,10 +1,9 @@
 // Quiz, server side (Contract E + E1): the question bank (data/quiz/*.json, validated at boot, NEVER
-// served), the pluggable text judge, and the round clock. The pure rules are in shared/quiz/.
+// served) and the pluggable text judge. The pure rules are in shared/quiz/.
 
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { validateBank, type Question } from '../shared/quiz/bank.js';
-import type { QuizState } from '../shared/quiz/index.js';
 
 export type { Question };
 
@@ -67,16 +66,4 @@ export function withTimeout(judge: Judge, ms: number): Judge {
       () => { clearTimeout(timer); resolve(null); },
     );
   });
-}
-
-/** The quiz round timer: like the block clock, fires `close` when an open question's deadline passes;
- *  a stale timer is harmless (the reducer ignores a close whose deadline no longer matches). */
-export function makeQuizClock(fire: (deadline: number) => void) {
-  return {
-    onChange(prev: QuizState | null, next: QuizState): void {
-      const d = next.phase === 'question' && next.round ? next.round.deadline : null;
-      const before = prev?.phase === 'question' && prev.round ? prev.round.deadline : null;
-      if (d !== null && d !== before) setTimeout(() => fire(d), Math.max(0, d - Date.now()));
-    },
-  };
 }

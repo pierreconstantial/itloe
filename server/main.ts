@@ -14,22 +14,23 @@ import { makeApiHandler } from './http-api.ts';
 import { makeAccess } from './access.ts';
 import { pickLan } from './lan.ts';
 import { makeClock } from './clock.ts';
-import { activityDeadline, isQuiz, shiftActivityDeadline, type ActivityState } from './resume.ts';
-import { loadBank, makeQuizClock, nullJudge, withTimeout } from './quiz.ts';
+import { roundDeadline, shiftRound } from './resume.ts';
+import { loadBank, nullJudge, withTimeout } from './quiz.ts';
+import { minigame } from '../shared/minigames.js';
 import { candidatesFor, judgeAnswer, projectQuiz } from '../shared/quiz/bank.js';
 import { MAX_TEXT, type QuizAction, type QuizState } from '../shared/quiz/index.js';
 import { JOIN_QR_GAP_MS, JOIN_QR_MS } from '../shared/join-qr.js';
 import { cleanSpeech, isEmote } from '../shared/social.js';
 import { makeBests } from './bests.ts';
 import { CHARACTERS, isCharacterId } from '../shared/characters.js';
-import type { CharacterId } from '../shared/campaign/types.js';
+import type { ActivityState, CharacterId } from '../shared/campaign/types.js';
 import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
 import { PARTY_ROOM, spawnAt } from '../shared/scene.js';
 import { nearbyObject } from '../shared/interactions.js';
 import { loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import type { ServerAction, Settings, State } from './rules.ts';
 import {
-  CONTENT, CONTENT_VERSION, assertContent, reduceCampaign, isUnlocked, zoneAt,
+  CONTENT, CONTENT_VERSION, assertContent, reduceCampaign, isUnlocked, roundStatus, zoneAt,
   type Campaign, type CampaignAction, type GmOp,
 } from './campaign.ts';
 
@@ -54,18 +55,20 @@ const judge = withTimeout(nullJudge, JUDGE_TIMEOUT_MS);
 
 /** The campaign's nested activity (block game or quiz), or null on the hub / in a world / a scene. */
 const activity = (): ActivityState | null => game.campaign.at.activity;
-/** The block game, when that is what runs (block-only messages, bests, the block clock). */
-const blocks = (): State | null => { const s = activity(); return s && !isQuiz(s) ? s : null; };
+/** The block game, when that is what runs (block-only messages, bests). */
+const blocks = (): State | null => (game.campaign.at.kind === 'blocks' ? activity() as State : null);
 /** The quiz, when that is what runs. */
-const quiz = (): QuizState | null => { const s = activity(); return isQuiz(s) ? s : null; };
+const quiz = (): QuizState | null => (game.campaign.at.kind === 'quiz' ? activity() as QuizState : null);
 const party = () => game.campaign.party;
 
 const bests = makeBests(game);
 
 // beat() first: after a suspend, the overdue bell may run before the heartbeat; the beat shifts the
-// deadline, so this timeUp no longer matches it and the reducer ignores it (the new one is armed).
-const clock = makeClock((deadline) => { beat(); applyGame({ t: 'timeUp', deadline }); });
-const quizClock = makeQuizClock((deadline) => { beat(); applyQuiz({ t: 'close', deadline }); });
+// deadline, so this deadline action no longer matches it and the reducer ignores it (the new one is armed).
+const clock = makeClock((kind, deadline) => {
+  beat();
+  if (game.campaign.at.kind === kind) apply({ t: 'activity', action: minigame(kind)!.deadlineAction(deadline) });
+});
 
 /** Avatar positions: in memory only, outside the reducer (see pos.ts). */
 const positions = makePositions<WebSocket>();
@@ -74,16 +77,11 @@ const zones = new Map<string, string | null>();
 
 const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   (prev, next) => { // before saveGame: it sets game.bestPrevious (solo block games only)
-    const a = prev.at.activity, b = next.at.activity;
-    if (a && b && !isQuiz(a) && !isQuiz(b)) bests.onChange(a, b);
-    else if (!b || isQuiz(b)) game.bestPrevious = null;
+    if (prev.at.kind === 'blocks' && next.at.kind === 'blocks') bests.onChange(prev.at.activity as State, next.at.activity as State);
+    else if (next.at.kind !== 'blocks') game.bestPrevious = null;
   },
   () => saveGame(game), // ONE atomic save per step: a finished game and its recorded facts land together
-  (prev, next) => {
-    const a = prev.at.activity, b = next.at.activity;
-    if (b && !isQuiz(b)) clock.onChange(a && !isQuiz(a) ? a : null, b);
-    if (isQuiz(b)) quizClock.onChange(isQuiz(a) ? a : null, b);
-  },
+  (prev, next) => clock.onChange(prev.at, next.at),
   (_prev, next) => positions.prune(next.party),
   (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
   () => broadcast(),
@@ -126,11 +124,10 @@ function beat(): void {
   const gap = now - lastBeat;
   lastBeat = now;
   const c = game.campaign;
-  const s = c.at.activity;
-  if (activityDeadline(s) === null || !s) return; // nothing on a clock (a timed block game, an open quiz question)
-  const shifted = gap > SUSPEND_GAP_MS ? shiftActivityDeadline(s, now - gap + BEAT_MS, now) : s;
+  if (roundDeadline(c.at) === null) return; // nothing on a clock (a timed block game, an open quiz question)
+  const shifted = gap > SUSPEND_GAP_MS ? shiftRound(c, now - gap + BEAT_MS, now) : c;
   // a server-owned input moved: installed directly (not an engine transition), like the resume shift
-  if (shifted !== s && commit({ ...c, at: { ...c.at, activity: shifted } })) {
+  if (shifted !== c && commit(shifted)) {
     console.log(`[itloe] process was suspended ${Math.round(gap / 1000)} s — timed clock paused for that long`);
     return; // commit saved + broadcast
   }
@@ -277,8 +274,8 @@ const isOnline = (playerId: string): boolean => sockets.get(playerId)?.readyStat
 function joinRefusal(): ErrCode {
   const held = new Set(party().order.filter((id) => !party().players[id].left).map((id) => party().players[id].character));
   if (Object.keys(CHARACTERS).every((c) => held.has(c as CharacterId))) return 'full';
-  const s = activity();
-  return s && s.phase !== 'lobby' ? 'full' : 'taken';
+  const status = roundStatus(game.campaign);
+  return status !== null && status !== 'lobby' ? 'full' : 'taken';
 }
 
 const isPlainObject = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
@@ -365,7 +362,7 @@ function handleMessage(ws: WebSocket, m: any): void {
   if (m.t === 'interact') {
     const id = who.get(ws);
     // the party room's furniture: wherever avatars walk there (hub, world, a block or quiz lobby)
-    if (!id || !isMember(id) || (activity() && activity()?.phase !== 'lobby')) return;
+    if (!id || !isMember(id) || (activity() && roundStatus(game.campaign) !== 'lobby')) return;
     const now = Date.now();
     if (now - (interactionAt.get(ws) ?? 0) < 700) return;
     const member = party().players[id];
@@ -648,9 +645,7 @@ wss.on('connection', (ws) => {
 
 saveGame(game); // a --new start must not let the next plain start resume the old game (and a v1 save is now v2)
 // resumed timed game or open quiz question: re-arm (fires at once if the deadline passed while down)
-const resumed = activity();
-if (resumed && !isQuiz(resumed)) clock.onChange(null, resumed);
-if (isQuiz(resumed)) quizClock.onChange(null, resumed);
+clock.onChange(null, game.campaign.at);
 
 httpServer.listen(PORT, process.env.BLOKO_BIND, () => {
   console.log(`[itloe] ${loaded.how}`);

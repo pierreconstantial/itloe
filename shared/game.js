@@ -479,4 +479,8 @@ export const BLOCK_RULES = {
     endReason: s.endReason,
   }),
   validateSettings,
+  deadline: (s) => (s.phase === 'playing' && typeof s.deadline === 'number' ? s.deadline : null),
+  deadlineAction: (deadline) => ({ t: 'timeUp', deadline }),
+  shiftDeadline: (s, by) => (s.phase === 'playing' && typeof s.deadline === 'number' ? { ...s, deadline: s.deadline + by } : s),
+  describe: (s) => `block game ${s.phase}${s.order.length ? ` (${s.order.map((id) => `${s.players[id].name} ${s.players[id].score}`).join(', ')})` : ''}`,
 };

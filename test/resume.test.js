@@ -1,8 +1,9 @@
-// P2 — timed-pause fairness (server/resume.ts).
+// P2 — timed-pause fairness (server/resume.ts): any round keeps its remaining time.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { initState, reduce } from '../server/rules.ts';
-import { savedAtMs, shiftDeadline } from '../server/resume.ts';
+import { savedAtMs, shiftRound } from '../server/resume.ts';
+import { initQuiz, reduceQuiz } from '../shared/quiz/index.js';
 
 const T0 = 1_700_000_000_000;
 
@@ -25,28 +26,48 @@ test('savedAtMs: epoch ms, legacy ISO string, absent/garbage → null', () => {
   assert.equal(savedAtMs({}), null);
 });
 
-test('shiftDeadline: a live deadline keeps its remaining time across the downtime', () => {
+/** A campaign whose round is `s` (only `at` matters here). @param {any} s @param {string | null} [kind] */
+const at = (s, kind = 'blocks') => /** @type {any} */ ({ at: { node: 'x', kind, activity: s } });
+
+test('shiftRound: a live deadline keeps its remaining time across the downtime', () => {
   const s = timedGame();
   const savedAt = T0 + 20_000; // 20 s into the game
   const now = savedAt + 3_600_000; // server down for an hour
-  const r = shiftDeadline(s, savedAt, now);
+  const r = /** @type {any} */ (shiftRound(at(s), savedAt, now).at.activity);
   assert.equal(r.deadline, /** @type {number} */ (s.deadline) + 3_600_000);
   assert.equal(/** @type {number} */ (r.deadline) - now, /** @type {number} */ (s.deadline) - savedAt, 'same remaining time');
   assert.deepEqual({ ...r, deadline: s.deadline }, s, 'nothing else changes');
   assert.notEqual(r, s);
 });
 
-test('shiftDeadline: unchanged (same object) when there is nothing to shift', () => {
+test('shiftRound: an open quiz question keeps its remaining time too', () => {
+  let q = initQuiz(1);
+  q = reduceQuiz(q, { t: 'join', id: 'a', character: 'anna' });
+  q = reduceQuiz(q, { t: 'start', id: 'a', now: T0, candidates: [{ id: 'q1', choices: 4 }] });
+  const d = /** @type {any} */ (q.round).deadline;
+  const r = /** @type {any} */ (shiftRound(at(q, 'quiz'), T0 + 5000, T0 + 65_000).at.activity);
+  assert.equal(r.round.deadline, d + 60_000);
+  const reveal = reduceQuiz(q, { t: 'close', deadline: d });
+  const c = at(reveal, 'quiz');
+  assert.equal(shiftRound(c, T0, T0 + 5000), c, 'a reveal is not on a clock');
+});
+
+test('shiftRound: unchanged (same object) when there is nothing to shift', () => {
   const s = timedGame();
-  assert.equal(shiftDeadline(s, null, T0 + 5000), s, 'old envelope without savedAt');
-  assert.equal(shiftDeadline(s, T0 + 5000, T0 + 5000), s, 'no downtime');
-  assert.equal(shiftDeadline(s, T0 + 9000, T0 + 5000), s, 'clock went backwards');
+  const c = at(s);
+  assert.equal(shiftRound(c, null, T0 + 5000), c, 'old envelope without savedAt');
+  assert.equal(shiftRound(c, T0 + 5000, T0 + 5000), c, 'no downtime');
+  assert.equal(shiftRound(c, T0 + 9000, T0 + 5000), c, 'clock went backwards');
   const classic = reduce(reduce(initState(1), { t: 'join', id: 'a', character: 'anna' }), { t: 'start', id: 'a', now: T0 });
   assert.equal(classic.deadline, null);
-  assert.equal(shiftDeadline(classic, T0, T0 + 5000), classic, 'untimed game');
-  const lobby = initState(1, { mode: 'timed' });
-  assert.equal(shiftDeadline(lobby, T0, T0 + 5000), lobby, 'lobby');
+  const untimed = at(classic);
+  assert.equal(shiftRound(untimed, T0, T0 + 5000), untimed, 'untimed game');
+  const lobby = at(initState(1, { mode: 'timed' }));
+  assert.equal(shiftRound(lobby, T0, T0 + 5000), lobby, 'lobby');
   const finished = reduce(s, { t: 'timeUp', deadline: /** @type {number} */ (s.deadline) });
   assert.equal(finished.phase, 'finished');
-  assert.equal(shiftDeadline(finished, T0, T0 + 5000), finished, 'finished');
+  const done = at(finished);
+  assert.equal(shiftRound(done, T0, T0 + 5000), done, 'finished');
+  const none = at(null, null);
+  assert.equal(shiftRound(none, T0, T0 + 5000), none, 'no round');
 });
