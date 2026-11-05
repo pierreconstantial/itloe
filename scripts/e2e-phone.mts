@@ -439,14 +439,29 @@ try {
   await resumes(A, 'mid-game silent dead link: heals by itself, same game', 'view-game', idA, 15_000);
 
   console.log(`  (locking A for ${LOCK_MS / 1000} s: frozen page, the server restarts meanwhile so its socket is dead)`);
+  // a page timer and a count of opened sockets: did the page really freeze, and did the unlock reconnect?
+  await A.ev(`window.__ticks = 0; setInterval(() => window.__ticks++, 100); window.__opens = 0;
+    window.WebSocket = class extends WebSocket { constructor(...a) { super(...a); this.addEventListener('open', () => window.__opens++); } }`);
   await A.lifecycle('frozen');
+  const ticksAt = (): Promise<number> => Promise.race([A.ev('window.__ticks'), sleep(1000).then(() => -1)]); // -1: no answer, frozen
+  const ticks0 = await ticksAt();
   const restartAt = Math.min(5000, LOCK_MS / 2);
   await sleep(restartAt);
+  const froze = ticks0 === -1 || [ticks0, -1].includes(await ticksAt());
   await kill9();
   await boot();
   await sleep(Math.max(0, LOCK_MS - restartAt));
   await A.lifecycle('active');
-  await resumes(A, `phone locked ${(LOCK_MS / 60_000).toFixed(1)} min mid-game → unlock resumes`, 'view-game', idA, 10_000);
+  const lockLabel = `phone locked ${(LOCK_MS / 60_000).toFixed(1)} min mid-game → unlock resumes`;
+  if (!froze) {
+    console.log(`SKIP  ${lockLabel}  — Chrome did not freeze the page (its timers kept running), so the unlock path is not exercised`);
+    await A.waitFor((x) => x.view === 'view-game' && !x.banner, 10_000);
+  } else {
+    let opens = 0;
+    for (const end = Date.now() + 10_000 * SLOW; !opens && Date.now() < end; await sleep(100)) opens = await A.ev('window.__opens');
+    expect(opens > 0, `${lockLabel}: a fresh socket after the unlock`, `${opens} opened`);
+    await resumes(A, lockLabel, 'view-game', idA, 10_000);
+  }
 
   await kill9();
   const down = await A.waitFor((x) => x.banner, 5000);
