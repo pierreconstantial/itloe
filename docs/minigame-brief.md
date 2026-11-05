@@ -19,15 +19,21 @@ Itloe is a party game for one evening, and agents write the code. Build what the
 ## Before starting
 
 - **The work happens on the `konst` branch.** Pierre reviews it and merges it into `master`. When to push and open the pull request is Konstantin's decision. `AGENTS.md` applies to every session working on it.
+- **Hard deadline: Friday 13 November 2026.**
 - **`konst` is rebased onto `origin/master` at `ba3c3cd`** and pushed to `origin/konst`. This brief is checked against that base.
+- **No backward compatibility.** Saves from earlier versions need not load: a fresh evening is fine, and no new save migrations are written. The existing migrations stay. A save written by the current version must still resume after a restart.
 - **Pierre works on `origin/pierre`** (the story's opening), merged after this work with adjustments. It overlaps this work in three places: its `portal` campaign action requires the opening block game's lobby (`c.at.activity?.phase !== 'lobby'`), which phase 3c removes; `public/screen/party-room.js`, which phase 5 splits; and `server/main.ts`. Its `STORY_CONTENT` passes phase 1's content validation.
 
 ## Terms
 
+- **Evening**: one playthrough of the campaign, from the false start on, saved and resumed as one. The real one is Élodie's birthday party, played once with the final version.
+- **Node**: a place in the story's content, by kind: the **hub**, where the story opens out; a **world**, one period of Élodie's life, entered from the hub; a **tableau**, one spot inside a world (or the false start, under the hub) with one activity: a minigame or a scene. The party is at one node at a time (`campaign.at.node`).
 - **Minigame**: a registered kind of game with its own rules: `blocks` and `quiz` today. A content node's `activity.kind` names a minigame, or `scene`, which stays a content kind without rules.
 - **Round**: one play of a minigame at a tableau. The host starts it from the room, and it runs until its podium closes. `campaign.at.activity` holds the round's state; between rounds there is none.
-- **Status**: a round's `running` or `finished` (podium), derived by the minigame from its state. The quiz's `question` and `reveal` are both `running`.
-- **Room**: one of the RPG's places, where avatars walk among walls and furniture (geometry from `shared/scene.js`). Today there is one, the party room, shown between rounds. Minigames have no rooms.
+- **Status**: a round's `running` or `finished` (podium), derived by the minigame from its state; also `lobby` until phase 3c removes the games' lobbies. The quiz's `question` and `reveal` are both `running`.
+- **Room**: what the TV draws for a node: a space with walls and furniture where avatars walk (geometry from `shared/scene.js`). Today there is one, the party room, used for every node. Minigames have no rooms.
+- **Map**: the room at the hub or in a world, with a door for each node the party can enter from there.
+- **The room at a tableau**: the room between rounds at a tableau, under the tableau's band.
 - **Game area**: where a minigame lets avatars walk over its own screen during its round, e.g. players already out of a block game roaming over its board to distract the others. Its bounds are a `shared/scene.js` scene without furniture.
 - **Shared code**: everything that isn't a minigame's own files: the campaign engine (the RPG), the server, and the parts of the phone and TV around the games.
 - **Frame**: the screens every minigame shares: the room at a tableau between rounds, the podium, and the host controls.
@@ -71,7 +77,7 @@ Shared code arms one timer per deadline, as the two clocks do today. A stale tim
 
 The campaign stores the round's kind next to it in `campaign.at`. An older save without it gets a derived kind: a state with `kind: 'quiz'` is a quiz, a state without `kind` is blocks. A saved kind that isn't registered stops the boot with an error naming the kind, and leaves the save file untouched. Today a load failure starts a fresh evening and quarantines the save, so this case needs its own path.
 
-**Hosting.** The evening runs hosted on Konstantin's server, not on a laptop, so a phone's Wi-Fi or internet dropping is likelier on the night than the server going down. The production release workflow runs `npm run check`, `npm test`, `e2e:resume` and `test/hosting.test.js`. Infrastructure's deploy check reads `room` at the top of the save file and expects a `view` as the first message on a socket; every save change keeps both. A deploy restarts the server, mid-evening too, and relies on resume. A deploy that meets a save with an unregistered kind stops at boot, and Infrastructure restores the previous release and its saved data.
+**Hosting.** The evening runs hosted on Konstantin's server, not on a laptop, so a phone's Wi-Fi or internet dropping is likelier during the evening than the server going down. The production release workflow runs `npm run check`, `npm test`, `e2e:resume` and `test/hosting.test.js`. Infrastructure's deploy check reads `room` at the top of the save file and expects a `view` as the first message on a socket; every save change keeps both.
 
 ### Players, rounds and the host: the RPG owns them
 
@@ -79,13 +85,13 @@ The campaign stores the round's kind next to it in `campaign.at`. An older save 
 - **The evening opens this way:** in the room at the start tableau, without doors, with the ITLOE band and the join QR, as today.
 - **During a round**, a newcomer joins the party and plays the next round. A player who leaves the evening is reported to the minigame, which decides what that means for its rules. A disconnected player keeps their seat and can take their character back from another phone.
 - **The host is the party's host.** A minigame stores no host. Shared code passes the host's id with every action, so a minigame can refuse its own host-only actions (the quiz: next question, answer overrides). Those buttons live in the minigame's own screens.
-- **Settings:** the host sets a tableau's settings through the shared settings sheet, from the minigame's settings schema: in the room before a round, and on the podium. The RPG keeps the choice per tableau between rounds; content gives the defaults.
+- **Settings:** the host sets a tableau's settings through the shared settings sheet, from the minigame's settings schema: in the room before a round, and on the podium. The RPG keeps the host's choice until the party leaves the tableau, as today; content gives the defaults.
 - **Host controls, the same for every minigame:**
   - "End game" during a round;
   - "Take a player out", which shared code reports to the minigame; it decides what that means, and by default treats it like leaving;
   - on the podium, "Play again" (a new round at once, with everyone present, including players who joined during the round) and "Back to the room" (the room at the tableau).
-- **Leaving the tableau** for the world map stays the game-master panel's Back, as today.
-- **Blocks and quiz lose** their lobby phase, `join`, `newGame`, their copy of the host and their own host rule. A save with a lobby open loads as "the party in the room at that tableau", and settings saved in a lobby or on a podium move into the RPG's per-tableau settings.
+- **Leaving the tableau** for the map stays the game-master panel's Back, as today.
+- **Blocks and quiz lose** their lobby phase, `join`, `newGame`, their copy of the host and their own host rule.
 
 ### Chat, emotes and object actions: the RPG's
 
@@ -185,6 +191,10 @@ Between 3 and 4:
 - **Found during the work: the phone's connection banner.** When the server is gone or the network drops, the phone's first reconnect attempt fails within the banner's 700 ms grace, and that second failure cancels the banner for good: the phone shows a frozen screen instead of "reconnecting". `e2e-phone` part 1's "server down: banner" check fails for this reason. Fixed in its own behaviour-change commit (`8e9c855`).
 - **Found during the work: the "phone locked" check tests nothing.** In headless Chrome 156, `Page.setWebLifecycleState('frozen')` doesn't freeze the page, so "phone locked … → unlock resumes" passes without exercising the unlock. A test-only commit makes it report a visible skip when the page didn't freeze, and require a fresh socket after the unlock.
 
+Before phase 3c:
+
+7. **The round buttons answer alike in every minigame.** A guest's "Play again", "Back to the room" or "End game" gets "Only the host can do that."; the host's at the wrong moment gets "That can't be done right now." Today a block game tells the host "Only the host can do that." there.
+
 Right after phase 3:
 
 6. **"Play again" includes players who joined during the round,** in every minigame.
@@ -252,7 +262,6 @@ Scope:
 - the round messages: start, play again, back to the room, end, take a player out;
 - rounds starting with the players handed in;
 - blocks and quiz without lobby, `join` or `newGame`;
-- the save migration;
 - the room at a tableau drawn by shared code from the campaign;
 - `PROTOCOL.md`.
 
@@ -263,13 +272,13 @@ Then behaviour change 6, in its own commit.
 - every suite passes;
 - the screenshots match the reference;
 - after 3a, a test shows that settings saved in a block lobby and on a block podium survive a restart;
-- after 3c, tests show that saves in a block lobby, in a quiz lobby and on a block podium all load as described.
+- after 3c, a test shows that a kill -9 in the room at a tableau and on a podium resumes there.
 
 ### Phase 4: the frame and the running screens
 
 Scope:
 
-- the shared podium and host controls;
+- the shared podium and host controls, with "Take a player out" in every minigame (the quiz refuses it until then);
 - the settings sheet fed by the minigame's schema;
 - cutscene gating;
 - block and quiz running screens mounted by the frame;
