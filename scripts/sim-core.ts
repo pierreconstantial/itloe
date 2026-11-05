@@ -4,7 +4,7 @@
 
 import { canPlace, place, findClears, applyClears, anyFit } from '../shared/board.js';
 import { PIECES, PIECE_SETS, handAt, type PieceId, type PieceSetId } from '../shared/pieces.js';
-import { initState, reduce, type Player, type Settings, type State } from '../shared/game.js';
+import { startGame, reduce, type Player, type Settings, type State } from '../shared/game.js';
 import { mulberry32 } from '../shared/rng.js';
 
 export type Weights = Record<PieceId, number>;
@@ -169,10 +169,8 @@ function hashName(s: string): number {
 export function playGame(
   seed: number, settings: Partial<Settings>, policy: Policy, weights?: Weights, salt = 0
 ): GameResult {
-  let s: State = initState(seed, settings);
-  const ctx = { settings: s.rules, hostId: 'a' }; // the settings the game is played with; 'a' plays and hosts
-  s = reduce(s, { t: 'join', id: 'a', character: 'pierre' }, ctx);
-  s = reduce(s, { t: 'start', id: 'a', now: 0 }, ctx);
+  let s: State = startGame({ seed, settings, players: [{ id: 'a', character: 'pierre' }], now: 0 })!;
+  const ctx = { hostId: 'a' }; // 'a' plays and hosts
   const { rules } = s;
   const rng = mulberry32((seed ^ hashName(policy.name) ^ Math.imul(salt, 0x85ebca6b)) >>> 0);
 

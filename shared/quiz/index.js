@@ -3,12 +3,11 @@
 //
 // The reducer NEVER sees the bank or an answer: the server judges each answer as it arrives and
 // injects the verdict (choice → index compare, text → judge-local, 'uncertain' → a later `verdict`).
-// Phases: lobby → question → reveal → question → … → finished → question (again) or lobby (newGame).
+// A quiz starts with startQuiz on question 1 (the campaign hands in the players, the settings, the time
+// and the candidate questions); phases: question → reveal → question → … → finished (the podium).
 //
-// Actions (ids, now, deadline, candidates and verdicts are injected by the server, never from the wire):
-//   join { id, character } · leave { id }                              (join: lobby only)
-//   start { id, now, candidates }   host: lobby → question 1 (seeded pick among candidates)
-//   again { id, now, candidates }   host: finished → question 1 of a new quiz (same players minus left)
+// Actions (ids, now, deadline and verdicts are injected by the server, never from the wire):
+//   leave { id }                    marked left; the round closes if they were the last one awaited
 //   answer { id, choice | text, now, verdict }   once per round, before the deadline
 //   close { deadline }              server: the round's timer rang (stale deadlines are ignored)
 //   verdict { target, ok, index, questionId }   server: the async judge decided an 'uncertain' answer of that
@@ -16,12 +15,10 @@
 //   override { id, target, ok }     host, on the reveal: fixes any answer, both ways, re-scoring it
 //   next { id, now }                host: reveal → next question, or finished after the last
 //   endGame { id }                  host: question/reveal → finished
-//   newGame { id }                  host: finished → lobby (same players minus left, scores reset)
 // The last answer of a round closes it at once (no waiting for the timer when everyone answered).
-// The settings are the tableau's, kept by the campaign and passed with every action; start and again lock
-// them in as the quiz's rules.
+// The host is the party's, passed in by the campaign with every action.
 
-import { CHARACTERS, isCharacterId } from '../characters.js';
+import { CHARACTERS } from '../characters.js';
 import { mulberry32 } from '../rng.js';
 
 /** @typedef {import('../characters.js').CharacterId} CharacterId */
@@ -43,9 +40,9 @@ import { mulberry32 } from '../rng.js';
 /**
  * @typedef {{
  *   kind: 'quiz',
- *   phase: 'lobby' | 'question' | 'reveal' | 'finished',
+ *   phase: 'question' | 'reveal' | 'finished',
  *   seed: number,
- *   rules: QuizSettings,          // the tableau's settings, locked at start
+ *   rules: QuizSettings,          // the tableau's settings, locked in at the start
  *   order: string[],
  *   players: Record<string, QuizPlayer>,
  *   questions: Candidate[],       // picked at start, in play order
@@ -55,17 +52,13 @@ import { mulberry32 } from '../rng.js';
  * }} QuizState
  */
 /**
- * @typedef {{ t: 'join', id: string, character: CharacterId }
- *   | { t: 'leave', id: string }
- *   | { t: 'start', id: string, now: number, candidates: Candidate[] }
- *   | { t: 'again', id: string, now: number, candidates: Candidate[] }
+ * @typedef {{ t: 'leave', id: string }
  *   | { t: 'answer', id: string, choice?: number, text?: string, now: number, verdict: Verdict }
  *   | { t: 'close', deadline: number }
  *   | { t: 'verdict', target: string, ok: boolean | null, index: number, questionId: string }
  *   | { t: 'override', id: string, target: string, ok: boolean }
  *   | { t: 'next', id: string, now: number }
- *   | { t: 'endGame', id: string }
- *   | { t: 'newGame', id: string }} QuizAction
+ *   | { t: 'endGame', id: string }} QuizAction
  */
 
 /** @type {QuizSettings} */
@@ -99,8 +92,6 @@ export const MAX_TEXT = 120;
 
 const LEVELS = [1, 2, 3];
 
-/** @param {number} s */
-const nextSeed = (s) => (Math.imul(s >>> 0, 1103515245) + 12345) >>> 0;
 
 /**
  * Settings from a partial patch: unknown keys and invalid values are dropped (like the block game).
@@ -140,15 +131,28 @@ export function validateQuizSettings(settings) {
 }
 
 /**
- * A fresh quiz in its lobby.
- * @param {number} seed @param {Partial<QuizSettings>} [settings] @returns {QuizState}
+ * A new quiz on its first question: the players handed in, the settings locked in as its rules, `count`
+ * questions picked (seeded) among the candidates (`inputs`). null when there is no player, no finite `now`,
+ * or nothing left to ask.
+ * @param {import('../minigames.js').RoundStart<Partial<QuizSettings>>} start @returns {QuizState | null}
  */
-export function initQuiz(seed, settings) {
-  const s = mergeQuizSettings(QUIZ_DEFAULTS, settings);
-  return {
-    kind: 'quiz', phase: 'lobby', seed: seed >>> 0, rules: s,
-    order: [], players: {}, questions: [], round: null, asked: [], endReason: null,
-  };
+export function startQuiz({ seed, settings, players, now, inputs }) {
+  const rules = mergeQuizSettings(QUIZ_DEFAULTS, settings);
+  if (players.length === 0 || !Number.isFinite(now) || !Array.isArray(inputs)) return null;
+  const pool = askable(inputs, rules.mode);
+  if (pool.length === 0) return null; // nothing left to ask
+  const s = seed >>> 0;
+  /** @type {Record<string, QuizPlayer>} */
+  const seated = {};
+  for (const { id, character } of players) {
+    const { name, color } = CHARACTERS[character];
+    seated[id] = { id, character, name, color, score: 0, correct: 0, left: false };
+  }
+  const questions = shuffle(pool, mulberry32(s)).slice(0, rules.count);
+  return openRound({
+    kind: 'quiz', phase: 'question', seed: s, rules, order: players.map((p) => p.id), players: seated,
+    questions, round: null, asked: [], endReason: null,
+  }, 0, now);
 }
 
 /** Is a quiz under way (answers can come in)? @param {Pick<QuizState, 'phase'>} s */
@@ -244,49 +248,17 @@ const isHost = (ctx, id) => ctx.hostId !== null && ctx.hostId === id;
 /**
  * @param {QuizState} s
  * @param {QuizAction} a
- * @param {import('../minigames.js').RoundCtx<QuizSettings>} ctx  the tableau's settings (start and again lock them in)
- *   and the party's host (the host-only actions)
+ * @param {import('../minigames.js').RoundCtx} ctx  the party's host (the host-only actions)
  * @returns {QuizState}  the SAME object when the action is refused
  */
 export function reduceQuiz(s, a, ctx) {
   switch (a.t) {
-    case 'join': {
-      if (s.phase !== 'lobby' || s.players[a.id] || !isCharacterId(a.character)) return s;
-      if (s.order.some((id) => s.players[id].character === a.character)) return s;
-      const { name, color } = CHARACTERS[a.character];
-      return {
-        ...s, order: [...s.order, a.id],
-        players: { ...s.players, [a.id]: { id: a.id, character: a.character, name, color, score: 0, correct: 0, left: false } },
-      };
-    }
-
     case 'leave': {
       const p = s.players[a.id];
       if (!p || p.left) return s;
-      if (s.phase === 'lobby') {
-        const { [a.id]: _gone, ...players } = s.players;
-        return { ...s, order: s.order.filter((id) => id !== a.id), players };
-      }
       const next = { ...s, players: { ...s.players, [a.id]: { ...p, left: true } } };
       // the leaver was the last one we were waiting for: the round closes
       return next.phase === 'question' && everyoneAnswered(next) ? reveal(next) : next;
-    }
-
-    case 'start':
-    case 'again': {
-      // like the block game: start from the lobby, again (a rematch) from the podium
-      if (!isHost(ctx, a.id) || s.phase !== (a.t === 'start' ? 'lobby' : 'finished') || !Number.isFinite(a.now)) return s;
-      if (active(s).length === 0 || !Array.isArray(a.candidates)) return s;
-      const rules = ctx.settings;
-      const pool = askable(a.candidates, rules.mode);
-      if (pool.length === 0) return s; // nothing left to ask
-      const seed = nextSeed(s.seed);
-      const questions = shuffle(pool, mulberry32(seed)).slice(0, rules.count);
-      const order = active(s); // a rematch drops the players who left, as newGame does
-      /** @type {Record<string, QuizPlayer>} */
-      const players = {};
-      for (const id of order) players[id] = { ...s.players[id], score: 0, correct: 0 };
-      return openRound({ ...s, seed, rules, order, players, questions, endReason: null }, 0, a.now);
     }
 
     case 'answer': {
@@ -356,15 +328,6 @@ export function reduceQuiz(s, a, ctx) {
       return { ...s, phase: 'finished', endReason: 'host', round };
     }
 
-    case 'newGame': {
-      if (!isHost(ctx, a.id) || s.phase !== 'finished') return s;
-      const order = s.order.filter((id) => !s.players[id].left);
-      /** @type {Record<string, QuizPlayer>} */
-      const players = {};
-      for (const id of order) players[id] = { ...s.players[id], score: 0, correct: 0 };
-      return { ...s, phase: 'lobby', seed: nextSeed(s.seed), order, players, questions: [], round: null, endReason: null };
-    }
-
     default:
       return s;
   }
@@ -398,9 +361,10 @@ export function quizRanking(s) {
  * @type {import('../minigames.js').MinigameRules<QuizState, QuizAction, QuizSettings>}
  */
 export const QUIZ_RULES = {
-  init: initQuiz,
+  init: startQuiz,
   reduce: reduceQuiz,
-  status: (s) => (quizRunning(s) ? 'running' : s.phase === 'lobby' ? 'lobby' : 'finished'),
+  status: (s) => (quizRunning(s) ? 'running' : s.phase === 'finished' ? 'finished' : null),
+  seated: (s) => active(s),
   result: (s, node) => {
     const ranking = quizRanking(s);
     /** @type {Record<string, number>} */

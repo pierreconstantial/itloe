@@ -28,26 +28,3 @@ export const ROSTER_SIZE = Object.keys(CHARACTERS).length;
 export function isCharacterId(id) {
   return typeof id === 'string' && Object.hasOwn(CHARACTERS, id);
 }
-
-/**
- * Characters not picked by any player who has not left, in display order.
- * A player without `character` (save from before M3) holds the character
- * of its colour slot, so the two can never share a colour.
- * @param {{ order: string[], players: Record<string, { color: number, left?: boolean, character?: CharacterId | null }> }} state
- * @returns {CharacterId[]}
- */
-export function freeCharacters(state) {
-  /** @type {Set<string>} */
-  const held = new Set();
-  /** @type {Set<number>} */
-  const heldColors = new Set();
-  for (const id of state.order) {
-    const p = state.players[id];
-    if (!p || p.left) continue;
-    if (p.character) held.add(p.character);
-    else heldColors.add(p.color);
-  }
-  return /** @type {CharacterId[]} */ (Object.keys(CHARACTERS)).filter(
-    (c) => !held.has(c) && !heldColors.has(CHARACTERS[c].color)
-  );
-}

@@ -3,8 +3,7 @@
 
 import { emptyBoard, canPlace, place, findClears, applyClears, anyFit } from './board.js';
 import { PIECES, handAt } from './pieces.js';
-import { mulberry32 } from './rng.js';
-import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
+import { CHARACTERS } from './characters.js';
 
 /**
  * @typedef {import('./pieces.js').PieceId} PieceId
@@ -22,7 +21,7 @@ import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
  *
  * @typedef {{
  *   id: string,
- *   name: string,               // copied from CHARACTERS[character] at join
+ *   name: string,               // copied from CHARACTERS[character] when the round starts
  *   color: number,              // 1..4, maps to CSS var --p1..--p4; = CHARACTERS[character].color
  *   character: CharacterId | null,  // null only for saves from before M3
  *   board: number[],            // see board.js
@@ -45,7 +44,7 @@ import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
  * }} Player
  *
  * @typedef {{
- *   phase: 'lobby' | 'playing' | 'finished',
+ *   phase: 'playing' | 'finished',
  *   seed: number,
  *   size: number,               // === rules.size (kept for existing readers)
  *   order: string[],
@@ -55,12 +54,8 @@ import { CHARACTERS, freeCharacters, isCharacterId } from './characters.js';
  *   endReason: 'stuck' | 'time' | 'host' | null   // host = the host ended the game (endGame)
  * }} State
  *
- * `now` on start/again and the whole `timeUp` action are SERVER-injected, never from the wire.
- * @typedef {{ t: 'join', id: string, character: CharacterId }
- *   | { t: 'start', id: string, now?: number }
- *   | { t: 'again', id: string, now?: number }
- *   | { t: 'newGame', id: string }
- *   | { t: 'timeUp', deadline: number }
+ * The whole `timeUp` action is SERVER-injected, never from the wire. A round starts with startGame.
+ * @typedef {{ t: 'timeUp', deadline: number }
  *   | { t: 'leave', id: string }
  *   | { t: 'endGame', id: string }
  *   | { t: 'retire', id: string, target: string }
@@ -134,15 +129,28 @@ export function validateSettings(settings) {
 }
 
 /**
- * @param {number} seed
- * @param {Partial<Settings>} [settings]  e.g. the persisted settings file; normalized
- * @returns {State}
+ * A new round, under way: the players handed in (fresh boards, hand 0 dealt from the seed), the settings
+ * locked in as the rules (normalized), the bell set in timed mode. null when there is no player, or when
+ * timed mode lacks a finite `now`.
+ * @param {import('./minigames.js').RoundStart<Partial<Settings>>} start
+ * @returns {State | null}
  */
-export function initState(seed, settings) {
-  const s = normalizeSettings(settings ?? {});
+export function startGame({ seed, settings, players, now }) {
+  const rules = normalizeSettings(settings ?? {});
+  const timed = rules.mode === 'timed';
+  if (timed && !(typeof now === 'number' && Number.isFinite(now))) return null;
+  if (players.length < 1) return null;
+  const hand0 = handAt(seed, 0, rules.pieceSet);
+  /** @type {Record<string, Player>} */
+  const seated = {};
+  for (const { id, character } of players) {
+    const { name, color } = CHARACTERS[character];
+    seated[id] = { ...newPlayer(id, name, color, rules.size, rules.grace, character), hand: hand0.slice() };
+  }
   return {
-    phase: 'lobby', seed, size: s.size, order: [], players: {},
-    rules: { ...s }, deadline: null, endReason: null,
+    phase: 'playing', seed, size: rules.size, order: players.map((p) => p.id), players: seated, rules,
+    deadline: timed ? now + rules.timedSeconds * 1000 : null,
+    endReason: null,
   };
 }
 
@@ -211,35 +219,11 @@ export function ranking(state) {
  * Rules: BUILD-PLAN.md «Contract A», normative paragraph, + Q4 addendum.
  * @param {State} state
  * @param {Action} action
- * @param {import('./minigames.js').RoundCtx<Settings>} ctx  the tableau's settings (start, again and newGame lock them
- *   in) and the party's host (the host-only actions)
+ * @param {import('./minigames.js').RoundCtx} ctx  the party's host (the host-only actions)
  * @returns {State}
  */
 export function reduce(state, action, ctx) {
   switch (action.t) {
-    case 'join': {
-      if (state.phase !== 'lobby') return state;
-      if (typeof action.id !== 'string' || action.id === '') return state;
-      if (state.players[action.id]) return state;
-      if (!isCharacterId(action.character) || !freeCharacters(state).includes(action.character)) return state;
-      const { name, color } = CHARACTERS[action.character];
-      return {
-        ...state,
-        order: [...state.order, action.id],
-        players: {
-          ...state.players,
-          [action.id]: newPlayer(action.id, name, color, state.rules.size, state.rules.grace, action.character),
-        },
-      };
-    }
-
-    case 'start': {
-      if (state.phase !== 'lobby') return state;
-      if (!isHost(ctx, action.id)) return state;
-      if (state.order.length < 1) return state;
-      return beginPlay(state, state.seed, action.now, ctx.settings);
-    }
-
     case 'place': {
       if (state.phase !== 'playing') return state;
       const p = state.players[action.id];
@@ -318,36 +302,11 @@ export function reduce(state, action, ctx) {
     case 'leave': {
       const p = state.players[action.id];
       if (!p || p.left) return state;
-      if (state.phase !== 'playing') {
+      if (state.phase === 'finished') { // off the podium
         const { [p.id]: _gone, ...players } = state.players;
         return { ...state, order: state.order.filter((id) => id !== p.id), players };
       }
       return finishIfAllDone(state, { ...state.players, [p.id]: { ...p, done: true, left: true } });
-    }
-
-    case 'again': {
-      if (state.phase !== 'finished') return state;
-      if (!isHost(ctx, action.id)) return state;
-      if (state.order.length < 1) return state;
-      return beginPlay(state, nextSeed(state.seed), action.now, ctx.settings);
-    }
-
-    case 'newGame': {
-      // Podium → lobby: same players minus those who left, fresh, joins/config/start open again.
-      if (state.phase !== 'finished') return state;
-      if (!isHost(ctx, action.id)) return state;
-      const rules = { ...ctx.settings };
-      const order = state.order.filter((id) => !state.players[id].left);
-      /** @type {Record<string, Player>} */
-      const players = {};
-      for (const id of order) {
-        const old = state.players[id];
-        players[id] = newPlayer(id, old.name, old.color, rules.size, rules.grace, old.character ?? null);
-      }
-      return {
-        ...state, phase: 'lobby', seed: nextSeed(state.seed), order, players,
-        rules, size: rules.size, deadline: null, endReason: null,
-      };
     }
 
     default:
@@ -382,55 +341,14 @@ function finishIfAllDone(state, players) {
 }
 
 /**
- * Locks rules ← settings, same players (ids/names/colors) minus those who left, fresh
- * boards/scores, hand 0 dealt, deadline set in timed mode. `state` unchanged if timed mode
- * lacks a finite `now`, or if no player remains.
- * @param {State} state
- * @param {number} seed
- * @param {number | undefined} now
- * @param {Settings} settings  the tableau's settings, locked in as the rules
- * @returns {State}
- */
-function beginPlay(state, seed, now, settings) {
-  const rules = { ...settings };
-  const timed = rules.mode === 'timed';
-  if (timed && !(typeof now === 'number' && Number.isFinite(now))) return state;
-  const order = state.order.filter((id) => !state.players[id].left);
-  if (order.length < 1) return state;
-  const hand0 = handAt(seed, 0, rules.pieceSet);
-  /** @type {Record<string, Player>} */
-  const players = {};
-  for (const id of order) {
-    const old = state.players[id];
-    players[id] = {
-      ...newPlayer(id, old.name, old.color, rules.size, rules.grace, old.character ?? null),
-      hand: hand0.slice(),
-    };
-  }
-  return {
-    ...state, phase: 'playing', seed, order, players, rules, size: rules.size,
-    deadline: timed ? /** @type {number} */ (now) + rules.timedSeconds * 1000 : null,
-    endReason: null,
-  };
-}
-
-/**
- * Deterministic next seed for «Replay» (reduce stays pure; the seed is part of the state).
- * @param {number} seed
- * @returns {number}
- */
-function nextSeed(seed) {
-  return Math.floor(mulberry32(seed)() * 4294967296) >>> 0;
-}
-
-/**
  * The block game's entry in the rules list (shared/minigames.js).
  * @type {import('./minigames.js').MinigameRules<State, Action, Settings>}
  */
 export const BLOCK_RULES = {
-  init: initState,
+  init: startGame,
   reduce,
-  status: (s) => (s.phase === 'playing' ? 'running' : s.phase),
+  status: (s) => (s.phase === 'playing' ? 'running' : s.phase === 'finished' ? 'finished' : null),
+  seated: (s) => s.order.filter((id) => !s.players[id].left),
   result: (s) => ({
     ranking: ranking(s).map((r) => ({ character: s.players[r.id].character ?? null, score: r.score, rank: r.rank })),
     endReason: s.endReason,

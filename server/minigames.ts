@@ -11,10 +11,9 @@ import { makeQuizServer } from './quiz.ts';
 
 export type ErrCode = 'full' | 'bad-place' | 'not-host' | 'not-playing' | 'unknown-player' | 'locked' | 'bad-room' | 'taken' | 'refused';
 
-/** What a minigame's message handler gets with a message: the sender, the time, the party's host, the
- *  round's state, and the round's server inputs (until the RPG starts rounds, a minigame's own start
- *  messages need them). */
-export type MessageCtx<S, I> = { id: string, now: number, hostId: string | null, state: S, inputs: () => I };
+/** What a minigame's message handler gets with a message: the sender, the time, the party's host and
+ *  the round's state. */
+export type MessageCtx<S> = { id: string, now: number, hostId: string | null, state: S };
 
 /** `apply`: runs an action on the round now, false when refused or when the round is over (e.g. the
  *  quiz's verdict, arriving later). */
@@ -24,11 +23,13 @@ export type MinigameIo<A> = { apply: (action: A) => boolean };
  *  refusal, or nothing (null: ignored silently). */
 export type Reply<A> = { action: A, refused?: ErrCode } | { refused: ErrCode } | null;
 
-/** A minigame's server code. `view`: the round's view, the same for everyone (it may filter, as the quiz
- *  hides answers until the reveal). `onChange`: after every change of its round, null where none of its
- *  rounds runs, before the save. */
+/** A minigame's server code. `message`: every message of a party member the RPG doesn't handle (the
+ *  round messages start, again, newGame, endGame, retire and config are the RPG's). `inputs`: the server
+ *  inputs a round starts with (the quiz: its candidate questions). `view`: the round's view, the same for
+ *  everyone (it may filter, as the quiz hides answers until the reveal). `onChange`: after every change
+ *  of its round, null where none of its rounds runs, before the save. */
 export type MinigameServer<S, A, I = undefined> = {
-  message: (m: any, ctx: MessageCtx<S, I>, io: MinigameIo<A>) => Reply<A>,
+  message: (m: any, ctx: MessageCtx<S>, io: MinigameIo<A>) => Reply<A>,
   inputs?: (settings: any, facts: Facts) => I,   // settings: the tableau's
   view: (state: S) => unknown,
   onChange?: (prev: S | null, next: S | null) => void,

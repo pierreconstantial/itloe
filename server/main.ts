@@ -251,12 +251,11 @@ const isMember = (id: unknown): id is string => typeof id === 'string' && !!part
 const isOnline = (playerId: string): boolean => sockets.get(playerId)?.readyState === WebSocket.OPEN;
 
 /** Why a (non-reclaim) join was refused: every character held → full; held by an online member → taken
- *  while a block lobby (or no game) is open, full while a game is under way; not a character → taken. */
+ *  between rounds, full while a round is under way or on its podium; not a character → taken. */
 function joinRefusal(): ErrCode {
   const held = new Set(party().order.filter((id) => !party().players[id].left).map((id) => party().players[id].character));
   if (Object.keys(CHARACTERS).every((c) => held.has(c as CharacterId))) return 'full';
-  const status = roundStatus(game.campaign);
-  return status !== null && status !== 'lobby' ? 'full' : 'taken';
+  return game.campaign.at.activity ? 'full' : 'taken';
 }
 
 const isPlainObject = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
@@ -267,7 +266,7 @@ function walk(id: string, pos: Pos): void {
   const c = game.campaign;
   const character = c.party.players[id]?.character;
   if (STORY_MODE && c.at.node === 'hub' && character !== CONTENT.chooser) return; // the others still occupy the old lobby
-  const portalOpen = STORY_MODE && c.at.node === CONTENT.start && roundStatus(c) === 'lobby' && c.facts.flags.includes('portal.ready');
+  const portalOpen = STORY_MODE && c.at.node === CONTENT.start && c.at.activity === null && c.facts.flags.includes('portal.ready');
   const inPortal = portalOpen && Math.hypot(pos.x - PORTAL.x, pos.y - PORTAL.y) < PORTAL.radius;
   const zone = inPortal ? '@portal' : zoneAt(CONTENT, c.at.node, pos.x, pos.y);
   // a walker's first known position (new phone, or after a restart wiped this memory) only sets the
@@ -356,8 +355,9 @@ function handleMessage(ws: WebSocket, m: any): void {
 
   if (m.t === 'interact') {
     const id = who.get(ws);
-    // the furniture of the room where the party is (roomAt), wherever avatars walk (hub, world, a block or quiz lobby)
-    if (!id || !isMember(id) || (game.campaign.at.activity && roundStatus(game.campaign) !== 'lobby')) return;
+    // the furniture of the room where the party is (roomAt): wherever avatars walk, between rounds (hub, world,
+    // the room at a tableau)
+    if (!id || !isMember(id) || game.campaign.at.activity) return;
     if (STORY_MODE && game.campaign.at.node === 'hub' && party().players[id].character !== CONTENT.chooser) return;
     if (STORY_MODE && m.object === INTRO_KEY && game.campaign.at.node === 'hub'
       && party().players[id].character === CONTENT.chooser && game.campaign.facts.flags.includes('apparition.seen')) {
@@ -475,27 +475,44 @@ function handleMessage(ws: WebSocket, m: any): void {
       else if (roundStatus(game.campaign) === 'running') sendErr(ws, 'locked');
       return;
 
-    // the story's opening: its first round needs the four opening players, and none follows once the
-    // portal is ready; any other start or again goes on to the round's minigame
+    // the round messages: the RPG's, at a minigame's tableau (elsewhere → not-playing). A guest gets
+    // not-host, the host at the wrong moment refused, in every minigame
     case 'start':
     case 'again':
-      if (STORY_MODE && game.campaign.at.node === CONTENT.start && game.campaign.facts.flags.includes('portal.ready')) {
-        sendErr(ws, 'refused'); return;
-      }
-      if (STORY_MODE && m.t === 'start' && game.campaign.at.node === CONTENT.start && !game.campaign.facts.flags.includes('portal.ready')
-        && !OPENING_PLAYERS.every((character) => party().order.some((playerId) => !party().players[playerId].left && party().players[playerId].character === character))) {
-        sendErr(ws, 'refused'); return;
-      }
-      break;
+    case 'newGame':
+    case 'endGame':
+    case 'retire': {
+      const { kind } = game.campaign.at;
+      if (kind === null) { sendErr(ws, 'not-playing'); return; }
+      if (m.t === 'retire' && typeof m.target !== 'string') return;
+      if ((m.t === 'start' || m.t === 'again') && storyRefusesRound(m.t)) { sendErr(ws, 'refused'); return; }
+      const host = id === party().hostId;
+      const action: CampaignAction = m.t === 'start' || m.t === 'again'
+        ? { t: m.t, id, now: Date.now(), inputs: serverOf(kind).inputs?.(game.campaign.at.settings, game.campaign.facts) }
+        : m.t === 'newGame' ? { t: 'newGame', id }
+          : { t: 'activity', action: m.t === 'endGame' ? { t: 'endGame', id } : { t: 'retire', id, target: m.target } };
+      if (apply(action)) return;
+      // the host taking out an unknown, done or left player while the round runs: a no-op, not an error
+      if (m.t === 'retire' && host && roundStatus(game.campaign) === 'running') return;
+      sendErr(ws, host ? 'refused' : 'not-host');
+      return;
+    }
   }
 
   roundMessage(ws, id, m);
 }
 
+/** The story's opening: its first round needs the four opening players, and none follows once the portal
+ *  is ready. */
+function storyRefusesRound(t: 'start' | 'again'): boolean {
+  if (!STORY_MODE || game.campaign.at.node !== CONTENT.start) return false;
+  if (game.campaign.facts.flags.includes('portal.ready')) return true;
+  return t === 'start' && !OPENING_PLAYERS.every((character) => party().order.some((playerId) => !party().players[playerId].left && party().players[playerId].character === character));
+}
+
 /**
  * Every other message goes to the running round's minigame (no round → not-playing), with the sender's
- * id and the time. Until the RPG owns rounds, that includes the round messages (start, again, newGame,
- * endGame, retire): the games still have their lobbies.
+ * id and the time.
  */
 function roundMessage(ws: WebSocket, id: string, m: any): void {
   const { kind, activity: state } = game.campaign.at;
@@ -503,8 +520,7 @@ function roundMessage(ws: WebSocket, id: string, m: any): void {
   const server = serverOf(kind);
   // a later action (the quiz's verdict) lands only while a round of this minigame runs
   const io = { apply: (action: unknown) => game.campaign.at.kind === kind && apply({ t: 'activity', action: action as any }) };
-  const inputs = () => server.inputs?.(game.campaign.at.settings, game.campaign.facts);
-  const reply = server.message(m, { id, now: Date.now(), hostId: party().hostId, state, inputs }, io);
+  const reply = server.message(m, { id, now: Date.now(), hostId: party().hostId, state }, io);
   if (!reply) return;
   if (!('action' in reply)) sendErr(ws, reply.refused);
   else if (!io.apply(reply.action) && reply.refused) sendErr(ws, reply.refused);

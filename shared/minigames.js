@@ -7,9 +7,9 @@ import { QUIZ_RULES } from './quiz/index.js';
 /** @typedef {import('./characters.js').CharacterId} CharacterId */
 
 /**
- * A round's status, derived by its minigame from its state. `lobby` lasts until the games' lobbies
- * move to the campaign; `finished` is the podium.
- * @typedef {'lobby' | 'running' | 'finished'} RoundStatus
+ * A round's status, derived by its minigame from its state. `finished` is the podium; between rounds there
+ * is no round (the room at the tableau).
+ * @typedef {'running' | 'finished'} RoundStatus
  */
 
 /**
@@ -32,11 +32,17 @@ import { QUIZ_RULES } from './quiz/index.js';
  */
 
 /**
- * What the campaign passes with every action of a round. `settings`: the tableau's settings, kept by the
- * campaign (the host's choice until the party leaves the tableau); a round locks them in when it starts.
- * `hostId`: the party's host (a minigame stores none), for the minigame's own host-only actions.
+ * What a round starts from, handed in by the campaign: the seed, the tableau's settings (locked in as the
+ * round's rules), the players (every party member present, in party order), the time, and the minigame's
+ * server inputs (the quiz: its candidate questions).
  * @template [T=any]
- * @typedef {{ settings: T, hostId: string | null }} RoundCtx
+ * @typedef {{ seed: number, settings: T, players: { id: string, character: CharacterId }[], now: number, inputs?: any }} RoundStart
+ */
+
+/**
+ * What the campaign passes with every action of a round: the party's host (a minigame stores none), for
+ * the minigame's own host-only actions.
+ * @typedef {{ hostId: string | null }} RoundCtx
  */
 
 /**
@@ -45,9 +51,10 @@ import { QUIZ_RULES } from './quiz/index.js';
  * @template S, A
  * @template [T=any]
  * @typedef {{
- *   init: (seed: number, settings: T) => S,     // a new round, in its lobby
- *   reduce: (s: S, a: A, ctx: RoundCtx<T>) => S,
- *   status: (s: S) => RoundStatus,
+ *   init: (start: RoundStart<T>) => S | null,  // a new round, running; null: it cannot start (nothing to ask)
+ *   reduce: (s: S, a: A, ctx: RoundCtx) => S,
+ *   status: (s: S) => RoundStatus | null,       // null: not a round this release can resume (an older save)
+ *   seated: (s: S) => string[],                 // the round's players who have not left: who plays again
  *   result: (s: S, node: string) => RoundResult,   // once finished; node: the tableau it ran at
  *   settings: (patch: unknown, base?: T) => T,  // `base` (default: the minigame's defaults) with every valid key of `patch`
  *   validateSettings: (settings: unknown) => string[],   // a content node's settings: problems, as readable lines

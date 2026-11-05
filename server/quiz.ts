@@ -81,14 +81,10 @@ export function makeQuizServer(): MinigameServer<QuizState, QuizAction, Candidat
   console.log(`[itloe] quiz bank: ${bank.questions.length} questions (${bank.files.join(', ') || 'no files'}), judge: none (uncertain typed answers → wrong, host overrides)`);
 
   return {
-    message(m, { id, now, hostId, state: q, inputs }, io) {
+    message(m, { id, now, hostId, state: q }, io) {
       const host = id === hostId;
       const refusal: ErrCode = host ? 'refused' : 'not-host';
       switch (m.t) {
-        case 'start':
-        case 'again':
-          return { action: { t: m.t, id, now, candidates: inputs() }, refused: refusal };
-
         case 'answer': {
           // judged HERE, from the bank: only the verdict enters the reducer
           const r = q.round;
@@ -116,15 +112,6 @@ export function makeQuizServer(): MinigameServer<QuizState, QuizAction, Candidat
           // host, on the reveal: any answer, both ways
           if (typeof m.target !== 'string' || typeof m.ok !== 'boolean') return null;
           return { action: { t: 'override', id, target: m.target, ok: m.ok }, refused: refusal };
-
-        case 'endGame':
-        case 'newGame':
-          return { action: { t: m.t, id }, refused: refusal };
-
-        case 'retire':
-          // a round button, answered like in every minigame; the quiz has no "take out" yet (phase 4)
-          if (typeof m.target !== 'string') return null;
-          return { refused: refusal };
 
         default: // not a quiz thing (place, …)
           return { refused: 'not-playing' };

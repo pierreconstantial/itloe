@@ -116,7 +116,7 @@ export {};
 /** @typedef {{ id: string, character: CharacterId | null, name: string, color: number, left: boolean }} PartyMember */
 
 /**
- * The evening's roster, owned by reduceCampaign (A1). Activities seed their players from it.
+ * The evening's roster, owned by reduceCampaign (A1). A round starts with its members present.
  * @typedef {{ order: string[], players: Record<string, PartyMember>, hostId: string | null }} Party
  */
 
@@ -124,8 +124,8 @@ export {};
  * @typedef {{
  *   v: 1,
  *   seed: number,                                   // advanced on every block game created (deterministic)
- *   at: { node: string, kind: MinigameKind | null, activity: ActivityState | null,   // kind: the round's minigame
- *         settings: TableauSettings | null },                                    // the tableau's (null: no minigame)
+ *   at: { node: string, kind: MinigameKind | null, activity: ActivityState | null,   // kind: the tableau's minigame;
+ *         settings: TableauSettings | null },     // activity: its round, null between rounds (the room); settings: the tableau's
  *   party: Party,
  *   facts: Facts,
  *   news: News[],                                   // not yet celebrated on the TV
@@ -155,13 +155,16 @@ export {};
 
 /**
  * Ids are injected by the server (socket → playerId; ack: 'screen'). `activity` carries a game
- * ServerAction already rebuilt field by field by the server (now/deadline/timeUp server-only).
+ * ServerAction already rebuilt field by field by the server (now/deadline/timeUp server-only); `now` and
+ * `inputs` (the minigame's server inputs, e.g. the quiz's candidates) of start/again too.
  * @typedef {{ t: 'join', id: string, character: CharacterId }
  *   | { t: 'leave', id: string }
  *   | { t: 'enter', id: string, node: string }
  *   | { t: 'portal', id: string }
  *   | { t: 'collect', id: string, item: string }
  *   | { t: 'back', id: string }
+ *   | { t: 'start' | 'again', id: string, now: number, inputs?: unknown }    // host: a round from the room / the podium
+ *   | { t: 'newGame', id: string }                                         // host, on the podium: back to the room
  *   | { t: 'activity', action: import('../game.js').Action | QuizAction }   // routed by the activity's kind
  *   | { t: 'config', id: string, patch: unknown }                            // host: the tableau's settings
  *   | { t: 'event', event: CampaignEvent }
