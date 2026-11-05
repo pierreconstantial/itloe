@@ -7,7 +7,8 @@
 //   loadCampaign(raw, content)               → Campaign; drops ids the content no longer has, re-settles
 //   reduceCampaign(campaign, action, content)→ Campaign; actions: join leave enter back activity event ack gm
 //   activityOf(campaign)                     → the live activity State (block game or quiz), or null
-//   activityRunning(state)                   → a game / quiz is under way (enter/back refused)
+//   roundStatus(campaign)                    → 'lobby' | 'running' | 'finished', or null (no round);
+//                                              running: enter/back refused
 //   isUnlocked(campaign, nodeId) · nodeAt(campaign, content)
 //   holds(cond, facts) · record(facts, event) · settle(facts, content, fromSeq) → { facts, news }
 //   validateContent(content) → string[] · zoneAt(content, nodeId, x, y) → child id | null
@@ -77,29 +78,54 @@ const FINISHED = {
 /** Events only the engine may produce (an activity's end): an external copy could count a game twice. */
 const DERIVED_EVENTS = new Set(Object.values(FINISHED).map((k) => k.finishedEvent));
 
-/** @param {ActivityState} s @returns {MinigameKind} */
-const kindNameOf = (s) => ('kind' in s && s.kind === 'quiz' ? 'quiz' : 'blocks');
-/** @param {ActivityState} s */
-const kindOf = (s) => /** @type {import('../minigames.js').MinigameRules<any, any>} */ (minigame(kindNameOf(s)));
-
-/** A game or quiz is under way (no enter/back until it ends). @param {ActivityState | null} s */
-export const activityRunning = (s) => !!s && kindOf(s).status(s) === 'running';
+/** The rules of the campaign's round (its kind is stored next to it). @param {Campaign} c */
+const kindOf = (c) => /** @type {import('../minigames.js').MinigameRules<any, any>} */ (minigame(c.at.kind));
 
 /**
- * The lobby of a tableau's activity (blocks or quiz), seeded with every non-left party member (host =
- * party host). No such activity (a scene) → null.
- * @param {Node | undefined} node @param {Party} party @param {number} seed
- * @returns {ActivityState | null}
+ * The status of the campaign's round, or null between rounds. `running`: no enter/back until it ends.
+ * @param {Campaign} c @returns {import('../minigames.js').RoundStatus | null}
  */
-function activityLobby(node, party, seed) {
-  const spec = minigame(node?.activity?.kind);
-  if (!spec) return null;
+export const roundStatus = (c) => (c.at.activity ? kindOf(c).status(c.at.activity) : null);
+
+/** A saved round of a minigame this release does not have: the save can't be resumed, and must not be dropped. */
+export class UnknownMinigameError extends Error {
+  /** @param {string} kind */
+  constructor(kind) {
+    super(`the saved round is of the minigame "${kind}", which is not registered`);
+    this.kind = kind;
+  }
+}
+
+/**
+ * The kind of a saved round: stored next to it, or derived for a save from before it was (a state with
+ * `kind` names it, a state without one is blocks). No round → null.
+ * @param {{ kind?: unknown, activity?: ActivityState | null } | undefined} at
+ * @returns {MinigameKind | null}  throws UnknownMinigameError for a kind not in the rules list
+ */
+function savedKind(at) {
+  const s = at?.activity;
+  if (!s) return null;
+  const kind = at.kind ?? ('kind' in s ? s.kind : 'blocks');
+  if (!minigame(kind)) throw new UnknownMinigameError(String(kind));
+  return /** @type {MinigameKind} */ (kind);
+}
+
+/**
+ * The round of a tableau's minigame, in its lobby, seeded with every non-left party member (host =
+ * party host). No minigame (a scene, a hub or a world) → no round.
+ * @param {Node | undefined} node @param {Party} party @param {number} seed
+ * @returns {{ kind: MinigameKind | null, activity: ActivityState | null }}
+ */
+function roundAt(node, party, seed) {
+  const kind = node?.activity?.kind;
+  const spec = minigame(kind);
+  if (!spec) return { kind: null, activity: null };
   let s = spec.init(seed, /** @type {any} */ (node?.activity)?.settings);
   for (const id of party.order) {
     const m = party.players[id];
     if (!m.left && m.character) s = spec.reduce(s, { t: 'join', id, character: m.character });
   }
-  return syncHost(s, party);
+  return { kind: /** @type {MinigameKind} */ (kind), activity: syncHost(s, party) };
 }
 
 /** The party is the authority on who hosts: mirror it into the nested game when that player is seated. */
@@ -120,7 +146,7 @@ export function newCampaign(content, seed) {
   const facts = quietSettle({ ...emptyFacts(), seen: [content.start] }, content);
   return {
     v: 1, seed: nextSeed(seed), party, facts, news: [], newsSeq: 0,
-    at: { node: content.start, activity: activityLobby(content.nodes[content.start], party, seed) },
+    at: { node: content.start, ...roundAt(content.nodes[content.start], party, seed) },
   };
 }
 
@@ -139,7 +165,7 @@ export function fromLegacyState(state, content) {
     party.players[id] = { id, character: p.character ?? null, name: p.name, color: p.color, left: !!p.left };
   }
   const facts = quietSettle({ ...emptyFacts(), seen: [content.start] }, content);
-  return { v: 1, seed: nextSeed(state.seed), party, facts, news: [], newsSeq: 0, at: { node: content.start, activity: state } };
+  return { v: 1, seed: nextSeed(state.seed), party, facts, news: [], newsSeq: 0, at: { node: content.start, kind: 'blocks', activity: state } };
 }
 
 /**
@@ -166,10 +192,11 @@ export function loadCampaign(raw, content) {
   const newsSeq = raw.newsSeq ?? Math.max(0, ...news.map((n) => n.seq));
   const party = raw.party ?? emptyParty();
   const seed = raw.seed ?? 1;
+  const kind = savedKind(raw.at); // first: a round of an unknown minigame stops the load even where the node is gone
   const keep = known(raw.at?.node); // else a fresh lobby is built at the start, which consumes a seed
   const at = keep
-    ? { node: raw.at.node, activity: raw.at.activity ?? null }
-    : { node: content.start, activity: activityLobby(content.nodes[content.start], party, seed) };
+    ? { node: raw.at.node, kind, activity: raw.at.activity ?? null }
+    : { node: content.start, ...roundAt(content.nodes[content.start], party, seed) };
   const s = settle(facts, content, newsSeq);
   return {
     v: 1, seed: keep ? seed : nextSeed(seed), party, at,
@@ -219,9 +246,9 @@ function quizFinishedEvent(s, node) {
 
 /** Moves the party to a node, creating its activity. @param {Campaign} c @param {string} node @param {Content} content @returns {Campaign} */
 function moveTo(c, node, content) {
-  const activity = activityLobby(content.nodes[node], c.party, c.seed);
+  const round = roundAt(content.nodes[node], c.party, c.seed);
   const facts = { ...c.facts, seen: withId(c.facts.seen, node) };
-  return withFacts({ ...c, seed: activity ? nextSeed(c.seed) : c.seed, at: { node, activity } }, facts, content);
+  return withFacts({ ...c, seed: round.activity ? nextSeed(c.seed) : c.seed, at: { node, ...round } }, facts, content);
 }
 
 /**
@@ -232,7 +259,7 @@ function moveTo(c, node, content) {
  */
 function withActivity(c, next, content) {
   const prev = c.at.activity;
-  const spec = kindOf(next);
+  const spec = kindOf(c);
   if (spec.status(next) === 'lobby') {
     for (const id of c.party.order) {
       const m = c.party.players[id];
@@ -243,7 +270,7 @@ function withActivity(c, next, content) {
   if (next === prev) return c;
   const moved = { ...c, at: { ...c.at, activity: next } };
   if (prev && spec.status(prev) === 'running' && spec.status(next) === 'finished') {
-    const ev = FINISHED[kindNameOf(next)].finished(next, c.at.node);
+    const ev = FINISHED[/** @type {MinigameKind} */ (c.at.kind)].finished(next, c.at.node);
     return withFacts(moved, record(c.facts, ev), content, ev);
   }
   return moved;
@@ -282,7 +309,7 @@ export function reduceCampaign(c, a, content) {
       const moved = { ...c, party: { ...c.party, hostId, players: { ...c.party.players, [a.id]: { ...m, left: true } } } };
       const s = c.at.activity;
       if (!s) return moved;
-      const next = s.players[a.id] ? kindOf(s).reduce(s, { t: 'leave', id: a.id }) : s;
+      const next = s.players[a.id] ? kindOf(c).reduce(s, { t: 'leave', id: a.id }) : s;
       return withActivity(moved, next, content); // a lobby drops them, a game marks them done (left)
     }
 
@@ -293,7 +320,7 @@ export function reduceCampaign(c, a, content) {
       if (!isHost(c, a.id) && !chooser) return c;
       const n = content.nodes[a.node];
       if (!n || n.parent !== c.at.node || !isUnlocked(c, n.id)) return c;
-      if (activityRunning(c.at.activity)) return c;
+      if (roundStatus(c) === 'running') return c;
       if (n.kind === 'tableau' && c.facts.done.includes(n.id) && !n.replayable) return c; // one-shot, already seen
       return moveTo(c, n.id, content);
     }
@@ -301,14 +328,14 @@ export function reduceCampaign(c, a, content) {
     case 'back': {
       if (!isHost(c, a.id)) return c;
       const n = content.nodes[c.at.node];
-      if (!n || n.parent === null || activityRunning(c.at.activity)) return c; // endGame first
+      if (!n || n.parent === null || roundStatus(c) === 'running') return c; // endGame first
       return moveTo(c, n.parent, content);
     }
 
     case 'activity': {
       const s = c.at.activity;
       if (!s) return c;
-      return withActivity(c, kindOf(s).reduce(s, a.action), content); // routed by the activity's kind
+      return withActivity(c, kindOf(c).reduce(s, a.action), content); // routed by the round's kind
     }
 
     case 'event': {

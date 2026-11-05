@@ -2,7 +2,7 @@
 // seeded from the party → finished exactly once → counters, totals and the evening's asked ids.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newCampaign, reduceCampaign, loadCampaign, activityRunning, SAMPLE_CONTENT, COUNTER, record, holds } from '../shared/campaign/index.js';
+import { newCampaign, reduceCampaign, loadCampaign, roundStatus, SAMPLE_CONTENT, COUNTER, record, holds } from '../shared/campaign/index.js';
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
 /** @typedef {import('../shared/campaign/types.js').CampaignAction} CampaignAction */
@@ -52,12 +52,12 @@ test('entering a quiz tableau opens a quiz lobby seeded with the party (node set
   assert.deepEqual(q.order, ['e', 's']);
   assert.equal(q.hostId, 'e');
   assert.equal(q.settings.count, 5, 'settings from the node');
-  assert.equal(activityRunning(c.at.activity), false);
+  assert.equal(roundStatus(c), 'lobby');
 });
 
 test('quiz under way: enter/back refused; a newcomer waits for the next lobby', () => {
   let c = run(inQuiz(), act({ t: 'start', id: 'e', now: 1, candidates: CANDIDATES }));
-  assert.equal(activityRunning(c.at.activity), true);
+  assert.equal(roundStatus(c), 'running');
   assert.equal(run(c, { t: 'back', id: 'e' }), c, 'back refused while the quiz runs');
   c = run(c, { t: 'join', id: 'a', character: 'anna' });
   assert.ok(c.party.players.a && !quiz(c).players.a, 'joined the evening, not seated mid-quiz');

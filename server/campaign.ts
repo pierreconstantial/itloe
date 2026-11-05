@@ -4,11 +4,11 @@
 import { createHash } from 'node:crypto';
 import {
   newCampaign, fromLegacyState, loadCampaign, reduceCampaign, activityOf, isUnlocked,
-  validateContent, zoneAt, SAMPLE_CONTENT,
+  validateContent, zoneAt, UnknownMinigameError, SAMPLE_CONTENT,
 } from '../shared/campaign/index.js';
 import type { Campaign, CampaignAction, CampaignEvent, Content, GmOp } from '../shared/campaign/types.js';
 
-export { newCampaign, fromLegacyState, loadCampaign, reduceCampaign, activityOf, isUnlocked, validateContent, zoneAt };
+export { newCampaign, fromLegacyState, loadCampaign, reduceCampaign, activityOf, isUnlocked, validateContent, zoneAt, UnknownMinigameError };
 export type { Campaign, CampaignAction, CampaignEvent, Content, GmOp };
 
 /** The evening's content (placeholder until the user writes the story). */

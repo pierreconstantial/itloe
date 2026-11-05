@@ -10,6 +10,7 @@ export {};
 /** @typedef {BlockState | QuizState} ActivityState */
 /** @typedef {import('../game.js').Settings} Settings */
 /** @typedef {import('../characters.js').CharacterId} CharacterId */
+/** @typedef {import('../minigames.js').MinigameKind} MinigameKind */
 
 // ---------------------------------------------------------------- content (data, user-edited)
 
@@ -122,7 +123,7 @@ export {};
  * @typedef {{
  *   v: 1,
  *   seed: number,                                   // advanced on every block game created (deterministic)
- *   at: { node: string, activity: ActivityState | null },
+ *   at: { node: string, kind: MinigameKind | null, activity: ActivityState | null },  // kind: the round's minigame
  *   party: Party,
  *   facts: Facts,
  *   news: News[],                                   // not yet celebrated on the TV

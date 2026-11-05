@@ -330,7 +330,7 @@ test('content tolerance: unknown ids dropped, settle re-runs, nothing re-locked'
   assert.ok(l2.facts.unlocked.includes('bonus'));
   assert.ok(l2.news.some((n) => n.t === 'unlocked' && n.node === 'bonus' && n.seq > raw.newsSeq));
   // the party stood in a node that no longer exists → back at the start
-  const lost = loadCampaign({ ...raw, at: { node: 'removed.world', activity: null } }, C);
+  const lost = loadCampaign({ ...raw, at: { node: 'removed.world', kind: null, activity: null } }, C);
   assert.equal(lost.at.node, C.start);
   assert.equal(lost.at.activity?.phase, 'lobby');
 });

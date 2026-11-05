@@ -10,7 +10,7 @@ import { quarantine, readJson, varPath, writeJsonAtomic } from './persist.ts';
 import type { State } from './rules.ts';
 import { activityDeadline, isQuiz, savedAtMs, shiftActivityDeadline } from './resume.ts';
 import { resolvePending } from '../shared/quiz/index.js';
-import { fromLegacyState, loadCampaign, newCampaign, type Campaign, type Content } from './campaign.ts';
+import { fromLegacyState, loadCampaign, newCampaign, UnknownMinigameError, type Campaign, type Content } from './campaign.ts';
 
 export const STATE_FILE = varPath('bloko.state.json');
 export const BESTS_FILE = varPath('bests.json');
@@ -86,7 +86,8 @@ function keepV1(): string {
 /**
  * The saved evening in any state → resume it (room code, party, host, nested game, facts, news kept);
  * missing/corrupt/--new → a fresh campaign at content.start. A timed game keeps its remaining time.
- * A corrupt save is quarantined (kept for inspection), never deleted.
+ * A corrupt save is quarantined (kept for inspection), never deleted. A round of a minigame this release
+ * does not have throws: the boot stops and the save stays as it is, for the release that has it.
  */
 export function loadGame(forceNew: boolean, content: Content, now = Date.now()): Game & { how: string } {
   const fresh = (why: string) => {
@@ -110,6 +111,9 @@ export function loadGame(forceNew: boolean, content: Content, now = Date.now()):
       how = `MIGRATED a v1 save (original kept as ${keepV1()}) and resumed`;
     }
   } catch (e: any) {
+    if (e instanceof UnknownMinigameError) {
+      throw new Error(`cannot resume ${STATE_FILE}: ${e.message}. Boot stopped; the save is left untouched for a release that has "${e.kind}".`);
+    }
     return fresh(`save could not be loaded: ${e?.message ?? e}; moved to ${quarantine(STATE_FILE)}`);
   }
 

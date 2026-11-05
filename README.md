@@ -99,6 +99,7 @@ A phone that goes to sleep or reloads also comes back to its own board automatic
 - **A phone keeps dimming.** Turn off its screen auto-lock for the evening, or just tap it: the game picks up where it was.
 - **"That code didn't work."** Use the `room` code printed by the server that's running now: a restart into a fresh evening draws a new one.
 - **The server refuses to start, listing problems.** The story content or the quiz bank has a mistake: the list says which question or place, and what is wrong.
+- **The server refuses to start, naming a minigame.** The save holds a round of a minigame this version of the game doesn't have, e.g. after going back to an older release. Run a version that has it: the save is left exactly as it was.
 
 ## Saved data
 
