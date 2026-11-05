@@ -164,9 +164,10 @@ async function rejoin(label: string, playerId: string): Promise<Client> {
 }
 const drop = async (c: Client) => { c.ws.close(); for (let k = 0; k < 100 && !c.closed; k++) await sleep(10); };
 
-const tvState = 'window.bloko.state()';
+/** The block game the TV shows: its round's view (bloko.round(), null between rounds). */
+const tvState = 'window.bloko.round()?.view';
 /** The TV shows the room at a tableau: no round, a minigame's tableau, the party room under the band. */
-const tvRoom = "(window.bloko?.state() === null && !!window.bloko.campaign()?.at.kind && document.body.classList.contains('party') && !!document.querySelector('section.lobby'))";
+const tvRoom = "(window.bloko?.round() === null && !!window.bloko.campaign()?.at.kind && document.body.classList.contains('party') && !!document.querySelector('section.lobby'))";
 const tvOnlineBanner = "document.body.classList.contains('offline')";
 const tvOffline = 'JSON.stringify(window.bloko.offline().sort())';
 const boardsOf = (s: any) => JSON.stringify(s.order.map((id: string) => [id, s.players[id].board, s.players[id].score, s.players[id].hand]));
@@ -189,7 +190,7 @@ async function killAndBackRoom(tv: Page): Promise<void> {
 async function killAndBack(tv: Page, phase: string, ref: Client): Promise<void> {
   // the TV must have caught up with the last move before the snapshot (views race the kill)
   const want = boardsOf(ref.lastView());
-  await tv.until(`(() => { const s = window.bloko.state(); return !!s && JSON.stringify(s.order.map((id) => [id, s.players[id].board, s.players[id].score, s.players[id].hand])) === ${JSON.stringify(want)}; })()`, 'tv converged');
+  await tv.until(`(() => { const s = window.bloko.round()?.view; return !!s && JSON.stringify(s.order.map((id) => [id, s.players[id].board, s.players[id].score, s.players[id].hand])) === ${JSON.stringify(want)}; })()`, 'tv converged');
   const before = await tv.js(`JSON.stringify(${tvState})`);
   const hostBefore = await tv.js('window.bloko.campaign()?.party.hostId ?? null');
   await kill9();
@@ -204,7 +205,7 @@ async function killAndBack(tv: Page, phase: string, ref: Client): Promise<void> 
       '| console:', tv.console.slice(-6).join(' / '), '| errors:', tv.errors.slice(-3).join(' / '));
   }
   check(back, `${phase}: restart → TV reconnects by itself, banner gone`);
-  await tv.until(`(() => { const s = window.bloko.state(); return s?.phase === ${JSON.stringify(phase)} && JSON.stringify(s.order.map((id) => [id, s.players[id].board, s.players[id].score, s.players[id].hand])) === ${JSON.stringify(want)}; })()`, 'resumed view');
+  await tv.until(`(() => { const s = window.bloko.round()?.view; return s?.phase === ${JSON.stringify(phase)} && JSON.stringify(s.order.map((id) => [id, s.players[id].board, s.players[id].score, s.players[id].hand])) === ${JSON.stringify(want)}; })()`, 'resumed view');
   const after = await tv.js(`JSON.stringify(${tvState})`);
   const hostAfter = await tv.js('window.bloko.campaign()?.party.hostId ?? null');
   const a = JSON.parse(after), b = JSON.parse(before);
@@ -369,7 +370,7 @@ try {
     `…and hides by itself at until (${left} s later), boards back to full width`);
   await tv.cmd('Page.reload');
   await tv.front();
-  await tv.until(`!!window.bloko?.state()`, 'reloaded 2', 8000);
+  await tv.until(`!!window.bloko?.round()`, 'reloaded 2', 8000);
   await sleep(800);
   check(!(await tv.js(cardOn)), 'a reload after until does not show it again');
   // An old window cannot close a newer one; the current owner can close it early.
@@ -482,7 +483,7 @@ try {
   const cv = () => [...A2.msgs].reverse().find((m) => m.t === 'view')?.campaign;
   i = A2.mark(); A2.send({ t: 'back' });
   const hubView = await A2.waitFor((m) => m.t === 'view' && blocksOf(m) === null, i);
-  check(await tv.until(`window.bloko.state() === null && !!document.querySelector('.map-band') && !document.getElementById('party-bg').hidden && window.bloko.avatars().length === 3`, 'hub map'),
+  check(await tv.until(`window.bloko.round() === null && !!document.querySelector('.map-band') && !document.getElementById('party-bg').hidden && window.bloko.avatars().length === 3`, 'hub map'),
     `back to the hub (state null, at ${hubView.campaign?.at?.node}) → TV shows the map in the party room, every avatar there`);
   const d0 = JSON.parse(await tv.js(doorsJs));
   check(d0['hub.false-start'] === 'open' && d0.childhood === 'locked' && d0.teens === 'locked' && d0.adult === 'locked',
