@@ -55,6 +55,7 @@ Set them in front of `npm start`, e.g. `PORT=8080 npm start`.
 | `BLOKO_NEW=1` | Start a brand-new game instead of resuming the saved one. Same as `npm start -- --new`. |
 | `BLOKO_VAR` | Folder for saved data (default `var/`). |
 | `BLOKO_QUIZ_DIR` | Folder of the quiz question bank (default `data/quiz/`). |
+| `ITLOE_CONTENT=sample` | Play the sample content (`shared/campaign/sample.js`) instead of the birthday story (`shared/campaign/story.js`). The end-to-end suites run on it. |
 
 If the laptop has several network connections (Wi-Fi + Ethernet, VPN…), `npm start` asks which one the phones are on. Press Enter for the first one.
 
@@ -177,14 +178,14 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 - **Simulator:** open **/sim/** on a running server: the TV screen plus player phones side by side in one page. The phones get the room code from `/api/join`.
 - **End-to-end tests** (exit code 0 = all pass, the last line says `ALL PASS`). Never use port 3131: that's the live server.
 
-  `e2e.mts` needs a separate server with a fresh lobby:
+  `e2e.mts` needs a separate server with a fresh lobby, on the sample content:
 
   ```sh
-  BLOKO_VAR=/tmp/bloko-e2e PORT=3199 npm start -- --new
+  ITLOE_CONTENT=sample BLOKO_VAR=/tmp/bloko-e2e PORT=3199 npm start -- --new
   PORT=3199 node scripts/e2e.mts     # in a second terminal
   ```
 
-  All the others start their OWN server (scratch data folder, removed at the end) on `PORT`, and refuse a busy port:
+  All the others start their OWN server on the sample content (scratch data folder, removed at the end) on `PORT`, and refuse a busy port:
 
   | Script | Covers | Needs |
   |---|---|---|
