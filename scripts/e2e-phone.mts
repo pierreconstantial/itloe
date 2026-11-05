@@ -466,7 +466,7 @@ try {
   const froze = ticks0 === -1 || [ticks0, -1].includes(await ticksAt());
   await kill9();
   await boot();
-  await sleep(Math.max(0, LOCK_MS - restartAt));
+  if (froze) await sleep(Math.max(0, LOCK_MS - restartAt)); // a page that never froze has nothing to wait out: the check below is skipped
   await A.lifecycle('active');
   const lockLabel = `phone locked ${(LOCK_MS / 60_000).toFixed(1)} min mid-game → unlock resumes`;
   if (!froze) {
