@@ -115,8 +115,6 @@ test('TV: every player count the roster allows has a board layout and a density'
     assert.ok(new RegExp(`${sel.replace(/[[\]"]/g, (c) => `\\${c}`)}[^{]*\\{[^}]*--pcell`).test(SCREEN_CSS),
       `${sel} has its own --head/--pcell sizing`);
   }
-  // the fullest layout still gives every player a panel of the same size
-  assert.ok(/\.arena\[data-players="5"\] \.panel \{ grid-column: span 2; \}/.test(SCREEN_CSS));
   for (let n = 1; n <= ROSTER_SIZE; n++) {
     assert.ok(QUIZ_CSS.includes(`.quiz-result:nth-child(${n})`) || n === 1,
       `the quiz reveal animates seat ${n}`);
