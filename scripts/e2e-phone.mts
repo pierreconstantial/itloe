@@ -10,7 +10,7 @@
 // LOCK_MS is how long the "phone locked" case freezes the page (default 5 min, as in the acceptance list).
 // ONLY=1 … 7 runs just that part (continuity / host controls / campaign / quiz / room code / inventory / QR);
 // a full run is the acceptance.
-// SHOTS=<dir> saves screenshots of the campaign screens.
+// SHOTS=<dir> saves screenshots of the block, quiz and campaign screens, each with its visible text (<name>.txt).
 import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -23,7 +23,7 @@ const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const CDP = process.env.CDP ?? '9222';
 const LOCK_MS = Number(process.env.LOCK_MS ?? 5 * 60_000);
-const SHOTS = process.env.SHOTS; // a folder: screenshots of the campaign screens land there
+const SHOTS = process.env.SHOTS; // a folder: screenshots of the screens land there
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-phone-'));
 // the quiz part plays a FIXED bank (a copy of the placeholder file), whatever the real bank holds
 const FIXED_BANK = join(VAR, 'fixed-bank');
@@ -256,6 +256,7 @@ async function phone(label: string) {
     await cmd('Page.bringToFront', {}, s);
     const { data } = await cmd('Page.captureScreenshot', { format: 'png' }, s);
     writeFileSync(join(SHOTS, `${name}.png`), Buffer.from(data, 'base64'));
+    writeFileSync(join(SHOTS, `${name}.txt`), await ev('document.body.innerText')); // the words on screen, for a text diff
   };
   return { label, ev, snap, waitFor, tap, placeOne, watch, navigate, history, lifecycle, board, card, continueButton, hostButtons, steer, push, text, visible, shot, type, vibes };
 }
@@ -311,6 +312,8 @@ try {
   const idA = a0?.id ?? null;
   const idB = await joinAs(B, 'sol');
   expect(idB !== null, 'B joins as Sol');
+  await A.shot('blocks-room-host');
+  await B.shot('blocks-room-guest');
 
   await A.ev('location.reload()');
   await resumes(A, 'lobby: reload → silent resume', 'view-lobby', idA);
@@ -319,9 +322,15 @@ try {
   await setMode(A, 'Timed');
   await sleep(400);
   for (let i = 0; i < 4; i++) { await A.ev(`document.querySelector('#settings-body [aria-label^="Less"]')?.click()`); await sleep(250); }
+  if (SHOTS) {
+    await A.tap('#btn-settings-lobby');
+    await A.shot('blocks-settings');
+    await A.ev(`document.querySelector('#sheet-settings [data-close]').click()`);
+  }
   await A.tap('#btn-start');
   await resumes(A, 'host starts game 1 (timed 1:00)', 'view-game', idA);
   await resumes(B, 'guest follows into game 1', 'view-game', idB);
+  await A.shot('blocks-game-timed');
 
   await A.ev('location.reload()');
   await resumes(A, 'game: reload → silent resume', 'view-game', idA);
@@ -399,6 +408,8 @@ try {
   const guestSees = await B.ev(`[!document.getElementById('podium-actions').hidden, !document.getElementById('podium-hint').hidden]`);
   expect(pa?.view === 'view-podium' && hostSees.every(Boolean), 'podium: host has Play again + Back to the room');
   expect(pb?.view === 'view-podium' && guestSees[0] === false && guestSees[1] === true, 'podium: guest has no buttons, a waiting hint');
+  await A.shot('blocks-podium-time-host');
+  await B.shot('blocks-podium-time-guest');
   await B.ev('location.reload()');
   await resumes(B, 'podium: guest reload → podium again', 'view-podium', idB);
   await B.navigate(joinUrl());
@@ -420,6 +431,7 @@ try {
   expect(hostRoom?.view === 'view-lobby' && hostRoom.id === idA, 'Back to the room: host in the lobby, same id');
   expect(room1?.view === 'view-lobby' && /back to the room/i.test(room1.toast ?? '') && room1.id === idB, 'Back to the room: guest follows with a toast, same id', `toast="${room1?.toast}"`);
   expect(!(await A.snap())?.sawPick && !(await B.snap())?.sawPick, 'Back to the room: picker never shown');
+  await B.shot('blocks-room-back');
 
   // ---- dead links ----
   freeze(true); // idle lobby, Wi-Fi silently gone: only the liveness watchdog can notice
@@ -496,6 +508,22 @@ try {
   await boot(true);
   const H = await phone('H'), G = await phone('G'), R = await phone('R');
   await joinAs(H, 'elodie');
+  // a solo game on a fresh server, ended by the host after one placement: a first record, "New best!"
+  await setMode(H, 'Marathon');
+  await sleep(400);
+  await H.tap('#btn-start');
+  await H.waitFor((x) => x.view === 'view-game');
+  await H.placeOne();
+  await H.tap('#btn-menu');
+  await H.tap('#btn-end-game');
+  await H.tap('#btn-end-game');
+  await H.waitFor((x) => x.view === 'view-podium', 5000);
+  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+  const solo: string = await H.text('podium-title');
+  expect(/New best/.test(solo), 'solo game ended after one placement: the podium says "New best!"', solo);
+  await H.shot('blocks-podium-solo-best');
+  await H.tap('#btn-new-game');
+  await H.waitFor((x) => x.view === 'view-lobby', 5000);
   await joinAs(G, 'sol');
   await joinAs(R, 'anna');
   await setMode(H, 'Marathon');
@@ -504,6 +532,14 @@ try {
   for (const p of [H, G, R]) await p.waitFor((x) => x.view === 'view-game');
   expect((await R.snap())?.view === 'view-game', '3 players in a marathon game');
   expect((await G.hostButtons()).length === 0, 'guest menu has no host controls');
+  await H.shot('blocks-game');
+  if (SHOTS) { // a new phone during a game: no free character to pick, it waits
+    const W = await phone('W');
+    await W.navigate(joinUrl());
+    await W.waitFor((x) => x.view === 'view-waiting', 5000);
+    await W.shot('blocks-waiting-newcomer');
+    await W.navigate('about:blank');
+  }
 
   await R.navigate('about:blank'); // Anna's phone dies
   await sleep(1500);
@@ -514,6 +550,7 @@ try {
   let hb = await H.hostButtons();
   expect(!(await H.ev(`document.getElementById('sheet-menu').hidden`)) && /Take Anna out \(offline\)/.test(hb[1]) && /End game/.test(hb[hb.length - 1]),
     'menu: offline Anna listed first, End game last', JSON.stringify(hb));
+  await H.shot('blocks-host-menu');
   await H.tap('[data-retire]');
   hb = await H.hostButtons();
   chip = await annaChip();
@@ -528,6 +565,7 @@ try {
   const over = await R.waitFor((x) => x.view === 'view-over', 8000);
   const overTitle: string = await R.ev(`document.getElementById('over-title').textContent`);
   expect(over?.view === 'view-over' && /took you out.*score counts/.test(overTitle), 'retired phone: calm "taken out" screen, no board', overTitle);
+  await R.shot('blocks-over-retired');
 
   await H.tap('#btn-menu');
   await H.tap('#btn-end-game');
@@ -540,6 +578,8 @@ try {
   expect((await H.hostButtons()).length === 0, 'podium: no in-game host controls left');
   const ranks: string[] = await H.ev(`[...document.querySelectorAll('#podium-list li')].map((e) => e.textContent)`);
   expect(ranks.length === 3 && ranks.some((t) => t.includes('Anna')), 'podium ranks all 3, Anna included', JSON.stringify(ranks));
+  await H.shot('blocks-podium-ended-host');
+  await G.shot('blocks-podium-ended-guest');
 
   } // part 2
 
@@ -734,6 +774,7 @@ try {
     }
     await H.ev(`[...document.querySelectorAll('#settings-body .seg button')].find((b) => b.textContent === ${JSON.stringify(mode)})?.click()`);
     await sleep(300);
+    if (mode === 'Choices') await H.shot('quiz-settings');
     await H.ev(`document.querySelector('#sheet-settings [data-close]').click()`);
     return labels;
   };
@@ -841,6 +882,7 @@ try {
   await H.tap('#btn-menu');
   const qhb = await H.hostButtons();
   expect(qhb.length === 2 && /End game/.test(qhb[1]), 'quiz: the host menu offers End game, no "take out"', JSON.stringify(qhb));
+  await H.shot('quiz-host-menu');
   await H.tap('#btn-end-game');
   const qArmed: string = await H.ev(`document.getElementById('btn-end-game').textContent`);
   expect(/Tap again/.test(qArmed) && await Q.visible('quiz-question'), 'quiz End game: first tap arms, nothing ends yet', qArmed);

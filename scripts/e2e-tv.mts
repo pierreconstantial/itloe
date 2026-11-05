@@ -4,6 +4,7 @@
 // and the wake-from-sleep reconnect. ONLY=connection|campaign|quiz runs just that section.
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3180 CDP=9222 [SHOTS=dir] node scripts/e2e-tv.mts       (never PORT 3131: the live server)
+// SHOTS=<dir> saves screenshots, each with its visible text (<name>.txt).
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -130,6 +131,7 @@ class Page {
     const r = await this.cmd('Page.captureScreenshot', { format: 'png' });
     mkdirSync(SHOTS, { recursive: true });
     writeFileSync(join(SHOTS, `${name}.png`), Buffer.from(r.result.data, 'base64'));
+    writeFileSync(join(SHOTS, `${name}.txt`), String(await this.js('document.body.innerText'))); // the words on screen, for a text diff
   }
   /** Closes the TAB, not just the debugger socket: a leaked TV tab keeps reconnecting to every later server. */
   async close(): Promise<void> {
@@ -214,6 +216,10 @@ try {
 
   // ---------- lobby, avatars, presence ----------
   const A = await device('A'); const idA = await tap(A, 'anna');
+  if (SHOTS) { // the evening's first screen, with its first guest
+    await tv.until('window.bloko.avatars().length === 1', '1 avatar');
+    await tv.shot('start-room');
+  }
   let B = await device('B'); const idB = await tap(B, 'sol');
   let A2 = A;
   let N: Client | undefined, E: Client | undefined;
