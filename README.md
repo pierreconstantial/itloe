@@ -204,6 +204,7 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 
 ### Further reading
 
+- [docs/minigames.md](docs/minigames.md): adding a minigame: its parts, registration lines, what the frame offers, the development start and tests.
 - [PROTOCOL.md](PROTOCOL.md): WebSocket messages, HTTP endpoints, trusted inputs, view filtering, and compatibility rules.
 - [SPEC-BLOCKS.md](SPEC-BLOCKS.md): original block-game design and technical direction.
 - [BUILD-PLAN.md](BUILD-PLAN.md): implementation history, contracts, and milestone-specific working agreements.

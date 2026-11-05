@@ -8,6 +8,7 @@
 ## Before editing
 
 - Read the README's “For developers” section for architecture, code conventions, and test commands. Inspect the neighboring implementation and relevant tests before choosing an approach.
+- When adding or changing a minigame, read `docs/minigames.md` first.
 - Read the relevant sections of `PROTOCOL.md` and the contract sections of `BUILD-PLAN.md` when touching messages, shared APIs, or saved state. Do not silently change a contract marked frozen: raise the proposed change for agreement before implementing it. Historical work-package assignments apply when that coordination is in use; draft proposals do not define implemented APIs.
 - Check the working tree and preserve unrelated local changes. Follow file ownership assigned for the current task; coordinate changes to files owned by another active contributor.
 
