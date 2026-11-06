@@ -25,7 +25,7 @@ const chosen = args.length ? SEQUENCES.filter((s) => args.includes(s.id)) : SEQU
 
 /** Plays one sequence on its own server and browser, and returns its slides. */
 async function play(seq: Sequence): Promise<Slide[]> {
-  const d = await drive({ content: seq.content, phones: seq.phones.length });
+  const d = await drive({ content: seq.content, phones: seq.phones.length, env: seq.env });
   const slides: Slide[] = [];
   try {
     const phones = new Map(seq.phones.map((who, i) => [who, d.phones[i]]));

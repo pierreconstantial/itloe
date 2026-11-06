@@ -1,0 +1,28 @@
+{
+  "language": "fr",
+  "categories": {
+    "easy": [
+      { "id": "t-easy-1", "word": "chat" },
+      { "id": "t-easy-2", "word": "maison" },
+      { "id": "t-easy-3", "word": "soleil" },
+      { "id": "t-easy-4", "word": "pomme" }
+    ],
+    "medium": [
+      { "id": "t-medium-1", "word": "boulanger" },
+      { "id": "t-medium-2", "word": "parapluie" },
+      { "id": "t-medium-3", "word": "arc-en-ciel" },
+      { "id": "t-medium-4", "word": "fromage" },
+      { "id": "t-medium-5", "word": "vélo" },
+      { "id": "t-medium-6", "word": "horloge" },
+      { "id": "t-medium-7", "word": "école" },
+      { "id": "t-medium-8", "word": "aujourd'hui" },
+      { "id": "t-medium-9", "word": "piscine" },
+      { "id": "t-medium-10", "word": "guitare" }
+    ],
+    "hard": [
+      { "id": "t-hard-1", "word": "nostalgie" },
+      { "id": "t-hard-2", "word": "sérendipité" },
+      { "id": "t-hard-3", "word": "éphémère" }
+    ]
+  }
+}

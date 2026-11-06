@@ -134,12 +134,13 @@ messages (`unsaved` below) while it runs.
 
 ### Minigames and their lobbies
 
-Blocks and quiz run in the plain lobby (`shared/plain-lobby.js`, `server/plain-lobby.ts`); a minigame with its
-own lobby accepts the same messages where they apply. A guest's game-master message → `err "not-gm"`; the
+Blocks, quiz and Pyramide run in the plain lobby (`shared/plain-lobby.js`, `server/plain-lobby.ts`); a minigame with
+its own lobby accepts the same messages where they apply. A guest's game-master message → `err "not-gm"`; the
 game master's at the wrong moment → `err "refused"`.
 
 ```jsonc
-{ "t": "ready", "on": true }           // an eligible player, in the lobby: ready for the next round, or (false) no longer
+{ "t": "ready", "on": true }           // an eligible player, in the lobby: ready for the next round, or (false) no longer;
+                                       // in a lobby with spots (Pyramide) → err "refused": holding a spot is being ready
 { "t": "config", "patch": { … } }      // game master, in the lobby: the minigame's settings, from its schema; invalid
                                        // keys/values ignored, his no-op patch silent; outside the lobby → err "locked"
 { "t": "start" }                       // game master, in the lobby, with one ready player or more (and the content's
@@ -150,7 +151,8 @@ game master's at the wrong moment → `err "refused"`.
                                        // means; without its own rule (the quiz) it is the target's leave from the round:
                                        // no more answers, the score kept. An unknown, done or left target → silent no-op
 { "t": "lobby" }                       // game master, on the podium: back to the lobby; the round's players come back
-                                       // ready, except who left or was taken out, or is no longer eligible
+                                       // ready, except who left or was taken out, or is no longer eligible; in a lobby
+                                       // with spots, on the spots they left
 ```
 
 Every other message goes to the running round's server code (blocks: `place`; quiz: `answer`, `next`,
@@ -165,13 +167,15 @@ the minigame's saved state.
 - **Stepping onto a spot:** the server reads each walker's `pos` against the spots, edge-triggered like the doors:
   stepping onto a spot, off it or from one to another gives the minigame the action `spot { id, spot }` (the spot's
   id, or null), injected by the server, never from the wire. A walker's first known position only sets where it
-  stands; a wisp on a spot counts for nothing. The minigame decides what the step means (taking a free spot,
-  leaving one).
+  stands; a wisp on a spot counts for nothing. The minigame decides what the step means: in the plain lobby with
+  spots, a free spot is taken and the one held before is let go; a held spot stays its holder's.
 - **`takeSpot`:** a walker onto a free spot from the phone: the server moves the character to the spot's centre,
   sends that `pos` to the walker's phone and the screens, and the step onto it follows as above. An unknown or held
   spot, or a sender not walking the lobby → `err "refused"`.
-- **Restarts:** positions are in memory only; a holder without a known position (after a restart) is put back on
-  its spot, on the screens and on its phone. A disconnected walker stays where it stood, so a holder keeps its spot.
+- **Start positions:** whoever starts walking the lobby (the minigame's start, a join, back from a round they sat
+  out, a restart: positions are in memory only) is placed by the server, on the screens and on its phone: a holder on
+  its spot's centre, anyone else on one of the minigame's start positions. A disconnected walker stays where it stood,
+  so a holder keeps its spot.
 
 ```jsonc
 { "t": "enter", "node": "childhood" }   // game master, or the content's chooser (Élodie), into an UNLOCKED child of where
@@ -289,6 +293,36 @@ marks the target `left` in the running quiz (the round stops waiting for their a
   quiz's end records it: counters `quiz.played`, `quiz.won.<character>`, `quiz.correct.<character>`, `node.<id>.finished`,
   totals per character, and the shown question ids appended to `facts.asked` (never asked again).
 
+### Pyramide: a tableau `activity: { kind: 'pyramide', settings: { mode } }`
+
+Two teams of two in the plain lobby with four spots (`team1-clue`, `team1-guess`, `team2-clue`, `team2-guess`): a
+round starts when all four are held. The word bank (`data/pyramide/*.json`) stays on the server and is never served.
+Rules and the round's state: `shared/pyramide.js`.
+
+```jsonc
+{ "t": "config", "patch": { "mode": "duel" } }   // game master, in the lobby: classic | duel
+{ "t": "start" }                       // game master, all four spots held: the mode's first words drawn among the bank's
+                                       // words minus every word used this evening; too few left → err "refused"
+{ "t": "clue", "text": "fromage" }     // the clue giver whose turn it is: one word (letters, hyphens, apostrophes), not
+                                       // containing the word, nor contained in it with 4 letters or more (case and
+                                       // accents ignored): a brick
+{ "t": "guess", "text": "la maison" }  // the guesser whose turn it is, after a clue. The server judges it (equal once case,
+                                       // accents, spaces and a leading article are ignored) and only the verdict enters
+                                       // the reducer
+{ "t": "skip" }                        // classic: a clue giver, before the word's first clue: another word of its level
+{ "t": "bid", "n": 4 }                 // duel: the bidding clue giver, 1–10, strictly lower than the last bid
+{ "t": "pass" }                        // duel: the bidding clue giver, after the first bid: the last bid plays
+```
+
+Anything refused → `err "refused"`. `retire` and a player leaving end the round with the scores so far, like
+`endGame` (endReason `retired`, `left`, `gm`).
+
+- **The word in play is in the view:** the round's view is the same for everyone, so every phone and TV receives
+  each team's current word (`teams[i].word`); Pyramide's screens show it only on its clue givers' phones. Words
+  resolved are in the log with their word.
+- **Campaign:** each word drawn, skipped ones too, is reported in the round's `asked` and never drawn again that
+  evening. Each player scores their team's words found (classic) or points (duel); ranks are the teams'.
+
 ### Show the join QR again (any player, any moment)
 
 ```jsonc
@@ -316,7 +350,8 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 // content rules for the Start button ("required": its `eligible` and `allReady`, absent ones left out).
 // The plain lobby's view: { stage, settings, players: [{ id, character }], ready: [id], round }, with "round" the round
 // server's view of the running or finished round (null in the lobby). blocks: the full State (shared/game.js), plus
-// "best" in solo games (below); quiz: the public projection (below).
+// "best" in solo games (below); quiz: the public projection (below); Pyramide: its round without the words still
+// drawable (below). In a lobby with spots, "ready" is the spots' holders.
 // "campaign" = the whole evening (at.node, at.kind, at.results, party, facts, news, …) WITHOUT the minigame's raw state
 // (`at.activity`): that travels only through "minigame". The saved campaign keeps it.
 // "online" lists party members. "contentVersion": the
@@ -360,8 +395,8 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 { "t": "pos", "playerId": "p-abc123", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
 { "t": "jump", "playerId": "p-abc123" }                      // relayed to screens only; never saved or used for doors
 // M3: relayed to SCREEN clients only, with ONE exception: a player gets its OWN pos right after welcome (join or
-// rejoin) if it has one, and whenever the server moves its character (the portal; takeSpot; a spot's holder put
-// back on its spot after a restart) — the phone takes its local position from that, else from shared/world.js
+// rejoin) if it has one, and whenever the server moves its character (the portal; takeSpot; a walkable lobby's
+// start positions and holders) — the phone takes its local position from that, else from shared/world.js
 // spawnPoint(character). On screen connect the server
 // sends one pos per known player: the room's (last position, in-memory only — positions reset
 // on restart, so after a restart everyone is back at their spawn point on all clients consistently).

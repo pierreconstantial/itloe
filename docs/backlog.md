@@ -31,6 +31,9 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Pickup handles one item](#pickup-handles-one-item) | `collect` only knows the first key | P3 | Open | Low |
 | [Debug accessors show only the party room](#debug-accessors-show-only-the-party-room) | `bloko.drawOrder()` and `bloko.scene()` ignore the apartment and door #4's room | P3 | Open | Trivial |
 | [Apartment sofa sparkle](#apartment-sofa-sparkle) | The sofa's sparkle overlaps its "Comfy!" bubble in the apartment | P3 | Open | Trivial |
+| [Walking in the plain lobby](#walking-in-the-plain-lobby) | Blocks' and the quiz's lobbies show players standing still, with no chat or emotes | P3 | Open | Medium |
+| [Pyramide in the story](#pyramide-in-the-story) | Pyramide has no tableau in the story and no reward for ending it | P1 | Needs decision | Low |
+| [Smarter guess check in Pyramide](#smarter-guess-check-in-pyramide) | A correct guess with a spelling mistake counts as wrong | P3 | Needs decision | Low |
 | [Minigame wording in shared folders](#minigame-wording-in-shared-folders) | Block and quiz files in `public/commun/`, block files with generic names | P3 | Open | Low |
 | [Debug view of a running screen](#debug-view-of-a-running-screen) | Nothing shows what a minigame's TV screen draws | P3 | Open | Low |
 | [Screen comparison flags random content](#screen-comparison-flags-random-content) | `--compare` lists room codes, QR codes, questions and scores as changes | P3 | Open | Medium |
@@ -111,6 +114,26 @@ The TV's debug accessors `bloko.drawOrder()` and `bloko.scene()` report `PARTY_R
 The sofa's object-action sparkle is placed for the party room's narrow sofa. In the apartment, where the sofa is stretched 1.7×, it overlaps the "Comfy!" bubble.
 
 **Recommendation:** place the effect from the prop's box.
+
+### Walking in the plain lobby
+
+Only a lobby with spots is walkable (`docs/minigames.md`, "Walking on its lobby"). In blocks' and the quiz's lobbies the eligible players stand still, so there are no chat bubbles or emotes over them, as there are in the main game's rooms.
+
+**Recommendation:** make the plain lobby walkable without spots: `spots` non-null in every plain lobby, redraw its TV lobby around walking characters, and give it start positions. Do it once a minigame's lobby gains from it: blocks and the quiz work as they are.
+
+### Pyramide in the story
+
+Pyramide has no place in the story yet: it runs from its development start only (`ITLOE_CONTENT=minigame:pyramide`), no tableau of the birthday story names it, and ending it rewards nothing. Its eligible players come from the tableau's content, so the tableau also decides who may play. The intended four are Élodie, Nico, Pierre and Sol; a story wisp the tableau names, as Nico is before his reunion, plays as their character (`GameStory.md`, "Reunions").
+
+This is Pierre's content.
+
+**Recommendation:** Pierre decides which tableau holds Pyramide, in which world, who plays, and whether `person.nico.unlocked` is its reward when he ends it. Then add its content entry in `shared/campaign/story.js`, with a test that the story validates and the reward is recorded.
+
+### Smarter guess check in Pyramide
+
+A guess matches only if it equals the word once case, accents, surrounding spaces and a leading article are ignored (`judgeGuess` in `server/pyramide.ts`). "Char" is not "chat", and neither are a plural or a typo.
+
+**Recommendation:** leave it unless the exact match proves insufficient in play. Then replace `judgeGuess`, the one place that judges, by a cheap LLM check that falls back to the exact match when the model is unavailable; keep the verdict server-side.
 
 ### Minigame wording in shared folders
 

@@ -3,6 +3,7 @@
 
 import { BLOCK_RULES } from './game.js';
 import { QUIZ_RULES } from './quiz/index.js';
+import { PYRAMIDE_RULES } from './pyramide.js';
 import { plainLobby } from './plain-lobby.js';
 
 /** @typedef {import('./characters.js').CharacterId} CharacterId */
@@ -28,6 +29,12 @@ import { plainLobby } from './plain-lobby.js';
  * in world units (16 × 9, shared/world.js), as the TV draws it; `holder`: the player holding it, from the
  * minigame's state, or null while it's free.
  * @typedef {{ id: string, label: string, x: number, y: number, w: number, h: number, holder: string | null }} Spot
+ */
+
+/**
+ * A start position: where a player who starts walking a walkable lobby stands (its feet, in world units), unless
+ * they hold a spot. The minigame places them where its TV screen leaves room, clear of its spots and panels.
+ * @typedef {{ x: number, y: number }} StartPosition
  */
 
 /**
@@ -73,10 +80,10 @@ import { plainLobby } from './plain-lobby.js';
 
 /**
  * What a round starts from, handed in by its lobby: the seed, the minigame's settings (locked in as the
- * round's rules), the players (the ready ones, in party order), the time, and the round server's inputs
- * (the quiz: its candidate questions).
+ * round's rules), the players (the ready ones, in party order, each with the spot they hold in a lobby with
+ * spots), the time, and the round server's inputs (the quiz: its candidate questions).
  * @template [T=any]
- * @typedef {{ seed: number, settings: T, players: { id: string, character: CharacterId }[], now: number, inputs?: any }} RoundStart
+ * @typedef {{ seed: number, settings: T, players: { id: string, character: CharacterId, spot?: string }[], now: number, inputs?: any }} RoundStart
  */
 
 /**
@@ -112,6 +119,8 @@ import { plainLobby } from './plain-lobby.js';
  *   shiftDeadline: (s: S, by: number) => S,     // deadlines moved by a downtime (ms): resume, sleep
  *   resume?: (s: S) => S,                       // what a restart does besides the shift
  *   retire?: true,                              // the reducer takes the game master's retire itself (else: the target's leave)
+ *   spots?: readonly Omit<Spot, 'holder'>[],    // the lobby's spots: it is walkable, and holding a spot is being ready
+ *   startPositions?: readonly StartPosition[],  // with spots: where its walkers start (MinigameRules)
  *   describe: (s: S) => string,                 // the round in the boot log
  * }} RoundRules
  */
@@ -131,6 +140,7 @@ import { plainLobby } from './plain-lobby.js';
  *   ready: (s: S) => string[],                  // the players ready for the next round
  *   shows: (s: S) => string[],                  // the players it draws itself (everyone else is a wisp)
  *   spots?: (s: S) => Spot[] | null,            // a walkable lobby: its spots while the players it shows walk, else null
+ *   startPositions?: readonly StartPosition[],  // where a player stands on becoming a walker, if not holding a spot
  *   settings: (patch: unknown, base?: T) => T,  // `base` (default: the minigame's defaults) with every valid key of `patch`
  *   validateSettings: (settings: unknown) => string[],   // a content node's settings: problems, as readable lines
  *   sampleSettings: object,                     // the development start's settings (ITLOE_CONTENT=minigame:<kind>)
@@ -145,6 +155,7 @@ import { plainLobby } from './plain-lobby.js';
 export const MINIGAMES = {
   blocks: plainLobby(BLOCK_RULES),
   quiz: plainLobby(QUIZ_RULES),
+  pyramide: plainLobby(PYRAMIDE_RULES),
 };
 
 /** @typedef {keyof typeof MINIGAMES} MinigameKind */

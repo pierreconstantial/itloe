@@ -4,7 +4,7 @@
 // keeps running against a wall, and the stick and facing behaviour.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { facing, posFromEcho, step, stickVector } from '../public/play/movement.js';
+import { SNAP_IN, SNAP_OUT, facing, posFromEcho, snapTo, step, stickVector } from '../public/play/movement.js';
 import { FEET, PARTY_ROOM, isWalkable, prop, room } from '../shared/scene.js';
 import { WALK_SPEED, WORLD, spawnPoint } from '../shared/world.js';
 import { CHARACTERS } from '../shared/characters.js';
@@ -199,4 +199,15 @@ test('posFromEcho only clamps: a position inside a prop is kept, not teleported'
   const echoed = posFromEcho({ x: 11, y: 7, dir: 'down' });
   assert.deepEqual(echoed, { x: 11, y: 7, dir: 'down', moving: false });
   assert.equal(isWalkable(PARTY_ROOM, 11, 7), false, 'that spot is inside the table');
+});
+
+test('snapping: near a free spot\'s centre the character stands on it, and walks off only past a wider radius', () => {
+  const centre = { x: 8, y: 7 };
+  /** @type {{ x: number, y: number } | null} */ let held = null;
+  const walk = (/** @type {number} */ x) => (held = snapTo({ x, y: 7 }, held, [centre]));
+  assert.equal(walk(8 - SNAP_IN - 0.05), null, 'not close enough yet');
+  assert.equal(walk(8 - SNAP_IN + 0.05), centre, 'close: on the centre');
+  assert.equal(walk(8 + SNAP_IN + 0.05), centre, 'past the snapping radius, still held: no flicker at its edge');
+  assert.equal(walk(8 + SNAP_OUT + 0.05), null, 'pushed past the wider radius: free again');
+  assert.equal(walk(8 + SNAP_IN + 0.05), null, 'and coming back within it doesn\'t snap until the snapping radius');
 });

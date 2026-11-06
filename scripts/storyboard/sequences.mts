@@ -2,9 +2,12 @@
 // takes the TV and the phones that matter at that moment: captured from the running game where the game
 // already draws that screen ("today"), a mockup where it's planned (./mock.mts). When the game starts
 // drawing a planned screen, replace its mockup with the steps that reach it and a capture.
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { drive } from '../drive.mts';
-import { sleep } from '../e2e-lib.mts';
-import { avatar, colorOf, phone, player, tv, wisp, wispPhone } from './mock.mts';
+import { SLOW, sleep } from '../e2e-lib.mts';
+import { PYRAMIDE_SPOTS } from '../../shared/pyramide.js';
+import { avatar, phone, player, tv, wisp } from './mock.mts';
 
 export type Shot = { who: string, img: string, planned: boolean };
 type Drive = Awaited<ReturnType<typeof drive>>;
@@ -21,14 +24,14 @@ export type Board = {
   frame: (caption: string, shots: (() => Promise<Shot>)[]) => Promise<void>,
 };
 
-/** `content`: ITLOE_CONTENT for its server (the story when empty); `phones`: the characters with a phone. */
-export type Sequence = { id: string, title: string, intro: string, content: string, phones: string[], run: (b: Board) => Promise<void> };
+/** `content`: ITLOE_CONTENT for its server (the story when empty); `env`: more environment for it; `phones`: the characters with a phone. */
+export type Sequence = { id: string, title: string, intro: string, content: string, env?: Record<string, string>, phones: string[], run: (b: Board) => Promise<void> };
 
 // ---------------------------------------------------------------- driving the game
 
-/** Where a character's avatar stands, as the TV draws it. */
+/** Where a character's avatar stands, as the TV draws it: in a minigame's walkable lobby, among its walkers. */
 const where = (b: Board, who: string) => async () =>
-  (await b.d.tv.ev(`window.bloko.avatars().find((a) => a.character === ${JSON.stringify(who)}) ?? null`)) as { x: number, y: number } | null;
+  (await b.d.tv.ev(`[...window.bloko.walkers(), ...window.bloko.avatars()].find((a) => a.character === ${JSON.stringify(who)}) ?? null`)) as { x: number, y: number } | null;
 
 /** Walks a character's avatar to a point with its phone's joystick; `done` says when it's there. */
 async function walk(b: Board, who: string, to: { x: number, y: number }, done?: () => Promise<boolean>) {
@@ -113,52 +116,6 @@ async function answer(p: Phone, pick: number, typed: string) {
   if (choices && !(await p.ev(`document.getElementById('quiz-choices').hidden`))) await p.tap(`#quiz-choices button:nth-child(${pick})`);
   else await p.type('#quiz-text', typed).then(() => p.tap('#quiz-send'));
 }
-
-// ---------------------------------------------------------------- mockups shared by several slides
-
-/** The game master's phone in a main-game room: walking, and starting the minigame waiting here. */
-const gmRoomPhone = (game: string, hint: string) => phone('pierre', `
-  <p class="hint">${hint}</p>
-  <button class="primary">▶ Start ${game}</button>
-  <div class="pad">Touch and drag here to walk on the TV</div>`);
-
-/** A lobby's list of eligible players on the TV: standing characters, ✓ under those who are ready. */
-const tvPlayers = (rows: { who: string, in: boolean, note?: string }[]) => `<div class="players">${rows.map((r) =>
-  `<figure class="${r.in ? '' : 'out'}">${avatar(r.who, 14)}<figcaption>${player(r.who)}<br><span class="${r.in ? 'tick' : 'dim'}">${r.note ?? (r.in ? '✓ ready' : 'not ready')}</span></figcaption></figure>`).join('')}</div>`;
-
-/** A lobby's list of eligible players on a phone. */
-const phonePlayers = (rows: { who: string, in: boolean, note?: string }[]) => `<div class="card list">${rows.map((r) =>
-  player(r.who, `<small style="margin-left:auto">${r.note ?? (r.in ? '✓ ready' : 'not ready')}</small>`)).join('')}</div>`;
-
-/** A choice the game master taps through, as the settings sheet draws one. */
-const seg = (label: string, values: string[], on: string) =>
-  `<div><p class="hint" style="margin-bottom:6px">${label}</p><div class="seg">${values.map((v) => `<span class="${v === on ? 'on' : ''}">${v}</span>`).join('')}</div></div>`;
-
-/** Pyramide's pyramid of 13 bricks (5, 4, 3, 1 from the bottom), `left` still to give. */
-const pyramid = (who: string, left: number) => {
-  const rows = [1, 3, 4, 5];
-  let n = 13 - left; // used bricks go first, from the top
-  return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px">${rows.map((w) =>
-    `<div style="display:flex;gap:6px">${Array.from({ length: w }, () => {
-      const used = n-- > 0;
-      return `<span style="width:58px;height:30px;border-radius:4px;background:${used ? '#2b3138' : 'linear-gradient(#ffe08a,#d4a017)'};box-shadow:${used ? 'none' : `0 0 10px #d4a01766, inset 0 -4px 0 ${colorOf(who)}`}"></span>`;
-    }).join('')}</div>`).join('')}</div>`;
-};
-
-/** Pyramide's TV: both teams' pyramids, words found, and what's happening in the middle. */
-const pyramideTv = (o: { mode: string, left: [number, number], words: [number, number], turn: 0 | 1, middle: string, over?: string }) => tv(
-  `PYRAMIDE <span style="font-size:28px;color:var(--fg-dim);margin-left:16px">${o.mode}</span>`,
-  [['elodie', 'nico'], ['pierre', 'sol']].map((team, i) => `
-    <div class="col" style="flex:0 0 360px"><div class="panel" style="${o.turn === i ? 'outline:3px solid var(--accent)' : ''}">
-      <h2>${player(team[0])} &amp; ${player(team[1])}</h2>
-      ${pyramid(team[0], o.left[i])}
-      <p class="big">${o.words[i]} <span class="dim" style="font-size:24px">word${o.words[i] === 1 ? '' : 's'} · ${o.left[i]} bricks left</span></p>
-    </div></div>`).join(`<div class="col" style="justify-content:center">${o.middle}</div>`),
-  o.over ?? '');
-
-/** A clue or a guess in Pyramide's log on the TV. */
-const said = (who: string, kind: 'clue' | 'guess', word: string, mark = '') =>
-  `<div class="panel" style="padding:12px 20px;flex-direction:row;align-items:center;gap:14px">${avatar(who, 3)}<span class="dim">${kind}</span><b style="font-size:34px">${word}</b>${mark}</div>`;
 
 // ---------------------------------------------------------------- the sequences
 
@@ -315,97 +272,191 @@ const quiz: Sequence = {
   },
 };
 
-const team1 = ['elodie', 'nico'], team2 = ['pierre', 'sol'];
-const pyramidePlayers = [{ who: 'elodie', in: true, note: '✓ ready · team 1' }, { who: 'nico', in: true, note: '✓ ready · team 1' }, { who: 'pierre', in: true, note: '✓ ready · team 2' }, { who: 'sol', in: true, note: '✓ ready · team 2' }];
+// ---------------------------------------------------------------- Pyramide, played through the phones
+
+/** The storyboard's own word bank (BLOKO_PYRAMIDE_DIR for its server): each word comes with clues that fit it, and a near miss. */
+const WORD_BANK = join(import.meta.dirname, 'pyramide-words');
+const NOTES = new Map<string, { clues: string[], wrong: string }>(
+  Object.values<any[]>(JSON.parse(readFileSync(join(WORD_BANK, 'words.json'), 'utf8')).categories).flat().map((w) => [w.word, w]));
+
+/** The four who take a spot, by team. Anna is eligible too and takes none. */
+const TEAM_1 = ['elodie', 'nico'], TEAM_2 = ['pierre', 'sol'];
+const SPOT = Object.fromEntries(PYRAMIDE_SPOTS.map((s) => [s.id, { x: s.x + s.w / 2, y: s.y + s.h / 2 }]));
+
+/** Is `selector` showing on the phone? */
+const showing = (p: Phone, selector: string): Promise<boolean> =>
+  p.ev(`(() => { const e = document.querySelector(${JSON.stringify(selector)}); return !!e && !e.closest('[hidden]'); })()`);
+
+/** The player whose phone shows `selector`, once one does; null once the round has gone to its podium. */
+async function whoShows(b: Board, selector: string): Promise<string | null> {
+  const end = Date.now() + 10_000 * SLOW;
+  for (;;) {
+    for (const who of [...TEAM_1, ...TEAM_2]) if (await showing(b.phone(who), selector)) return who;
+    if ((await b.d.tv.ev('window.bloko.minigame()?.status')) === 'podium') return null;
+    if (Date.now() > end) throw new Error(`pyramide: no phone shows ${selector}`);
+    await sleep(100);
+  }
+}
+
+/** Plays a round through the phones: clues from the clue giver's phone (the only one that shows the word), guesses from the guesser's. */
+function pyramidePlay(b: Board) {
+  const given = new Map<string, number>(); // clues given per word
+  /** The clue giver whose turn it is gives the word's next clue; null at the podium. */
+  async function giveClue() {
+    const giver = await whoShows(b, '#pyr-clue-form');
+    if (!giver) return null;
+    const p = b.phone(giver);
+    const word: string = await p.ev(`document.getElementById('pyr-word-text').textContent`);
+    const n = given.get(word) ?? 0;
+    given.set(word, n + 1);
+    const clue = NOTES.get(word)!.clues[n];
+    await p.type('#pyr-clue', clue);
+    await p.tap('#pyr-clue-send');
+    return { giver, word, clue, n };
+  }
+  /** The guesser whose turn it is guesses the word, or its near miss. */
+  async function guess(word: string, right: boolean) {
+    const guesser = (await whoShows(b, '#pyr-guess-form'))!;
+    const text = right ? word : NOTES.get(word)!.wrong;
+    await b.phone(guesser).type('#pyr-guess', text);
+    await b.phone(guesser).tap('#pyr-guess-send');
+    return { guesser, text };
+  }
+  /** A clue giver bids: the control starts at 5 (the opening bid) or one under the last bid; `lower` taps "−" first. */
+  async function bid(who: string, lower = 0) {
+    for (let k = 0; k < lower; k++) await b.phone(who).tap('#pyr-bid-less');
+    await b.phone(who).tap('#pyr-bid-send');
+  }
+  /** The classic round to its podium: team 1 finds each word on its first clue, team 2 on its second. */
+  async function finishClassic() {
+    for (let c = await giveClue(); c; c = await giveClue()) await guess(c.word, !(TEAM_2.includes(c.giver) && c.n === 0));
+  }
+  /** The duel to its podium: the opening team bids 5, the other passes, the opening team finds the word on its first clue. */
+  async function finishDuel() {
+    for (let opener = await whoShows(b, '#pyr-bid'); opener; opener = await whoShows(b, '#pyr-bid')) {
+      await bid(opener);
+      await b.phone((await whoShows(b, '#pyr-pass'))!).tap('#pyr-pass');
+      const c = (await giveClue())!;
+      await guess(c.word, true);
+    }
+  }
+  return { giveClue, guess, bid, finishClassic, finishDuel };
+}
+
+// ---------------------------------------------------------------- Pyramide
 
 const pyramide: Sequence = {
   id: 'pyramide',
   title: 'Pyramide with Nico',
-  intro: 'Planned: Nico’s reunion. Nico joins from Sweden on his phone and has been a wisp until now. Pyramide’s place names who may play: Élodie, Nico, Pierre and Sol. Anna isn’t among them and stays a wisp. Every screen here is a mockup.',
-  content: '',
-  phones: [],
+  intro: 'Pyramide has no place in the story yet, so it runs from its development start, in a placeholder room. That start has no story wisps: Anna is an eligible player who takes no spot, and a wisp once the round runs. Nico plays as his character here; in the story he joins from Sweden and is a wisp until this reunion, which is why the last slide is planned. The words are the storyboard’s own small list, so each clue fits its word.',
+  content: 'minigame:pyramide',
+  env: { BLOKO_PYRAMIDE_DIR: WORD_BANK },
+  phones: ['pierre', 'elodie', 'nico', 'sol', 'anna'],
   async run(b) {
-    await b.frame('The party reaches Pyramide’s place in a memory world. Nico is connected and floats around as a wisp. Pierre starts Pyramide.',
-      [() => b.mockTv(tv('Young adulthood in Vienna', `<div class="col" style="justify-content:flex-end"><div class="players">
-          ${['elodie', 'pierre', 'sol'].map((w) => `<figure>${avatar(w, 9)}<figcaption>${player(w)}</figcaption></figure>`).join('')}</div>
-          <p class="dim">(the world’s room)</p></div>`, wisp('nico', 72, 40) + wisp('anna', 84, 62))),
-        () => b.mockPhone('pierre', gmRoomPhone('Pyramide', 'Pyramide is waiting here.')),
-        () => b.mockPhone('nico', wispPhone('nico', 'You’re a wisp: float around the TV and Shine.'))]);
+    const [P, E, N, S, A] = ['pierre', 'elodie', 'nico', 'sol', 'anna'].map((w) => b.phone(w));
+    const play = pyramidePlay(b);
+    for (const [p, who] of [[P, 'pierre'], [E, 'elodie'], [N, 'nico'], [S, 'sol'], [A, 'anna']] as const) await p.join(who);
+    await guests(b, 5);
+    await sleep(500);
+    await b.frame('Pyramide’s place, in the placeholder room of its development start. Pierre, the game master, starts it; everyone else waits.',
+      [b.tv, () => b.real('pierre'), () => b.real('nico')]);
 
-    await b.frame('Pyramide’s lobby. Nico shows as his character here. Pierre picks the mode and puts the four in two teams; each taps “I’m ready”. Anna’s wisp floats over the screen.',
-      [() => b.mockTv(tv('Pyramide · lobby', `
-          <div class="col">${tvPlayers(pyramidePlayers)}</div>
-          <div class="col" style="flex:0 0 560px"><div class="panel"><h2>Classic</h2>
-            <p>${player('elodie')} &amp; ${player('nico')}</p><p>vs ${player('pierre')} &amp; ${player('sol')}</p>
-            <p class="dim">4 words each · 13 bricks</p><p class="dim">Pierre starts when all four are ready</p></div></div>`, wisp('anna', 58, 20))),
-        () => b.mockPhone('pierre', phone('pierre', `<h2>Pyramide</h2>${seg('Mode', ['Classic', 'Bidding duel'], 'Classic')}
-          <div class="card"><b>Team 1</b>${player('elodie')}${player('nico')}</div><div class="card"><b>Team 2</b>${player('pierre')}${player('sol')}</div>
-          <p class="hint">Tap a player to move them to the other team.</p><button class="primary">▶ Start</button><button class="danger">End Pyramide</button>`)),
-        () => b.mockPhone('nico', phone('nico', `<h2>Pyramide</h2><button class="on">✓ I’m ready</button><p class="hint">Classic · you’re on team 1 with Élodie</p>${phonePlayers(pyramidePlayers)}`)),
-        () => b.mockPhone('anna', wispPhone('anna', 'Pyramide is about to start. You’re watching as a wisp.'))]);
+    await P.tap('#btn-start-minigame');
+    await minigameIs(b, 'lobby');
+    await sleep(1500);
+    await b.frame('Pyramide’s lobby is walkable. The five eligible players stand at the lobby’s start positions, between the two teams’ spots. Being ready means standing on a spot, so there is no “I’m ready”: each team has a clue giver and a guesser. Pierre sets the mode from ⚙ and can only start once all four spots are taken.',
+      [b.tv, () => b.real('pierre'), () => b.real('nico')]);
 
-    await b.frame('Classic mode, team 1’s turn. Élodie gives clues: only her phone shows the word. Nico guesses on his. The TV shows every clue and guess, never the word.',
-      [() => b.mockTv(pyramideTv({ mode: 'Classic · word 1 of 4', left: [11, 13], words: [0, 0], turn: 0,
-          middle: said('elodie', 'clue', 'lait') + said('nico', 'guess', 'beurre', '<span style="color:var(--bad)">✗</span>') + said('elodie', 'clue', 'camembert'),
-          over: wisp('anna', 50, 85) })),
-        () => b.mockPhone('elodie', phone('elodie', `<p class="hint">Give Nico a one-word clue</p><div class="word">FROMAGE</div>
-          <div class="field">Your clue…</div><button class="primary">Give the clue (11 bricks left)</button><button class="ghost">Skip this word</button>`)),
-        () => b.mockPhone('nico', phone('nico', `<p class="hint">Élodie’s clues</p><div class="card"><b>lait</b><span class="hint">you said beurre ✗</span><b>camembert</b></div>
-          <div class="field">Your guess…</div><button class="primary">Guess</button>`)),
-        () => b.mockPhone('sol', phone('sol', `<p class="hint">Team 1 is playing</p><div class="card"><b>lait</b><span class="hint">Nico: beurre ✗</span><b>camembert</b></div><p class="hint">Your turn next.</p>`))]);
+    await walk(b, 'elodie', SPOT['team1-clue']);
+    await walk(b, 'pierre', SPOT['team2-clue']);
+    await walk(b, 'sol', SPOT['team2-guess']);
+    await sleep(1000);
+    await b.frame('Players walk onto the spots with the joystick on their phone: Élodie is team 1’s clue giver, Pierre and Sol are team 2’s clue giver and guesser. One spot is left, and Nico’s phone lists it with “Take this spot”: that moves his character onto it.',
+      [b.tv, () => b.real('nico'), () => b.real('sol')]);
 
-    await b.frame('Nico finds it. The word shows to everyone, and on team 1 the roles swap: Nico gives the clues for the next word. Then it’s team 2’s turn.',
-      [() => b.mockTv(pyramideTv({ mode: 'Classic · word 1 of 4', left: [10, 13], words: [1, 0], turn: 0,
-          middle: `<div class="panel" style="align-items:center"><span class="dim">found in 3 bricks</span><b style="font-size:64px;color:var(--accent)">FROMAGE</b></div>${said('nico', 'guess', 'fromage', '<span class="tick">✓</span>')}` })),
-        () => b.mockPhone('nico', phone('nico', `<div class="word">FROMAGE ✓</div><p class="hint">Next word: you give the clues, Élodie guesses.</p>`))]);
+    await N.tap('li[data-spot="team1-guess"] .spot-take');
+    await b.d.tv.waitFor(`window.bloko.minigame()?.spots?.every((s) => s.holder)`);
+    await sleep(1000);
+    await b.frame('Nico takes the last spot from his phone: he is team 1’s guesser. All four spots are taken, so Pierre can start. Anna took no spot: she stays in the lobby, and her phone says so.',
+      [b.tv, () => b.real('pierre'), () => b.real('nico'), () => b.real('anna')]);
 
-    await b.frame('Team 2’s turn: Pierre gives the clues, Sol guesses. Élodie sees the clues and guesses but not team 2’s word.',
-      [() => b.mockTv(pyramideTv({ mode: 'Classic · word 1 of 4', left: [10, 12], words: [1, 0], turn: 1,
-          middle: said('pierre', 'clue', 'pédale') })),
-        () => b.mockPhone('pierre', phone('pierre', `<p class="hint">Give Sol a one-word clue</p><div class="word">VÉLO</div><div class="field">Your clue…</div><button class="primary">Give the clue (12 bricks left)</button><button class="ghost">Skip this word</button>`)),
-        () => b.mockPhone('sol', phone('sol', `<p class="hint">Pierre’s clues</p><div class="card"><b>pédale</b></div><div class="field">Your guess…</div><button class="primary">Guess</button>`)),
-        () => b.mockPhone('elodie', phone('elodie', `<p class="hint">Team 2 is playing</p><div class="card"><b>pédale</b></div>`))]);
+    await P.tap('#btn-start');
+    await minigameIs(b, 'running');
+    await sleep(1000);
+    const c1 = (await play.giveClue())!;
+    await sleep(1200);
+    await b.frame(`Classic mode, team 1’s turn. Élodie gave the one-word clue “${c1.clue}” to get Nico to ${c1.word.toUpperCase()}, and the clue cost a brick. Only her phone shows the word. Nico’s phone has the clue and the guess field; the TV shows every clue and guess, never the word. Sol watches, and Anna floats over the TV as a wisp.`,
+      [b.tv, () => b.real('elodie'), () => b.real('nico'), () => b.real('sol'), () => b.real('anna')]);
 
-    await b.frame('Both teams have played their four words or used up their bricks: the podium. Team 1 found more words.',
-      [() => b.mockTv(tv('Pyramide · Classic', `<div class="col" style="align-items:center;justify-content:center;gap:30px">
-          <div class="players">${team1.map((w) => `<figure>${avatar(w, 12)}<figcaption>${player(w)}</figcaption></figure>`).join('')}</div>
-          <p class="big">🥇 Élodie &amp; Nico · 4 words · 11 bricks</p><p class="dim big">🥈 Pierre &amp; Sol · 3 words · 13 bricks</p></div>`))]);
+    await play.guess(c1.word, false);
+    const c2 = (await play.giveClue())!;
+    await sleep(1200);
+    await b.frame(`Nico guessed “${NOTES.get(c1.word)!.wrong}”: wrong, and shown with ✗ in the log, so it’s team 2’s turn. Pierre gives a clue, “${c2.clue}”, for his own word, and Sol guesses next. Élodie, watching, sees the clues and guesses, and her own team’s word, but not team 2’s.`,
+      [b.tv, () => b.real('pierre'), () => b.real('sol'), () => b.real('elodie')]);
 
-    await b.frame('Back in Pyramide’s lobby. Pierre switches to the bidding duel and keeps the teams.',
-      [() => b.mockTv(tv('Pyramide · lobby', `<div class="col">${tvPlayers(pyramidePlayers)}</div>
-          <div class="col" style="flex:0 0 560px"><div class="panel"><h2>Bidding duel</h2><p>${player('elodie')} &amp; ${player('nico')}</p><p>vs ${player('pierre')} &amp; ${player('sol')}</p>
-          <p class="dim">5 words · last game: Élodie &amp; Nico</p></div></div>`)),
-        () => b.mockPhone('pierre', phone('pierre', `<h2>Pyramide</h2>${seg('Mode', ['Classic', 'Bidding duel'], 'Bidding duel')}
-          <div class="card"><b>Team 1</b>${player('elodie')}${player('nico')}</div><div class="card"><b>Team 2</b>${player('pierre')}${player('sol')}</div>
-          <button class="primary">▶ Start</button><button class="danger">End Pyramide</button>`))]);
+    await play.guess(c2.word, false);
+    const c3 = (await play.giveClue())!;
+    await play.guess(c3.word, true);
+    await sleep(2000);
+    await b.frame(`Back to team 1: Élodie’s second clue, “${c3.clue}”, and Nico finds ${c3.word.toUpperCase()}. The word shows to everyone, and on team 1 the roles swap: Nico now sees the next word on his phone and gives the clues, Élodie guesses. First it’s team 2’s turn.`,
+      [b.tv, () => b.real('nico'), () => b.real('elodie')]);
 
-    await b.frame('The duel’s bidding. Both clue givers see the same word. Élodie offers to get it across in 4 clues; Pierre bids lower or passes. The guessers only see the bids.',
-      [() => b.mockTv(pyramideTv({ mode: 'Bidding duel · word 1 of 5', left: [13, 13], words: [0, 0], turn: 1,
-          middle: `<div class="panel" style="align-items:center"><span class="dim">Élodie bids</span><b style="font-size:72px;color:var(--accent)">4</b><span class="dim">Pierre: lower, or pass?</span></div>` })),
-        () => b.mockPhone('elodie', phone('elodie', `<div class="word">PARAPLUIE</div><p class="hint">You bid 4. Waiting for Pierre.</p>`)),
-        () => b.mockPhone('pierre', phone('pierre', `<div class="word">PARAPLUIE</div><p class="hint">Élodie bids 4 clues.</p>
-          <div class="row"><button>−</button><b style="text-align:center;font-size:30px">3</b><button>+</button></div><button class="primary">Bid 3</button><button>Pass: Élodie plays</button>`)),
-        () => b.mockPhone('nico', phone('nico', `<p class="hint">Bidding</p><div class="card"><span>Élodie bids <b>4</b></span><span class="hint">Pierre is deciding…</span></div>`))]);
+    await play.finishClassic();
+    await minigameIs(b, 'podium');
+    await sleep(3000);
+    await b.frame('Both teams found their four words, so the round is over: the podium. Team 1 used fewer bricks for the same four words (5 against 8), so it ranks first. Only Pierre’s phone has “Back to the lobby”.',
+      [b.tv, () => b.real('pierre'), () => b.real('anna')]);
 
-    await b.frame('Pierre won the bid at 3: he has 3 clues to get Sol to the word. Found: a point for team 2; not found: a point for team 1.',
-      [() => b.mockTv(pyramideTv({ mode: 'Bidding duel · word 1 of 5 · Pierre has 3 clues', left: [13, 11], words: [0, 0], turn: 1,
-          middle: said('pierre', 'clue', 'pluie') + said('sol', 'guess', 'orage', '<span style="color:var(--bad)">✗</span>') + said('pierre', 'clue', 'ouvrir') })),
-        () => b.mockPhone('pierre', phone('pierre', `<div class="word">PARAPLUIE</div><div class="field">Your clue…</div><button class="primary">Give the clue (1 left)</button>`)),
-        () => b.mockPhone('sol', phone('sol', `<p class="hint">Pierre’s clues · 1 left</p><div class="card"><b>pluie</b><span class="hint">you said orage ✗</span><b>ouvrir</b></div><div class="field">Your guess…</div><button class="primary">Guess</button>`))]);
+    await P.tap('#btn-back-to-lobby');
+    await minigameIs(b, 'lobby');
+    await P.tap('#btn-settings-lobby');
+    await P.tap('Bidding duel');
+    await b.d.tv.waitFor(`window.bloko.minigame()?.view.settings.mode === 'duel'`);
+    await sleep(1000);
+    await b.frame('Back in the lobby, everyone is still on their spot, so the teams stay. Pierre opens ⚙ and switches the mode to the bidding duel. The TV shows the last game’s winners and the new mode.',
+      [b.tv, () => b.real('pierre')]);
 
-    await b.frame('After five words, the duel’s podium, then back to the lobby. Pierre ends Pyramide.',
-      [() => b.mockTv(tv('Pyramide · Bidding duel', `<div class="col" style="align-items:center;justify-content:center;gap:30px">
-          <div class="players">${team2.map((w) => `<figure>${avatar(w, 12)}<figcaption>${player(w)}</figcaption></figure>`).join('')}</div>
-          <p class="big">🥇 Pierre &amp; Sol · 3 points</p><p class="dim big">🥈 Élodie &amp; Nico · 2 points</p></div>`)),
-        () => b.mockPhone('pierre', phone('pierre', `<h2>Pyramide</h2><p class="hint">Last game: Pierre &amp; Sol</p><button class="primary">▶ Play again</button><button class="danger">End Pyramide</button>`))]);
+    await P.tap('#sheet-settings [data-close]');
+    await P.tap('#btn-start');
+    await minigameIs(b, 'running');
+    await sleep(500);
+    const opener = (await whoShows(b, '#pyr-bid'))!;
+    await play.bid(opener, 1);
+    const rival = (await whoShows(b, '#pyr-pass'))!;
+    await sleep(1200);
+    const word: string = await b.phone(opener).ev(`document.getElementById('pyr-word-text').textContent`);
+    await b.frame(`The duel’s bidding, for the word ${word.toUpperCase()}: both clue givers see it, the guessers and the TV don’t. Team 1’s clue giver, Élodie, offers to get it across in 4 clues. Pierre can bid lower or pass. Nico, a guesser, only sees the bids.`,
+      [b.tv, () => b.real(opener), () => b.real(rival), () => b.real('nico')]);
 
-    await b.frame('Back in the main game, the reward: Nico’s phone counts down 3, 2, 1 and his wisp turns into his character for good.',
+    await play.bid(rival);
+    await b.phone(opener).tap('#pyr-pass');
+    const d1 = (await play.giveClue())!;
+    await play.guess(d1.word, false);
+    const d2 = (await play.giveClue())!;
+    await sleep(1200);
+    await b.frame(`Élodie passed, so Pierre’s bid of 3 plays: he has 3 clues to get Sol to ${d1.word.toUpperCase()}. He gave “${d1.clue}”, Sol guessed “${NOTES.get(d1.word)!.wrong}” (✗), and Pierre gave “${d2.clue}”: one brick left, and Sol guesses next. Found: a point for team 2; not found in time: a point for team 1.`,
+      [b.tv, () => b.real('pierre'), () => b.real('sol')]);
+
+    await play.guess(d2.word, true);
+    await play.finishDuel();
+    await minigameIs(b, 'podium');
+    await sleep(3000);
+    await b.frame('After five words, the duel’s podium: Pierre and Sol have 3 points, Élodie and Nico 2.',
+      [b.tv, () => b.real('pierre')]);
+
+    await P.tap('#btn-back-to-lobby');
+    await minigameIs(b, 'lobby');
+    await endMinigame(b, P);
+    await sleep(1500);
+    await b.frame('Pierre goes back to the lobby and ends Pyramide (two taps): everyone is back in the main game’s room.',
+      [b.tv, () => b.real('pierre')]);
+
+    await b.frame('Planned: back in the main game, the reward. Nico’s phone counts down 3, 2, 1 and his wisp turns into his character for good. This waits for Pyramide’s place in the story.',
       [() => b.mockTv(tv('Young adulthood in Vienna', `<div class="col" style="justify-content:flex-end"><div class="players">
           ${['elodie', 'pierre', 'sol', 'nico'].map((w) => `<figure>${avatar(w, 9)}<figcaption>${player(w)}${w === 'nico' ? ' 🎉' : ''}</figcaption></figure>`).join('')}</div></div>`, wisp('anna', 80, 40))),
         () => b.mockPhone('nico', phone('nico', `<div style="flex:1;display:grid;place-items:center"><b style="font-size:140px;color:var(--accent)">1</b></div><p class="hint" style="text-align:center">You’re becoming Nico…</p>`, { wisp: true }))]);
   },
 };
-
 const moments: Sequence = {
   id: 'moments',
   title: 'Edge moments',

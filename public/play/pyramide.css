@@ -1,0 +1,90 @@
+/* Pyramide's phone screens (pyramide-ui.js). Top-aligned: opening the keyboard never makes the page jump. */
+
+#view-pyramide {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: calc(10px + env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+#view-pyramide .pyr-top { padding-right: 48px; /* the ☰ button */ }
+
+/* both teams, side by side: a brick strip that empties as clues are given */
+#view-pyramide .pyr-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#view-pyramide .pyr-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 6px;
+  border-radius: 12px;
+  background: var(--bg-2);
+  border: 2px solid transparent;
+  text-align: center;
+}
+#view-pyramide .pyr-team.t1 { --team: var(--team1); }
+#view-pyramide .pyr-team.t2 { --team: var(--team2); }
+#view-pyramide .pyr-team.turn { border-color: var(--team); }
+#view-pyramide .pyr-team.mine .pyr-team-name::after { content: ' · you'; font-weight: 400; color: var(--fg-dim); }
+#view-pyramide .pyr-team-name { color: var(--team); }
+#view-pyramide .pyr-team small { color: var(--fg-dim); font-size: 13px; }
+#view-pyramide .pyr-score { font-size: 34px; line-height: 1.1; }
+#view-pyramide .pyr-bricks { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; min-height: 8px; margin-top: 4px; }
+#view-pyramide .pyr-bricks i { width: 14px; height: 8px; border-radius: 2px; background: #2b3138; }
+#view-pyramide .pyr-bricks i.left { background: linear-gradient(#ffe08a, #d4a017); }
+
+#view-pyramide .pyr-status { margin: 0; text-align: center; font-size: 17px; font-weight: 600; }
+
+/* the clue giver's word */
+#view-pyramide .pyr-word {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--bg-2);
+  border: 2px solid var(--accent);
+}
+#view-pyramide .pyr-word small { color: var(--fg-dim); font-size: 13px; }
+#view-pyramide .pyr-word strong { font-size: 34px; letter-spacing: 1px; text-transform: uppercase; overflow-wrap: anywhere; color: var(--accent); }
+
+#view-pyramide .pyr-form { display: flex; flex-wrap: wrap; gap: 8px; }
+#view-pyramide .pyr-form input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 18px; /* ≥ 16 px: iOS does not zoom on focus */
+  padding: 12px;
+  color: var(--fg);
+  background: var(--bg-2);
+  border: 2px solid var(--fg-dim);
+  border-radius: 12px;
+}
+#view-pyramide .pyr-form input:focus { border-color: var(--accent); outline: none; }
+#view-pyramide .pyr-form button { flex: 1 1 100%; touch-action: manipulation; }
+#view-pyramide .pyr-form .error { flex: 1 1 100%; margin: 0; text-align: center; }
+#view-pyramide #pyr-skip { touch-action: manipulation; }
+#view-pyramide #pyr-error { margin: 0; text-align: center; }
+
+/* the duel's bid: − n +, then Bid and Pass */
+#view-pyramide .pyr-bid { display: flex; flex-direction: column; gap: 8px; }
+#view-pyramide .pyr-bid .stepper { display: flex; align-items: center; justify-content: center; gap: 18px; }
+#view-pyramide .pyr-bid .stepper output { min-width: 2ch; text-align: center; font-size: 40px; font-weight: 800; }
+#view-pyramide .pyr-bid .stepper button { width: 56px; height: 56px; font-size: 26px; padding: 0; touch-action: manipulation; }
+#view-pyramide .pyr-bid button { touch-action: manipulation; }
+
+/* the log, newest first: a team chip and what was said */
+#view-pyramide .pyr-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+#view-pyramide .pyr-log li { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 10px; background: var(--bg-2); color: var(--fg-dim); font-size: 15px; }
+#view-pyramide .pyr-log li.now { color: var(--fg); font-size: 17px; }
+#view-pyramide .pyr-log li.resolved { color: var(--fg); font-weight: 700; }
+#view-pyramide .pyr-log li.right { color: #6fdc8c; }
+#view-pyramide .pyr-log li.wrong { color: var(--bad); }
+#view-pyramide .pyr-chip { flex: none; padding: 1px 7px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #111418; }
+#view-pyramide .pyr-log li.t1 .pyr-chip { background: var(--team1); }
+#view-pyramide .pyr-log li.t2 .pyr-chip { background: var(--team2); }
+#view-pyramide .pyr-line { overflow-wrap: anywhere; }
+
+.rule-emoji { font-size: 26px; }

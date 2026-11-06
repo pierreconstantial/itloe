@@ -71,6 +71,28 @@ export function step(pos, vx, vy, dt, scene) {
   };
 }
 
+/** Within this distance of a free spot's centre, a walker snaps onto it… */
+export const SNAP_IN = 0.45;
+/** …and stays there until the stick has pushed it this far from the centre: further than SNAP_IN, so it never
+ *  flickers on and off at the edge. Both are inside a spot, so snapping never changes which spot one is on. */
+export const SNAP_OUT = 0.7;
+
+/**
+ * Snapping onto a spot's centre on a walkable lobby. `free` is where the stick alone has taken the walker;
+ * `snapped` the centre it was held at, or null. A held walker stays at its centre while `free` is within SNAP_OUT
+ * of it; otherwise it snaps to the nearest centre within SNAP_IN of `free`, if any.
+ * @param {{ x: number, y: number }} free @param {{ x: number, y: number } | null} snapped
+ * @param {readonly { x: number, y: number }[]} centres
+ * @returns {{ x: number, y: number } | null} the centre it's held at now, or null: it stands at `free`
+ */
+export function snapTo(free, snapped, centres) {
+  const d = (/** @type {{ x: number, y: number }} */ c) => Math.hypot(free.x - c.x, free.y - c.y);
+  if (snapped && d(snapped) <= SNAP_OUT) return snapped;
+  let best = null;
+  for (const c of centres) if (d(c) <= SNAP_IN && (!best || d(c) < d(best))) best = c;
+  return best;
+}
+
 /** Wire form: 2 decimals is far below a visible pixel on the TV. @param {Pos} p @returns {Pos} */
 export function roundPos(p) {
   return { x: Math.round(p.x * 100) / 100, y: Math.round(p.y * 100) / 100, dir: p.dir, moving: p.moving };

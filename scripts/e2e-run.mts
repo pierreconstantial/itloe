@@ -1,7 +1,7 @@
 // The e2e runner: the one way to run the end-to-end suites. Blocks until every requested suite is done,
 // then prints one line per suite, the FAIL lines of failed ones, and an overall line; exits 1 on a failure.
 // Usage: npm run e2e [-- [--shots <dir> [--compare <ref>]] <suite>…]      (no suite: all of them)
-//   suites: base resume presence campaign quiz inventory tv phone; phone:<n> = ONLY=<n>, tv:<section> = ONLY=<section>
+//   suites: base resume presence campaign quiz pyramide inventory tv phone; phone:<n> = ONLY=<n>, tv:<section> = ONLY=<section>
 //   --shots <dir>: SHOTS=<dir>/<suite> for the tv and phone suites (each must be new or empty).
 //   --compare <ref>: then compares those screenshots with <ref>/<suite>, an earlier --shots folder (e2e-compare.mts).
 //   LOCK_MS and E2E_SLOW pass through.
@@ -30,6 +30,7 @@ const SUITES: Record<string, { script: string, browser?: boolean, server?: boole
   tv: { script: 'e2e-tv.mts', browser: true, focus: true },
   campaign: { script: 'e2e-campaign.mts' },
   quiz: { script: 'e2e-quiz.mts' },
+  pyramide: { script: 'e2e-pyramide.mts', browser: true },
   inventory: { script: 'e2e-inventory.mts' },
   resume: { script: 'e2e-resume.mts' },
   presence: { script: 'e2e-presence.mts' },

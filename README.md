@@ -39,6 +39,7 @@ The code only keeps stray devices out; it is not a password.
 - **Wisp Mode.** A late player selects a predefined character and joins as a tiny floating light with a hint of their character's color. Wisps have no name label and pulse slightly while moving. They can tap **Shine** in reactions or beside nearby objects, but cannot speak, use objects, or affect the story through their Wisp action. During a game, everyone who isn't playing (not one of its players, not ready, or out of the round) floats over the TV as a wisp too. When the story introduces that character, the phone vibrates and counts down **3, 2, 1** before the TV reveals the character with an emote. Nico is available as a fifth character slot.
 - **Pierre is the game master.** On Pierre's phone, **☰ → 🎲 Game master** is available even when he is a Wisp. He can move the party, unlock or lock a place, set flags and counters, and see *why* something is still locked. Every change needs a second tap to confirm. He also starts and ends every game, sets it up in its lobby, and starts its rounds.
 - **Quizzes.** Questions in French on the TV; players answer on their phones with 4 choices or by typing (spelling mistakes, accents and articles are forgiven; years must be exact). The game master can correct any verdict on the reveal. A question is never asked twice in the same evening.
+- **Pyramide.** A word game in French, in teams of two: one player gives one-word clues and the other guesses the secret word, and each clue costs a brick. Players walk their characters onto spots in its lobby to choose their team and role. There is a classic mode (each team plays its own words with a few bricks) and a bidding duel (both teams play the same words and bid how few clues they need). The word shows only on its clue givers' phones, and a remote player can play from the phone alone, with no TV. A word is never used twice in the same evening.
 - **A phone died or got lost?** Open the address on any other phone and tap your character: it carries on with your board and score. The old phone, if it comes back, shows "Continued on another device".
 - **Someone left mid-game?** The game master can take an offline player out, or end the game, from ☰ on their phone.
 
@@ -57,6 +58,7 @@ Set them in front of `npm start`, e.g. `PORT=8080 npm start`.
 | `BLOKO_NEW=1` | Start a brand-new game instead of resuming the saved one. Same as `npm start -- --new`. |
 | `BLOKO_VAR` | Folder for saved data (default `var/`). |
 | `BLOKO_QUIZ_DIR` | Folder of the quiz question bank (default `data/quiz/`). |
+| `BLOKO_PYRAMIDE_DIR` | Folder of Pyramide's word list (default `data/pyramide/`). |
 | `ITLOE_CONTENT=sample` | Play the sample content (`shared/campaign/sample.js`) instead of the birthday story (`shared/campaign/story.js`). The end-to-end suites run on it. |
 | `ITLOE_CONTENT=minigame:<kind>` | Start at a hub and one tableau with that minigame and its sample settings (`sampleSettings` in its rules), which Pierre starts from his phone, without the story's opening, e.g. `ITLOE_CONTENT=minigame:quiz BLOKO_VAR="$(mktemp -d)" PORT=3199 npm start -- --new`. An unknown kind, or any `ITLOE_CONTENT` value other than these two, refuses to boot. |
 
@@ -77,7 +79,7 @@ The service also needs `BLOKO_ADMIN_TOKEN`: without it, nobody can use the admin
 
 Pushing to `production` runs [the production workflow](.github/workflows/production.yml): locked dependency install, type-checking, tests, save/resume checks, packaging and an extracted-runtime access test. It then publishes a GitHub Release tagged `prod-<full-commit-sha>` with:
 
-- `itloe-<full-commit-sha>-linux-x64.tar.gz`: `server/`, `shared/`, `public/`, `data/quiz/`, `package.json`, `package-lock.json`, production `node_modules/`, and `release.json`.
+- `itloe-<full-commit-sha>-linux-x64.tar.gz`: `server/`, `shared/`, `public/`, `data/quiz/`, `data/pyramide/`, `package.json`, `package-lock.json`, production `node_modules/`, and `release.json`.
 - `SHA256SUMS`: the SHA-256 checksum and archive filename.
 
 `release.json` is `{ "commit": "<full-sha>", "nodeMajor": 24, "platform": "linux", "arch": "x64" }`. Node executes the TypeScript directly. No development tools, saves, raw quiz imports or secrets are packaged. For a manual build on Linux x64 with Node 24, run `npm run release` (or `npm run release -- <commit>`); output is in ignored `dist/release/`. The builder packages **committed files**, so uncommitted edits are not released.
@@ -154,7 +156,7 @@ The application runs locally on Node.js 24+, with HTTP and WebSocket traffic on 
 | `public/commun/` | Shared browser helpers and CSS |
 | `public/sim/` | Development page combining the TV and phone pages |
 | `public/admin/` | Admin page: the server's state, recent events and the pages' errors, from `server/admin.ts` |
-| `data/quiz/` | Server-only question banks |
+| `data/quiz/`, `data/pyramide/` | Server-only question banks and Pyramide's word list |
 | `test/`, `scripts/` | Node unit tests, end-to-end suites, simulation, and data import tools |
 
 Phones send actions; the server binds them to a player, validates them, runs the shared reducers, and saves and broadcasts accepted changes. The server handles the evening's own messages and passes every other one to the running minigame's server code, listed in `server/minigames.ts` beside the rules list in `shared/minigames.js`. The campaign owns the party and progression, with the running minigame (its lobby, rounds and podiums) nested inside it. Phone placement previews use the same rules as the server and reconcile with its next view.
@@ -196,6 +198,7 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
   | `campaign` | false start → unlocks → news acked by two TVs → doors, kill -9 at each step; chat, emotes and object actions (relay, history, rate limits, where interact works); `pos` while a minigame runs dropped unless from a wisp |
   | `inventory` | rewards land in the right inventory (chooser / winner / all), survive kill -9 and a reclaim; the game master's give/take, unknown items refused |
   | `quiz` | quiz over real sockets: no answer on the wire before the reveal, judging, override, resume (plays a fixed copy of `placeholder.json`) |
+  | `pyramide` | Pyramide in headless Chrome (four phones, a TV): a classic round and a bidding duel played through the phones' forms, from the lobby's spots to the podium; the word in play on its clue givers' phones and on no guesser's phone or TV screen; a clue giver reconnecting mid-word (plays a fixed word bank) |
   | `tv` | the TV page in headless Chrome: the minigame's lobby, the room again after its end, the minigame screens' teardown; one section: `tv:<section>` |
   | `phone` | phone pages in headless Chrome: session never lost, reclaim, the minigame's lobby, the game master's round controls, campaign screens, quiz and the screens' teardown, room code, wisps over a minigame; one part: `phone:<n>` |
 

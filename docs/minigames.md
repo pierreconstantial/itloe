@@ -14,16 +14,17 @@ A minigame is a few files of its own, registered in four lists. The main game ow
 - **Evening**: one playthrough of the campaign, from the opening on, saved and resumed as one.
 - **Main game**: the RPG. It owns the party, joining, presence, the hub and the worlds, the story, the game master, and who shows as a wisp. Its engine is the campaign ([`shared/campaign/index.js`](../shared/campaign/index.js)).
 - **Node**: a place in the story's content, by kind: the **hub**, where the story opens out; a **world**, one period of Élodie's life, entered from the hub; a **tableau**, one spot inside a world (or the opening, under the hub). The party is at one node at a time (`campaign.at.node`). A tableau's content field `activity` holds what happens there: a minigame or a scene.
-- **Minigame**: a registered game with its own rules, e.g. `blocks` and `quiz`; a tableau's `activity.kind` names it. At its tableau it runs from the game master's start to his end. `campaign.at.activity` holds the running minigame's state, null otherwise.
+- **Minigame**: a registered game with its own rules, e.g. `blocks`, `quiz` and `pyramide`; a tableau's `activity.kind` names it. At its tableau it runs from the game master's start to his end. `campaign.at.activity` holds the running minigame's state, null otherwise.
 - **Lobby**: a minigame's own screens before and between its rounds. Eligible players get ready there, and the game master sets the minigame up, starts rounds and ends it.
-- **Plain lobby**: the lobby shared code offers as a building block: "I'm ready", the game master's settings and Start, a round with the ready players, its podium, "Back to the lobby", and the end. Blocks and quiz use it.
+- **Plain lobby**: the lobby shared code offers as a building block: "I'm ready", the game master's settings and Start, a round with the ready players, its podium, "Back to the lobby", and the end. Blocks, quiz and Pyramide use it; Pyramide's has spots.
 - **Round**: one play of a running minigame, from its start to its podium. After the podium the minigame is back in its lobby.
 - **Status**: what a running minigame shows, derived from its state: `lobby`, `running` (a round) or `podium`.
 - **Eligible players**: the party members the main game hands a minigame: the characters its tableau's content names, among the members who haven't left; without names, every member who isn't a story wisp.
-- **Ready**: an eligible player who has tapped "I'm ready" for the next round.
+- **Ready**: an eligible player who has tapped "I'm ready" for the next round, or, in a lobby with spots, who holds a spot.
 - **Game master**: the one person who runs the evening: Pierre, as every content names him (`gameMaster`). Whoever holds that character is the game master, wisp or not, and nobody while he isn't in the evening ([`gameMasterId`](../shared/campaign/index.js)). The role never passes to anyone else.
 - **Walkable lobby**: a lobby where the players the minigame shows walk over its screens as their characters, with the joystick on their phone, chatting and emoting, as in the main game's rooms.
 - **Spot**: a marked place on a walkable lobby that an eligible player takes by stepping onto it, or by tapping it on their phone.
+- **Start position**: where a player stands on starting to walk a walkable lobby, unless they hold a spot.
 - **Wisp**: a player shown as a small light instead of their character. While no minigame runs, a player whose character the story hasn't introduced yet (the `wisp` status); while one runs, every connected player it doesn't show itself ([`isWisp`](../shared/campaign/index.js)).
 - **Room**: what the TV draws for a node: a space with walls and furniture where avatars walk (`ROOMS` in [`shared/scene.js`](../shared/scene.js)). A node names its room, else it gets the party room ([`roomAt`](../shared/campaign/content.js)). Minigames have no rooms.
 - **The room at a tableau**: the main game's room at a minigame's tableau, while the minigame doesn't run. The game master starts the minigame there.
@@ -43,8 +44,8 @@ A minigame is a few files of its own, registered in four lists. The main game ow
 
 A minigame chooses its lobby:
 
-- **In the plain lobby**, as blocks and quiz: it writes a round's rules, server code and screens, and wraps each in the plain lobby's building block. Everything about the lobby is then shared.
-- **With a lobby of its own**, when the plain lobby doesn't fit (Pyramide: teams and modes): it writes the minigame's rules, server code and screens against the same contract the plain lobby implements (`MinigameRules`, `MinigameServer`, `PhoneScreen`, `TvScreen`), and reuses the pieces listed under [What shared code offers](#what-shared-code-offers).
+- **In the plain lobby**, as blocks, quiz and Pyramide: it writes a round's rules, server code and screens, and wraps each in the plain lobby's building block. Everything about the lobby is then shared.
+- **With a lobby of its own**, when the plain lobby doesn't fit (no minigame does yet): it writes the minigame's rules, server code and screens against the same contract the plain lobby implements (`MinigameRules`, `MinigameServer`, `PhoneScreen`, `TvScreen`), and reuses the pieces listed under [What shared code offers](#what-shared-code-offers).
 
 ### Registration lines
 
@@ -62,7 +63,7 @@ Then its type entries in [`shared/campaign/types.js`](../shared/campaign/types.j
 - **At its start** (the game master's `startMinigame`, from the room at the tableau): `open` gets the seed, the settings (the tableau's content over the minigame's defaults), the eligible players in party order, and the time (`MinigameStart` in [`shared/minigames.js`](../shared/minigames.js)). The game master's changes to the settings live in the minigame's state and end with it: each start begins from the content's settings.
 - **While it runs**, every change in who is eligible, as the minigame's actions `join { id, character }` (joined the evening, or incarnated by the story) and `leave { id }` (left the evening, or became a story wisp where the tableau names nobody). The minigame decides what they mean: blocks marks a player who leaves during a round done, and the plain lobby lists a joiner, who plays from the next round on.
 - **With every action**, the game master's id (`RoundCtx`), for the minigame's own game-master-only actions. A minigame stores no game master.
-- **On a walkable lobby**, every step of a player it shows onto a spot, off it or from one to another, as its action `spot { id, spot }` (the spot's id, or null), injected by the server, never from the wire. The server reads each walker's position against the spots, edge-triggered like the doors (`spotStep` in [`shared/minigames.js`](../shared/minigames.js)): a walker's first known position only sets where it stands, and wisps never step onto a spot. Taking a spot from the phone is a step onto it. The minigame decides what a step means (Pyramide: a free spot is taken, the one held before is left).
+- **On a walkable lobby**, every step of a player it shows onto a spot, off it or from one to another, as its action `spot { id, spot }` (the spot's id, or null), injected by the server, never from the wire. The server reads each walker's position against the spots, edge-triggered like the doors (`spotStep` in [`shared/minigames.js`](../shared/minigames.js)): a walker's first known position only sets where it stands, and wisps never step onto a spot. Taking a spot from the phone is a step onto it. The minigame decides what a step means (the plain lobby: a free spot is taken, the one held before is let go).
 - **With every message**, the evening's used-up content ids (`asked` in `MessageCtx`, [`server/minigames.ts`](../server/minigames.ts)): `facts.asked` plus the running minigame's finished rounds (`askedSoFar`). The quiz picks its questions outside them, so no question is asked twice in an evening, also across the rounds of one run.
 - **The content's rules for its players**, from the tableau's `activity`: `eligible` names the characters who may play (absent: every party member who isn't a story wisp); a story wisp the tableau names is eligible and plays as their character there. `allReady: true` makes the main game refuse every step into a running round until every named character is in the party and ready (without names: every eligible player). The story's opening names its four characters and requires them all ([`shared/campaign/story.js`](../shared/campaign/story.js)). One function each decides these, for the engine, the server and the clients: `eligibleOf` and `readyRuleMet` ([`shared/campaign/index.js`](../shared/campaign/index.js)).
 
@@ -73,7 +74,7 @@ Then its type entries in [`shared/campaign/types.js`](../shared/campaign/types.j
 - **Pure and deterministic.** Time, randomness and ids come in through actions and the start; the reducer does no I/O. A refused action returns the same state object: the server uses that identity to skip saving and broadcasting.
 - **The status** (`status`): `lobby`, `running` or `podium`; null for a saved state this release can't resume, which makes the server start a fresh evening and keep the old save aside. The game master can end the minigame (`endMinigame`) only while its status is `lobby`.
 - **Ready** (`ready`): who is ready for the next round. The main game checks the content's ready rule over it; the minigame's own minimum is its own (blocks and quiz: one; Pyramide: four).
-- **A walkable lobby** (`spots`, optional): its spots while the players it shows walk, null otherwise (absent: never; blocks and quiz). Each spot (`Spot`) has an id, a label for the phone, its area in world units (16 × 9) and its holder, from the minigame's state: who holds a spot is saved with the minigame, while positions are in memory. After a restart a holder is put back on its spot.
+- **A walkable lobby** (`spots`, optional): its spots while the players it shows walk, null otherwise (absent: never; blocks and quiz). Each spot (`Spot`) has an id, a label for the phone, its area in world units (16 × 9) and its holder, from the minigame's state: who holds a spot is saved with the minigame, while positions are in memory. Its start positions (`startPositions`, in world units) go where its TV screen leaves room, clear of its spots and panels. Whoever starts walking (the minigame's start, a join, back from a round they sat out, a restart) is placed by the server: a holder on its spot's centre, anyone else on the first start position nobody stands on.
 - **Whom it shows** (`shows`): the players it draws itself. Every other connected party member floats over its screens as a wisp. The plain lobby shows its eligible players in the lobby, the round's players still playing during a round, and the round's players on its podium; so players who aren't eligible, aren't ready or are out of the round are wisps.
 - **Results** (`result`): what a round reports once it turned `podium` (`RoundResult`). The main game keeps it in `campaign.at.results` in the same step, and when the game master ends the minigame it records every kept result in order, each with its counters and the unlocks and rewards that follow, in one step and one save. In order, so a `winner` reward goes to the winners of the round that completed the node. The counters: `<kind>.played`, `<kind>.won.<character>`, `node.<id>.finished`, the totals per kind, the minigame's own counters under its name, and `asked`. A minigame ended before any round finished records nothing. Moving the party elsewhere (the game-master panel's goto, or back) ends the minigame first in the same way, dropping a running round.
 - **Deadlines.** `deadline` names the next one, and shared code arms a timer that fires `deadlineAction`. A timer is never cancelled, so the reducer must refuse a stale one: blocks compares the action's `deadline` with the state's. `shiftDeadline` moves the clock by a downtime, so a timed round keeps its remaining time across a restart or a sleeping laptop.
@@ -88,6 +89,7 @@ Then its type entries in [`shared/campaign/types.js`](../shared/campaign/types.j
 - **`status`**: `running` or `finished` (its podium).
 - **`leave` and the game master's actions.** A round gets `leave` when a player stops being eligible, and `endGame` from the game master. "Take a player out" reaches it as `retire` when its rules set `retire: true`, else as the target's `leave`. Blocks: a player who leaves or is taken out stops playing but stays ranked, and the last player out ends the round. A round that can't carry on without someone ends with the scores so far.
 - `result`, the deadlines, the settings and `describe`, as above.
+- **Spots** (optional, `spots`: their ids, labels and areas, with `startPositions` beside them): the lobby is walkable, and an eligible player is ready by holding a spot, with no "I'm ready". A step onto a free spot takes it and lets go of the one held before; stepping off lets go. `init` gets each player's spot (`RoundStart`), and returns null unless the spots it needs are held (Pyramide: all four). Back from the podium, the round's players hold the spots they left, except those who left or were taken out. Pyramide ([`shared/pyramide.js`](../shared/pyramide.js)) uses them.
 
 ### A lobby of its own
 
@@ -101,12 +103,22 @@ A minigame with its own lobby implements `MinigameRules` directly, and has to:
 
 Its messages use the plain lobby's names where they mean the same (`ready`, `config`, `start`, `lobby`, `endGame`, `retire`: [PROTOCOL.md](../PROTOCOL.md), "Minigames and their lobbies"), and its own names for the rest.
 
+## Pyramide: a plain lobby with spots
+
+Pyramide ([`shared/pyramide.js`](../shared/pyramide.js), [`server/pyramide.ts`](../server/pyramide.ts), [`public/play/pyramide-ui.js`](../public/play/pyramide-ui.js), [`public/screen/pyramide-screen.js`](../public/screen/pyramide-screen.js)) is the example of a minigame in the plain lobby with a walkable lobby:
+
+- **Spots instead of "I'm ready".** Four spots (team 1's clue giver and guesser, team 2's) in its round rules ([In the plain lobby: round rules](#in-the-plain-lobby-round-rules)): the spot a player holds is their team and role, and a round starts when all four are held. Its one setting, the mode, is an ordinary setting.
+- **Four players are needed,** so a player who leaves or is taken out ends the round with the scores so far (`retire: true`).
+- **Server-side judging.** The server turns a guess into a verdict before the reducer sees it (`judgeGuess`), so a smarter check replaces one function. The word bank is in `data/`, checked at boot and never served; `inputs` hands a round the words not yet used this evening, and the round's `asked` lists the words it drew.
+- **Hidden information:** the word in play, see [Hidden information](#hidden-information).
+- **The screens:** the lobby's are the plain lobby's; Pyramide's own phone and TV screens draw a round.
+
 ## Server code
 
 `MinigameServer` and `RoundServer` in [`server/minigames.ts`](../server/minigames.ts) describe each hook. In short:
 
 - **`message`** gets every message from a party member that the main game doesn't handle, with the sender's id, the time, the game master's id, the state and `asked`, and returns an action, a refusal or nothing. Build the action field by field from the message, so server-only inputs (time, deadlines, a round's inputs) never come from the wire (blocks: `place`). A guest's game-master message gets `not-gm`, the game master's at the wrong moment `refused`, and a message the minigame doesn't know `not-playing`.
-- **`view`** is what every phone and TV gets, the same for everyone. Filter it here: the quiz hides answers until the reveal.
+- **`view`** is what every phone and TV gets, the same for everyone. Filter it here: the quiz hides answers until the reveal. What the view must carry for some screens but not others is [hidden information](#hidden-information).
 - **`onChange`** runs after every change of its state, before the save (blocks: solo best scores).
 - **The io** (`MinigameIo`) belongs to one run of the minigame, from its start to its end ([`server/round.ts`](../server/round.ts)): `apply` runs a later action (the quiz's verdict), `send` sends an unsaved message. After the minigame ends, whatever goes through it is dropped.
 
@@ -116,7 +128,7 @@ In the plain lobby, `plainLobbyServer(roundServer)` ([`server/plain-lobby.ts`](.
 
 - **The room at the tableau**, while the minigame doesn't run: on the TV the band with the TV entry's `title`, the guests and the join QR; on the phones the walking pad, and for the game master "▶ Start the <name>" (the phone entry's `name`).
 - **Mounting.** The frame mounts the minigame's screens when it starts (or when a page loads or reconnects while it runs), and unmounts them when it ends. A phone gets them while the minigame shows its player, and always on the game master's phone.
-- **Walking on its lobby,** while its `spots` aren't null: the TV draws the players it shows as their characters over its screen, offline ones dimmed where they stood, with chat bubbles and emotes. The phone shows them the frame's walk panel under the minigame's screens: the joystick, the spot they're on and the free spots, each taken with a tap (`takeSpot`). The minigame's TV screen draws its spots in a `worldBox` with `placeInWorld` ([`public/screen/dom.js`](../public/screen/dom.js)): the same projection as the characters, so they line up; its phone screens leave the bottom of the page to the walk panel.
+- **Walking on its lobby,** while its `spots` aren't null: the TV draws the players it shows as their characters over its screen, offline ones dimmed where they stood, with chat bubbles and emotes. The phone shows them the frame's walk panel, the joystick, under the minigame's screens, which list the spots, each free one taken with a tap (`takeSpot`; the plain lobby does it). Near a free spot's centre, or the one it holds, the character snaps onto the centre, and walks off when the stick pushes it further (`snapTo` in [`public/play/movement.js`](../public/play/movement.js)). The TV screen draws the spots in a `worldBox` with `placeInWorld` ([`public/screen/dom.js`](../public/screen/dom.js)): the same projection as the characters, so they line up (the plain lobby's TV screen does it for every plain-lobby minigame, in place of its standing players); phone screens leave the bottom of the page to the walk panel.
 - **Wisps over its screens.** The TV draws every connected party member the minigame doesn't show as a wisp over its screen, and their phones get the wisp's walking pad and Shine. Every wisp has the same abilities: walking and Shine, no speech, no objects. One function decides who is a wisp, for the server, the TV and the phone ([`isWisp`](../shared/campaign/index.js)).
 - **The plain lobby's screens** ([`public/play/plain-lobby.js`](../public/play/plain-lobby.js), [`public/screen/plain-lobby.js`](../public/screen/plain-lobby.js)): the lobby with the eligible players ("✓ ready" / "not ready", offline ones dimmed), "I'm ready", the game master's ⚙ Settings, "▶ Start" (later "▶ Play again") with how many are ready and "End the <name>"; the last round's winner; the round's screens while it runs; the podium with the game master's "Back to the lobby". A minigame with its own lobby can follow them for its own.
 - **The podium**: [`public/play/podium.js`](../public/play/podium.js) and [`public/screen/podium-view.js`](../public/screen/podium-view.js) rank the round's players with medals, plus the minigame's extras (`PodiumExtras`: the quiz's right answers, blocks' "New best!", the TV's delay while "Time's up!" plays).
@@ -137,6 +149,15 @@ In the plain lobby, a round's screens (`RoundScreen`) add `settings` (its schema
 
 The screens build their own markup and load their own CSS (`addStylesheet` in `public/play/dom.js` and `public/screen/dom.js`), scoped under `root`; they add nothing to `public/play/index.html`. The phone's io sends messages and says who this phone is, whether it's the game master's and whether it's connected; the TV's tells whether a view directly follows the last one (no sounds for missed events).
 
+## Hidden information
+
+A view is the same for every phone and TV, so a secret that only some players may see can't be left out of it for them. Two ways:
+
+- **Filter it out** in `view`, when nobody needs it before it is revealed. The quiz does this with the answers.
+- **Send it to everyone and draw it for some,** when a few players need it while it is secret. Pyramide's word in play travels in the shared view, and only the clue givers' phones draw it: [`server/pyramide.ts`](../server/pyramide.ts) filters out the words still drawable (`view`), not the word in play; [`public/play/pyramide-ui.js`](../public/play/pyramide-ui.js) keeps it only when this phone's player gives clues, and the TV screen ([`public/screen/pyramide-screen.js`](../public/screen/pyramide-screen.js)) reads only its level. It needs nothing from the server, but every phone receives the secret, and nothing but the screens' code keeps it from showing: a player who reads their phone's traffic sees it. That suits a party of friends; it doesn't suit a game where cheating matters.
+
+Whichever way, keep the secret out of every place a screen can show it: the log, the status line, the lobby, and what a reconnecting phone draws first. [`scripts/e2e-pyramide.mts`](../scripts/e2e-pyramide.mts) checks that no guesser's phone and no TV screen shows the word in play, including a clue giver's phone after it reconnects.
+
 ## What a minigame can and can't do
 
 It can:
@@ -153,7 +174,7 @@ It can't:
 - record results: it reports each round's, and the main game records them when the minigame ends;
 - handle the main game's messages (`hello`, `join`, `leave`, `enter`, `back`, `gm`, `ack`, `pos`, `say`, `emote`, `interact`, `showJoin`, `hideJoin`, `takeSpot`, `startMinigame`, `endMinigame`): it sees their effects as actions or views;
 - switch chat or emotes off, offer object actions (those are the room's, while no minigame runs), or give wisps other abilities;
-- send different views to different players, or save anything outside its state and its own server data;
+- send different views to different players (see [hidden information](#hidden-information)), or save anything outside its state and its own server data;
 - draw before its start or after its end: the room at the tableau shows then.
 
 ## Unsaved messages

@@ -8,16 +8,23 @@
 //   join { id, character }      the main game: someone became eligible (listed, not ready)
 //   leave { id }                the main game: someone stopped being eligible; passed on to a running round
 //                               or the podium, which decide what it means
-//   ready { id, on }            an eligible player, in the lobby
+//   ready { id, on }            an eligible player, in the lobby (refused in a lobby with spots)
+//   spot { id, spot }           the server, in a lobby with spots: an eligible player now stands on that spot, or
+//                               on none (null); a free spot is taken, the one held before is let go
 //   config { id, patch }        the game master, in the lobby: the minigame's settings
 //   start { id, now, inputs }   the game master, in the lobby, with one ready player or more: a round with the
-//                               ready players, its seed from the lobby's, which then advances
+//                               ready players (each with their spot, in a lobby with spots), its seed from the
+//                               lobby's, which then advances
 //   lobby { id }                the game master, on the podium: back to the lobby; the round's players come back
-//                               ready, except those who left or were taken out, or are no longer eligible
+//                               ready, except those who left or were taken out, or are no longer eligible; in a
+//                               lobby with spots, they hold the spots they left
 //   retire { id, target }       the game master, while a round runs: the round's own rule (`retire: true`), else
 //                               the target's leave from the round
 //   anything else               the running round's own actions (endGame, place, answer, timeUp, …)
 // The round finishing turns the stage to `podium` in the same step.
+//
+// Spots: round rules that list `spots` make the lobby walkable (MinigameRules `spots`, docs/minigames.md):
+// an eligible player is ready by holding a spot, and there is no "I'm ready".
 
 import { nextSeed } from './rng.js';
 
@@ -28,6 +35,8 @@ import { nextSeed } from './rng.js';
 /**
  * A plain lobby's state. `round`: the running round, or the finished one on the podium; null in the lobby.
  * `players`: the eligible players, in party order (later ones at the end); `ready`: their ids, in that order.
+ * `holders`: in a lobby with spots, who holds each spot (spot id → player id; free spots absent), and then
+ * `ready` is the holders.
  * @template [R=any]
  * @template [T=any]
  * @typedef {{
@@ -36,6 +45,7 @@ import { nextSeed } from './rng.js';
  *   settings: T,
  *   players: { id: string, character: CharacterId }[],
  *   ready: string[],
+ *   holders: Record<string, string>,
  *   round: R | null,
  * }} PlainLobbyState
  */
@@ -45,6 +55,7 @@ import { nextSeed } from './rng.js';
  * @typedef {{ t: 'join', id: string, character: CharacterId }
  *   | { t: 'leave', id: string }
  *   | { t: 'ready', id: string, on: boolean }
+ *   | import('./minigames.js').SpotAction
  *   | { t: 'config', id: string, patch: unknown }
  *   | { t: 'start', id: string, now: number, inputs?: unknown }
  *   | { t: 'lobby', id: string }
@@ -74,6 +85,18 @@ export function plainLobby(rules) {
     return { ...s, round, ...(finished ? { stage: /** @type {const} */ ('podium') } : {}) };
   };
 
+  /**
+   * New holders, and the ready players with them (the holders, in party order).
+   * @param {S} s @param {Record<string, string>} holders @returns {S}
+   */
+  const withHolders = (s, holders) => {
+    const holding = Object.values(holders);
+    return { ...s, holders, ready: s.players.map((p) => p.id).filter((id) => holding.includes(id)) };
+  };
+
+  /** The holders `keep` keeps. @param {Record<string, string>} holders @param {(id: string) => boolean} keep */
+  const holdersKept = (holders, keep) => Object.fromEntries(Object.entries(holders).filter(([, id]) => keep(id)));
+
   /** @param {S} s @param {any} action @param {RoundCtx} ctx @returns {S} */
   const toRound = (s, action, ctx) => (s.round ? withRound(s, rules.reduce(s.round, action, ctx)) : s);
 
@@ -90,14 +113,26 @@ export function plainLobby(rules) {
         const listed = s.players.some((p) => p.id === a.id);
         const next = s.stage === 'lobby' ? s : toRound(s, { t: 'leave', id: a.id }, ctx);
         if (!listed) return next;
-        return { ...next, players: next.players.filter((p) => p.id !== a.id), ready: next.ready.filter((id) => id !== a.id) };
+        return {
+          ...next, players: next.players.filter((p) => p.id !== a.id), ready: next.ready.filter((id) => id !== a.id),
+          holders: holdersKept(next.holders, (id) => id !== a.id),
+        };
       }
 
       case 'ready': {
-        if (s.stage !== 'lobby' || typeof a.on !== 'boolean' || !s.players.some((p) => p.id === a.id)) return s;
+        if (rules.spots || s.stage !== 'lobby' || typeof a.on !== 'boolean' || !s.players.some((p) => p.id === a.id)) return s;
         if (s.ready.includes(a.id) === a.on) return s;
         const ready = a.on ? [...s.ready, a.id] : s.ready.filter((id) => id !== a.id);
         return { ...s, ready: s.players.map((p) => p.id).filter((id) => ready.includes(id)) };
+      }
+
+      case 'spot': {
+        if (!rules.spots || s.stage !== 'lobby' || !s.players.some((p) => p.id === a.id)) return s;
+        if (a.spot !== null && !rules.spots.some((spot) => spot.id === a.spot)) return s;
+        // standing on one spot at most: any other is let go, and this one taken if it's free
+        const holders = holdersKept(s.holders, (id) => id !== a.id);
+        if (a.spot !== null && !holders[a.spot]) holders[a.spot] = a.id;
+        return JSON.stringify(holders) === JSON.stringify(s.holders) ? s : withHolders(s, holders);
       }
 
       case 'config': {
@@ -108,7 +143,8 @@ export function plainLobby(rules) {
 
       case 'start': {
         if (s.stage !== 'lobby' || !isGameMaster(ctx, a.id)) return s;
-        const players = s.players.filter((p) => s.ready.includes(p.id));
+        const spotOf = (/** @type {string} */ id) => Object.keys(s.holders).find((spot) => s.holders[spot] === id);
+        const players = s.players.filter((p) => s.ready.includes(p.id)).map((p) => (rules.spots ? { ...p, spot: spotOf(p.id) } : p));
         if (players.length === 0) return s;
         const round = rules.init({ seed: s.seed, settings: s.settings, players, now: a.now, inputs: a.inputs });
         return round ? { ...s, stage: 'running', seed: nextSeed(s.seed), ready: [], round } : s;
@@ -117,8 +153,11 @@ export function plainLobby(rules) {
       case 'lobby': {
         if (s.stage !== 'podium' || !isGameMaster(ctx, a.id) || !s.round) return s;
         const round = s.round;
-        const back = (/** @type {string} */ id) => round.order.includes(id) && !round.players[id]?.left && !round.players[id]?.retired;
-        return { ...s, stage: 'lobby', ready: s.players.map((p) => p.id).filter(back), round: null };
+        const back = (/** @type {string} */ id) => round.order.includes(id) && !round.players[id]?.left && !round.players[id]?.retired
+          && s.players.some((p) => p.id === id);
+        const lobby = { ...s, stage: /** @type {const} */ ('lobby'), round: null };
+        if (rules.spots) return withHolders(lobby, holdersKept(s.holders, back));
+        return { ...lobby, ready: s.players.map((p) => p.id).filter(back) };
       }
 
       case 'retire': {
@@ -134,11 +173,11 @@ export function plainLobby(rules) {
 
   return {
     open: ({ seed, settings, players }) => ({
-      stage: 'lobby', seed, settings, players: players.map(({ id, character }) => ({ id, character })), ready: [], round: null,
+      stage: 'lobby', seed, settings, players: players.map(({ id, character }) => ({ id, character })), ready: [], holders: {}, round: null,
     }),
     reduce,
     status: (s) => {
-      if (!s || typeof s !== 'object' || !Array.isArray(s.players) || !Array.isArray(s.ready)) return null;
+      if (!s || typeof s !== 'object' || !Array.isArray(s.players) || !Array.isArray(s.ready) || !s.holders) return null;
       const round = s.round ? rules.status(s.round) : null;
       if (s.stage === 'lobby') return s.round === null ? 'lobby' : null;
       if (s.stage === 'running') return round === 'running' ? 'running' : null;
@@ -147,6 +186,10 @@ export function plainLobby(rules) {
     },
     result: (s, node) => rules.result(/** @type {R} */ (s.round), node),
     ready: (s) => s.ready,
+    startPositions: rules.startPositions,
+    spots: (s) => (rules.spots && s.stage === 'lobby'
+      ? rules.spots.map(({ id, label, x, y, w, h }) => ({ id, label, x, y, w, h, holder: s.holders[id] ?? null }))
+      : null),
     shows: (s) => {
       const round = s.round;
       if (!round) return s.players.map((p) => p.id);

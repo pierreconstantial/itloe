@@ -1,7 +1,7 @@
 // Virtual joystick for the phone lobby. The stick appears where the thumb lands on the pad;
 // while held, the avatar position is integrated every frame and sent as throttled `pos`
 // (≤ 15/s, only on change), plus one final moving:false on release.
-import { stickVector, step, roundPos, samePos } from './movement.js';
+import { stickVector, step, roundPos, samePos, snapTo } from './movement.js';
 
 /** @typedef {import('./movement.js').Pos} Pos */
 /** @typedef {import('../../shared/scene.js').Scene} Scene */
@@ -16,6 +16,7 @@ const RADIUS_PX = 56; // knob travel = full speed
  *   start: () => Pos | null,       // where the avatar is now; null = walking not allowed
  *   scene: () => Scene,            // the room being walked: what the feet collide with
  *   send: (pos: Pos) => void,      // wire send (already rounded)
+ *   snap?: () => readonly { x: number, y: number }[],   // centres to snap onto (a walkable lobby's free spots)
  *   onGrab?: () => void,
  * }} o
  */
@@ -24,7 +25,10 @@ export function createJoystick(o) {
   let originX = 0, originY = 0, vx = 0, vy = 0;
   /** The room we are walking, captured with the start position so one hold stays self-consistent. */
   /** @type {Scene | null} */ let scene = null;
+  /** Where the avatar stands (sent), and where the stick alone has taken it (they differ while it's snapped). */
   /** @type {Pos | null} */ let pos = null;
+  /** @type {Pos | null} */ let free = null;
+  /** The spot centre the avatar is held at, or null. @type {{ x: number, y: number } | null} */ let snapped = null;
   /** @type {Pos | null} */ let lastSent = null;
   let lastSentAt = -Infinity, lastFrame = 0, raf = 0;
 
@@ -42,10 +46,11 @@ export function createJoystick(o) {
 
   /** @param {number} t */
   function tick(t) {
-    if (pointerId === null || !pos || !scene) return;
+    if (pointerId === null || !free || !scene) return;
     const dt = Math.min(MAX_DT, (t - lastFrame) / 1000);
     lastFrame = t;
-    pos = step(pos, vx, vy, dt, scene);
+    free = step(free, vx, vy, dt, scene);
+    snap();
     flush(false);
     raf = requestAnimationFrame(tick);
   }
@@ -73,7 +78,9 @@ export function createJoystick(o) {
     o.pad.classList.add('active');
     moveKnob(0, 0);
     vx = vy = 0;
-    pos = from;
+    free = from;
+    snapped = null;
+    snap();
     scene = o.scene();
     lastSent = null; // the first frame always announces where we are
     lastFrame = performance.now();
@@ -93,6 +100,13 @@ export function createJoystick(o) {
   o.pad.addEventListener('pointerup', release);
   o.pad.addEventListener('pointercancel', release);
 
+  /** Where the avatar stands: `free`, or the spot centre it snaps onto. */
+  function snap() {
+    if (!free) return;
+    snapped = o.snap ? snapTo(free, snapped, o.snap()) : null;
+    pos = snapped ? { ...free, x: snapped.x, y: snapped.y } : free;
+  }
+
   /** Let go: stop the loop and send the final moving:false (bypassing the throttle). */
   function cancel() {
     if (pointerId === null) return;
@@ -107,6 +121,14 @@ export function createJoystick(o) {
 
   return {
     cancel,
+    /** The server moved the avatar (a walkable lobby's start position): a held stick walks on from there. @param {Pos} at */
+    moveTo(at) {
+      if (pointerId === null) return;
+      free = { ...at, moving: free?.moving ?? false };
+      snapped = null;
+      snap();
+      lastSent = pos && roundPos(pos);
+    },
     /** Current position while held (null when idle). */
     current: () => pointerId === null ? null : pos,
   };

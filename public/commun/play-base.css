@@ -11,17 +11,17 @@ html, body {
 /* the frame's root for a minigame's screens: they lay out as if they were the frame's own */
 #view-minigame { display: contents; }
 
-/* a walkable lobby: the minigame's screens above, the frame's walk panel (free spots, stick) below */
+/* a walkable lobby: the minigame's screens above at their own height, the frame's walk panel (the stick) below in
+   the rest of the page */
 body.lobby-walk main { display: flex; flex-direction: column; }
-body.lobby-walk #view-minigame > * { flex: 1 1 0; min-height: 0; height: auto; overflow: auto; }
+body.lobby-walk #view-minigame > * { flex: 0 1 auto; min-height: 0; height: auto; overflow: auto; }
 #walk-panel {
-  flex: 0 0 45%;
+  flex: 1 1 0;
+  min-height: 160px;
   display: flex;
   flex-direction: column;
   padding: 0 16px calc(12px + env(safe-area-inset-bottom));
 }
-#walk-on { margin: 0; text-align: center; font-weight: 700; }
-#walk-spots { padding-top: 6px; }
 #walk-panel #stick-pad { min-height: 0; margin-top: 8px; }
 
 /* ---------- "menu" views (name, lobby, game over, podium…) ---------- */

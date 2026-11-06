@@ -4,6 +4,7 @@
 import { BLOCK_SCREEN } from './blocks-ui.js';
 import { QUIZ_SCREEN } from './quiz-ui.js';
 import { plainLobbyScreen } from './plain-lobby.js';
+import { PYRAMIDE_SCREEN } from './pyramide-ui.js';
 
 /** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
 /** @typedef {import('../../shared/minigames.js').MinigameView} MinigameView */
@@ -68,6 +69,7 @@ import { plainLobbyScreen } from './plain-lobby.js';
 export const SCREENS = {
   blocks: plainLobbyScreen(BLOCK_SCREEN),
   quiz: plainLobbyScreen(QUIZ_SCREEN),
+  pyramide: plainLobbyScreen(PYRAMIDE_SCREEN),
 };
 
 /** A minigame's phone screens, or null (none registered). @param {string | null | undefined} kind @returns {PhoneScreen | null} */

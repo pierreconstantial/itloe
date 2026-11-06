@@ -7,6 +7,7 @@ import type { MinigameKind } from '../shared/minigames.js';
 import type { Game } from './store.ts';
 import { makeBlockServer } from './blocks.ts';
 import { makeQuizServer } from './quiz.ts';
+import { makePyramideServer } from './pyramide.ts';
 import { plainLobbyServer } from './plain-lobby.ts';
 
 export type ErrCode = 'full' | 'bad-place' | 'not-gm' | 'not-playing' | 'unknown-player' | 'locked' | 'bad-room' | 'taken' | 'refused';
@@ -49,10 +50,11 @@ export type RoundServer<S, A, I = undefined> = {
   onChange?: (prev: S | null, next: S | null) => void,
 };
 
-/** The list, built once at boot (the block game's best scores live in the saved game, the quiz's bank on disk). */
+/** The list, built once at boot (the block game's best scores live in the saved game, the quiz's and Pyramide's banks on disk). */
 export function makeMinigameServers(game: Game) {
   return {
     blocks: plainLobbyServer(makeBlockServer(game)),
     quiz: plainLobbyServer(makeQuizServer()),
+    pyramide: plainLobbyServer(makePyramideServer()),
   } satisfies Record<MinigameKind, MinigameServer<any, any>>;
 }

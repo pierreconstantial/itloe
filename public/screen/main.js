@@ -524,6 +524,8 @@ connect();
   scene: () => party.scene(),
   offline: () => [...presence.offline()],
   /** Who floats as a wisp over the running minigame, and where (none while none runs). */
+  /** Who walks over the running minigame (its wisps, and its players on its walkable lobby), and where they head. */
+  walkers: () => (shownMinigame ? minigameAvatars.snapshot().filter((a) => minigameWalkers.includes(a.id)).map(({ id, character, x, y }) => ({ id, character, x, y })) : []),
   wisps: () => (shownMinigame ? minigameAvatars.snapshot().filter((a) => minigameWisps.includes(a.id)).map(({ id, x, y }) => ({ id, x, y })) : []),
   campaign: () => campaign,
   doors: () => party.doors(),

@@ -40,3 +40,23 @@
 .minigame-lobby-panel h2 { margin: 0; font-size: calc(36 * var(--u)); }
 .minigame-lobby-big { margin: 0; font-size: calc(52 * var(--u)); font-weight: 800; }
 .minigame-lobby-dim { margin: 0; font-size: calc(30 * var(--u)); color: var(--fg-dim); }
+
+/* A walkable lobby's spots, placed in world coordinates (worldBox): the frame draws the characters walking over them. */
+.minigame-lobby-spots { pointer-events: none; }
+.minigame-lobby-body.has-spots { justify-content: center; }
+.minigame-lobby-spot {
+  --tc: var(--accent);
+  display: flex; flex-direction: column; align-items: center;
+  border: calc(5 * var(--u)) dashed color-mix(in srgb, var(--tc) 80%, #fff);
+  border-radius: calc(20 * var(--u));
+  background: radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--tc) 40%, transparent), color-mix(in srgb, var(--tc) 8%, transparent) 75%);
+  transition: background 0.3s, border-style 0.3s, box-shadow 0.3s;
+}
+.minigame-lobby-spot.is-taken { border-style: solid; box-shadow: 0 0 calc(40 * var(--u)) color-mix(in srgb, var(--tc) 55%, transparent); }
+.minigame-lobby-spot-caption {
+  position: absolute; top: 100%; left: 50%; width: 130%; transform: translateX(-50%);
+  margin-top: calc(8 * var(--u)); display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.minigame-lobby-spot-label { font-size: calc(30 * var(--u)); font-weight: 800; line-height: 1.15; text-wrap: balance; }
+.minigame-lobby-spot-holder { margin-top: calc(6 * var(--u)); font-size: calc(28 * var(--u)); color: var(--fg-dim); }
+.minigame-lobby-spot.is-taken .minigame-lobby-spot-holder { color: var(--ok); font-weight: 800; }

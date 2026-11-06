@@ -20,7 +20,7 @@ import { makeAdmin } from './admin.ts';
 import { pickLan } from './lan.ts';
 import { makeClock } from './clock.ts';
 import { roundDeadline, shiftRound } from './resume.ts';
-import { minigame, spotStep, type MinigameKind, type MinigameView, type Spot } from '../shared/minigames.js';
+import { minigame, spotAt, spotStep, type MinigameKind, type MinigameView, type Spot, type StartPosition } from '../shared/minigames.js';
 import { makeMinigameServers, type ErrCode, type MinigameServer } from './minigames.ts';
 import { makeRound, roundOf, type Round } from './round.ts';
 import { JOIN_QR_GAP_MS, JOIN_QR_MS } from '../shared/join-qr.js';
@@ -104,6 +104,9 @@ round = openRound(game.campaign); // a resumed round
 const zones = new Map<string, string | null>();
 /** Spot each walker of a walkable lobby currently stands on (edge trigger, as the doors). In memory only. */
 const onSpot = new Map<string, string | null>();
+/** The players the running minigame shows who were placed on its walkable lobby since it last showed them
+ *  (placeWalkers). In memory only: a restart places everyone again. */
+const placed = new Set<string>();
 
 const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   (prev, next) => { // before saveGame: a minigame's own records land in the same save (the block game's best)
@@ -123,9 +126,10 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
     ended?.end(); // the old round's io goes quiet before the next round opens
     round = openRound(next);
     onSpot.clear();
+    placed.clear();
   },
   (_prev, next) => positions.prune(next.party),
-  () => seatHolders(),
+  () => placeWalkers(),
   (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
   (prev, next) => {
     for (const id of next.party.order) {
@@ -417,17 +421,36 @@ function stepOnSpots(id: string, pos: Pos): void {
   if (changed) apply({ t: 'activity', action: { t: 'spot', id, spot: at } });
 }
 
-/** A spot's holder without a known position (positions are in memory: after a restart) stands on its spot
- *  again, on the TVs and on its phone. */
-function seatHolders(): void {
-  for (const spot of spots() ?? []) {
-    if (spot.holder === null || positions.get(spot.holder)) continue;
-    const pos = onSpotPos(spot);
-    positions.set(spot.holder, pos);
-    onSpot.set(spot.holder, spot.id);
-    const ws = sockets.get(spot.holder);
-    if (ws) send(ws, posMsg(spot.holder, pos));
-    relayPos(spot.holder, pos);
+/** A start position for a walker: the minigame's first one where no other walker stands, else one in turn. */
+function startPosition(id: string, starts: readonly StartPosition[]): Pos | null {
+  if (!starts.length) return null;
+  const others = [...placed].filter((other) => other !== id).map((other) => positions.get(other)).filter((p) => !!p);
+  const free = starts.find((s) => !others.some((p) => Math.hypot(p.x - s.x, p.y - s.y) < 0.5));
+  const at = free ?? starts[placed.size % starts.length];
+  return { x: at.x, y: at.y, dir: 'down', moving: false };
+}
+
+/** Whoever starts walking a walkable lobby (the minigame's start, a join, back from a round they sat out, a
+ *  restart) stands where the lobby puts them, on the TVs and on their phone: a holder on its spot, anyone else on
+ *  one of the minigame's start positions (none: where they stood). Placed once until the minigame stops showing
+ *  them, so walking and the rounds don't move them. */
+function placeWalkers(): void {
+  const ids = shown() ?? [];
+  for (const id of placed) if (!ids.includes(id)) placed.delete(id);
+  const list = spots();
+  if (!list) return;
+  const starts = minigame(game.campaign.at.kind)!.startPositions ?? [];
+  for (const id of ids) {
+    if (placed.has(id)) continue;
+    const held = list.find((s) => s.holder === id);
+    const pos = held ? onSpotPos(held) : startPosition(id, starts);
+    placed.add(id);
+    if (!pos) continue;
+    positions.set(id, pos);
+    onSpot.set(id, held?.id ?? spotAt(list, pos.x, pos.y));
+    const ws = sockets.get(id);
+    if (ws) send(ws, posMsg(id, pos));
+    relayPos(id, pos);
   }
 }
 
@@ -832,7 +855,7 @@ function serveReset(req: IncomingMessage, res: ServerResponse): boolean {
 // ---------- start ----------
 
 saveGame(game); // a --new start must not let the next plain start resume the old game (and a v1 save is now v2)
-seatHolders(); // a resumed walkable lobby: its holders on their spots
+placeWalkers(); // a resumed walkable lobby: its holders on their spots, everyone else on a start position
 for (const id of party().order) scheduleIncarnation(id);
 // resumed timed game or open quiz question: re-arm (fires at once if the deadline passed while down)
 clock.onChange(null, game.campaign.at);

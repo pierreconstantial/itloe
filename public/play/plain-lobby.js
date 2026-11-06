@@ -1,7 +1,8 @@
 // The plain lobby's phone screens (shared/plain-lobby.js): a building block that wraps a minigame's round
 // screens into the screens of a running minigame. The frame mounts them from the minigame's start to its end
 // (./minigames.js). They draw the lobby (the eligible players and who is ready, "I'm ready", the game
-// master's settings, Start and the end of the minigame, the last round's winner), the round screens while a
+// master's settings, Start and the end of the minigame, the last round's winner; in a lobby with spots, the spots
+// with who holds each and "Take this spot" instead of "I'm ready", above the frame's walk panel), the round screens while a
 // round runs (mounted inside, with the same update and message as before), and the shared podium (./podium.js)
 // with the game master's "Back to the lobby". The frame mounts them for the players the minigame shows, and
 // for the game master; everyone else floats over it as a wisp. The round controls in ☰ follow the running round.
@@ -29,6 +30,7 @@ const MARKUP = `
     <p id="minigame-lobby-settings" class="settings-summary"></p>
     <p id="minigame-lobby-last" hidden></p>
     <ul id="minigame-lobby-players" class="player-list minigame-lobby-players"></ul>
+    <p id="minigame-lobby-nospot" class="dim" hidden></p>
     <div id="minigame-lobby-gm" class="lobby-actions" hidden>
       <button id="btn-settings-lobby" type="button" data-open="settings">⚙ Settings</button>
       <button id="btn-start" type="button" class="primary"></button>
@@ -129,11 +131,12 @@ export function plainLobbyScreen(roundScreen) {
         const me = io.meId();
         const online = new Set(io.online());
         const eligible = v.players.some((p) => p.id === me);
+        const spots = m.spots; // a lobby with spots: holding one is being ready
         const isReady = v.ready.includes(me);
         $('minigame-lobby-title').textContent = capitalized(roundScreen.name);
 
         const ready = /** @type {HTMLButtonElement} */ ($('btn-ready'));
-        ready.hidden = !eligible;
+        ready.hidden = !eligible || !!spots;
         ready.className = isReady ? 'on' : 'primary';
         ready.textContent = isReady ? "✓ I'm ready" : "I'm ready";
         ready.disabled = !io.connected();
@@ -143,7 +146,32 @@ export function plainLobbyScreen(roundScreen) {
         $('minigame-lobby-last').hidden = winners === '';
         $('minigame-lobby-last').textContent = `Last game: 🥇 ${winners}`;
 
-        $('minigame-lobby-players').replaceChildren(...v.players.map(({ id, character }) => {
+        $('view-minigame-lobby').classList.toggle('has-spots', !!spots);
+        const nameOf = (/** @type {string} */ id) => {
+          const p = v.players.find((x) => x.id === id);
+          return id === me ? 'You' : p ? CHARACTERS[p.character].name : '?';
+        };
+        const noSpot = spots ? v.players.filter((p) => !spots.some((spot) => spot.holder === p.id)).map((p) => p.id) : [];
+        $('minigame-lobby-nospot').hidden = noSpot.length === 0;
+        $('minigame-lobby-nospot').textContent = `No spot yet: ${noSpot.map((id) => (id === me ? 'you' : nameOf(id))).join(', ')}`;
+        if (spots) $('minigame-lobby-players').replaceChildren(...spots.map((spot) => {
+          const li = document.createElement('li');
+          li.dataset.spot = spot.id;
+          li.append(Object.assign(document.createElement('span'), { className: 'spot-label', textContent: spot.label }));
+          if (spot.holder === null) {
+            const take = Object.assign(document.createElement('button'), { type: 'button', className: 'spot-take', textContent: 'Take this spot' });
+            take.disabled = !eligible || !io.connected();
+            take.addEventListener('click', () => io.send({ t: 'takeSpot', spot: spot.id }));
+            li.append(take);
+          } else {
+            const p = v.players.find((x) => x.id === spot.holder);
+            li.classList.toggle('offline', !online.has(spot.holder));
+            li.append(Object.assign(document.createElement('small'), { className: 'is-ready', textContent: nameOf(spot.holder) }));
+            if (p) li.lastElementChild?.prepend(dotEl(CHARACTERS[p.character].color), ' ');
+          }
+          return li;
+        }));
+        else $('minigame-lobby-players').replaceChildren(...v.players.map(({ id, character }) => {
           const li = document.createElement('li');
           li.dataset.id = id;
           li.classList.toggle('offline', !online.has(id));
@@ -155,11 +183,13 @@ export function plainLobbyScreen(roundScreen) {
           return li;
         }));
 
-        // the content's ready rule (the main game's) and the plain lobby's own: one ready player or more
-        const canStart = v.ready.length >= 1 && readyRuleMet(m.required, v.players, v.ready);
+        // the content's ready rule (the main game's) and the plain lobby's own: one ready player or more, and in
+        // a lobby with spots every spot held
+        const taken = spots?.filter((spot) => spot.holder !== null).length ?? 0;
+        const canStart = v.ready.length >= 1 && (!spots || taken === spots.length) && readyRuleMet(m.required, v.players, v.ready);
         $('minigame-lobby-gm').hidden = !isGm;
         const start = /** @type {HTMLButtonElement} */ ($('btn-start'));
-        start.textContent = `▶ ${c.at.results.length ? 'Play again' : 'Start'} (${v.ready.length}/${v.players.length} ready)`;
+        start.textContent = `▶ ${c.at.results.length ? 'Play again' : 'Start'} (${spots ? `${taken}/${spots.length} spots taken` : `${v.ready.length}/${v.players.length} ready`})`;
         start.disabled = !canStart;
         $('btn-end-minigame').textContent = confirm.isArmed('end') ? `Tap again to end the ${roundScreen.name}` : `End the ${roundScreen.name}`;
         if (!isGm) confirm.disarm();
@@ -169,7 +199,8 @@ export function plainLobbyScreen(roundScreen) {
           : canStart ? ''
             : m.required.allReady && missing.length ? `Waiting for ${names(missing)} to join.`
               : m.required.allReady ? 'Everyone must be ready to start.'
-                : 'Waiting for someone to be ready.';
+                : spots ? '' // the Start button counts the spots taken
+                  : 'Waiting for someone to be ready.';
       }
 
       return {

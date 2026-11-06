@@ -14,7 +14,7 @@ const output = join(root, 'dist', 'release');
 const name = `itloe-${commit}-linux-x64.tar.gz`;
 const stage = mkdtempSync(join(tmpdir(), 'itloe-release-'));
 try {
-  const source = execFileSync('git', ['archive', commit, 'server', 'shared', 'public', 'data/quiz', 'package.json', 'package-lock.json'], { cwd: root, maxBuffer: 16 * 1024 * 1024 });
+  const source = execFileSync('git', ['archive', commit, 'server', 'shared', 'public', 'data/quiz', 'data/pyramide', 'package.json', 'package-lock.json'], { cwd: root, maxBuffer: 16 * 1024 * 1024 });
   execFileSync('tar', ['-xf', '-', '-C', stage], { input: source });
   execFileSync('npm', ['ci', '--omit=dev', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: stage, stdio: 'inherit' });
   writeFileSync(join(stage, 'release.json'), JSON.stringify({ commit, nodeMajor: 24, platform: 'linux', arch: 'x64' }) + '\n');

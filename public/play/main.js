@@ -31,7 +31,6 @@ import { childMarks, content, onContentChange, syncContent, titleOf } from './ca
 /** @typedef {import('../../shared/minigames.js').MinigameView} MinigameView */
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
 /** @typedef {import('./movement.js').Pos} Pos */
-/** @typedef {import('../../shared/minigames.js').Spot} Spot */
 /** A party member in the room at a tableau. @typedef {{ id: string, name: string, color: number, character: CharacterId, left?: boolean, statuses: string[] }} TableauPlayer */
 
 /** What the wisp pad says on the hub (the story's wisps). */
@@ -176,7 +175,7 @@ function receive(raw) {
   } else if (m.t === 'pos') {
     // the one pos a phone receives: our own last position, echoed right after welcome
     const echoed = m.playerId === playerId ? posFromEcho(m) : null;
-    if (echoed) { myPos = echoed; render(); }
+    if (echoed) { myPos = echoed; joystick.moveTo(echoed); render(); }
   } else if (m.t === 'unsaved') {
     running?.screen.message(m); // the running minigame's own; none running: ignored
   } else if (m.t === 'say' || m.t === 'chatHistory') {
@@ -445,7 +444,7 @@ function render() {
     }
     show('minigame');
     mountScreen(minigame.kind).update(minigame, campaign);
-    if (amLobbyWalker()) renderWalkPanel(/** @type {Spot[]} */ (minigame.spots));
+    if (amLobbyWalker()) renderWalkPanel();
     return;
   }
   if (isStory() && campaign?.at.node === 'hub' && amWisp()) {
@@ -547,26 +546,11 @@ function updateInteraction() {
   button.textContent = action?.text ?? 'Walk to an object';
 }
 
-/**
- * Under a walkable lobby's screens: the stick, the spot we're on, and the free spots, each taken with a tap.
- * @param {Spot[]} spots
- */
-function renderWalkPanel(spots) {
+/** Under a walkable lobby's screens (which list its spots, each taken with a tap): the stick. */
+function renderWalkPanel() {
   document.body.classList.add('lobby-walk');
   $('walk-panel').hidden = false;
   dockStick('walk-panel');
-  const mine = spots.find((s) => s.holder === playerId);
-  $('walk-on').hidden = !mine;
-  $('walk-on').textContent = mine ? `You're on ${mine.label}. Walk off it to leave it.` : '';
-  $('walk-spots').replaceChildren(...spots.filter((s) => s.holder === null).map((s) => {
-    const button = Object.assign(document.createElement('button'), { type: 'button', textContent: `→ ${s.label}` });
-    button.disabled = !conn.isOnline();
-    button.addEventListener('click', () => {
-      joystick.cancel(); // the last step lands before the move onto the spot
-      send({ t: 'takeSpot', spot: s.id });
-    });
-    return button;
-  }));
 }
 
 /** Hub, world or a scene tableau: where the party is, what is open from here, how to go on.
@@ -697,6 +681,9 @@ const joystick = createJoystick({
     return character && canWalk() ? currentPos(character) : null;
   },
   scene: roomHere,
+  // on a walkable lobby the character snaps onto a free spot's centre, or the one it holds
+  snap: () => (amLobbyWalker() ? (minigame?.spots ?? []).filter((s) => s.holder === null || s.holder === playerId)
+    .map((s) => ({ x: s.x + s.w / 2, y: s.y + s.h / 2 })) : []),
   send: (pos) => {
     const turned = myPos?.dir !== pos.dir;
     myPos = pos;

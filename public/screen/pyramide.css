@@ -1,0 +1,233 @@
+/* Pyramide's TV screens: a retro French television game show. Deep blue studio, gold, bulbs; readable from the
+   sofa. The round (.pyr), the lobby's spots (.minigame-lobby[data-kind=pyramide]), the podium extras, and the
+   flash over a word found, lost or skipped (.pyr-flash, in #fx: it outlives the round's screen). */
+
+.pyr, .pyr-flash, .pyr-victory, .pyr-podium-team, .minigame-lobby[data-kind="pyramide"] {
+  --gold: #ffd44d;
+  --gold-deep: #c8920c;
+  --studio: #0a0d3d;
+}
+
+/* ---- the round ---- */
+.pyr {
+  flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(120, 110, 255, 0.35), transparent 70%),
+    linear-gradient(180deg, #151a6b 0%, var(--studio) 60%, #05071f 100%);
+}
+.pyr-head {
+  position: relative;
+  display: flex; align-items: baseline; justify-content: center; gap: calc(40 * var(--u));
+  padding: calc(20 * var(--u)) calc(56 * var(--u)) calc(26 * var(--u));
+  background: linear-gradient(180deg, #2b1160, #170a3a);
+  border-bottom: calc(6 * var(--u)) solid var(--gold);
+}
+/* the marquee bulbs along the band's lower edge */
+.pyr-head::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: calc(-22 * var(--u)); height: calc(12 * var(--u));
+  background: radial-gradient(circle at 50% 50%, #fff6c4 0 28%, var(--gold) 30% 52%, transparent 56%) 0 0 / calc(48 * var(--u)) 100% repeat-x;
+  filter: drop-shadow(0 0 calc(8 * var(--u)) var(--gold));
+  animation: pyr-bulbs 1.4s steps(2, jump-none) infinite;
+}
+@keyframes pyr-bulbs { 0% { opacity: 1; } 100% { opacity: 0.55; } }
+.pyr-logo {
+  margin: 0;
+  font-family: 'Arial Black', Impact, system-ui, sans-serif;
+  font-size: calc(92 * var(--u)); font-weight: 900; letter-spacing: 0.12em;
+  color: var(--gold);
+  text-shadow: 0 calc(5 * var(--u)) 0 var(--gold-deep), 0 calc(10 * var(--u)) 0 #5b3a00, 0 0 calc(40 * var(--u)) rgba(255, 212, 77, 0.45);
+}
+.pyr-mode { font-size: calc(40 * var(--u)); font-weight: 800; color: #cfd3ff; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.pyr-stage {
+  flex: 1; min-height: 0;
+  display: flex; align-items: stretch; justify-content: center; gap: calc(36 * var(--u));
+  padding: calc(48 * var(--u)) calc(48 * var(--u)) calc(36 * var(--u));
+}
+
+/* a team: pyramid, players, score */
+.pyr-team {
+  --tc: var(--team1);
+  flex: 0 0 calc(540 * var(--u));
+  display: flex; flex-direction: column; align-items: center; gap: calc(14 * var(--u));
+  padding: calc(18 * var(--u)) calc(24 * var(--u)) calc(20 * var(--u));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  border: calc(5 * var(--u)) solid color-mix(in srgb, var(--tc) 55%, #1b1f5c);
+  border-radius: calc(26 * var(--u));
+  transition: border-color 0.4s, box-shadow 0.4s, opacity 0.4s, transform 0.4s;
+}
+.pyr-team[data-team="1"] { --tc: var(--team2); }
+.pyr-team.is-turn {
+  border-color: var(--gold);
+  box-shadow: 0 0 calc(50 * var(--u)) rgba(255, 212, 77, 0.35), inset 0 0 calc(40 * var(--u)) rgba(255, 212, 77, 0.08);
+  transform: translateY(calc(-6 * var(--u)));
+}
+.pyr-team.is-done { opacity: 0.55; }
+.pyr-team-head { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: calc(16 * var(--u)); }
+.pyr-team-name {
+  margin: 0; padding: calc(4 * var(--u)) calc(22 * var(--u));
+  font-size: calc(42 * var(--u)); font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+  background: var(--tc); color: #fff; border-radius: calc(10 * var(--u));
+  text-shadow: 0 calc(3 * var(--u)) 0 rgba(0, 0, 0, 0.35);
+}
+.pyr-badge { font-size: calc(26 * var(--u)); white-space: nowrap; font-weight: 900; color: var(--gold); letter-spacing: 0.06em; }
+.pyr-team.is-turn .pyr-badge { animation: pyr-blink 1s steps(2, jump-none) infinite; }
+@keyframes pyr-blink { 0% { opacity: 1; } 100% { opacity: 0.35; } }
+
+.pyr-players { width: 100%; display: flex; flex-direction: column; gap: calc(6 * var(--u)); }
+.pyr-role { display: flex; align-items: center; gap: calc(14 * var(--u)); font-size: calc(36 * var(--u)); }
+.pyr-role canvas { width: calc(64 * var(--u)); height: calc(64 * var(--u)); image-rendering: pixelated; flex: none; }
+.pyr-role-name { font-weight: 800; border-bottom: calc(5 * var(--u)) solid var(--pc); }
+.pyr-role-tag { margin-left: auto; font-size: calc(28 * var(--u)); color: #aeb4ff; }
+
+/* the pyramid of bricks */
+.pyr-pyramid { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(7 * var(--u)); padding: calc(8 * var(--u)) 0; }
+.pyr-row { display: flex; gap: calc(7 * var(--u)); }
+.pyr-brick {
+  position: relative; display: block;
+  width: calc(88 * var(--u)); height: calc(46 * var(--u));
+  border-radius: calc(6 * var(--u));
+  background: rgba(255, 255, 255, 0.05);
+  border: calc(2 * var(--u)) dashed rgba(255, 212, 77, 0.22); /* the empty slot */
+}
+.pyr-fill {
+  position: absolute; inset: calc(-2 * var(--u));
+  border-radius: calc(6 * var(--u));
+  background: linear-gradient(180deg, #fff1b0 0%, var(--gold) 38%, var(--gold-deep) 100%);
+  box-shadow: 0 0 calc(14 * var(--u)) rgba(255, 212, 77, 0.55), inset 0 calc(-6 * var(--u)) 0 rgba(120, 70, 0, 0.35), inset 0 calc(3 * var(--u)) 0 rgba(255, 255, 255, 0.6);
+  animation: pyr-brick-in 0.5s calc(var(--i) * 45ms) cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+.pyr-brick.is-gone .pyr-fill { animation: none; opacity: 0; }
+.pyr-brick.is-falling .pyr-fill { animation: pyr-brick-fall 0.9s ease-in forwards; }
+@keyframes pyr-brick-in { 0% { transform: scale(0.2); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes pyr-brick-fall {
+  0% { transform: none; opacity: 1; filter: brightness(2); }
+  25% { transform: translateY(calc(-14 * var(--u))) rotate(-4deg); opacity: 1; }
+  100% { transform: translateY(calc(150 * var(--u))) rotate(24deg); opacity: 0; }
+}
+
+.pyr-team-foot { width: 100%; display: flex; align-items: center; gap: calc(22 * var(--u)); }
+.pyr-scoreboard {
+  display: flex; flex-direction: column; align-items: center; flex: none;
+  width: calc(200 * var(--u)); padding: calc(6 * var(--u)) calc(16 * var(--u));
+  background: #05071f; border: calc(4 * var(--u)) solid var(--gold); border-radius: calc(14 * var(--u));
+}
+.pyr-score { font-size: calc(96 * var(--u)); line-height: 1; font-weight: 900; color: var(--gold); font-variant-numeric: tabular-nums; text-shadow: 0 0 calc(24 * var(--u)) rgba(255, 212, 77, 0.6); }
+.pyr-score-label { font-size: calc(20 * var(--u)); white-space: nowrap; color: #aeb4ff; text-transform: uppercase; letter-spacing: 0.06em; }
+.pyr-team-info { display: flex; flex-direction: column; gap: calc(6 * var(--u)); font-size: calc(30 * var(--u)); font-weight: 800; white-space: nowrap; }
+.pyr-word { font-size: calc(26 * var(--u)); color: #aeb4ff; }
+
+/* the middle: whose turn it is, the clue, the bidding, then the log */
+.pyr-center { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: calc(24 * var(--u)); }
+.pyr-turn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(12 * var(--u));
+  min-height: calc(330 * var(--u)); padding: calc(20 * var(--u)) calc(28 * var(--u));
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 212, 77, 0.2), rgba(255, 255, 255, 0.04) 70%);
+  border: calc(5 * var(--u)) solid var(--gold); border-radius: calc(26 * var(--u));
+  text-align: center;
+}
+.pyr-kicker { margin: 0; font-size: calc(30 * var(--u)); font-weight: 900; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; }
+.pyr-main { margin: 0; font-size: calc(46 * var(--u)); font-weight: 800; text-wrap: balance; }
+.pyr-mystery {
+  margin: 0; width: calc(130 * var(--u)); line-height: calc(110 * var(--u)); height: calc(110 * var(--u));
+  font-size: calc(90 * var(--u)); font-weight: 900; color: var(--gold);
+  background: #05071f; border: calc(4 * var(--u)) solid var(--gold); border-radius: calc(16 * var(--u));
+  animation: pyr-blink 1.6s steps(2, jump-none) infinite;
+}
+.pyr-clue {
+  max-width: 100%; padding: calc(4 * var(--u)) calc(36 * var(--u));
+  font-size: calc(88 * var(--u)); font-weight: 900; line-height: 1.2; overflow-wrap: anywhere;
+  color: #1a1200; background: linear-gradient(180deg, #fff1b0, var(--gold) 50%, var(--gold-deep));
+  border-radius: calc(16 * var(--u)); box-shadow: 0 calc(8 * var(--u)) 0 rgba(0, 0, 0, 0.35);
+  animation: pyr-pop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+.pyr-bid { display: flex; align-items: baseline; gap: calc(22 * var(--u)); animation: pyr-pop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1); }
+.pyr-bid-n { font-size: calc(170 * var(--u)); line-height: 1; font-weight: 900; color: var(--gold); text-shadow: 0 calc(8 * var(--u)) 0 var(--gold-deep), 0 0 calc(40 * var(--u)) rgba(255, 212, 77, 0.5); }
+.pyr-bid-by { font-size: calc(40 * var(--u)); font-weight: 800; color: #cfd3ff; }
+.pyr-bid.is-none .pyr-bid-n { color: #6a70b8; text-shadow: none; }
+@keyframes pyr-pop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: none; opacity: 1; } }
+
+.pyr-log {
+  flex: 1; min-height: 0; margin: 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: calc(10 * var(--u));
+  overflow: hidden;
+}
+/* the newest entry first and biggest, older ones smaller and fainter; each team's entries in its colour */
+.pyr-line {
+  --lc: var(--team1);
+  flex: none; padding: calc(8 * var(--u)) calc(26 * var(--u));
+  font-size: calc(36 * var(--u)); line-height: 1.25; overflow-wrap: anywhere;
+  background: color-mix(in srgb, var(--lc) 22%, transparent);
+  border-left: calc(10 * var(--u)) solid var(--lc); border-radius: calc(14 * var(--u));
+}
+.pyr-line.is-t1 { --lc: var(--team2); align-self: flex-end; text-align: right; border-left: 0; border-right: calc(10 * var(--u)) solid var(--lc); }
+.pyr-line:nth-child(1) { font-size: calc(42 * var(--u)); padding-block: calc(14 * var(--u)); background: color-mix(in srgb, var(--lc) 38%, transparent); }
+.pyr-line:nth-child(2) { opacity: 0.8; }
+.pyr-line:nth-child(3) { opacity: 0.6; }
+.pyr-line:nth-child(4) { opacity: 0.42; }
+.pyr-line:nth-child(5) { opacity: 0.28; }
+.pyr-line.is-new { animation: pyr-line-in 0.45s cubic-bezier(0.2, 1.3, 0.4, 1); }
+@keyframes pyr-line-in { 0% { transform: translateY(calc(-30 * var(--u))) scale(0.92); opacity: 0; } 100% { transform: none; } }
+.pyr-line b { font-weight: 900; }
+.pyr-line.k-clue b { color: var(--gold); }
+.pyr-ok { color: #6be07a; font-weight: 900; }
+.pyr-no { color: #ff7a7a; font-weight: 900; }
+.pyr-line.is-resolved { --lc: #7c82c8; font-weight: 800; }
+.pyr-line.k-found { --lc: #3fae52; }
+.pyr-line.k-lost { --lc: #d4504f; }
+
+/* ---- a word found, lost or skipped: a flash over the screen (the last one holds the podium back) ---- */
+.pyr-flash {
+  inset: 0; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 45%, rgba(40, 30, 130, 0.85), rgba(5, 7, 31, 0.93));
+  animation: pyr-flash-bg var(--hold, 2800ms) ease-out both;
+}
+.pyr-flash-card {
+  display: flex; flex-direction: column; align-items: center; gap: calc(14 * var(--u)); text-align: center;
+  animation: pyr-flash-card var(--hold, 2800ms) cubic-bezier(0.2, 1.3, 0.3, 1) both;
+}
+.pyr-flash-kicker {
+  margin: 0; font-family: 'Arial Black', Impact, system-ui, sans-serif;
+  font-size: calc(120 * var(--u)); font-weight: 900; letter-spacing: 0.1em; color: #fff;
+  -webkit-text-stroke: calc(4 * var(--u)) #1fa84a; text-shadow: 0 0 calc(50 * var(--u)) #1fa84a, 0 calc(8 * var(--u)) 0 rgba(0, 0, 0, 0.6);
+}
+.pyr-flash.is-lost .pyr-flash-kicker { -webkit-text-stroke-color: var(--bad); text-shadow: 0 0 calc(50 * var(--u)) var(--bad), 0 calc(8 * var(--u)) 0 rgba(0, 0, 0, 0.6); }
+.pyr-flash.is-skipped .pyr-flash-kicker { font-size: calc(80 * var(--u)); -webkit-text-stroke-color: #6a70b8; text-shadow: 0 0 calc(40 * var(--u)) #6a70b8; }
+.pyr-flash-word {
+  margin: 0; padding: calc(8 * var(--u)) calc(64 * var(--u));
+  font-size: calc(170 * var(--u)); font-weight: 900; line-height: 1.15; overflow-wrap: anywhere; max-width: 92vw;
+  color: #1a1200; background: linear-gradient(180deg, #fff1b0, var(--gold) 50%, var(--gold-deep));
+  border-radius: calc(24 * var(--u)); box-shadow: 0 calc(12 * var(--u)) 0 rgba(0, 0, 0, 0.4), 0 0 calc(80 * var(--u)) rgba(255, 212, 77, 0.5);
+}
+.pyr-flash.is-skipped .pyr-flash-word { font-size: calc(110 * var(--u)); }
+.pyr-flash-sub { margin: 0; font-size: calc(48 * var(--u)); font-weight: 800; color: #e3e5ff; }
+.pyr-flash-next { margin: calc(16 * var(--u)) 0 0; font-size: calc(36 * var(--u)); color: #aeb4ff; text-transform: uppercase; letter-spacing: 0.08em; }
+@keyframes pyr-flash-bg { 0% { opacity: 0; } 8%, 85% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes pyr-flash-card { 0% { transform: scale(0.3) rotate(-6deg); } 12% { transform: scale(1.06) rotate(1deg); } 20%, 100% { transform: scale(1) rotate(0); } }
+
+/* ---- the podium's extras ---- */
+.pyr-podium-team { margin-left: calc(24 * var(--u)); font-size: calc(28 * var(--u)); font-weight: 800; color: var(--team1); }
+.pyr-podium-team.is-t1 { color: var(--team2); }
+.pyr-victory { display: flex; align-items: center; gap: calc(36 * var(--u)); }
+.pyr-victory .pyr-pyramid { flex: none; padding: 0; gap: calc(4 * var(--u)); }
+.pyr-victory .pyr-row { gap: calc(4 * var(--u)); }
+.pyr-victory .pyr-brick { width: calc(44 * var(--u)); height: calc(24 * var(--u)); }
+.pyr-victory .pyr-fill { animation: none; }
+.pyr-victory-title { margin: 0; font-size: calc(64 * var(--u)); font-weight: 900; color: var(--gold); text-shadow: 0 0 calc(40 * var(--u)) rgba(255, 212, 77, 0.55); }
+.pyr-victory-stat { margin: 0; font-size: calc(34 * var(--u)); color: #cfd3ff; }
+.pyr-victory-stat.is-dim { font-size: calc(28 * var(--u)); color: #8d93d6; }
+
+/* ---- the lobby: the spots are team-coloured (the plain lobby draws them, ./plain-lobby.css) ---- */
+.minigame-lobby[data-kind="pyramide"] [data-spot^="team1"] { --tc: var(--team1); }
+.minigame-lobby[data-kind="pyramide"] [data-spot^="team2"] { --tc: var(--team2); }
+
+/* the lobby wears the studio too */
+.minigame-lobby[data-kind="pyramide"] {
+  background: radial-gradient(ellipse 70% 55% at 50% 0%, rgba(120, 110, 255, 0.3), transparent 70%), linear-gradient(180deg, #151a6b 0%, var(--studio) 60%, #05071f 100%);
+}
+.minigame-lobby[data-kind="pyramide"] .minigame-lobby-title {
+  background: linear-gradient(180deg, #2b1160, #170a3a); border-bottom: calc(6 * var(--u)) solid var(--gold);
+  color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase;
+  text-shadow: 0 calc(4 * var(--u)) 0 var(--gold-deep), 0 0 calc(30 * var(--u)) rgba(255, 212, 77, 0.4);
+}
+.minigame-lobby[data-kind="pyramide"] .minigame-lobby-panel { background: rgba(5, 7, 31, 0.8); border: calc(4 * var(--u)) solid var(--gold); }

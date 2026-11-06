@@ -13,6 +13,9 @@
   --p4: #9b5de5;
   --p5: #5275ed;
   --p6: #51b975;
+  /* Pyramide's teams: the same colour on the TV and the phones */
+  --team1: var(--p1);
+  --team2: var(--p2);
   --ok: #4caf50;
   --bad: #e53935;
 }

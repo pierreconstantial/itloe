@@ -1,0 +1,141 @@
+{
+ "language": "fr",
+ "categories": {
+  "easy": [
+   {
+    "id": "easy-001",
+    "word": "fromage",
+    "clues": [
+     "lait",
+     "camembert",
+     "vache"
+    ],
+    "wrong": "beurre"
+   },
+   {
+    "id": "easy-002",
+    "word": "vélo",
+    "clues": [
+     "pédale",
+     "roues",
+     "guidon"
+    ],
+    "wrong": "moto"
+   }
+  ],
+  "medium": [
+   {
+    "id": "medium-001",
+    "word": "parapluie",
+    "clues": [
+     "ouvrir",
+     "averse",
+     "mouillé"
+    ],
+    "wrong": "imperméable"
+   },
+   {
+    "id": "medium-002",
+    "word": "boulangerie",
+    "clues": [
+     "pain",
+     "croissant",
+     "baguette"
+    ],
+    "wrong": "pâtisserie"
+   },
+   {
+    "id": "medium-003",
+    "word": "ordinateur",
+    "clues": [
+     "écran",
+     "clavier",
+     "souris"
+    ],
+    "wrong": "téléphone"
+   },
+   {
+    "id": "medium-004",
+    "word": "montagne",
+    "clues": [
+     "neige",
+     "sommet",
+     "alpes"
+    ],
+    "wrong": "colline"
+   },
+   {
+    "id": "medium-005",
+    "word": "bibliothèque",
+    "clues": [
+     "livres",
+     "silence",
+     "emprunter"
+    ],
+    "wrong": "librairie"
+   },
+   {
+    "id": "medium-006",
+    "word": "chocolat",
+    "clues": [
+     "cacao",
+     "tablette",
+     "noir"
+    ],
+    "wrong": "bonbon"
+   },
+   {
+    "id": "medium-007",
+    "word": "aéroport",
+    "clues": [
+     "avion",
+     "piste",
+     "bagages"
+    ],
+    "wrong": "gare"
+   },
+   {
+    "id": "medium-008",
+    "word": "cinéma",
+    "clues": [
+     "film",
+     "popcorn",
+     "salle"
+    ],
+    "wrong": "théâtre"
+   },
+   {
+    "id": "medium-009",
+    "word": "jardin",
+    "clues": [
+     "fleurs",
+     "tondeuse",
+     "potager"
+    ],
+    "wrong": "parc"
+   }
+  ],
+  "hard": [
+   {
+    "id": "hard-001",
+    "word": "cathédrale",
+    "clues": [
+     "église",
+     "gothique",
+     "Notre-Dame"
+    ],
+    "wrong": "basilique"
+   },
+   {
+    "id": "hard-002",
+    "word": "paratonnerre",
+    "clues": [
+     "foudre",
+     "orage",
+     "toit"
+    ],
+    "wrong": "antenne"
+   }
+  ]
+ }
+}
