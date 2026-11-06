@@ -193,11 +193,11 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
   | `base` | a running server over sockets: room code, join, avatar positions, moves, rejoin and replaced sockets, new game, leaving |
   | `resume` | kill -9 in every phase, timed clock kept |
   | `presence` | reclaim a character, newest device wins, the game master's round controls |
-  | `campaign` | false start → unlocks → news acked by two TVs → doors, kill -9 at each step; chat, emotes and object actions (relay, history, rate limits, where interact works); `pos` during a round kept apart from the room's |
+  | `campaign` | false start → unlocks → news acked by two TVs → doors, kill -9 at each step; chat, emotes and object actions (relay, history, rate limits, where interact works); `pos` during a round dropped unless from a wisp |
   | `inventory` | rewards land in the right inventory (chooser / winner / all), survive kill -9 and a reclaim; the game master's give/take, unknown items refused |
   | `quiz` | quiz over real sockets: no answer on the wire before the reveal, judging, override, resume (plays a fixed copy of `placeholder.json`) |
-  | `tv` | the TV page in headless Chrome, including the minigame screens' teardown and a stand-in minigame screen; one section: `tv:<section>` |
-  | `phone` | phone pages in headless Chrome: session never lost, reclaim, the game master's round controls, campaign screens, quiz and the screens' teardown, room code, a stand-in minigame's joystick; one part: `phone:<n>` |
+  | `tv` | the TV page in headless Chrome, including the minigame screens' teardown; one section: `tv:<section>` |
+  | `phone` | phone pages in headless Chrome: session never lost, reclaim, the game master's round controls, campaign screens, quiz and the screens' teardown, room code; one part: `phone:<n>` |
 
   The suite's header lists its sections or parts, and the suite refuses an unknown one with the list. `--shots <dir>` saves the TV and phone screens, each with its visible text, to `<dir>/<suite>`. `LOCK_MS` (how long the phone suite freezes a locked phone: 20 s in the runner, 5 min in the suite alone) and `E2E_SLOW=3` (multiplies every wait on a busy machine) pass through. The `e2e:<suite>` scripts run one suite bare, as CI does, with the caller's `PORT`.
 

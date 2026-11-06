@@ -1,8 +1,8 @@
 // The avatar layer: every player's walking character on the TV, whatever screen is showing.
 // One layer for the whole page: `pos`, `say` and `emote` reach it at every moment, and the screen
 // that is showing draws it — a room with its props (avatars and props in one depth-sorted list,
-// see ./scene-render.js), or a minigame's screen with its game area, a scene without furniture,
-// where the avatars are drawn on top, only those of the players the screen names (its walkers).
+// see ./scene-render.js), or a scene without furniture (the wisp overlay over a running round), where
+// the avatars are drawn on top, only those of the players it names.
 // Positions are EPHEMERAL (`pos` messages, see PROTOCOL.md); the players come from the last `view`.
 // A pos (x, y) is the avatar's feet, in world units (WORLD = 16 × 9).
 //
@@ -178,8 +178,8 @@ export function createAvatarLayer() {
     expressions.clear();
   }
 
-  /** Every avatar stands at its last reported position at once, without walking there (the room's
-   *  positions, back after a round). */
+  /** Every avatar stands at its last reported position at once, without walking there (back in the room
+   *  after a round). */
   function settle() {
     for (const a of avatars.values()) {
       a.x = a.px = a.tx;
@@ -214,11 +214,11 @@ export function createAvatarLayer() {
 
   /**
    * Draws the avatars into `scene`: a room's props through `art`, sorted with the avatars by
-   * baseline; a game area has no props, so the avatars are drawn on top of what is already there.
+   * baseline; a scene without props draws the avatars on top of what is already there.
    * @param {CanvasRenderingContext2D} g @param {View} v
    * @param {number} alpha how far this frame sits between the last two updates @param {number} now
    * @param {Scene} scene @param {PropArt} [art]
-   * @param {readonly string[]} [only] only these players' avatars (a minigame's walkers); every one without it
+   * @param {readonly string[]} [only] only these players' avatars (the wisps); every one without it
    */
   function draw(g, v, alpha, now, scene, art = {}, only) {
     frameNow = now;

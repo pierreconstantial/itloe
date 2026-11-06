@@ -40,11 +40,9 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness), `/admin/` (adm
 // something changed). World coordinates: x ∈ [0,16], y ∈ [0,9] (16:9 units, avatar ≈ 1.2 units
 // tall); dir ∈ up|down|left|right. Server clamps to bounds and drops malformed or non-joined
 // senders silently. Between rounds, pos moves the player in the room (doors below). During a round
-// (until its podium closes), pos belongs to the round's minigame and its game area: kept only from the
-// players its server code lets walk (`walks`, server/minigames.ts; blocks and quiz: nobody), else
-// dropped silently; no doors. Those positions are the round's own, apart from the room's, and are
-// dropped when it ends: the room's positions stay where everyone stood (no longer moving). A phone whose
-// minigame screen switches the joystick on (its game area) sends its start position at once.
+// (until its podium closes), pos is kept and relayed only from wisps, in the room's positions and
+// without doors; anyone else's is dropped silently, and the room's positions stay where everyone
+// stood (no longer moving).
 { "t": "say", "text": "Hello!" }                         // joined player; 1–100 printable characters
 { "t": "emote", "kind": "victory" }                      // incarnated: victory | fart | annoy; wisp: shine
 { "t": "interact", "object": "table" }                    // near an object of the room where the party is (roomAt)
@@ -295,11 +293,9 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 { "t": "jump", "playerId": "p-abc123" }                      // relayed to screens only; never saved or used for doors
 // M3: relayed to SCREEN clients only, with ONE exception: right after welcome (join or rejoin)
 // the server sends a player its OWN last pos in the room if it has one — the phone seeds its local
-// position from that, else from shared/world.js spawnPoint(character); a minigame's phone screen picks
-// its own start in its game area. On screen connect the server sends one pos per known player: the
-// round's positions during a round, else the room's (last position, in-memory only — positions reset
+// position from that, else from shared/world.js spawnPoint(character). On screen connect the server
+// sends one pos per known player: the room's (last position, in-memory only — positions reset
 // on restart, so after a restart everyone is back at their spawn point on all clients consistently).
-// When a round ends, every screen gets the room's positions again, before the view that ends it.
 ```
 
 **Forward compatibility rule (M3): every client MUST silently ignore messages with an unknown `t`.**

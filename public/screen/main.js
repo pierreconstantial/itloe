@@ -122,7 +122,7 @@ const portalOpen = () => portalReady() && !campaign?.facts.flags.includes('porta
 const tableauSettings = () => campaign?.at.settings ?? null;
 
 /** What the frame offers a minigame's screen. @type {import('./minigames.js').TvIo} */
-const io = { continuous: () => !gap, avatars, worldView };
+const io = { continuous: () => !gap };
 
 /** Removes the running minigame's screen, with its listeners, loops, sounds and timers. */
 function unmountScreen() {
@@ -132,7 +132,7 @@ function unmountScreen() {
 }
 
 /** Leaving a round for the room or the map: its screen goes, its podium's sounds stop, and the avatars
- *  stand where they stood in the room (its positions came back just before this view), without walking there. */
+ *  stand where they stood in the room, without walking there. */
 function leaveRound() {
   unmountScreen();
   if (!shownRound) return;

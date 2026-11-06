@@ -9,18 +9,13 @@ import { QUIZ_SCREEN } from './quiz-ui.js';
 /** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
 
 /**
- * What the frame offers a minigame's phone screens. `joystick`: walking our avatar in the minigame's game
- * area (a shared/scene.js scene without furniture) from `start`, with the frame's stick placed at the end of
- * the screens' root, and no object button; null switches it off, and so does unmount. Our position there goes
- * to the server as `pos` (the start at once, so the TVs place the avatar); the server keeps it only for the
- * players the minigame's server code lets walk, apart from our position in the room, which waits for us.
+ * What the frame offers a minigame's phone screens.
  * @typedef {{
  *   send: (msg: unknown) => void,   // a plain message to the server (PROTOCOL.md)
  *   meId: () => string,             // this phone's player
  *   isGameMaster: () => boolean,    // is this phone the game master's?
  *   online: () => readonly string[],  // players with a live socket
  *   connected: () => boolean,       // is this phone's socket up? (the frame calls update when it changes)
- *   joystick: (on: { area: import('../../shared/scene.js').Scene, start: { x: number, y: number, dir?: import('../../shared/world.js').Dir } } | null) => void,
  * }} PhoneIo
  */
 

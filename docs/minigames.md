@@ -19,7 +19,6 @@ A minigame is a few files of its own, registered in four lists. Everything aroun
 - **Room**: what the TV draws for a node: a space with walls and furniture where avatars walk (`ROOMS` in [`shared/scene.js`](../shared/scene.js)). A node names its room, else it gets the party room ([`roomAt`](../shared/campaign/content.js)). Minigames have no rooms.
 - **Map**: the room at the hub or in a world, with a door for each node the party can enter from there.
 - **The room at a tableau**: the room between rounds at a tableau, under the tableau's band.
-- **Game area**: where a minigame lets avatars walk over its own screen during its round, e.g. players already out of a game roaming over its board. Its bounds are a `shared/scene.js` scene without furniture.
 - **Shared code**: everything that isn't a minigame's own files: the campaign engine (the RPG), the server, and the parts of the phone and TV around the games.
 - **Frame**: the screens every minigame shares: the room at a tableau between rounds, the podium, and the game master's round controls.
 - **Game master**: the one person who runs the evening: Pierre, as the content names him (`gameMaster`). Whoever holds that character is the game master, and nobody while he isn't in the evening ([`gameMasterId`](../shared/campaign/index.js)).
@@ -68,8 +67,7 @@ Then its type entries in [`shared/campaign/types.js`](../shared/campaign/types.j
 - **`inputs`** supplies what a round starts with besides the players and settings (the quiz: its candidate questions from the server-only bank).
 - **`view`** is what every phone and TV gets, the same for everyone. Filter it here: the quiz hides answers until the reveal.
 - **`onChange`** runs after every change of its round, before the save (blocks: solo best scores).
-- **`walks`** says who may walk its game area during its round; without it, nobody walks.
-- **The `io`** belongs to one round: `apply` runs a later action (the quiz's verdict), `send` sends an unsaved message, `positions` reads where the walkers stand. After the round ends, whatever goes through it is dropped ([`server/round.ts`](../server/round.ts)).
+- **The `io`** belongs to one round: `apply` runs a later action (the quiz's verdict), `send` sends an unsaved message. After the round ends, whatever goes through it is dropped ([`server/round.ts`](../server/round.ts)).
 
 ## The frame
 
@@ -98,7 +96,7 @@ It can:
 
 - run its own rules, with its own game-master-only actions and its own buttons for them in its screens;
 - filter its view, add its own counters, and keep server-side data of its own (blocks: best scores);
-- send unsaved messages to its screens, let chosen players walk its game area, and read their positions.
+- send unsaved messages to its screens.
 
 It can't:
 
@@ -108,13 +106,9 @@ It can't:
 - send different views to different players, or save anything outside its round's state and its own server data;
 - draw outside its round: before it, the room at the tableau shows; after it, the podium.
 
-## Avatars and unsaved messages
+## Unsaved messages
 
-- **Server.** `walks` decides who walks its game area during its round; anyone else's `pos` is dropped. Those positions are the round's own and are dropped with it, so the room resumes where everyone stood. `io.positions()` reads them, e.g. to place a fart, and `io.send` sends the effect as an unsaved message to every phone and TV (the wire's `unsaved`, see [PROTOCOL.md](../PROTOCOL.md)). Unsaved messages are for effects, not fast-moving games.
-- **Phone.** `io.joystick({ area, start })` switches the frame's joystick on in the game area, from `start`; `io.joystick(null)` or unmounting switches it off. The stick sits at the end of `root`, so a screen that rebuilds its markup while the stick is on must not empty `root` (`replaceChildren()`): add to it, or rebuild an element of its own inside it.
-- **TV.** `io.avatars` is the avatar layer ([`public/screen/avatar-layer.js`](../public/screen/avatar-layer.js)), which gets `pos`, chat and emotes whatever screen shows. A screen with a game area steps it from its loop (`update(dt)`) and draws it over its own canvas (`draw(g, view, alpha, now, area, {}, ids)`, only the players in `ids`), with `view` from `io.worldView(w, h, dpr)`: size the canvas in CSS pixels times `devicePixelRatio` and pass the CSS size, as the party room does (`layout` in [`public/screen/party-room.js`](../public/screen/party-room.js)). Avatars are drawn on top, so anything they must line up with is placed in world coordinates (16 × 9). `say` and `emote` show a bubble or an emote over an avatar, e.g. from an unsaved message.
-
-A game area is a scene built with `room()` in [`shared/scene.js`](../shared/scene.js), without props. Blocks and quiz use none of this; the stand-ins in the tests below do.
+A minigame's server code sends an effect to every phone and TV with `io.send`: the wire's `unsaved` (see [PROTOCOL.md](../PROTOCOL.md)), delivered to the running screens' `message`. Unsaved messages are for effects, not fast-moving games.
 
 ## Development start
 
@@ -130,9 +124,6 @@ Open `http://127.0.0.1:3199/sim/`: the TV and four phones side by side. Pick cha
 
 - **`npm run check` and `npm test`** for every change. `test/campaign.test.js` already checks that every registered minigame's development start validates and starts at its tableau.
 - **Rules:** tests in `test/<topic>.test.js` with `node:test`, small fixtures and explicit seeds and times, that play the rules through in order, as [`test/story.test.js`](../test/story.test.js) does for the opening. Cover the RPG's actions, a stale deadline and the result.
-- **Stand-ins** show how to test the minigame parts in isolation:
-  - [`test/round.test.js`](../test/round.test.js): server code through a round's `io`, without a server (walking, positions, unsaved messages, what's dropped after the round);
-  - [`test/avatar-layer.test.js`](../test/avatar-layer.test.js): the avatar layer over a game area;
-  - `e2e-tv.mts`'s `standin` section and `e2e-phone.mts`'s part 8: a TV screen and a phone screen swapped into the lists in the browser, with avatars, unsaved messages and the joystick.
+- **Stand-in:** [`test/round.test.js`](../test/round.test.js) shows how to test server code through a round's `io`, without a server (unsaved messages, what's dropped after the round).
 - **Over real sockets:** the `scripts/e2e-*.mts` suites start their own server on a scratch save folder; [`scripts/e2e-quiz.mts`](../scripts/e2e-quiz.mts) is the pattern for one minigame. The README's "Development commands and testing" lists them and how to run them.
 - **Playing it:** a short script with [`scripts/drive.mts`](../scripts/drive.mts) plays a round of your minigame on its development start (`content: 'minigame:<kind>'`) with a TV and phones in headless Chrome, and takes screenshots to look at.

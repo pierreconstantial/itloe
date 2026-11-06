@@ -1,8 +1,6 @@
 // M3 — avatar positions: ephemeral, client-authoritative, relayed to screens (plus a player's own
 // pos right after its welcome). Never enters the reducer State or the save file; reset on restart.
-// Walking belongs to the evening: whoever is in the party (and has not left) moves. During a round, `pos`
-// belongs to its minigame's game area instead: those positions are the round's own (server/round.ts), apart
-// from the room's, which stay where everyone stood.
+// Walking belongs to the evening: whoever is in the party (and has not left) moves.
 
 import { clampToWorld } from '../shared/world.js';
 import type { Campaign } from './campaign.ts';
@@ -54,8 +52,6 @@ export function makePositions<S extends object>() {
     },
 
     entries(): [string, Pos][] { return [...last.entries()]; },
-
-    clear(): void { last.clear(); },
   };
 }
 

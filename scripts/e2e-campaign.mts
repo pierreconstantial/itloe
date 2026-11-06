@@ -401,26 +401,25 @@ try {
   k = await until(P, (x) => !x.party.players[idN].statuses.includes('wisp'), i, 5000);
   check(k.at.activity.players[idN].left === true, 'incarnation restores the character for the next round, not this one');
   await interactsHere('during a running block game', false);
-  // during a round, pos belongs to its minigame's game area, apart from the room's positions; blocks lets nobody walk
+  // during a round, only wisps walk: a pos from anyone else is dropped
   i = T1.mark();
   E.send({ t: 'pos', ...floor, dir: 'up', moving: true });
   await settled([E], [T1]);
-  check(!T1.since(i).some((m) => m.t === 'pos'), 'during a running block game, a pos is dropped (blocks lets nobody walk)');
+  check(!T1.since(i).some((m) => m.t === 'pos'), 'during a running block game, a pos from a player who is not a wisp is dropped');
   const T4 = new Client('T4'); await T4.open();
   T4.send({ t: 'hello', role: 'screen' });
   await T4.waitFor((m) => m.t === 'chatHistory');
   await roundTrip(T4); // after the positions a hello sends
-  check(!T4.msgs.some((m) => m.t === 'pos'), "a TV saying hello during the round gets the round's positions: none in a block game");
+  const standing = T4.msgs.find((m) => m.t === 'pos' && m.playerId === idE);
+  check(standing?.x === TABLE.x && standing?.y === TABLE.y && standing?.moving === false,
+    `a TV saying hello during the round gets the room's positions: Élodie stands at the table, not walking (${JSON.stringify(standing)})`);
   T4.ws.close();
   i = P.mark(); P.send({ t: 'endGame' });
   await until(P, (x) => x.at.activity?.phase === 'finished', i);
   await interactsHere('on a block podium', false);
-  const [iT1, iP] = [T1.mark(), P.mark()];
+  const iP = P.mark();
   P.send({ t: 'gm', op: { op: 'goto', node: 'hub' } });
   await until(P, (x) => x.at.node === 'hub', iP);
-  const back = await T1.waitFor((m) => m.t === 'pos' && m.playerId === idE, iT1).catch(() => null);
-  check(back?.x === TABLE.x && back?.y === TABLE.y && back?.moving === false,
-    `after the round, the TVs get the room's positions again: Élodie stands at the table, not walking (${JSON.stringify(back)})`);
   await interactsHere('on the hub', true);
   i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'childhood' } });
   await until(P, (x) => x.at.node === 'childhood', i);

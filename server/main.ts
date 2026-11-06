@@ -67,7 +67,7 @@ const clock = makeClock((kind, deadline) => {
   if (game.campaign.at.kind === kind) apply({ t: 'activity', action: minigame(kind)!.deadlineAction(deadline) });
 });
 
-/** The room's avatar positions: in memory only, outside the reducer (see pos.ts). A round keeps its own. */
+/** The room's avatar positions: in memory only, outside the reducer (see pos.ts). */
 const positions = makePositions<WebSocket>();
 /** A server-timed presentation window after a Wisp gains playable status. */
 const incarnations = new Map<string, { at: number, kind: string }>();
@@ -88,24 +88,15 @@ function scheduleIncarnation(id: string): void {
   }, 3000);
 }
 
-/** The running round's in-memory side (round.ts): its server code's io, with unsaved messages, and its
- *  positions. Null between rounds. */
+/** The running round's in-memory side (round.ts): its server code's io, with unsaved messages. Null between rounds. */
 let round: Round<unknown> | null = null;
 const openRound = (c: Campaign): Round<unknown> | null => {
   if (!c.at.kind || !c.at.activity) return null;
-  // Keep the room's position even for someone who never moved: their game-area position must not
-  // survive the return to the room. Nobody keeps walking there while the round runs.
-  for (const id of c.party.order) {
-    const member = c.party.players[id];
-    if (member.left) continue;
-    const pos = positions.get(id) ?? spawnAt(roomAt(CONTENT, c.at.node), member.character);
-    positions.set(id, { ...pos, moving: false });
-  }
-  return makeRound(serverOf(c.at.kind), {
-    state: () => game.campaign.at.activity,
+  // Nobody keeps walking in the room while the round runs (a phone's last "stop" may arrive after it started).
+  for (const [id, pos] of positions.entries()) if (pos.moving) positions.set(id, { ...pos, moving: false });
+  return makeRound({
     apply: (action) => apply({ t: 'activity', action: action as any }),
     sendAll,
-    relay: relayPos,
   });
 };
 round = openRound(game.campaign); // a resumed round
@@ -147,14 +138,10 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
     if (roundOf(prev) === roundOf(next)) return;
     const ended = round;
     round = null;
-    if (ended) { // the old round's io goes quiet and its positions go before the next round opens
-      ended.end();
-      // the screens draw the room's positions again: the room resumes where everyone stood
-      for (const c of screens) sendPositions(c);
-    }
+    ended?.end(); // the old round's io goes quiet before the next round opens
     round = openRound(next);
   },
-  (_prev, next) => { positions.prune(next.party); round?.positions.prune(next.party); },
+  (_prev, next) => positions.prune(next.party),
   (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
   (prev, next) => {
     for (const id of next.party.order) {
@@ -310,11 +297,9 @@ function broadcast(): void {
   sendAll(viewMsg());
 }
 
-/** A screen's snapshot of the positions it draws: the round's during a round, else the room's. */
+/** A screen's snapshot of the positions it draws: the room's. */
 function sendPositions(ws: WebSocket): void {
-  for (const [playerId, pos] of (round?.positions ?? positions).entries()) send(ws, posMsg(playerId, pos));
-  if (round) for (const [playerId, pos] of positions.entries())
-    if (party().players[playerId]?.statuses.includes('wisp')) send(ws, posMsg(playerId, pos));
+  for (const [playerId, pos] of positions.entries()) send(ws, posMsg(playerId, pos));
 }
 
 function relayPos(playerId: string, pos: Pos): void {
@@ -450,12 +435,12 @@ function handleMessage(ws: WebSocket, m: any): void {
     const id = who.get(ws);
     if (!id || !canMove(party(), id) || !positions.allow(ws)) return;
     if (isIncarnating(id)) return;
-    if (round) { // the round's game area: kept apart from the room, walking as its minigame allows, no doors
+    if (round) { // during a round only wisps walk, in the room's positions and without doors
       const pos = parsePos(m);
       if (pos && party().players[id].statuses.includes('wisp')) {
         positions.set(id, pos);
         relayPos(id, pos);
-      } else if (pos) round.walk(id, pos);
+      }
       return;
     }
     if (STORY_MODE && game.campaign.at.node === 'hub' && party().players[id].character === CONTENT.chooser
@@ -747,11 +732,10 @@ wss.on('connection', (ws, req) => {
     }
     // player stays in the game: phones rejoin via hello + playerId.
     // A phone that drops mid-walk must not leave its avatar walking on the TV forever.
-    const walking = round?.positions ?? positions;
-    const pos = id ? walking.get(id) : undefined;
+    const pos = id ? positions.get(id) : undefined;
     if (id && pos?.moving) {
       const stopped = { ...pos, moving: false };
-      walking.set(id, stopped);
+      positions.set(id, stopped);
       relayPos(id, stopped);
     }
   });
@@ -775,7 +759,7 @@ function adminSnapshot() {
       const ws = sockets.get(id);
       return {
         id, online: isOnline(id), attaches: attaches.get(id) ?? 0, socket: ws ? socket(ws) : null,
-        pos: positions.get(id) ?? null, roundPos: round?.positions.get(id) ?? null,
+        pos: positions.get(id) ?? null,
       };
     }),
     screens: [...screens].map(socket),

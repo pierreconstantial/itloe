@@ -75,12 +75,12 @@ function draw(d) {
   fillTable($('players'), ['Player', 'Id', 'Role', 'State', 'Statuses', 'Socket since', 'Last message', 'Address', 'Browser', 'Sockets', 'Position'],
     d.players.map((/** @type {any} */ p) => {
       const m = players[p.id];
-      const pos = p.roundPos ?? p.pos;
+      const pos = p.pos;
       return [
         `${m.name} (${m.character})`, p.id, p.id === d.gameMaster ? 'game master' : '',
         el('td', m.left ? 'left' : p.online ? 'online' : 'offline', m.left ? 'dim' : p.online ? 'ok' : 'bad'),
         m.statuses.join(', '), ...socketCells(p.socket, now), String(p.attaches),
-        pos ? `${p.roundPos ? 'game area ' : ''}${pos.x.toFixed(1)}, ${pos.y.toFixed(1)}${pos.moving ? ' moving' : ''}` : '—',
+        pos ? `${pos.x.toFixed(1)}, ${pos.y.toFixed(1)}${pos.moving ? ' moving' : ''}` : '—',
       ];
     }));
 

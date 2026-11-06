@@ -7,21 +7,13 @@ import { QUIZ_SCREEN } from './quiz-screen.js';
 /** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
 /** @typedef {import('../../shared/minigames.js').MinigameKind} MinigameKind */
 /** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
-/** @typedef {ReturnType<typeof import('./avatar-layer.js').createAvatarLayer>} AvatarLayer */
 
 /**
  * What the frame offers a minigame's TV screen. `continuous`: this view directly follows the last one the
  * TV showed — false after a page load or a reconnect, when what happened in between is not replayed (no
  * sounds for missed events). The first view of a round is continuous when the TV watched it start.
- * `avatars`: the players' avatars (./avatar-layer.js), whose `pos` the TV gets whatever screen shows; a
- * screen with a game area steps them from its loop (`update`), draws them on top of its canvas with the
- * players it names (`draw(g, view, alpha, now, area, {}, ids)`), and can show a bubble or an emote over
- * one (`say`, `emote`, e.g. from its unsaved message). `worldView`: the world-to-screen projection for its
- * canvas (the 16 × 9 world, letterboxed): what the avatars line up with is placed in world coordinates.
  * @typedef {{
  *   continuous: () => boolean,
- *   avatars: Pick<AvatarLayer, 'update' | 'draw' | 'say' | 'emote'>,
- *   worldView: typeof import('./avatar-layer.js').worldView,
  * }} TvIo
  */
 

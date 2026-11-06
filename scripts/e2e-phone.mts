@@ -8,15 +8,15 @@
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3182 CDP=9222 [LOCK_MS=300000] node scripts/e2e-phone.mts    (never PORT 3131: the live server)
 // LOCK_MS is how long the "phone locked" case freezes the page (default 5 min, as in the acceptance list).
-// ONLY=1 … 8 runs just that part (continuity / game master controls / campaign / quiz / room code / inventory / QR /
-// a stand-in minigame's phone screen walking its game area); an unknown part is refused.
+// ONLY=1 … 7 runs just that part (continuity / game master controls / campaign / quiz / room code / inventory / QR);
+// an unknown part is refused.
 // a full run is the acceptance.
 // SHOTS=<dir> saves screenshots of the block, quiz and campaign screens, each with its visible text (<name>.txt).
 import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, Client, finish, HTTP, onlyPart, sleep, SLOW, SOCKET_PROBE, TEARDOWN_PROBE } from './e2e-lib.mts';
+import { check, Client, finish, HTTP, onlyPart, sleep, SLOW, TEARDOWN_PROBE } from './e2e-lib.mts';
 import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
 import { FEET, PARTY_ROOM } from '../shared/scene.js';
 
@@ -25,7 +25,7 @@ if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT
 const CDP = process.env.CDP ?? '9222';
 const LOCK_MS = Number(process.env.LOCK_MS ?? 5 * 60_000);
 const SHOTS = process.env.SHOTS; // a folder: screenshots of the screens land there
-const ONLY = onlyPart(['1', '2', '3', '4', '5', '6', '7', '8']); // e.g. ONLY=3: just the campaign part (quick iteration)
+const ONLY = onlyPart(['1', '2', '3', '4', '5', '6', '7']); // e.g. ONLY=3: just the campaign part (quick iteration)
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-phone-'));
 // the quiz part plays a FIXED bank (a copy of the placeholder file), whatever the real bank holds
 const FIXED_BANK = join(VAR, 'fixed-bank');
@@ -1114,71 +1114,6 @@ try {
   tv7.ws.close();
   } // part 7
 
-  if (!ONLY || ONLY === '8') {
-  // ================= part 8: a minigame's phone screen with the joystick in its game area =================
-  // A stand-in screen, put in the phone's list (public/play/minigames.js) in place of the block game's by this
-  // test only; the round itself is a block game's, whose server code lets nobody walk, so the phone's own
-  // socket (SOCKET_PROBE) shows what it sends.
-  console.log('\n— part 8: a stand-in minigame\'s joystick in its game area —');
-  await kill9();
-  await boot(true);
-  const S = await phone('S', [SOCKET_PROBE]);
-  const idS = await joinAs(S, 'pierre');
-  const tv8 = new Client('tv8'); await tv8.open(); tv8.send({ t: 'hello', role: 'screen' });
-  await tv8.waitFor((m) => m.t === 'view');
-  await S.push(1, 0, 500); // a few steps in the room
-  await sleep(300);
-  const inRoom = [...tv8.msgs].reverse().find((m) => m.t === 'pos' && m.playerId === idS);
-  expect(!!inRoom && inRoom.y > 4.8, 'walking in the room: the TV gets our position', JSON.stringify(inRoom));
-  await S.ev(`(async () => {
-    const [{ SCREENS }, { room }] = await Promise.all([import('/play/minigames.js'), import('/shared/scene.js')]);
-    const area = room('stand-in-area', { x: 0.5, y: 0.5, w: 15, h: 3 }, []); // above the party room's floor
-    const s = window.__standIn = { messages: [], unmounted: false, real: SCREENS.blocks };
-    SCREENS.blocks = { ...s.real, mount(root, io) {
-      root.insertAdjacentHTML('beforeend', '<section id="view-stand-in"><p>Walk!</p></section>');
-      io.joystick({ area, start: { x: 3, y: 2, dir: 'right' } });
-      return {
-        update() {},
-        message(msg) { s.messages.push(msg); },
-        unmount() { s.unmounted = true; root.replaceChildren(); },
-      };
-    } };
-  })()`);
-  const sentPos = (from: number) => S.ev(`window.__sent.slice(${from}).filter((m) => m.t === 'pos')`);
-  let from8: number = await S.ev('window.__sent.length');
-  await S.tap('#btn-start');
-  const roundUp = await S.waitFor((x) => x.view === 'view-stand-in', 5000);
-  expect(roundUp?.view === 'view-stand-in', 'Start → the frame mounts the stand-in screen');
-  expect(await S.ev(`document.getElementById('stick-pad').parentElement.id === 'view-round'`) && await S.visible('stick-pad')
-    && !(await S.visible('btn-interact')), 'its joystick shows under its screen, without the object button');
-  const first = (await sentPos(from8))[0];
-  expect(JSON.stringify(first) === JSON.stringify({ t: 'pos', x: 3, y: 2, dir: 'right', moving: false }),
-    'switching the joystick on sends the start position at once', JSON.stringify(first));
-  from8 = await S.ev('window.__sent.length');
-  await S.push(1, 0, 600);
-  const walked = await sentPos(from8);
-  expect(walked.length > 1 && walked.every((p: any) => p.y === 2 && p.x >= 3) && walked.at(-1).x > 3 && walked.at(-1).moving === false,
-    'walking the game area: from the start, in its bounds (y 2, above the room\'s floor), a final stop', JSON.stringify(walked.at(-1)));
-  const fart = { t: 'unsaved', data: { t: 'fart', x: 3, y: 2 } };
-  await S.ev(`window.__receive(${JSON.stringify(fart)})`);
-  expect(JSON.stringify(await S.ev('window.__standIn.messages')) === JSON.stringify([fart]), "an unsaved message reaches the running screen's message()");
-  from8 = await S.ev('window.__sent.length');
-  await S.ev(`window.__ws.send(JSON.stringify({ t: 'endGame' }))`);
-  await S.waitFor((x) => x.view === 'view-podium', 5000);
-  expect(await S.ev('window.__standIn.unmounted') && !(await S.visible('stick-pad')), 'the round ends → the screen is unmounted, its joystick goes');
-  await S.tap('#btn-new-game');
-  await S.waitFor((x) => x.view === 'view-lobby', 5000);
-  expect(await S.visible('stick-pad') && await S.visible('btn-interact'), 'back in the room: the room\'s joystick and the object button');
-  expect((await sentPos(from8)).length === 0, 'nothing of the game area reaches the server after the round');
-  const i8 = tv8.mark();
-  await S.push(-1, 0, 300);
-  await sleep(500);
-  const back = tv8.since(i8).filter((m) => m.t === 'pos' && m.playerId === idS).at(-1);
-  expect(!!back && back.y === inRoom.y && back.x < inRoom.x && back.x > inRoom.x - 1.5,
-    'walking on from where we stood in the room', `${JSON.stringify(inRoom)} → ${JSON.stringify(back)}`);
-  await S.ev('(async () => { (await import("/play/minigames.js")).SCREENS.blocks = window.__standIn.real; })()');
-  tv8.ws.close();
-  } // part 8
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}`);
   if (log) console.log(`--- server log ---\n${log}`);
