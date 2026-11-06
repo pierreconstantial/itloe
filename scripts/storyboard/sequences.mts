@@ -9,7 +9,7 @@ import { SLOW, sleep } from '../e2e-lib.mts';
 import { PYRAMIDE_SPOTS } from '../../shared/pyramide.js';
 import { avatar, phone, player, tv, wisp } from './mock.mts';
 
-export type Shot = { who: string, img: string, planned: boolean };
+export type Shot = { who: string, img: string, planned: boolean, asset?: boolean, mime?: 'image/png' };
 type Drive = Awaited<ReturnType<typeof drive>>;
 type Phone = Drive['phones'][number];
 
@@ -182,7 +182,7 @@ const opening: Sequence = {
 
     await walk(b, 'elodie', { x: 8, y: 5.4 }, hasFlag(b, 'portal.entered'));
     await sleep(2500);
-    await b.frame('Élodie crosses into her Vienna apartment. Pierre, Sol and Anna become wisps too and follow her, with Nico. A mysterious visitor appears and speaks.',
+    await b.frame('Élodie crosses into her dream apartment. Pierre, Sol and Anna become wisps too and follow her, with Nico. A mysterious visitor appears and speaks.',
       [b.tv, () => b.real('elodie'), () => b.real('pierre')]);
 
     await b.d.tv.waitFor('window.bloko.campaign()?.facts.flags.includes("apparition.seen")', 60_000);
@@ -194,12 +194,85 @@ const opening: Sequence = {
     await E.tap('Pick up key');
     await b.d.tv.waitFor(`(window.bloko.campaign()?.facts.inventory.elodie?.['memory-key-intro'] ?? 0) > 0`);
     await sleep(1500);
-    await b.frame('Élodie picks up the key: the door to the Young Adult world opens.', [b.tv, () => b.real('elodie')]);
+    await b.frame('Élodie picks up the key: the large memory door becomes reachable.', [b.tv, () => b.real('elodie')]);
 
     await cutscenesDone(b);
-    await walk(b, 'elodie', { x: 8.95, y: 5.3 }, async () => (await campaign(b))?.at.node === 'young-adult');
+    await walk(b, 'elodie', { x: 8.15, y: 5.3 }, async () => (await campaign(b))?.at.node === 'young-adult');
     await sleep(1500);
-    await b.frame('Through the door, the Young Adult world. Its contents are still to be written.', [b.tv, () => b.real('elodie'), () => b.real('anna')]);
+    await b.frame('Through the large door, Young Adult begins at Wallensteinplatz.', [b.tv, () => b.real('elodie'), () => b.real('anna')]);
+  },
+};
+
+/** A background already used by the game, shown without avatars or UI. */
+const gameTvImage = (filename: string): Shot => ({
+  who: 'TV', img: readFileSync(new URL(`../../public/assets/places/young-adult/${filename}`, import.meta.url)).toString('base64'),
+  planned: false, asset: true, mime: 'image/png',
+});
+
+const hubTvImage = (): Shot => ({
+  who: 'TV', img: readFileSync(new URL('../../public/assets/places/hub/elodie-dream-apartment-oriental-rug-v2.png', import.meta.url)).toString('base64'),
+  planned: false, asset: true, mime: 'image/png',
+});
+
+/** The destination sheet appears only after a tram quiz. */
+const tramMenu = (destinations: string[]) => phone('elodie', `
+  <h2>Tram 5</h2>
+  <p class="hint">Quiz complete. Where shall we go?</p>
+  <div class="card list">
+    ${destinations.map((name) => `<button class="primary">🚋 ${name}</button>`).join('')}
+  </div>
+  <button class="ghost">Stay at Wallensteinplatz</button>`);
+
+const youngAdult: Sequence = {
+  id: 'young-adult',
+  title: 'Young Adult',
+  intro: 'Élodie’s Young Adult story runs from Wallensteinplatz through her flat, The Shelter and Marokkanergasse. The backgrounds are game assets; the conversations, puzzles, tram quizzes and minigames shown here are planned.',
+  content: '',
+  phones: [],
+  async run(b) {
+    const art = (image: string) => async () => gameTvImage(image);
+    const elo = (html: string) => () => b.mockPhone('elodie', phone('elodie', html));
+    await b.frame('Élodie’s dream apartment · hub. The current pixel-art background has one large interior door, plants, art posters, an oriental rug and a sunny terrace for four with beer and an ashtray. The door leads to Young Adult.',
+      [async () => hubTvImage()]);
+
+    await b.frame('Tram 5 · young-adult/tram-5. Élodie arrives alone at Wallensteinplatz. A dog barks at a man trying to break into a Zigarettenautomat with a crowbar; The Shelter is closed.',
+      [art('tram-5-shelter-closed-v5.png'), elo('<h2>Wallensteinplatz</h2><p>🐕 A dog barks at a man by the cigarette machine.</p><button class="primary">Talk to the man</button>')]);
+    await b.frame('The man asks, “Host a Tschick? I brauch dringend ane!” Élodie has no cigarette yet. Later, giving him one makes him say “Oida, geil!”, disappear and leave his crowbar.',
+      [art('tram-5-shelter-closed-v5.png'), elo('<h2>By the Zigarettenautomat</h2><div class="card">“Host a Tschick? I brauch dringend ane!”</div><button disabled>Give a cigarette</button>')]);
+    await b.frame('Élodie interacts with Tram 5. Every journey begins with a quiz: she chooses one of three topics, then everyone who is not hidden may answer five questions.',
+      [art('tram-5-shelter-closed-v5.png'), elo('<h2>Tram 5 · quiz</h2><p>Choose a topic</p><div class="card list"><button>Topic 1</button><button>Topic 2</button><button>Topic 3</button></div><p class="hint">5 questions · all visible players can answer</p>')]);
+    await b.frame('After every answer, the quiz shows the correct answer and an explanation in the style Élodie likes. After question five, the first available destination is Élodie’s flat.',
+      [art('tram-5-shelter-closed-v5.png'), () => b.mockPhone('elodie', tramMenu(['Appart Elo 1']))]);
+
+    await b.frame('Élodie’s flat · young-adult/appart-elo-1. The partly underground room is dark when she arrives. She can switch on the floor lamp.',
+      [art('appart-elo-1-lamp-off-v2.png'), elo('<h2>Élodie’s room</h2><button class="primary">Turn on the lamp</button>')]);
+    await b.frame('The TV offers Columbo on YouTube or TV5 Monde for one in-game hour. Reading a book advances two hours. The beer bottles are empty: “Pierre said he\'d bring beer.” A cracked floorboard traps a Shelter ticket; it needs a tool.',
+      [art('appart-elo-1-basement-v1.png'), elo('<h2>Explore the room</h2><div class="card list"><button>Watch Columbo on YouTube</button><button>Watch TV5 Monde · 1 hour</button><button>Read a book · 2 hours</button><button>Examine empty beer bottles</button><button>Inspect cracked floorboard</button></div><p class="hint">“There\'s a piece of paper stuck under the parquet floor. I can\'t pull it out.”</p>')]);
+    await b.frame('After three in-game hours, regardless of puzzle progress, Pierre arrives with beer: “I brought beers and cigarettes! But first, let\'s play backgammon.” The only reply is “Yes”; every non-hidden player joins the game.',
+      [art('appart-elo-1-basement-v1.png'), elo('<h2>Pierre arrives</h2><div class="card">“I brought beers and cigarettes! But first, let\'s play backgammon.”</div><button class="primary">Yes</button>')]);
+    await b.frame('Backgammon ends. Pierre returns to wisp mode. A pack of cigarettes and some beers appear on the floor for Élodie to pick up.',
+      [art('appart-elo-1-basement-v1.png'), elo('<h2>After backgammon</h2><div class="card list"><button>Pick up cigarettes</button><button>Pick up beers</button></div>')]);
+
+    await b.frame('The Shelter ticket puzzle: Élodie returns to Tram 5, gives the man a cigarette, hears “Oida, geil!”, and picks up the crowbar he leaves. The dog drew her to him.',
+      [art('tram-5-shelter-closed-v5.png'), elo('<h2>By the Zigarettenautomat</h2><div class="card">“Oida, geil!”</div><button class="primary">Pick up crowbar</button>')]);
+    await b.frame('A second tram quiz takes Élodie back to her flat. She uses the crowbar to lift the cracked floorboard and takes the concert ticket. The Shelter becomes an available destination.',
+      [art('appart-elo-1-basement-v1.png'), elo('<h2>Cracked floorboard</h2><button class="primary">Use crowbar</button><div class="card">🎟 The Shelter concert ticket</div>')]);
+    await b.frame('Wallensteinplatz at night: The Shelter is now open. After another five-question tram quiz, Élodie can choose The Shelter.',
+      [art('tram-5-night-shelter-open-v6.png'), () => b.mockPhone('elodie', tramMenu(['Appart Elo 1', 'The Shelter']))]);
+
+    await b.frame('The Shelter · young-adult/shelter. Élodie goes down the steep stair into the rock and punk bar. Pierre proposes multiplayer table football, or baby-foot.',
+      [art('shelter-interior-playable-v3.png'), elo('<h2>The Shelter</h2><div class="card">Pierre: “Let\'s play baby-foot.”</div><button class="primary">Play table football</button>')]);
+    await b.frame('After the table-football match, Pierre becomes kissable. Kissing him unlocks Marokkanergasse and makes Élodie’s original flat inaccessible.',
+      [art('shelter-interior-playable-v3.png'), elo('<h2>Pierre</h2><button class="primary">Kiss Pierre</button><p class="hint">Marokkanergasse unlocked · Élodie’s flat closed</p>')]);
+    await b.frame('One final tram quiz leads to Marokkanergasse. The destination menu now offers Marokkanergasse and no longer offers Élodie’s original flat.',
+      [art('tram-5-night-shelter-open-v6.png'), () => b.mockPhone('elodie', tramMenu(['The Shelter', 'Marokkanergasse']))]);
+
+    await b.frame('Marokkanergasse · young-adult/appart-pierre. There is no normal exit. Nico and Mathieu are NPCs who may be controlled by connected players; Johanna and the Shikababe gang are here too. Anyone Élodie approaches invites her to Pyramide.',
+      [art('appart-pierre-table-center-v4.png'), elo('<h2>Marokkanergasse</h2><div class="card">Nico · Mathieu · Johanna · Shikababe</div><p>“Shikababy Shikaboom! Let\'s play a Pyramide game!”</p><button class="primary">Yes</button><button>Dismiss</button>')]);
+    await b.frame('“Yes” starts the multiplayer Pyramide word game using the shared game engine. “Dismiss” closes the invitation; Élodie can speak to someone again.',
+      [art('appart-pierre-table-center-v4.png'), elo('<h2>Pyramide</h2><button class="primary">Yes · start game</button><button>Dismiss</button>')]);
+    await b.frame('After Pyramide, a special key appears on the floor. Élodie picks it up to unlock the Adult Age door in the hub. A portal then appears in the apartment; she enters it to return to the hub and complete Young Adult.',
+      [art('appart-pierre-table-center-v4.png'), elo('<h2>Young Adult complete</h2><button class="primary">Pick up Adult Age key</button><button>Enter portal to the hub</button>')]);
   },
 };
 
@@ -494,4 +567,4 @@ const moments: Sequence = {
   },
 };
 
-export const SEQUENCES: Sequence[] = [opening, quiz, pyramide, moments];
+export const SEQUENCES: Sequence[] = [opening, youngAdult, quiz, pyramide, moments];

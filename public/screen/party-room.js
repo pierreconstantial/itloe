@@ -1,6 +1,6 @@
 // M3 party room, M4 (Contract G) the hub's scene: the lobby room with every joined guest's avatar
-// walking in it, among props they collide with and sort against. It draws the three rooms:
-// the party room, the apartment and Young Adult's room (ROOMS in shared/scene.js; roomAt picks one).
+// walking in it, among props they collide with and sort against. It draws the party room,
+// the dream apartment and the Young Adult places (ROOMS in shared/scene.js; roomAt picks one).
 //
 // This file is ONE room: its backdrop painting, its scene's prop art, the furniture effects of
 // object actions, and the story's drawings (the portal, the cats, the friends, the keepsakes, the
@@ -12,7 +12,8 @@
 //              list — 'back' props, then 'sorted' props and avatars interleaved by baseline Y,
 //              then 'front' props.
 
-import { PARTY_ROOM, APARTMENT_ROOM, YOUNG_ADULT_ROOM } from '../../shared/scene.js';
+import { PARTY_ROOM, APARTMENT_ROOM } from '../../shared/scene.js';
+import { WORLD } from '../../shared/world.js';
 import { INTRO_KEY, INTRO_KEY_SPOT, PORTAL } from '../../shared/campaign/story.js';
 import { OBJECT_ACTIONS } from '../../shared/interactions.js';
 import { createLoop, py as snapY } from './scene-render.js';
@@ -164,6 +165,9 @@ export function createPartyRoom(bg, fg, avatars) {
   /** @type {import('../../shared/scene.js').Scene} */ let room = PARTY_ROOM;
   let portalVisible = false;
   let keyVisible = false;
+  let shelterOpen = false;
+  let eloLampOff = false;
+  /** @type {Map<string, HTMLImageElement>} */ const placeImages = new Map();
   /** @type {string[]} */ let hubPeople = [];
   /** @type {{id: string, icon: string}[]} */ let decorations = [];
   let frameNow = 0;                    // the timestamp of the frame being drawn (furniture effects)
@@ -184,6 +188,17 @@ export function createPartyRoom(bg, fg, avatars) {
   /** world → CSS px @param {number} x @param {number} y */
   const toScreen = (x, y) => ({ sx: geo.ox + x * geo.unit, sy: geo.oy + y * geo.unit });
 
+  /** Painted backgrounds for the dream apartment and Young Adult places. */
+  function placeBackground() {
+    if (room === APARTMENT_ROOM) return '/assets/places/hub/elodie-dream-apartment-oriental-rug-v2.png';
+    const base = '/assets/places/young-adult/';
+    if (room.id === 'young-adult/tram-5') return base + (shelterOpen ? 'tram-5-night-shelter-open-v6.png' : 'tram-5-shelter-closed-v5.png');
+    if (room.id === 'young-adult/shelter') return base + 'shelter-interior-playable-v3.png';
+    if (room.id === 'young-adult/appart-elo-1') return base + (eloLampOff ? 'appart-elo-1-lamp-off-v2.png' : 'appart-elo-1-basement-v1.png');
+    if (room.id === 'young-adult/appart-pierre') return base + 'appart-pierre-table-center-v4.png';
+    return null;
+  }
+
   // ---- static scene: an Altbau living room in Vienna, decorated for the birthday ----
   // Back wall (pale stucco, cornice, chair rail), a tall casement window on the left and a white
   // double door on the right — the lobby panels sit on the wall between them (screen-main.css keeps
@@ -200,11 +215,17 @@ export function createPartyRoom(bg, fg, avatars) {
     const Y = (/** @type {number} */ u) => snap(geo.oy + u * unit, p);
     const floorTop = Y(SCENE.floorTop);
 
-    if (room === YOUNG_ADULT_ROOM) {
-      rect(g, 0, 0, w, floorTop, '#b8a998');
-      rect(g, 0, floorTop, w, h - floorTop, '#8a6951');
-      rect(g, 0, floorTop - p * 3, w, p * 3, PAL.stucco);
-      paintDoor(g, X(6.6), X(9.4), Y(1.15), floorTop, p);
+    const src = placeBackground();
+    if (src) {
+      rect(g, 0, 0, w, h, '#211528');
+      let image = placeImages.get(src);
+      if (!image) {
+        image = new Image();
+        image.onload = () => { if (visible && placeBackground() === src) paintScene(); };
+        image.src = src;
+        placeImages.set(src, image);
+      }
+      if (image.complete && image.naturalWidth) g.drawImage(image, geo.ox, geo.oy, unit * WORLD.w, unit * WORLD.h);
       return;
     }
 
@@ -506,9 +527,11 @@ export function createPartyRoom(bg, fg, avatars) {
     g.setTransform(geo.dpr, 0, 0, geo.dpr, 0, 0);
     g.clearRect(0, 0, geo.w, geo.h);
     g.imageSmoothingEnabled = false;
-    for (const d of doors) drawDoorway(g, d, now); // the doorways lie flat on the back wall, under everything
+    if (room !== APARTMENT_ROOM && !room.id.startsWith('young-adult/')) for (const d of doors) drawDoorway(g, d, now);
     if (portalVisible && room === PARTY_ROOM) drawPortal(g, now);
-    avatars.draw(g, geo, alpha, now, room, PROP_ART);
+    // The apartment's sofa and plants are painted into its background; the scene props remain
+    // for collision and object interactions without drawing duplicate pixel furniture over them.
+    avatars.draw(g, geo, alpha, now, room, room === APARTMENT_ROOM ? {} : PROP_ART);
     if (room === APARTMENT_ROOM) {
       drawCats(g, now);
       drawHubPeople(g, now);
@@ -549,7 +572,7 @@ export function createPartyRoom(bg, fg, avatars) {
   /** @param {CanvasRenderingContext2D} g */
   function drawDecorations(g) {
     decorations.slice(0, 8).forEach((item, index) => {
-      const { sx, sy } = toScreen(1.4 + index * 1.05, 3.65);
+      const { sx, sy } = toScreen(3.2 + (index % 4) * 1.12, 1.8 + Math.floor(index / 4) * 1.05);
       const p = geo.scale;
       rect(g, sx - p * 8, sy - p * 7, p * 16, p * 14, '#6d4a38');
       rect(g, sx - p * 6, sy - p * 5, p * 12, p * 10, '#e9d9b3');
@@ -738,6 +761,16 @@ export function createPartyRoom(bg, fg, avatars) {
     if (visible) paintScene();
   }
 
+  /** Story flags select the night Tram 5 and lamp-off room variants. @param {string[]} flags */
+  function setWorldFlags(flags) {
+    const nextShelterOpen = flags.includes('young-adult.shelter.open');
+    const nextLampOff = flags.includes('young-adult.appart-elo-1.lamp-off');
+    if (shelterOpen === nextShelterOpen && eloLampOff === nextLampOff) return;
+    shelterOpen = nextShelterOpen;
+    eloLampOff = nextLampOff;
+    if (visible) paintScene();
+  }
+
   /** Forget the furniture effects (reconnect); the avatar layer resets its own. */
   function reset() {
     objectEffects.clear();
@@ -746,7 +779,7 @@ export function createPartyRoom(bg, fg, avatars) {
   addEventListener('resize', () => { if (visible) layout(); });
 
   return {
-    setPlayers, setDoors, onInteract, setVisible, setRoom,
+    setPlayers, setDoors, onInteract, setVisible, setRoom, setWorldFlags,
     setPortal: (/** @type {boolean} */ on) => { portalVisible = on; },
     setKey: (/** @type {boolean} */ on) => { keyVisible = on; },
     setHubPeople: (/** @type {string[]} */ people) => { hubPeople = people; },

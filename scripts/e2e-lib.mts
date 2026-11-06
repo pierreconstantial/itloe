@@ -234,7 +234,7 @@ export async function playToDone(c: Client, id: string, other: Client, rnd: () =
 }
 
 // ---------- processes: ports, a server, Chrome, process groups ----------
-const CHROME = '/usr/bin/google-chrome';
+const CHROME = process.env.CHROME ?? '/usr/bin/google-chrome';
 const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 
 /** A free TCP port on loopback (never 3131: the OS hands out ephemeral ports). */

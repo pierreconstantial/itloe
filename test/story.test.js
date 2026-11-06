@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newCampaign, loadCampaign, reduceCampaign, validateContent, holding, gameMasterId } from '../shared/campaign/index.js';
+import { newCampaign, loadCampaign, reduceCampaign, validateContent, holding, gameMasterId, roomAt } from '../shared/campaign/index.js';
 import { INTRO_KEY, MEMORY_WORLDS, OPENING_PLAYERS, STORY_CONTENT } from '../shared/campaign/story.js';
 
 /** @param {import('../shared/campaign/types.js').Campaign} campaign
@@ -101,6 +101,32 @@ test('opening match, portal, apparition, pickup and Young Adult are one-time and
   assert.equal(act(c, { t: 'enter', id: 'pierre', node: 'young-adult' }), c);
   c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult' });
   assert.equal(c.at.node, 'young-adult');
+  assert.equal(roomAt(STORY_CONTENT, c.at.node).id, 'young-adult/tram-5');
+  assert.equal(c.facts.unlocked.includes('young-adult/tram-5'), true);
+  assert.equal(c.facts.unlocked.includes('young-adult/appart-elo-1'), true);
+  assert.equal(c.facts.unlocked.includes('young-adult/shelter'), false);
+  assert.equal(c.facts.unlocked.includes('young-adult/appart-pierre'), false);
+  c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/tram-5' });
+  assert.equal(c.at.node, 'young-adult/tram-5');
+  assert.equal(act(c, { t: 'enter', id: 'elodie', node: 'young-adult/appart-pierre' }), c, 'Pierre’s flat is still locked');
+  c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/appart-elo-1' });
+  assert.equal(roomAt(STORY_CONTENT, c.at.node).id, 'young-adult/appart-elo-1');
+  c = act(c, { t: 'back', id: 'elodie' });
+  assert.equal(c.at.node, 'young-adult/tram-5');
+  c = act(c, { t: 'back', id: 'elodie' });
+  assert.equal(c.at.node, 'young-adult');
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.shelter.open', on: true } });
+  assert.equal(c.facts.unlocked.includes('young-adult/shelter'), true);
+  c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/shelter' });
+  assert.equal(roomAt(STORY_CONTENT, c.at.node).id, 'young-adult/shelter');
+  c = act(c, { t: 'back', id: 'elodie' });
+  c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/tram-5' });
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.appart-pierre.open', on: true } });
+  assert.equal(c.facts.unlocked.includes('young-adult/appart-pierre'), true);
+  c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/appart-pierre' });
+  assert.equal(roomAt(STORY_CONTENT, c.at.node).id, 'young-adult/appart-pierre');
+  c = act(c, { t: 'back', id: 'elodie' });
+  c = act(c, { t: 'back', id: 'elodie' });
   c = act(c, { t: 'back', id: 'elodie' });
   assert.equal(c.at.node, 'hub');
   assert.equal(holding(c.facts, 'elodie', INTRO_KEY), 1);

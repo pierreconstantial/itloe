@@ -532,6 +532,11 @@ function updateInteraction() {
     $('object-actions').hidden = button.hidden;
     return;
   }
+  if (campaign?.at.node.startsWith('young-adult')) {
+    button.hidden = true;
+    $('object-actions').hidden = true;
+    return;
+  }
   if (incarnationAt > serverNow() || minigame) { // over a minigame there is no furniture
     button.dataset.object = '';
     button.disabled = true;
@@ -564,7 +569,8 @@ function renderPlace(c, mem) {
   intro.textContent = here?.intro ?? '';
 
   // open places only (no spoilers): done ✓, never entered ✨; the locked ones are just counted
-  const marks = childMarks(c).filter((m) => m.node.door);
+  const children = childMarks(c);
+  const marks = children.filter((m) => m.node.door);
   const open = marks.filter((m) => m.unlocked);
   const ul = $('place-children');
   ul.replaceChildren(...open.map((m) => {
@@ -586,8 +592,29 @@ function renderPlace(c, mem) {
   const chooser = CHARACTERS[content().chooser];
   const isChooser = mem.character === content().chooser;
   const doors = open.length > 0;
-  $('btn-place-back').hidden = !(isStory() && c.at.node === 'young-adult' && isChooser);
+  const atTram = isStory() && c.at.node === 'young-adult/tram-5';
+  const destinations = $('tram-destinations');
+  destinations.hidden = !(atTram && isChooser);
+  if (!destinations.hidden) {
+    $('tram-destination-buttons').replaceChildren(...children.filter((m) => m.unlocked).map((m) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'primary';
+      button.dataset.node = m.node.id;
+      button.textContent = `🚋 ${m.node.title}`;
+      button.disabled = !conn.isOnline();
+      return button;
+    }));
+  }
+  const back = /** @type {HTMLButtonElement} */ ($('btn-place-back'));
+  back.hidden = !(isStory() && c.at.node.startsWith('young-adult') && isChooser);
+  if (!back.hidden) back.textContent = c.at.node === 'young-adult' ? '← Back to Élodie’s dream apartment'
+    : ['young-adult/tram-5', 'young-adult/shelter'].includes(c.at.node) ? '← Stay at Wallensteinplatz'
+      : `← Back to ${here?.parent ? titleOf(here.parent) : 'Tram 5'}`;
   $('place-hint').hidden = !(isChooser && doors);
+  $('place-hint').textContent = c.at.node === 'young-adult'
+    ? c.facts.unlocked.includes('young-adult/shelter') ? 'Walk to Tram 5 or the Shelter entrance' : 'Walk to Tram 5'
+    : 'Walk into a door to enter';
   if (isStory() && c.at.node === 'hub' && !c.facts.flags.includes('apparition.seen')) {
     $('place-wait').textContent = 'Watch the TV—the visitor is speaking.';
     dockStick('view-place');
@@ -598,7 +625,7 @@ function renderPlace(c, mem) {
     dockStick('view-place');
     return;
   }
-  $('place-wait').textContent = !doors
+  $('place-wait').textContent = !(doors || (atTram && children.some((m) => m.unlocked)))
     ? (here?.kind === 'tableau' ? 'Eyes on the big screen!' : '')
     : isChooser ? ''
       : isGameMaster() ? `${chooser.name} walks into a door, or you pick one from ☰ 🎲 Game master.`
@@ -723,6 +750,11 @@ $('btn-jump').addEventListener('click', () => {
   if (canWalk() && !minigame && !amWisp() && conn.isOnline()) send({ t: 'jump' });
 });
 $('btn-place-back').addEventListener('click', () => send({ t: 'back' }));
+$('tram-destination-buttons').addEventListener('click', (event) => {
+  if (!(event.target instanceof Element)) return;
+  const button = /** @type {HTMLButtonElement | null} */ (event.target.closest('button[data-node]'));
+  if (button?.dataset.node && conn.isOnline()) send({ t: 'enter', node: button.dataset.node });
+});
 $('btn-interact').addEventListener('click', () => {
   if (!canWalk() || !conn.isOnline()) return;
   if (amWisp()) {

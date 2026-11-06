@@ -78,8 +78,12 @@ export function mapCopy(c, content) {
     ? !c.facts.flags.includes('apparition.seen') ? 'A visitor is appearing…'
       : !c.facts.inventory.elodie?.['memory-key-intro'] ? 'Élodie, pick up the key.'
         : 'Élodie, enter the Young Adult room.'
-    : c.at.node === 'young-adult' ? "Élodie can return to Elo's dream place."
-      : chooser ? `${chooser.name}, walk through a door — or the game master picks one` : 'The game master picks a door';
+    : c.at.node === 'young-adult' ? (c.facts.unlocked.includes('young-adult/shelter')
+      ? 'Élodie, walk to Tram 5 or enter the Shelter.' : 'Élodie, walk to Tram 5. The Shelter opens later.')
+      : c.at.node === 'young-adult/tram-5' ? 'Élodie, choose a destination on your phone.'
+        : c.at.node === 'young-adult/shelter' ? 'Élodie can return to Wallensteinplatz.'
+          : c.at.node.startsWith('young-adult/') ? 'Élodie can return to Tram 5.'
+            : chooser ? `${chooser.name}, walk through a door — or the game master picks one` : 'The game master picks a door';
   return {
     title: node?.title ?? c.at.node,
     hint,
