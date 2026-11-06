@@ -7,6 +7,8 @@ import { join } from 'node:path';
 import type { drive } from '../drive.mts';
 import { SLOW, sleep } from '../e2e-lib.mts';
 import { PYRAMIDE_SPOTS } from '../../shared/pyramide.js';
+import { canPlace } from '../../shared/board.js';
+import { PIECES } from '../../shared/pieces.js';
 import { avatar, phone, player, tv, wisp } from './mock.mts';
 
 export type Shot = { who: string, img: string, planned: boolean, asset?: boolean, mime?: 'image/png' };
@@ -46,44 +48,28 @@ const hasFlag = (b: Board, flag: string) => async () => !!(await campaign(b))?.f
 const cutscenesDone = (b: Board, ms = 60_000) => b.d.tv.waitFor('!window.bloko.cutscene().playing', ms);
 
 /**
- * Plays a phone's player out of the running block game: random legal moves until no piece fits. The moves
- * go through a second socket opened in the phone's page (the phone shows "Continued on another device"
- * meanwhile, and forgets its player), then the page gets its player back and reloads, as a phone reclaims.
+ * Plays a phone's player out of the running block game: random legal moves until no piece fits, read from the
+ * TV and sent through the phone's own socket (send), so the phone shows each move.
  */
 async function playToOut(b: Board, who: string) {
   const p = b.phone(who);
   const id: string = await p.ev(`localStorage.getItem('bloko-id')`);
-  await p.ev(`(async () => {
-    const { canPlace } = await import('/shared/board.js');
-    const { PIECES } = await import('/shared/pieces.js');
-    const id = ${JSON.stringify(id)};
-    const ws = new WebSocket(location.origin.replace(/^http/, 'ws') + '/ws');
-    let view = null;
-    ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.t === 'view') view = m.minigame?.view.round ?? null; };
-    await new Promise((r) => { ws.onopen = r; });
-    ws.send(JSON.stringify({ t: 'hello', role: 'player', playerId: id }));
-    const tick = () => new Promise((r) => setTimeout(r, 40));
-    for (let n = 0; n < 600; n++) {
-      await tick();
-      const me = view?.players[id];
-      if (!me || me.done || view.phase !== 'playing') break;
-      const moves = [];
-      me.hand.forEach((pid, piece) => {
-        if (pid === null) return;
-        for (let y = 0; y < view.size; y++) for (let x = 0; x < view.size; x++) if (canPlace(me.board, view.size, PIECES[pid].cells, x, y)) moves.push({ piece, x, y });
-      });
-      if (!moves.length) continue;
-      const before = view;
-      ws.send(JSON.stringify({ t: 'place', ...moves[Math.floor(Math.random() * moves.length)] }));
-      for (let w = 0; w < 50 && view === before; w++) await tick();
-    }
-    ws.close();
-    return true;
-  })()`);
+  const round = (): Promise<any> => b.d.tv.ev('window.bloko.minigame()?.view.round ?? null');
+  for (let n = 0; n < 600; n++) {
+    const view = await round();
+    const me = view?.players[id];
+    if (!me || me.done || view.phase !== 'playing') break;
+    const moves: { piece: number, x: number, y: number }[] = [];
+    me.hand.forEach((pid: number | null, piece: number) => {
+      if (pid === null) return;
+      for (let y = 0; y < view.size; y++) for (let x = 0; x < view.size; x++) if (canPlace(me.board, view.size, PIECES[pid].cells, x, y)) moves.push({ piece, x, y });
+    });
+    if (!moves.length) { await sleep(40); continue; }
+    await p.send({ t: 'place', ...moves[Math.floor(Math.random() * moves.length)] });
+    const before = JSON.stringify(me);
+    for (let w = 0; w < 50 && JSON.stringify((await round())?.players[id]) === before; w++) await sleep(40);
+  }
   await b.d.tv.waitFor(`window.bloko.minigame()?.view.round?.players[${JSON.stringify(id)}]?.done === true`, 20_000);
-  await p.ev(`localStorage.setItem('bloko-id', ${JSON.stringify(id)})`);
-  await p.goto(b.d.url + '/play/');
-  await p.waitFor(`!document.getElementById('view-pick') || !!document.getElementById('view-pick').closest('[hidden]')`);
 }
 
 /** The game master ends the running round from ☰ (two taps, as on the phone), then closes ☰ (it stays open

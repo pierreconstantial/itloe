@@ -1,7 +1,7 @@
 // A driver for checking the game by hand from a script: a server on the given content (a free port, a
 // scratch save folder), a TV page and phone pages in one headless Chrome (each phone its own browser
 // context: a separate device), and per page: join, tap by selector or visible label, type, wait for text or
-// a condition, read the visible text, take screenshots. close() stops everything and removes the scratch
+// a condition, read the visible text, take screenshots, and send a message through its own connection (send). close() stops everything and removes the scratch
 // folder; so does a failure or Ctrl-C. Screenshots stay.
 //   import { drive } from '<repo>/scripts/drive.mts';
 //   const d = await drive({ content: 'minigame:quiz', phones: 2, shots: '/tmp/my-shots' });
@@ -17,7 +17,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { cdpConnect, freePort, killGroups, openPage, signalGroup, startChrome, startServer } from './e2e-lib.mts';
+import { cdpConnect, freePort, killGroups, openPage, signalGroup, SOCKET_PROBE, startChrome, startServer } from './e2e-lib.mts';
 export type { Page } from './e2e-lib.mts';
 
 /**
@@ -60,14 +60,16 @@ export async function drive(opts: { content?: string, phones?: number, shots?: s
   await tv.goto(`${http}/screen/`);
   const phones = [];
   for (let i = 1; i <= (opts.phones ?? 2); i++) {
-    const p = await openPage(cdp, `phone${i}`, true, shotDir);
+    const p = await openPage(cdp, `phone${i}`, true, shotDir, [SOCKET_PROBE]);
     await p.goto(joinUrl);
     /** Picks the character on the picker and waits until the phone is in. */
     const joinAs = async (character: string): Promise<void> => {
       await p.tap(`.pick-card[data-id="${character}"]`);
       await p.waitFor(`localStorage.getItem('bloko-id') && document.getElementById('view-pick')?.closest('[hidden]')`);
     };
-    phones.push({ ...p, join: joinAs });
+    /** Sends a message through the phone's own socket (SOCKET_PROBE's window.__ws), as its screens would. */
+    const sendAs = (msg: object): Promise<unknown> => p.ev(`window.__ws.send(${JSON.stringify(JSON.stringify(msg))})`);
+    phones.push({ ...p, join: joinAs, send: sendAs });
   }
 
   async function close(): Promise<void> {
