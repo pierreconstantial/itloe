@@ -1257,7 +1257,7 @@ try {
   await tv8.ev(`new Promise((r) => { const t = setInterval(() => { if (window.bloko?.campaign()) { clearInterval(t); r(true); } }, 50); })`);
   const tvWisps = async (want: string[]) => {
     let got: string[] = [];
-    for (let k = 0; k < 50; k++) { got = await tv8.ev('window.bloko.wisps().map((w) => w.id)'); if (JSON.stringify([...got].sort()) === JSON.stringify([...want].sort())) break; await sleep(100); }
+    for (let k = 0; k < 50; k++) { got = await tv8.ev('window.bloko.avatars().filter((a) => a.drawnAs === \'wisp\').map((a) => a.id)'); if (JSON.stringify([...got].sort()) === JSON.stringify([...want].sort())) break; await sleep(100); }
     return got;
   };
   const idOf = async (p: Phone) => (await p.snap())?.id ?? '';
@@ -1280,7 +1280,7 @@ try {
   expect(both.length === 2 && both.includes(idN8) && both.includes(idS8) && (await E8.snap())?.view === 'view-game',
     'over the running block game on the TV: Nico and Sol as wisps; the others play on', JSON.stringify(both));
   // the pad moves the wisp: the server relays a wisp's pos while a minigame runs
-  const sx = () => tv8.ev(`window.bloko.wisps().find((w) => w.id === ${JSON.stringify(idS8)})?.x ?? null`);
+  const sx = () => tv8.ev(`window.bloko.avatars().find((a) => a.drawnAs === 'wisp' && a.id === ${JSON.stringify(idS8)})?.x ?? null`);
   const x0 = await sx();
   await S8.push(1, 0, 800);
   let x1 = x0;

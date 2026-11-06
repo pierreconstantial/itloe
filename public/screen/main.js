@@ -517,16 +517,15 @@ connect();
   minigame: () => shownMinigame,
   /** Feed a fake `pos` (self-tests before the server relays them). @param {object} m */
   pos: (m) => avatars.onPos(m),
-  avatars: () => avatars.snapshot(),
+  /** What the TV draws now, per player: while a minigame runs, its walkers and wisps over its screen, otherwise the room's
+   *  characters. `drawnAs`: 'character' or 'wisp'. */
+  avatars: () => (shownMinigame ? minigameAvatars.snapshot().filter((a) => minigameWalkers.includes(a.id)) : avatars.snapshot())
+    .map((a) => ({ ...a, drawnAs: a.statuses.includes('wisp') ? 'wisp' : 'character' })),
   /** Contract G: the party room's paint order, back to front (prop ids and player ids interleaved). */
   drawOrder: () => party.drawOrder(),
   /** Contract G: the room's colliders and prop anchors. */
   scene: () => party.scene(),
   offline: () => [...presence.offline()],
-  /** Who floats as a wisp over the running minigame, and where (none while none runs). */
-  /** Who walks over the running minigame (its wisps, and its players on its walkable lobby), and where they head. */
-  walkers: () => (shownMinigame ? minigameAvatars.snapshot().filter((a) => minigameWalkers.includes(a.id)).map(({ id, character, x, y }) => ({ id, character, x, y })) : []),
-  wisps: () => (shownMinigame ? minigameAvatars.snapshot().filter((a) => minigameWisps.includes(a.id)).map(({ id, x, y }) => ({ id, x, y })) : []),
   campaign: () => campaign,
   doors: () => party.doors(),
   joinQr: () => ({ ...joinQrState(joinWindow, serverNow()), until: joinWindow?.until ?? null }),

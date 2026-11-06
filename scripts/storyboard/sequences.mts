@@ -29,9 +29,9 @@ export type Sequence = { id: string, title: string, intro: string, content: stri
 
 // ---------------------------------------------------------------- driving the game
 
-/** Where a character's avatar stands, as the TV draws it: in a minigame's walkable lobby, among its walkers. */
+/** Where a character's avatar stands, as the TV draws it. */
 const where = (b: Board, who: string) => async () =>
-  (await b.d.tv.ev(`[...window.bloko.walkers(), ...window.bloko.avatars()].find((a) => a.character === ${JSON.stringify(who)}) ?? null`)) as { x: number, y: number } | null;
+  (await b.d.tv.ev(`window.bloko.avatars().find((a) => a.character === ${JSON.stringify(who)}) ?? null`)) as { x: number, y: number } | null;
 
 /** Walks a character's avatar to a point with its phone's joystick; `done` says when it's there. */
 async function walk(b: Board, who: string, to: { x: number, y: number }, done?: () => Promise<boolean>) {
