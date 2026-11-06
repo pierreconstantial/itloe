@@ -3,14 +3,16 @@
 // 'uncertain' (close, partial, or ambiguous): the server may then ask a pluggable judge, else counts it
 // wrong and lets the game master override on the reveal.
 //
-//   normalize: case, accents (é → e), ligatures (œ → oe), curly apostrophes, punctuation and hyphens
-//              (→ spaces), ONE leading French article (le/la/les/l'/un/une/des/du/de la/de l'/d').
+//   normalize: shared/normalize.js (case, accents, punctuation, one leading French article).
 //   numbers:   an answer made of digits (a year…) must match EXACTLY: 1789 is never 1798.
 //   distance:  Levenshtein from `fastest-levenshtein` (MIT, zero dependencies, 21 kB), plus one rule of
 //              ours: a single swapped pair of adjacent letters ("Mozatr") is one typo, not two. The
 //              thresholds are data (JUDGE_RULES), relative to the answer's length.
 // Server and tests only: no browser imports this file (the bare npm import would not resolve there).
 import { distance as levenshtein } from 'fastest-levenshtein';
+import { normalize } from '../normalize.js';
+
+export { normalize };
 
 /** @typedef {'right' | 'wrong' | 'uncertain'} LocalVerdict */
 /** @typedef {{ answer: string | number, choices?: string[], accept?: string[] }} Judgeable */
@@ -29,33 +31,10 @@ export const JUDGE_RULES = Object.freeze({
 /** The length budgets (kept as an export for readers of the old name). */
 export const THRESHOLDS = JUDGE_RULES.budgets;
 
-/** Leading articles, longest first ("de la" before "de"); elided ones end with an apostrophe. */
-const ARTICLES = ["de la ", "de l'", 'les ', 'des ', 'une ', 'le ', 'la ', 'un ', 'du ', "l'", "d'"];
-
 /** @param {number} len @returns {number} */
 export function typoBudget(len) {
   for (const [max, typos] of JUDGE_RULES.budgets) if (len <= max) return typos;
   return 0;
-}
-
-/**
- * Canonical form for comparison.
- * @param {string} raw @returns {string}
- */
-export function normalize(raw) {
-  let s = String(raw ?? '')
-    .normalize('NFD').replace(/\p{M}+/gu, '') // accents
-    .toLowerCase()
-    .replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/ß/g, 'ss')
-    .replace(/[’‘`´ʼ]/g, "'")
-    .replace(/&/g, ' et ')
-    .replace(/[^\p{L}\p{N}']+/gu, ' ') // punctuation, hyphens, symbols → space
-    .replace(/\s+/g, ' ')
-    .trim();
-  for (const a of ARTICLES) {
-    if (s.startsWith(a) && s.length > a.length) { s = s.slice(a.length); break; }
-  }
-  return s.replace(/'/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 /** Same letters, one pair of adjacent letters swapped ("mozatr" / "mozart"). @param {string} a @param {string} b */
