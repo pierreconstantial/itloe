@@ -21,6 +21,7 @@
 
 import { CHARACTERS } from './characters.js';
 import { mulberry32 } from './rng.js';
+import { mergeBySchema, settingsProblems } from './settings.js';
 
 /** @typedef {import('./characters.js').CharacterId} CharacterId */
 /** @typedef {'a' | 'b'} Side */
@@ -98,23 +99,10 @@ export const BACKGAMMON_SETTINGS_SCHEMA = Object.freeze({
 });
 
 /** `base` with every valid key of `patch`. @param {BackgammonSettings} base @param {unknown} patch @returns {BackgammonSettings} */
-export function mergeBackgammonSettings(base, patch) {
-  const p = /** @type {any} */ (patch);
-  const next = { ...base };
-  for (const key of /** @type {const} */ (['minutes', 'games'])) {
-    if (BACKGAMMON_SETTINGS_SCHEMA[key].values.includes(p?.[key])) next[key] = p[key];
-  }
-  return next;
-}
+export const mergeBackgammonSettings = (base, patch) => mergeBySchema(BACKGAMMON_SETTINGS_SCHEMA, base, patch);
 
 /** A content node's settings: problems, as readable lines. @param {unknown} settings @returns {string[]} */
-export function validateBackgammonSettings(settings) {
-  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) return ['settings must be an object'];
-  return Object.entries(settings).flatMap(([key, v]) => {
-    if (key !== 'minutes' && key !== 'games') return [`unknown setting "${key}"`];
-    return BACKGAMMON_SETTINGS_SCHEMA[key].values.includes(v) ? [] : [`setting "${key}" can't be ${JSON.stringify(v)}`];
-  });
-}
+export const validateBackgammonSettings = (settings) => settingsProblems(BACKGAMMON_DEFAULTS, mergeBackgammonSettings, settings);
 
 // ---------------------------------------------------------------- moves
 
