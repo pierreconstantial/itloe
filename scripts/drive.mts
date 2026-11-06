@@ -9,6 +9,8 @@
 //   await a.join('elodie'); await b.join('sol'); await a.tap('Start game');
 //   await d.tv.waitText(/QUESTION 1/); await d.tv.shot('tv-question');
 //   await d.close();
+// A phone can also walk its avatar with the joystick (steer); capture() returns a screen as a JPEG, and
+// page() opens a page outside the game, e.g. to render a mockup at a TV's or a phone's size.
 // Run the script with node in the foreground. Waits scale with E2E_SLOW, as in the suites.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -121,10 +123,37 @@ async function openPage(cdp: Awaited<ReturnType<typeof cdpConnect>>, label: stri
     writeFileSync(join(dir, `${name}.txt`), await text());
     return file;
   };
+  /** The screen as a JPEG (base64), scaled: a phone's 2× pixels at 0.5 come out at its CSS size. */
+  const capture = async (scale = 0.5, quality = 80): Promise<string> => {
+    await cmd('Page.bringToFront', {}, s);
+    const size = await ev('({ w: innerWidth, h: innerHeight })');
+    const { data } = await cmd('Page.captureScreenshot', { format: 'jpeg', quality, clip: { x: 0, y: 0, width: size.w, height: size.h, scale } }, s);
+    return data;
+  };
+  /**
+   * Holds a phone's joystick and steers, closed loop, towards `target` (world units) until `done()`;
+   * `where()` is the avatar's position as the TV shows it. Gives up after `ms`.
+   */
+  const steer = async (target: { x: number, y: number }, done: () => Promise<boolean>,
+    where: () => Promise<{ x: number, y: number } | null>, ms = 15_000): Promise<void> => {
+    await cmd('Page.bringToFront', {}, s);
+    const pad = await ev(`(() => { const r = document.getElementById('stick-pad').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+    await cmd('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [pad] }, s);
+    const end = Date.now() + ms * SLOW;
+    while (Date.now() < end && !(await done())) {
+      const at = (await where()) ?? { x: 8, y: 4.5 };
+      const dx = target.x - at.x, dy = target.y - at.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const push = Math.min(56, 20 + len * 12); // slow down near the target
+      await cmd('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: pad.x + (dx / len) * push, y: pad.y + (dy / len) * push }] }, s);
+      await sleep(80);
+    }
+    await cmd('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }, s);
+  };
   const goto = async (url: string): Promise<void> => { await cmd('Page.navigate', { url }, s); await waitFor('document.readyState === "complete"'); };
   /** The innermost screen showing (the frame's view, or a minigame's screen inside it), e.g. 'view-lobby'. */
   const view = (): Promise<string | null> => ev(`[...document.querySelectorAll('main section[id^="view-"]')].filter((e) => !e.closest('[hidden]')).pop()?.id ?? null`);
-  return { label, errors, ev, text, waitFor, waitText, tap, type, shot, goto, view };
+  return { label, errors, ev, text, waitFor, waitText, tap, type, shot, capture, steer, goto, view };
 }
 
 /**
@@ -183,5 +212,7 @@ export async function drive(opts: { content?: string, phones?: number, shots?: s
     await killGroups(groups);
     rmSync(scratch, { recursive: true, force: true, maxRetries: 5 });
   }
-  return { tv, phones, room: room as string, url: http, log: () => log, close };
+  /** A page outside the game, at a phone's or the TV's size (blank until goto). */
+  const page = (kind: 'tv' | 'phone', label: string = kind) => openPage(cdp, label, kind === 'phone', shotDir);
+  return { tv, phones, page, room: room as string, url: http, log: () => log, close };
 }
