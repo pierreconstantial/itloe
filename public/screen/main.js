@@ -224,6 +224,7 @@ function showRoom(c) {
       : portalReady() ? { hostId: c.party.hostId, status: 'Élodie went through the portal.' }
         : { hostId: c.party.hostId, required: opening ? OPENING_PLAYERS.length : undefined }));
   party.setRoom(roomAt(content.get(), c.at.node));
+  party.setWorldFlags(c.facts.flags);
   party.setPortal(portalOpen());
   party.setKey(false);
   party.setPlayers({ order: here, players: c.party.players });
@@ -248,6 +249,7 @@ function showMap(c) {
   const storyScene = c.facts.flags.includes('story.elo-50') && c.facts.flags.includes('portal.entered');
   const inApartment = storyScene && c.at.node === 'hub';
   party.setRoom(roomAt(content.get(), c.at.node));
+  party.setWorldFlags(c.facts.flags);
   party.setPlayers(c.party);
   avatars.setStatuses(c.party.players);
   party.setPortal(false);

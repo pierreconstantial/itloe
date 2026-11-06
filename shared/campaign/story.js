@@ -48,7 +48,7 @@ export const STORY_CONTENT = {
     }),
   ]),
   nodes: {
-    hub: { id: 'hub', kind: 'hub', parent: null, title: "Elo's dream place", room: 'apartment-room', unlock: { always: true } },
+    hub: { id: 'hub', kind: 'hub', parent: null, title: 'Élodie’s dream apartment', room: 'apartment-room', unlock: { always: true } },
     'hub.false-start': {
       id: 'hub.false-start', kind: 'tableau', parent: 'hub', title: 'Block game',
       activity: { kind: 'blocks' }, replayable: true, unlock: { always: true },
@@ -56,9 +56,27 @@ export const STORY_CONTENT = {
       rewards: [{ flag: 'portal.ready' }],
     },
     'young-adult': {
-      id: 'young-adult', kind: 'world', parent: 'hub', title: 'Young Adult', room: 'young-adult-room',
+      id: 'young-adult', kind: 'world', parent: 'hub', title: 'Young Adult', room: 'young-adult/tram-5',
       unlock: { has: INTRO_KEY, who: 'elodie' },
-      door: { x: 7.6, y: 4.7, w: 2.7, h: 1.2 },
+      door: { x: 7, y: 4.7, w: 2.3, h: 1.2 },
+    },
+    'young-adult/tram-5': {
+      id: 'young-adult/tram-5', kind: 'world', parent: 'young-adult', title: 'Tram 5 — Wallensteinplatz',
+      room: 'young-adult/tram-5', unlock: { unlocked: 'young-adult' },
+      door: { x: 2.4, y: 5.75, w: 3.2, h: 1.05 },
+    },
+    'young-adult/shelter': {
+      id: 'young-adult/shelter', kind: 'world', parent: 'young-adult', title: 'The Shelter',
+      room: 'young-adult/shelter', unlock: { all: [{ unlocked: 'young-adult' }, { flag: 'young-adult.shelter.open' }] },
+      door: { x: 13.2, y: 5.75, w: 2.2, h: 1.05 },
+    },
+    'young-adult/appart-elo-1': {
+      id: 'young-adult/appart-elo-1', kind: 'world', parent: 'young-adult/tram-5', title: 'Appart Elo 1',
+      room: 'young-adult/appart-elo-1', unlock: { unlocked: 'young-adult/tram-5' },
+    },
+    'young-adult/appart-pierre': {
+      id: 'young-adult/appart-pierre', kind: 'world', parent: 'young-adult/tram-5', title: 'Appart Pierre',
+      room: 'young-adult/appart-pierre', unlock: { all: [{ unlocked: 'young-adult/tram-5' }, { flag: 'young-adult.appart-pierre.open' }] },
     },
     ...Object.fromEntries(MEMORY_WORLDS.map((world, i) => {
       const id = `memory.${world.id}`;

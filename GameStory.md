@@ -11,7 +11,7 @@ kind: reference
 
 Itloe begins as an ordinary multiplayer block puzzle game. Four people join by QR code, play together, and return to the same lobby. The birthday adventure must not be visible or hinted at before this first match ends. A space portal then appears in the middle of the lobby. Élodie ("Elo") alone enters it; the other three players become wisps and accompany her.
 
-The portal takes Elo to her personal paradise, a Viennese apartment. The story follows her life through six memory worlds and an unknown future. Its emotional goal is to bring her loved ones together in the apartment. The tone is warm, personal and absurdly funny: a solemn mystical apparition suddenly shreds on a guitar.
+The portal takes Elo to Élodie’s dream apartment in Vienna. The story follows her life through six memory worlds and an unknown future. Its emotional goal is to bring her loved ones together in the apartment. The tone is warm, personal and absurdly funny: a solemn mystical apparition suddenly shreds on a guitar.
 
 ## Required opening sequence
 
@@ -19,7 +19,7 @@ The portal takes Elo to her personal paradise, a Viennese apartment. The story f
 2. They play the block game. Winning or losing does not affect story access.
 3. All four return to the same lobby. A space portal now stands in its centre.
 4. Elo enters. Only her character crosses as a person; Pierre, Sol and Anna become wisps and accompany her.
-5. Elo arrives in the Viennese apartment hub with the three wisps. Silex and Taïga are NPC cats. No other player character appears there yet.
+5. Elo arrives in Élodie’s dream apartment with the three wisps. Silex and Taïga are NPC cats. No other player character appears there yet.
 6. A mystical figure resembling Omraam Mikhaël Aïvanhov slowly materializes in a darker part of the room. Light grows around him. He floats above the floor at twice a normal character's size and says:
 
    > Fifty years… You turn fifty today, and you have travelled through space and time. But can you gather the keys of memory? Only they will open the path to your future.
@@ -40,13 +40,12 @@ For example, Nico can select his predefined character and join an ongoing game a
 
 For incarnated players, objects have a default interaction unless their rule says otherwise. A rule may change or deny that action by player ID, character, status, or inventory. Wisp Mode always prevents object interaction regardless of the object's rule.
 
-## Apartment hub
+## Élodie’s dream apartment
 
-- An elegant Viennese apartment with high ceilings, a large sofa and warm, subdued lighting. The interior occupies about two-thirds of the scene.
-- A sunny terrace occupies the right side. A small table holds an ashtray and a beer; the weather is beautiful.
+- An elegant Viennese apartment with high ceilings, a sofa, plants, art posters, an oriental rug and warm, subdued lighting. Its [game background](public/assets/places/hub/elodie-dream-apartment-oriental-rug-v2.png) uses the approved pixel-art design at the game’s character scale.
+- A large sunny terrace fills the right half of the scene, with a table for four. A beer and an ashtray sit on the table. Beyond it are open sky and what might be the sea.
 - Silex and Taïga remain in the apartment as NPCs throughout the story.
-- There are eventually four hub doors. Initially only #4 is visible. It is a large traditional Viennese apartment door, matching the existing door style, and stays the largest as more doors appear.
-- Door #4 leads first to a second room. Its contents are **not yet defined**. The four doors are **not** assumed to correspond one-to-one with worlds.
+- The single large interior door is the currently visible hub door and leads to Young Adult. The other three hub doors and their reveal sequence remain to be designed.
 - Unlocked loved ones stay in the hub on later visits. Collected objects decorate it, gradually turning the quiet apartment into a gathering place.
 
 ## Exploration and progression
@@ -67,7 +66,37 @@ The proposed seven keys are the introductory key from the apparition plus one fr
 | 6 | Family life to the present | Sol's birth; Rosenburg; Anna; bookseller work; renovation work at Rosenburg; life today. |
 | 7 | Future | Unknown. Its contents and final reveal remain undefined. |
 
-These are content anchors, not permission to invent events or dialogue. Individual scenes, object puzzles, world entrances and the second room are still to be specified. Keep their data configurable.
+These are content anchors, not permission to invent events or dialogue. The Young Adult flow is specified below; scenes and entrances for the other worlds remain to be defined.
+
+### Young Adult places
+
+The Young Adult area starts at Tram 5, its entrance and hub. The first named places are:
+
+| Place | Code name | Background assets |
+| --- | --- | --- |
+| Tram 5 (entrance and hub) | `young-adult/tram-5` | [Shelter closed](public/assets/places/young-adult/tram-5-shelter-closed-v5.png), [Shelter open at night](public/assets/places/young-adult/tram-5-night-shelter-open-v6.png) |
+| Shelter | `young-adult/shelter` | [Interior](public/assets/places/young-adult/shelter-interior-playable-v3.png) |
+| Appart Elo 1 | `young-adult/appart-elo-1` | [Lamp on](public/assets/places/young-adult/appart-elo-1-basement-v1.png), [lamp off](public/assets/places/young-adult/appart-elo-1-lamp-off-v2.png) |
+| Appart Pierre | `young-adult/appart-pierre` | [Pierre’s flat](public/assets/places/young-adult/appart-pierre-table-center-v4.png) |
+
+### Young Adult game flow
+
+1. **Tram 5 — Wallensteinplatz (`young-adult/tram-5`).** Élodie arrives alone. A dog barks at a suspicious man who is trying to break into a *Zigarettenautomat* with a crowbar. When Élodie speaks to him, he asks, “Host a Tschick? I brauch dringend ane!” If she gives him a cigarette, he says, “Oida, geil!”, disappears, and leaves the crowbar for her to collect. Interacting with the tram starts a quiz; after completing it, she can travel to her flat.
+2. **Tram travel.** Every journey requires a quiz. Élodie chooses one of three topics, then everyone who is not hidden may answer five questions. After each answer, the game shows the correct answer and an explanation in the style Élodie likes. When the quiz is complete, Élodie selects an available destination.
+3. **Élodie’s flat (`young-adult/appart-elo-1`).** The room is dark at first; Élodie can turn on its floor lamp. The TV offers a Columbo episode on YouTube or TV5 Monde for one in-game hour. Reading a book advances time by two hours. The beer bottles are empty; examining them prompts, “Pierre said he'd bring beer.” A cracked floorboard hides a Shelter concert ticket, but Élodie needs a tool to lift it. Before she has one, she says, “There's a piece of paper stuck under the parquet floor. I can't pull it out.”
+4. **Pierre’s arrival.** After three in-game hours, regardless of puzzle progress, Pierre arrives with beer. He says, “I brought beers and cigarettes! But first, let's play backgammon.” The only response is “Yes.” All non-hidden players take part in backgammon. When the game ends, beers and a pack of cigarettes appear on the floor to collect, and Pierre returns to wisp mode.
+5. **The Shelter ticket puzzle.** Élodie takes the cigarettes, returns to Tram 5, gives one to the man and collects his crowbar. She takes another tram quiz to return to her flat, uses the crowbar on the floorboard and retrieves the ticket. The Shelter then becomes an available tram destination.
+6. **The Shelter (`young-adult/shelter`).** Wallensteinplatz switches to its night view when The Shelter opens. Élodie travels there by tram quiz. Inside the bar she meets Pierre again; he proposes a multiplayer table-football (*baby-foot*) game. After the match, she can kiss him. The kiss unlocks Marokkanergasse as a tram destination and closes access to Élodie’s original flat. One final tram quiz takes her to Marokkanergasse.
+7. **Marokkanergasse (`young-adult/appart-pierre`).** The apartment has no normal exit. Nico and Mathieu are NPCs who may be controlled by connected players; Johanna and the Shikababe gang are present. Interacting with any of them prompts, “Shikababy Shikaboom! Let's play a Pyramide game!” Élodie may choose “Yes” to start the multiplayer word game or “Dismiss” to close the dialogue.
+8. **World completion.** After Pyramide, a special key appears on the floor. Élodie picks it up, unlocking the Adult Age door in the hub. A portal appears in the apartment; entering it returns everyone to the central hub and completes the Young Adult world.
+
+The rooms, art variants and basic travel nodes exist now. The dialogue, item puzzle, in-game clock, quizzes, table football, backgammon, Pyramide, destination changes and completion portal above are the planned game flow, not implemented interactions yet.
+
+Inside, a steep stair behind the entrance door descends into a brick-vaulted rock and punk bar. Two small tables stand in the middle, with walkable space around them. Foosball is farther back; the bar and pinball machine are on the right. The music stage is visible through the left arch, at the back of a small, roughly square second room that is much darker than the bar. Gig posters cover the walls. The visual reference is “WhatsApp Image 2026-11-06 at 4.45.29 PM” in Downloads.
+
+Appart Elo 1 is one small room in Élodie's flat, partly underground. A few steps descend from the door. Its windows are narrow and high on the wall. A mattress lies on the floor, with a cathode-ray TV beside it showing TV5MONDE. There are many books, a lamp on the floor, and a beer and ashtray on the floor near the bed. The visual reference is “Cozy Nick Cave Basement Retreat” in Downloads.
+
+Appart Pierre is a warm sitting room in Vienna. Blue evening shows through two tall windows; an ornate green tiled stove glows beside the door to the hall. A cathode-ray television plays TV5MONDE. A sofa and chairs surround a low table with beer, cards and an ashtray, while a few half-unpacked boxes sit near the doorway. There is room to walk around the furniture; the story has no normal exit from this apartment. The original visual reference is `4a754bd8-c82c-4046-be04-36081f51012c.png` in Downloads.
 
 ### Reunions
 

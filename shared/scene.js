@@ -244,14 +244,36 @@ export const PARTY_ROOM = room('party-room', PARTY_FLOOR, [
   prop('plant', { x: 14.81, y: 4, w: 0.98, h: 1.5 }, { anchorY: 5.5, solid: { x: 14.95, y: 4.95, w: 0.65, h: 0.55 } }),
 ]);
 
-/** Elo's apartment uses the same movement engine but has its own furniture and collision map. */
+/** Élodie’s dream apartment uses the same movement engine but has its own furniture and collision map. */
 export const APARTMENT_ROOM = room('apartment-room', PARTY_FLOOR, [
-  prop('sofa', { x: 0.65, y: 4.65, w: 3.05, h: 1.2 }, { anchorY: 5.85, solid: { x: 0.72, y: 4.8, w: 2.9, h: 1.05 } }),
-  prop('plant', { x: 5.2, y: 4.1, w: 0.98, h: 1.5 }, { anchorY: 5.6, solid: { x: 5.34, y: 4.95, w: 0.65, h: 0.55 } }),
+  prop('sofa', { x: 0.1, y: 4.2, w: 2.1, h: 1.7 }, { anchorY: 5.9, solid: { x: 0.5, y: 4.85, w: 1.7, h: 1.05 } }),
+  prop('plant', { x: 1.55, y: 3, w: 1.05, h: 1.9 }, { anchorY: 4.9, solid: { x: 1.85, y: 4.75, w: 0.55, h: 0.4 } }),
+], [
+  { x: 2.35, y: 4.9, w: 0.95, h: 0.6 }, // armchair
+  { x: 5.5, y: 4.85, w: 1.1, h: 0.55 }, // bookshelf
+  { x: 12.35, y: 4.75, w: 2.8, h: 1.1 }, // terrace table and chairs
 ]);
 
-/** Neutral Young Adult room; its story and furnishings have not been specified. */
-export const YOUNG_ADULT_ROOM = room('young-adult-room', PARTY_FLOOR, []);
+/** Young Adult backgrounds use their visible furniture as movement obstacles. */
+export const TRAM_5_ROOM = room('young-adult/tram-5', { x: 0.5, y: 5.6, w: 15, h: 3.2 }, []);
+export const SHELTER_ROOM = room('young-adult/shelter', { x: 0.5, y: 4.4, w: 15, h: 4.4 }, [], [
+  { x: 7.1, y: 4.5, w: 2.5, h: 1.2 }, // foosball
+  { x: 10.5, y: 4.1, w: 4.8, h: 1.2 }, // bar and pinball machine
+  { x: 3.1, y: 6, w: 1.2, h: 0.65 },
+  { x: 9, y: 6.1, w: 1.3, h: 0.65 }, // the two central tables
+]);
+export const APPART_ELO_1_ROOM = room('young-adult/appart-elo-1', { x: 0.5, y: 5.3, w: 15, h: 3.5 }, [], [
+  { x: 5.25, y: 5.15, w: 4.6, h: 1.05 }, // mattress
+  { x: 9.9, y: 5.1, w: 1.55, h: 0.9 }, // television
+]);
+export const APPART_PIERRE_ROOM = room('young-adult/appart-pierre', { x: 0.5, y: 5.05, w: 15, h: 3.75 }, [], [
+  { x: 1.8, y: 5.05, w: 2.1, h: 1.2 }, // sofa
+  { x: 4.2, y: 5.55, w: 2.9, h: 0.55 }, // coffee table; the floor in front stays clear
+  { x: 7.65, y: 5.3, w: 1.2, h: 1.05 }, // armchair
+  { x: 13.9, y: 4.9, w: 1.4, h: 0.75 }, // tiled stove
+]);
 
 /** Every room by its id, which a content node names as its `room` (roomAt in shared/campaign/content.js). */
-export const ROOMS = Object.freeze(Object.fromEntries([PARTY_ROOM, APARTMENT_ROOM, YOUNG_ADULT_ROOM].map((r) => [r.id, r])));
+export const ROOMS = Object.freeze(Object.fromEntries([
+  PARTY_ROOM, APARTMENT_ROOM, TRAM_5_ROOM, SHELTER_ROOM, APPART_ELO_1_ROOM, APPART_PIERRE_ROOM,
+].map((r) => [r.id, r])));

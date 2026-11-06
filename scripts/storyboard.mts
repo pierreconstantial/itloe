@@ -73,7 +73,7 @@ async function sequential(shots: (() => Promise<Shot>)[]): Promise<Shot[]> {
 
 /** The viewer: one slide at a time, ← → (or the buttons) to move, the sequences listed at the top. */
 function viewer(slides: Slide[]): string {
-  const data = JSON.stringify(slides.map((s) => ({ ...s, shots: s.shots.map((x) => ({ ...x, img: `data:image/jpeg;base64,${x.img}` })) })));
+  const data = JSON.stringify(slides.map((s) => ({ ...s, shots: s.shots.map((x) => ({ ...x, img: `data:${x.mime ?? 'image/jpeg'};base64,${x.img}` })) })));
   const seqs = JSON.stringify(chosen.map(({ id, title, intro }) => ({ id, title, intro })));
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Itloe storyboard</title>
 <style>
@@ -119,8 +119,8 @@ function show() {
   document.getElementById('main').innerHTML = '<h1>' + seq.title + ' · ' + n + '/' + inSeq.length + '</h1>'
     + (n === 1 ? '<p class="intro">' + seq.intro + '</p>' : '')
     + '<p class="caption">' + s.caption + '</p><div class="screens">'
-    + s.shots.map((x) => '<figure class="' + (x.who === 'TV' ? 'tv' : 'phone') + (x.planned ? ' planned' : '') + '"><img src="' + x.img + '"><figcaption><b>' + x.who + '</b><span class="badge">' + (x.planned ? 'planned' : 'today') + '</span></figcaption></figure>').join('')
-    + '</div><p class="legend">“today”: captured from the game as it is. “planned”: a mockup of a screen that doesn\\'t exist yet.</p>';
+    + s.shots.map((x) => '<figure class="' + (x.who === 'TV' ? 'tv' : 'phone') + (x.planned ? ' planned' : '') + '"><img src="' + x.img + '"><figcaption><b>' + x.who + '</b><span class="badge">' + (x.asset ? 'game asset' : x.planned ? 'planned' : 'today') + '</span></figcaption></figure>').join('')
+    + '</div><p class="legend">“today”: captured from the game. “game asset”: a background the game uses, shown without avatars or UI. “planned”: a mockup of a screen that doesn\\'t exist yet.</p>';
   location.hash = String(at + 1);
 }
 document.addEventListener('click', (e) => { const to = e.target.closest('[data-to]'); if (to) { const n = Number(to.dataset.to); if (n >= 0 && n < slides.length) { at = n; show(); } } });
@@ -146,6 +146,7 @@ try {
   await page.goto(`file://${file}`);
   for (let i = 0; i < slides.length; i++) {
     await page.ev(`(() => { at = ${i}; show(); return true; })()`);
+    await page.waitFor('Array.from(document.images).every((img) => img.complete && img.naturalWidth > 0)');
     const png = await page.capture(1, 90);
     writeFileSync(join(out, 'slides', `${String(i + 1).padStart(2, '0')}.jpg`), Buffer.from(png, 'base64'));
   }

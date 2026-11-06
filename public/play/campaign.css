@@ -37,6 +37,10 @@
   color: var(--accent);
   font-weight: 700;
 }
+.tram-destinations { width: min(100%, 340px); }
+.tram-destinations p { margin: 4px 0 8px; color: var(--accent); font-weight: 700; }
+#tram-destination-buttons { display: flex; flex-direction: column; gap: 8px; }
+#tram-destination-buttons button { width: 100%; }
 
 /* game-master sheet: rows of small controls (the panel's own rules style only direct buttons) */
 .gm-panel { text-align: left; }
