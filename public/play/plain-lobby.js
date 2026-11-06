@@ -2,7 +2,7 @@
 // screens into the screens of a running minigame. The frame mounts them from the minigame's start to its end
 // (./minigames.js). They draw the lobby (the eligible players and who is ready, "I'm ready", the game
 // master's settings, Start and the end of the minigame, the last round's winner; in a lobby with spots, the spots
-// with who holds each and "Take this spot" instead of "I'm ready", above the frame's walk panel), the round screens while a
+// with who holds each and "Take this spot" instead of "I'm ready"; above the frame's walk panel), the round screens while a
 // round runs (mounted inside, with the same update and message as before), and the shared podium (./podium.js)
 // with the game master's "Back to the lobby". The frame mounts them for the players the minigame shows, and
 // for the game master; everyone else floats over it as a wisp. The round controls in ☰ follow the running round.
@@ -131,7 +131,7 @@ export function plainLobbyScreen(roundScreen) {
         const me = io.meId();
         const online = new Set(io.online());
         const eligible = v.players.some((p) => p.id === me);
-        const spots = m.spots; // a lobby with spots: holding one is being ready
+        const spots = m.spots?.length ? m.spots : null; // a lobby with spots: holding one is being ready
         const isReady = v.ready.includes(me);
         $('minigame-lobby-title').textContent = capitalized(roundScreen.name);
 

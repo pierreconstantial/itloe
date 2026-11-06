@@ -23,7 +23,8 @@
 //   anything else               the running round's own actions (endGame, place, answer, timeUp, …)
 // The round finishing turns the stage to `podium` in the same step.
 //
-// Spots: round rules that list `spots` make the lobby walkable (MinigameRules `spots`, docs/minigames.md):
+// Walking: the lobby is walkable (MinigameRules `spots`, docs/minigames.md): the eligible players walk it as their
+// characters, from the round rules' start positions or the plain lobby's. Round rules that list `spots` add them:
 // an eligible player is ready by holding a spot, and there is no "I'm ready".
 
 import { nextSeed } from './rng.js';
@@ -61,6 +62,16 @@ import { nextSeed } from './rng.js';
  *   | { t: 'lobby', id: string }
  *   | { t: 'retire', id: string, target: string }} PlainLobbyAction
  */
+
+/**
+ * Where the walkers of a lobby without its own start positions start, in world units (16 × 9): left of the TV's
+ * panel and below its title, in two rows whose names don't touch; the corners first for the evening's four
+ * players, the middle for the development start's six.
+ * @type {readonly import('./minigames.js').StartPosition[]}
+ */
+export const PLAIN_LOBBY_START_POSITIONS = Object.freeze([
+  { x: 3.2, y: 5 }, { x: 7.2, y: 5 }, { x: 3.2, y: 7.8 }, { x: 7.2, y: 7.8 }, { x: 5.2, y: 5 }, { x: 5.2, y: 7.8 },
+]);
 
 /** @param {RoundCtx} ctx @param {unknown} id */
 const isGameMaster = (ctx, id) => ctx.gameMasterId !== null && id === ctx.gameMasterId;
@@ -186,9 +197,9 @@ export function plainLobby(rules) {
     },
     result: (s, node) => rules.result(/** @type {R} */ (s.round), node),
     ready: (s) => s.ready,
-    startPositions: rules.startPositions,
-    spots: (s) => (rules.spots && s.stage === 'lobby'
-      ? rules.spots.map(({ id, label, x, y, w, h }) => ({ id, label, x, y, w, h, holder: s.holders[id] ?? null }))
+    startPositions: rules.startPositions ?? PLAIN_LOBBY_START_POSITIONS,
+    spots: (s) => (s.stage === 'lobby'
+      ? (rules.spots ?? []).map(({ id, label, x, y, w, h }) => ({ id, label, x, y, w, h, holder: s.holders[id] ?? null }))
       : null),
     shows: (s) => {
       const round = s.round;

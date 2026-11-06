@@ -12,6 +12,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnPoint } from '../shared/world.js';
 import { SAMPLE_CONTENT } from '../shared/campaign/index.js';
+import { PLAIN_LOBBY_START_POSITIONS } from '../shared/plain-lobby.js';
 
 /** A node's title (the server runs the sample content). @param {string} id */
 const C_TITLE = (id: string): string => SAMPLE_CONTENT.nodes[id].title;
@@ -171,8 +172,8 @@ const tvState = 'window.bloko.minigame()?.view.round';
 const tvRoom = "(window.bloko?.minigame() === null && !!window.bloko.campaign()?.at.kind && document.body.classList.contains('party') && !!document.querySelector('section.lobby'))";
 /** The TV shows the running minigame's lobby. */
 const tvLobby = "(window.bloko?.minigame()?.status === 'lobby' && !!document.querySelector('section.minigame-lobby'))";
-/** The lobby's players on the TV, as "<name>:<ready line>". */
-const tvLobbyPlayers = `JSON.stringify([...document.querySelectorAll('.minigame-lobby-players figure')].map((f) => f.querySelector('.minigame-lobby-name').textContent.trim() + ':' + f.querySelector('.minigame-lobby-ready').textContent))`;
+/** The lobby's players in the TV's panel, as "<name>:<ready line>". */
+const tvLobbyPlayers = `JSON.stringify([...document.querySelectorAll('.minigame-lobby-players li')].map((f) => f.querySelector('.minigame-lobby-name').textContent.trim() + ':' + f.querySelector('.minigame-lobby-ready').textContent))`;
 const tvOnlineBanner = "document.body.classList.contains('offline')";
 const tvOffline = 'JSON.stringify(window.bloko.offline().sort())';
 /** Records the frequency each of the TV's tones starts at (public/screen/audio.js), to hear which sounds played. */
@@ -376,7 +377,12 @@ try {
   check(await tv.until(`${tvLobby} && document.querySelector('.minigame-lobby-title')?.textContent === 'Block game'`, 'tv lobby'),
     'the game master starts the block game → the TV shows its lobby');
   check(await tv.until(`${tvLobbyPlayers} === ${JSON.stringify(JSON.stringify(['Pierre:not ready', 'Sol:not ready']))}`, 'lobby players'),
-    `…the eligible players standing, each "not ready" (${await tv.js(tvLobbyPlayers)})`);
+    `…the eligible players listed, each "not ready" (${await tv.js(tvLobbyPlayers)})`);
+  // the lobby is walkable: its players are drawn as their characters, placed on the plain lobby's first start positions
+  const firstStarts = JSON.stringify(PLAIN_LOBBY_START_POSITIONS.slice(0, 2).map((p) => [p.x, p.y]));
+  const lobbyWalkers = `JSON.stringify(window.bloko.avatars().filter((a) => a.drawnAs === 'character').map((a) => [Math.round(a.x * 10) / 10, Math.round(a.y * 10) / 10]).sort((p, q) => p[0] - q[0]))`;
+  check(await tv.until(`${lobbyWalkers} === ${JSON.stringify(firstStarts)}`, 'lobby walkers'),
+    `…walking the lobby as their characters, from its start positions (${await tv.js(lobbyWalkers)})`);
   check(/Settings/.test(await tv.js(`document.querySelector('.minigame-lobby-panel')?.textContent ?? ''`))
     && /starts when someone is ready/.test(await tv.js(`document.querySelector('.minigame-lobby-status')?.textContent ?? ''`)),
     '…the settings, and what Start waits for');

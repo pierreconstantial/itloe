@@ -119,8 +119,8 @@ import { plainLobby } from './plain-lobby.js';
  *   shiftDeadline: (s: S, by: number) => S,     // deadlines moved by a downtime (ms): resume, sleep
  *   resume?: (s: S) => S,                       // what a restart does besides the shift
  *   retire?: true,                              // the reducer takes the game master's retire itself (else: the target's leave)
- *   spots?: readonly Omit<Spot, 'holder'>[],    // the lobby's spots: it is walkable, and holding a spot is being ready
- *   startPositions?: readonly StartPosition[],  // with spots: where its walkers start (MinigameRules)
+ *   spots?: readonly Omit<Spot, 'holder'>[],    // the lobby's spots: holding one is being ready, with no "I'm ready"
+ *   startPositions?: readonly StartPosition[],  // where its lobby's walkers start (MinigameRules; absent: the plain lobby's)
  *   describe: (s: S) => string,                 // the round in the boot log
  * }} RoundRules
  */

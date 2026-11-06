@@ -1,14 +1,13 @@
 // The plain lobby's TV screen (shared/plain-lobby.js): a building block that wraps a minigame's round screen
 // into the screen of a running minigame. The frame mounts it in #app from the minigame's start to its end
-// (./minigames.js). It draws the lobby (the eligible players standing, who is ready, the settings, the last
-// round's winner and what Start waits for; in a walkable lobby the spots instead of standing players: the frame
-// draws the walking characters over them), the round screen while a round runs (mounted inside, with the same
-// update and message as before), and the shared podium (./podium-view.js) with its reveal, sounds and confetti.
+// (./minigames.js). It draws the lobby (a panel with the settings or the last round's winner, who is ready and
+// what Start waits for; in a lobby with spots, the spots instead of who is ready; the frame draws the eligible
+// players walking over it), the round screen while a round runs (mounted inside, with the same update and message
+// as before), and the shared podium (./podium-view.js) with its reveal, sounds and confetti.
 import { h, colorDot, addStylesheet, worldBox, placeInWorld } from './dom.js';
 import { renderPodium, podiumSequence } from './podium-view.js';
 import { sfx } from './audio.js';
 import * as fx from './fx.js';
-import { avatarCanvas } from '../commun/avatar.js';
 import { CHARACTERS } from '../../shared/characters.js';
 import { readyRuleMet } from '../../shared/campaign/index.js';
 
@@ -19,8 +18,6 @@ import { readyRuleMet } from '../../shared/campaign/index.js';
 /** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
 /** The plain lobby's view (server/plain-lobby.ts): its state, with `round` as the round server's view. @typedef {Omit<PlainLobbyState, 'seed'>} PlainLobbyView */
-
-const AVATAR_SCALE = 10; // a standing player in the lobby: 160 px at 1080p
 
 addStylesheet(new URL('./plain-lobby.css', import.meta.url));
 
@@ -89,29 +86,27 @@ export function plainLobbyScreen(roundScreen) {
         unmountRound();
         if (lastStage === 'podium') { cancelPodium(); fx.clearAll(); }
         if (lastStage === 'lobby' && v.ready.length > lastReady && io.continuous()) sfx.joined();
-        // a lobby with spots draws them, and the frame draws the walking characters over them; else the players stand
-        const players = m.spots ? spotsBoard(m.spots, v) : h('div', 'minigame-lobby-players', v.players.map(({ id, character }) => {
-          const ready = v.ready.includes(id);
-          const figure = h('figure', ready ? 'is-ready' : '', [
-            avatarCanvas(character, AVATAR_SCALE),
-            h('figcaption', '', [
-              h('span', 'minigame-lobby-name', [colorDot(CHARACTERS[character].color), ` ${CHARACTERS[character].name}`]),
-              h('span', 'minigame-lobby-ready', [ready ? '✓ ready' : 'not ready']),
-            ]),
-          ]);
-          figure.dataset.id = id;
-          return figure;
-        }));
+        // the frame draws the players walking over the lobby; a lobby with spots draws them under the walkers
+        const spots = m.spots?.length ? m.spots : null;
         const summary = roundScreen.settings.summarize(v.settings);
         const winners = lastWinners(c);
         const panel = h('aside', 'minigame-lobby-panel', winners
           ? [h('h2', '', ['Last game']), h('p', 'minigame-lobby-big', [`🥇 ${winners}`]), h('p', 'minigame-lobby-dim', [summary])]
           : [h('h2', '', ['Settings']), h('p', 'minigame-lobby-big', [summary])]);
-        panel.append(h('p', 'minigame-lobby-dim minigame-lobby-status', [startLine(m, v, io.gameMasterName())]));
-        if (m.spots) panel.append(h('p', 'minigame-lobby-dim', ['Walk onto a spot to take your place, or tap it on your phone']));
+        if (!spots) panel.append(h('ul', 'minigame-lobby-players', v.players.map(({ id, character }) => {
+          const ready = v.ready.includes(id);
+          const li = h('li', ready ? 'is-ready' : '', [
+            h('span', 'minigame-lobby-name', [colorDot(CHARACTERS[character].color), ` ${CHARACTERS[character].name}`]),
+            h('span', 'minigame-lobby-ready', [ready ? '✓ ready' : 'not ready']),
+          ]);
+          li.dataset.id = id;
+          return li;
+        })));
+        panel.append(h('p', 'minigame-lobby-dim minigame-lobby-status', [startLine(m, spots, v, io.gameMasterName())]));
+        if (spots) panel.append(h('p', 'minigame-lobby-dim', ['Walk onto a spot to take your place, or tap it on your phone']));
         const lobby = h('section', 'minigame-lobby', [
           h('h1', 'minigame-lobby-title', [capitalized(roundScreen.name)]),
-          h('div', `minigame-lobby-body${m.spots ? ' has-spots' : ''}`, m.spots ? [panel, players] : [players, panel]),
+          h('div', `minigame-lobby-body${spots ? ' has-spots' : ''}`, spots ? [panel, spotsBoard(spots, v)] : [panel]),
         ]);
         lobby.dataset.kind = m.kind;
         root.replaceChildren(lobby);
@@ -183,12 +178,13 @@ function spotsBoard(spots, v) {
 /**
  * What the game master's Start waits for: the content's ready rule (the main game's) and the plain lobby's own,
  * one ready player or more.
- * @param {MinigameView} m @param {PlainLobbyView} v @param {string} gm the game master's name
+ * @param {MinigameView} m @param {MinigameView['spots']} spots a lobby's spots, null without
+ * @param {PlainLobbyView} v @param {string} gm the game master's name
  */
-function startLine(m, v, gm) {
-  if (m.spots) { // a lobby with spots: ready is holding one
-    const taken = m.spots.filter((s) => s.holder).length;
-    return taken === m.spots.length ? `${gm} can start` : `${gm} starts when every spot is taken (${taken}/${m.spots.length})`;
+function startLine(m, spots, v, gm) {
+  if (spots) { // a lobby with spots: ready is holding one
+    const taken = spots.filter((s) => s.holder).length;
+    return taken === spots.length ? `${gm} can start` : `${gm} starts when every spot is taken (${taken}/${spots.length})`;
   }
   const count = `(${v.ready.length}/${v.players.length})`;
   const missing = (m.required.eligible ?? []).filter((ch) => !v.players.some((p) => p.character === ch));

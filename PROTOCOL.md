@@ -159,10 +159,10 @@ Every other message goes to the running round's server code (blocks: `place`; qu
 `override`); in the lobby or on the podium → `err "not-playing"`. A player who becomes eligible during a round
 is listed in the lobby and plays from the next round on.
 
-**A walkable lobby.** A minigame may make its lobby walkable: while it lists its spots (the view's `spots`, non-null),
-the players it shows walk over its screens as their characters, with `pos`, `say` and `emote` as in the room, and
-wisps walk as always. A spot is a named area in world units, with the player holding it, or null; who holds it is
-the minigame's saved state.
+**A walkable lobby.** A minigame may make its lobby walkable: while it lists its spots (the view's `spots`, non-null;
+empty without spots, as in every plain lobby whose minigame has none), the players it shows walk over its screens as
+their characters, with `pos`, `say` and `emote` as in the room, and wisps walk as always. A spot is a named area in
+world units, with the player holding it, or null; who holds it is the minigame's saved state.
 
 - **Stepping onto a spot:** the server reads each walker's `pos` against the spots, edge-triggered like the doors:
   stepping onto a spot, off it or from one to another gives the minigame the action `spot { id, spot }` (the spot's
@@ -346,7 +346,7 @@ Anything refused → `err "refused"`. `retire` and a player leaving end the roun
 // scene, the room at a tableau): its "kind", its "status" (lobby | running | podium), its server code's "view" of its
 // state, the same for everyone (server/minigames.ts), the players it shows itself ("shows": in the lobby the eligible
 // players, during a round those still playing, on the podium the round's players), its spots while its lobby is
-// walkable ("spots": [{ id, label, x, y, w, h, holder }], else null; shared/minigames.js Spot), and the tableau's
+// walkable ("spots": [{ id, label, x, y, w, h, holder }], [] without spots, else null; shared/minigames.js Spot), and the tableau's
 // content rules for the Start button ("required": its `eligible` and `allReady`, absent ones left out).
 // The plain lobby's view: { stage, settings, players: [{ id, character }], ready: [id], round }, with "round" the round
 // server's view of the running or finished round (null in the lobby). blocks: the full State (shared/game.js), plus

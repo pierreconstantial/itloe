@@ -1,5 +1,6 @@
-/* The plain lobby's TV screen (plain-lobby.js): the eligible players standing, and a panel with the settings or
-   the last game, and what Start waits for. Builds on /commun/screen-main.css (tokens, .title, the podium). */
+/* The plain lobby's TV screen (plain-lobby.js): a panel with the settings or the last game, who is ready, and what
+   Start waits for, right of the players the frame draws walking. Builds on /commun/screen-main.css (tokens, .title,
+   the podium). */
 .minigame-lobby { flex: 1; display: flex; flex-direction: column; }
 .minigame-lobby-title {
   margin: 0;
@@ -10,26 +11,18 @@
   color: var(--accent);
 }
 .minigame-lobby-body {
-  display: flex; align-items: flex-start; gap: calc(48 * var(--u));
+  display: flex; align-items: flex-start; justify-content: flex-end; gap: calc(48 * var(--u));
   padding: calc(48 * var(--u)) calc(80 * var(--u));
 }
 .minigame-lobby-players {
-  flex: 1;
-  display: flex; flex-wrap: wrap; justify-content: center; gap: calc(40 * var(--u)) calc(56 * var(--u));
-}
-.minigame-lobby-players figure {
-  margin: 0;
-  display: flex; flex-direction: column; align-items: center; gap: calc(10 * var(--u));
-}
-.minigame-lobby-players canvas { width: calc(160 * var(--u)); height: calc(160 * var(--u)); image-rendering: pixelated; }
-.minigame-lobby-players figcaption {
-  display: flex; flex-direction: column; align-items: center;
+  margin: 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: calc(10 * var(--u));
   font-size: calc(32 * var(--u));
 }
+.minigame-lobby-players li { display: flex; align-items: center; justify-content: space-between; gap: calc(24 * var(--u)); }
 .minigame-lobby-name { display: flex; align-items: center; gap: calc(8 * var(--u)); font-weight: 800; }
 .minigame-lobby-ready { color: var(--fg-dim); }
 .minigame-lobby-players .is-ready .minigame-lobby-ready { color: var(--ok); font-weight: 700; }
-.minigame-lobby-players figure.is-offline { opacity: 0.35; filter: grayscale(0.8); }
 .minigame-lobby-panel {
   flex: 0 0 calc(560 * var(--u));
   display: flex; flex-direction: column; gap: calc(20 * var(--u));

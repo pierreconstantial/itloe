@@ -9,16 +9,17 @@
 .minigame-lobby-players li.offline { opacity: 0.45; }
 #minigame-lobby-last { font-size: 18px; font-weight: 700; }
 #minigame-lobby-gm { flex-direction: column; align-items: stretch; width: min(300px, 100%); }
-/* a lobby with spots: compact, so it fits above the frame's walk pad */
-.minigame-lobby.has-spots { gap: 8px; padding-top: calc(14px + env(safe-area-inset-top)); }
-.minigame-lobby.has-spots h2 { margin: 0; padding: 0 48px; } /* clear of the fixed ☰ */
-.minigame-lobby.has-spots #minigame-lobby-settings, .minigame-lobby.has-spots p { margin: 0; }
-.minigame-lobby.has-spots .minigame-lobby-players { gap: 6px; width: min(360px, 100%); }
+/* walking the lobby: compact, so it fits above the frame's walk pad */
+.lobby-walk .minigame-lobby { gap: 8px; padding-top: calc(14px + env(safe-area-inset-top)); }
+.lobby-walk .minigame-lobby h2 { margin: 0; padding: 0 48px; } /* clear of the fixed ☰ */
+.lobby-walk .minigame-lobby #minigame-lobby-settings, .lobby-walk .minigame-lobby p { margin: 0; }
+.lobby-walk .minigame-lobby .minigame-lobby-players { gap: 6px; width: min(360px, 100%); }
+.lobby-walk .minigame-lobby #btn-ready { padding: 0.5em 1.4em; }
+.lobby-walk .minigame-lobby #minigame-lobby-gm { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: min(340px, 100%); }
+.lobby-walk .minigame-lobby #btn-start { grid-column: 1 / -1; grid-row: 1; font-size: 17px; }
+.lobby-walk .minigame-lobby #minigame-lobby-gm button { padding: 8px 10px; font-size: 15px; }
+/* a lobby with spots: each one a row, with "Take this spot" while it's free */
 .minigame-lobby.has-spots .minigame-lobby-players li { justify-content: space-between; min-height: 44px; padding: 4px 6px 4px 14px; font-size: 16px; }
 .minigame-lobby-players .spot-label { text-align: left; }
 .minigame-lobby-players .spot-take { flex: none; padding: 6px 12px; font-size: 15px; white-space: nowrap; touch-action: manipulation; }
-.minigame-lobby.has-spots #minigame-lobby-gm { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: min(340px, 100%); }
-.minigame-lobby.has-spots #btn-start { grid-column: 1 / -1; grid-row: 1; }
-.minigame-lobby.has-spots #minigame-lobby-gm button { padding: 8px 10px; font-size: 15px; }
-.minigame-lobby.has-spots #btn-start { font-size: 17px; }
 .podium-body { display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%; }
