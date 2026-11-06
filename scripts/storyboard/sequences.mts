@@ -230,12 +230,12 @@ const opening: Sequence = {
     await E.tap('Pick up key');
     await b.d.tv.waitFor(`(window.bloko.campaign()?.facts.inventory.elodie?.['memory-key-intro'] ?? 0) > 0`);
     await sleep(1500);
-    await b.frame('Élodie picks up the key: door #4 opens.', [b.tv, () => b.real('elodie')]);
+    await b.frame('Élodie picks up the key: the door to the Young Adult world opens.', [b.tv, () => b.real('elodie')]);
 
     await cutscenesDone(b);
-    await walk(b, 'elodie', { x: 8.95, y: 5.3 }, async () => (await campaign(b))?.at.node === 'hub.door4');
+    await walk(b, 'elodie', { x: 8.95, y: 5.3 }, async () => (await campaign(b))?.at.node === 'young-adult');
     await sleep(1500);
-    await b.frame('Through door #4, the second room. Its contents are still to be written.', [b.tv, () => b.real('elodie'), () => b.real('anna')]);
+    await b.frame('Through the door, the Young Adult world. Its contents are still to be written.', [b.tv, () => b.real('elodie'), () => b.real('anna')]);
   },
 };
 
