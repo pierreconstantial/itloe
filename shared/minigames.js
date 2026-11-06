@@ -49,11 +49,11 @@ import { plainLobby } from './plain-lobby.js';
 /**
  * The round's players, as every minigame's view carries them: the frame's podium, round controls and presence
  * read them, whatever the minigame. `order`: the seated players in party order; `score`: ranked by the shared
- * rule (shared/ranking.js); `left`: gone from the evening; `done`: out of this round (stuck, or taken out:
+ * rule (shared/ranking.js), unless every player has a `rank` of its own (Pyramide's teams, set on the podium); `left`: gone from the evening; `done`: out of this round (stuck, or taken out:
  * `retired`); `endReason`: how a finished round ended (`time`, `gm`, or the minigame's own).
  * @typedef {{
  *   order: string[],
- *   players: Record<string, { name: string, color: number, score: number, left?: boolean, done?: boolean, retired?: boolean }>,
+ *   players: Record<string, { name: string, color: number, score: number, rank?: number, left?: boolean, done?: boolean, retired?: boolean }>,
  *   endReason?: string | null,
  * }} RoundPlayers
  */
