@@ -5,9 +5,10 @@
 // doors, broadcast.
 // Run: npm start          (resumes the saved evening in any state; a timed clock keeps its remaining time)
 //      npm start -- --new (or BLOKO_NEW=1: always a fresh evening)
+//      /?reset=1 in a browser, once confirmed: saves a fresh evening and exits for a restart
 // Env: PORT (3131), BLOKO_BIND, BLOKO_HOST (LAN), BLOKO_VAR, BLOKO_PUBLIC_ORIGIN + BLOKO_ACCESS_TOKEN
 
-import { createServer, type IncomingMessage } from 'node:http';
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import qrcodeTerminal from 'qrcode-terminal';
 import { WebSocketServer, WebSocket } from 'ws';
@@ -29,7 +30,7 @@ import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
 import { holding } from '../shared/campaign/index.js';
 import { PARTY_ROOM, spawnAt } from '../shared/scene.js';
 import { interactionActor, nearbyObject, objectAction } from '../shared/interactions.js';
-import { loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
+import { freshGame, loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import {
   CONTENT, CONTENT_VERSION, assertContent, reduceCampaign, isUnlocked, roundStatus, zoneAt, roomAt,
   type Campaign, type CampaignAction, type GmOp,
@@ -210,6 +211,7 @@ const serveApi = makeApiHandler((req) => ({ url: joinUrl(req?.headers.host), cod
 const httpServer = createServer(async (req, res) => {
   try {
     if (!access.http(req, res)) return;
+    if (serveReset(req, res)) return;
     if (!await serveApi(req, res)) await serveStatic(req, res);
   } catch (e) {
     console.error('[itloe] http error:', e);
@@ -702,6 +704,44 @@ wss.on('connection', (ws) => {
     }
   });
 });
+
+// ---------- reset (/?reset=1) ----------
+
+/** The reset's two pages: the confirmation, then the wait for the restart. */
+const resetPage = (head: string, body: string) => `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+${head}<title>Itloe: a fresh evening</title>
+<style>body{font:18px/1.5 system-ui,sans-serif;max-width:32em;margin:3em auto;padding:0 1em}
+button{font:inherit;padding:.5em 1em;margin-right:1em}</style></head>
+<body>${body}</body></html>`;
+const RESET_CONFIRM = resetPage('', `<h1>Start a fresh evening?</h1>
+<p>The current evening is replaced: the party, the progress and the room code. The server restarts;
+phones and TVs reconnect, and players join again with the new code on the TV.</p>
+<form method="post"><button type="submit">Start a fresh evening</button><a href="/">Keep the current evening</a></form>`);
+const RESET_DONE = resetPage('<meta http-equiv="refresh" content="8;url=/">', `<h1>Starting a fresh evening…</h1>
+<p>The server is restarting. The TV page opens in a few seconds.</p>`);
+
+/** Exit code after a reset. Not 0: the hosted service restarts the server only after a failure exit. */
+const EXIT_RESET = 75;
+
+/** Any page with `?reset=1`: GET shows the confirmation page; its POST saves a fresh evening, as `--new`
+ *  starts it, and exits so that the restart loads it. False when the request is not a reset. */
+function serveReset(req: IncomingMessage, res: ServerResponse): boolean {
+  if (new URL(req.url ?? '/', 'http://x').searchParams.get('reset') !== '1') return false;
+  if (req.method !== 'POST') {
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+    res.end(RESET_CONFIRM);
+    return true;
+  }
+  res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+  res.end(RESET_DONE, () => {
+    // saved and exited in the same step: no change to the old evening can overwrite the fresh save
+    saveGame(freshGame(CONTENT));
+    console.log('[itloe] fresh evening saved (/?reset=1): exiting, the restart loads it');
+    process.exit(EXIT_RESET);
+  });
+  return true;
+}
 
 // ---------- start ----------
 

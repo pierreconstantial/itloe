@@ -94,6 +94,8 @@ The whole evening is saved after every move. Just run `npm start` again:
 - **everything is resumed**: where the party is, who is playing, a game in progress (a timed game keeps its remaining time), the podium, what has been unlocked so far. Phones and the TV reconnect on their own;
 - `npm start -- --new` always starts a fresh evening.
 
+To start a fresh evening on the hosted server, open `https://itloe.kputnik.com/?reset=1` and confirm. The server saves a fresh evening, as `--new` would start it, and exits with code 75; the hosted service restarts it after a failure exit, and it loads that evening. Phones and TVs reconnect on their own; players join again with the new code from the TV. Anyone who can open the game can reset it. Run locally, `/?reset=1` only stops the server: start it again with `npm start`.
+
 A phone that goes to sleep or reloads also comes back to its own board automatically.
 
 ## Troubleshooting
