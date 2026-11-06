@@ -5,6 +5,7 @@ import { BLOCK_RULES } from './game.js';
 import { QUIZ_RULES } from './quiz/index.js';
 import { PYRAMIDE_RULES } from './pyramide.js';
 import { BACKGAMMON_RULES } from './backgammon.js';
+import { FOOSBALL_RULES } from './foosball.js';
 import { plainLobby } from './plain-lobby.js';
 
 /** @typedef {import('./characters.js').CharacterId} CharacterId */
@@ -162,6 +163,7 @@ export const MINIGAMES = {
   quiz: plainLobby(QUIZ_RULES),
   pyramide: plainLobby(PYRAMIDE_RULES),
   backgammon: plainLobby(BACKGAMMON_RULES),
+  foosball: plainLobby(FOOSBALL_RULES),
 };
 
 /** @typedef {keyof typeof MINIGAMES} MinigameKind */

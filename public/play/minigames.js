@@ -1,11 +1,12 @@
 // The phone's minigame screens: one entry per minigame, by kind (shared/minigames.js). Adding a minigame is
 // one import line and one entry here. The frame (main.js) mounts an entry's screens into its root from the
-// minigame's start to its end. Blocks, quiz, Pyramide and backgammon wrap their round screens in the plain lobby (./plain-lobby.js).
+// minigame's start to its end. Blocks, quiz, Pyramide, backgammon and table football wrap their round screens in the plain lobby (./plain-lobby.js).
 import { BLOCK_SCREEN } from './blocks-ui.js';
 import { QUIZ_SCREEN } from './quiz-ui.js';
 import { plainLobbyScreen } from './plain-lobby.js';
 import { PYRAMIDE_SCREEN } from './pyramide-ui.js';
 import { BACKGAMMON_SCREEN } from './backgammon-ui.js';
+import { FOOSBALL_SCREEN } from './foosball-ui.js';
 
 /** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
 /** @typedef {import('../../shared/minigames.js').MinigameView} MinigameView */
@@ -72,6 +73,7 @@ export const SCREENS = {
   quiz: plainLobbyScreen(QUIZ_SCREEN),
   pyramide: plainLobbyScreen(PYRAMIDE_SCREEN),
   backgammon: plainLobbyScreen(BACKGAMMON_SCREEN),
+  foosball: plainLobbyScreen(FOOSBALL_SCREEN),
 };
 
 /** A minigame's phone screens, or null (none registered). @param {string | null | undefined} kind @returns {PhoneScreen | null} */

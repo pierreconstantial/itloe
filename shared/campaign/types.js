@@ -12,12 +12,15 @@ export {};
 /** @typedef {import('../backgammon.js').BackgammonState} BackgammonState */
 /** @typedef {import('../backgammon.js').BackgammonSettings} BackgammonSettings */
 /** @typedef {import('../backgammon.js').BackgammonAction} BackgammonAction */
-/** A round of a tableau's minigame: the block game, a quiz (Contract E: `kind: 'quiz'`), Pyramide, or backgammon. */
-/** @typedef {BlockState | QuizState | PyramideState | BackgammonState} RoundState */
+/** @typedef {import('../foosball.js').FoosballState} FoosballState */
+/** @typedef {import('../foosball.js').FoosballSettings} FoosballSettings */
+/** @typedef {import('../foosball.js').FoosballAction} FoosballAction */
+/** A round of a tableau's minigame: the block game, a quiz (Contract E: `kind: 'quiz'`), Pyramide, backgammon, or table football. */
+/** @typedef {BlockState | QuizState | PyramideState | BackgammonState | FoosballState} RoundState */
 /** The running minigame's state, nested in the campaign: blocks and quiz run in a plain lobby. */
 /** @typedef {import('../plain-lobby.js').PlainLobbyState<RoundState, TableauSettings>} ActivityState */
 /** A minigame's settings, by its minigame: the content's, then the game master's choice in its lobby. */
-/** @typedef {import('../game.js').Settings | QuizSettings | PyramideSettings | BackgammonSettings} TableauSettings */
+/** @typedef {import('../game.js').Settings | QuizSettings | PyramideSettings | BackgammonSettings | FoosballSettings} TableauSettings */
 /** @typedef {import('../game.js').Settings} Settings */
 /** @typedef {import('../characters.js').CharacterId} CharacterId */
 /** @typedef {import('../minigames.js').MinigameKind} MinigameKind */
@@ -72,7 +75,8 @@ export {};
  *   | { kind: 'scene', sceneId: string }
  *   | ({ kind: 'quiz', settings?: Partial<QuizSettings> } & TableauPlayers)     // questions from the server's bank (E1)
  *   | ({ kind: 'pyramide', settings?: Partial<PyramideSettings> } & TableauPlayers)     // words from the server's bank
- *   | ({ kind: 'backgammon', settings?: Partial<BackgammonSettings> } & TableauPlayers)} Activity
+ *   | ({ kind: 'backgammon', settings?: Partial<BackgammonSettings> } & TableauPlayers)
+ *   | ({ kind: 'foosball', settings?: Partial<FoosballSettings> } & TableauPlayers)} Activity
  */
 
 /** Door rectangle in world units (16 × 9), on a hub/world child: walking INTO it enters the node. */
@@ -248,7 +252,7 @@ export {};
  *   | { t: 'back', id: string }
  *   | { t: 'startMinigame', id: string, now: number }   // game master, in the room at a minigame's tableau
  *   | { t: 'endMinigame', id: string }                  // game master, in its lobby: its results recorded
- *   | { t: 'activity', action: import('../plain-lobby.js').PlainLobbyAction | import('../minigames.js').SpotAction | import('../game.js').Action | QuizAction | PyramideAction | BackgammonAction }   // to the running minigame
+ *   | { t: 'activity', action: import('../plain-lobby.js').PlainLobbyAction | import('../minigames.js').SpotAction | import('../game.js').Action | QuizAction | PyramideAction | BackgammonAction | FoosballAction }   // to the running minigame
  *   | { t: 'event', event: CampaignEvent }
  *   | { t: 'ack', id: 'screen', upTo: number }
  *   | { t: 'gm', id: string, op: GmOp }} CampaignAction

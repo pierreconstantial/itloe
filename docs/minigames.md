@@ -16,7 +16,7 @@ A minigame is a few files of its own, registered in four lists. The main game ow
 - **Node**: a place in the story's content, by kind: the **hub**, where the story opens out; a **world**, one period of Élodie's life, entered from the hub; a **tableau**, one spot inside a world (or the opening, under the hub). The party is at one node at a time (`campaign.at.node`). A tableau's content field `activity` holds what happens there: a minigame or a scene.
 - **Minigame**: a registered game with its own rules, e.g. `blocks`, `quiz` and `pyramide`; a tableau's `activity.kind` names it. At its tableau it runs from the game master's start to his end. `campaign.at.activity` holds the running minigame's state, null otherwise.
 - **Lobby**: a minigame's own screens before and between its rounds. Eligible players get ready there, and the game master sets the minigame up, starts rounds and ends it.
-- **Plain lobby**: the lobby shared code offers as a building block: its eligible players walking it, "I'm ready", the game master's settings and Start, a round with the ready players, its podium, "Back to the lobby", and the end. Blocks, quiz, Pyramide and backgammon use it; Pyramide's has spots.
+- **Plain lobby**: the lobby shared code offers as a building block: its eligible players walking it, "I'm ready", the game master's settings and Start, a round with the ready players, its podium, "Back to the lobby", and the end. Blocks, quiz, Pyramide, backgammon and table football use it; Pyramide's has spots.
 - **Round**: one play of a running minigame, from its start to its podium. After the podium the minigame is back in its lobby.
 - **Status**: what a running minigame shows, derived from its state: `lobby`, `running` (a round) or `podium`.
 - **Eligible players**: the party members the main game hands a minigame: the characters its tableau's content names, among the members who haven't left; without names, every member who isn't a story wisp.
@@ -44,7 +44,7 @@ A minigame is a few files of its own, registered in four lists. The main game ow
 
 A minigame chooses its lobby:
 
-- **In the plain lobby**, as blocks, quiz, Pyramide and backgammon: it writes a round's rules, server code and screens, and wraps each in the plain lobby's building block. Everything about the lobby is then shared.
+- **In the plain lobby**, as blocks, quiz, Pyramide, backgammon and table football: it writes a round's rules, server code and screens, and wraps each in the plain lobby's building block. Everything about the lobby is then shared.
 - **With a lobby of its own**, when the plain lobby doesn't fit (no minigame does yet): it writes the minigame's rules, server code and screens against the same contract the plain lobby implements (`MinigameRules`, `MinigameServer`, `PhoneScreen`, `TvScreen`), and reuses the pieces listed under [What shared code offers](#what-shared-code-offers).
 
 ### Registration lines
@@ -73,7 +73,7 @@ Then its type entries in [`shared/campaign/types.js`](../shared/campaign/types.j
 
 - **Pure and deterministic.** Time, randomness and ids come in through actions and the start; the reducer does no I/O. A refused action returns the same state object: the server uses that identity to skip saving and broadcasting.
 - **The status** (`status`): `lobby`, `running` or `podium`; null for a saved state this release can't resume (a fix deployed while it ran): the server then ends the minigame as the game master's `back` would, recording its finished rounds, and keeps the rest of the evening. The game master can end the minigame (`endMinigame`) only while its status is `lobby`.
-- **Ready** (`ready`): who is ready for the next round. The main game checks the content's ready rule over it; how many ready players a round takes is the minigame's own (`players` in a plain lobby's round rules: blocks and quiz one or more, backgammon two to four, Pyramide four).
+- **Ready** (`ready`): who is ready for the next round. The main game checks the content's ready rule over it; how many ready players a round takes is the minigame's own (`players` in a plain lobby's round rules: blocks and quiz one or more, backgammon two to four, table football two to six, Pyramide four).
 - **A walkable lobby** (`spots`, optional): its spots while the players it shows walk, null otherwise (absent: never; the plain lobby: while in its lobby). Each spot (`Spot`) has an id, a label for the phone, its area in world units (16 × 9) and its holder, from the minigame's state: who holds a spot is saved with the minigame, while positions are in memory. An empty list is a walkable lobby without spots (the plain lobby's, unless its round rules list spots). Its start positions (`startPositions`, in world units) go where its TV screen leaves room, clear of its spots and panels. Whoever starts walking (the minigame's start, a join, back from a round they sat out, a restart) is placed by the server: a holder on its spot's centre, anyone else on the first start position nobody stands on.
 - **Whom it shows** (`shows`): the players it draws itself. Every other connected party member floats over its screens as a wisp. The plain lobby shows its eligible players in the lobby, the round's players still playing during a round, and the round's players on its podium; so players who aren't eligible, aren't ready or are out of the round are wisps.
 - **Results** (`result`): what a round reports once it turned `podium` (`RoundResult`). The main game keeps it in `campaign.at.results` in the same step, and when the game master ends the minigame it records every kept result in order, each with its counters and the unlocks and rewards that follow, in one step and one save. In order, so a `winner` reward goes to the winners of the round that completed the node. The counters: `<kind>.played`, `<kind>.won.<character>`, `node.<id>.finished`, the totals per kind, the minigame's own counters under its name, and `asked`. A minigame ended before any round finished records nothing. Moving the party elsewhere (the game-master panel's goto, or back) ends the minigame first in the same way, dropping a running round.
@@ -181,7 +181,7 @@ It can't:
 
 ## Unsaved messages
 
-A minigame's server code sends an effect to every phone and TV with `io.send`: the wire's `unsaved` (see [PROTOCOL.md](../PROTOCOL.md)), delivered to its screens' `message`. Unsaved messages are for effects, not fast-moving games.
+A minigame's server code sends an effect to every phone and TV with `io.send`: the wire's `unsaved` (see [PROTOCOL.md](../PROTOCOL.md)), delivered to its screens' `message`. Unsaved messages are for effects, and for a live game's moment-to-moment state that a restart may lose: table football's server code runs its match in memory, takes the phones' rod positions as messages it answers with no action, and sends the TV the ball and rods 20 times a second; only its goals are saved ([`server/foosball.ts`](../server/foosball.ts)).
 
 ## Development start
 

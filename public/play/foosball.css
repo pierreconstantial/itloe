@@ -1,0 +1,43 @@
+/* Table football's phone screens (foosball-ui.js): the strip the finger slides on, and the power button. */
+
+#view-foosball {
+  --team: var(--fg-dim);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: calc(10px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));
+  user-select: none;
+  -webkit-user-select: none;
+}
+#view-foosball .fb-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding-right: 48px; /* the ☰ button */ }
+#view-foosball .fb-team { font-weight: 800; font-size: 20px; color: var(--team); }
+#view-foosball .fb-roles { font-weight: 700; }
+#view-foosball .fb-lag { width: 100%; font-size: 13px; color: var(--fg-dim); font-variant-numeric: tabular-nums; }
+
+#view-foosball .fb-pad { flex: 1; min-height: 0; display: flex; gap: 12px; }
+#view-foosball:not(.playing) .fb-pad { display: none; }
+#view-foosball.playing .fb-watching { display: none; }
+
+/* the strip: the finger's height is the rods' position */
+#view-foosball .fb-strip {
+  flex: 3; position: relative; border-radius: 18px;
+  background: repeating-linear-gradient(to bottom, var(--bg-2) 0 22px, color-mix(in srgb, var(--bg-2), #fff 6%) 22px 44px);
+  border: 3px solid var(--team);
+  touch-action: none;
+}
+#view-foosball .fb-handle, #view-foosball .fb-rod {
+  position: absolute; left: 8px; right: 8px; top: 50%; translate: 0 -50%; border-radius: 12px; pointer-events: none;
+}
+#view-foosball .fb-handle { height: 56px; background: var(--team); box-shadow: 0 0 0 3px #0006; }
+/* where the rods actually are, from the TV's snapshots: behind the finger by the lag */
+#view-foosball .fb-rod { height: 8px; background: #fff8; }
+
+#view-foosball .fb-power {
+  flex: 2; border-radius: 18px; border: 3px solid var(--team); background: var(--bg-2); color: var(--fg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  font-size: 44px; touch-action: none;
+}
+#view-foosball .fb-power span { font-size: 18px; font-weight: 800; }
+#view-foosball .fb-power.on { background: var(--team); color: #111; }
+#view-foosball .fb-watching { color: var(--fg-dim); }

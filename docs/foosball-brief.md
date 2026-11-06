@@ -18,7 +18,7 @@ Lag spoils inputs that depend on a precise moment, and barely affects inputs tha
 - **The finger is the rod.** The player drags a finger up and down a tall strip on their phone, and their men follow the finger's position (absolute, not a joystick). The player always knows where they meant to be; the rod catching up on the TV reads as a heavy rod, not as lag.
 - **Shots are automatic.** A ball that touches a man is kicked toward the other goal, its angle set by where on the man it hits. Aiming is placing the rod; no button press has to land at the right moment.
 - **Power shot, held.** While the player holds the phone's power button, their next touch is a strong shot. A held button lasts longer than the lag, so it arrives in time.
-- **A slow, heavy ball.** It takes about two seconds to cross the table, and its speed is capped. A Wi-Fi hiccup makes it jump a little.
+- **A slow, heavy ball.** It takes about three seconds to cross the table, and its speed is capped. A Wi-Fi hiccup makes it jump a little.
 - **A dead ball comes back.** A ball that stays almost still for a few seconds is served again from the middle.
 
 ## Teams and rods
@@ -63,8 +63,9 @@ A match needs at least one player per team. With 3 or 5 players the teams are un
 ## Plan
 
 1. **Prototype.** The registered minigame with the plain lobby's "I'm ready" (no spots yet), teams alternating in party order, the table, the ball, the rods, automatic shots and the power shot, a match that runs until End game, and the score. All tuning values (ball speed, cap, man sizes, rod speed) in one table in `shared/foosball.js`. A lag readout on the TV for each player: how long their rod messages take to come back in the TV's snapshots, typical and worst over the last 10 seconds.
+   Done, on the `foosball` branch.
    **Checkpoint:** Konstantin and Pierre play it on real phones against the production server (pushing to `production` deploys it, once Konstantin says so). Decide: does it play well, and what to retune.
-2. **The full minigame:** spots and the team split for 2 to 6 players, the settings, the match end, the podium, leaving, the goal celebration, the PROTOCOL.md entries, the minigames.md update, and tests.
+2. **The full minigame:** spots and the team split for 2 to 6 players, the target score and time limit, the goal celebration, and tests. Done with the prototype: the tuning settings, the podium, leaving, the 2 to 6 player range, the README, PROTOCOL.md and minigames.md entries.
 3. **An e2e suite** that plays a match to its podium, and a storyboard sequence. Then delete this brief.
 
-Waiting on: the prototype.
+Waiting on: Konstantin and Pierre, to play the prototype.

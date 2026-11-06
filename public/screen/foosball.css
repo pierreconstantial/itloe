@@ -1,0 +1,37 @@
+/* Table football's TV screen (foosball-screen.js): the score, the table and each player's lag. Sizes in --u (1/1080 of
+   the screen's height). */
+
+.fb {
+  flex: 1; min-height: 0; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.fb-head {
+  display: flex; align-items: center; gap: calc(40 * var(--u));
+  padding: calc(14 * var(--u)) calc(48 * var(--u)); background: var(--bg-2);
+}
+.fb-logo { margin: 0; font-size: calc(40 * var(--u)); color: var(--accent); letter-spacing: 0.06em; }
+.fb-score { flex: 1; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: calc(32 * var(--u)); font-size: calc(28 * var(--u)); }
+.fb-side { display: flex; flex-direction: column; gap: calc(4 * var(--u)); }
+.fb-side.a { align-items: flex-end; text-align: right; }
+.fb-names { display: flex; gap: calc(14 * var(--u)); font-weight: 700; }
+.fb-names .left { opacity: 0.4; text-decoration: line-through; }
+.fb-goals { font-size: calc(64 * var(--u)); font-weight: 900; font-variant-numeric: tabular-nums; }
+
+.fb-stage { flex: 1; min-height: 0; position: relative; }
+.fb-table { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fb-goal {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  pointer-events: none; opacity: 0; scale: 0.6; transition: opacity 0.2s, scale 0.3s;
+  text-shadow: 0 calc(6 * var(--u)) calc(24 * var(--u)) #000c;
+}
+.fb-goal.on { opacity: 1; scale: 1; }
+.fb-goal b { font-size: calc(200 * var(--u)); font-weight: 900; }
+.fb-goal span { font-size: calc(56 * var(--u)); font-weight: 800; color: var(--fg); }
+
+.fb-lags {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: calc(8 * var(--u)) calc(36 * var(--u));
+  padding: calc(10 * var(--u)) calc(48 * var(--u)); font-size: calc(22 * var(--u)); color: var(--fg-dim);
+  font-variant-numeric: tabular-nums;
+}
+.fb-lag { display: inline-flex; align-items: center; gap: calc(8 * var(--u)); }
+.fb-lag i { width: calc(14 * var(--u)); height: calc(14 * var(--u)); border-radius: 50%; display: inline-block; }

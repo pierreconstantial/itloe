@@ -142,7 +142,7 @@ messages (`unsaved` below) while it runs.
 
 ### Minigames and their lobbies
 
-Blocks, quiz, Pyramide and backgammon run in the plain lobby (`shared/plain-lobby.js`, `server/plain-lobby.ts`); a minigame with
+Blocks, quiz, Pyramide, backgammon and table football run in the plain lobby (`shared/plain-lobby.js`, `server/plain-lobby.ts`); a minigame with
 its own lobby accepts the same messages where they apply. A guest's game-master message → `err "not-gm"`; the
 game master's at the wrong moment → `err "refused"`.
 
@@ -152,7 +152,7 @@ game master's at the wrong moment → `err "refused"`.
 { "t": "config", "patch": { … } }      // game master, in the lobby: the minigame's settings, from its schema; invalid
                                        // keys/values ignored, his no-op patch silent; outside the lobby → err "locked"
 { "t": "start" }                       // game master, in the lobby, with as many ready players as a round takes (one or
-                                       // more; backgammon 2 to 4, Pyramide 4) and the content's ready rule met: a round
+                                       // more; backgammon 2 to 4, table football 2 to 6, Pyramide 4) and the content's ready rule met: a round
                                        // with the ready players, in party order; the quiz picks
                                        // its questions among the bank's candidates, none left → refused
 { "t": "endGame" }                     // game master, a round running → its podium, endReason "gm"
@@ -357,6 +357,38 @@ loses their game and every game left; with fewer than two players left the group
 - **Campaign:** each player scores their points (a win 1, a gammon 2); ranks follow the standings (points, then the
   points between the players level on points, then the pips their opponents had left).
 
+### Table football: a tableau `activity: { kind: 'foosball', settings: { kick, power, … } }`
+
+Two to six players in two teams play a live match; one round in the plain lobby is one match, until the game master's
+`endGame`. Rules, the live match and the settings: `shared/foosball.js`. The live match runs in the server code's
+memory (`server/foosball.ts`); only goals reach the saved state.
+
+```jsonc
+{ "t": "config", "patch": { "kick": 45, "behind": "kick" } }   // game master, in the lobby: the tuning, from
+                                       // FOOSBALL_SETTINGS_SCHEMA (shared/foosball.js)
+{ "t": "start" }                       // game master, 2 to 6 ready players: a match, the teams alternating in party order
+{ "t": "rod", "y": 0.42, "power": false, "n": 17, "lag": [48, 120] }
+                                       // a playing player, while the match runs, at most 15 a second and every 0.5 s
+                                       // anyway: their finger on the strip (0 top, 1 bottom) and the power button; never
+                                       // answered, never saved. The first one of a match starts its live side. "n" numbers
+                                       // the message, "lag" is this phone's measured lag (typical, worst, ms) for the TV
+```
+
+A player who leaves or is taken out passes their rods to their teammates; a team with nobody left loses (endReason
+`left`). `endGame` ends the match with the score so far (endReason `gm`). While the match runs, every socket gets
+its live state about 20 times a second:
+
+```jsonc
+{ "t": "unsaved", "data": { "t": "foosball", "at": 1730700000000, "serves": 3, "ball": [61.2, 30.5],
+  "rods": { "a": [0.5, 0.5, 0.31, 0.7], "b": [0.5, 0.5, 0.5, 0.5] }, "armed": ["p-abc"],
+  "seen": { "p-abc": 17 }, "lag": { "p-abc": [48, 120] } } }
+// "at": the server's time; "serves": serves so far (the ball jumps, it doesn't roll, to a new serve); "ball": x, y in cm
+// on the 120 × 68 table; "rods": each team's rod positions by role (goalie, defence, midfield, attack); "armed": whose
+// next touch is a power shot; "seen": the last "n" received from each phone; "lag": what each phone measured.
+```
+
+- **Campaign:** each player scores their team's goals; ranks follow (the winning team's players share first place).
+
 ### Show the join QR again (any player, any moment)
 
 ```jsonc
@@ -385,7 +417,7 @@ loses their game and every game left; with fewer than two players left the group
 // The plain lobby's view: { stage, settings, players: [{ id, character }], ready: [id], round }, with "round" the round
 // server's view of the running or finished round (null in the lobby). blocks: the full State (shared/game.js), plus
 // "best" in solo games (below); quiz: the public projection (below); Pyramide: its round without the words still
-// drawable (below); backgammon: its round without the seed and the rolls (below). In a lobby with spots, "ready" is the spots' holders.
+// drawable (below); backgammon: its round without the seed and the rolls (below); table football: its round without the seed (below). In a lobby with spots, "ready" is the spots' holders.
 // "campaign" = the whole evening (at.node, at.kind, at.results, party, facts, news, …) WITHOUT the minigame's raw state
 // (`at.activity`): that travels only through "minigame"; nor the seed, which each minigame's seed comes from (and with
 // it backgammon's dice). The saved campaign keeps both.
