@@ -1,0 +1,2411 @@
+{
+  "language": "fr",
+  "categories": {
+    "easy": [
+      {
+        "id": "easy-001",
+        "word": "chat"
+      },
+      {
+        "id": "easy-002",
+        "word": "chien"
+      },
+      {
+        "id": "easy-003",
+        "word": "maison"
+      },
+      {
+        "id": "easy-004",
+        "word": "voiture"
+      },
+      {
+        "id": "easy-005",
+        "word": "vélo"
+      },
+      {
+        "id": "easy-006",
+        "word": "train"
+      },
+      {
+        "id": "easy-007",
+        "word": "avion"
+      },
+      {
+        "id": "easy-008",
+        "word": "bateau"
+      },
+      {
+        "id": "easy-009",
+        "word": "bus"
+      },
+      {
+        "id": "easy-010",
+        "word": "moto"
+      },
+      {
+        "id": "easy-011",
+        "word": "école"
+      },
+      {
+        "id": "easy-012",
+        "word": "livre"
+      },
+      {
+        "id": "easy-013",
+        "word": "stylo"
+      },
+      {
+        "id": "easy-014",
+        "word": "crayon"
+      },
+      {
+        "id": "easy-015",
+        "word": "papier"
+      },
+      {
+        "id": "easy-016",
+        "word": "table"
+      },
+      {
+        "id": "easy-017",
+        "word": "chaise"
+      },
+      {
+        "id": "easy-018",
+        "word": "canapé"
+      },
+      {
+        "id": "easy-019",
+        "word": "lit"
+      },
+      {
+        "id": "easy-020",
+        "word": "oreiller"
+      },
+      {
+        "id": "easy-021",
+        "word": "couverture"
+      },
+      {
+        "id": "easy-022",
+        "word": "fenêtre"
+      },
+      {
+        "id": "easy-023",
+        "word": "porte"
+      },
+      {
+        "id": "easy-024",
+        "word": "toit"
+      },
+      {
+        "id": "easy-025",
+        "word": "mur"
+      },
+      {
+        "id": "easy-026",
+        "word": "jardin"
+      },
+      {
+        "id": "easy-027",
+        "word": "arbre"
+      },
+      {
+        "id": "easy-028",
+        "word": "fleur"
+      },
+      {
+        "id": "easy-029",
+        "word": "herbe"
+      },
+      {
+        "id": "easy-030",
+        "word": "forêt"
+      },
+      {
+        "id": "easy-031",
+        "word": "plage"
+      },
+      {
+        "id": "easy-032",
+        "word": "mer"
+      },
+      {
+        "id": "easy-033",
+        "word": "rivière"
+      },
+      {
+        "id": "easy-034",
+        "word": "lac"
+      },
+      {
+        "id": "easy-035",
+        "word": "montagne"
+      },
+      {
+        "id": "easy-036",
+        "word": "colline"
+      },
+      {
+        "id": "easy-037",
+        "word": "neige"
+      },
+      {
+        "id": "easy-038",
+        "word": "pluie"
+      },
+      {
+        "id": "easy-039",
+        "word": "soleil"
+      },
+      {
+        "id": "easy-040",
+        "word": "lune"
+      },
+      {
+        "id": "easy-041",
+        "word": "étoile"
+      },
+      {
+        "id": "easy-042",
+        "word": "nuage"
+      },
+      {
+        "id": "easy-043",
+        "word": "vent"
+      },
+      {
+        "id": "easy-044",
+        "word": "orage"
+      },
+      {
+        "id": "easy-045",
+        "word": "arc-en-ciel"
+      },
+      {
+        "id": "easy-046",
+        "word": "feu"
+      },
+      {
+        "id": "easy-047",
+        "word": "fumée"
+      },
+      {
+        "id": "easy-048",
+        "word": "eau"
+      },
+      {
+        "id": "easy-049",
+        "word": "glace"
+      },
+      {
+        "id": "easy-050",
+        "word": "sable"
+      },
+      {
+        "id": "easy-051",
+        "word": "pierre"
+      },
+      {
+        "id": "easy-052",
+        "word": "terre"
+      },
+      {
+        "id": "easy-053",
+        "word": "boue"
+      },
+      {
+        "id": "easy-054",
+        "word": "route"
+      },
+      {
+        "id": "easy-055",
+        "word": "pont"
+      },
+      {
+        "id": "easy-056",
+        "word": "tunnel"
+      },
+      {
+        "id": "easy-057",
+        "word": "rue"
+      },
+      {
+        "id": "easy-058",
+        "word": "ville"
+      },
+      {
+        "id": "easy-059",
+        "word": "village"
+      },
+      {
+        "id": "easy-060",
+        "word": "pays"
+      },
+      {
+        "id": "easy-061",
+        "word": "carte"
+      },
+      {
+        "id": "easy-062",
+        "word": "boussole"
+      },
+      {
+        "id": "easy-063",
+        "word": "valise"
+      },
+      {
+        "id": "easy-064",
+        "word": "sac"
+      },
+      {
+        "id": "easy-065",
+        "word": "chapeau"
+      },
+      {
+        "id": "easy-066",
+        "word": "manteau"
+      },
+      {
+        "id": "easy-067",
+        "word": "veste"
+      },
+      {
+        "id": "easy-068",
+        "word": "pantalon"
+      },
+      {
+        "id": "easy-069",
+        "word": "robe"
+      },
+      {
+        "id": "easy-070",
+        "word": "jupe"
+      },
+      {
+        "id": "easy-071",
+        "word": "chemise"
+      },
+      {
+        "id": "easy-072",
+        "word": "chaussure"
+      },
+      {
+        "id": "easy-073",
+        "word": "chaussette"
+      },
+      {
+        "id": "easy-074",
+        "word": "gant"
+      },
+      {
+        "id": "easy-075",
+        "word": "écharpe"
+      },
+      {
+        "id": "easy-076",
+        "word": "lunettes"
+      },
+      {
+        "id": "easy-077",
+        "word": "montre"
+      },
+      {
+        "id": "easy-078",
+        "word": "bague"
+      },
+      {
+        "id": "easy-079",
+        "word": "collier"
+      },
+      {
+        "id": "easy-080",
+        "word": "bracelet"
+      },
+      {
+        "id": "easy-081",
+        "word": "parapluie"
+      },
+      {
+        "id": "easy-082",
+        "word": "clé"
+      },
+      {
+        "id": "easy-083",
+        "word": "serrure"
+      },
+      {
+        "id": "easy-084",
+        "word": "lampe"
+      },
+      {
+        "id": "easy-085",
+        "word": "bougie"
+      },
+      {
+        "id": "easy-086",
+        "word": "miroir"
+      },
+      {
+        "id": "easy-087",
+        "word": "horloge"
+      },
+      {
+        "id": "easy-088",
+        "word": "téléphone"
+      },
+      {
+        "id": "easy-089",
+        "word": "ordinateur"
+      },
+      {
+        "id": "easy-090",
+        "word": "écran"
+      },
+      {
+        "id": "easy-091",
+        "word": "clavier"
+      },
+      {
+        "id": "easy-092",
+        "word": "souris"
+      },
+      {
+        "id": "easy-093",
+        "word": "télévision"
+      },
+      {
+        "id": "easy-094",
+        "word": "radio"
+      },
+      {
+        "id": "easy-095",
+        "word": "musique"
+      },
+      {
+        "id": "easy-096",
+        "word": "chanson"
+      },
+      {
+        "id": "easy-097",
+        "word": "danse"
+      },
+      {
+        "id": "easy-098",
+        "word": "cinéma"
+      },
+      {
+        "id": "easy-099",
+        "word": "film"
+      },
+      {
+        "id": "easy-100",
+        "word": "photo"
+      },
+      {
+        "id": "easy-101",
+        "word": "dessin"
+      },
+      {
+        "id": "easy-102",
+        "word": "peinture"
+      },
+      {
+        "id": "easy-103",
+        "word": "pinceau"
+      },
+      {
+        "id": "easy-104",
+        "word": "couleur"
+      },
+      {
+        "id": "easy-105",
+        "word": "rouge"
+      },
+      {
+        "id": "easy-106",
+        "word": "bleu"
+      },
+      {
+        "id": "easy-107",
+        "word": "vert"
+      },
+      {
+        "id": "easy-108",
+        "word": "jaune"
+      },
+      {
+        "id": "easy-109",
+        "word": "noir"
+      },
+      {
+        "id": "easy-110",
+        "word": "blanc"
+      },
+      {
+        "id": "easy-111",
+        "word": "orange"
+      },
+      {
+        "id": "easy-112",
+        "word": "rose"
+      },
+      {
+        "id": "easy-113",
+        "word": "violet"
+      },
+      {
+        "id": "easy-114",
+        "word": "pain"
+      },
+      {
+        "id": "easy-115",
+        "word": "beurre"
+      },
+      {
+        "id": "easy-116",
+        "word": "fromage"
+      },
+      {
+        "id": "easy-117",
+        "word": "lait"
+      },
+      {
+        "id": "easy-118",
+        "word": "yaourt"
+      },
+      {
+        "id": "easy-119",
+        "word": "œuf"
+      },
+      {
+        "id": "easy-120",
+        "word": "riz"
+      },
+      {
+        "id": "easy-121",
+        "word": "pâtes"
+      },
+      {
+        "id": "easy-122",
+        "word": "soupe"
+      },
+      {
+        "id": "easy-123",
+        "word": "salade"
+      },
+      {
+        "id": "easy-124",
+        "word": "tomate"
+      },
+      {
+        "id": "easy-125",
+        "word": "carotte"
+      },
+      {
+        "id": "easy-126",
+        "word": "pomme"
+      },
+      {
+        "id": "easy-127",
+        "word": "poire"
+      },
+      {
+        "id": "easy-128",
+        "word": "banane"
+      },
+      {
+        "id": "easy-129",
+        "word": "fraise"
+      },
+      {
+        "id": "easy-130",
+        "word": "cerise"
+      },
+      {
+        "id": "easy-131",
+        "word": "raisin"
+      },
+      {
+        "id": "easy-132",
+        "word": "citron"
+      },
+      {
+        "id": "easy-133",
+        "word": "pastèque"
+      },
+      {
+        "id": "easy-134",
+        "word": "chocolat"
+      },
+      {
+        "id": "easy-135",
+        "word": "bonbon"
+      },
+      {
+        "id": "easy-136",
+        "word": "gâteau"
+      },
+      {
+        "id": "easy-137",
+        "word": "biscuit"
+      },
+      {
+        "id": "easy-138",
+        "word": "miel"
+      },
+      {
+        "id": "easy-139",
+        "word": "sucre"
+      },
+      {
+        "id": "easy-140",
+        "word": "sel"
+      },
+      {
+        "id": "easy-141",
+        "word": "poivre"
+      },
+      {
+        "id": "easy-142",
+        "word": "café"
+      },
+      {
+        "id": "easy-143",
+        "word": "thé"
+      },
+      {
+        "id": "easy-144",
+        "word": "jus"
+      },
+      {
+        "id": "easy-145",
+        "word": "fourchette"
+      },
+      {
+        "id": "easy-146",
+        "word": "couteau"
+      },
+      {
+        "id": "easy-147",
+        "word": "cuillère"
+      },
+      {
+        "id": "easy-148",
+        "word": "assiette"
+      },
+      {
+        "id": "easy-149",
+        "word": "verre"
+      },
+      {
+        "id": "easy-150",
+        "word": "tasse"
+      },
+      {
+        "id": "easy-151",
+        "word": "bouteille"
+      },
+      {
+        "id": "easy-152",
+        "word": "casserole"
+      },
+      {
+        "id": "easy-153",
+        "word": "four"
+      },
+      {
+        "id": "easy-154",
+        "word": "réfrigérateur"
+      },
+      {
+        "id": "easy-155",
+        "word": "cuisine"
+      },
+      {
+        "id": "easy-156",
+        "word": "restaurant"
+      },
+      {
+        "id": "easy-157",
+        "word": "boulangerie"
+      },
+      {
+        "id": "easy-158",
+        "word": "marché"
+      },
+      {
+        "id": "easy-159",
+        "word": "argent"
+      },
+      {
+        "id": "easy-160",
+        "word": "magasin"
+      },
+      {
+        "id": "easy-161",
+        "word": "cadeau"
+      },
+      {
+        "id": "easy-162",
+        "word": "anniversaire"
+      },
+      {
+        "id": "easy-163",
+        "word": "ballon"
+      },
+      {
+        "id": "easy-164",
+        "word": "jouet"
+      },
+      {
+        "id": "easy-165",
+        "word": "poupée"
+      },
+      {
+        "id": "easy-166",
+        "word": "puzzle"
+      },
+      {
+        "id": "easy-167",
+        "word": "dé"
+      },
+      {
+        "id": "easy-168",
+        "word": "cartes"
+      },
+      {
+        "id": "easy-169",
+        "word": "football"
+      },
+      {
+        "id": "easy-170",
+        "word": "basket"
+      },
+      {
+        "id": "easy-171",
+        "word": "tennis"
+      },
+      {
+        "id": "easy-172",
+        "word": "natation"
+      },
+      {
+        "id": "easy-173",
+        "word": "piscine"
+      },
+      {
+        "id": "easy-174",
+        "word": "course"
+      },
+      {
+        "id": "easy-175",
+        "word": "docteur"
+      },
+      {
+        "id": "easy-176",
+        "word": "hôpital"
+      },
+      {
+        "id": "easy-177",
+        "word": "dentiste"
+      },
+      {
+        "id": "easy-178",
+        "word": "pharmacie"
+      },
+      {
+        "id": "easy-179",
+        "word": "bébé"
+      },
+      {
+        "id": "easy-180",
+        "word": "enfant"
+      },
+      {
+        "id": "easy-181",
+        "word": "mère"
+      },
+      {
+        "id": "easy-182",
+        "word": "père"
+      },
+      {
+        "id": "easy-183",
+        "word": "frère"
+      },
+      {
+        "id": "easy-184",
+        "word": "sœur"
+      },
+      {
+        "id": "easy-185",
+        "word": "grand-mère"
+      },
+      {
+        "id": "easy-186",
+        "word": "grand-père"
+      },
+      {
+        "id": "easy-187",
+        "word": "ami"
+      },
+      {
+        "id": "easy-188",
+        "word": "voisin"
+      },
+      {
+        "id": "easy-189",
+        "word": "roi"
+      },
+      {
+        "id": "easy-190",
+        "word": "reine"
+      },
+      {
+        "id": "easy-191",
+        "word": "princesse"
+      },
+      {
+        "id": "easy-192",
+        "word": "pirate"
+      },
+      {
+        "id": "easy-193",
+        "word": "policier"
+      },
+      {
+        "id": "easy-194",
+        "word": "pompier"
+      },
+      {
+        "id": "easy-195",
+        "word": "facteur"
+      },
+      {
+        "id": "easy-196",
+        "word": "boulanger"
+      },
+      {
+        "id": "easy-197",
+        "word": "professeur"
+      },
+      {
+        "id": "easy-198",
+        "word": "élève"
+      },
+      {
+        "id": "easy-199",
+        "word": "oiseau"
+      },
+      {
+        "id": "easy-200",
+        "word": "poisson"
+      }
+    ],
+    "medium": [
+      {
+        "id": "medium-001",
+        "word": "avalanche"
+      },
+      {
+        "id": "medium-002",
+        "word": "éclipse"
+      },
+      {
+        "id": "medium-003",
+        "word": "mirage"
+      },
+      {
+        "id": "medium-004",
+        "word": "tornade"
+      },
+      {
+        "id": "medium-005",
+        "word": "volcan"
+      },
+      {
+        "id": "medium-006",
+        "word": "éruption"
+      },
+      {
+        "id": "medium-007",
+        "word": "séisme"
+      },
+      {
+        "id": "medium-008",
+        "word": "tsunami"
+      },
+      {
+        "id": "medium-009",
+        "word": "marée"
+      },
+      {
+        "id": "medium-010",
+        "word": "courant"
+      },
+      {
+        "id": "medium-011",
+        "word": "cascade"
+      },
+      {
+        "id": "medium-012",
+        "word": "falaise"
+      },
+      {
+        "id": "medium-013",
+        "word": "grotte"
+      },
+      {
+        "id": "medium-014",
+        "word": "canyon"
+      },
+      {
+        "id": "medium-015",
+        "word": "delta"
+      },
+      {
+        "id": "medium-016",
+        "word": "estuaire"
+      },
+      {
+        "id": "medium-017",
+        "word": "lagune"
+      },
+      {
+        "id": "medium-018",
+        "word": "oasis"
+      },
+      {
+        "id": "medium-019",
+        "word": "savane"
+      },
+      {
+        "id": "medium-020",
+        "word": "banquise"
+      },
+      {
+        "id": "medium-021",
+        "word": "iceberg"
+      },
+      {
+        "id": "medium-022",
+        "word": "glacier"
+      },
+      {
+        "id": "medium-023",
+        "word": "constellation"
+      },
+      {
+        "id": "medium-024",
+        "word": "galaxie"
+      },
+      {
+        "id": "medium-025",
+        "word": "météorite"
+      },
+      {
+        "id": "medium-026",
+        "word": "comète"
+      },
+      {
+        "id": "medium-027",
+        "word": "orbite"
+      },
+      {
+        "id": "medium-028",
+        "word": "satellite"
+      },
+      {
+        "id": "medium-029",
+        "word": "astronaute"
+      },
+      {
+        "id": "medium-030",
+        "word": "télescope"
+      },
+      {
+        "id": "medium-031",
+        "word": "microscope"
+      },
+      {
+        "id": "medium-032",
+        "word": "laboratoire"
+      },
+      {
+        "id": "medium-033",
+        "word": "expérience"
+      },
+      {
+        "id": "medium-034",
+        "word": "hypothèse"
+      },
+      {
+        "id": "medium-035",
+        "word": "théorie"
+      },
+      {
+        "id": "medium-036",
+        "word": "énergie"
+      },
+      {
+        "id": "medium-037",
+        "word": "électricité"
+      },
+      {
+        "id": "medium-038",
+        "word": "aimant"
+      },
+      {
+        "id": "medium-039",
+        "word": "gravité"
+      },
+      {
+        "id": "medium-040",
+        "word": "pression"
+      },
+      {
+        "id": "medium-041",
+        "word": "température"
+      },
+      {
+        "id": "medium-042",
+        "word": "atmosphère"
+      },
+      {
+        "id": "medium-043",
+        "word": "oxygène"
+      },
+      {
+        "id": "medium-044",
+        "word": "carbone"
+      },
+      {
+        "id": "medium-045",
+        "word": "molécule"
+      },
+      {
+        "id": "medium-046",
+        "word": "cellule"
+      },
+      {
+        "id": "medium-047",
+        "word": "bactérie"
+      },
+      {
+        "id": "medium-048",
+        "word": "virus"
+      },
+      {
+        "id": "medium-049",
+        "word": "vaccin"
+      },
+      {
+        "id": "medium-050",
+        "word": "antibiotique"
+      },
+      {
+        "id": "medium-051",
+        "word": "allergie"
+      },
+      {
+        "id": "medium-052",
+        "word": "fracture"
+      },
+      {
+        "id": "medium-053",
+        "word": "diagnostic"
+      },
+      {
+        "id": "medium-054",
+        "word": "symptôme"
+      },
+      {
+        "id": "medium-055",
+        "word": "chirurgie"
+      },
+      {
+        "id": "medium-056",
+        "word": "radiographie"
+      },
+      {
+        "id": "medium-057",
+        "word": "anatomie"
+      },
+      {
+        "id": "medium-058",
+        "word": "squelette"
+      },
+      {
+        "id": "medium-059",
+        "word": "muscle"
+      },
+      {
+        "id": "medium-060",
+        "word": "tendon"
+      },
+      {
+        "id": "medium-061",
+        "word": "articulation"
+      },
+      {
+        "id": "medium-062",
+        "word": "cerveau"
+      },
+      {
+        "id": "medium-063",
+        "word": "mémoire"
+      },
+      {
+        "id": "medium-064",
+        "word": "réflexe"
+      },
+      {
+        "id": "medium-065",
+        "word": "instinct"
+      },
+      {
+        "id": "medium-066",
+        "word": "intuition"
+      },
+      {
+        "id": "medium-067",
+        "word": "émotion"
+      },
+      {
+        "id": "medium-068",
+        "word": "jalousie"
+      },
+      {
+        "id": "medium-069",
+        "word": "courage"
+      },
+      {
+        "id": "medium-070",
+        "word": "patience"
+      },
+      {
+        "id": "medium-071",
+        "word": "colère"
+      },
+      {
+        "id": "medium-072",
+        "word": "tristesse"
+      },
+      {
+        "id": "medium-073",
+        "word": "joie"
+      },
+      {
+        "id": "medium-074",
+        "word": "peur"
+      },
+      {
+        "id": "medium-075",
+        "word": "honte"
+      },
+      {
+        "id": "medium-076",
+        "word": "fierté"
+      },
+      {
+        "id": "medium-077",
+        "word": "confiance"
+      },
+      {
+        "id": "medium-078",
+        "word": "respect"
+      },
+      {
+        "id": "medium-079",
+        "word": "justice"
+      },
+      {
+        "id": "medium-080",
+        "word": "liberté"
+      },
+      {
+        "id": "medium-081",
+        "word": "solidarité"
+      },
+      {
+        "id": "medium-082",
+        "word": "tolérance"
+      },
+      {
+        "id": "medium-083",
+        "word": "tradition"
+      },
+      {
+        "id": "medium-084",
+        "word": "coutume"
+      },
+      {
+        "id": "medium-085",
+        "word": "cérémonie"
+      },
+      {
+        "id": "medium-086",
+        "word": "rituel"
+      },
+      {
+        "id": "medium-087",
+        "word": "festival"
+      },
+      {
+        "id": "medium-088",
+        "word": "carnaval"
+      },
+      {
+        "id": "medium-089",
+        "word": "défilé"
+      },
+      {
+        "id": "medium-090",
+        "word": "spectacle"
+      },
+      {
+        "id": "medium-091",
+        "word": "théâtre"
+      },
+      {
+        "id": "medium-092",
+        "word": "comédie"
+      },
+      {
+        "id": "medium-093",
+        "word": "tragédie"
+      },
+      {
+        "id": "medium-094",
+        "word": "acteur"
+      },
+      {
+        "id": "medium-095",
+        "word": "réalisateur"
+      },
+      {
+        "id": "medium-096",
+        "word": "scénario"
+      },
+      {
+        "id": "medium-097",
+        "word": "dialogue"
+      },
+      {
+        "id": "medium-098",
+        "word": "réplique"
+      },
+      {
+        "id": "medium-099",
+        "word": "costume"
+      },
+      {
+        "id": "medium-100",
+        "word": "décor"
+      },
+      {
+        "id": "medium-101",
+        "word": "coulisse"
+      },
+      {
+        "id": "medium-102",
+        "word": "orchestre"
+      },
+      {
+        "id": "medium-103",
+        "word": "symphonie"
+      },
+      {
+        "id": "medium-104",
+        "word": "mélodie"
+      },
+      {
+        "id": "medium-105",
+        "word": "rythme"
+      },
+      {
+        "id": "medium-106",
+        "word": "harmonie"
+      },
+      {
+        "id": "medium-107",
+        "word": "partition"
+      },
+      {
+        "id": "medium-108",
+        "word": "instrument"
+      },
+      {
+        "id": "medium-109",
+        "word": "clarinette"
+      },
+      {
+        "id": "medium-110",
+        "word": "violoncelle"
+      },
+      {
+        "id": "medium-111",
+        "word": "trompette"
+      },
+      {
+        "id": "medium-112",
+        "word": "accordéon"
+      },
+      {
+        "id": "medium-113",
+        "word": "harpe"
+      },
+      {
+        "id": "medium-114",
+        "word": "marionnette"
+      },
+      {
+        "id": "medium-115",
+        "word": "sculpture"
+      },
+      {
+        "id": "medium-116",
+        "word": "mosaïque"
+      },
+      {
+        "id": "medium-117",
+        "word": "fresque"
+      },
+      {
+        "id": "medium-118",
+        "word": "portrait"
+      },
+      {
+        "id": "medium-119",
+        "word": "caricature"
+      },
+      {
+        "id": "medium-120",
+        "word": "photographie"
+      },
+      {
+        "id": "medium-121",
+        "word": "exposition"
+      },
+      {
+        "id": "medium-122",
+        "word": "musée"
+      },
+      {
+        "id": "medium-123",
+        "word": "galerie"
+      },
+      {
+        "id": "medium-124",
+        "word": "patrimoine"
+      },
+      {
+        "id": "medium-125",
+        "word": "monument"
+      },
+      {
+        "id": "medium-126",
+        "word": "cathédrale"
+      },
+      {
+        "id": "medium-127",
+        "word": "château"
+      },
+      {
+        "id": "medium-128",
+        "word": "forteresse"
+      },
+      {
+        "id": "medium-129",
+        "word": "rempart"
+      },
+      {
+        "id": "medium-130",
+        "word": "donjon"
+      },
+      {
+        "id": "medium-131",
+        "word": "douves"
+      },
+      {
+        "id": "medium-132",
+        "word": "armure"
+      },
+      {
+        "id": "medium-133",
+        "word": "bouclier"
+      },
+      {
+        "id": "medium-134",
+        "word": "épée"
+      },
+      {
+        "id": "medium-135",
+        "word": "arbalète"
+      },
+      {
+        "id": "medium-136",
+        "word": "mousquetaire"
+      },
+      {
+        "id": "medium-137",
+        "word": "chevalier"
+      },
+      {
+        "id": "medium-138",
+        "word": "explorateur"
+      },
+      {
+        "id": "medium-139",
+        "word": "navigateur"
+      },
+      {
+        "id": "medium-140",
+        "word": "conquérant"
+      },
+      {
+        "id": "medium-141",
+        "word": "empereur"
+      },
+      {
+        "id": "medium-142",
+        "word": "ambassadeur"
+      },
+      {
+        "id": "medium-143",
+        "word": "diplomatie"
+      },
+      {
+        "id": "medium-144",
+        "word": "négociation"
+      },
+      {
+        "id": "medium-145",
+        "word": "alliance"
+      },
+      {
+        "id": "medium-146",
+        "word": "traité"
+      },
+      {
+        "id": "medium-147",
+        "word": "révolution"
+      },
+      {
+        "id": "medium-148",
+        "word": "rébellion"
+      },
+      {
+        "id": "medium-149",
+        "word": "manifestation"
+      },
+      {
+        "id": "medium-150",
+        "word": "élection"
+      },
+      {
+        "id": "medium-151",
+        "word": "parlement"
+      },
+      {
+        "id": "medium-152",
+        "word": "constitution"
+      },
+      {
+        "id": "medium-153",
+        "word": "république"
+      },
+      {
+        "id": "medium-154",
+        "word": "monarchie"
+      },
+      {
+        "id": "medium-155",
+        "word": "démocratie"
+      },
+      {
+        "id": "medium-156",
+        "word": "frontière"
+      },
+      {
+        "id": "medium-157",
+        "word": "territoire"
+      },
+      {
+        "id": "medium-158",
+        "word": "province"
+      },
+      {
+        "id": "medium-159",
+        "word": "capitale"
+      },
+      {
+        "id": "medium-160",
+        "word": "métropole"
+      },
+      {
+        "id": "medium-161",
+        "word": "banlieue"
+      },
+      {
+        "id": "medium-162",
+        "word": "quartier"
+      },
+      {
+        "id": "medium-163",
+        "word": "carrefour"
+      },
+      {
+        "id": "medium-164",
+        "word": "rond-point"
+      },
+      {
+        "id": "medium-165",
+        "word": "autoroute"
+      },
+      {
+        "id": "medium-166",
+        "word": "aéroport"
+      },
+      {
+        "id": "medium-167",
+        "word": "embouteillage"
+      },
+      {
+        "id": "medium-168",
+        "word": "itinéraire"
+      },
+      {
+        "id": "medium-169",
+        "word": "trajet"
+      },
+      {
+        "id": "medium-170",
+        "word": "destination"
+      },
+      {
+        "id": "medium-171",
+        "word": "escale"
+      },
+      {
+        "id": "medium-172",
+        "word": "correspondance"
+      },
+      {
+        "id": "medium-173",
+        "word": "embarquement"
+      },
+      {
+        "id": "medium-174",
+        "word": "décollage"
+      },
+      {
+        "id": "medium-175",
+        "word": "atterrissage"
+      },
+      {
+        "id": "medium-176",
+        "word": "navigation"
+      },
+      {
+        "id": "medium-177",
+        "word": "bousculade"
+      },
+      {
+        "id": "medium-178",
+        "word": "labyrinthe"
+      },
+      {
+        "id": "medium-179",
+        "word": "énigme"
+      },
+      {
+        "id": "medium-180",
+        "word": "indice"
+      },
+      {
+        "id": "medium-181",
+        "word": "mystère"
+      },
+      {
+        "id": "medium-182",
+        "word": "secret"
+      },
+      {
+        "id": "medium-183",
+        "word": "complot"
+      },
+      {
+        "id": "medium-184",
+        "word": "stratégie"
+      },
+      {
+        "id": "medium-185",
+        "word": "tactique"
+      },
+      {
+        "id": "medium-186",
+        "word": "défi"
+      },
+      {
+        "id": "medium-187",
+        "word": "victoire"
+      },
+      {
+        "id": "medium-188",
+        "word": "défaite"
+      },
+      {
+        "id": "medium-189",
+        "word": "tournoi"
+      },
+      {
+        "id": "medium-190",
+        "word": "championnat"
+      },
+      {
+        "id": "medium-191",
+        "word": "arbitre"
+      },
+      {
+        "id": "medium-192",
+        "word": "adversaire"
+      },
+      {
+        "id": "medium-193",
+        "word": "équipe"
+      },
+      {
+        "id": "medium-194",
+        "word": "performance"
+      },
+      {
+        "id": "medium-195",
+        "word": "entraînement"
+      },
+      {
+        "id": "medium-196",
+        "word": "endurance"
+      },
+      {
+        "id": "medium-197",
+        "word": "équilibre"
+      },
+      {
+        "id": "medium-198",
+        "word": "souplesse"
+      },
+      {
+        "id": "medium-199",
+        "word": "agilité"
+      },
+      {
+        "id": "medium-200",
+        "word": "rapidité"
+      }
+    ],
+    "hard": [
+      {
+        "id": "hard-001",
+        "word": "sérendipité"
+      },
+      {
+        "id": "hard-002",
+        "word": "résilience"
+      },
+      {
+        "id": "hard-003",
+        "word": "ambivalence"
+      },
+      {
+        "id": "hard-004",
+        "word": "éphémère"
+      },
+      {
+        "id": "hard-005",
+        "word": "utopie"
+      },
+      {
+        "id": "hard-006",
+        "word": "oxymore"
+      },
+      {
+        "id": "hard-007",
+        "word": "anachronisme"
+      },
+      {
+        "id": "hard-008",
+        "word": "synesthésie"
+      },
+      {
+        "id": "hard-009",
+        "word": "entropie"
+      },
+      {
+        "id": "hard-010",
+        "word": "sagacité"
+      },
+      {
+        "id": "hard-011",
+        "word": "obsolescence"
+      },
+      {
+        "id": "hard-012",
+        "word": "quintessence"
+      },
+      {
+        "id": "hard-013",
+        "word": "procrastination"
+      },
+      {
+        "id": "hard-014",
+        "word": "idiosyncrasie"
+      },
+      {
+        "id": "hard-015",
+        "word": "solipsisme"
+      },
+      {
+        "id": "hard-016",
+        "word": "palimpseste"
+      },
+      {
+        "id": "hard-017",
+        "word": "dilemme"
+      },
+      {
+        "id": "hard-018",
+        "word": "catharsis"
+      },
+      {
+        "id": "hard-019",
+        "word": "heuristique"
+      },
+      {
+        "id": "hard-020",
+        "word": "paréidolie"
+      },
+      {
+        "id": "hard-021",
+        "word": "perspicacité"
+      },
+      {
+        "id": "hard-022",
+        "word": "taciturne"
+      },
+      {
+        "id": "hard-023",
+        "word": "inéluctable"
+      },
+      {
+        "id": "hard-024",
+        "word": "antinomie"
+      },
+      {
+        "id": "hard-025",
+        "word": "aporie"
+      },
+      {
+        "id": "hard-026",
+        "word": "apophtegme"
+      },
+      {
+        "id": "hard-027",
+        "word": "aphorisme"
+      },
+      {
+        "id": "hard-028",
+        "word": "antiphrase"
+      },
+      {
+        "id": "hard-029",
+        "word": "antithèse"
+      },
+      {
+        "id": "hard-030",
+        "word": "anacoluthe"
+      },
+      {
+        "id": "hard-031",
+        "word": "asyndète"
+      },
+      {
+        "id": "hard-032",
+        "word": "polysyndète"
+      },
+      {
+        "id": "hard-033",
+        "word": "litote"
+      },
+      {
+        "id": "hard-034",
+        "word": "euphémisme"
+      },
+      {
+        "id": "hard-035",
+        "word": "hyperbole"
+      },
+      {
+        "id": "hard-036",
+        "word": "métonymie"
+      },
+      {
+        "id": "hard-037",
+        "word": "synecdoque"
+      },
+      {
+        "id": "hard-038",
+        "word": "zeugma"
+      },
+      {
+        "id": "hard-039",
+        "word": "chiasme"
+      },
+      {
+        "id": "hard-040",
+        "word": "anaphore"
+      },
+      {
+        "id": "hard-041",
+        "word": "épiphore"
+      },
+      {
+        "id": "hard-042",
+        "word": "paronomase"
+      },
+      {
+        "id": "hard-043",
+        "word": "prosopopée"
+      },
+      {
+        "id": "hard-044",
+        "word": "allégorie"
+      },
+      {
+        "id": "hard-045",
+        "word": "périphrase"
+      },
+      {
+        "id": "hard-046",
+        "word": "ellipse"
+      },
+      {
+        "id": "hard-047",
+        "word": "pléonasme"
+      },
+      {
+        "id": "hard-048",
+        "word": "paradoxe"
+      },
+      {
+        "id": "hard-049",
+        "word": "sophisme"
+      },
+      {
+        "id": "hard-050",
+        "word": "dialectique"
+      },
+      {
+        "id": "hard-051",
+        "word": "maïeutique"
+      },
+      {
+        "id": "hard-052",
+        "word": "épistémologie"
+      },
+      {
+        "id": "hard-053",
+        "word": "ontologie"
+      },
+      {
+        "id": "hard-054",
+        "word": "phénoménologie"
+      },
+      {
+        "id": "hard-055",
+        "word": "herméneutique"
+      },
+      {
+        "id": "hard-056",
+        "word": "sémiotique"
+      },
+      {
+        "id": "hard-057",
+        "word": "axiologie"
+      },
+      {
+        "id": "hard-058",
+        "word": "téléologie"
+      },
+      {
+        "id": "hard-059",
+        "word": "déontologie"
+      },
+      {
+        "id": "hard-060",
+        "word": "empirisme"
+      },
+      {
+        "id": "hard-061",
+        "word": "rationalisme"
+      },
+      {
+        "id": "hard-062",
+        "word": "déterminisme"
+      },
+      {
+        "id": "hard-063",
+        "word": "existentialisme"
+      },
+      {
+        "id": "hard-064",
+        "word": "nihilisme"
+      },
+      {
+        "id": "hard-065",
+        "word": "relativisme"
+      },
+      {
+        "id": "hard-066",
+        "word": "pragmatisme"
+      },
+      {
+        "id": "hard-067",
+        "word": "stoïcisme"
+      },
+      {
+        "id": "hard-068",
+        "word": "épicurisme"
+      },
+      {
+        "id": "hard-069",
+        "word": "scepticisme"
+      },
+      {
+        "id": "hard-070",
+        "word": "agnosticisme"
+      },
+      {
+        "id": "hard-071",
+        "word": "panthéisme"
+      },
+      {
+        "id": "hard-072",
+        "word": "animisme"
+      },
+      {
+        "id": "hard-073",
+        "word": "anthropocentrisme"
+      },
+      {
+        "id": "hard-074",
+        "word": "ethnocentrisme"
+      },
+      {
+        "id": "hard-075",
+        "word": "anthropomorphisme"
+      },
+      {
+        "id": "hard-076",
+        "word": "dichotomie"
+      },
+      {
+        "id": "hard-077",
+        "word": "dualisme"
+      },
+      {
+        "id": "hard-078",
+        "word": "monisme"
+      },
+      {
+        "id": "hard-079",
+        "word": "holisme"
+      },
+      {
+        "id": "hard-080",
+        "word": "réductionnisme"
+      },
+      {
+        "id": "hard-081",
+        "word": "paradigme"
+      },
+      {
+        "id": "hard-082",
+        "word": "postulat"
+      },
+      {
+        "id": "hard-083",
+        "word": "axiome"
+      },
+      {
+        "id": "hard-084",
+        "word": "corollaire"
+      },
+      {
+        "id": "hard-085",
+        "word": "syllogisme"
+      },
+      {
+        "id": "hard-086",
+        "word": "isomorphisme"
+      },
+      {
+        "id": "hard-087",
+        "word": "homomorphisme"
+      },
+      {
+        "id": "hard-088",
+        "word": "homéostasie"
+      },
+      {
+        "id": "hard-089",
+        "word": "homonymie"
+      },
+      {
+        "id": "hard-090",
+        "word": "polysémie"
+      },
+      {
+        "id": "hard-091",
+        "word": "antonymie"
+      },
+      {
+        "id": "hard-092",
+        "word": "synonymie"
+      },
+      {
+        "id": "hard-093",
+        "word": "étymologie"
+      },
+      {
+        "id": "hard-094",
+        "word": "néologisme"
+      },
+      {
+        "id": "hard-095",
+        "word": "archaïsme"
+      },
+      {
+        "id": "hard-096",
+        "word": "barbarisme"
+      },
+      {
+        "id": "hard-097",
+        "word": "solécisme"
+      },
+      {
+        "id": "hard-098",
+        "word": "hapax"
+      },
+      {
+        "id": "hard-099",
+        "word": "anagramme"
+      },
+      {
+        "id": "hard-100",
+        "word": "palindrome"
+      },
+      {
+        "id": "hard-101",
+        "word": "acrostiche"
+      },
+      {
+        "id": "hard-102",
+        "word": "contrepèterie"
+      },
+      {
+        "id": "hard-103",
+        "word": "calembour"
+      },
+      {
+        "id": "hard-104",
+        "word": "paronomasie"
+      },
+      {
+        "id": "hard-105",
+        "word": "dyslexie"
+      },
+      {
+        "id": "hard-106",
+        "word": "aphasie"
+      },
+      {
+        "id": "hard-107",
+        "word": "agnosie"
+      },
+      {
+        "id": "hard-108",
+        "word": "apraxie"
+      },
+      {
+        "id": "hard-109",
+        "word": "amygdale"
+      },
+      {
+        "id": "hard-110",
+        "word": "hippocampe"
+      },
+      {
+        "id": "hard-111",
+        "word": "synapse"
+      },
+      {
+        "id": "hard-112",
+        "word": "neuroplasticité"
+      },
+      {
+        "id": "hard-113",
+        "word": "myéline"
+      },
+      {
+        "id": "hard-114",
+        "word": "dopamine"
+      },
+      {
+        "id": "hard-115",
+        "word": "sérotonine"
+      },
+      {
+        "id": "hard-116",
+        "word": "ocytocine"
+      },
+      {
+        "id": "hard-117",
+        "word": "adrénaline"
+      },
+      {
+        "id": "hard-118",
+        "word": "cortisol"
+      },
+      {
+        "id": "hard-119",
+        "word": "mélatonine"
+      },
+      {
+        "id": "hard-120",
+        "word": "méiose"
+      },
+      {
+        "id": "hard-121",
+        "word": "mitose"
+      },
+      {
+        "id": "hard-122",
+        "word": "osmose"
+      },
+      {
+        "id": "hard-123",
+        "word": "diffusion"
+      },
+      {
+        "id": "hard-124",
+        "word": "transcription"
+      },
+      {
+        "id": "hard-125",
+        "word": "épigénétique"
+      },
+      {
+        "id": "hard-126",
+        "word": "hérédité"
+      },
+      {
+        "id": "hard-127",
+        "word": "mutation"
+      },
+      {
+        "id": "hard-128",
+        "word": "symbiose"
+      },
+      {
+        "id": "hard-129",
+        "word": "parasitisme"
+      },
+      {
+        "id": "hard-130",
+        "word": "commensalisme"
+      },
+      {
+        "id": "hard-131",
+        "word": "mimétisme"
+      },
+      {
+        "id": "hard-132",
+        "word": "biomimétisme"
+      },
+      {
+        "id": "hard-133",
+        "word": "photosynthèse"
+      },
+      {
+        "id": "hard-134",
+        "word": "chimiosynthèse"
+      },
+      {
+        "id": "hard-135",
+        "word": "métabolisme"
+      },
+      {
+        "id": "hard-136",
+        "word": "catabolisme"
+      },
+      {
+        "id": "hard-137",
+        "word": "anabolisme"
+      },
+      {
+        "id": "hard-138",
+        "word": "homéothermie"
+      },
+      {
+        "id": "hard-139",
+        "word": "ectothermie"
+      },
+      {
+        "id": "hard-140",
+        "word": "thermodynamique"
+      },
+      {
+        "id": "hard-141",
+        "word": "électromagnétisme"
+      },
+      {
+        "id": "hard-142",
+        "word": "supraconductivité"
+      },
+      {
+        "id": "hard-143",
+        "word": "intrication"
+      },
+      {
+        "id": "hard-144",
+        "word": "superposition"
+      },
+      {
+        "id": "hard-145",
+        "word": "quantification"
+      },
+      {
+        "id": "hard-146",
+        "word": "diffraction"
+      },
+      {
+        "id": "hard-147",
+        "word": "réfraction"
+      },
+      {
+        "id": "hard-148",
+        "word": "interférence"
+      },
+      {
+        "id": "hard-149",
+        "word": "polarisation"
+      },
+      {
+        "id": "hard-150",
+        "word": "isotropie"
+      },
+      {
+        "id": "hard-151",
+        "word": "anisotropie"
+      },
+      {
+        "id": "hard-152",
+        "word": "viscosité"
+      },
+      {
+        "id": "hard-153",
+        "word": "turbulence"
+      },
+      {
+        "id": "hard-154",
+        "word": "cavitation"
+      },
+      {
+        "id": "hard-155",
+        "word": "condensation"
+      },
+      {
+        "id": "hard-156",
+        "word": "cristallisation"
+      },
+      {
+        "id": "hard-157",
+        "word": "sédimentation"
+      },
+      {
+        "id": "hard-158",
+        "word": "stratification"
+      },
+      {
+        "id": "hard-159",
+        "word": "fossilisation"
+      },
+      {
+        "id": "hard-160",
+        "word": "pétrification"
+      },
+      {
+        "id": "hard-161",
+        "word": "érosion"
+      },
+      {
+        "id": "hard-162",
+        "word": "tectonique"
+      },
+      {
+        "id": "hard-163",
+        "word": "subduction"
+      },
+      {
+        "id": "hard-164",
+        "word": "orogenèse"
+      },
+      {
+        "id": "hard-165",
+        "word": "sismologie"
+      },
+      {
+        "id": "hard-166",
+        "word": "vulcanologie"
+      },
+      {
+        "id": "hard-167",
+        "word": "paléontologie"
+      },
+      {
+        "id": "hard-168",
+        "word": "archéologie"
+      },
+      {
+        "id": "hard-169",
+        "word": "dendrochronologie"
+      },
+      {
+        "id": "hard-170",
+        "word": "chronobiologie"
+      },
+      {
+        "id": "hard-171",
+        "word": "cryptographie"
+      },
+      {
+        "id": "hard-172",
+        "word": "stéganographie"
+      },
+      {
+        "id": "hard-173",
+        "word": "cryptanalyse"
+      },
+      {
+        "id": "hard-174",
+        "word": "algorithmique"
+      },
+      {
+        "id": "hard-175",
+        "word": "récursivité"
+      },
+      {
+        "id": "hard-176",
+        "word": "indécidabilité"
+      },
+      {
+        "id": "hard-177",
+        "word": "incomplétude"
+      },
+      {
+        "id": "hard-178",
+        "word": "combinatoire"
+      },
+      {
+        "id": "hard-179",
+        "word": "probabilisme"
+      },
+      {
+        "id": "hard-180",
+        "word": "stochastique"
+      },
+      {
+        "id": "hard-181",
+        "word": "bayésien"
+      },
+      {
+        "id": "hard-182",
+        "word": "extrapolation"
+      },
+      {
+        "id": "hard-183",
+        "word": "interpolation"
+      },
+      {
+        "id": "hard-184",
+        "word": "endogénéité"
+      },
+      {
+        "id": "hard-185",
+        "word": "exogénéité"
+      },
+      {
+        "id": "hard-186",
+        "word": "rétroaction"
+      },
+      {
+        "id": "hard-187",
+        "word": "cybernétique"
+      },
+      {
+        "id": "hard-188",
+        "word": "autopoïèse"
+      },
+      {
+        "id": "hard-189",
+        "word": "émergence"
+      },
+      {
+        "id": "hard-190",
+        "word": "auto-organisation"
+      },
+      {
+        "id": "hard-191",
+        "word": "résurgence"
+      },
+      {
+        "id": "hard-192",
+        "word": "réminiscence"
+      },
+      {
+        "id": "hard-193",
+        "word": "atavisme"
+      },
+      {
+        "id": "hard-194",
+        "word": "atavique"
+      },
+      {
+        "id": "hard-195",
+        "word": "anamnèse"
+      },
+      {
+        "id": "hard-196",
+        "word": "amnésie"
+      },
+      {
+        "id": "hard-197",
+        "word": "apathie"
+      },
+      {
+        "id": "hard-198",
+        "word": "aboulie"
+      },
+      {
+        "id": "hard-199",
+        "word": "anhédonie"
+      },
+      {
+        "id": "hard-200",
+        "word": "alexithymie"
+      }
+    ]
+  }
+}
