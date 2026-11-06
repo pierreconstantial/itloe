@@ -102,21 +102,21 @@ function renderJoin(join) {
  * @param {unknown} _prev
  * @param {JoinInfo} join
  * @param {{ title: string, settings: string }} band the minigame's title and the tableau's settings, summarized
- * @param {{ hostId: string | null, required?: number, status?: string }} options hostId: the party's host;
+ * @param {{ gameMasterId: string | null, required?: number, status?: string }} options gameMasterId: who starts games;
  *   required: the guests a round needs; status: replaces the guest count when no round starts here
  */
 export function renderLobby(s, _prev, join, band, options) {
   const n = s.order.length;
   const max = options.required ?? MAX_PLAYERS;
-  const host = options.hostId ? s.players[options.hostId] : undefined;
+  const gm = options.gameMasterId ? s.players[options.gameMasterId] : undefined;
   const status = options.status ?? (n === 0
     ? 'Waiting for the first guest…'
-    : `${n}/${max} guest${n === 1 ? '' : 's'}${host ? ` · ${host.name} starts the game from their phone` : ''}`);
+    : `${n}/${max} guest${n === 1 ? '' : 's'}${gm ? ` · ${gm.name} starts the game from their phone` : ''}`);
   const side = h('div', 'lobby-side', [
     h('h1', 'title', [band.title]),
     h('p', 'settings-line', [band.settings]),
     h('p', 'lobby-count', [status]),
   ]);
-  if (host && !options.status) side.querySelector('.lobby-count')?.prepend(colorDot(host.color), ' ');
+  if (gm && !options.status) side.querySelector('.lobby-count')?.prepend(colorDot(gm.color), ' ');
   return h('section', 'lobby', [renderJoin(join), side]);
 }

@@ -40,6 +40,7 @@ export const STORY_CONTENT = {
   storyId: 'elo-50',
   start: 'hub.false-start',
   chooser: 'elodie',
+  gameMaster: 'pierre',
   items: Object.fromEntries([
     [INTRO_KEY, { id: INTRO_KEY, name: 'First key of memory', icon: '🗝️', description: 'Left behind by the mysterious visitor.' }],
     ...MEMORY_WORLDS.map((world, i) => {

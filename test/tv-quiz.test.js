@@ -5,8 +5,8 @@ import { startQuiz, reduceQuiz as reduceRound } from '../shared/quiz/index.js';
 import { projectQuiz } from '../shared/quiz/bank.js';
 import { anecdoteOf, pickedBy, questionHeader, revealRows, seatedIds } from '../public/screen/quiz-view.js';
 
-/** The quiz reducer, with the host the campaign passes: 'a'. */
-const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { hostId: 'a' });
+/** The quiz reducer, with the game master the campaign passes: 'a'. */
+const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { gameMasterId: 'a' });
 
 const T0 = 1_700_000_000_000;
 /** @type {Record<string, any>} */

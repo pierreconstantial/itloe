@@ -34,7 +34,7 @@ import { PARTY_ROOM, spawnAt } from '../shared/scene.js';
 import { interactionActor, nearbyObject, objectAction } from '../shared/interactions.js';
 import { freshGame, loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import {
-  CONTENT, CONTENT_VERSION, assertContent, reduceCampaign, isUnlocked, roundStatus, zoneAt, roomAt,
+  CONTENT, CONTENT_VERSION, assertContent, reduceCampaign, isUnlocked, roundStatus, gameMasterId, zoneAt, roomAt,
   type Campaign, type CampaignAction, type GmOp,
 } from './campaign.ts';
 
@@ -57,6 +57,8 @@ const game: Game = { campaign: loaded.campaign, room: loaded.room, bestPrevious:
 const servers = makeMinigameServers(game);
 const serverOf = (kind: MinigameKind): MinigameServer<any, any, any> => servers[kind];
 const party = () => game.campaign.party;
+/** The game master's id (Pierre, by the content), or null while he isn't in the evening. */
+const gameMaster = () => gameMasterId(party(), CONTENT);
 
 // beat() first: after a suspend, the overdue bell may run before the heartbeat; the beat shifts the
 // deadline, so this deadline action no longer matches it and the reducer ignores it (the new one is armed).
@@ -112,7 +114,7 @@ const zones = new Map<string, string | null>();
 const OPENING_PODIUM_MS = 8000;
 let openingReturnTimer: ReturnType<typeof setTimeout> | null = null;
 
-/** The opening's ranking gets a short reveal, then the existing host action returns to the room. */
+/** The opening's ranking gets a short reveal, then the game master's newGame returns to the room. */
 function scheduleOpeningReturn(): void {
   const c = game.campaign;
   const shouldReturn = STORY_MODE && c.at.node === CONTENT.start && c.facts.flags.includes('portal.ready')
@@ -125,8 +127,8 @@ function scheduleOpeningReturn(): void {
   if (openingReturnTimer) return;
   openingReturnTimer = setTimeout(() => {
     openingReturnTimer = null;
-    const hostId = party().hostId;
-    if (hostId) apply({ t: 'newGame', id: hostId });
+    const gm = gameMaster();
+    if (gm) apply({ t: 'newGame', id: gm });
   }, OPENING_PODIUM_MS);
 }
 
@@ -284,7 +286,7 @@ const roundView = () => {
   return kind && activity ? { kind, status: roundStatus(game.campaign), view: serverOf(kind).view(activity) } : null;
 };
 
-/** `round`: the running round; `campaign`: the whole evening (TV hub/cutscenes, phone host panel), without
+/** `round`: the running round; `campaign`: the whole evening (TV hub/cutscenes, phone game-master panel), without
  *  the round's raw state, which travels only through its minigame's view (raw quiz verdicts would leak). */
 const viewMsg = () => {
   const { activity: _raw, ...at } = game.campaign.at;
@@ -384,7 +386,7 @@ function joinRefusal(): ErrCode {
 const isPlainObject = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
 
 /** Edge-triggered doors: entering one fires `zone.entered` (any member) and, for the chooser on an
- *  unlocked door, `enter` (A1: Élodie walks into a door; the host can always enter directly). */
+ *  unlocked door, `enter` (A1: Élodie walks into a door; the game master can also enter directly). */
 function walk(id: string, pos: Pos): void {
   const c = game.campaign;
   const character = c.party.players[id]?.character;
@@ -572,7 +574,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     if (!roomOk.has(ws)) { sendErr(ws, 'bad-room'); return; }
     const character = m.character;
     // reclaim ("tap your character"): a character held by an OFFLINE member is taken back by this
-    // socket, in any state — same playerId, so board, score, hand, facts and host role come along
+    // socket, in any state — same playerId, so board, score, hand and facts come along
     const holder = isCharacterId(character) ? holderOf(character) : undefined;
     if (holder && !isOnline(holder)) {
       attach(ws, holder);
@@ -599,9 +601,9 @@ function handleMessage(ws: WebSocket, m: any): void {
     case 'leave':
       // leaving the EVENING (forwarded to a live game: a lobby drops them, a game marks them done);
       // the stored id must not rejoin, so the socket goes back to being a stranger
-      // The last person is also the last host. Finish an abandoned opening round, then close its
-      // podium before they leave; the portal room remains joinable even with nobody still present.
-      if (STORY_MODE && game.campaign.at.node === CONTENT.start && party().hostId === id
+      // The game master leaving last finishes an abandoned opening round, then closes its podium before
+      // leaving; the portal room remains joinable even with nobody still present.
+      if (STORY_MODE && game.campaign.at.node === CONTENT.start && gameMaster() === id
         && party().order.filter((memberId) => !party().players[memberId].left).length === 1) {
         if (roundStatus(game.campaign) === 'running') apply({ t: 'activity', action: { t: 'endGame', id } });
         if (roundStatus(game.campaign) === 'finished' && game.campaign.facts.flags.includes('portal.ready')) {
@@ -612,37 +614,37 @@ function handleMessage(ws: WebSocket, m: any): void {
       return;
 
     case 'enter':
-      // host, or the chooser, into an unlocked child of where the party is; refused → 'refused'
+      // the game master, or the chooser, into an unlocked child of where the party is; refused → 'refused'
       if (typeof m.node !== 'string' || !apply({ t: 'enter', id, node: m.node })) sendErr(ws, 'refused');
       return;
 
     case 'back':
-      // host only, up one level; refused while a game is being played (endGame first) → 'refused'
-      if (!apply({ t: 'back', id })) sendErr(ws, id === party().hostId || (STORY_MODE && party().players[id]?.character === CONTENT.chooser) ? 'refused' : 'not-host');
+      // the game master (the chooser after the portal), up one level; refused while a game is being played
+      // (endGame first) → 'refused'
+      if (!apply({ t: 'back', id })) sendErr(ws, id === gameMaster() || (STORY_MODE && party().players[id]?.character === CONTENT.chooser) ? 'refused' : 'not-gm');
       return;
 
     case 'gm': {
-      // Pierre steers the birthday story, even as a Wisp; sample content keeps the host as GM.
-      // The engine validates the op. A GM's no-op is silent, EXCEPT a refused
-      // give/take (Contract F: unknown item or character, or taking more than held) → 'refused'
+      // the game master (Pierre, even as a Wisp) steers the evening. The engine validates the op. A GM's
+      // no-op is silent, EXCEPT a refused give/take (Contract F: unknown item or character, or taking more
+      // than held) → 'refused'
       if (!isPlainObject(m.op)) return;
       if (apply({ t: 'gm', id, op: m.op as GmOp })) return;
-      const gm = STORY_MODE ? party().players[id]?.character === 'pierre' && !party().players[id]?.left : id === party().hostId;
-      if (!gm) sendErr(ws, STORY_MODE ? 'not-gm' : 'not-host');
+      if (id !== gameMaster()) sendErr(ws, 'not-gm');
       else if (m.op.op === 'give' || m.op.op === 'take') sendErr(ws, 'refused');
       return;
     }
 
     case 'config':
-      // the tableau's settings: host only, not while a round runs; a host's no-op patch is silent
+      // the tableau's settings: game master only, not while a round runs; their no-op patch is silent
       if (game.campaign.at.kind === null) { sendErr(ws, 'not-playing'); return; }
       if (!isPlainObject(m.patch) || apply({ t: 'config', id, patch: m.patch })) return;
-      if (id !== party().hostId) sendErr(ws, 'not-host');
+      if (id !== gameMaster()) sendErr(ws, 'not-gm');
       else if (roundStatus(game.campaign) === 'running') sendErr(ws, 'locked');
       return;
 
     // the round messages: the RPG's, at a minigame's tableau (elsewhere → not-playing). A guest gets
-    // not-host, the host at the wrong moment refused, in every minigame
+    // not-gm, the game master at the wrong moment refused, in every minigame
     case 'start':
     case 'again':
     case 'newGame':
@@ -652,15 +654,15 @@ function handleMessage(ws: WebSocket, m: any): void {
       if (kind === null) { sendErr(ws, 'not-playing'); return; }
       if (m.t === 'retire' && typeof m.target !== 'string') return;
       if ((m.t === 'start' || m.t === 'again') && storyRefusesRound(m.t)) { sendErr(ws, 'refused'); return; }
-      const host = id === party().hostId;
+      const gm = id === gameMaster();
       const action: CampaignAction = m.t === 'start' || m.t === 'again'
         ? { t: m.t, id, now: Date.now(), inputs: serverOf(kind).inputs?.(game.campaign.at.settings, game.campaign.facts) }
         : m.t === 'newGame' ? { t: 'newGame', id }
           : { t: 'activity', action: m.t === 'endGame' ? { t: 'endGame', id } : { t: 'retire', id, target: m.target } };
       if (apply(action)) return;
-      // the host taking out an unknown, done or left player while the round runs: a no-op, not an error
-      if (m.t === 'retire' && host && roundStatus(game.campaign) === 'running') return;
-      sendErr(ws, host ? 'refused' : 'not-host');
+      // the game master taking out an unknown, done or left player while the round runs: a no-op, not an error
+      if (m.t === 'retire' && gm && roundStatus(game.campaign) === 'running') return;
+      sendErr(ws, gm ? 'refused' : 'not-gm');
       return;
     }
   }
@@ -685,7 +687,7 @@ function roundMessage(ws: WebSocket, id: string, m: any): void {
   if (kind === null || !state || !round) { sendErr(ws, 'not-playing'); return; }
   // the round's own io: a later action (the quiz's verdict) lands only while this round runs
   const { io } = round;
-  const reply = serverOf(kind).message(m, { id, now: Date.now(), hostId: party().hostId, state }, io);
+  const reply = serverOf(kind).message(m, { id, now: Date.now(), gameMasterId: gameMaster(), state }, io);
   if (!reply) return;
   if (!('action' in reply)) sendErr(ws, reply.refused);
   else if (!io.apply(reply.action) && reply.refused) sendErr(ws, reply.refused);
@@ -778,6 +780,7 @@ function adminSnapshot() {
     }),
     screens: [...screens].map(socket),
     strangers: [...wss.clients].filter((ws) => !who.has(ws) && !screens.has(ws)).map(socket),
+    gameMaster: gameMaster(),
     round: c.at.kind && c.at.activity ? {
       kind: c.at.kind, status: roundStatus(c), describe: rules?.describe(c.at.activity) ?? '', deadline: roundDeadline(c.at),
     } : null,

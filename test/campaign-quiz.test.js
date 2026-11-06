@@ -19,53 +19,54 @@ const run = (c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a, C),
 const quiz = (c) => /** @type {any} */ (c.at.activity);
 const act = (/** @type {any} */ action) => /** @type {CampaignAction} */ ({ t: 'activity', action });
 
-/** Élodie (host) + Sol, standing in the room at the World 1 quiz. */
+/** Pierre (the game master), Élodie and Sol, standing in the room at the World 1 quiz. */
 function inQuiz() {
   let c = newCampaign(C, 5);
-  c = run(c, { t: 'join', id: 'e', character: 'elodie' }, { t: 'join', id: 's', character: 'sol' });
-  c = run(c, { t: 'gm', id: 'e', op: { op: 'unlock', node: 'childhood' } });
+  c = run(c, { t: 'join', id: 'p', character: 'pierre' }, { t: 'join', id: 'e', character: 'elodie' }, { t: 'join', id: 's', character: 'sol' });
+  c = run(c, { t: 'gm', id: 'p', op: { op: 'unlock', node: 'childhood' } });
   assert.ok(!c.facts.unlocked.includes(QUIZ), 'the quiz waits for the world\'s block game');
-  c = run(c, { t: 'gm', id: 'e', op: { op: 'unlock', node: QUIZ } }, { t: 'gm', id: 'e', op: { op: 'goto', node: QUIZ } });
+  c = run(c, { t: 'gm', id: 'p', op: { op: 'unlock', node: QUIZ } }, { t: 'gm', id: 'p', op: { op: 'goto', node: QUIZ } });
   assert.ok(c.facts.unlocked.includes(QUIZ));
   return c;
 }
 
-/** Plays the whole quiz: Élodie right every time, Sol wrong. */
+/** Plays the whole quiz: Élodie right every time, Pierre and Sol wrong. */
 function playThrough(/** @type {Campaign} */ c, now = 1000) {
-  c = run(c, { t: 'start', id: 'e', now, inputs: CANDIDATES });
+  c = run(c, { t: 'start', id: 'p', now, inputs: CANDIDATES });
   while (quiz(c).phase === 'question') {
     const r = /** @type {any} */ (quiz(c).round);
     const given = r.asChoice ? { choice: 0 } : { text: 'x' };
     c = run(c, act({ t: 'answer', id: 'e', ...given, now: now + 500, verdict: 'right' }),
-      act({ t: 'answer', id: 's', ...given, now: now + 900, verdict: 'wrong' }));
+      act({ t: 'answer', id: 'p', ...given, now: now + 700, verdict: 'wrong' }), act({ t: 'answer', id: 's', ...given, now: now + 900, verdict: 'wrong' }));
     now += 30_000;
-    c = run(c, act({ t: 'next', id: 'e', now }));
+    c = run(c, act({ t: 'next', id: 'p', now }));
   }
   return c;
 }
 
 test('quiz under way: enter/back refused; a newcomer waits for the next round', () => {
-  let c = run(inQuiz(), { t: 'start', id: 'e', now: 1, inputs: CANDIDATES });
+  let c = run(inQuiz(), { t: 'start', id: 'p', now: 1, inputs: CANDIDATES });
   assert.equal(roundStatus(c), 'running');
-  assert.equal(run(c, { t: 'back', id: 'e' }), c, 'back refused while the quiz runs');
+  assert.equal(run(c, { t: 'back', id: 'p' }), c, 'back refused while the quiz runs');
   c = run(c, { t: 'join', id: 'a', character: 'anna' });
   assert.ok(c.party.players.a && !quiz(c).players.a, 'joined the evening, not seated mid-quiz');
 });
 
-test('taking a player out of a quiz counts as their leaving: host only, while it runs', () => {
-  let c = run(inQuiz(), { t: 'start', id: 'e', now: 1, inputs: CANDIDATES });
+test('taking a player out of a quiz counts as their leaving: the game master only, while it runs', () => {
+  let c = run(inQuiz(), { t: 'start', id: 'p', now: 1, inputs: CANDIDATES });
   assert.equal(run(c, act({ t: 'retire', id: 's', target: 'e' })), c, 'a guest can\'t');
-  c = run(c, act({ t: 'retire', id: 'e', target: 's' }));
+  c = run(c, act({ t: 'retire', id: 'p', target: 's' }));
   assert.equal(quiz(c).players.s.left, true, 'Sol is out of the quiz');
   assert.equal(quiz(c).players.s.score, 0, '…and keeps a score for the podium');
   assert.equal(c.party.players.s.left, false, '…but still in the evening');
-  assert.equal(run(c, act({ t: 'retire', id: 'e', target: 's' })), c, 'twice: nothing more');
+  assert.equal(run(c, act({ t: 'retire', id: 'p', target: 's' })), c, 'twice: nothing more');
   const r = /** @type {any} */ (quiz(c).round);
-  c = run(c, act({ t: 'answer', id: 'e', ...(r.asChoice ? { choice: 0 } : { text: 'x' }), now: 2, verdict: 'right' }));
+  const given = r.asChoice ? { choice: 0 } : { text: 'x' };
+  c = run(c, act({ t: 'answer', id: 'e', ...given, now: 2, verdict: 'right' }), act({ t: 'answer', id: 'p', ...given, now: 2, verdict: 'wrong' }));
   assert.equal(quiz(c).phase, 'reveal', 'the round no longer waits for Sol');
-  c = run(c, act({ t: 'endGame', id: 'e' }));
+  c = run(c, act({ t: 'endGame', id: 'p' }));
   assert.equal(roundStatus(c), 'finished');
-  assert.equal(run(c, act({ t: 'retire', id: 'e', target: 'e' })), c, 'on the podium: refused');
+  assert.equal(run(c, act({ t: 'retire', id: 'p', target: 'e' })), c, 'on the podium: refused');
 });
 
 test('asked survives loadCampaign', () => {

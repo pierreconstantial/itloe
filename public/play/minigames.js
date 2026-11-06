@@ -17,7 +17,7 @@ import { QUIZ_SCREEN } from './quiz-ui.js';
  * @typedef {{
  *   send: (msg: unknown) => void,   // a plain message to the server (PROTOCOL.md)
  *   meId: () => string,             // this phone's player
- *   isHost: () => boolean,          // is this phone the party's host?
+ *   isGameMaster: () => boolean,    // is this phone the game master's?
  *   online: () => readonly string[],  // players with a live socket
  *   connected: () => boolean,       // is this phone's socket up? (the frame calls update when it changes)
  *   joystick: (on: { area: import('../../shared/scene.js').Scene, start: { x: number, y: number, dir?: import('../../shared/world.js').Dir } } | null) => void,

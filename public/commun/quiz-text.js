@@ -1,4 +1,4 @@
-// Quiz settings wording for every client: the host's sheet (labels, values) and the one-line summary
+// Quiz settings wording for every client: the game master's sheet (labels, values) and the one-line summary
 // on the TV lobby and the phone ("10 questions · 20 s each · mixed answers"). Driven by
 // QUIZ_SETTINGS_SCHEMA: a new key gets a label and its raw value with no change here.
 import { QUIZ_SETTINGS_SCHEMA } from '../../shared/quiz/index.js';

@@ -11,6 +11,7 @@ import { createSettingsSheet } from './settings-ui.js';
 import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.js';
 import { WORLD, spawnPoint } from '../../shared/world.js';
 import { roomAt } from '../../shared/campaign/content.js';
+import { gameMasterId } from '../../shared/campaign/index.js';
 import { room as sceneRoom } from '../../shared/scene.js';
 import { interactionActor, nearbyObject, nearbyProp, objectAction } from '../../shared/interactions.js';
 import { INTRO_KEY, INTRO_KEY_SPOT, openingPlayersPresent } from '../../shared/campaign/story.js';
@@ -20,7 +21,7 @@ import { avatarCanvas, paintAvatar } from './avatar.js';
 import { posFromEcho, roundPos } from './movement.js';
 import { createConnection } from './connection.js';
 import { installBackGuard } from './back-guard.js';
-import { createHostControls } from './host-controls.js';
+import { createRoundControls } from './round-controls.js';
 import { createGmPanel } from './gm-panel.js';
 import { screenOf } from './minigames.js';
 import { createBag } from './bag.js';
@@ -41,21 +42,20 @@ const MEDALS = ['🥇', '🥈', '🥉', ''];
 const LOBBY_ME_SCALE = 4; // own avatar in the lobby header: 64 px
 const LOBBY_CHIP_SCALE = 2; // other players' avatars: 32 px
 
-/** @type {Record<string, string>} */
-const ERR_TOASTS = {
+/** @returns {Record<string, string>} */
+const errToasts = () => ({
   locked: 'Settings are locked while a game is on.',
-  'not-host': 'Only the host can do that.',
-  'not-gm': 'Only Pierre can do that.',
-};
+  'not-gm': `Only ${gameMasterName()} can do that.`,
+});
 
-/** What the podium's choice became, told to everyone (the host picks, guests follow); `room`: no round. @type {Record<string, string>} */
+/** What the podium's choice became, told to everyone (the game master picks, guests follow); `room`: no round. @type {Record<string, string>} */
 const PHASE_TOASTS = {
   'finished>room': 'Back to the room!',
   'finished>running': 'Rematch! Go go go!',
 };
 
 /** The podium's kicker, by how the round ended. @type {Record<string, string>} */
-const ENDINGS = { time: "⏰ Time's up!", host: 'The host ended the game.' };
+const ENDINGS = { time: "⏰ Time's up!", gm: 'The game master ended the game.' };
 
 // ---------- pure helpers ----------
 
@@ -209,7 +209,7 @@ function receive(raw) {
     const turn = prev && playerId && prev.view.players[playerId]
       && (next ? next.view.players[playerId] : campaign?.at.node === prevNode)
       ? PHASE_TOASTS[`${prev.status}>${next ? next.status : 'room'}`] : undefined;
-    // the party moved (a door, the host): say where we are now
+    // the party moved (a door, the game master): say where we are now
     const moved = prevNode !== null && campaign !== null && campaign.at.node !== prevNode && member() ? `→ ${titleOf(campaign.at.node)}` : undefined;
     if (turn || moved) { menu.close(); toast(/** @type {string} */ (moved ?? turn)); }
     render();
@@ -221,7 +221,7 @@ function receive(raw) {
     else if (m.code === 'full') showPickError(`Sorry, the game is full (${ROSTER_SIZE} players max).`);
     else if (m.code === 'taken') toast(`${refusedPick ? CHARACTERS[refusedPick].name : 'That character'} was just picked. Choose someone else!`);
     else if (m.code === 'bad-room') onBadRoom();
-    else if (ERR_TOASTS[m.code]) toast(ERR_TOASTS[m.code]);
+    else if (errToasts()[m.code]) toast(errToasts()[m.code]);
     running?.screen.message(m);
     render();
   }
@@ -263,10 +263,12 @@ const tableauSettings = () => campaign?.at.settings ?? null;
 /** The screens of the tableau's minigame (null on the hub, in a world, at a scene). */
 const screensHere = () => screenOf(campaign?.at.kind);
 
-/** The party's host (a minigame stores none). */
-const partyHost = () => campaign?.party.hostId ?? null;
+/** The game master's id (shared/campaign: Pierre, by the content), or null while he isn't in the evening. */
+const gameMaster = () => (campaign ? gameMasterId(campaign.party, content()) : null);
+/** The game master's name, for the hints. */
+const gameMasterName = () => CHARACTERS[content().gameMaster].name;
 
-/** Pierre steers the birthday story, even while a Wisp; sample content uses its host. */
+/** The birthday story (its own screens and hints). */
 const isStory = () => campaign?.facts.flags.includes('story.elo-50') ?? false;
 /** The room where the party is: what the joystick walks in and the object button looks around. */
 /** @type {WeakMap<import('../../shared/scene.js').Scene, import('../../shared/scene.js').Scene>} */
@@ -278,7 +280,7 @@ const roomHere = () => {
   if (!scene) { scene = sceneRoom(`${base.id}-wisp`, { x: 0, y: 0, w: WORLD.w, h: WORLD.h }, []); wispRooms.set(base, scene); }
   return scene;
 };
-const isGameMaster = () => !!member() && (isStory() ? member()?.character === 'pierre' : partyHost() === playerId);
+const isGameMaster = () => playerId !== null && gameMaster() === playerId;
 
 /** Walking: a member, between rounds (on the hub, in a world, in the room at a tableau), or in a running
  *  round's game area while its screens have the stick on. */
@@ -374,7 +376,7 @@ function show(name) {
 const io = {
   send,
   meId: () => playerId ?? '',
-  isHost: () => playerId !== null && partyHost() === playerId,
+  isGameMaster,
   online: () => online,
   connected: () => conn.isOnline(),
   joystick: (on) => setGameArea(on && { area: on.area, pos: { x: on.start.x, y: on.start.y, dir: on.start.dir ?? 'down', moving: false } }),
@@ -423,17 +425,16 @@ function render() {
   if (replaced) { show('replaced'); return; }
   if (!viewed) { show('loading'); return; }
   const mem = member();
-  const hostId = partyHost();
   // the tableau's minigame (null on the hub, in a world, at a scene) and the room between its rounds
   const kind = campaign?.at.kind ?? null;
   const inRoom = kind !== null && round === null;
 
-  // the settings sheet follows the tableau's minigame (its schema and wording); the host changes them
+  // the settings sheet follows the tableau's minigame (its schema and wording); the game master changes them
   // except while a round runs
   const tableau = screensHere();
-  const configurable = tableau !== null && mem !== null && hostId === playerId && round?.status !== 'running';
+  const configurable = tableau !== null && isGameMaster() && round?.status !== 'running';
   if (tableau) settingsSheet.render(tableauSettings(), configurable, tableau.settings);
-  hostControls.render(round, online, playerId ?? '', hostId);
+  roundControls.render(round, online, isGameMaster());
   if (!configurable) menu.close('settings');
   if (campaign && isGameMaster()) gmPanel.render(campaign, round?.status ?? null);
   else menu.close('gm');
@@ -464,11 +465,11 @@ function render() {
     picker.render(states, pendingPick, isCharacterId(last) ? last : null);
     return;
   }
-  if (inRoom && campaign) { // the room at the tableau: walk, the settings, the host's Start
+  if (inRoom && campaign) { // the room at the tableau: walk, the settings, the game master's Start
     const party = campaign.party;
     const here = { order: party.order.filter((id) => !party.players[id].left && party.players[id].character), players: party.players };
     show('lobby');
-    renderLobby(here, mem, hostId === playerId, screensHere()?.settings.summarize(tableauSettings()) ?? '');
+    renderLobby(here, mem, isGameMaster(), screensHere()?.settings.summarize(tableauSettings()) ?? '');
     return;
   }
   if (round && mem.statuses.includes('wisp')) {
@@ -484,7 +485,7 @@ function render() {
     if (round.status === 'finished') {
       if (running?.kind === round.kind) running.screen.update(round, campaign); // the screens see their round end
       show('podium');
-      renderPodium(round, screens, playerId, hostId === playerId);
+      renderPodium(round, screens, playerId, isGameMaster());
       return;
     }
     show('round');
@@ -644,18 +645,18 @@ function renderPlace(c, mem) {
 }
 
 /**
- * The room at a tableau, between rounds: who's here (the party), the settings, the host's Start.
+ * The room at a tableau, between rounds: who's here (the party), the settings, the game master's Start.
  * @param {{ order: string[], players: Record<string, LobbyPlayer> }} v
- * @param {LobbyPlayer} me @param {boolean} isHost @param {string} settings the settings summary
+ * @param {LobbyPlayer} me @param {boolean} isGm @param {string} settings the settings summary
  */
-function renderLobby(v, me, isHost, settings) {
+function renderLobby(v, me, isGm, settings) {
   dockStick('lobby');
   const header = $('lobby-me');
   header.replaceChildren(
     avatarCanvas(me.character, LOBBY_ME_SCALE, currentPos(me.character).dir),
     Object.assign(document.createElement('span'), {
       className: 'lobby-me-name',
-      textContent: `You're ${me.name}${me.id === partyHost() ? ' 👑' : ''}`,
+      textContent: `You're ${me.name}${me.id === gameMaster() ? ' 👑' : ''}`,
     }),
   );
 
@@ -666,7 +667,7 @@ function renderLobby(v, me, isHost, settings) {
     if (id === me.id || p.left) continue;
     const li = document.createElement('li');
     li.append(avatarCanvas(p.character, LOBBY_CHIP_SCALE), document.createTextNode(
-      p.name + (id === partyHost() ? ' 👑' : '')));
+      p.name + (id === gameMaster() ? ' 👑' : '')));
     ul.append(li);
   }
   ul.hidden = ul.childElementCount === 0;
@@ -674,21 +675,21 @@ function renderLobby(v, me, isHost, settings) {
   const opening = isStory() && campaign?.at.node === content().start && !campaign.facts.flags.includes('portal.ready');
   const portalReady = isStory() && campaign?.at.node === content().start && campaign.facts.flags.includes('portal.ready');
   const quartetReady = openingPlayersPresent(v);
-  $('btn-settings-lobby').hidden = !isHost || !!portalReady;
-  $('btn-start').hidden = !isHost || !!portalReady;
+  $('btn-settings-lobby').hidden = !isGm || !!portalReady;
+  $('btn-start').hidden = !isGm || !!portalReady;
   /** @type {HTMLButtonElement} */ ($('btn-start')).disabled = !!opening && !quartetReady;
   $('lobby-hint').textContent = portalReady ? (campaign?.facts.flags.includes('portal.entered')
     ? 'Élodie went through the portal.' : 'A portal has appeared. Élodie, walk into it!')
     : opening && !quartetReady ? 'Wait for all four players.'
-      : isHost ? (v.order.length === 1 ? 'Play solo, or wait for friends to join.' : 'Everyone in? Hit start!')
-        : 'Waiting for the host to start…';
+      : isGm ? (v.order.length === 1 ? 'Play solo, or wait for friends to join.' : 'Everyone in? Hit start!')
+        : `Waiting for ${gameMasterName()} to start…`;
 }
 
 /**
  * The podium, the same for every minigame: the round's players ranked, with the minigame's extras (./minigames.js).
- * @param {RoundView} r @param {import('./minigames.js').PhoneScreen} screens @param {string} meId @param {boolean} isHost
+ * @param {RoundView} r @param {import('./minigames.js').PhoneScreen} screens @param {string} meId @param {boolean} isGm
  */
-function renderPodium(r, screens, meId, isHost) {
+function renderPodium(r, screens, meId, isGm) {
   const v = /** @type {RoundPlayers} */ (r.view);
   const extras = screens.podium?.(r) ?? {};
   const portalReady = isStory() && campaign?.at.node === content().start && campaign.facts.flags.includes('portal.ready');
@@ -719,12 +720,12 @@ function renderPodium(r, screens, meId, isHost) {
   }
   $('podium-settings').textContent = portalReady ? 'Return to the room together.'
     : `Next game: ${screens.settings.summarize(tableauSettings())}`;
-  $('btn-settings-podium').hidden = !isHost || !!portalReady;
+  $('btn-settings-podium').hidden = !isGm || !!portalReady;
   $('btn-again').hidden = !!portalReady;
   $('podium-hint').textContent = portalReady ? 'Returning to the room shortly…'
-    : 'Waiting for the host: rematch or back to the room…';
-  $('podium-actions').hidden = !isHost;
-  $('podium-hint').hidden = isHost;
+    : `Waiting for ${gameMasterName()}: rematch or back to the room…`;
+  $('podium-actions').hidden = !isGm;
+  $('podium-hint').hidden = isGm;
 }
 
 /** @param {string} text */
@@ -746,7 +747,7 @@ const menu = initMenu({
   onClosed: (sheet) => { if (sheet === 'invite') hideJoinOnTv(); },
 });
 const settingsSheet = createSettingsSheet({ send });
-const hostControls = createHostControls({ send });
+const roundControls = createRoundControls({ send });
 const gmPanel = createGmPanel({ send });
 const bag = createBag();
 const social = createSocial({

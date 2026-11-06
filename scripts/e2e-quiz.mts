@@ -1,9 +1,9 @@
 // Quiz end-to-end (Contract E + E1, server side): a quiz tableau inside the campaign, played over real
 // sockets against a real server this script kill -9s. Checks: the answer NEVER on the wire before the
-// reveal (every raw message of every client is grepped), server-side judging, the round timer, host
+// reveal (every raw message of every client is grepped), server-side judging, the round timer, game master
 // next/override/endGame, resume mid-question (deadline shifted, same question) and on the reveal,
 // quiz.finished recorded once (counters, asked), no question asked twice in an evening, the bank never
-// served, and with a tiny custom bank: an 'uncertain' typed answer → no judge → wrong → host override,
+// served, and with a tiny custom bank: an 'uncertain' typed answer → no judge → wrong → game master override,
 // and a verdict left pending by a crash is never re-judged (wrong on resume).
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR). Usage:
 //   PORT=3193 node scripts/e2e-quiz.mts      (never 3131: that's the live server)
@@ -11,7 +11,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, hostOf, HTTP, quizOf, roomOf, settingsOf, sleep } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, gmOf, HTTP, quizOf, roomOf, settingsOf, sleep } from './e2e-lib.mts';
 import { expectedAnswers } from '../shared/quiz/judge-local.js';
 
 const PORT = process.env.PORT ?? '3141';
@@ -158,13 +158,13 @@ try {
   P.send({ t: 'gm', op: { op: 'unlock', node: 'childhood' } });
   P.send({ t: 'gm', op: { op: 'goto', node: QUIZ } });
   const v0 = await P.waitFor((m) => m.t === 'view' && m.campaign.at.node === QUIZ, i);
-  check(v0.campaign.at.kind === 'quiz' && v0.round === null && roomOf(v0).order.length === 2 && hostOf(v0) === idP,
+  check(v0.campaign.at.kind === 'quiz' && v0.round === null && roomOf(v0).order.length === 2 && gmOf(v0) === idP,
     'quiz tableau → the room at it, with the party; no round yet, so no block game in the view (block clients never see a quiz)');
-  check(await errOf(E, { t: 'config', patch: { count: 3 } }) === 'not-host', 'quiz config: host only');
+  check(await errOf(E, { t: 'config', patch: { count: 3 } }) === 'not-gm', 'quiz config: game master only');
   i = P.mark(); P.send({ t: 'config', patch: { count: 3, seconds: 10, mode: 'mixed' } });
   await P.waitFor((m) => m.t === 'view' && settingsOf(m)?.count === 3 && settingsOf(m).seconds === 10, i);
-  check(true, 'host configures the quiz (3 questions, 10 s)');
-  check(await errOf(E, { t: 'start' }) === 'not-host', 'quiz start: host only');
+  check(true, 'game master configures the quiz (3 questions, 10 s)');
+  check(await errOf(E, { t: 'start' }) === 'not-gm', 'quiz start: game master only');
   check(await errOf(E, { t: 'place', piece: 0, x: 0, y: 0 }) === 'not-playing', 'block messages during a quiz → not-playing');
 
   i = P.mark(); P.send({ t: 'start' });
@@ -177,7 +177,7 @@ try {
   let question = byText.get(q.round.question.q)!;
   shown.push(question);
   check(!!question && q.round.answer === null && q.round.answers === null && Array.isArray(q.round.answered), 'question view: the question, nobody\'s answer, no answer');
-  check(await errOf(E, { t: 'next' }) === 'not-host', 'next: host only');
+  check(await errOf(E, { t: 'next' }) === 'not-gm', 'next: game master only');
   i = T.mark(); P.send(answerFor(q.round, question, true));
   q = await untilQuiz(T, (x) => x.round?.answered.includes(idP), i);
   check(q.phase === 'question' && q.round.answers === null, 'one answer in: still a question, still no verdicts on the wire');
@@ -210,7 +210,7 @@ try {
   const scoreP = q.players[idP].score;
   i = T.mark(); P.send({ t: 'override', target: idP, ok: false });
   q = await untilQuiz(T, (x) => x.round.answers[idP].ok === false, i);
-  check(q.players[idP].score === scoreP - q.round.answers[idP].points && q.round.answers[idP].overridden, 'host override: right → wrong, points taken back');
+  check(q.players[idP].score === scoreP - q.round.answers[idP].points && q.round.answers[idP].overridden, 'game master override: right → wrong, points taken back');
   i = T.mark(); P.send({ t: 'override', target: idP, ok: true });
   q = await untilQuiz(T, (x) => x.round.answers[idP].ok === true, i);
   check(q.players[idP].score === scoreP, '…and back: points restored');
@@ -268,15 +268,15 @@ try {
   check(lastView(T).campaign.facts.asked.length === 6, 'asked grows to 6');
   // play again from the podium: a new quiz at once, as in the block game
   check(await errOf(P, { t: 'start' }) === 'refused', 'quiz start on the podium → refused (start is for the room)');
-  check(await errOf(E, { t: 'again' }) === 'not-host', 'quiz again: host only');
-  check(await errOf(E, { t: 'retire', target: idP }) === 'not-host' && await errOf(P, { t: 'retire', target: idE }) === 'refused',
-    'quiz retire, like every round button: a guest → not-host, the host → refused');
+  check(await errOf(E, { t: 'again' }) === 'not-gm', 'quiz again: game master only');
+  check(await errOf(E, { t: 'retire', target: idP }) === 'not-gm' && await errOf(P, { t: 'retire', target: idE }) === 'refused',
+    'quiz retire, like every round button: a guest → not-gm, the game master → refused');
   i = T.mark(); P.send({ t: 'again' });
   q = await untilQuiz(T, (x) => x.phase === 'question', i);
-  check(q.round.index === 0 && q.order.length === 2 && Object.values<any>(q.players).every((p) => p.score === 0), 'host again on the podium → question 1 of a new quiz, same players, scores reset');
+  check(q.round.index === 0 && q.order.length === 2 && Object.values<any>(q.players).every((p) => p.score === 0), 'game master again on the podium → question 1 of a new quiz, same players, scores reset');
   i = T.mark(); P.send({ t: 'endGame' });
   q = await untilQuiz(T, (x) => x.phase === 'finished', i);
-  check(q.endReason === 'host' && lastView(T).campaign.facts.counters['quiz.played'] === 3, 'host endGame finishes a quiz (counts as played)');
+  check(q.endReason === 'gm' && lastView(T).campaign.facts.counters['quiz.played'] === 3, 'game master endGame finishes a quiz (counts as played)');
 
   // ---------- a tiny custom bank: uncertain → no judge → wrong → override; pending never re-judged ----------
   for (const c of [P, E, T]) c.ws.close();
@@ -311,7 +311,7 @@ try {
     `the anecdote (it names the answer) only arrives with the reveal (${tleak.frames} question frames grepped)${tleak.leak ? ` LEAK: ${tleak.leak}` : ''}`);
   i = T.mark(); P.send({ t: 'override', target: idP, ok: true });
   q = await untilQuiz(T, (x) => x.round.answers[idP].ok === true, i);
-  check(q.players[idP].score > 0, 'the host overrides it to right: points credited');
+  check(q.players[idP].score > 0, 'the game master overrides it to right: points credited');
 
   // a verdict left pending by a crash: forge it in the save, restart → wrong, never re-judged
   i = T.mark(); P.send({ t: 'next' });

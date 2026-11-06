@@ -174,8 +174,8 @@ function mount(root, io) {
       chip.className = 'opp';
       const off = !p.done && !online.includes(id);
       chip.append(dotEl(p.color), document.createTextNode(`${p.name} ${p.done ? (p.retired ? '👋' : '💀') : p.score}${off ? ' 📴' : ''}`));
-      // the host can act on an offline player right from the bar: the chip opens the host menu
-      if (off && io.isHost()) { chip.dataset.open = 'menu'; chip.classList.add('offline'); }
+      // the game master can act on an offline player right from the bar: the chip opens their menu
+      if (off && io.isGameMaster()) { chip.dataset.open = 'menu'; chip.classList.add('offline'); }
       opp.append(chip);
     }
 
@@ -212,9 +212,9 @@ function mount(root, io) {
 
   /** @param {State} v @param {Player} me */
   function renderGameOver(v, me) {
-    // taken out by the host (slice 2b): calm, the run still counts
+    // taken out by the game master (slice 2b): calm, the run still counts
     $('over-icon').textContent = me.retired ? '👋' : '💀';
-    $('over-title').textContent = me.retired ? 'The host took you out — your score counts' : 'Out of moves!';
+    $('over-title').textContent = me.retired ? 'You were taken out — your score counts' : 'Out of moves!';
     $('final-score').textContent = String(me.score);
     $('final-rank').textContent = v.order.length > 1
       ? `You're ${ordinal(rankOf(v, me.id))} of ${v.order.length} so far.`

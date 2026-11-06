@@ -1,6 +1,6 @@
 // Campaign end-to-end (slice 3, server side): the false start → 3 block games → reward + two worlds
 // unlocked at once → news acked by seq with TWO TVs → doors (the chooser walks in, edge-triggered) →
-// host back/enter/gm — with a kill -9 + restart after every step that must resume the SAME evening and
+// game master back/enter/gm — with a kill -9 + restart after every step that must resume the SAME evening and
 // never count a game twice. Then chat, emotes and object actions: relay, history, rate limits, and where
 // interact works. Uses the placeholder SAMPLE_CONTENT (shared/campaign/sample.js).
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR) so it can kill -9 it.
@@ -134,7 +134,7 @@ async function restartSame(step: string): Promise<void> {
 
 const played = (k: any) => k.facts.counters['blocks.played'] ?? 0;
 
-/** Host starts a block game and ends it at once (endGame counts as a game played, A1). */
+/** The game master starts a block game and ends it at once (endGame counts as a game played, A1). */
 async function playOne(n: number): Promise<void> {
   let i = P.mark();
   P.send({ t: camp(P).at.activity === null ? 'start' : 'again' });
@@ -144,7 +144,7 @@ async function playOne(n: number): Promise<void> {
   P.send({ t: 'endGame' });
   const k = await until(P, (x) => x.at.activity?.phase === 'finished', i);
   await until(T1, (x) => x.at.activity?.phase === 'finished' && played(x) === n, tvFrom);
-  check(played(k) === n && k.at.activity.endReason === 'host', `block game ${n} ended by the host → blocks.played = ${played(k)}`);
+  check(played(k) === n && k.at.activity.endReason === 'gm', `block game ${n} ended by the game master → blocks.played = ${played(k)}`);
 }
 
 try {
@@ -152,15 +152,15 @@ try {
   room = await roomCode();
 
   // ---------- a new evening: the false start ----------
-  ({ c: P, id: idP } = await player('P', 'pierre')); // the host (first in)
-  ({ c: E, id: idE } = await player('E', 'elodie')); // the chooser, not the host
+  ({ c: P, id: idP } = await player('P', 'pierre')); // the game master
+  ({ c: E, id: idE } = await player('E', 'elodie')); // the chooser, not the game master
   T1 = await screen('T1');
   T2 = await screen('T2');
   let k = await until(T1, (x) => x.party.order.length === 2);
   check(k.v === 1 && k.at.node === 'hub.false-start' && k.at.kind === 'blocks' && k.at.activity === null,
     'new evening starts AT the false-start blocks tableau, in its room (no round yet)');
-  check(k.party.hostId === idP && roomOf(T1.msgs.findLast((m) => m.t === 'view')).order.join() === `${idP},${idE}`,
-    'party = both phones, host = first in, both in the room');
+  check(T1.lastGm() === idP && roomOf(T1.msgs.findLast((m) => m.t === 'view')).order.join() === `${idP},${idE}`,
+    'party = both phones, game master = Pierre, both in the room');
   check(!k.facts.unlocked.includes('childhood') && k.news.length === 0, 'worlds locked, no news yet');
   await restartSame('in the room at the false start');
 
@@ -188,7 +188,7 @@ try {
   const kinds = k.news.map((n: any) => (n.t === 'unlocked' ? `unlocked:${n.node}` : `${n.t}:${n.item}`));
   check(k.facts.done.includes('hub.false-start') && k.facts.inventory.elodie?.['old-key'] === 1 && k.facts.flags.includes('false-start-over'),
     "false start done → the old key in the CHOOSER's inventory (Élodie) + flag");
-  check(!k.facts.inventory.pierre?.['old-key'], '…and nobody else got it (the host is not the chooser)');
+  check(!k.facts.inventory.pierre?.['old-key'], '…and nobody else got it (the game master is not the chooser)');
   check(k.facts.unlocked.includes('childhood') && k.facts.unlocked.includes('teens') && !k.facts.unlocked.includes('adult'), 'childhood AND teens unlocked at once; adult still locked');
   check(kinds.includes('unlocked:childhood') && kinds.includes('unlocked:teens') && kinds.includes('item:old-key'), `news queued: ${kinds.join(', ')}`);
   check(k.news.every((n: any, j: number) => n.seq === j + 1) && k.newsSeq === k.news.length, 'news seq = 1, 2, 3… (newsSeq = last handed out)');
@@ -212,11 +212,11 @@ try {
   check(k.newsSeq === all, 'TV 2 acks the rest → queue empty, newsSeq kept (seqs never reused)');
   await restartSame('after the acks');
 
-  // ---------- host back to the hub; doors ----------
-  check(await errOf(E, { t: 'back' }) === 'not-host', 'non-host back → not-host');
+  // ---------- game master back to the hub; doors ----------
+  check(await errOf(E, { t: 'back' }) === 'not-gm', 'non-game-master back → not-gm');
   i = P.mark(); P.send({ t: 'back' });
   k = await until(P, (x) => x.at.node === 'hub', i);
-  check(k.at.activity === null && T1.msgs.findLast((m) => m.t === 'view').round === null, 'host back → hub, no block game (view round null)');
+  check(k.at.activity === null && T1.msgs.findLast((m) => m.t === 'view').round === null, 'game master back → hub, no block game (view round null)');
   await restartSame('on the hub');
 
   const at = () => camp(T1).at.node;
@@ -231,10 +231,10 @@ try {
   await step(P, floor);
   await step(E, door('adult')); // adult's door: still locked
   check(at() === 'hub', 'chooser walks into a LOCKED door → nothing');
-  await step(P, door('childhood')); // the host walks into childhood's door: only the chooser's walk enters
-  check(at() === 'hub', 'non-chooser walks into an unlocked door → nothing (the host enters by command)');
+  await step(P, door('childhood')); // the game master walks into childhood's door: only the chooser's walk enters
+  check(at() === 'hub', 'non-chooser walks into an unlocked door → nothing (the game master enters by command)');
   const zoneCount = (z: string, ch: string) => Object.entries(camp(T1).facts.counters).find(([key]) => key.includes(z) && key.includes(ch))?.[1] ?? 0;
-  check(zoneCount('childhood', 'pierre') === 1, 'the host stepping in is still recorded (zone.entered, counted once)');
+  check(zoneCount('childhood', 'pierre') === 1, 'the game master stepping in is still recorded (zone.entered, counted once)');
   await step(P, door('childhood', 0.7, 0.7)); // still inside: no second count
   check(zoneCount('childhood', 'pierre') === 1, 'standing in a door → no second zone.entered (edge-triggered)');
   await step(E, door('childhood')); // Élodie walks into childhood's door
@@ -248,9 +248,9 @@ try {
   check(at() === 'childhood', 'step out and back in → enters again');
   i = P.mark(); P.send({ t: 'back' }); await until(P, (x) => x.at.node === 'hub', i);
 
-  // ---------- host enter / refused enter / gm ----------
-  check(await errOf(P, { t: 'enter', node: 'adult' }) === 'refused', 'host enter on a locked world → refused');
-  check(await errOf(E, { t: 'gm', op: { op: 'unlock', node: 'adult' } }) === 'not-host', 'gm from a non-host → not-host');
+  // ---------- game master enter / refused enter / gm ----------
+  check(await errOf(P, { t: 'enter', node: 'adult' }) === 'refused', 'game master enter on a locked world → refused');
+  check(await errOf(E, { t: 'gm', op: { op: 'unlock', node: 'adult' } }) === 'not-gm', 'gm from a non-game-master → not-gm');
   i = T1.mark(); P.send({ t: 'gm', op: { op: 'unlock', node: 'adult' } });
   k = await until(T1, (x) => x.facts.unlocked.includes('adult'), i);
   check(k.news.some((n: any) => n.t === 'unlocked' && n.node === 'adult' && n.seq === all + 1), 'gm unlock → adult open, news seq continues');
@@ -259,7 +259,7 @@ try {
   i = P.mark(); P.send({ t: 'enter', node: 'teens.blocks' });
   k = await until(P, (x) => x.at.node === 'teens.blocks', i);
   check(k.at.activity === null && k.at.settings.mode === 'timed' && roomOf(P.msgs.findLast((m) => m.t === 'view')).order.length === 2,
-    "host enters a world's blocks tableau → its room with the node's settings (timed), the whole party there");
+    "game master enters a world's blocks tableau → its room with the node's settings (timed), the whole party there");
   i = P.mark(); P.send({ t: 'start' });
   const timedStart = await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   check(blocksOf(timedStart).order.length === 2, '…and the round starts with the whole party seated');

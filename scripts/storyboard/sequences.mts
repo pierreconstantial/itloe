@@ -84,7 +84,7 @@ async function playToOut(b: Board, who: string) {
   await p.waitFor(`!document.getElementById('view-pick') || !!document.getElementById('view-pick').closest('[hidden]')`);
 }
 
-/** The host ends the running round from ☰ (two taps, as on the phone). */
+/** The game master ends the running round from ☰ (two taps, as on the phone). */
 async function endGame(p: Phone) {
   await p.tap('#btn-menu');
   await p.tap('End game now');

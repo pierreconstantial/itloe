@@ -12,14 +12,14 @@ import { recipients } from '../shared/campaign/rules.js';
 /** @param {Content} C @param {Campaign} c @param {any[]} actions @returns {Campaign} */
 const runC = (C, c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a, C), c);
 
-/** Élodie (host, chooser), Sol, Anna in the party at the false start of `C`. @param {Content} C */
+/** Pierre (the game master), Élodie (the chooser), Sol, Anna in the party at the false start of `C`. @param {Content} C */
 function party(C) {
-  return runC(C, newCampaign(C, 3), { t: 'join', id: 'e', character: 'elodie' }, { t: 'join', id: 's', character: 'sol' }, { t: 'join', id: 'a', character: 'anna' });
+  return runC(C, newCampaign(C, 3), { t: 'join', id: 'p', character: 'pierre' }, { t: 'join', id: 'e', character: 'elodie' }, { t: 'join', id: 's', character: 'sol' }, { t: 'join', id: 'a', character: 'anna' });
 }
-/** One block game ended by the host (from the room, or from the podium after going back to the room). @param {Content} C @param {Campaign} c */
+/** One block game ended by the game master (from the room, or from the podium after going back to the room). @param {Content} C @param {Campaign} c */
 function game(C, c) {
-  if (c.at.activity?.phase === 'finished') c = runC(C, c, { t: 'newGame', id: 'e' });
-  return runC(C, c, { t: 'start', id: 'e', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
+  if (c.at.activity?.phase === 'finished') c = runC(C, c, { t: 'newGame', id: 'p' });
+  return runC(C, c, { t: 'start', id: 'p', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'p' } });
 }
 
 /** A small content where the false start rewards with a given `to`. @param {any} reward @returns {Content} */
@@ -88,28 +88,28 @@ test('has: anyone (default) / a given character, gte; it can open a node', () =>
   /** @type {Content} */
   const C = structuredClone(SAMPLE_CONTENT);
   C.nodes.adult.unlock = { has: 'ticket', who: 'anna' };
-  let c = runC(C, party(C), { t: 'gm', id: 'e', op: { op: 'unlock', node: 'childhood' } });
+  let c = runC(C, party(C), { t: 'gm', id: 'p', op: { op: 'unlock', node: 'childhood' } });
   assert.ok(!c.facts.unlocked.includes('adult'));
-  c = runC(C, c, { t: 'gm', id: 'e', op: { op: 'give', item: 'ticket', to: 'anna' } });
+  c = runC(C, c, { t: 'gm', id: 'p', op: { op: 'give', item: 'ticket', to: 'anna' } });
   assert.ok(c.facts.unlocked.includes('adult'), 'giving the item opens the node in the same step');
 });
 
 // ---------------------------------------------------------------- gm give / take
 
-test('gm give/take: host only; unknown item, unknown character, bad count or taking more than held → refused (same ref)', () => {
+test('gm give/take: the game master only; unknown item, unknown character, bad count or taking more than held → refused (same ref)', () => {
   const C = SAMPLE_CONTENT;
   let c = party(C);
-  assert.equal(runC(C, c, { t: 'gm', id: 's', op: { op: 'give', item: 'photo', to: 'sol' } }), c, 'host only');
-  assert.equal(runC(C, c, { t: 'gm', id: 'e', op: { op: 'give', item: 'ghost', to: 'sol' } }), c, 'unknown item');
-  assert.equal(runC(C, c, { t: 'gm', id: 'e', op: /** @type {any} */ ({ op: 'give', item: 'photo', to: 'bowser' }) }), c, 'unknown character');
-  assert.equal(runC(C, c, { t: 'gm', id: 'e', op: { op: 'give', item: 'photo', to: 'sol', count: 0 } }), c, 'count ≥ 1');
-  c = runC(C, c, { t: 'gm', id: 'e', op: { op: 'give', item: 'photo', to: 'sol', count: 3 } });
+  assert.equal(runC(C, c, { t: 'gm', id: 's', op: { op: 'give', item: 'photo', to: 'sol' } }), c, 'the game master only');
+  assert.equal(runC(C, c, { t: 'gm', id: 'p', op: { op: 'give', item: 'ghost', to: 'sol' } }), c, 'unknown item');
+  assert.equal(runC(C, c, { t: 'gm', id: 'p', op: /** @type {any} */ ({ op: 'give', item: 'photo', to: 'bowser' }) }), c, 'unknown character');
+  assert.equal(runC(C, c, { t: 'gm', id: 'p', op: { op: 'give', item: 'photo', to: 'sol', count: 0 } }), c, 'count ≥ 1');
+  c = runC(C, c, { t: 'gm', id: 'p', op: { op: 'give', item: 'photo', to: 'sol', count: 3 } });
   assert.equal(holding(c.facts, 'sol', 'photo'), 3);
-  assert.equal(runC(C, c, { t: 'gm', id: 'e', op: { op: 'take', item: 'photo', from: 'sol', count: 4 } }), c, 'more than held: refused whole');
-  c = runC(C, c, { t: 'gm', id: 'e', op: { op: 'take', item: 'photo', from: 'sol', count: 3 } });
+  assert.equal(runC(C, c, { t: 'gm', id: 'p', op: { op: 'take', item: 'photo', from: 'sol', count: 4 } }), c, 'more than held: refused whole');
+  c = runC(C, c, { t: 'gm', id: 'p', op: { op: 'take', item: 'photo', from: 'sol', count: 3 } });
   assert.equal(holding(c.facts, 'sol', 'photo'), 0);
   assert.deepEqual(c.facts.inventory, {}, 'an emptied entry is removed (no zero counts)');
-  assert.equal(runC(C, c, { t: 'gm', id: 'e', op: { op: 'take', item: 'photo', from: 'sol' } }), c, 'nothing to take');
+  assert.equal(runC(C, c, { t: 'gm', id: 'p', op: { op: 'take', item: 'photo', from: 'sol' } }), c, 'nothing to take');
 });
 
 // ---------------------------------------------------------------- migration + tolerance
@@ -119,7 +119,7 @@ test('loadCampaign: items no longer in the catalogue dropped', () => {
   const later = JSON.parse(JSON.stringify({ ...c, facts: { ...c.facts, inventory: { sol: { photo: 2, removed: 1 }, anna: { gone: 3 } } } }));
   assert.deepEqual(loadCampaign(later, SAMPLE_CONTENT).facts.inventory, { sol: { photo: 2 } }, 'unknown items dropped, empty characters too');
   // a JSON round trip of a campaign with an inventory is unchanged
-  const withInv = runC(SAMPLE_CONTENT, party(SAMPLE_CONTENT), { t: 'gm', id: 'e', op: { op: 'give', item: 'ticket', to: 'anna', count: 2 } });
+  const withInv = runC(SAMPLE_CONTENT, party(SAMPLE_CONTENT), { t: 'gm', id: 'p', op: { op: 'give', item: 'ticket', to: 'anna', count: 2 } });
   assert.deepEqual(loadCampaign(JSON.parse(JSON.stringify(withInv)), SAMPLE_CONTENT), JSON.parse(JSON.stringify(withInv)));
 });
 

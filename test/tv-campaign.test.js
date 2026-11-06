@@ -9,20 +9,20 @@ import { composeMoment, createCutscenes } from '../public/screen/cutscenes.js';
 /** @param {Campaign} c @param {any[]} actions */
 const run = (c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a, C), c);
 /** @param {Campaign} c */
-const game = (c) => run(c, { t: 'newGame', id: 'e' }, { t: 'start', id: 'e', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
+const game = (c) => run(c, { t: 'newGame', id: 'p' }, { t: 'start', id: 'p', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'p' } });
 
 function threeGames() {
-  let c = run(newCampaign(C, 3), { t: 'join', id: 'e', character: 'elodie' });
-  c = run(c, { t: 'start', id: 'e', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'e' } });
+  let c = run(newCampaign(C, 3), { t: 'join', id: 'p', character: 'pierre' }, { t: 'join', id: 'e', character: 'elodie' });
+  c = run(c, { t: 'start', id: 'p', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'p' } });
   return game(game(c));
 }
 
 test('doorStates: locked / new / open / done from the facts', () => {
   let c = threeGames();
-  c = run(c, { t: 'back', id: 'e' });
+  c = run(c, { t: 'back', id: 'p' });
   const byId = Object.fromEntries(doorStates(c, C).map((d) => [d.id, d.state]));
   assert.deepEqual(byId, { 'hub.false-start': 'done', childhood: 'new', teens: 'new', adult: 'locked' });
-  c = run(c, { t: 'enter', id: 'e', node: 'childhood' }, { t: 'back', id: 'e' });
+  c = run(c, { t: 'enter', id: 'e', node: 'childhood' }, { t: 'back', id: 'p' });
   assert.equal(doorStates(c, C).find((d) => d.id === 'childhood')?.state, 'open', 'entered once → no longer new');
   assert.equal(mapCopy(c, C).title, C.nodes.hub.title);
   assert.ok(mapCopy(c, C).hint.startsWith('Élodie'));
@@ -132,7 +132,7 @@ test('cutscenes: a game / quiz question starting mid-moment interrupts it — no
   const news = threeGames().news;
   cs.update(news, 7);
   assert.equal(plays.length, 1);
-  calm = false;           // the host started the quiz
+  calm = false;           // the game master started the quiz
   cs.update(news, 7);     // the next view (quiz phase: question)
   await tickOut();
   assert.ok(plays[0].signal.aborted, 'interrupted at once');

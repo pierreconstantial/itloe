@@ -142,7 +142,7 @@ export function renderReveal(q) {
         ...(row.text !== null ? [h('span', 'quiz-typed', [`« ${row.text} »`])] : []),
         h('span', 'quiz-mark', [mark]),
         h('span', 'quiz-points', [what]),
-        ...(row.overridden ? [h('span', 'quiz-fixed', ['fixed by the host'])] : []),
+        ...(row.overridden ? [h('span', 'quiz-fixed', ['fixed by the game master'])] : []),
       ]);
       el.dataset.id = row.id;
       return el;

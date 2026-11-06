@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newCampaign, loadCampaign, reduceCampaign, validateContent, holding } from '../shared/campaign/index.js';
+import { newCampaign, loadCampaign, reduceCampaign, validateContent, holding, gameMasterId } from '../shared/campaign/index.js';
 import { INTRO_KEY, MEMORY_WORLDS, OPENING_PLAYERS, STORY_CONTENT } from '../shared/campaign/story.js';
 
 /** @param {import('../shared/campaign/types.js').Campaign} campaign
@@ -9,9 +9,9 @@ const act = (campaign, action) => reduceCampaign(campaign, action, STORY_CONTENT
 
 test('Nico joins as a wisp, stays out of rounds, and incarnates when introduced', () => {
   let early = act(newCampaign(STORY_CONTENT, 4), { t: 'join', id: 'nico-first', character: 'nico' });
-  assert.equal(early.party.hostId, null, 'a wisp cannot host the opening round');
   early = act(early, { t: 'join', id: 'elo-first', character: 'elodie' });
-  assert.equal(early.party.hostId, 'elo-first');
+  assert.equal(gameMasterId(early.party, STORY_CONTENT), null, 'nobody but Pierre is the game master');
+  assert.equal(act(early, { t: 'start', id: 'elo-first', now: 1000 }), early, 'nobody can start before Pierre joins');
   let c = newCampaign(STORY_CONTENT, 42);
   for (const character of OPENING_PLAYERS) c = act(c, { t: 'join', id: character, character });
   c = act(c, { t: 'join', id: 'nico-player', character: 'nico' });
@@ -22,9 +22,9 @@ test('Nico joins as a wisp, stays out of rounds, and incarnates when introduced'
   c = act(c, { t: 'newGame', id: 'pierre' });
   c = act(c, { t: 'portal', id: 'elodie' });
   assert.deepEqual(c.party.players.pierre.statuses, ['wisp']);
-  assert.equal(c.party.hostId, 'elodie');
+  assert.equal(gameMasterId(c.party, STORY_CONTENT), 'pierre', 'Pierre stays the game master as a wisp');
   assert.equal(act(c, { t: 'gm', id: 'elodie', op: { op: 'setFlag', flag: 'person.nico.unlocked', on: true } }), c,
-    'the host cannot use Pierre’s game-master controls');
+    'Élodie cannot use the game-master controls');
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'person.nico.unlocked', on: true } });
   assert.deepEqual(c.party.players['nico-player'].statuses, ['wisp', 'incarnating']);
   c = act(c, { t: 'incarnate', id: 'nico-player' });
@@ -90,19 +90,18 @@ test('future needs all seven keys, while world entrances remain unassigned', () 
   assert.equal(c.facts.unlocked.includes('future'), true);
 });
 
-test('a saved opening podium with no remaining host resumes in the portal room', () => {
+test('a saved opening podium with nobody left resumes in the portal room', () => {
   let c = newCampaign(STORY_CONTENT, 42);
   for (const character of OPENING_PLAYERS) c = act(c, { t: 'join', id: character, character });
   c = act(c, { t: 'start', id: 'pierre', now: 1000 });
   c = act(c, { t: 'activity', action: { t: 'endGame', id: 'pierre' } });
   for (const character of OPENING_PLAYERS) c = act(c, { t: 'leave', id: character });
-  assert.equal(c.party.hostId, null);
+  assert.equal(gameMasterId(c.party, STORY_CONTENT), null);
   assert.equal(c.at.activity !== null, true);
   const resumed = loadCampaign(c, STORY_CONTENT);
   assert.equal(resumed.at.activity, null);
   assert.equal(resumed.facts.flags.includes('portal.ready'), true);
   assert.equal(resumed.facts.counters['blocks.played'], 1);
   const joined = act(resumed, { t: 'join', id: 'elo-returned', character: 'elodie' });
-  assert.equal(joined.party.hostId, 'elo-returned');
   assert.equal(act(joined, { t: 'portal', id: 'elo-returned' }).at.node, 'hub');
 });

@@ -170,7 +170,7 @@ export function playGame(
   seed: number, settings: Partial<Settings>, policy: Policy, weights?: Weights, salt = 0
 ): GameResult {
   let s: State = startGame({ seed, settings, players: [{ id: 'a', character: 'pierre' }], now: 0 })!;
-  const ctx = { hostId: 'a' }; // 'a' plays and hosts
+  const ctx = { gameMasterId: 'a' }; // 'a' plays and is the game master
   const { rules } = s;
   const rng = mulberry32((seed ^ hashName(policy.name) ^ Math.imul(salt, 0x85ebca6b)) >>> 0);
 

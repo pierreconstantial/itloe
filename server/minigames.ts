@@ -10,11 +10,11 @@ import type { Pos } from './pos.ts';
 import { makeBlockServer } from './blocks.ts';
 import { makeQuizServer } from './quiz.ts';
 
-export type ErrCode = 'full' | 'bad-place' | 'not-host' | 'not-gm' | 'not-playing' | 'unknown-player' | 'locked' | 'bad-room' | 'taken' | 'refused';
+export type ErrCode = 'full' | 'bad-place' | 'not-gm' | 'not-playing' | 'unknown-player' | 'locked' | 'bad-room' | 'taken' | 'refused';
 
-/** What a minigame's message handler gets with a message: the sender, the time, the party's host and
+/** What a minigame's message handler gets with a message: the sender, the time, the game master and
  *  the round's state. */
-export type MessageCtx<S> = { id: string, now: number, hostId: string | null, state: S };
+export type MessageCtx<S> = { id: string, now: number, gameMasterId: string | null, state: S };
 
 /** The round's io, the same for its whole round (server/round.ts); once the round is over, what goes
  *  through it is dropped. `apply`: runs an action on the round now, false when refused or when the round

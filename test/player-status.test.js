@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { loadCampaign, newCampaign, reduceCampaign } from '../shared/campaign/index.js';
+import { gameMasterId, loadCampaign, newCampaign, reduceCampaign } from '../shared/campaign/index.js';
 import { STORY_CONTENT } from '../shared/campaign/story.js';
 
 /** @param {import('../shared/campaign/types.js').Campaign} campaign
@@ -55,7 +55,7 @@ test('the game master switches Wisp Mode during a round without putting the play
   assert.equal(c.at.activity?.players.sol.left, true);
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'wisp', character: 'pierre', on: true } });
   assert.deepEqual(c.party.players.pierre.statuses, ['wisp']);
-  assert.equal(c.party.hostId, 'elodie');
+  assert.equal(gameMasterId(c.party, STORY_CONTENT), 'pierre', 'still the game master as a wisp');
   assert.equal(c.at.activity?.players.pierre.left, true);
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'wisp', character: 'pierre', on: false } });
   assert.deepEqual(c.party.players.pierre.statuses, ['wisp', 'incarnating']);

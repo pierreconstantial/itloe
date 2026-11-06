@@ -16,6 +16,7 @@ import { minigame } from '../minigames.js';
 export const SAMPLE_CONTENT = {
   start: 'hub.false-start',
   chooser: 'elodie',
+  gameMaster: 'pierre',
   // the item catalogue (Contract F): only these can exist; placeholders until the user writes the story
   items: {
     'old-key': { id: 'old-key', name: 'Old key (placeholder)', icon: '🗝️', description: 'Opens something, one day. (placeholder)' },
@@ -102,6 +103,7 @@ export function minigameContent(kind) {
   return {
     start,
     chooser: 'elodie',
+    gameMaster: 'pierre',
     items: {},
     nodes: {
       hub: { id: 'hub', kind: 'hub', parent: null, title: 'Hub', unlock: { always: true } },

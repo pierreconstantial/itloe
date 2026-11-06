@@ -1,4 +1,4 @@
-// Two-tap confirm for irreversible host actions: the first tap arms one action (its button says
+// Two-tap confirm for irreversible game-master actions: the first tap arms one action (its button says
 // "Tap again…"), the second tap on the SAME action runs it; another action, or a few seconds, disarms.
 
 const CONFIRM_MS = 4000;

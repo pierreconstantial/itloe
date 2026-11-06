@@ -70,7 +70,7 @@ test('numbers and years: exact only, wherever they stand in the text', () => {
   assert.equal(judgeLocal(q('1789'), '17890'), 'wrong');
 });
 
-test('partial names are uncertain (the host or a judge decides)', () => {
+test('partial names are uncertain (the game master or a judge decides)', () => {
   assert.equal(judgeLocal(q('Victor Hugo'), 'Hugo'), 'uncertain');
   assert.equal(judgeLocal(q('Hugo'), 'Victor Hugo'), 'uncertain');
   assert.equal(judgeLocal(q('Antoine de Saint-Exupéry'), 'Saint Exupéry'), 'uncertain');
@@ -99,7 +99,7 @@ test('more French cases: hyphenated places, particles, swapped letters, two-word
   assert.equal(judgeLocal(q('Mont-Blanc'), 'mont blanc'), 'right');
   assert.equal(judgeLocal(q('Charles de Gaulle'), 'De Gaulle'), 'uncertain', 'surname with its particle');
   assert.equal(judgeLocal(q('Charles de Gaulle'), 'charles de gaule'), 'right', 'one letter missing on a long name');
-  assert.equal(judgeLocal(q('Mozart'), 'Mzoatr'), 'wrong', 'two swaps on 6 letters: too garbled (the host can override)');
+  assert.equal(judgeLocal(q('Mozart'), 'Mzoatr'), 'wrong', 'two swaps on 6 letters: too garbled (the game master can override)');
   assert.equal(judgeLocal(q('Napoléon Bonaparte'), 'Napoleon'), 'uncertain');
   assert.equal(judgeLocal(q('Jeanne d’Arc'), "jeanne d'arc"), 'right', 'curly vs straight apostrophe inside a name');
 });

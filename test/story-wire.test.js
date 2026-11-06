@@ -5,7 +5,8 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:net';
-import { OPENING_PLAYERS, INTRO_KEY, PORTAL, INTRO_KEY_SPOT } from '../shared/campaign/story.js';
+import { OPENING_PLAYERS, INTRO_KEY, PORTAL, INTRO_KEY_SPOT, STORY_CONTENT } from '../shared/campaign/story.js';
+import { gameMasterId } from '../shared/campaign/index.js';
 
 test('wire: all four can leave the opening podium, rejoin, and Elo can reach the key', async (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'itloe-story-'));
@@ -55,18 +56,18 @@ test('wire: all four can leave the opening podium, rejoin, and Elo can reach the
     const welcome = await until(phone, (m) => m.t === 'welcome');
     phones.set(character, { ...phone, id: welcome.playerId });
   }
-  const host = phones.get('pierre');
-  assert.ok(host);
-  host.send({ t: 'start' });
-  await until(host, (m) => m.t === 'view' && m.round?.status === 'running');
-  host.send({ t: 'endGame' });
-  const finished = await until(host, (m) => m.t === 'view' && m.round?.status === 'finished');
+  const pierre = phones.get('pierre');
+  assert.ok(pierre);
+  pierre.send({ t: 'start' });
+  await until(pierre, (m) => m.t === 'view' && m.round?.status === 'running');
+  pierre.send({ t: 'endGame' });
+  const finished = await until(pierre, (m) => m.t === 'view' && m.round?.status === 'finished');
   assert.ok(finished.campaign.facts.flags.includes('portal.ready'));
   for (const character of OPENING_PLAYERS.filter((character) => character !== 'pierre')) {
     phones.get(character).send({ t: 'leave' });
     await until(screen, (m) => m.t === 'view' && m.campaign.party.players[phones.get(character).id]?.left);
   }
-  host.send({ t: 'leave' });
+  pierre.send({ t: 'leave' });
   await until(screen, (m) => m.t === 'view' && m.round === null && m.campaign.facts.flags.includes('portal.ready'));
   for (const character of OPENING_PLAYERS) {
     const phone = phones.get(character);
@@ -98,12 +99,12 @@ test('wire: all four can leave the opening podium, rejoin, and Elo can reach the
   const returned = await until(elo, (m) => m.t === 'view' && m.campaign?.at.node === 'hub'
     && m.campaign?.facts.inventory.elodie?.[INTRO_KEY] === 1);
   assert.equal(returned.campaign.news.some((/** @type {any} */ n) => n.t === 'apparition'), false);
-  assert.equal(returned.campaign.party.hostId, elo.id, 'Élodie hosts the round after the portal');
-  assert.deepEqual(returned.campaign.party.players[host.id].statuses, ['wisp']);
+  assert.equal(gameMasterId(returned.campaign.party, STORY_CONTENT), phones.get('pierre').id, 'Pierre, rejoined, stays the game master after the portal');
+  assert.deepEqual(returned.campaign.party.players[pierre.id].statuses, ['wisp']);
   const refusedFrom = elo.messages.length;
   elo.send({ t: 'gm', op: { op: 'setFlag', flag: 'gm.pierre.checked', on: true } });
   assert.equal((await until(elo, (m) => m.t === 'err', refusedFrom)).code, 'not-gm');
-  const gmFrom = host.messages.length;
-  host.send({ t: 'gm', op: { op: 'setFlag', flag: 'gm.pierre.checked', on: true } });
-  await until(host, (m) => m.t === 'view' && m.campaign?.facts.flags.includes('gm.pierre.checked'), gmFrom);
+  const gmFrom = pierre.messages.length;
+  pierre.send({ t: 'gm', op: { op: 'setFlag', flag: 'gm.pierre.checked', on: true } });
+  await until(pierre, (m) => m.t === 'view' && m.campaign?.facts.flags.includes('gm.pierre.checked'), gmFrom);
 });

@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import { startQuiz, reduceQuiz as reduceRound, quizRanking, resolvePending, mergeQuizSettings, pointsFor, SCORING, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
 
 /** @typedef {import('../shared/quiz/index.js').QuizState} QuizState */
-/** The reducer, with the host the campaign passes: 'a'. */
-const reduceQuiz = (/** @type {QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { hostId: 'a' });
+/** The reducer, with the game master the campaign passes: 'a'. */
+const reduceQuiz = (/** @type {QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { gameMasterId: 'a' });
 
 const T0 = 1_700_000_000_000;
 /** 6 candidates: 4 with choices, 2 text-only. */
@@ -14,7 +14,7 @@ const CANDIDATES = [
   { id: 'q4', choices: 4 }, { id: 'q5', choices: 0 }, { id: 'q6', choices: 4 },
 ];
 
-/** A quiz with Anna (host) and Sol on its first question, settings patched; null when it can't start. */
+/** A quiz with Anna (game master) and Sol on its first question, settings patched; null when it can't start. */
 const start = (patch = {}, candidates = CANDIDATES) => startQuiz({
   seed: 42, settings: { count: 3, seconds: 20, ...patch }, now: T0, inputs: candidates,
   players: [{ id: 'a', character: 'anna' }, { id: 'b', character: 'sol' }],
@@ -115,11 +115,11 @@ test('uncertain text: pending until the judge; credited when the verdict lands, 
   assert.equal(timedOut.round?.answers.b.ok, false, 'null (no judge / timeout) → wrong');
 });
 
-test('override: host on the reveal, any answer, both ways, re-scoring', () => {
+test('override: the game master on the reveal, any answer, both ways, re-scoring', () => {
   let s = choiceRound();
   s = reduceQuiz(s, { t: 'answer', id: 'a', choice: 1, now: T0 + 2000, verdict: 'right' });
   s = reduceQuiz(s, { t: 'answer', id: 'b', choice: 0, now: T0 + 4000, verdict: 'wrong' });
-  assert.equal(reduceQuiz(s, { t: 'override', id: 'b', target: 'b', ok: true }), s, 'non-host');
+  assert.equal(reduceQuiz(s, { t: 'override', id: 'b', target: 'b', ok: true }), s, 'not the game master');
   const up = reduceQuiz(s, { t: 'override', id: 'a', target: 'b', ok: true });
   assert.equal(up.players.b.score, /** @type {any} */ (s.round).answers.b.points);
   assert.equal(up.round?.answers.b.overridden, true);
@@ -133,7 +133,7 @@ test('next: pending → wrong, next round, then finished after the last; asked a
   let s = started({ mode: 'text', count: 3 });
   s = reduceQuiz(s, { t: 'answer', id: 'a', text: 'x', now: T0 + 1000, verdict: 'uncertain' });
   s = reduceQuiz(s, { t: 'close', deadline: /** @type {any} */ (s.round).deadline });
-  assert.equal(reduceQuiz(s, { t: 'next', id: 'b', now: T0 }), s, 'non-host');
+  assert.equal(reduceQuiz(s, { t: 'next', id: 'b', now: T0 }), s, 'not the game master');
   s = reduceQuiz(s, { t: 'next', id: 'a', now: T0 + 30_000 });
   assert.equal(s.phase, 'question');
   assert.equal(s.round?.index, 1);
@@ -149,17 +149,17 @@ test('next: pending → wrong, next round, then finished after the last; asked a
   assert.equal(s.asked.length, 3);
 });
 
-test('endGame: host, from question (round dropped) or reveal (kept)', () => {
+test('endGame: the game master, from question (round dropped) or reveal (kept)', () => {
   let s = choiceRound();
   s = reduceQuiz(s, { t: 'answer', id: 'a', choice: 1, now: T0 + 1000, verdict: 'right' });
   const fromQuestion = reduceQuiz(s, { t: 'endGame', id: 'a' });
   assert.equal(fromQuestion.phase, 'finished');
-  assert.equal(fromQuestion.endReason, 'host');
+  assert.equal(fromQuestion.endReason, 'gm');
   assert.equal(fromQuestion.players.a.score, 0, 'half a round is not credited');
   const fromReveal = reduceQuiz(reduceQuiz(s, { t: 'close', deadline: /** @type {any} */ (s.round).deadline }), { t: 'endGame', id: 'a' });
   assert.ok(fromReveal.players.a.score > 0);
   assert.equal(reduceQuiz(fromQuestion, { t: 'endGame', id: 'a' }), fromQuestion, 'nothing left to end');
-  assert.equal(reduceQuiz(s, { t: 'endGame', id: 'b' }), s, 'not the host');
+  assert.equal(reduceQuiz(s, { t: 'endGame', id: 'b' }), s, 'not the game master');
 });
 
 test('leave: mid-quiz marks left, closes the round if they were the last awaited', () => {

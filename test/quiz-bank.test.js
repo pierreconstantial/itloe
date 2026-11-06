@@ -7,8 +7,8 @@ import { validateBank, candidatesFor, judgeAnswer, projectQuiz, answerText } fro
 import { expectedAnswers } from '../shared/quiz/judge-local.js';
 import { startQuiz, reduceQuiz as reduceRound, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
 
-/** The quiz reducer, with the host the campaign passes: 'a'. */
-const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { hostId: 'a' });
+/** The quiz reducer, with the game master the campaign passes: 'a'. */
+const reduceQuiz = (/** @type {import('../shared/quiz/index.js').QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { gameMasterId: 'a' });
 
 /** @type {import('../shared/quiz/bank.js').Question[]} */
 const BANK = JSON.parse(readFileSync(new URL('../data/quiz/placeholder.json', import.meta.url), 'utf8')).questions;
@@ -75,7 +75,7 @@ test('judgeAnswer: a displayed choice maps through the round permutation; text u
   assert.equal(judgeAnswer(/** @type {any} */ (lookup('ph-lit-miserables')), { asChoice: false, perm: null }, { text: 'Hugo' }), 'right', 'accept list');
 });
 
-/** A quiz started at T0 by Anna ('a', host) and the given others, on its first question. */
+/** A quiz started at T0 by Anna ('a', game master) and the given others, on its first question. */
 const quizOf = (/** @type {Partial<import('../shared/quiz/index.js').QuizSettings>} */ settings, /** @type {import('../shared/quiz/index.js').Candidate[]} */ inputs, seed = 1, others = /** @type {[string, import('../shared/characters.js').CharacterId][]} */ ([])) =>
   /** @type {import('../shared/quiz/index.js').QuizState} */ (startQuiz({ seed, settings, now: T0, inputs,
     players: [{ id: 'a', character: 'anna' }, ...others.map(([id, character]) => ({ id, character }))] }));

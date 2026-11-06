@@ -1,5 +1,5 @@
 // Screen-only sound: tiny WebAudio synths, no binary assets.
-// Browsers block audio until a user gesture on THIS page (the host starts from the phone),
+// Browsers block audio until a user gesture on THIS page (the game master starts from the phone),
 // so the screen shows a hint until someone clicks / presses a key; M toggles mute.
 
 /** @type {AudioContext | null} */

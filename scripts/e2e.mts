@@ -3,7 +3,7 @@
 // (kill -9 / resume across phases: scripts/e2e-resume.mts, which runs its own server)
 import { PIECES } from '../shared/pieces.js';
 import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
-import { blocksOf, check, Client, finish, hostOf, HTTP, illegalMove, roomOf, legalMoves, playToDone, sleep, URL_WS } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, gmOf, HTTP, illegalMove, roomOf, legalMoves, playToDone, sleep, URL_WS } from './e2e-lib.mts';
 
 let s = 12345;
 const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 4294967296);
@@ -45,7 +45,7 @@ A.send({ t: 'start' });
 check((await A.waitFor((m) => m.t === 'err', i)).code === 'unknown-player', 'start before join → err unknown-player');
 
 // --- join ---
-i = A.mark(); A.send({ t: 'join', character: 'anna' });
+i = A.mark(); A.send({ t: 'join', character: 'pierre' });
 const idA = (await A.waitFor((m) => m.t === 'welcome', i)).playerId;
 await A.waitFor((m) => m.t === 'view' && roomOf(m)?.players[idA], i);
 i = B.mark(); B.send({ t: 'join', character: 'sol' });
@@ -53,20 +53,20 @@ const idB = (await B.waitFor((m) => m.t === 'welcome', i)).playerId;
 await B.waitFor((m) => m.t === 'view' && roomOf(m)?.players[idB], i);
 await screen.waitFor((m) => m.t === 'view' && roomOf(m)?.order.length === 2);
 check(true, 'room code accepted (B typed it in lower case)');
-check(B.lastHost() === idA && B.lastRoom().order.join() === `${idA},${idB}`, 'two joins → welcome each, A is host, view broadcast to all (incl. screen)');
+check(B.lastGm() === idA && B.lastRoom().order.join() === `${idA},${idB}`, 'two joins → welcome each, A (Pierre) is game master, view broadcast to all (incl. screen)');
 const pA = B.lastRoom().players[idA];
-check(pA.character === 'anna' && pA.name === CHARACTERS.anna.name && pA.color === CHARACTERS.anna.color, 'join by character → name + colour from the roster');
+check(pA.character === 'pierre' && pA.name === CHARACTERS.pierre.name && pA.color === CHARACTERS.pierre.color, 'join by character → name + colour from the roster');
 
 // --- character already picked / not a character / roster exhausted ---
 const T = new Client('T'); await T.open(); T.send({ t: 'hello', role: 'player', room });
-i = T.mark(); T.send({ t: 'join', character: 'anna' });
+i = T.mark(); T.send({ t: 'join', character: 'pierre' });
 check((await T.waitFor((m) => m.t === 'err', i)).code === 'taken', 'join with a picked character → err taken');
 i = T.mark(); T.send({ t: 'join', character: 'bowser' });
 check((await T.waitFor((m) => m.t === 'err', i)).code === 'taken', 'join with an unknown character → err taken');
 
 // --- leave in the room: player removed, its id can no longer rejoin ---
 const L = new Client('L'); await L.open(); L.send({ t: 'hello', role: 'player', room });
-i = L.mark(); L.send({ t: 'join', character: 'pierre' });
+i = L.mark(); L.send({ t: 'join', character: 'anna' });
 const idL = (await L.waitFor((m) => m.t === 'welcome', i)).playerId;
 const M = new Client('M'); await M.open(); M.send({ t: 'hello', role: 'player', room });
 i = M.mark(); M.send({ t: 'join', character: 'elodie' });
@@ -74,7 +74,7 @@ const idM = (await M.waitFor((m) => m.t === 'welcome', i)).playerId;
 await A.waitFor((m) => m.t === 'view' && roomOf(m)?.players[idL] && roomOf(m)?.players[idM]);
 // the rest of the roster (Nico, …) is held too, so nothing is left to pick
 const extra: { c: Client, id: string }[] = [];
-for (const character of Object.keys(CHARACTERS).filter((c) => !['anna', 'sol', 'pierre', 'elodie'].includes(c))) {
+for (const character of Object.keys(CHARACTERS).filter((c) => !['pierre', 'sol', 'anna', 'elodie'].includes(c))) {
   const c = new Client(character); await c.open(); c.send({ t: 'hello', role: 'player', room });
   i = c.mark(); c.send({ t: 'join', character });
   extra.push({ c, id: (await c.waitFor((m) => m.t === 'welcome', i)).playerId });
@@ -146,7 +146,7 @@ S2.ws.close();
 // a phone dropped while its avatar walks in the room: the screen must see it stop (then it comes back to
 // leave the evening, so the round below seats A and B only)
 const W = new Client('W'); await W.open(); W.send({ t: 'hello', role: 'player', room });
-i = W.mark(); W.send({ t: 'join', character: 'pierre' });
+i = W.mark(); W.send({ t: 'join', character: 'anna' });
 const idW = (await W.waitFor((m) => m.t === 'welcome', i)).playerId;
 W.send({ t: 'pos', x: 7, y: 6, dir: 'up', moving: true });
 await screen.waitFor((m) => m.t === 'pos' && m.playerId === idW && m.moving === true);
@@ -161,18 +161,18 @@ i = A.mark(); W2.send({ t: 'leave' });
 await A.waitFor((m) => m.t === 'view' && !roomOf(m)?.players[idW], i);
 W2.ws.close();
 
-// --- start: host guard ---
+// --- start: game master guard ---
 let ia = A.mark(); ib = B.mark();
 B.send({ t: 'start' });
-check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-host', 'non-host start → err not-host');
+check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'non-game-master start → err not-gm');
 await sleep(250);
-check(A.since(ia).length === 0, 'non-host start → no broadcast');
+check(A.since(ia).length === 0, 'non-game-master start → no broadcast');
 
 ia = A.mark(); ib = B.mark();
 A.send({ t: 'start' });
 const v0 = blocksOf(await A.waitFor((m) => m.t === 'view', ia));
 await B.waitFor((m) => m.t === 'view', ib);
-check(v0.phase === 'playing', 'host start → phase playing, broadcast');
+check(v0.phase === 'playing', 'game master start → phase playing, broadcast');
 check(JSON.stringify(v0.players[idA].hand) === JSON.stringify(v0.players[idB].hand) && v0.players[idA].hand.every((h: any) => h), `both players get identical hand 0 (${v0.players[idA].hand.join(' ')})`);
 const seed1 = v0.seed;
 
@@ -226,7 +226,7 @@ const X = new Client('X'); await X.open();
 i = X.mark(); X.send({ t: 'hello', role: 'player', room, playerId: 'p-nope' });
 await X.waitFor((m) => m.t === 'view', i); await sleep(150);
 check(!X.since(i).some((m) => m.t === 'welcome'), 'unknown playerId → no welcome (fresh client)');
-i = X.mark(); X.send({ t: 'join', character: 'pierre' });
+i = X.mark(); X.send({ t: 'join', character: 'anna' });
 // A1: a newcomer joins the EVENING mid-game and watches: welcomed, in the party, not seated in the game
 const xw = await X.waitFor((m) => m.t === 'welcome' || m.t === 'err', i);
 const xv = await X.waitFor((m) => m.t === 'view' && m.campaign?.party.players[xw.playerId], i);
@@ -243,7 +243,7 @@ Acur.send({ t: 'place', ...legalMoves({ ...Acur.lastView(), players: { [idA]: { 
 check((await Acur.waitFor((m) => m.t === 'err', i)).code === 'bad-place', 'place by done player → err bad-place');
 ib = B.mark();
 B.send({ t: 'again' });
-check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-host', 'again while playing (non-host) → err');
+check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'again while playing (non-game-master) → err');
 
 const nB = await playToDone(B, idB, Acur, rnd);
 const fin = Acur.lastView();
@@ -256,31 +256,31 @@ check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-playing', 'place 
 // --- newGame: podium → the room, same players, newcomers can join, start works again ---
 ib = B.mark();
 B.send({ t: 'newGame' });
-check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-host', 'non-host newGame → err not-host');
+check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'non-game-master newGame → err not-gm');
 ia = Acur.mark(); ib = B.mark();
 Acur.send({ t: 'newGame' });
 const vnMsg = await B.waitFor((m) => m.t === 'view', ib);
 const vn = roomOf(vnMsg);
 await screen.waitFor((m) => m.t === 'view' && !!roomOf(m));
-check(!!vn && hostOf(vnMsg) === idA && vn.order.join() === `${idA},${idB}`,
-  'host newGame → the room, same players + host, broadcast');
-check(vn.players[idA].character === 'anna' && vn.players[idB].character === 'sol', 'newGame keeps each character');
+check(!!vn && gmOf(vnMsg) === idA && vn.order.join() === `${idA},${idB}`,
+  'game master newGame → the room, same players + game master, broadcast');
+check(vn.players[idA].character === 'pierre' && vn.players[idB].character === 'sol', 'newGame keeps each character');
 const joinAfter = await (await fetch(`${HTTP}/api/join`)).json();
 check(joinAfter.code === room, 'newGame keeps the room code');
 ia = Acur.mark();
 Acur.send({ t: 'newGame' });
-check((await Acur.waitFor((m) => m.t === 'err', ia)).code === 'refused', 'host newGame outside finished (the room) → err refused');
+check((await Acur.waitFor((m) => m.t === 'err', ia)).code === 'refused', 'game master newGame outside finished (the room) → err refused');
 const N = new Client('N'); await N.open(); N.send({ t: 'hello', role: 'player', room });
-i = N.mark(); N.send({ t: 'join', character: 'pierre' });
+i = N.mark(); N.send({ t: 'join', character: 'anna' });
 const idN = (await N.waitFor((m) => m.t === 'welcome', i)).playerId;
 await Acur.waitFor((m) => m.t === 'view' && roomOf(m)?.players[idN]);
 check(Acur.lastRoom().order.join() === `${idA},${idB},${idN}`, 'a newcomer joins the room after newGame');
 i = N.mark(); N.send({ t: 'start' });
-check((await N.waitFor((m) => m.t === 'err', i)).code === 'not-host', 'newcomer (non-host) start → err not-host');
+check((await N.waitFor((m) => m.t === 'err', i)).code === 'not-gm', 'newcomer (non-game-master) start → err not-gm');
 ia = Acur.mark();
 Acur.send({ t: 'start' });
 const vs = blocksOf(await Acur.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', ia));
-check(vs.order.length === 3 && vs.seed !== fin.seed, 'host start after newGame → playing with 3 players, new seed');
+check(vs.order.length === 3 && vs.seed !== fin.seed, 'game master start after newGame → playing with 3 players, new seed');
 await Promise.all([N, B].map((c) => c.waitFor((m) => m.t === 'view' && blocksOf(m)?.seed === vs.seed)));
 await playToDone(N, idN, Acur, rnd);
 await playToDone(B, idB, Acur, rnd);
@@ -294,12 +294,12 @@ N.ws.close();
 // --- again ---
 ib = B.mark();
 B.send({ t: 'again' });
-check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-host', 'non-host again → err not-host');
+check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'non-game-master again → err not-gm');
 ia = Acur.mark(); ib = B.mark();
 Acur.send({ t: 'again' });
 const va = blocksOf(await B.waitFor((m) => m.t === 'view', ib));
 const pa = va.players[idA], pb = va.players[idB];
-check(va.phase === 'playing' && va.seed !== seed1, `host again → playing, new seed (${seed1} → ${va.seed})`);
+check(va.phase === 'playing' && va.seed !== seed1, `game master again → playing, new seed (${seed1} → ${va.seed})`);
 check(va.order.join() === `${idA},${idB}` && pa.score === 0 && pb.score === 0 && pa.board.every((c: number) => c === 0) && !pa.done && !pb.done
   && JSON.stringify(pa.hand) === JSON.stringify(pb.hand), 'again → same players, fresh boards/scores, identical new hand 0');
 

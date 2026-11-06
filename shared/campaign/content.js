@@ -77,8 +77,9 @@ export function validateContent(content) {
   const errors = [];
   const nodes = content?.nodes ?? {};
   const ids = Object.keys(nodes);
-  if (!content || typeof content !== 'object' || !content.nodes) return ['content needs { start, chooser, nodes }'];
+  if (!content || typeof content !== 'object' || !content.nodes) return ['content needs { start, chooser, gameMaster, nodes }'];
   if (!isCharacterId(content.chooser)) errors.push(`chooser "${content.chooser}" is not a character`);
+  if (!isCharacterId(content.gameMaster)) errors.push(`game master "${content.gameMaster}" is not a character`);
   const start = nodes[content.start];
   if (!start) errors.push(`start "${content.start}" is not a node`);
   else if (!minigame(start.activity?.kind)) errors.push(`start "${content.start}" must be the tableau of a minigame`);

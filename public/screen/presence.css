@@ -1,6 +1,6 @@
 /* Player status on the TV: offline (presence.js, debounced; a minigame's screen dims its own players, see
-   blocks.css; avatars are dimmed on the canvas) and out (retired by the host), on the podium. */
-/* Host controls: a retired player ("out") on the podium, and how the game ended. */
+   blocks.css; avatars are dimmed on the canvas) and out (retired by the game master), on the podium. */
+/* Round controls: a retired player ("out") on the podium, and how the game ended. */
 .out-tag {
   margin-left: 0.5em;
   padding: 0.05em 0.5em;

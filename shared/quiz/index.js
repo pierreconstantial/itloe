@@ -12,11 +12,11 @@
 //   close { deadline }              server: the round's timer rang (stale deadlines are ignored)
 //   verdict { target, ok, index, questionId }   server: the async judge decided an 'uncertain' answer of that
 //                                   round (null = wrong); a verdict for another round is ignored
-//   override { id, target, ok }     host, on the reveal: fixes any answer, both ways, re-scoring it
-//   next { id, now }                host: reveal → next question, or finished after the last
-//   endGame { id }                  host: question/reveal → finished
+//   override { id, target, ok }     game master, on the reveal: fixes any answer, both ways, re-scoring it
+//   next { id, now }                game master: reveal → next question, or finished after the last
+//   endGame { id }                  game master: question/reveal → finished
 // The last answer of a round closes it at once (no waiting for the timer when everyone answered).
-// The host is the party's, passed in by the campaign with every action.
+// The game master is the party's, passed in by the campaign with every action.
 
 import { CHARACTERS } from '../characters.js';
 import { mulberry32 } from '../rng.js';
@@ -49,7 +49,7 @@ import { ranking } from '../ranking.js';
  *   questions: Candidate[],       // picked at start, in play order
  *   round: Round | null,
  *   asked: string[],              // ids of the questions actually shown (reported to the campaign)
- *   endReason: 'done' | 'host' | null,
+ *   endReason: 'done' | 'gm' | null,
  * }} QuizState
  */
 /**
@@ -233,7 +233,7 @@ function settlePending(r) {
 }
 
 /**
- * The pending verdicts of a resumed quiz are never re-judged (E1): they become wrong; the host can
+ * The pending verdicts of a resumed quiz are never re-judged (E1): they become wrong; the game master can
  * still override them on the reveal. Same object when nothing was pending.
  * @param {QuizState} s @returns {QuizState}
  */
@@ -243,13 +243,13 @@ export function resolvePending(s) {
   return r === s.round ? s : { ...s, round: r };
 }
 
-/** The party's host, passed in by the campaign. @param {{ hostId: string | null }} ctx @param {string} id */
-const isHost = (ctx, id) => ctx.hostId !== null && ctx.hostId === id;
+/** The game master, passed in by the campaign. @param {{ gameMasterId: string | null }} ctx @param {string} id */
+const isGameMaster = (ctx, id) => ctx.gameMasterId !== null && ctx.gameMasterId === id;
 
 /**
  * @param {QuizState} s
  * @param {QuizAction} a
- * @param {import('../minigames.js').RoundCtx} ctx  the party's host (the host-only actions)
+ * @param {import('../minigames.js').RoundCtx} ctx  the game master (the game-master-only actions)
  * @returns {QuizState}  the SAME object when the action is refused
  */
 export function reduceQuiz(s, a, ctx) {
@@ -307,7 +307,7 @@ export function reduceQuiz(s, a, ctx) {
     case 'override': {
       const r = s.round;
       const ans = r?.answers[a.target];
-      if (!isHost(ctx, a.id) || s.phase !== 'reveal' || !r || !ans || typeof a.ok !== 'boolean') return s;
+      if (!isGameMaster(ctx, a.id) || s.phase !== 'reveal' || !r || !ans || typeof a.ok !== 'boolean') return s;
       if (ans.ok === a.ok) return s;
       let players = s.players;
       if (ans.ok === true) players = credit(players, a.target, ans, -1);
@@ -316,17 +316,17 @@ export function reduceQuiz(s, a, ctx) {
     }
 
     case 'next': {
-      if (!isHost(ctx, a.id) || s.phase !== 'reveal' || !s.round || !Number.isFinite(a.now)) return s;
+      if (!isGameMaster(ctx, a.id) || s.phase !== 'reveal' || !s.round || !Number.isFinite(a.now)) return s;
       const done = { ...s, round: settlePending(s.round) };
       const index = s.round.index + 1;
       return index < s.questions.length ? openRound(done, index, a.now) : { ...done, phase: 'finished', endReason: 'done' };
     }
 
     case 'endGame': {
-      if (!isHost(ctx, a.id) || !quizRunning(s)) return s;
+      if (!isGameMaster(ctx, a.id) || !quizRunning(s)) return s;
       // a round still open is dropped (nobody is credited for half a question); a reveal keeps its credit
       const round = s.round && s.phase === 'reveal' ? settlePending(s.round) : s.round;
-      return { ...s, phase: 'finished', endReason: 'host', round };
+      return { ...s, phase: 'finished', endReason: 'gm', round };
     }
 
     default:

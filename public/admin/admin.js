@@ -77,7 +77,7 @@ function draw(d) {
       const m = players[p.id];
       const pos = p.roundPos ?? p.pos;
       return [
-        `${m.name} (${m.character})`, p.id, p.id === c.party.hostId ? 'host' : '',
+        `${m.name} (${m.character})`, p.id, p.id === d.gameMaster ? 'game master' : '',
         el('td', m.left ? 'left' : p.online ? 'online' : 'offline', m.left ? 'dim' : p.online ? 'ok' : 'bad'),
         m.statuses.join(', '), ...socketCells(p.socket, now), String(p.attaches),
         pos ? `${p.roundPos ? 'game area ' : ''}${pos.x.toFixed(1)}, ${pos.y.toFixed(1)}${pos.moving ? ' moving' : ''}` : '—',

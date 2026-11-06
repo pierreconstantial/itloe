@@ -10,8 +10,8 @@ import {
 /** @typedef {import('../shared/game.js').State} State */
 /** @typedef {import('../shared/game.js').Player} Player */
 
-/** The reducer, with the host the campaign passes: 'a' by default. */
-const reduce = (/** @type {State} */ s, /** @type {import('../shared/game.js').Action} */ a, hostId = 'a') => reduceGame(s, a, { hostId });
+/** The reducer, with the game master the campaign passes: 'a' by default. */
+const reduce = (/** @type {State} */ s, /** @type {import('../shared/game.js').Action} */ a, gameMasterId = 'a') => reduceGame(s, a, { gameMasterId });
 
 /**
  * A round under way with the given characters (ids a, b, c… in that order), seed 42.
@@ -37,7 +37,7 @@ function fullExcept(empties) {
 }
 
 /**
- * Single-player playing state, player 'a' (host), with overrides on the player.
+ * Single-player playing state, player 'a' (game master), with overrides on the player.
  * @param {Partial<Player>} over
  * @param {number} seed
  * @returns {State}
@@ -340,7 +340,7 @@ test('Player.last: move record on each place, with clears before applyClears', (
 const SZT = ['s_h', 'z_h', 's_v', 'z_v', 't_down', 't_up', 't_right', 't_left'];
 
 /**
- * A round under way with 'a' (host) and 'b'.
+ * A round under way with 'a' (game master) and 'b'.
  * @param {Partial<import('../shared/game.js').Settings>} [settings]
  * @returns {State}
  */
@@ -486,7 +486,7 @@ test('endReason stuck when everyone is stuck (also before the bell)', () => {
 
 // ---------- leave ----------
 
-/** A round under way with a (host), b, c. @returns {State} */
+/** A round under way with a (game master), b, c. @returns {State} */
 const game3 = () => started(['pierre', 'elodie', 'sol']);
 
 test('leave: unknown or already-removed id → same state', () => {

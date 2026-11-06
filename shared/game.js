@@ -31,9 +31,9 @@ import { ranking } from './ranking.js';
  *   score: number,
  *   streak: number,             // consecutive clearing placements before now
  *   graceLeft: number,          // non-clearing placements still forgiven (reset to rules.grace on a clear)
- *   done: boolean,              // stuck, stopped by the bell, retired, ended by the host, or left; board frozen
+ *   done: boolean,              // stuck, stopped by the bell, retired, ended by the game master, or left; board frozen
  *   left: boolean,              // left mid-game (still shown until the game ends; not in the rematch)
- *   retired?: boolean,          // taken out by the host mid-game: still ranked, keeps seat + character (absent on old saves)
+ *   retired?: boolean,          // taken out by the game master mid-game: still ranked, keeps seat + character (absent on old saves)
  *   last: null | {
  *     n: number,                // per-player move counter (event id — clients react to n changing)
  *     pieceId: PieceId, x: number, y: number,
@@ -52,7 +52,7 @@ import { ranking } from './ranking.js';
  *   players: Record<string, Player>,
  *   rules: Settings,            // locked snapshot used by the game being played / shown (choice: the campaign)
  *   deadline: number | null,    // epoch ms of the timed-mode bell; null otherwise
- *   endReason: 'stuck' | 'time' | 'host' | null   // host = the host ended the game (endGame)
+ *   endReason: 'stuck' | 'time' | 'gm' | null   // gm = the game master ended the game (endGame)
  * }} State
  *
  * The whole `timeUp` action is SERVER-injected, never from the wire. A round starts with startGame.
@@ -199,7 +199,7 @@ export { ranking };
  * Rules: BUILD-PLAN.md «Contract A», normative paragraph, + Q4 addendum.
  * @param {State} state
  * @param {Action} action
- * @param {import('./minigames.js').RoundCtx} ctx  the party's host (the host-only actions)
+ * @param {import('./minigames.js').RoundCtx} ctx  the game master (the game-master-only actions)
  * @returns {State}
  */
 export function reduce(state, action, ctx) {
@@ -265,15 +265,15 @@ export function reduce(state, action, ctx) {
     }
 
     case 'endGame': {
-      // host stops the game (e.g. someone dropped while not stuck): everyone still playing is frozen, scores kept
-      if (state.phase !== 'playing' || !isHost(ctx, action.id)) return state;
-      return { ...state, players: allMarkedDone(state), phase: 'finished', endReason: 'host' };
+      // the game master stops the game (e.g. someone dropped while not stuck): everyone still playing is frozen, scores kept
+      if (state.phase !== 'playing' || !isGameMaster(ctx, action.id)) return state;
+      return { ...state, players: allMarkedDone(state), phase: 'finished', endReason: 'gm' };
     }
 
     case 'retire': {
-      // host takes one player out: done (board frozen, still ranked) but NOT left — the seat, the
+      // the game master takes one player out: done (board frozen, still ranked) but NOT left — the seat, the
       // character and a reconnect stay theirs. The last one out ends the game like getting stuck.
-      if (state.phase !== 'playing' || !isHost(ctx, action.id)) return state;
+      if (state.phase !== 'playing' || !isGameMaster(ctx, action.id)) return state;
       const t = state.players[action.target];
       if (!t || t.done || t.left) return state;
       return finishIfAllDone(state, { ...state.players, [t.id]: { ...t, done: true, retired: true } });
@@ -294,8 +294,8 @@ export function reduce(state, action, ctx) {
   }
 }
 
-/** The party's host, passed in by the campaign. @param {{ hostId: string | null }} ctx @param {string} id */
-const isHost = (ctx, id) => ctx.hostId !== null && id === ctx.hostId;
+/** The game master, passed in by the campaign. @param {{ gameMasterId: string | null }} ctx @param {string} id */
+const isGameMaster = (ctx, id) => ctx.gameMasterId !== null && id === ctx.gameMasterId;
 
 /** Every seated player done (already-done ones kept as is). @param {State} state @returns {Record<string, Player>} */
 function allMarkedDone(state) {

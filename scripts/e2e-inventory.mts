@@ -1,7 +1,7 @@
 // Inventory end-to-end (Contract F, server side) over real sockets and a server this script kill -9s:
 // rewards land in the right inventory (chooser / winner incl. a tie / all non-left members), survive
-// kill -9 and a reclaim from another device, the host's gm give/take work and are refused for an unknown
-// item or character, for taking more than held, and for a non-host. Uses the sample content (old key →
+// kill -9 and a reclaim from another device, the game master's gm give/take work and are refused for an unknown
+// item or character, for taking more than held, and for a non-game-master. Uses the sample content (old key →
 // chooser, ticket → quiz winner, photo → all).
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR, a fixed quiz bank). Usage:
 //   PORT=3197 node scripts/e2e-inventory.mts      (never 3131: that's the live server)
@@ -80,11 +80,11 @@ async function screen(): Promise<Client> {
 const gm = (c: Client, op: object) => c.send({ t: 'gm', op });
 
 /** Plays one quiz in childhood.quiz (choice mode, 3 questions): `right` players answer right, others wrong. */
-async function playQuiz(host: Client, players: { c: Client, right: boolean }[], T: Client): Promise<void> {
+async function playQuiz(gm: Client, players: { c: Client, right: boolean }[], T: Client): Promise<void> {
   let i = T.mark();
-  host.send({ t: 'config', patch: { count: 3, mode: 'choice' } });
+  gm.send({ t: 'config', patch: { count: 3, mode: 'choice' } });
   await T.waitFor((m) => m.t === 'view' && settingsOf(m)?.mode === 'choice' && settingsOf(m).count === 3, i);
-  i = T.mark(); host.send({ t: 'start' });
+  i = T.mark(); gm.send({ t: 'start' });
   let q = quizOf(await T.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'question', i));
   for (let r = 0; r < 3; r++) {
     const bq = BANK.find((x) => x.q === q.round.question.q)!;
@@ -92,7 +92,7 @@ async function playQuiz(host: Client, players: { c: Client, right: boolean }[], 
     i = T.mark();
     for (const p of players) p.c.send({ t: 'answer', choice: p.right ? right : (right + 1) % 4 });
     await T.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'reveal' && quizOf(m).round.index === r, i);
-    i = T.mark(); host.send({ t: 'next' });
+    i = T.mark(); gm.send({ t: 'next' });
     q = quizOf(await T.waitFor((m) => m.t === 'view' && (quizOf(m)?.phase === 'finished' || (quizOf(m)?.phase === 'question' && quizOf(m).round.index === r + 1)), i));
   }
 }
@@ -110,7 +110,7 @@ async function restart(step: string): Promise<void> {
 try {
   // ---------- chooser: the false start's old key goes to Élodie only ----------
   await boot(true);
-  ({ c: P, id: idP } = await player('P', 'pierre')); // host
+  ({ c: P, id: idP } = await player('P', 'pierre')); // the game master
   ({ c: E, id: idE } = await player('E', 'elodie')); // chooser
   ({ c: S, id: idS } = await player('S', 'sol'));
   T = await screen();
@@ -141,16 +141,16 @@ try {
   // ---------- gm give / take ----------
   i = T.mark(); gm(P, { op: 'give', item: 'ticket', to: 'sol' });
   await until(T, (x) => x.facts.inventory.sol?.ticket === 1, i);
-  check(true, 'host gives a ticket to Sol');
+  check(true, 'game master gives a ticket to Sol');
   check(await errOf(P, { t: 'gm', op: { op: 'take', item: 'ticket', from: 'sol', count: 2 } }) === 'refused', 'take more than held → refused (no partial take)');
   check(inv(T).sol?.ticket === 1, '…and nothing was taken');
   check(await errOf(P, { t: 'gm', op: { op: 'give', item: 'unicorn', to: 'sol' } }) === 'refused', 'unknown item → refused (items must exist)');
   check(await errOf(P, { t: 'gm', op: { op: 'give', item: 'ticket', to: 'zorro' } }) === 'refused', 'unknown character → refused');
-  check(await errOf(S, { t: 'gm', op: { op: 'give', item: 'ticket', to: 'sol' } }) === 'not-host', 'give from a non-host → not-host');
+  check(await errOf(S, { t: 'gm', op: { op: 'give', item: 'ticket', to: 'sol' } }) === 'not-gm', 'give from a non-game-master → not-gm');
   check(await errOf(P, { t: 'gm', op: { op: 'unlock', node: 'hub' } }) === null, 'other no-op gm ops stay silent');
   i = T.mark(); gm(P, { op: 'take', item: 'ticket', from: 'sol' });
   await until(T, (x) => !x.facts.inventory.sol?.ticket, i);
-  check(!inv(T).sol || !('ticket' in inv(T).sol), 'host takes it back: a count of 0 is removed');
+  check(!inv(T).sol || !('ticket' in inv(T).sol), 'game master takes it back: a count of 0 is removed');
 
   // ---------- all: the photo goes to every non-left member, never to someone who left ----------
   const { c: A, id: idA } = await player('A', 'anna');

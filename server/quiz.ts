@@ -60,7 +60,7 @@ export type Judge = (q: Question, text: string) => Promise<boolean | null>;
 
 export const nullJudge: Judge = async () => null;
 
-/** Bounds a judge: a timeout or a failure is "cannot tell" (→ wrong; the host can override). */
+/** Bounds a judge: a timeout or a failure is "cannot tell" (→ wrong; the game master can override). */
 export function withTimeout(judge: Judge, ms: number): Judge {
   return (q, text) => new Promise<boolean | null>((resolve) => {
     const timer = setTimeout(() => resolve(null), ms);
@@ -78,12 +78,11 @@ const JUDGE_TIMEOUT_MS = 4000;
 export function makeQuizServer(): MinigameServer<QuizState, QuizAction, Candidate[]> {
   const bank = loadBank();
   const judge = withTimeout(nullJudge, JUDGE_TIMEOUT_MS);
-  console.log(`[itloe] quiz bank: ${bank.questions.length} questions (${bank.files.join(', ') || 'no files'}), judge: none (uncertain typed answers → wrong, host overrides)`);
+  console.log(`[itloe] quiz bank: ${bank.questions.length} questions (${bank.files.join(', ') || 'no files'}), judge: none (uncertain typed answers → wrong, the game master overrides)`);
 
   return {
-    message(m, { id, now, hostId, state: q }, io) {
-      const host = id === hostId;
-      const refusal: ErrCode = host ? 'refused' : 'not-host';
+    message(m, { id, now, gameMasterId, state: q }, io) {
+      const refusal: ErrCode = id === gameMasterId ? 'refused' : 'not-gm';
       switch (m.t) {
         case 'answer': {
           // judged HERE, from the bank: only the verdict enters the reducer
@@ -109,7 +108,7 @@ export function makeQuizServer(): MinigameServer<QuizState, QuizAction, Candidat
           return { action: { t: 'next', id, now }, refused: refusal };
 
         case 'override':
-          // host, on the reveal: any answer, both ways
+          // the game master, on the reveal: any answer, both ways
           if (typeof m.target !== 'string' || typeof m.ok !== 'boolean') return null;
           return { action: { t: 'override', id, target: m.target, ok: m.ok }, refused: refusal };
 

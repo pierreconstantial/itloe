@@ -1,4 +1,4 @@
-// How settings read, for every client: the host's settings sheet (labels, values) and the one-line
+// How settings read, for every client: the game master's settings sheet (labels, values) and the one-line
 // summary on the TV and the phone ("9×9 · timed 3:00 · simple set"). Driven by SETTINGS_SCHEMA: a new
 // schema key gets a label and a summary slot with no change here (TEXT only adds nicer wording).
 // Summary rule: size and mode always; any other key only when it differs from DEFAULT_SETTINGS.

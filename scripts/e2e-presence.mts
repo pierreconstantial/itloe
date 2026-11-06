@@ -1,5 +1,5 @@
 // P1 (server) end-to-end, slice 2b — the character IS the identity: presence (`online` in view),
-// reclaim by character, newest-socket-wins (`replaced`), host reclaim, dead-socket sweep, restart.
+// reclaim by character, newest-socket-wins (`replaced`), game master reclaim, dead-socket sweep, restart.
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR) so it can kill -9 it.
 // Usage: PORT=3179 node scripts/e2e-presence.mts      (never 3131: that's the live server)
 import { spawn, type ChildProcess } from 'node:child_process';
@@ -88,7 +88,7 @@ try {
 
   // ---------- the room at the tableau: presence + reclaim ----------
   const A = await device('A');
-  const idA = (await tap(A, 'anna')).id!;
+  const idA = (await tap(A, 'pierre')).id!;
   await onlineIs(screen, [idA], 'join → online');
   const B = await device('B');
   const idB = (await tap(B, 'sol')).id!;
@@ -98,7 +98,7 @@ try {
   check(screen.lastRoom().players[idB] && screen.lastRoom().order.length === 2, '…but still in the game');
 
   const C = await device('C');
-  check((await tap(C, 'anna')).err === 'taken', 'tap an ONLINE-held character → err taken');
+  check((await tap(C, 'pierre')).err === 'taken', 'tap an ONLINE-held character → err taken');
   const r = await tap(C, 'sol');
   check(r.id === idB, 'the room: tap an OFFLINE-held character → welcome with the EXISTING playerId (reclaim)');
   await onlineIs(screen, [idA, idB], 'reclaim → online again');
@@ -113,16 +113,16 @@ try {
   await sleep(150);
   check(lastOnline(screen).join() === `${idA},${idB}`, 'presence unchanged by a bump (same player, new socket)');
 
-  // ---------- host reclaim, then the host starts ----------
+  // ---------- game master reclaim, then the game master starts ----------
   await closed(A2);
-  await onlineIs(screen, [idB], 'host phone dies → offline');
+  await onlineIs(screen, [idB], 'game master phone dies → offline');
   const A3 = await device('A3');
-  check((await tap(A3, 'anna')).id === idA, 'host character reclaimed on a new device → same playerId');
-  check(screen.lastHost() === idA, 'reclaimed host is still host');
+  check((await tap(A3, 'pierre')).id === idA, 'game master character reclaimed on a new device → same playerId');
+  check(screen.lastGm() === idA, 'reclaimed Pierre is still game master');
   let i = A3.mark(); A3.send({ t: 'start' });
   await A3.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   await B2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing');
-  check(A3.lastView().phase === 'playing', 'reclaimed host can start the game');
+  check(A3.lastView().phase === 'playing', 'reclaimed game master can start the game');
 
   // ---------- mid-game reclaim keeps board, score, hand ----------
   i = A3.mark(); B2.send({ t: 'place', ...legalMoves(B2.lastView(), idB)[0] });
@@ -156,7 +156,7 @@ try {
   console.log(`      (swept after ${Math.round((Date.now() - t0) / 100) / 10} s)`);
   zombie.terminate();
   const A4 = await device('A4');
-  check((await tap(A4, 'anna')).id === idA, 'swept player reclaimed');
+  check((await tap(A4, 'pierre')).id === idA, 'swept player reclaimed');
 
   // ---------- podium reclaim; a left player's character is free, not reclaimable ----------
   i = A4.mark(); Bold.send({ t: 'leave' });
@@ -171,12 +171,12 @@ try {
   await playToDone(A4, idA, screen, rnd);
   await A4.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished');
   await closed(A4);
-  await onlineIs(screen, [], 'podium: host offline');
-  const Ehost = await device('Ehost');
-  check((await tap(Ehost, 'anna')).id === idA, 'podium: offline host reclaimed by character');
-  check(Ehost.lastHost() === idA && Ehost.lastView().phase === 'finished', '…still host, still on the podium');
-  i = Ehost.mark(); Ehost.send({ t: 'newGame' });
-  const lob = roomOf(await Ehost.waitFor((m) => m.t === 'view' && !!roomOf(m), i));
+  await onlineIs(screen, [], 'podium: game master offline');
+  const Egm = await device('Egm');
+  check((await tap(Egm, 'pierre')).id === idA, 'podium: offline game master reclaimed by character');
+  check(Egm.lastGm() === idA && Egm.lastView().phase === 'finished', '…still game master, still on the podium');
+  i = Egm.mark(); Egm.send({ t: 'newGame' });
+  const lob = roomOf(await Egm.waitFor((m) => m.t === 'view' && !!roomOf(m), i));
   check(!lob.players[idB], 'newGame drops the left player');
   const F = await device('F');
   const idF = (await tap(F, 'sol')).id ?? '';
@@ -192,9 +192,9 @@ try {
   const F2 = await device('F2');
   check((await tap(F2, 'sol')).id === idF, 'after restart: no stored id → tap the character → reclaim');
   await onlineIs(screen, [idA, idF], 'everyone back online');
-  check(screen.lastHost() === idA, 'host kept through the restart');
-  // ---------- host controls: a dropped player can never block the game ----------
-  const G = await device('G'); const idG = (await tap(G, 'pierre')).id!;
+  check(screen.lastGm() === idA, 'game master kept through the restart');
+  // ---------- game master controls: a dropped player can never block the game ----------
+  const G = await device('G'); const idG = (await tap(G, 'anna')).id!;
   i = E2.mark(); E2.send({ t: 'start' });
   await E2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   await closed(F2); // sol drops while NOT stuck: the game would wait for her forever
@@ -204,14 +204,14 @@ try {
     const r = await c.waitFor((m) => m.t === 'err', k).catch(() => null);
     return r?.code ?? 'none';
   };
-  check(await errOf(G, { t: 'retire', target: idF }) === 'not-host', 'non-host retire → err not-host');
-  check(await errOf(G, { t: 'endGame' }) === 'not-host', 'non-host endGame → err not-host');
+  check(await errOf(G, { t: 'retire', target: idF }) === 'not-gm', 'non-game-master retire → err not-gm');
+  check(await errOf(G, { t: 'endGame' }) === 'not-gm', 'non-game-master endGame → err not-gm');
   i = screen.mark(); E2.send({ t: 'retire', target: idF });
   const vr2 = blocksOf(await screen.waitFor((m) => m.t === 'view' && blocksOf(m)?.players[idF]?.done, i));
   const pf = vr2.players[idF];
-  check(pf.done && pf.retired && !pf.left && vr2.phase === 'playing', 'host retires the dropped player → done + retired, not left, game goes on');
+  check(pf.done && pf.retired && !pf.left && vr2.phase === 'playing', 'game master retires the dropped player → done + retired, not left, game goes on');
   i = E2.mark(); E2.send({ t: 'retire', target: 'p-nope' }); await sleep(300);
-  check(!E2.since(i).some((m) => m.t === 'err'), "host's no-op retire (unknown target) → no error");
+  check(!E2.since(i).some((m) => m.t === 'err'), "game master's no-op retire (unknown target) → no error");
   const F3 = await device('F3');
   check((await tap(F3, 'sol')).id === idF, 'a retired player keeps the character: tap → reclaim');
   check(F3.lastView().players[idF].retired === true, '…and sees themself out (done) on reconnect');
@@ -219,11 +219,11 @@ try {
   const scores = Object.fromEntries(E2.lastView().order.map((id: string) => [id, E2.lastView().players[id].score]));
   i = screen.mark(); E2.send({ t: 'endGame' });
   const ve = blocksOf(await screen.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i));
-  check(ve.endReason === 'host' && ve.order.every((id: string) => ve.players[id].done && ve.players[id].score === scores[id]),
-    'host endGame → finished, endReason host, everyone done, scores kept');
-  check(await errOf(E2, { t: 'endGame' }) === 'refused', 'host endGame on the podium → err refused');
-  check(await errOf(E2, { t: 'retire', target: idG }) === 'refused', 'host retire on the podium → err refused');
-  // solo: a host-ended game is a real score → solo best recorded
+  check(ve.endReason === 'gm' && ve.order.every((id: string) => ve.players[id].done && ve.players[id].score === scores[id]),
+    'game master endGame → finished, endReason gm, everyone done, scores kept');
+  check(await errOf(E2, { t: 'endGame' }) === 'refused', 'game master endGame on the podium → err refused');
+  check(await errOf(E2, { t: 'retire', target: idG }) === 'refused', 'game master retire on the podium → err refused');
+  // solo: a game ended by the game master is a real score → solo best recorded
   i = E2.mark(); E2.send({ t: 'newGame' }); await E2.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
   F3.send({ t: 'leave' }); G.send({ t: 'leave' });
   await E2.waitFor((m) => m.t === 'view' && roomOf(m)?.order.length === 1);
@@ -232,7 +232,7 @@ try {
   const solo = E2.lastView().players[idA].score;
   i = E2.mark(); E2.send({ t: 'endGame' });
   const vb = await E2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i);
-  check(blocksOf(vb).endReason === 'host' && blocksOf(vb).best?.score === solo && solo > 0, `solo game ended by the host still counts as a best (${solo})`);
+  check(blocksOf(vb).endReason === 'gm' && blocksOf(vb).best?.score === solo && solo > 0, `solo game ended by the game master still counts as a best (${solo})`);
   void idG;
 
   // ---------- show the join QR again: any joined player → screens only, ephemeral, rate-limited ----------

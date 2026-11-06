@@ -39,7 +39,7 @@ function harness() {
     relay: (id, pos) => relayed.push([id, pos]),
   });
   /** @param {string} id @param {any} m */
-  const message = (id, m) => STAND_IN.message(m, { id, now: 0, hostId: null, state }, round.io);
+  const message = (id, m) => STAND_IN.message(m, { id, now: 0, gameMasterId: null, state }, round.io);
   return { round, all, relayed, applied, message };
 }
 

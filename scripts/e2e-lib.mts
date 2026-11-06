@@ -7,6 +7,7 @@ import { createServer } from 'node:net';
 import { join } from 'node:path';
 import { canPlace } from '../shared/board.js';
 import { PIECES } from '../shared/pieces.js';
+import { gameMasterId } from '../shared/campaign/index.js';
 
 export const URL_WS = `ws://localhost:${process.env.PORT ?? 3141}/ws`;
 /** Timeout multiplier for a loaded machine: E2E_SLOW=3 triples every wait (default 1). */
@@ -100,8 +101,8 @@ export const roomOf = (v: any): any => {
 };
 /** A view's tableau settings (the campaign keeps them), else null. */
 export const settingsOf = (v: any): any => v?.campaign?.at.settings ?? null;
-/** A view's host: the party's (a minigame stores none). */
-export const hostOf = (v: any): string | null => v?.campaign?.party.hostId ?? null;
+/** A view's game master: whoever holds Pierre, the game master of every content (shared/campaign gameMasterId). */
+export const gmOf = (v: any): string | null => (v?.campaign ? gameMasterId(v.campaign.party, { gameMaster: 'pierre' } as any) : null);
 
 export class Client {
   ws!: WebSocket;
@@ -129,8 +130,8 @@ export class Client {
   lastRoom(): any { return roomOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
   /** The tableau's settings in the last view, or null. */
   lastSettings(): any { return settingsOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
-  /** The party's host in the last view. */
-  lastHost(): string | null { return hostOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
+  /** The game master in the last view. */
+  lastGm(): string | null { return gmOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
   async waitFor(pred: (m: any) => boolean, from = 0, ms = 2000): Promise<any> {
     const end = Date.now() + ms * SLOW;
     while (Date.now() < end) {

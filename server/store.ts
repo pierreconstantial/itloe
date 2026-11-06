@@ -56,7 +56,7 @@ function describe(c: Campaign, room: string): string {
 }
 
 /**
- * The saved evening in any state → resume it (room code, party, host, nested game, facts, news kept);
+ * The saved evening in any state → resume it (room code, party, nested game, facts, news kept);
  * missing/corrupt/--new → a fresh campaign at content.start. A timed game keeps its remaining time.
  * A corrupt save is quarantined (kept for inspection), never deleted. A round of a minigame this release
  * does not have throws: the boot stops and the save stays as it is, for the release that has it.

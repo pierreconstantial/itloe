@@ -2,7 +2,7 @@
 // PUBLIC quiz (shared/quiz/bank.js projectQuiz), which never carries an answer before the reveal. Between
 // quizzes the party is in the room (main.js); phases here:
 // question (4 big choices or a typed answer; one shot), reveal (my verdict + points, the answer, everyone's
-// answers; host: overrides + next). The finished quiz is the frame's podium, with each player's right answers.
+// answers; the game master: overrides + next). The finished quiz is the frame's podium, with each player's right answers.
 // Controls are built once per question, so a view arriving mid-typing never resets the text field.
 import { $, addStylesheet } from './dom.js';
 import * as haptics from './haptics.js';
@@ -36,7 +36,7 @@ function el(tag, cls, text) {
 export function createQuizUi(io) {
   /** @type {QuizView | null} */ let last = null;
   /** @type {string} */ let meId = '';
-  /** Am I the party's host (the quiz stores no host)? */ let amHost = false;
+  /** Am I the game master (the quiz stores none)? */ let amGm = false;
   /** What I sent this round (the view only says THAT I answered). @type {{ key: string, choice?: number, text?: string } | null} */
   let mine = null;
   /** Round whose question controls are built. */ let builtKey = '';
@@ -98,7 +98,7 @@ export function createQuizUi(io) {
     buildQuestion(r);
     $('quiz-category').textContent = r.question.category ? `${r.question.category}${r.question.level ? ` · ${'★'.repeat(r.question.level)}` : ''}` : '';
     $('quiz-q').textContent = frenchSpaces(r.question.q);
-    const out = !!v.players[meId]?.left; // taken out by the host: no more answers, the score counts
+    const out = !!v.players[meId]?.left; // taken out by the game master: no more answers, the score counts
     const sent = out || r.answered.includes(meId) || mine?.key === roundKey(r);
     const asChoice = !!r.question.choices;
     $('quiz-choices').hidden = !asChoice;
@@ -111,7 +111,7 @@ export function createQuizUi(io) {
     /** @type {HTMLButtonElement} */ ($('quiz-send')).disabled = sent;
     if (sent && mine?.text !== undefined && mine.key === roundKey(r)) input.value = mine.text;
     $('quiz-sent').hidden = !sent;
-    $('quiz-sent').textContent = out ? 'The host took you out — your score counts' : 'Answer sent ✓';
+    $('quiz-sent').textContent = out ? 'You were taken out — your score counts' : 'Answer sent ✓';
     renderAnswered(v, r);
   }
 
@@ -147,7 +147,7 @@ export function createQuizUi(io) {
     anecdote.hidden = !r.answer?.anecdote;
     anecdote.textContent = r.answer?.anecdote ? `💡 ${frenchSpaces(r.answer.anecdote)}` : '';
 
-    const host = amHost;
+    const gm = amGm;
     const ul = $('quiz-results');
     ul.replaceChildren(...v.order.map((id) => {
       const p = v.players[id];
@@ -160,7 +160,7 @@ export function createQuizUi(io) {
         el('span', 'what', answerShown(v, r, id)),
         el('span', 'pts', ans?.ok ? `+${ans.points}` : ''),
       );
-      if (host && ans && v.phase === 'reveal') {
+      if (gm && ans && v.phase === 'reveal') {
         const to = !(ans.ok === true); // flip: right ↔ wrong (a pending one is marked right)
         const k = `ovr:${key}:${id}:${to}`;
         const b = /** @type {HTMLButtonElement} */ (el('button', 'override', confirm.isArmed(k) ? 'Tap again' : to ? 'Mark right' : 'Mark wrong'));
@@ -173,16 +173,16 @@ export function createQuizUi(io) {
       return li;
     }));
     const isLast = r.index + 1 >= r.total;
-    $('quiz-next').hidden = !host || v.phase !== 'reveal';
+    $('quiz-next').hidden = !gm || v.phase !== 'reveal';
     $('quiz-next').textContent = isLast ? 'See the results' : 'Next question';
-    $('quiz-reveal-hint').hidden = host || v.phase !== 'reveal';
+    $('quiz-reveal-hint').hidden = gm || v.phase !== 'reveal';
   }
 
-  /** @param {QuizView} v @param {string} id @param {boolean} [host] am I the party's host (default: as last time) */
-  function render(v, id, host = amHost) {
+  /** @param {QuizView} v @param {string} id @param {boolean} [gm] am I the game master (default: as last time) */
+  function render(v, id, gm = amGm) {
     last = v;
     meId = id;
-    amHost = host;
+    amGm = gm;
     for (const ph of PHASES) $(`quiz-${ph}`).hidden = v.phase !== ph;
     const r = v.round;
     $('quiz-progress').textContent = r ? `Question ${r.index + 1}/${r.total}` : 'Quiz';
@@ -239,7 +239,7 @@ const MARKUP = `
       <p id="quiz-anecdote" class="quiz-anecdote" hidden></p>
       <ul id="quiz-results" class="quiz-results"></ul>
       <button id="quiz-next" type="button" class="primary" hidden>Next question</button>
-      <p id="quiz-reveal-hint" class="dim">Waiting for the host…</p>
+      <p id="quiz-reveal-hint" class="dim">Waiting for the game master…</p>
     </div>
   </section>
 `;
@@ -253,7 +253,7 @@ export const QUIZ_SCREEN = {
     const ui = createQuizUi(io);
     const clock = setInterval(ui.tick, TICK_MS);
     return {
-      update: (round) => ui.render(round.view, io.meId(), io.isHost()),
+      update: (round) => ui.render(round.view, io.meId(), io.isGameMaster()),
       message: () => {},
       unmount() {
         clearInterval(clock);
@@ -262,11 +262,11 @@ export const QUIZ_SCREEN = {
       },
     };
   },
-  /** Each player's right answers; the host's end in the quiz's words. */
+  /** Each player's right answers; the game master's end in the quiz's words. */
   podium(round) {
     const v = /** @type {QuizView} */ (round.view);
     return {
-      ...(v.endReason === 'host' ? { kicker: 'The host ended the quiz.' } : {}),
+      ...(v.endReason === 'gm' ? { kicker: 'The game master ended the quiz.' } : {}),
       rowExtra: (id) => ` (${v.players[id].correct} ✓)`,
     };
   },

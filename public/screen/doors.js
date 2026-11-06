@@ -79,7 +79,7 @@ export function mapCopy(c, content) {
       : !c.facts.inventory.elodie?.['memory-key-intro'] ? 'Élodie, pick up the key.'
         : 'Élodie, enter the Young Adult room.'
     : c.at.node === 'young-adult' ? "Élodie can return to Elo's dream place."
-      : chooser ? `${chooser.name}, walk through a door — or the host picks one` : 'The host picks a door';
+      : chooser ? `${chooser.name}, walk through a door — or the game master picks one` : 'The game master picks a door';
   return {
     title: node?.title ?? c.at.node,
     hint,

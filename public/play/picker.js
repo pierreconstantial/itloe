@@ -2,7 +2,7 @@
 // new character appears with no change here. Each card is in one of three states, live from each view:
 //  - free: nobody holds it → a new party member (during a round, they watch);
 //  - continue: held by a player whose phone is offline → tapping takes that player back (same board,
-//    score, hand, host role), from any device and in any phase;
+//    score, hand), from any device and in any phase;
 //  - taken: held by an online player → greyed.
 import { CHARACTERS } from '../../shared/characters.js';
 import { $ } from './dom.js';

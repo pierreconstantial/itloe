@@ -13,7 +13,7 @@ const STEP_MS = 1100;
 const CHAMPION_PAUSE_MS = 600;
 
 /** Line under the title, by how the game ended (no line when it ran its natural course). */
-const ENDINGS = /** @type {Record<string, string>} */ ({ host: 'Game ended by the host' });
+const ENDINGS = /** @type {Record<string, string>} */ ({ gm: 'Game ended by the game master' });
 
 /**
  * When each ranking row appears, in ranking order (same order as `ranking(s)`).
@@ -67,7 +67,7 @@ export function renderPodium(s, elapsedMs, opts) {
   const sub = ending ? [h('p', 'podium-ending reveal', [ending])] : [];
   for (const el of sub) delay(el, 0);
   const again = opts.again ?? true;
-  const hint = h('p', 'podium-hint reveal', [opts.hint ?? (again ? "Play again on the host's phone" : "Back to the room on the host's phone")]);
+  const hint = h('p', 'podium-hint reveal', [opts.hint ?? (again ? "Play again on the game master's phone" : "Back to the room on the game master's phone")]);
   delay(hint, lastAt + 1200);
   const next = again ? [h('p', 'settings-line reveal', [`Next game: ${opts.next}`])] : [];
   for (const el of next) delay(el, lastAt + 1200);

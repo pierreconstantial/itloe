@@ -1,7 +1,7 @@
 // Local text judge for typed quiz answers (Contract E): pure, no I/O, French-aware.
 // Verdict per answer: 'right' (clearly the answer, small typos forgiven), 'wrong' (clearly not), or
 // 'uncertain' (close, partial, or ambiguous): the server may then ask a pluggable judge, else counts it
-// wrong and lets the host override on the reveal.
+// wrong and lets the game master override on the reveal.
 //
 //   normalize: case, accents (é → e), ligatures (œ → oe), curly apostrophes, punctuation and hyphens
 //              (→ spaces), ONE leading French article (le/la/les/l'/un/une/des/du/de la/de l'/d').

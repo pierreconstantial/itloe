@@ -15,6 +15,7 @@ import { h } from './dom.js';
 import { createContentSource } from '../commun/content.js';
 import { doorStates, mapCopy, nameOf } from './doors.js';
 import { roomAt } from '../../shared/campaign/content.js';
+import { gameMasterId } from '../../shared/campaign/index.js';
 import { room as sceneRoom } from '../../shared/scene.js';
 import { createCutscenes } from './cutscenes.js';
 import { screenOf } from './minigames.js';
@@ -96,7 +97,7 @@ function cancelPodium() {
   podiumTimers.clear();
 }
 
-/** Who has dropped (debounced): dims their board / avatar so the host can say "tap your character". */
+/** Who has dropped (debounced): dims their board / avatar so the game master can say "tap your character". */
 const presence = createPresence({ onChange: applyPresence });
 
 /** A round's seated players, who can be offline (a left player is gone, not offline). @param {RoundPlayers} s */
@@ -218,11 +219,12 @@ function showRoom(c) {
   roomIds = here;
   const band = /** @type {import('./minigames.js').TvScreen} */ (screenOf(c.at.kind));
   const opening = c.facts.flags.includes('story.elo-50') && c.at.node === 'hub.false-start';
+  const gm = gameMasterId(c.party, content.get());
   app.replaceChildren(renderLobby({ order: here, players: c.party.players }, null, joinInfo,
     { title: band.title, settings: band.settings.summarize(c.at.settings) },
-    portalOpen() ? { hostId: c.party.hostId, status: 'A portal has appeared. Élodie, walk into it!' }
-      : portalReady() ? { hostId: c.party.hostId, status: 'Élodie went through the portal.' }
-        : { hostId: c.party.hostId, required: opening ? OPENING_PLAYERS.length : undefined }));
+    portalOpen() ? { gameMasterId: gm, status: 'A portal has appeared. Élodie, walk into it!' }
+      : portalReady() ? { gameMasterId: gm, status: 'Élodie went through the portal.' }
+        : { gameMasterId: gm, required: opening ? OPENING_PLAYERS.length : undefined }));
   party.setRoom(roomAt(content.get(), c.at.node));
   party.setPortal(portalOpen());
   party.setKey(false);

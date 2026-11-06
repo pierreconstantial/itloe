@@ -141,7 +141,7 @@
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* offline (presence.js, debounced): dims the board + tag, so the host can say "tap your character" */
+/* offline (presence.js, debounced): dims the board + tag, so the game master can say "tap your character" */
 .panel.is-offline { opacity: 0.55; }
 .panel.is-offline .board { filter: grayscale(0.8) brightness(0.75); }
 .panel.is-offline .panel-head::after {

@@ -62,7 +62,7 @@ try {
   await boot(true);
   const room = await roomCode();
   let A = new Client('A'); await A.open(); A.send({ t: 'hello', role: 'player', room });
-  let i = A.mark(); A.send({ t: 'join', character: 'anna' });
+  let i = A.mark(); A.send({ t: 'join', character: 'pierre' });
   const idA = (await A.waitFor((m) => m.t === 'welcome', i)).playerId;
   let B = new Client('B'); await B.open(); B.send({ t: 'hello', role: 'player', room });
   i = B.mark(); B.send({ t: 'join', character: 'sol' });
@@ -79,9 +79,9 @@ try {
   await kill9(); await boot();
   check((await roomCode()) === room, `kill -9 in the room → same room code (${room})`);
   A = await rejoin('A', idA); B = await rejoin('B', idB);
-  check(JSON.stringify(A.lastRoom()) === JSON.stringify(inRoom) && A.lastView() === null && A.lastHost() === idA
+  check(JSON.stringify(A.lastRoom()) === JSON.stringify(inRoom) && A.lastView() === null && A.lastGm() === idA
     && JSON.stringify(A.lastSettings()) === roomSettings && A.lastSettings().grace === 2,
-    'kill -9 in the room at the tableau → the room again: same players, host and settings (changed there); stored ids rejoin');
+    'kill -9 in the room at the tableau → the room again: same players, game master and settings (changed there); stored ids rejoin');
   check(!A.msgs.some((m) => m.t === 'pos'), 'positions are ephemeral: none replayed after a restart');
   check(/RESUMED .* at hub\.false-start, room /.test(log), 'server log says it resumed the room at the tableau');
 
@@ -116,10 +116,10 @@ try {
   check(JSON.stringify(A.lastSettings()) === podiumSettings && A.lastSettings().grace === 2 && A.lastSettings().cleanBoardBonus === 450,
     'finished kill -9 → the settings changed in the room and on the podium are kept');
   i = B.mark(); B.send({ t: 'newGame' });
-  check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-host', 'after resume: non-host newGame → err not-host');
+  check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-gm', 'after resume: non-game-master newGame → err not-gm');
   i = A.mark(); A.send({ t: 'newGame' });
   const back = roomOf(await A.waitFor((m) => m.t === 'view' && !!roomOf(m), i));
-  check(back.order.join() === `${idA},${idB}` && A.lastHost() === idA && (await roomCode()) === room, 'after resume: host newGame → the room, same players + room code');
+  check(back.order.join() === `${idA},${idB}` && A.lastGm() === idA && (await roomCode()) === room, 'after resume: game master newGame → the room, same players + room code');
 
   // the room after newGame survives a kill too (the case of the first playtest)
   await kill9(); await boot();

@@ -19,10 +19,10 @@ import { QUIZ_RULES } from './quiz/index.js';
  */
 
 /**
- * The round's players, as every minigame's view carries them: the frame's podium, host controls and presence
+ * The round's players, as every minigame's view carries them: the frame's podium, round controls and presence
  * read them, whatever the minigame. `order`: the seated players in party order; `score`: ranked by the shared
  * rule (shared/ranking.js); `left`: gone from the evening; `done`: out of this round (stuck, or taken out:
- * `retired`); `endReason`: how a finished round ended (`time`, `host`, or the minigame's own).
+ * `retired`); `endReason`: how a finished round ended (`time`, `gm`, or the minigame's own).
  * @typedef {{
  *   order: string[],
  *   players: Record<string, { name: string, color: number, score: number, left?: boolean, done?: boolean, retired?: boolean }>,
@@ -52,9 +52,9 @@ import { QUIZ_RULES } from './quiz/index.js';
  */
 
 /**
- * What the campaign passes with every action of a round: the party's host (a minigame stores none), for
- * the minigame's own host-only actions.
- * @typedef {{ hostId: string | null }} RoundCtx
+ * What the campaign passes with every action of a round: the game master (a minigame stores none), for
+ * the minigame's own game-master-only actions.
+ * @typedef {{ gameMasterId: string | null }} RoundCtx
  */
 
 /**
@@ -74,7 +74,7 @@ import { QUIZ_RULES } from './quiz/index.js';
  *   deadlineAction: (deadline: number) => A,    // fired when it passes; a stale one must be refused
  *   shiftDeadline: (s: S, by: number) => S,     // deadlines moved by a downtime (ms): resume, sleep
  *   resume?: (s: S) => S,                       // what a restart does besides the shift
- *   retire?: true,                              // the reducer takes the host's retire itself (else: the target's leave)
+ *   retire?: true,                              // the reducer takes the game master's retire itself (else: the target's leave)
  *   describe: (s: S) => string,                 // the round in the boot log
  * }} MinigameRules
  */

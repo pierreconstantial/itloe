@@ -8,7 +8,7 @@ export {};
 /** @typedef {import('../quiz/index.js').QuizAction} QuizAction */
 /** The nested activity a tableau runs: the block game, or a quiz (Contract E: `kind: 'quiz'`). */
 /** @typedef {BlockState | QuizState} ActivityState */
-/** A tableau's settings, by its minigame: the content's, then the host's choice until the party leaves. */
+/** A tableau's settings, by its minigame: the content's, then the game master's choice until the party leaves. */
 /** @typedef {import('../game.js').Settings | QuizSettings} TableauSettings */
 /** @typedef {import('../game.js').Settings} Settings */
 /** @typedef {import('../characters.js').CharacterId} CharacterId */
@@ -74,6 +74,7 @@ export {};
  *   start: string,              // where a NEW campaign starts: a minigame's tableau (the false-start block game)
  *   storyId?: string,            // optional live-story marker; absent from the engine's sample fixture
  *   chooser: CharacterId,       // whose walking opens doors ('elodie')
+ *   gameMaster: CharacterId,    // who runs the evening ('pierre'): whoever holds this character, never passed on
  *   nodes: Record<string, Node>,
  *   items: Record<string, Item>, // the item catalogue (keys = ids)
  * }} Content
@@ -117,7 +118,7 @@ export {};
 
 /**
  * The evening's roster, owned by reduceCampaign (A1). A round starts with its members present.
- * @typedef {{ order: string[], players: Record<string, PartyMember>, hostId: string | null }} Party
+ * @typedef {{ order: string[], players: Record<string, PartyMember> }} Party
  */
 
 /**
@@ -142,7 +143,7 @@ export {};
 // ---------------------------------------------------------------- actions (reduceCampaign)
 
 /**
- * Game-master ops (host only).
+ * Game-master ops.
  * @typedef {{ op: 'goto', node: string }               // move the party there (no unlock check)
  *   | { op: 'unlock', node: string }                    // force-unlock (+ news)
  *   | { op: 'lock', node: string }                      // the ONLY way an unlock is taken back
@@ -166,10 +167,10 @@ export {};
  *   | { t: 'status', id: string, status: string, on: boolean } // internal: add or remove a player status
  *   | { t: 'incarnate', id: string }                            // internal: finish the Wisp countdown
  *   | { t: 'back', id: string }
- *   | { t: 'start' | 'again', id: string, now: number, inputs?: unknown }    // host: a round from the room / the podium
- *   | { t: 'newGame', id: string }                                         // host, on the podium: back to the room
+ *   | { t: 'start' | 'again', id: string, now: number, inputs?: unknown }    // game master: a round from the room / the podium
+ *   | { t: 'newGame', id: string }                                         // game master, on the podium: back to the room
  *   | { t: 'activity', action: import('../game.js').Action | QuizAction }   // routed by the activity's kind
- *   | { t: 'config', id: string, patch: unknown }                            // host: the tableau's settings
+ *   | { t: 'config', id: string, patch: unknown }                            // game master: the tableau's settings
  *   | { t: 'event', event: CampaignEvent }
  *   | { t: 'ack', id: 'screen', upTo: number }
  *   | { t: 'gm', id: string, op: GmOp }} CampaignAction

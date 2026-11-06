@@ -1,4 +1,4 @@
-// Host settings sheet, generated from the tableau's minigame's settings schema and wording (its entry in
+// The game master's settings sheet, generated from the tableau's minigame's settings schema and wording (its entry in
 // ./minigames.js). Any minigame with a schema and a text table gets its sheet for free.
 import { $ } from './dom.js';
 

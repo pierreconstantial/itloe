@@ -86,7 +86,7 @@ function mount(root, io) {
         : first && io.continuous() && next.phase === 'playing' ? [{ t: /** @type {const} */ ('start') }] : [];
       countdown.update(next);
       if (next.phase === 'playing') root.replaceChildren(renderGame(next, prev, { danger: playersInDanger(next) }));
-      // the game ending in this very view (bell, host's endGame) marks everyone done at once:
+      // the game ending in this very view (bell, the game master's endGame) marks everyone done at once:
       // its own sound covers it, so no pile of per-player "done" sounds
       const endsNow = events.some((e) => e.t === 'finished');
       for (const e of events) if (!(endsNow && e.t === 'done')) react(e, next);

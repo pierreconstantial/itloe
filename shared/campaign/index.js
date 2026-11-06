@@ -10,6 +10,7 @@
 //   roundStatus(campaign)                    → 'running' | 'finished', or null (no round: the room at a
 //                                              tableau, the hub, a world); running: enter/back refused
 //   isUnlocked(campaign, nodeId) · nodeAt(campaign, content)
+//   gameMasterId(party, content)              → who runs the evening: the member holding content.gameMaster, or null
 //   holds(cond, facts) · record(facts, event) · settle(facts, content, fromSeq) → { facts, news }
 //   validateContent(content) → string[] · zoneAt(content, nodeId, x, y) → child id | null
 //   roomAt(content, nodeId) → the node's room (a scene)
@@ -59,7 +60,7 @@ const withId = (list, id) => (list.includes(id) ? list : [...list, id]);
 // ---------------------------------------------------------------- creation / loading
 
 /** @returns {Party} */
-const emptyParty = () => ({ order: [], players: {}, hostId: null });
+const emptyParty = () => ({ order: [], players: {} });
 
 /**
  * Settles facts at creation WITHOUT news: what is open at the start is not a surprise.
@@ -110,8 +111,8 @@ function settingsAt(node) {
   return spec ? spec.settings(/** @type {any} */ (node?.activity)?.settings) : null;
 }
 
-/** What the campaign passes with every action of its round. @param {Campaign} c */
-const ctxOf = (c) => ({ hostId: c.party.hostId });
+/** What the campaign passes with every action of its round. @param {Campaign} c @param {Content} content */
+const ctxOf = (c, content) => ({ gameMasterId: gameMasterId(c.party, content) });
 
 /**
  * Where the party stands at a node, between rounds: at a minigame's tableau, the room with that minigame's
@@ -210,7 +211,7 @@ export function loadCampaign(raw, content) {
     node, kind: stays && activity ? kind : room.kind, activity: stays ? activity : null,
     settings: (stays ? raw.at.settings : null) ?? room.settings,
   };
-  // A saved first podium with nobody left in the evening has no host who can close it. Resume
+  // A saved first podium with nobody left in the evening has nobody to close it. Resume
   // in the portal room; the completed match and its reward facts remain intact.
   if (content.storyId === 'elo-50' && node === content.start && at.activity && facts.flags.includes('portal.ready')
     && !party.order.some((id) => !party.players[id].left) && minigame(at.kind)?.status(at.activity) === 'finished') {
@@ -225,18 +226,16 @@ export function loadCampaign(raw, content) {
 
 // ---------------------------------------------------------------- reducer
 
-/** @param {Campaign} c @param {string} id */
-const isHost = (c, id) => c.party.hostId !== null && c.party.hostId === id && !c.party.players[id]?.statuses.includes('wisp');
-/** Pierre steers the birthday story even while he is a Wisp; sample content keeps its host GM.
- * @param {Campaign} c @param {string} id @param {Content} content */
-const isGameMaster = (c, id, content) => content.storyId === 'elo-50'
-  ? c.party.players[id]?.character === 'pierre' && !c.party.players[id].left
-  : isHost(c, id);
-
-/** @param {Party} party @param {string} goneId @returns {string | null} */
-function nextHost(party, goneId) {
-  return party.order.find((id) => id !== goneId && !party.players[id].left && !party.players[id].statuses.includes('wisp')) ?? null;
+/**
+ * The game master: the party member holding the character the content names, wisp or not; null before they
+ * join or once they left. The role never passes to anyone else.
+ * @param {Party} party @param {Content} content @returns {string | null}
+ */
+export function gameMasterId(party, content) {
+  return party.order.find((id) => !party.players[id].left && party.players[id].character === content.gameMaster) ?? null;
 }
+/** @param {Campaign} c @param {string} id @param {Content} content */
+const isGameMaster = (c, id, content) => gameMasterId(c.party, content) === id;
 
 /**
  * Settles facts into the campaign, queuing news with fresh seqs.
@@ -305,7 +304,6 @@ export function reduceCampaign(c, a, content) {
         order: [...c.party.order, a.id],
         players: { ...c.party.players, [a.id]: { id: a.id, character: a.character, name, color, left: false,
           statuses } },
-        hostId: c.party.hostId ?? (statuses.includes('wisp') ? null : a.id),
       };
       // a round under way: they watch, and play the next one
       return { ...c, party };
@@ -314,11 +312,10 @@ export function reduceCampaign(c, a, content) {
     case 'leave': {
       const m = c.party.players[a.id];
       if (!m || m.left) return c;
-      const hostId = c.party.hostId === a.id ? nextHost(c.party, a.id) : c.party.hostId;
-      const moved = { ...c, party: { ...c.party, hostId, players: { ...c.party.players, [a.id]: { ...m, left: true } } } };
+      const moved = { ...c, party: { ...c.party, players: { ...c.party.players, [a.id]: { ...m, left: true } } } };
       const s = c.at.activity;
       if (!s) return moved;
-      const next = s.players[a.id] ? kindOf(c).reduce(s, { t: 'leave', id: a.id }, ctxOf(moved)) : s;
+      const next = s.players[a.id] ? kindOf(c).reduce(s, { t: 'leave', id: a.id }, ctxOf(moved, content)) : s;
       return withActivity(moved, next, content); // reported to the round's minigame, which decides what it means
     }
 
@@ -334,13 +331,11 @@ export function reduceCampaign(c, a, content) {
           : a.on ? (statuses.includes(a.status) ? statuses : [...statuses, a.status])
             : statuses.filter((status) => status !== a.status);
       if (next === statuses || next.length === statuses.length) return c;
-      const hostId = a.status === 'wisp' && a.on && c.party.hostId === a.id ? nextHost(c.party, a.id)
-        : c.party.hostId;
-      const moved = { ...c, party: { ...c.party, hostId, players: { ...c.party.players, [a.id]: { ...member, statuses: next } } } };
+      const moved = { ...c, party: { ...c.party, players: { ...c.party.players, [a.id]: { ...member, statuses: next } } } };
       const activity = c.at.activity;
       if (a.status !== 'wisp' || !a.on || !activity || roundStatus(c) !== 'running') return moved;
       // A newly made Wisp leaves this round now. Their party membership and score still persist.
-      const without = kindOf(c).reduce(activity, { t: 'leave', id: a.id }, ctxOf(moved));
+      const without = kindOf(c).reduce(activity, { t: 'leave', id: a.id }, ctxOf(moved, content));
       return withActivity(moved, without, content);
     }
 
@@ -348,16 +343,15 @@ export function reduceCampaign(c, a, content) {
       const member = c.party.players[a.id];
       if (!member || member.left || !member.statuses.includes('wisp') || !member.statuses.includes('incarnating')) return c;
       const statuses = member.statuses.filter((status) => status !== 'wisp' && status !== 'incarnating');
-      return { ...c, party: { ...c.party, hostId: c.party.hostId ?? a.id,
-        players: { ...c.party.players, [a.id]: { ...member, statuses } } } };
+      return { ...c, party: { ...c.party, players: { ...c.party.players, [a.id]: { ...member, statuses } } } };
     }
 
     case 'enter': {
-      // the host, or the chooser's character (walking into a door), opens an unlocked child
+      // the game master, or the chooser's character (walking into a door), opens an unlocked child
       const actor = c.party.players[a.id];
       const chooser = actor && !actor.left && actor.character === content.chooser;
       if (!actor || actor.statuses.includes('wisp') ||
-        (content.storyId === 'elo-50' && c.facts.flags.includes('portal.entered') ? !chooser : (!isHost(c, a.id) && !chooser))) return c;
+        (content.storyId === 'elo-50' && c.facts.flags.includes('portal.entered') ? !chooser : (!isGameMaster(c, a.id, content) && !chooser))) return c;
       const n = content.nodes[a.node];
       if (!n || n.parent !== c.at.node || !isUnlocked(c, n.id)) return c;
       if (roundStatus(c) === 'running') return c;
@@ -373,8 +367,7 @@ export function reduceCampaign(c, a, content) {
       const facts = { ...c.facts, flags: withId(c.facts.flags, 'portal.entered'), seen: withId(c.facts.seen, 'hub') };
       const players = Object.fromEntries(Object.entries(c.party.players).map(([id, member]) => [id,
         member.character === content.chooser ? member : { ...member, statuses: [...new Set([...member.statuses, 'wisp'])] }]));
-      const chooserId = c.party.order.find((id) => c.party.players[id].character === content.chooser && !c.party.players[id].left);
-      const moved = withFacts({ ...c, party: { ...c.party, hostId: chooserId ?? c.party.hostId, players }, at: { node: 'hub', kind: null, activity: null, settings: null } }, facts, content);
+      const moved = withFacts({ ...c, party: { ...c.party, players }, at: { node: 'hub', kind: null, activity: null, settings: null } }, facts, content);
       const seq = moved.newsSeq + 1;
       return { ...moved, news: [...moved.news, { seq, t: 'apparition' }], newsSeq: seq };
     }
@@ -392,7 +385,7 @@ export function reduceCampaign(c, a, content) {
 
     case 'back': {
       const chooser = c.party.players[a.id]?.character === content.chooser && !c.party.players[a.id]?.left && !c.party.players[a.id]?.statuses.includes('wisp');
-      if (content.storyId === 'elo-50' && c.facts.flags.includes('portal.entered') ? !chooser : !isHost(c, a.id)) return c;
+      if (content.storyId === 'elo-50' && c.facts.flags.includes('portal.entered') ? !chooser : !isGameMaster(c, a.id, content)) return c;
       const n = content.nodes[c.at.node];
       if (!n || n.parent === null || roundStatus(c) === 'running') return c; // endGame first
       return moveTo(c, n.parent, content);
@@ -400,19 +393,19 @@ export function reduceCampaign(c, a, content) {
 
     case 'start':
     case 'again': {
-      // the host starts a round of the tableau's minigame, with every party member present (players who
+      // the game master starts a round of the tableau's minigame, with every party member present (players who
       // joined during the last round included): from the room (start), or at once from the podium (again)
       const spec = minigame(c.at.kind);
       const s = c.at.activity;
-      if (!isHost(c, a.id) || !spec) return c;
+      if (!isGameMaster(c, a.id, content) || !spec) return c;
       if (a.t === 'start' ? s !== null : !s || spec.status(s) !== 'finished') return c;
       const next = spec.init({ seed: c.seed, settings: c.at.settings, players: present(c.party), now: a.now, inputs: a.inputs });
       return next ? { ...c, seed: nextSeed(c.seed), at: { ...c.at, activity: next } } : c;
     }
 
     case 'newGame': {
-      // the host, on the podium: back to the room at the tableau
-      if (!isHost(c, a.id) || roundStatus(c) !== 'finished') return c;
+      // the game master, on the podium: back to the room at the tableau
+      if (!isGameMaster(c, a.id, content) || roundStatus(c) !== 'finished') return c;
       return { ...c, at: { ...c.at, activity: null } };
     }
 
@@ -420,18 +413,18 @@ export function reduceCampaign(c, a, content) {
       const s = c.at.activity;
       if (!s) return c;
       const rules = kindOf(c);
-      // the host taking a player out: the minigame's own rule, else it counts as that player leaving the round
+      // the game master taking a player out: the minigame's own rule, else it counts as that player leaving the round
       const action = a.action?.t === 'retire' && !rules.retire
-        ? (isHost(c, a.action.id) && roundStatus(c) === 'running' ? { t: 'leave', id: a.action.target } : null)
+        ? (isGameMaster(c, a.action.id, content) && roundStatus(c) === 'running' ? { t: 'leave', id: a.action.target } : null)
         : a.action;
       if (!action) return c;
-      return withActivity(c, rules.reduce(s, action, ctxOf(c)), content); // routed by the round's kind
+      return withActivity(c, rules.reduce(s, action, ctxOf(c, content)), content); // routed by the round's kind
     }
 
     case 'config': {
-      // the host sets the tableau's settings, except while a round runs; kept until the party leaves the tableau
+      // the game master sets the tableau's settings, except while a round runs; kept until the party leaves the tableau
       const spec = minigame(c.at.kind);
-      if (!isHost(c, a.id) || !spec || roundStatus(c) === 'running') return c;
+      if (!isGameMaster(c, a.id, content) || !spec || roundStatus(c) === 'running') return c;
       const settings = spec.settings(a.patch, c.at.settings);
       return JSON.stringify(settings) === JSON.stringify(c.at.settings) ? c : { ...c, at: { ...c.at, settings } };
     }

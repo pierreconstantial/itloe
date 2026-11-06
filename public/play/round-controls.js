@@ -1,9 +1,9 @@
-// Host controls during a game (slice 2b): a disconnected player must never block the podium.
-// Lives in the ☰ menu sheet, host only, while a round runs, the same for every minigame: "Take <name> out"
+// The game master's round controls (slice 2b): a disconnected player must never block the podium.
+// Lives in the ☰ menu sheet, game master only, while a round runs, the same for every minigame: "Take <name> out"
 // per player still playing (offline ones first and flagged), and "End game". Both are
 // irreversible, so each needs a second tap to confirm (same pattern as "Leave game"); an armed button
 // disarms after a few seconds.
-// Its buttons are inserted as direct children of the sheet panel, just before the #host-controls
+// Its buttons are inserted as direct children of the sheet panel, just before the #round-controls
 // marker, so they get the panel's button styles.
 import { $ } from './dom.js';
 import { createConfirm } from './confirm.js';
@@ -12,8 +12,8 @@ import { createConfirm } from './confirm.js';
 /** @typedef {import('../../shared/minigames.js').RoundPlayers} RoundPlayers */
 
 /** @param {{ send: (msg: unknown) => void }} io */
-export function createHostControls(io) {
-  /** @type {{ round: RoundView | null, online: readonly string[], meId: string, hostId: string | null } | null} */ let last = null;
+export function createRoundControls(io) {
+  /** @type {{ round: RoundView | null, online: readonly string[], isGm: boolean } | null} */ let last = null;
   // armed key: 'end' or a playerId
   const confirm = createConfirm(() => redraw());
   const tap = confirm.tap;
@@ -37,15 +37,15 @@ export function createHostControls(io) {
     const sig = els.map((el) => el.textContent).join('|');
     if (sig === shown) return;
     shown = sig;
-    const marker = $('host-controls');
-    for (const old of document.querySelectorAll('.host-control')) old.remove();
-    for (const el of els) { el.classList.add('host-control'); marker.before(el); }
+    const marker = $('round-controls');
+    for (const old of document.querySelectorAll('.round-control')) old.remove();
+    for (const el of els) { el.classList.add('round-control'); marker.before(el); }
   }
 
   function redraw() {
     const ctx = last;
-    // exactly when the server accepts endGame: the party's host, while a round runs
-    const v = ctx && ctx.hostId === ctx.meId && ctx.round?.status === 'running' ? /** @type {RoundPlayers} */ (ctx.round.view) : null;
+    // exactly when the server accepts endGame: the game master, while a round runs
+    const v = ctx && ctx.isGm && ctx.round?.status === 'running' ? /** @type {RoundPlayers} */ (ctx.round.view) : null;
     if (!ctx || !v) { place([]); confirm.disarm(); return; }
     const live = new Set(ctx.online);
     const playing = v.order.filter((id) => !v.players[id].done && !v.players[id].left);
@@ -54,7 +54,7 @@ export function createHostControls(io) {
 
     const title = document.createElement('p');
     title.className = 'dim';
-    title.textContent = 'Host';
+    title.textContent = 'Game master';
     const rows = playing.map((id) => {
       const p = v.players[id];
       const off = !live.has(id);
@@ -73,10 +73,10 @@ export function createHostControls(io) {
   return {
     /**
      * @param {RoundView | null} round the running round, null between rounds
-     * @param {readonly string[]} online @param {string} meId @param {string | null} hostId the party's host
+     * @param {readonly string[]} online @param {boolean} isGm is this phone the game master's?
      */
-    render(round, online, meId, hostId) {
-      last = { round, online, meId, hostId };
+    render(round, online, isGm) {
+      last = { round, online, isGm };
       redraw();
     },
   };

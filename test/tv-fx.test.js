@@ -6,8 +6,8 @@ import { detectMove } from '../public/screen/events.js';
 import { clearedCells } from '../public/screen/game-view.js';
 import { createFloaterPlanner, MERGE_MS, LIFE_MS } from '../public/screen/floaters.js';
 
-/** The block reducer, with the host the campaign passes: 'a'. */
-const reduce = (/** @type {import('../shared/game.js').State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { hostId: 'a' });
+/** The block reducer, with the game master the campaign passes: 'a'. */
+const reduce = (/** @type {import('../shared/game.js').State} */ s, /** @type {import('../shared/game.js').Action} */ a) => reduceGame(s, a, { gameMasterId: 'a' });
 
 const SIZE = 8;
 

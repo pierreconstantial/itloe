@@ -15,7 +15,7 @@ import { SAMPLE_CONTENT } from '../shared/campaign/index.js';
 
 /** A node's title (the server runs the sample content). @param {string} id */
 const C_TITLE = (id: string): string => SAMPLE_CONTENT.nodes[id].title;
-import { blocksOf, check, Client, finish, HTTP, legalMoves, quizOf, onlyPart, roomOf, settled, sleep, SLOW, SOCKET_PROBE, TEARDOWN_PROBE } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, gmOf, HTTP, legalMoves, quizOf, onlyPart, roomOf, settled, sleep, SLOW, SOCKET_PROBE, TEARDOWN_PROBE } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -221,8 +221,12 @@ async function killAndBackRoom(tv: Page): Promise<void> {
   await boot();
   check(await tv.until(`!${tvOnlineBanner}`, 'reconnect', 6000), 'room: restart → TV reconnects by itself, banner gone');
   check(await tv.until(tvRoom, 'room again') && await tv.js(partyJs) === before,
-    'room: the room at the tableau again, same party and host after the restart');
+    'room: the room at the tableau again, same party and game master after the restart');
 }
+
+/** The game master the TV's campaign view names (the player holding Pierre), or null. */
+const tvGm = async (tv: Page): Promise<string | null> =>
+  gmOf({ campaign: JSON.parse(await tv.js('JSON.stringify(window.bloko.campaign() ?? null)')) });
 
 /** kill -9, check the TV shows the banner, restart, check it comes back with the same game. */
 async function killAndBack(tv: Page, phase: string, ref: Client): Promise<void> {
@@ -230,7 +234,7 @@ async function killAndBack(tv: Page, phase: string, ref: Client): Promise<void> 
   const want = boardsOf(ref.lastView());
   await tv.until(`(() => { const s = window.bloko.round()?.view; return !!s && JSON.stringify(s.order.map((id) => [id, s.players[id].board, s.players[id].score, s.players[id].hand])) === ${JSON.stringify(want)}; })()`, 'tv converged');
   const before = await tv.js(`JSON.stringify(${tvState})`);
-  const hostBefore = await tv.js('window.bloko.campaign()?.party.hostId ?? null');
+  const gmBefore = await tvGm(tv);
   await kill9();
   check(await tv.until(tvOnlineBanner, 'banner'), `${phase}: kill -9 → TV shows the "Connecting…" banner`);
   await tv.shot(`kill-${phase}-banner`);
@@ -245,14 +249,14 @@ async function killAndBack(tv: Page, phase: string, ref: Client): Promise<void> 
   check(back, `${phase}: restart → TV reconnects by itself, banner gone`);
   await tv.until(`(() => { const s = window.bloko.round()?.view; return s?.phase === ${JSON.stringify(phase)} && JSON.stringify(s.order.map((id) => [id, s.players[id].board, s.players[id].score, s.players[id].hand])) === ${JSON.stringify(want)}; })()`, 'resumed view');
   const after = await tv.js(`JSON.stringify(${tvState})`);
-  const hostAfter = await tv.js('window.bloko.campaign()?.party.hostId ?? null');
+  const gmAfter = await tvGm(tv);
   const a = JSON.parse(after), b = JSON.parse(before);
-  const same = a.phase === phase && boardsOf(a) === boardsOf(b) && hostAfter === hostBefore && hostAfter !== null;
+  const same = a.phase === phase && boardsOf(a) === boardsOf(b) && gmAfter === gmBefore && gmAfter !== null;
   if (!same) {
     const diff = a.order.map((id: string) => `${id}: score ${b.players[id]?.score}→${a.players[id]?.score} hand ${JSON.stringify(b.players[id]?.hand)}→${JSON.stringify(a.players[id]?.hand)} done ${b.players[id]?.done}→${a.players[id]?.done}`);
-    console.log(`      diff: phase ${b.phase}→${a.phase} host ${hostBefore}→${hostAfter} seed ${b.seed}→${a.seed} | ${diff.join(' | ')}`);
+    console.log(`      diff: phase ${b.phase}→${a.phase} game master ${gmBefore}→${gmAfter} seed ${b.seed}→${a.seed} | ${diff.join(' | ')}`);
   }
-  check(same, `${phase}: same phase, boards/scores/hands, host after the restart`);
+  check(same, `${phase}: same phase, boards/scores/hands, game master after the restart`);
 }
 
 let tv: Page | null = null, tv2: Page | null = null;
@@ -276,7 +280,7 @@ try {
     return [...document.querySelectorAll('${sel}')].every((e) => { const r = e.getBoundingClientRect(); return r.right <= c.left || r.bottom <= c.top || r.left >= c.right || r.top >= c.bottom; }); })()`;
 
   // ---------- lobby, avatars, presence ----------
-  const A = await device('A'); const idA = await tap(A, 'anna');
+  const A = await device('A'); const idA = await tap(A, 'pierre'); // the game master
   check(await tv.until(`${tvJoined} === 1`, 'joined sound'), 'the first guest arriving in the room gets the "joined" sound');
   if (SHOTS) { // the evening's first screen, with its first guest
     await tv.until('window.bloko.avatars().length === 1', '1 avatar');
@@ -324,7 +328,7 @@ try {
   await killAndBackRoom(tv);
   A2 = await rejoin('A2', idA); B = await rejoin('B5', idB);
   const spawnOk = async () => tv!.js(`JSON.stringify(window.bloko.avatars().map((a) => [a.id, Math.round(a.x * 10), Math.round(a.y * 10)]))`);
-  const exp = JSON.stringify([[idA, Math.round(spawnPoint('anna').x * 10), Math.round(spawnPoint('anna').y * 10)], [idB, Math.round(spawnPoint('sol').x * 10), Math.round(spawnPoint('sol').y * 10)]]);
+  const exp = JSON.stringify([[idA, Math.round(spawnPoint('pierre').x * 10), Math.round(spawnPoint('pierre').y * 10)], [idB, Math.round(spawnPoint('sol').x * 10), Math.round(spawnPoint('sol').y * 10)]]);
   await tv.until(`window.bloko.avatars().length === 2`, 'avatars back');
   await sleep(500);
   check((await spawnOk()) === exp, 'lobby restart: avatars back, at their spawn points');
@@ -393,7 +397,7 @@ try {
 
   // ---------- "show the QR again": any player asks → side card on the TVs, never over a board ----------
   let qrPhoneMark = B.mark();
-  B.send({ t: 'showJoin', requestId: 1 }); // a non-host player
+  B.send({ t: 'showJoin', requestId: 1 }); // not the game master
   const firstJoinAck = await B.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 1, qrPhoneMark);
   check(firstJoinAck.accepted, 'the requesting player receives a show acknowledgement');
   check(await tv.until(cardOn, 'join card'), 'a player asks → the TV shows the join card mid-game');
@@ -486,20 +490,20 @@ try {
   const sc2 = blocksOf(await B.waitFor((m) => m.t === 'view', i)).players[idA].score;
   check(await tv.until(`${tvState}.players['${idA}'].score === ${sc2}`, 'live after silence'), '…and the next move reaches it');
 
-  // ---------- host controls: retire shows "Out", endGame shows the podium with its line ----------
+  // ---------- game master controls: retire shows "Out", endGame shows the podium with its line ----------
   i = A2.mark(); A2.send({ t: 'retire', target: idB });
   await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.players[idB].retired, i);
   check(await tv.until(`document.querySelector('.panel[data-id="${idB}"] .done-overlay')?.textContent.includes('Out')`, 'out overlay'),
-    'host retires a player → their board shows "🚪 Out" on the TV');
+    'the game master retires a player → their board shows "🚪 Out" on the TV');
   await tv.shot('retired');
   i = A2.mark(); A2.send({ t: 'endGame' });
   await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i);
-  check(await tv.until(`${tvState}.phase === 'finished' && document.querySelector('.podium-ending')?.textContent === 'Game ended by the host'`, 'podium'),
-    'host endGame → TV podium says "Game ended by the host"');
+  check(await tv.until(`${tvState}.phase === 'finished' && document.querySelector('.podium-ending')?.textContent === 'Game ended by the game master'`, 'podium'),
+    'the game master ends the game → TV podium says "Game ended by the game master"');
   check(await tv.js(`[...document.querySelectorAll('.rank-row')].some((r) => r.textContent.includes('Sol') && r.querySelector('.out-tag'))`),
     '…and the retired player is ranked with an "out" tag');
   if (SHOTS) await sleep(4000);
-  await tv.shot('podium-host');
+  await tv.shot('podium-gm');
   await killAndBack(tv, 'finished', A2);
   A2 = await rejoin('A4', idA); B = await rejoin('B8', idB);
 
@@ -514,7 +518,7 @@ try {
     '…and avatars resume walking (pos relayed)');
   check(await soundOn(tv), "the TV's sound is on again (the page reloaded above)");
   const joinedBefore = await tv.js(tvJoined);
-  N = await device('N'); const idN = await tap(N, 'pierre');
+  N = await device('N'); const idN = await tap(N, 'anna');
   check(await tv.until(`window.bloko.avatars().some((a) => a.id === '${idN}') && document.querySelector('.lobby-count').textContent.includes('3/')`, 'newcomer'),
     'a newcomer joins after newGame and appears on the TV');
   check(await tv.until(`${tvJoined} === ${joinedBefore + 1}`, 'joined sound'), '…with the "joined" sound, once');
@@ -523,7 +527,7 @@ try {
   } // connection
 
   if (!ONLY || ONLY === 'campaign' || ONLY === 'quiz') {
-  if (!N) { N = await device('N'); await tap(N, 'pierre'); }
+  if (!N) { N = await device('N'); await tap(N, 'anna'); }
 
   const doorsJs = `JSON.stringify(Object.fromEntries(window.bloko.doors().map((d) => [d.id, d.state])))`;
 
@@ -703,7 +707,7 @@ try {
   i = A2.mark(); A2.send({ t: 'back' });
   await A2.waitFor((m) => m.t === 'view' && !quizOf(m) && m.campaign?.at.node === 'childhood', i);
   check(await tv.until(`!document.querySelector('.quiz') && !!document.querySelector('.map-band') && !document.body.classList.contains('in-quiz')`, 'out of quiz'),
-    'host back → the world map again (quiz screen gone)');
+    'the game master goes back → the world map again (quiz screen gone)');
   const quizLeft = `[...window.__live(['quiz-screen.js', 'quiz-view.js', 'blocks-screen.js', 'countdown.js', 'game-view.js']), ...(document.querySelector('.quiz, .arena') ? ['its markup'] : [])]`;
   await tv.until(`${quizLeft}.length === 0`, 'quiz screen gone', 3000);
   const qLeft = await tv.js(quizLeft);
@@ -717,10 +721,10 @@ try {
   // A stand-in screen, put in the TV's list by this test (the round itself is a block game's) ----------
   i = A2.mark(); A2.send({ t: 'gm', op: { op: 'goto', node: 'childhood.blocks' } });
   await A2.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.node === 'childhood.blocks', i);
-  A2.send({ t: 'pos', x: 6, y: 6.5, dir: 'left', moving: false }); // where Anna stands in the room
+  A2.send({ t: 'pos', x: 6, y: 6.5, dir: 'left', moving: false }); // where Pierre stands in the room
   const avatarAt = (id: string, x: number, y: number, within: number) => `(() => { const a = window.bloko.avatars().find((a) => a.id === '${id}');
     return !!a && Math.abs(a.x - ${x}) < ${within} && Math.abs(a.y - ${y}) < ${within}; })()`;
-  check(await tv.until(`${tvRoom} && ${avatarAt(idA, 6, 6.5, 0.05)}`, 'room at a block tableau'), 'stand-in: the room at a block tableau, Anna standing in it');
+  check(await tv.until(`${tvRoom} && ${avatarAt(idA, 6, 6.5, 0.05)}`, 'room at a block tableau'), 'stand-in: the room at a block tableau, Pierre standing in it');
   await tv.js(STAND_IN_TV);
   const errorsBefore = tv.errors.length;
   const fart = { t: 'unsaved', data: { t: 'fart', x: 3, y: 2 } };
@@ -736,12 +740,12 @@ try {
   await tv.js(`window.__receive(${JSON.stringify(fart)})`);
   check(await tv.until(`JSON.stringify(window.__standIn.messages) === ${JSON.stringify(JSON.stringify([fart]))}`, 'unsaved'),
     "…and an unsaved message reaches the running screen's message()");
-  await tv.js(`window.bloko.pos({ playerId: '${idA}', x: 3, y: 2, dir: 'down', moving: false })`); // Anna in the game area
+  await tv.js(`window.bloko.pos({ playerId: '${idA}', x: 3, y: 2, dir: 'down', moving: false })`); // Pierre in the game area
   await tv.js(`window.bloko.pos({ playerId: '${idB}', x: 4, y: 2, dir: 'down', moving: false })`); // Sol never moved in the room
   i = A2.mark(); A2.send({ t: 'endGame' }); await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i);
   i = A2.mark(); A2.send({ t: 'newGame' }); await A2.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
   check(await tv.until(tvRoom, 'room again'), 'back to the room after the round');
-  check(await tv.js(avatarAt(idA, 6, 6.5, 0.01)), `…Anna stands where she stood in the room at once, without walking there (${JSON.stringify(await tv.js(`window.bloko.avatars().find((a) => a.id === '${idA}')`))})`);
+  check(await tv.js(avatarAt(idA, 6, 6.5, 0.01)), `…Pierre stands where he stood in the room at once, without walking there (${JSON.stringify(await tv.js(`window.bloko.avatars().find((a) => a.id === '${idA}')`))})`);
   const solSpawn = spawnPoint('sol');
   check(await tv.js(avatarAt(idB, solSpawn.x, solSpawn.y, 0.01)), '…Sol, who never moved in the room, is back at the spawn instead of the game-area position');
   check(await tv.js('window.__standIn.unmounted') && tv.errors.length === errorsBefore, '…the stand-in screen is unmounted, no page exception');
