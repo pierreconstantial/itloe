@@ -31,6 +31,7 @@ import { childMarks, content, onContentChange, syncContent, titleOf } from './ca
 /** @typedef {import('../../shared/minigames.js').MinigameView} MinigameView */
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
 /** @typedef {import('./movement.js').Pos} Pos */
+/** @typedef {import('../../shared/minigames.js').Spot} Spot */
 /** A party member in the room at a tableau. @typedef {{ id: string, name: string, color: number, character: CharacterId, left?: boolean, statuses: string[] }} TableauPlayer */
 
 /** What the wisp pad says on the hub (the story's wisps). */
@@ -256,21 +257,25 @@ const gameMasterName = () => CHARACTERS[content().gameMaster].name;
 const isStory = () => campaign?.facts.flags.includes('story.elo-50') ?? false;
 /** Do we show as a wisp now (the story's, or one the running minigame doesn't show)? */
 const amWisp = () => !!playerId && !!campaign && isWisp(campaign.party, playerId, minigame?.shows ?? null);
-/** The room where the party is: what the joystick walks in and the object button looks around. */
+/** Do we walk the running minigame's lobby as our character (it shows us, and its lobby is walkable)? */
+const amLobbyWalker = () => !!playerId && !!minigame?.spots && minigame.shows.includes(playerId);
+/** The room where the party is: what the joystick walks in and the object button looks around. A wisp, and a
+ *  player on a walkable lobby, walk the whole world without furniture. */
 /** @type {WeakMap<import('../../shared/scene.js').Scene, import('../../shared/scene.js').Scene>} */
 const wispRooms = new WeakMap();
 const roomHere = () => {
   const base = roomAt(content(), campaign?.at.node);
-  if (!amWisp()) return base;
+  if (!amWisp() && !minigame) return base;
   let scene = wispRooms.get(base);
   if (!scene) { scene = sceneRoom(`${base.id}-wisp`, { x: 0, y: 0, w: WORLD.w, h: WORLD.h }, []); wispRooms.set(base, scene); }
   return scene;
 };
 const isGameMaster = () => playerId !== null && gameMaster() === playerId;
 
-/** Walking: a member while no minigame runs (on the hub, in a world, in the room at a tableau), or a wisp at any time. */
+/** Walking: a member while no minigame runs (on the hub, in a world, in the room at a tableau), a wisp at any time,
+ *  or a player on a minigame's walkable lobby. */
 const canWalk = () => member() !== null && incarnationAt <= serverNow()
-  && (amWisp() || minigame === null)
+  && (amWisp() || minigame === null || amLobbyWalker())
   && !(isStory() && campaign?.at.node === 'hub' && myCharacter() === 'elodie' && !campaign.facts.flags.includes('apparition.seen'));
 
 /** The latest accepted window from this phone. The server decides whether a request succeeded. */
@@ -384,6 +389,8 @@ function unmountScreen() {
 }
 
 function render() {
+  $('walk-panel').hidden = true;
+  document.body.classList.remove('lobby-walk');
   menu.refresh();
   social.render();
   if (!member()) menu.close('chat');
@@ -432,16 +439,17 @@ function render() {
     if (amWisp() && !isGameMaster()) { // the game master keeps his controls when he sits a round out
       // the screens see the view that turns us into a wisp (a block player out of moves feels it), then go
       if (running?.kind === minigame.kind) running.screen.update(minigame, campaign);
-      show('wait-lobby'); dockStick('wait-lobby');
+      show('wait-lobby'); dockStick('view-wait-lobby');
       $('wait-lobby-text').textContent = `The ${screenOf(minigame.kind)?.name ?? 'game'} is on: until you play, you float over it as a light. Move it here, and tap Shine in the reactions to glow brighter.`;
       return;
     }
     show('minigame');
     mountScreen(minigame.kind).update(minigame, campaign);
+    if (amLobbyWalker()) renderWalkPanel(/** @type {Spot[]} */ (minigame.spots));
     return;
   }
   if (isStory() && campaign?.at.node === 'hub' && amWisp()) {
-    show('wait-lobby'); dockStick('wait-lobby'); $('wait-lobby-text').textContent = WISP_TEXT; return;
+    show('wait-lobby'); dockStick('view-wait-lobby'); $('wait-lobby-text').textContent = WISP_TEXT; return;
   }
   show('place'); if (campaign) renderPlace(campaign, mem);
 }
@@ -479,11 +487,12 @@ function currentPos(character) {
   return joystick.current() ?? myPos;
 }
 
-/** The stick lives in whichever walking screen is showing (the room at a tableau, a place, a wisp's): move it there. @param {string} view */
-function dockStick(view) {
+/** The stick lives in whichever walking screen is showing (the room at a tableau, a place, a wisp's, the walk panel
+ *  under a walkable lobby): move it there. @param {string} hostId */
+function dockStick(hostId) {
   const pad = $('stick-pad');
   const actions = $('object-actions');
-  const host = $(`view-${view}`);
+  const host = $(hostId);
   if (pad.parentElement !== host) host.append(actions, pad);
   updateInteraction();
 }
@@ -524,7 +533,7 @@ function updateInteraction() {
     $('object-actions').hidden = button.hidden;
     return;
   }
-  if (incarnationAt > serverNow()) {
+  if (incarnationAt > serverNow() || minigame) { // over a minigame there is no furniture
     button.dataset.object = '';
     button.disabled = true;
     button.hidden = true;
@@ -536,6 +545,28 @@ function updateInteraction() {
   button.dataset.object = canCollect ? INTRO_KEY : object?.id ?? '';
   button.disabled = !action || !conn.isOnline();
   button.textContent = action?.text ?? 'Walk to an object';
+}
+
+/**
+ * Under a walkable lobby's screens: the stick, the spot we're on, and the free spots, each taken with a tap.
+ * @param {Spot[]} spots
+ */
+function renderWalkPanel(spots) {
+  document.body.classList.add('lobby-walk');
+  $('walk-panel').hidden = false;
+  dockStick('walk-panel');
+  const mine = spots.find((s) => s.holder === playerId);
+  $('walk-on').hidden = !mine;
+  $('walk-on').textContent = mine ? `You're on ${mine.label}. Walk off it to leave it.` : '';
+  $('walk-spots').replaceChildren(...spots.filter((s) => s.holder === null).map((s) => {
+    const button = Object.assign(document.createElement('button'), { type: 'button', textContent: `→ ${s.label}` });
+    button.disabled = !conn.isOnline();
+    button.addEventListener('click', () => {
+      joystick.cancel(); // the last step lands before the move onto the spot
+      send({ t: 'takeSpot', spot: s.id });
+    });
+    return button;
+  }));
 }
 
 /** Hub, world or a scene tableau: where the party is, what is open from here, how to go on.
@@ -575,12 +606,12 @@ function renderPlace(c, mem) {
   $('place-hint').hidden = !(isChooser && doors);
   if (isStory() && c.at.node === 'hub' && !c.facts.flags.includes('apparition.seen')) {
     $('place-wait').textContent = 'Watch the TV—the visitor is speaking.';
-    dockStick('place');
+    dockStick('view-place');
     return;
   }
   if (isStory() && c.at.node === 'hub' && !c.facts.inventory.elodie?.[INTRO_KEY]) {
     $('place-wait').textContent = 'Walk to the glowing key and pick it up.';
-    dockStick('place');
+    dockStick('view-place');
     return;
   }
   $('place-wait').textContent = !doors
@@ -588,7 +619,7 @@ function renderPlace(c, mem) {
     : isChooser ? ''
       : isGameMaster() ? `${chooser.name} walks into a door, or you pick one from ☰ 🎲 Game master.`
         : `${chooser.name} chooses where we go next.`;
-  dockStick('place');
+  dockStick('view-place');
 }
 
 /**
@@ -597,7 +628,7 @@ function renderPlace(c, mem) {
  * @param {TableauPlayer} me @param {boolean} isGm
  */
 function renderTableau(v, me, isGm) {
-  dockStick('tableau');
+  dockStick('view-tableau');
   const header = $('tableau-me');
   header.replaceChildren(
     avatarCanvas(me.character, TABLEAU_ME_SCALE, currentPos(me.character).dir),

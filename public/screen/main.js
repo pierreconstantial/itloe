@@ -33,7 +33,8 @@ const WAKE_GAP_MS = 5000;
 const app = /** @type {HTMLElement} */ (document.getElementById('app'));
 /** Every player's avatar, whatever screen is showing. */
 const avatars = createAvatarLayer();
-const wispAvatars = createAvatarLayer();
+/** The players walking over the running minigame's screen: its wisps, and its players on its walkable lobby. */
+const minigameAvatars = createAvatarLayer();
 const wispOverlay = /** @type {HTMLCanvasElement} */ (document.getElementById('wisp-overlay'));
 const wispContext = /** @type {CanvasRenderingContext2D} */ (wispOverlay.getContext('2d'));
 let wispFrame = 0;
@@ -41,9 +42,12 @@ let lastWispFrame = 0;
 
 /** The connected party members the running minigame doesn't show (isWisp), as wisps over its screen. @type {string[]} */
 let minigameWisps = [];
+/** Who walks over the running minigame's screen: its wisps, and while its lobby is walkable (`spots`), the players it
+ *  shows, as their characters, offline ones too (they keep standing where they stood). @type {string[]} */
+let minigameWalkers = [];
 
-/** Draws `minigameWisps` over the running minigame's screen, frame by frame. @param {number} now */
-function drawRoundWisps(now) {
+/** Draws `minigameWalkers` over the running minigame's screen, frame by frame. @param {number} now */
+function drawMinigameWalkers(now) {
   if (!shownMinigame || !campaign) { wispFrame = 0; return; }
   const c = campaign;
   const dpr = devicePixelRatio || 1;
@@ -53,13 +57,13 @@ function drawRoundWisps(now) {
   }
   wispContext.setTransform(dpr, 0, 0, dpr, 0, 0);
   wispContext.clearRect(0, 0, w, h);
-  const ids = minigameWisps;
+  const ids = minigameWalkers;
   if (!ids.length) { wispFrame = 0; return; }
   const base = roomAt(content.get(), c.at.node);
-  wispAvatars.update(Math.min(.05, (now - lastWispFrame) / 1000 || .016));
-  wispAvatars.draw(wispContext, worldView(w, h, dpr), 1, now, sceneRoom('wisp-overlay', base.floor, []), {}, ids);
+  minigameAvatars.update(Math.min(.05, (now - lastWispFrame) / 1000 || .016));
+  minigameAvatars.draw(wispContext, worldView(w, h, dpr), 1, now, sceneRoom('wisp-overlay', base.floor, []), {}, ids);
   lastWispFrame = now;
-  wispFrame = requestAnimationFrame(drawRoundWisps);
+  wispFrame = requestAnimationFrame(drawMinigameWalkers);
 }
 
 const party = createPartyRoom(
@@ -94,6 +98,7 @@ function applyPresence() {
     el.classList.toggle('is-offline', off.has(/** @type {HTMLElement} */ (el).dataset.id ?? ''));
   }
   avatars.setOffline(off);
+  minigameAvatars.setOffline(off);
 }
 
 /** The story's start tableau after its first match: no round follows. */
@@ -127,7 +132,7 @@ function leaveMinigame() {
 
 /**
  * A running minigame: its screen, from its start to its end (its lobby, its rounds, their podiums), with the
- * party members it doesn't show as wisps over it.
+ * party members it doesn't show as wisps over it, and the players it shows walking over its walkable lobby.
  * @param {MinigameView} m @param {Campaign} c
  */
 function showMinigame(m, c) {
@@ -137,17 +142,19 @@ function showMinigame(m, c) {
   party.setRoom(roomAt(content.get(), c.at.node));
   party.setPortal(false);
   party.setKey(false);
-  wispAvatars.setPlayers(c.party, roomAt(content.get(), c.at.node));
+  minigameAvatars.setPlayers(c.party, roomAt(content.get(), c.at.node));
   minigameWisps = c.party.order.filter((id) => onlineNow.includes(id) && isWisp(c.party, id, m.shows));
-  // whom the minigame doesn't show is drawn as a wisp, whatever their story status
-  wispAvatars.setStatuses(Object.fromEntries(c.party.order.map((id) => [id, {
-    statuses: minigameWisps.includes(id) ? [...new Set([...c.party.players[id].statuses, 'wisp'])] : c.party.players[id].statuses,
-  }])));
+  minigameWalkers = [...minigameWisps, ...(m.spots ? m.shows : [])];
+  // whom the minigame doesn't show is drawn as a wisp, and whom it shows as their character, whatever their story status
+  minigameAvatars.setStatuses(Object.fromEntries(c.party.order.map((id) => {
+    const statuses = c.party.players[id].statuses.filter((s) => s !== 'wisp');
+    return [id, { statuses: minigameWisps.includes(id) ? [...statuses, 'wisp'] : statuses }];
+  })));
   avatars.setStatuses(c.party.players);
   party.setDoors([]);
   party.setVisible(false);
   wispOverlay.hidden = false;
-  if (!wispFrame) wispFrame = requestAnimationFrame(drawRoundWisps);
+  if (!wispFrame) wispFrame = requestAnimationFrame(drawMinigameWalkers);
   document.body.classList.remove('party');
   if (running?.kind !== m.kind) {
     unmountScreen();
@@ -398,11 +405,11 @@ const HANDLERS = {
     gap = false;
     if (campaign) cutscenes.update(campaign.news, campaign.newsSeq);
   },
-  pos: (msg) => { avatars.onPos(msg); wispAvatars.onPos(msg); },
+  pos: (msg) => { avatars.onPos(msg); minigameAvatars.onPos(msg); },
   jump: (msg) => avatars.onJump(msg),
   unsaved: (msg) => running?.screen.message(msg), // the running minigame's own; none running: ignored
-  say: (msg) => avatars.onSocial(msg),
-  emote: (msg) => { avatars.onSocial(msg); wispAvatars.onSocial(msg); },
+  say: (msg) => { avatars.onSocial(msg); minigameAvatars.onSocial(msg); },
+  emote: (msg) => { avatars.onSocial(msg); minigameAvatars.onSocial(msg); },
   interact: (msg) => party.onInteract(msg),
   tick: (msg) => syncClock(msg.now), // liveness (any message feeds the watchdog) + clock skew
   joinQr: (msg) => { syncClock(msg.now); onJoinQr(msg.until); },
@@ -517,7 +524,7 @@ connect();
   scene: () => party.scene(),
   offline: () => [...presence.offline()],
   /** Who floats as a wisp over the running minigame, and where (none while none runs). */
-  wisps: () => (shownMinigame ? wispAvatars.snapshot().filter((a) => minigameWisps.includes(a.id)).map(({ id, x, y }) => ({ id, x, y })) : []),
+  wisps: () => (shownMinigame ? minigameAvatars.snapshot().filter((a) => minigameWisps.includes(a.id)).map(({ id, x, y }) => ({ id, x, y })) : []),
   campaign: () => campaign,
   doors: () => party.doors(),
   joinQr: () => ({ ...joinQrState(joinWindow, serverNow()), until: joinWindow?.until ?? null }),

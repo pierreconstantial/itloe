@@ -23,10 +23,26 @@ import { plainLobby } from './plain-lobby.js';
  */
 
 /**
+ * A spot: a marked place on a walkable lobby that an eligible player takes by stepping onto it, or by tapping it
+ * on their phone. `id`: the minigame's name for it; `label`: how the phone lists it; `x`, `y`, `w`, `h`: its area
+ * in world units (16 × 9, shared/world.js), as the TV draws it; `holder`: the player holding it, from the
+ * minigame's state, or null while it's free.
+ * @typedef {{ id: string, label: string, x: number, y: number, w: number, h: number, holder: string | null }} Spot
+ */
+
+/**
+ * What the main game tells a minigame whose lobby is walkable: an eligible player now stands on a spot (`spot`:
+ * its id), or on none (null), after stepping onto it, off it or from one to another. Injected by the server,
+ * never taken from the wire.
+ * @typedef {{ t: 'spot', id: string, spot: string | null }} SpotAction
+ */
+
+/**
  * The running minigame as views carry it (`view.minigame`, null while none runs): its kind, its status, its
  * server code's view of its state (the same for everyone, server/minigames.ts), the players it shows itself
- * (`shows`), and the tableau's content rules for the Start button (`required`: its `eligible` and `allReady`).
- * @typedef {{ kind: MinigameKind, status: MinigameStatus, view: any, shows: string[],
+ * (`shows`), its spots while its players walk (`spots`: MinigameRules), and the tableau's content rules for the
+ * Start button (`required`: its `eligible` and `allReady`).
+ * @typedef {{ kind: MinigameKind, status: MinigameStatus, view: any, shows: string[], spots: Spot[] | null,
  *   required: { eligible?: CharacterId[], allReady?: true } }} MinigameView
  */
 
@@ -114,6 +130,7 @@ import { plainLobby } from './plain-lobby.js';
  *   result: (s: S, node: string) => RoundResult, // the round's, once it turned `podium`; node: the tableau
  *   ready: (s: S) => string[],                  // the players ready for the next round
  *   shows: (s: S) => string[],                  // the players it draws itself (everyone else is a wisp)
+ *   spots?: (s: S) => Spot[] | null,            // a walkable lobby: its spots while the players it shows walk, else null
  *   settings: (patch: unknown, base?: T) => T,  // `base` (default: the minigame's defaults) with every valid key of `patch`
  *   validateSettings: (settings: unknown) => string[],   // a content node's settings: problems, as readable lines
  *   sampleSettings: object,                     // the development start's settings (ITLOE_CONTENT=minigame:<kind>)
@@ -137,3 +154,24 @@ export const MINIGAMES = {
  * @param {unknown} kind @returns {MinigameRules<any, any> | null}
  */
 export const minigame = (kind) => (typeof kind === 'string' && Object.hasOwn(MINIGAMES, kind) ? MINIGAMES[/** @type {MinigameKind} */ (kind)] : null);
+
+/**
+ * The spot at a world position, or null. @param {readonly Spot[]} spots @param {number} x @param {number} y
+ * @returns {string | null}
+ */
+export function spotAt(spots, x, y) {
+  return spots.find((s) => x >= s.x && x <= s.x + s.w && y >= s.y && y <= s.y + s.h)?.id ?? null;
+}
+
+/**
+ * A walker's step on a walkable lobby, edge-triggered like the doors: the spot under it now (`at`), and whether
+ * it stepped onto or off a spot (`changed`). A walker's first known position (`before` undefined) only sets
+ * where it stands: standing on a spot is not stepping onto it.
+ * @param {readonly Spot[]} spots @param {string | null | undefined} before the spot under it before, undefined: unknown
+ * @param {number} x @param {number} y
+ * @returns {{ at: string | null, changed: boolean }}
+ */
+export function spotStep(spots, before, x, y) {
+  const at = spotAt(spots, x, y);
+  return { at, changed: before !== undefined && at !== before };
+}

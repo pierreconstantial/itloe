@@ -20,7 +20,7 @@ import { makeAdmin } from './admin.ts';
 import { pickLan } from './lan.ts';
 import { makeClock } from './clock.ts';
 import { roundDeadline, shiftRound } from './resume.ts';
-import { minigame, type MinigameKind, type MinigameView } from '../shared/minigames.js';
+import { minigame, spotStep, type MinigameKind, type MinigameView, type Spot } from '../shared/minigames.js';
 import { makeMinigameServers, type ErrCode, type MinigameServer } from './minigames.ts';
 import { makeRound, roundOf, type Round } from './round.ts';
 import { JOIN_QR_GAP_MS, JOIN_QR_MS } from '../shared/join-qr.js';
@@ -102,6 +102,8 @@ const openRound = (c: Campaign): Round<unknown> | null => {
 round = openRound(game.campaign); // a resumed round
 /** Door each walker currently stands in (edge trigger: entering a door fires once). In memory only. */
 const zones = new Map<string, string | null>();
+/** Spot each walker of a walkable lobby currently stands on (edge trigger, as the doors). In memory only. */
+const onSpot = new Map<string, string | null>();
 
 const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   (prev, next) => { // before saveGame: a minigame's own records land in the same save (the block game's best)
@@ -120,8 +122,10 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
     round = null;
     ended?.end(); // the old round's io goes quiet before the next round opens
     round = openRound(next);
+    onSpot.clear();
   },
   (_prev, next) => positions.prune(next.party),
+  () => seatHolders(),
   (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
   (prev, next) => {
     for (const id of next.party.order) {
@@ -251,6 +255,13 @@ const shown = (): string[] | null => {
 };
 /** Does this member show as a wisp now (the story's, or one the running minigame doesn't show)? @param id a member */
 const wisp = (id: string): boolean => isWisp(party(), id, shown());
+/** The running minigame's spots while the players it shows walk its lobby (MinigameRules `spots`), else null. */
+const spots = (): Spot[] | null => {
+  const { kind, activity } = game.campaign.at;
+  return kind && activity ? minigame(kind)!.spots?.(activity) ?? null : null;
+};
+/** Does this member walk the running minigame's lobby as their character (shown, while its lobby is walkable)? */
+const walksLobby = (id: string): boolean => spots() !== null && !!shown()?.includes(id);
 
 /** The running minigame as the view carries it (shared/minigames.js MinigameView): its kind, status, its server
  *  code's view, the same for everyone (the quiz hides answers until the reveal), whom it shows itself, and the
@@ -262,6 +273,7 @@ const minigameView = (): MinigameView | null => {
   const content = CONTENT.nodes[node]?.activity as TableauPlayers | undefined;
   return {
     kind, status: minigameStatus(game.campaign)!, view: serverOf(kind).view(activity), shows: rules.shows(activity),
+    spots: rules.spots?.(activity) ?? null,
     required: { ...(content?.eligible ? { eligible: content.eligible } : {}), ...(content?.allReady ? { allReady: true } : {}) },
   };
 };
@@ -392,6 +404,33 @@ function walk(id: string, pos: Pos): void {
   if (character === CONTENT.chooser && isUnlocked(game.campaign, zone)) apply({ t: 'enter', id, node: zone });
 }
 
+/** Where a character stands on a spot: its feet at the spot's centre, facing the TV. */
+const onSpotPos = (spot: Spot): Pos => ({ x: spot.x + spot.w / 2, y: spot.y + spot.h / 2, dir: 'down', moving: false });
+
+/** Edge-triggered spots on a walkable lobby: a walker stepping onto a spot, off it or from one to another tells
+ *  the minigame (`spot`, never from the wire). Wisps never get here. */
+function stepOnSpots(id: string, pos: Pos): void {
+  const list = spots();
+  if (!list) return;
+  const { at, changed } = spotStep(list, onSpot.get(id), pos.x, pos.y);
+  onSpot.set(id, at);
+  if (changed) apply({ t: 'activity', action: { t: 'spot', id, spot: at } });
+}
+
+/** A spot's holder without a known position (positions are in memory: after a restart) stands on its spot
+ *  again, on the TVs and on its phone. */
+function seatHolders(): void {
+  for (const spot of spots() ?? []) {
+    if (spot.holder === null || positions.get(spot.holder)) continue;
+    const pos = onSpotPos(spot);
+    positions.set(spot.holder, pos);
+    onSpot.set(spot.holder, spot.id);
+    const ws = sockets.get(spot.holder);
+    if (ws) send(ws, posMsg(spot.holder, pos));
+    relayPos(spot.holder, pos);
+  }
+}
+
 /** The party moved to another node: every walker's door is re-read on the new map, so standing where
  *  a door now is does not fire it — only a fresh step in does. */
 function resetZones(): void {
@@ -428,12 +467,15 @@ function handleMessage(ws: WebSocket, m: any): void {
     const id = who.get(ws);
     if (!id || !canMove(party(), id) || !positions.allow(ws)) return;
     if (isIncarnating(id)) return;
-    if (round) { // while a minigame runs only its wisps walk, in the room's positions and without doors
+    if (round) { // while a minigame runs only its wisps walk, and its players on its walkable lobby, in the room's
+      // positions and without doors
       const pos = parsePos(m);
-      if (pos && wisp(id)) {
-        positions.set(id, pos);
-        relayPos(id, pos);
-      }
+      const walker = walksLobby(id);
+      if (!pos || !(walker || wisp(id))) return;
+      positions.set(id, pos);
+      relayPos(id, pos);
+      if (walker) stepOnSpots(id, pos);
+      else onSpot.delete(id); // a wisp's light stands on no spot
       return;
     }
     if (STORY_MODE && game.campaign.at.node === 'hub' && party().players[id].character === CONTENT.chooser
@@ -601,6 +643,20 @@ function handleMessage(ws: WebSocket, m: any): void {
       if (apply({ t: 'gm', id, op: m.op as GmOp })) return;
       if (id !== gameMaster()) sendErr(ws, 'not-gm');
       else if (m.op.op === 'give' || m.op.op === 'take') sendErr(ws, 'refused');
+      return;
+    }
+
+    case 'takeSpot': {
+      // a walker of a walkable lobby takes a free spot from the phone: the character moves onto it, which is a
+      // step onto it, whatever it stood on before
+      const spot = spots()?.find((s) => s.id === m.spot);
+      if (!spot || spot.holder !== null || !walksLobby(id) || !positions.allow(ws)) { sendErr(ws, 'refused'); return; }
+      const pos = onSpotPos(spot);
+      positions.set(id, pos);
+      send(ws, posMsg(id, pos));
+      relayPos(id, pos);
+      onSpot.set(id, null);
+      stepOnSpots(id, pos);
       return;
     }
 
@@ -776,6 +832,7 @@ function serveReset(req: IncomingMessage, res: ServerResponse): boolean {
 // ---------- start ----------
 
 saveGame(game); // a --new start must not let the next plain start resume the old game (and a v1 save is now v2)
+seatHolders(); // a resumed walkable lobby: its holders on their spots
 for (const id of party().order) scheduleIncarnation(id);
 // resumed timed game or open quiz question: re-arm (fires at once if the deadline passed while down)
 clock.onChange(null, game.campaign.at);

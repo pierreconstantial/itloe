@@ -179,7 +179,7 @@ export {};
  *   | { t: 'back', id: string }
  *   | { t: 'startMinigame', id: string, now: number }   // game master, in the room at a minigame's tableau
  *   | { t: 'endMinigame', id: string }                  // game master, in its lobby: its results recorded
- *   | { t: 'activity', action: import('../plain-lobby.js').PlainLobbyAction | import('../game.js').Action | QuizAction }   // to the running minigame
+ *   | { t: 'activity', action: import('../plain-lobby.js').PlainLobbyAction | import('../minigames.js').SpotAction | import('../game.js').Action | QuizAction }   // to the running minigame
  *   | { t: 'event', event: CampaignEvent }
  *   | { t: 'ack', id: 'screen', upTo: number }
  *   | { t: 'gm', id: string, op: GmOp }} CampaignAction

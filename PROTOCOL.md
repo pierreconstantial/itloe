@@ -42,9 +42,11 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness), `/admin/` (adm
 // something changed). World coordinates: x ∈ [0,16], y ∈ [0,9] (16:9 units, avatar ≈ 1.2 units
 // tall); dir ∈ up|down|left|right. Server clamps to bounds and drops malformed or non-joined
 // senders silently. While no minigame runs, pos moves the player in the room (doors below). While one
-// runs (from the game master's start to his end), pos is kept and relayed only from wisps, in the room's
+// runs (from the game master's start to his end), pos is kept and relayed only from wisps, and from the
+// players it shows while its lobby is walkable (spots, under Minigames and their lobbies), in the room's
 // positions and without doors; anyone else's is dropped silently, and the room's positions stay where
 // everyone stood (no longer moving).
+{ "t": "takeSpot", "spot": "team1-clue" }                // a player walking a walkable lobby: onto a free spot (below)
 { "t": "say", "text": "Hello!" }                         // joined player; 1–100 printable characters
 { "t": "emote", "kind": "victory" }                      // incarnated: victory | fart | annoy; wisp: shine
 { "t": "interact", "object": "table" }                    // near an object of the room where the party is (roomAt)
@@ -109,7 +111,7 @@ the round that completed the node. A minigame ended before any round finished re
 rejoining). Every id is injected by the server (socket → playerId; screens: `"screen"`), never taken from the wire.
 
 **Routing.** The server handles `hello`, `join`, `leave`, `enter`, `back`, `gm`, `ack`, `pos`, `say`,
-`emote`, `interact`, `showJoin`, `hideJoin`, `startMinigame` and `endMinigame` itself:
+`emote`, `interact`, `showJoin`, `hideJoin`, `takeSpot`, `startMinigame` and `endMinigame` itself:
 
 - `startMinigame`: the game master, in the room at a minigame's tableau: the minigame starts, in its lobby, with
   the eligible players and the tableau's settings (the content's, over the minigame's defaults). Every start has
@@ -154,6 +156,22 @@ game master's at the wrong moment → `err "refused"`.
 Every other message goes to the running round's server code (blocks: `place`; quiz: `answer`, `next`,
 `override`); in the lobby or on the podium → `err "not-playing"`. A player who becomes eligible during a round
 is listed in the lobby and plays from the next round on.
+
+**A walkable lobby.** A minigame may make its lobby walkable: while it lists its spots (the view's `spots`, non-null),
+the players it shows walk over its screens as their characters, with `pos`, `say` and `emote` as in the room, and
+wisps walk as always. A spot is a named area in world units, with the player holding it, or null; who holds it is
+the minigame's saved state.
+
+- **Stepping onto a spot:** the server reads each walker's `pos` against the spots, edge-triggered like the doors:
+  stepping onto a spot, off it or from one to another gives the minigame the action `spot { id, spot }` (the spot's
+  id, or null), injected by the server, never from the wire. A walker's first known position only sets where it
+  stands; a wisp on a spot counts for nothing. The minigame decides what the step means (taking a free spot,
+  leaving one).
+- **`takeSpot`:** a walker onto a free spot from the phone: the server moves the character to the spot's centre,
+  sends that `pos` to the walker's phone and the screens, and the step onto it follows as above. An unknown or held
+  spot, or a sender not walking the lobby → `err "refused"`.
+- **Restarts:** positions are in memory only; a holder without a known position (after a restart) is put back on
+  its spot, on the screens and on its phone. A disconnected walker stays where it stood, so a holder keeps its spot.
 
 ```jsonc
 { "t": "enter", "node": "childhood" }   // game master, or the content's chooser (Élodie), into an UNLOCKED child of where
@@ -287,14 +305,15 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 ```jsonc
 { "t": "welcome", "playerId": "p-abc123" }   // to a player client after join or successful rejoin
 { "t": "view", "minigame": { "kind": "blocks", "status": "running", "view": { /* the minigame's view */ },
-  "shows": ["p-abc123"], "required": { "eligible": ["pierre", "elodie", "sol", "anna"], "allReady": true } },
+  "shows": ["p-abc123"], "spots": null, "required": { "eligible": ["pierre", "elodie", "sol", "anna"], "allReady": true } },
   "campaign": { /* CampaignView, see shared/campaign/types.js */ }, "contentVersion": "3f9a1c0b2d4e",
   "online": ["p-abc123"], "now": 1730700000000 }
 // "minigame" = the running minigame (shared/minigames.js MinigameView), null while none runs (the hub, a world, a
 // scene, the room at a tableau): its "kind", its "status" (lobby | running | podium), its server code's "view" of its
 // state, the same for everyone (server/minigames.ts), the players it shows itself ("shows": in the lobby the eligible
-// players, during a round those still playing, on the podium the round's players), and the tableau's content rules
-// for the Start button ("required": its `eligible` and `allReady`, absent ones left out).
+// players, during a round those still playing, on the podium the round's players), its spots while its lobby is
+// walkable ("spots": [{ id, label, x, y, w, h, holder }], else null; shared/minigames.js Spot), and the tableau's
+// content rules for the Start button ("required": its `eligible` and `allReady`, absent ones left out).
 // The plain lobby's view: { stage, settings, players: [{ id, character }], ready: [id], round }, with "round" the round
 // server's view of the running or finished round (null in the lobby). blocks: the full State (shared/game.js), plus
 // "best" in solo games (below); quiz: the public projection (below).
@@ -340,9 +359,10 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 // "taken": join refused — that character is already picked by an active player (M3)
 { "t": "pos", "playerId": "p-abc123", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
 { "t": "jump", "playerId": "p-abc123" }                      // relayed to screens only; never saved or used for doors
-// M3: relayed to SCREEN clients only, with ONE exception: right after welcome (join or rejoin)
-// the server sends a player its OWN last pos in the room if it has one — the phone seeds its local
-// position from that, else from shared/world.js spawnPoint(character). On screen connect the server
+// M3: relayed to SCREEN clients only, with ONE exception: a player gets its OWN pos right after welcome (join or
+// rejoin) if it has one, and whenever the server moves its character (the portal; takeSpot; a spot's holder put
+// back on its spot after a restart) — the phone takes its local position from that, else from shared/world.js
+// spawnPoint(character). On screen connect the server
 // sends one pos per known player: the room's (last position, in-memory only — positions reset
 // on restart, so after a restart everyone is back at their spawn point on all clients consistently).
 ```
