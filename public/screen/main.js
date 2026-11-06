@@ -453,6 +453,7 @@ const HANDLERS = {
     if (campaign) cutscenes.update(campaign.news, campaign.newsSeq);
   },
   pos: (msg) => { avatars.onPos(msg); wispAvatars.onPos(msg); },
+  jump: (msg) => avatars.onJump(msg),
   unsaved: (msg) => running?.screen.message(msg), // the running minigame's own; none running: ignored
   say: (msg) => avatars.onSocial(msg),
   emote: (msg) => { avatars.onSocial(msg); wispAvatars.onSocial(msg); },

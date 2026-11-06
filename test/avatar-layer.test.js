@@ -54,3 +54,28 @@ test('the campaign status still controls an avatar when a round roster omits sta
   layer.setPlayers(PARTY, AREA);
   assert.deepEqual(layer.snapshot().find((a) => a.id === 'p-sol')?.statuses, ['wisp', 'charged']);
 });
+
+test('a quiet character starts its idle activity after ten seconds and stops on movement', () => {
+  const layer = createAvatarLayer();
+  layer.setPlayers(PARTY, PARTY_ROOM);
+  /** @param {number} now */
+  const idle = (now) => layer.snapshot(now).find((a) => a.id === 'p-anna')?.idle;
+  const started = performance.now();
+  assert.equal(idle(started + 9_900), false);
+  assert.equal(idle(started + 10_100), true);
+  layer.onPos(pos('p-anna', 10, 7));
+  assert.equal(idle(performance.now()), false);
+  layer.setOffline(new Set(['p-anna']));
+  assert.equal(idle(performance.now() + 10_100), false);
+});
+
+test('jump animates the named character without changing its world position', () => {
+  const layer = createAvatarLayer();
+  layer.setPlayers(PARTY, PARTY_ROOM);
+  const before = at(layer, 'p-anna');
+  layer.onJump({ t: 'jump', playerId: 'p-anna' });
+  assert.equal(layer.snapshot().find((a) => a.id === 'p-anna')?.jumping, true);
+  assert.equal(layer.snapshot().find((a) => a.id === 'p-sol')?.jumping, false);
+  assert.deepEqual(at(layer, 'p-anna'), before);
+  assert.equal(layer.snapshot(performance.now() + 700).find((a) => a.id === 'p-anna')?.jumping, false);
+});

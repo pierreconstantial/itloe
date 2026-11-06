@@ -6,12 +6,13 @@
   --fg-dim: #9aa4ad;
   --cell: #272e36;       /* empty board cell */
   --accent: #ffd166;
-  /* player colours (colour-blind-safe-ish) — color index 1..5 */
+  /* player colours (colour-blind-safe-ish) — color index 1..6 */
   --p1: #e4572e;
   --p2: #3b8ea5;
   --p3: #f3a712;
   --p4: #9b5de5;
   --p5: #5275ed;
+  --p6: #51b975;
   --ok: #4caf50;
   --bad: #e53935;
 }

@@ -326,7 +326,6 @@ export function reduceCampaign(c, a, content) {
       const member = c.party.players[a.id];
       if (!member || member.left || typeof a.status !== 'string' || !a.status || a.status.length > 64) return c;
       if (a.status === 'incarnating') return c;
-      if (a.status === 'wisp' && a.on && roundStatus(c) === 'running') return c;
       const statuses = member.statuses;
       const next = a.status === 'wisp' && !a.on && statuses.includes('wisp')
         ? (statuses.includes('incarnating') ? statuses : [...statuses, 'incarnating'])
@@ -337,7 +336,12 @@ export function reduceCampaign(c, a, content) {
       if (next === statuses || next.length === statuses.length) return c;
       const hostId = a.status === 'wisp' && a.on && c.party.hostId === a.id ? nextHost(c.party, a.id)
         : c.party.hostId;
-      return { ...c, party: { ...c.party, hostId, players: { ...c.party.players, [a.id]: { ...member, statuses: next } } } };
+      const moved = { ...c, party: { ...c.party, hostId, players: { ...c.party.players, [a.id]: { ...member, statuses: next } } } };
+      const activity = c.at.activity;
+      if (a.status !== 'wisp' || !a.on || !activity || roundStatus(c) !== 'running') return moved;
+      // A newly made Wisp leaves this round now. Their party membership and score still persist.
+      const without = kindOf(c).reduce(activity, { t: 'leave', id: a.id }, ctxOf(moved));
+      return withActivity(moved, without, content);
     }
 
     case 'incarnate': {
@@ -523,6 +527,12 @@ function gm(c, op, content) {
       if (op.op === 'take' && holding(f, who, op.item) < n) return c;
       const inventory = addItem(f.inventory ?? {}, who, op.item, op.op === 'give' ? n : -n);
       return withFacts(c, { ...f, inventory }, content); // a `has` condition may open something now
+    }
+
+    case 'wisp': {
+      if (!isCharacterId(op.character) || typeof op.on !== 'boolean') return c;
+      const id = c.party.order.find((id) => !c.party.players[id].left && c.party.players[id].character === op.character);
+      return id ? reduceCampaign(c, { t: 'status', id, status: 'wisp', on: op.on }, content) : c;
     }
 
     default:

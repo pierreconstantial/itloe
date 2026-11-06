@@ -34,6 +34,7 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
                                                             // done → finished, endReason "stuck". Unknown, done or left target →
                                                             // silent no-op. The host may retire themself.
 { "t": "pos", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
+{ "t": "jump" }                                             // joined, incarnated player between rounds; visual hop only
 // M3 avatar movement — EPHEMERAL, never enters the reducer State. Client-authoritative:
 // the phone integrates its joystick locally and sends throttled updates (≤ 15/s, only when
 // something changed). World coordinates: x ∈ [0,16], y ∈ [0,9] (16:9 units, avatar ≈ 1.2 units
@@ -128,6 +129,11 @@ messages (`unsaved` below) during its round.
                                         // { op:'give', item, to, count? } / { op:'take', item, from, count? }):
                                         // unknown item or character, or taking more than held → err "refused"
                                         // (no partial take).
+{ "t": "gm", "op": { "op": "wisp", "character": "sol", "on": true } }
+                                        // GM only: switch a joined character into Wisp Mode at any time.
+                                        // on:false starts the existing 3-second incarnation. During a
+                                        // running round, on:true takes that player out of that round;
+                                        // turning them back lets them play the next round.
 { "t": "ack", "upTo": 3 }               // SCREENS only: the TV finished the cutscenes of every news entry with
                                         // seq <= upTo; they leave `campaign.news`. upTo is required. Two TVs, or a
                                         // TV reconnecting mid-cutscene, never drop a cutscene they did not play.
@@ -158,8 +164,9 @@ beside nearby objects, but sends the same emote without interacting with the obj
 interact with objects or NPCs, or trigger zone/story events. They are excluded from round seats.
 Pierre may still use game-master commands while a Wisp; those commands are separate from Wisp actions.
 The server incarnates a wisp when the story grants its `person.<character>.unlocked` flag (for
-example `person.nico.unlocked`), or via its internal status action; no client message can change
-the status. The same internal action can return a character to Wisp Mode. When incarnation begins,
+example `person.nico.unlocked`), via its internal status action, or from the GM's `wisp` operation.
+Ordinary player messages cannot change the status. The same GM operation can return a character
+to Wisp Mode. When incarnation begins,
 the campaign persists `statuses: ["wisp", "incarnating"]` and the next `view` includes
 `incarnations: { "<playerId>": { "at": <server epoch ms>, "kind": <emote> } }`.
 Until `at`, the TV draws the wisp, the phone vibrates and displays **3, 2, 1**, and the server
@@ -171,11 +178,11 @@ That acknowledgement adds `apparition.seen` to the persisted facts and reveals t
 
 ```jsonc
 { "t": "interact", "object": "memory-key-intro" }  // Elo, near the key after the apparition
-{ "t": "enter", "node": "hub.door4" }          // normally triggered by Elo walking into door #4
+{ "t": "enter", "node": "young-adult" }        // normally triggered by Elo walking into Young Adult
 { "t": "back" }                               // Elo returns from the second room to the apartment
 ```
 
-The key is stored in `campaign.facts.inventory.elodie`, and door #4 unlocks from that fact. The six
+The key is stored in `campaign.facts.inventory.elodie`, and Young Adult unlocks from that fact. The six
 memory-world entrances and reunion mini-games are not wired yet; their story specification is in
 `GameStory.md`.
 
@@ -283,6 +290,7 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 // "bad-room": join refused — wrong or missing room code (phone shows "ask for the code on the TV")
 // "taken": join refused — that character is already picked by an active player (M3)
 { "t": "pos", "playerId": "p-abc123", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
+{ "t": "jump", "playerId": "p-abc123" }                      // relayed to screens only; never saved or used for doors
 // M3: relayed to SCREEN clients only, with ONE exception: right after welcome (join or rejoin)
 // the server sends a player its OWN last pos in the room if it has one — the phone seeds its local
 // position from that, else from shared/world.js spawnPoint(character); a minigame's phone screen picks

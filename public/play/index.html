@@ -66,6 +66,7 @@
       <div id="stick-pad">
         <p class="stick-hint">Touch and drag here to walk on the TV</p>
         <div id="stick-base" hidden><div id="stick-knob"></div></div>
+        <button id="btn-jump" type="button" hidden>↑ Jump</button>
       </div>
     </section>
 
@@ -84,7 +85,7 @@
         <p id="place-intro" class="dim" hidden></p>
         <ul id="place-children"></ul>
         <p id="place-hint" class="place-hint" hidden>Walk into a door to enter</p>
-        <button id="btn-place-back" type="button" hidden>← Back to the apartment</button>
+        <button id="btn-place-back" type="button" hidden>← Back to Elo's dream place</button>
         <button type="button" class="bag-open" data-open="bag" hidden>🎒 Bag</button>
         <p id="place-wait" class="dim"></p>
       </div>
@@ -216,6 +217,13 @@
         <button type="button" data-gm="count-set">Set</button>
       </div>
       <datalist id="gm-counters"></datalist>
+
+      <p class="gm-h">Wisp Mode</p>
+      <div class="gm-row">
+        <select id="gm-wisp-who" aria-label="Wisp character"></select>
+        <button type="button" data-gm="wisp">Switch Wisp Mode</button>
+      </div>
+      <p id="gm-wisp-state" class="dim gm-why"></p>
 
       <p class="gm-h">Items</p>
       <div class="gm-row">

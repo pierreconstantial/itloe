@@ -564,6 +564,9 @@ function updateInteraction() {
   const object = pos ? nearbyObject(roomHere(), pos, actor) : null;
   const action = canCollect ? objectAction(INTRO_KEY, actor) : object ? objectAction(object.id, actor) : null;
   const button = /** @type {HTMLButtonElement} */ ($('btn-interact'));
+  const jump = /** @type {HTMLButtonElement} */ ($('btn-jump'));
+  jump.hidden = !mem || mem.statuses.includes('wisp') || !canWalk() || !!gameArea || !!round;
+  jump.disabled = !conn.isOnline();
   if (mem?.statuses.includes('wisp')) {
     const near = pos && wispNearObject(pos);
     button.dataset.object = '';
@@ -620,7 +623,7 @@ function renderPlace(c, mem) {
   const chooser = CHARACTERS[content().chooser];
   const isChooser = mem.character === content().chooser;
   const doors = open.length > 0;
-  $('btn-place-back').hidden = !(isStory() && c.at.node === 'hub.door4' && isChooser);
+  $('btn-place-back').hidden = !(isStory() && c.at.node === 'young-adult' && isChooser);
   $('place-hint').hidden = !(isChooser && doors);
   if (isStory() && c.at.node === 'hub' && !c.facts.flags.includes('apparition.seen')) {
     $('place-wait').textContent = 'Watch the TV—the visitor is speaking.';
@@ -803,6 +806,10 @@ $('room-form').addEventListener('submit', (e) => {
 });
 
 $('btn-start').addEventListener('click', () => send({ t: 'start' }));
+$('btn-jump').addEventListener('pointerdown', (e) => e.stopPropagation());
+$('btn-jump').addEventListener('click', () => {
+  if (canWalk() && !gameArea && !round && !member()?.statuses.includes('wisp') && conn.isOnline()) send({ t: 'jump' });
+});
 $('btn-place-back').addEventListener('click', () => send({ t: 'back' }));
 $('btn-interact').addEventListener('click', () => {
   if (!canWalk() || gameArea || !conn.isOnline()) return;

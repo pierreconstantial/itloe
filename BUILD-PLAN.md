@@ -177,10 +177,17 @@ avatars walk around on the TV. The full flow and the step screens will be specif
 
 ### Contract C — characters & movement (frozen like A/B; changes through the orchestrator)
 
+Amendment (2026-11-06, agreed for `small-improvements`): the live roster is Pierre, Élodie,
+Sol, Anna, Nico, and Konz, with unique colour slots 1–6. An incarnated player may send
+`{ t: 'jump' }` between rounds. The server binds the sender's identity and relays
+`{ t: 'jump', playerId }` to screens only; it is an ephemeral visual hop that does not move
+the feet, enter doors, or affect saved state. After ten seconds without movement, speech,
+emotes, or a jump, the TV plays that character's idle scene until the next activity.
+
 ```js
 // shared/characters.js (P1)
-// CharacterId = 'pierre' | 'elodie' | 'sol' | 'anna'   (roster will grow later)
-// Character = { id, name, color }   // color 1..4 — the character IS the colour slot
+// CharacterId = 'pierre' | 'elodie' | 'sol' | 'anna' | 'nico' | 'konz'
+// Character = { id, name, color }   // color 1..6 — the character IS the colour slot
 export const CHARACTERS = {};        // Record<CharacterId, Character>, insertion order = display order
 export function freeCharacters(state) {}  // → CharacterId[] not picked by any non-left player
 
@@ -193,7 +200,7 @@ export function freeCharacters(state) {}  // → CharacterId[] not picked by any
 export const WORLD = { w: 16, h: 9 };        // world units, 16:9
 export const WALK_SPEED = 4;                 // units/s
 export function spawnPoint(characterId) {}   // → { x, y, dir } deterministic per character:
-                                             //    x = 3 + 3.33·(color−1), y = 7, dir 'down'
+                                             //    x = 2 + 2.4·(color−1), y = 7.6, dir 'down'
 
 // shared/sprites.js (P4 — ownership exception inside shared/)
 // 16×16 indexed-palette pixel grids, per character: 4 directions × 3 walk frames + 1 idle
@@ -260,6 +267,11 @@ can take back a character whose phone is offline.
 | P2 (phone) | picker states (free / continue / taken), `replaced` screen, never auto-reconnect after `replaced`, acceptance pass on a second "device" (a fresh browser context) |
 
 ### Contract D v2 — campaign: hub, worlds, unlocks (FROZEN 2026-11-04, user approved; changes through the orchestrator)
+
+Amendment (2026-11-06, agreed for `small-improvements`): the game master can send
+`gm { op: 'wisp', character, on }` for any joined character, including during a round.
+Switching Wisp Mode on removes that character from the current round; switching it off
+uses the existing three-second incarnation, and the character joins the next round.
 
 **The story (user, 2026-11-04).** It starts as a false start: just the 4-player block game. Then the game
 turns into Élo's life. A central **hub** (menu map) opens onto **worlds**, one per period of her life

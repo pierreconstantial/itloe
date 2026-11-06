@@ -105,6 +105,7 @@ button.primary:active { transform: scale(0.97); }
 .dot.c3 { background: var(--p3); }
 .dot.c4 { background: var(--p4); }
 .dot.c5 { background: var(--p5); }
+.dot.c6 { background: var(--p6); }
 
 /* ---------- ☰ menu + sheets ---------- */
 
@@ -239,6 +240,7 @@ canvas.avatar {
 .pick-card.c3 { --pc: var(--p3); }
 .pick-card.c4 { --pc: var(--p4); }
 .pick-card.c5 { --pc: var(--p5); }
+.pick-card.c6 { --pc: var(--p6); }
 .pick-card:not(:disabled):active { transform: scale(0.97); border-color: var(--pc); }
 .pick-name { font-size: 18px; font-weight: 700; }
 .pick-badge {
@@ -333,6 +335,19 @@ canvas.avatar {
   pointer-events: none;
 }
 #stick-pad.active .stick-hint { visibility: hidden; }
+#btn-jump {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2;
+  min-width: 86px;
+  min-height: 64px;
+  background: var(--accent);
+  color: #201a08;
+  border: 0;
+  font-weight: 800;
+  touch-action: manipulation;
+}
 #stick-base {
   position: absolute;
   width: 132px;

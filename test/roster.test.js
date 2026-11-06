@@ -6,6 +6,7 @@ import { SPRITES, SPRITE_SIZE, DIRS, spriteFrame } from '../shared/sprites.js';
 
 test('roster: ids, names and colours line up, one colour slot per character', () => {
   const ids = Object.keys(CHARACTERS);
+  assert.deepEqual(ids, ['pierre', 'elodie', 'sol', 'anna', 'nico', 'konz']);
   assert.equal(ids.length, ROSTER_SIZE);
   const colors = ids.map((id) => CHARACTERS[/** @type {keyof typeof CHARACTERS} */ (id)].color);
   assert.deepEqual(colors, colors.map((_, i) => i + 1), 'colours are 1..N in display order');

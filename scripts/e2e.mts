@@ -80,6 +80,8 @@ for (const character of Object.keys(CHARACTERS).filter((c) => !['anna', 'sol', '
   extra.push({ c, id: (await c.waitFor((m) => m.t === 'welcome', i)).playerId });
 }
 
+await A.waitFor((m) => m.t === 'view' && roomOf(m)?.order.length === ROSTER_SIZE);
+
 i = T.mark(); T.send({ t: 'join', character: 'pierre' });
 check((await T.waitFor((m) => m.t === 'err', i)).code === 'full', `every character held (${ROSTER_SIZE}) → err full`);
 for (const { c, id } of extra) {
@@ -109,6 +111,11 @@ L2.ws.close();
 // --- avatar positions: relayed to screens only, clamped, malformed/unjoined dropped ---
 const posOf = (c: Client, from: number, id: string) => c.since(from).filter((m) => m.t === 'pos' && m.playerId === id);
 let is = screen.mark(), ib = B.mark();
+A.send({ t: 'jump', playerId: idB });
+check((await screen.waitFor((m) => m.t === 'jump', is)).playerId === idA, 'jump is bound to the sender and relayed to screens');
+await sleep(100);
+check(!B.since(ib).some((m) => m.t === 'jump'), 'phones do not receive jump');
+is = screen.mark(); ib = B.mark();
 A.send({ t: 'pos', x: 20, y: -1, dir: 'left', moving: true });
 const p1 = await screen.waitFor((m) => m.t === 'pos' && m.playerId === idA, is);
 check(p1.x === 16 && p1.y === 0 && p1.dir === 'left' && p1.moving === true, 'pos relayed to the screen, clamped to the world (20,-1 → 16,0)');

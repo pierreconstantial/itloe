@@ -117,7 +117,7 @@ test('a save holding a round in a lobby starts a fresh evening and is quarantine
 
 test('a save with missing or removed characters starts fresh and keeps the old file', { timeout: 30_000 }, async (t) => {
   for (const file of ['save-v2-blocks.json']) {
-    for (const character of [null, undefined, 'konz']) {
+    for (const character of [null, undefined, 'bowser']) {
       await t.test(`${file}: ${String(character)}`, async (t) => {
         const save = JSON.parse(await fixture(file));
         const players = save.campaign.party.players;

@@ -393,6 +393,13 @@ try {
   i = P.mark(); P.send({ t: 'start' });
   const next = await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   check(!!blocksOf(next).players[idN], 'the newcomer is seated in the round started from the room');
+  i = P.mark(); P.send({ t: 'gm', op: { op: 'wisp', character: 'anna', on: true } });
+  k = await until(P, (x) => x.party.players[idN].statuses.includes('wisp'), i);
+  check(k.at.activity.players[idN].left === true, 'GM switches a player to Wisp Mode during a round and removes their seat');
+  i = P.mark(); P.send({ t: 'gm', op: { op: 'wisp', character: 'anna', on: false } });
+  await until(P, (x) => x.party.players[idN].statuses.includes('incarnating'), i);
+  k = await until(P, (x) => !x.party.players[idN].statuses.includes('wisp'), i, 5000);
+  check(k.at.activity.players[idN].left === true, 'incarnation restores the character for the next round, not this one');
   await interactsHere('during a running block game', false);
   // during a round, pos belongs to its minigame's game area, apart from the room's positions; blocks lets nobody walk
   i = T1.mark();

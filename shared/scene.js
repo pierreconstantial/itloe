@@ -250,8 +250,8 @@ export const APARTMENT_ROOM = room('apartment-room', PARTY_FLOOR, [
   prop('plant', { x: 5.2, y: 4.1, w: 0.98, h: 1.5 }, { anchorY: 5.6, solid: { x: 5.34, y: 4.95, w: 0.65, h: 0.55 } }),
 ]);
 
-/** Neutral second room beyond door #4; its story and furnishings have not been specified. */
-export const DOOR_FOUR_ROOM = room('door-four-room', PARTY_FLOOR, []);
+/** Neutral Young Adult room; its story and furnishings have not been specified. */
+export const YOUNG_ADULT_ROOM = room('young-adult-room', PARTY_FLOOR, []);
 
 /** Every room by its id, which a content node names as its `room` (roomAt in shared/campaign/content.js). */
-export const ROOMS = Object.freeze(Object.fromEntries([PARTY_ROOM, APARTMENT_ROOM, DOOR_FOUR_ROOM].map((r) => [r.id, r])));
+export const ROOMS = Object.freeze(Object.fromEntries([PARTY_ROOM, APARTMENT_ROOM, YOUNG_ADULT_ROOM].map((r) => [r.id, r])));

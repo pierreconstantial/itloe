@@ -77,8 +77,8 @@ export function mapCopy(c, content) {
   const hint = c.at.node === 'hub' && c.facts.flags.includes('portal.entered')
     ? !c.facts.flags.includes('apparition.seen') ? 'A visitor is appearing…'
       : !c.facts.inventory.elodie?.['memory-key-intro'] ? 'Élodie, pick up the key.'
-        : 'Élodie, enter door #4.'
-    : c.at.node === 'hub.door4' ? 'Élodie can return to the apartment.'
+        : 'Élodie, enter the Young Adult room.'
+    : c.at.node === 'young-adult' ? "Élodie can return to Elo's dream place."
       : chooser ? `${chooser.name}, walk through a door — or the host picks one` : 'The host picks a door';
   return {
     title: node?.title ?? c.at.node,

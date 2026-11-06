@@ -85,7 +85,7 @@ Each new story step adds more branches in all three layers.
 
 ### Ids in client code
 
-The clients write content ids into code: node ids (`'hub.false-start'`, `'hub.door4'`), the character `'elodie'` where `content.chooser` exists, and the item `'memory-key-intro'`. Renaming a node or item in the content breaks the clients silently.
+The clients write content ids into code: node ids (`'hub.false-start'`, `'young-adult'`), the character `'elodie'` where `content.chooser` exists, and the item `'memory-key-intro'`. Renaming a node or item in the content breaks the clients silently.
 
 **Recommendation:** read them from the content (`content.start`, `content.chooser`, item ids from the node that offers them). Do it together with [Story rules in shared code](#story-rules-in-shared-code) if that goes ahead.
 

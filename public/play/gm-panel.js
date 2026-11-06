@@ -37,6 +37,7 @@ function contentNames() {
 
 /** @param {string} id */
 const nameOf = (id) => CHARACTERS[/** @type {keyof typeof CHARACTERS} */ (id)]?.name ?? id;
+const GAME_START_PICK = '@game-start';
 
 /** @param {HTMLElement} list @param {string[]} values */
 function fillDatalist(list, values) {
@@ -54,18 +55,25 @@ export function createGmPanel(io) {
   let names = contentNames();
 
   const select = /** @type {HTMLSelectElement} */ ($('gm-node'));
-  /** The place picker, from the content tree (rebuilt when the content changes; the choice is kept). */
+  const chosenNode = () => select.value === GAME_START_PICK ? content().start : select.value;
+  /** The story's GM shortcut list; the sample campaign still exposes its whole content tree. */
   function fillNodes() {
     const keep = select.value;
-    select.replaceChildren(...nodeTree().map(({ node, depth }) => Object.assign(document.createElement('option'), {
-      value: node.id, textContent: `${'  '.repeat(depth)}${node.title}`,
+    const places = content().storyId === 'elo-50'
+      ? [{ value: GAME_START_PICK, label: 'Game Start' },
+        { value: content().start, label: titleOf(content().start) },
+        { value: 'young-adult', label: titleOf('young-adult') }]
+      : nodeTree().map(({ node, depth }) => ({ value: node.id, label: `${'  '.repeat(depth)}${node.title}` }));
+    select.replaceChildren(...places.map(({ value, label }) => Object.assign(document.createElement('option'), {
+      value, textContent: label,
     })));
-    if (keep && content().nodes[keep]) select.value = keep;
+    if (keep && places.some(({ value }) => value === keep)) select.value = keep;
   }
   fillNodes();
   onContentChange(() => { names = contentNames(); fillNodes(); fillItems(); confirm.disarm(); redraw(); });
   const itemSelect = /** @type {HTMLSelectElement} */ ($('gm-item'));
   const whoSelect = /** @type {HTMLSelectElement} */ ($('gm-who'));
+  const wispSelect = /** @type {HTMLSelectElement} */ ($('gm-wisp-who'));
   /** Items from the content's catalogue (Contract F: nothing outside it exists); characters from the roster. */
   function fillItems() {
     const keep = itemSelect.value;
@@ -78,6 +86,15 @@ export function createGmPanel(io) {
     })));
   }
   fillItems();
+  /** Only joined characters can change Wisp Mode; keep the selected target across views. @param {Campaign} c */
+  function fillWisps(c) {
+    const keep = wispSelect.value;
+    const members = c.party.order.map((id) => c.party.players[id]).filter((p) => p && !p.left);
+    wispSelect.replaceChildren(...members.map((p) => Object.assign(document.createElement('option'), {
+      value: p.character, textContent: p.name,
+    })));
+    if (members.some((p) => p.character === keep)) wispSelect.value = keep;
+  }
   const flagInput = /** @type {HTMLInputElement} */ ($('gm-flag'));
   const counterInput = /** @type {HTMLInputElement} */ ($('gm-counter'));
   const countInput = /** @type {HTMLInputElement} */ ($('gm-count'));
@@ -88,10 +105,10 @@ export function createGmPanel(io) {
   /** The confirmable ops of the static buttons: key (unique per target) + label + what it sends. */
   /** @type {Record<string, () => { key: string, label: string, act: () => void } | null>} */
   const OPS = {
-    goto: () => ({ key: `goto:${select.value}`, label: `go to "${titleOf(select.value)}"`, act: () => gm({ op: 'goto', node: select.value }) }),
-    unlock: () => ({ key: `unlock:${select.value}`, label: `unlock "${titleOf(select.value)}"`, act: () => gm({ op: 'unlock', node: select.value }) }),
-    lock: () => ({ key: `lock:${select.value}`, label: `lock "${titleOf(select.value)}"`, act: () => gm({ op: 'lock', node: select.value }) }),
-    'reset-node': () => ({ key: `reset:${select.value}`, label: `reset "${titleOf(select.value)}"`, act: () => gm({ op: 'reset-node', node: select.value }) }),
+    goto: () => ({ key: `goto:${select.value}`, label: `go to "${select.selectedOptions[0]?.textContent ?? titleOf(chosenNode())}"`, act: () => gm({ op: 'goto', node: chosenNode() }) }),
+    unlock: () => ({ key: `unlock:${select.value}`, label: `unlock "${titleOf(chosenNode())}"`, act: () => gm({ op: 'unlock', node: chosenNode() }) }),
+    lock: () => ({ key: `lock:${select.value}`, label: `lock "${titleOf(chosenNode())}"`, act: () => gm({ op: 'lock', node: chosenNode() }) }),
+    'reset-node': () => ({ key: `reset:${select.value}`, label: `reset "${titleOf(chosenNode())}"`, act: () => gm({ op: 'reset-node', node: chosenNode() }) }),
     'flag-on': () => {
       const flag = flagInput.value.trim();
       return flag ? { key: `flag+:${flag}`, label: `set ${flag}`, act: () => gm({ op: 'setFlag', flag, on: true }) } : null;
@@ -115,6 +132,15 @@ export function createGmPanel(io) {
         ? { key: `count:${counter}=${set}`, label: `${counter} = ${set}`, act: () => gm({ op: 'count', counter, set }) }
         : null;
     },
+    wisp: () => {
+      const c = last;
+      const member = c?.party.order.map((id) => c.party.players[id]).find((p) => !p.left && p.character === wispSelect.value);
+      if (!member) return null;
+      const pending = member.statuses.includes('incarnating');
+      const on = !member.statuses.includes('wisp') || pending;
+      const label = pending ? `cancel ${member.name}'s incarnation` : on ? `make ${member.name} a Wisp` : `incarnate ${member.name}`;
+      return { key: `wisp:${member.character}:${on}`, label, act: () => gm({ op: 'wisp', character: member.character, on }) };
+    },
   };
 
   /** @type {Map<HTMLButtonElement, string>} button → its resting label */
@@ -127,7 +153,7 @@ export function createGmPanel(io) {
     });
   }
   // changing the target disarms (the armed action was for the previous one)
-  for (const el of [select, flagInput, counterInput, countInput, itemSelect, whoSelect]) el.addEventListener('input', () => { confirm.disarm(); redraw(); });
+  for (const el of [select, flagInput, counterInput, countInput, itemSelect, whoSelect, wispSelect]) el.addEventListener('input', () => { confirm.disarm(); redraw(); });
   counterInput.addEventListener('change', () => {
     const v = last?.facts.counters[counterInput.value.trim()];
     if (typeof v === 'number') countInput.value = String(v); // start from the current value
@@ -177,12 +203,17 @@ export function createGmPanel(io) {
     // the static op buttons: relabel the armed one
     for (const [b, label] of resting) {
       const op = OPS[b.dataset.gm ?? '']?.();
-      b.textContent = op && confirm.isArmed(op.key) ? `Tap again: ${op.label}` : label;
+      b.textContent = op && confirm.isArmed(op.key) ? `Tap again: ${op.label}` : b.dataset.gm === 'wisp' ? op?.label ?? label : label;
+      if (b.dataset.gm === 'wisp') b.disabled = !op;
       b.classList.toggle('armed', !!op && confirm.isArmed(op.key));
     }
 
+    const wisp = c.party.order.map((id) => c.party.players[id]).find((p) => !p.left && p.character === wispSelect.value);
+    $('gm-wisp-state').textContent = !wisp ? 'No joined characters.' : wisp.statuses.includes('incarnating')
+      ? `${wisp.name} is incarnating.` : `${wisp.name} is ${wisp.statuses.includes('wisp') ? 'a Wisp' : 'incarnated'}.`;
+
     // why the selected node is (not) unlocked
-    const sel = nodes[select.value];
+    const sel = nodes[chosenNode()];
     if (sel) {
       const open = f.unlocked.includes(sel.id);
       const forced = open && !holds(sel.unlock, f) ? ' (opened by the game master)' : '';
@@ -216,6 +247,7 @@ export function createGmPanel(io) {
     render(c, status) {
       last = c;
       lastStatus = status;
+      fillWisps(c);
       redraw();
     },
   };

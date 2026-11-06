@@ -40,10 +40,10 @@ test('birthday content begins with only the block game, no key or memory-world a
   assert.deepEqual([c.at.kind, c.at.activity], ['blocks', null], 'the room at the block tableau');
   assert.equal(c.facts.flags.includes('portal.ready'), false);
   assert.equal(c.facts.unlocked.includes('future'), false);
-  assert.equal(c.facts.unlocked.includes('hub.door4'), false);
+  assert.equal(c.facts.unlocked.includes('young-adult'), false);
 });
 
-test('opening match, portal, apparition, pickup and door #4 are one-time and Elo-only', () => {
+test('opening match, portal, apparition, pickup and Young Adult are one-time and Elo-only', () => {
   let c = newCampaign(STORY_CONTENT, 42);
   for (const character of OPENING_PLAYERS) c = act(c, { t: 'join', id: character, character });
   c = act(c, { t: 'start', id: 'pierre', now: 1000 });
@@ -66,11 +66,11 @@ test('opening match, portal, apparition, pickup and door #4 are one-time and Elo
   assert.equal(act(c, { t: 'collect', id: 'pierre', item: INTRO_KEY }), c);
   c = act(c, { t: 'collect', id: 'elodie', item: INTRO_KEY });
   assert.equal(holding(c.facts, 'elodie', INTRO_KEY), 1);
-  assert.equal(c.facts.unlocked.includes('hub.door4'), true);
+  assert.equal(c.facts.unlocked.includes('young-adult'), true);
   assert.equal(act(c, { t: 'collect', id: 'elodie', item: INTRO_KEY }), c);
-  assert.equal(act(c, { t: 'enter', id: 'pierre', node: 'hub.door4' }), c);
-  c = act(c, { t: 'enter', id: 'elodie', node: 'hub.door4' });
-  assert.equal(c.at.node, 'hub.door4');
+  assert.equal(act(c, { t: 'enter', id: 'pierre', node: 'young-adult' }), c);
+  c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult' });
+  assert.equal(c.at.node, 'young-adult');
   c = act(c, { t: 'back', id: 'elodie' });
   assert.equal(c.at.node, 'hub');
   assert.equal(holding(c.facts, 'elodie', INTRO_KEY), 1);

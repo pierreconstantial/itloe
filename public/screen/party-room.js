@@ -1,6 +1,6 @@
 // M3 party room, M4 (Contract G) the hub's scene: the lobby room with every joined guest's avatar
 // walking in it, among props they collide with and sort against. It draws the three rooms:
-// the party room, the apartment and door #4's room (ROOMS in shared/scene.js; roomAt picks one).
+// the party room, the apartment and Young Adult's room (ROOMS in shared/scene.js; roomAt picks one).
 //
 // This file is ONE room: its backdrop painting, its scene's prop art, the furniture effects of
 // object actions, and the story's drawings (the portal, the cats, the friends, the keepsakes, the
@@ -12,7 +12,7 @@
 //              list — 'back' props, then 'sorted' props and avatars interleaved by baseline Y,
 //              then 'front' props.
 
-import { PARTY_ROOM, APARTMENT_ROOM, DOOR_FOUR_ROOM } from '../../shared/scene.js';
+import { PARTY_ROOM, APARTMENT_ROOM, YOUNG_ADULT_ROOM } from '../../shared/scene.js';
 import { INTRO_KEY, INTRO_KEY_SPOT, PORTAL } from '../../shared/campaign/story.js';
 import { OBJECT_ACTIONS } from '../../shared/interactions.js';
 import { createLoop, py as snapY } from './scene-render.js';
@@ -200,7 +200,7 @@ export function createPartyRoom(bg, fg, avatars) {
     const Y = (/** @type {number} */ u) => snap(geo.oy + u * unit, p);
     const floorTop = Y(SCENE.floorTop);
 
-    if (room === DOOR_FOUR_ROOM) {
+    if (room === YOUNG_ADULT_ROOM) {
       rect(g, 0, 0, w, floorTop, '#b8a998');
       rect(g, 0, floorTop, w, h - floorTop, '#8a6951');
       rect(g, 0, floorTop - p * 3, w, p * 3, PAL.stucco);
@@ -626,7 +626,7 @@ export function createPartyRoom(bg, fg, avatars) {
     for (let x = rx0 + p * 4; x < rx1 - p * 4; x += p * 4) rect(g, x, ry0 + p, p * 2, p, locked ? '#7a6858' : '#e9c46a');
 
     // doorway standing on the rug's back edge
-    const grand = d.id === 'hub.door4';
+    const grand = d.id === 'young-adult';
     const dw = Math.max(p * 14, snap((rx1 - rx0) * (grand ? 0.92 : 0.7), p));
     const dh = snap(unit * (grand ? 2.65 : 1.75), p);
     const dx0 = snap((rx0 + rx1) / 2 - dw / 2, p), dy1 = ry0 + p * 2, dy0 = dy1 - dh;

@@ -91,9 +91,9 @@ test('wire: all four can leave the opening podium, rejoin, and Elo can reach the
   elo.send({ t: 'pos', x: INTRO_KEY_SPOT.x, y: INTRO_KEY_SPOT.y, dir: 'up', moving: false });
   elo.send({ t: 'interact', object: INTRO_KEY });
   const key = await until(elo, (m) => m.t === 'view' && m.campaign?.facts.inventory.elodie?.[INTRO_KEY] === 1);
-  assert.equal(key.campaign.facts.unlocked.includes('hub.door4'), true);
-  elo.send({ t: 'enter', node: 'hub.door4' });
-  await until(elo, (m) => m.t === 'view' && m.campaign?.at.node === 'hub.door4');
+  assert.equal(key.campaign.facts.unlocked.includes('young-adult'), true);
+  elo.send({ t: 'enter', node: 'young-adult' });
+  await until(elo, (m) => m.t === 'view' && m.campaign?.at.node === 'young-adult');
   elo.send({ t: 'back' });
   const returned = await until(elo, (m) => m.t === 'view' && m.campaign?.at.node === 'hub'
     && m.campaign?.facts.inventory.elodie?.[INTRO_KEY] === 1);

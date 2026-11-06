@@ -22,12 +22,12 @@ export const WALK_SPEED = 4;
 const SPAWN_Y = 7.6;
 
 /**
- * Deterministic spawn point on the row, facing down. The late-join slot fits at the right edge.
+ * Deterministic spawn point on the row, facing down. Six slots span the room without overlapping.
  * @param {CharacterId} characterId
  * @returns {Spawn}
  */
 export function spawnPoint(characterId) {
-  const x = Math.min(15.1, 3 + 3.33 * (CHARACTERS[characterId].color - 1));
+  const x = 2 + 2.4 * (CHARACTERS[characterId].color - 1);
   return { x, y: SPAWN_Y, dir: 'down' };
 }
 

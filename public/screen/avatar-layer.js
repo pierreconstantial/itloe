@@ -28,7 +28,7 @@ import { drawWisp } from './wisp.js';
  *   x: number, y: number,      // simulated position (eased towards the target, fixed timestep)
  *   px: number, py: number,    // the same, one update earlier — drawing interpolates between them
  *   tx: number, ty: number,    // last reported position
- *   dir: Dir, moving: boolean, lastPosAt: number,
+ *   dir: Dir, moving: boolean, lastPosAt: number, lastActiveAt: number, jumpStartedAt: number,
  * }} Avatar
  */
 /** A speech bubble (`text`) or an emote (`kind`) over an avatar. @typedef {{text?: string, kind?: string, until: number, started: number}} Expression */
@@ -37,11 +37,21 @@ import { drawWisp } from './wisp.js';
 const AVATAR_UNITS = 1.2;   // avatar height in world units
 const OFFLINE_ALPHA = 0.4;  // a dropped player's avatar fades (presence.js decides when)
 const STALE_MS = 400;       // no update for this long → idle frame
+const IDLE_MS = 10_000;     // a character's own activity starts after ten quiet seconds
+const JUMP_MS = 650;
 const EASE_PER_S = 14;      // interpolation speed (higher = snappier)
 const ARRIVED = 0.04;       // units: closer than this counts as standing still
 const SAY_MS = 5500;        // how long a speech bubble stays
 const EMOTE_MS = 2200;      // how long an emote plays
 const DIRS = new Set(['up', 'down', 'left', 'right']);
+const IDLE_ART = Object.freeze({
+  anna: { icon: '♫', label: 'Dancing' },
+  sol: { icon: '🎮', label: 'Playing games' },
+  pierre: { icon: '✏️', label: 'Drawing' },
+  konz: { icon: '⛰️', label: 'Dreaming of mountains' },
+  elodie: { icon: '📖', label: 'Reading' },
+  nico: { icon: '💕', label: 'Handsome guys' },
+});
 
 /**
  * The world-to-screen projection of the TV: the 16 × 9 world letterboxed into a `w × h` CSS-pixel
@@ -94,7 +104,7 @@ export function createAvatarLayer() {
         a = {
           id, name: p.name, color: p.color, character, statuses: p.statuses ?? [],
           x: start.x, y: start.y, px: start.x, py: start.y, tx: start.x, ty: start.y,
-          dir: start.dir, moving: start.moving, lastPosAt: start.at,
+          dir: start.dir, moving: start.moving, lastPosAt: start.at, lastActiveAt: performance.now(), jumpStartedAt: -Infinity,
         };
         avatars.set(id, a);
       }
@@ -124,18 +134,33 @@ export function createAvatarLayer() {
     lastPos.set(p.playerId, p);
     const a = avatars.get(p.playerId);
     if (!a) return;
+    if (p.moving || p.x !== a.tx || p.y !== a.ty || p.dir !== a.dir) a.lastActiveAt = now;
     a.tx = p.x; a.ty = p.y; a.dir = p.dir; a.moving = p.moving; a.lastPosAt = now;
+  }
+
+  /** A short visual hop; feet stay at the same world position, so doors and collisions do not change. */
+  /** @param {unknown} m */
+  function onJump(m) {
+    const id = /** @type {{playerId?: unknown}} */ (m)?.playerId;
+    if (typeof id !== 'string') return;
+    const a = avatars.get(id);
+    if (!a || a.statuses.includes('wisp')) return;
+    a.jumpStartedAt = a.lastActiveAt = performance.now();
   }
 
   /** A speech bubble over a player's avatar. @param {string} playerId @param {string} text @param {number} [ms] */
   function say(playerId, text, ms = SAY_MS) {
     const now = performance.now();
+    const a = avatars.get(playerId);
+    if (a) a.lastActiveAt = now;
     expressions.set(playerId, { text, started: now, until: now + ms });
   }
 
   /** An emote played by a player's avatar. @param {string} playerId @param {string} kind one of EMOTES in shared/social.js */
   function emote(playerId, kind) {
     const now = performance.now();
+    const a = avatars.get(playerId);
+    if (a) a.lastActiveAt = now;
     expressions.set(playerId, { kind, started: now, until: now + EMOTE_MS });
   }
 
@@ -219,6 +244,12 @@ export function createAvatarLayer() {
     return fresh && (a.moving || travelling); // updates stopped → idle, however far the easing got
   }
 
+  /** @param {Avatar} a @param {number} now */
+  function isIdle(a, now) {
+    return !offline.has(a.id) && !isWalking(a, now) && now - a.lastActiveAt >= IDLE_MS
+      && (expressions.get(a.id)?.until ?? 0) <= now;
+  }
+
   /** @param {CanvasRenderingContext2D} g @param {Avatar} a @param {number} spriteFrame @param {View} v */
   function drawAvatar(g, a, spriteFrame, v) {
     const { scale, unit } = v;
@@ -238,10 +269,17 @@ export function createAvatarLayer() {
     const expression = expressions.get(a.id);
     const active = expression && expression.until > frameNow ? expression : null;
     if (expression && !active) expressions.delete(a.id);
+    const idle = isIdle(a, frameNow);
     if (off) g.globalAlpha = OFFLINE_ALPHA;
     const elapsed = active ? frameNow - active.started : 0;
     g.save();
-    if (active?.kind === 'victory') {
+    const jumpAge = frameNow - a.jumpStartedAt;
+    if (jumpAge >= 0 && jumpAge < JUMP_MS) g.translate(0, -Math.sin(Math.PI * jumpAge / JUMP_MS) * scale * 5);
+    if (idle && a.character === 'anna') {
+      g.translate(Math.sin(frameNow / 180) * scale, -Math.abs(Math.sin(frameNow / 230)) * scale * 2);
+    } else if (idle && a.character === 'konz') {
+      g.translate(Math.sin(frameNow / 260) * scale, 0);
+    } else if (active?.kind === 'victory') {
       g.translate(0, -Math.abs(Math.sin(elapsed / 100)) * scale * 2);
     } else if (active?.kind === 'annoy') {
       g.translate(Math.sin(elapsed / 35) * scale, 0);
@@ -250,7 +288,38 @@ export function createAvatarLayer() {
     g.restore();
     g.globalAlpha = 1;
     if (active) drawExpression(g, active, sx, top, size, v, elapsed);
+    else if (idle) drawIdleArt(g, a.character, sx, top, size, v);
     label(g, a, sx, Math.min(v.h - unit * 0.3, sy + scale * 2), off, v);
+  }
+
+  /** A small comic bubble keeps each quiet character's activity legible on a TV. */
+  /** @param {CanvasRenderingContext2D} g @param {string} character
+   * @param {number} sx @param {number} top @param {number} size @param {View} v */
+  function drawIdleArt(g, character, sx, top, size, v) {
+    const art = IDLE_ART[/** @type {keyof typeof IDLE_ART} */ (character)];
+    if (!art) return;
+    const font = Math.max(15, Math.round(v.unit * 0.19));
+    const icon = character === 'nico' ? '👨  👨' : character === 'konz' ? '🚶 ⛰️' : art.icon;
+    g.save();
+    g.font = `700 ${font}px system-ui, sans-serif`;
+    const width = Math.max(g.measureText(art.label).width, g.measureText(icon).width) + font * 1.15;
+    const height = font * 2.65;
+    const x = Math.max(5, Math.min(v.w - width - 5, sx + size * 0.18));
+    const y = Math.max(5, top - height - v.scale * 2 + Math.sin(frameNow / 380) * v.scale * 0.5);
+    g.fillStyle = '#fff9ee';
+    g.strokeStyle = '#24202b';
+    g.lineWidth = Math.max(2, v.scale * 0.7);
+    g.beginPath();
+    g.roundRect(x, y, width, height, font * 0.45);
+    g.fill(); g.stroke();
+    g.fillStyle = '#201b29';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.font = `${font * 1.15}px system-ui, sans-serif`;
+    g.fillText(icon, x + width / 2, y + font * 0.75);
+    g.font = `700 ${font * 0.72}px system-ui, sans-serif`;
+    g.fillText(art.label, x + width / 2, y + font * 1.95);
+    g.restore();
   }
 
   /** @param {CanvasRenderingContext2D} g @param {Avatar} a @param {View} v */
@@ -261,7 +330,7 @@ export function createAvatarLayer() {
     const expression = expressions.get(a.id);
     const active = !!expression && expression.until > frameNow;
     if (expression && !active) expressions.delete(a.id);
-    const tint = ['#f6d77c', '#ffe7a8', '#a9e9ff', '#ffc5ef', '#cbb9ff'][(a.color - 1) % 5];
+    const tint = ['#f6d77c', '#ffe7a8', '#a9e9ff', '#ffc5ef', '#cbb9ff', '#9dffc0'][(a.color - 1) % 6];
     if (offline.has(a.id)) g.globalAlpha = OFFLINE_ALPHA;
     drawWisp(g, sx, sy, v.unit, frameNow, active, tint, isWalking(a, frameNow));
     g.globalAlpha = 1;
@@ -361,7 +430,7 @@ export function createAvatarLayer() {
   }
 
   return {
-    setPlayers, setStatuses, setOffline, onPos, onSocial, say, emote, reset, settle, update, draw,
+    setPlayers, setStatuses, setOffline, onPos, onJump, onSocial, say, emote, reset, settle, update, draw,
     /**
      * Debug / tests: the ids `draw` paints into `scene`, back to front — prop ids and player ids
      * interleaved. An avatar listed BEFORE a prop is drawn behind it.
@@ -369,6 +438,6 @@ export function createAvatarLayer() {
      */
     drawOrder: (scene, only) => drawOrder(scene, shown(only)),
     /** Debug / tests: the drawn state of every avatar. */
-    snapshot: () => [...avatars.values()].map((a) => ({ id: a.id, name: a.name, character: a.character, statuses: a.statuses, x: a.x, y: a.y, dir: a.dir, walking: isWalking(a, performance.now()), offline: offline.has(a.id) })),
+    snapshot: (now = performance.now()) => [...avatars.values()].map((a) => ({ id: a.id, name: a.name, character: a.character, statuses: a.statuses, x: a.x, y: a.y, dir: a.dir, walking: isWalking(a, now), idle: isIdle(a, now), jumping: now - a.jumpStartedAt < JUMP_MS, offline: offline.has(a.id) })),
   };
 }

@@ -278,6 +278,32 @@ DESIGNS.nico = {
   down: ['...oooooooooo...', ...DESIGNS.pierre.down.slice(1)],
 };
 
+// Konz's former sprite, restored alongside Nico: blond hair and a teal sweatshirt.
+DESIGNS.konz = {
+  palette: {
+    o: '#27211d', h: '#c9a158', H: '#8f6b35', s: '#f3c69a', e: '#27211d', m: '#a8584e',
+    c: '#416d68', C: '#31534f', a: '#9fe6df', p: '#786d58', b: '#514333',
+  },
+  down: [
+    '................', '....oooooooo....', '...ohhhhhhhho...', '...ohhhhhhhho...',
+    '...ohssssssho...', '...osesssseso...', '...osssssssso...', '...osssmmssso...',
+    '...osssssssso...', '....oooooooo....', '..osccaccaccso..', '..occaccacacco..',
+    '..oCCCaCCaCCCo..',
+  ],
+  up: [
+    '................', '....oooooooo....', '...ohhhhhhhho...', '...ohhhhhhhho...',
+    '...ohhhhhhhho...', '...ohhhhhhhho...', '...ohhhhhhhho...', '...oHhhhhhhHo...',
+    '...ohHHHHHHho...', '....oossssoo....', '..osccccccccso..', '..occcccccccco..',
+    '..oCCCCCCCCCCo..',
+  ],
+  right: [
+    '................', '....oooooooo....', '...ohhhhhhhho...', '...ohhhhhhhhho..',
+    '...ohhhhhssso...', '...ohhhssesso...', '...ohhhsssssso..', '...ohhssssmso...',
+    '...ohhssssso....', '....oooooo......', '....occacccso...', '....ocaaaccco...',
+    '...oCCCCCCCCo...',
+  ],
+};
+
 // ---- assembly ----------------------------------------------------------------------
 
 /** @param {string[]} rows */

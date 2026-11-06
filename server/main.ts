@@ -238,6 +238,7 @@ const screens = new Set<WebSocket>();
 /** Recent speech is kept only in memory; reconnecting phones can recover the conversation. */
 const chat: { t: 'say'; playerId: string; text: string; at: number }[] = [];
 const socialAt = new WeakMap<WebSocket, number>();
+const jumpAt = new WeakMap<WebSocket, number>();
 const interactionAt = new WeakMap<WebSocket, number>();
 
 /** The join QR on the TVs (showJoin / hideJoin): until when, in epoch ms; until ≤ now = closed.
@@ -433,6 +434,20 @@ function handleMessage(ws: WebSocket, m: any): void {
     positions.set(id, pos);
     relayPos(id, pos);
     walk(id, pos);
+    return;
+  }
+
+  if (m.t === 'jump') {
+    const id = who.get(ws);
+    if (!id || !canMove(party(), id) || round || isIncarnating(id)) return;
+    const member = party().players[id];
+    if (member.statuses.includes('wisp')) return;
+    if (STORY_MODE && game.campaign.at.node === 'hub' && member.character === CONTENT.chooser
+      && !game.campaign.facts.flags.includes('apparition.seen')) return;
+    const now = Date.now();
+    if (now - (jumpAt.get(ws) ?? 0) < 650) return;
+    jumpAt.set(ws, now);
+    for (const screen of screens) send(screen, { t: 'jump', playerId: id });
     return;
   }
 

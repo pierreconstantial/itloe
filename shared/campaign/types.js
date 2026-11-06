@@ -150,7 +150,8 @@ export {};
  *   | { op: 'count', counter: string, set?: number, by?: number }
  *   | { op: 'reset-node', node: string }                // forget done/seen + its finished counter (rewards stay applied)
  *   | { op: 'give', item: string, to: CharacterId, count?: number }     // catalogue item, default 1
- *   | { op: 'take', item: string, from: CharacterId, count?: number }} GmOp  // refused when they hold fewer
+ *   | { op: 'take', item: string, from: CharacterId, count?: number } // refused when they hold fewer
+ *   | { op: 'wisp', character: CharacterId, on: boolean }} GmOp // joined character's Wisp Mode
  */
 
 /**

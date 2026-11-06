@@ -26,5 +26,6 @@
 - A permanent test guards a behaviour that matters on the evening and could plausibly break. Checks made to confirm a change (each branch of a validation, a refactor's equivalence, exact wording, the shape of a fix) go in the report, not the suite.
 - Never run state-changing tests against the interactive server on port 3131 or its `var/` save. Use a free port and scratch `BLOKO_VAR`.
 - Run e2e tests only with `npm run e2e [suites]`, in the foreground: a full run takes about 3 minutes. To check that screens didn't change, take a reference with `--shots` on the base, then `--compare` on your change (README, "Development commands and testing").
+- When a visual interaction is easy for Pierre to assess and browser testing would require extra setup, ask him to test it directly. Start the game on a free port with a scratch `BLOKO_VAR` first, and give him the screen, phone, or simulator URL he needs. Do not change test infrastructure solely for that visual check.
 - Review the diff and remove unrelated changes or additions unnecessary for the requested outcome. Keep generated saves, screenshots, and dependencies out of commits.
 - Report the resulting behavior, checks run, and any checks that could not run. If work elsewhere already breaks a check, report it without expanding the task into unrelated fixes.
