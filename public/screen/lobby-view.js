@@ -21,7 +21,7 @@ export function fallbackJoinInfo() {
 }
 
 /**
- * Fetches the join info once (GET /api/join); falls back to the location-derived URL.
+ * Fetches the join info (GET /api/join); falls back to the location-derived URL.
  * @returns {Promise<JoinInfo>}
  */
 export async function fetchJoinInfo() {
@@ -56,16 +56,21 @@ let qrBroken = false;
 
 /**
  * One <img> reused across renders: re-appending a node doesn't reload it (no flicker, no refetch).
+ * A new room code (a fresh evening) loads the new QR.
+ * @param {string | null} code
  * @returns {HTMLImageElement | null} null once the QR failed to load
  */
-function qrImage() {
+function qrImage(code) {
   if (qrBroken) return null;
   if (!qrImg) {
     const img = /** @type {HTMLImageElement} */ (h('img', 'join-qr'));
     img.alt = 'QR code to join';
     img.addEventListener('error', () => { qrBroken = true; img.remove(); });
-    img.src = QR_SRC;
     qrImg = img;
+  }
+  if (qrImg.dataset.code !== (code ?? '')) {
+    qrImg.src = code ? `${QR_SRC}?room=${encodeURIComponent(code)}` : QR_SRC;
+    qrImg.dataset.code = code ?? '';
   }
   return qrImg;
 }
@@ -79,7 +84,7 @@ function renderJoin(join) {
   info.append(h('p', 'join-label', [join.qr ? 'or open' : 'Open']), h('div', 'join-url', [typedUrl(join.url)]));
 
   const box = h('div', 'join');
-  const img = join.qr ? qrImage() : null;
+  const img = join.qr ? qrImage(join.code) : null;
   if (img) {
     box.append(img);
   } else {

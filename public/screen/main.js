@@ -483,6 +483,7 @@ function connect() {
     party.reset();
     gap = true;
     sock.send(JSON.stringify({ t: 'hello', role: 'screen' }));
+    loadJoinInfo(); // a fresh evening since (restart, /?reset=1) has a new room code
   });
   sock.addEventListener('message', (ev) => {
     if (ws !== sock) { live.stop(); return; }
@@ -547,11 +548,15 @@ onAudioState((st) => {
   soundHint.dataset.state = st;
   soundHint.textContent = st === 'locked' ? '🔇 Click anywhere for sound' : st === 'muted' ? '🔇 Muted (M)' : '';
 });
+/** The join info, redrawn in the room when it changed. */
+function loadJoinInfo() {
+  fetchJoinInfo().then((info) => {
+    const changed = info.code !== joinInfo.code || info.url !== joinInfo.url;
+    joinInfo = info;
+    if (changed && roomIds !== null && campaign) showRoom(campaign);
+  });
+}
 connect();
-fetchJoinInfo().then((info) => {
-  joinInfo = info;
-  if (roomIds !== null && campaign) showRoom(campaign);
-});
 
 /** @type {any} */ (window).bloko = {
   /** The round shown (running, or its podium): { kind, status, view }; null between rounds. */
