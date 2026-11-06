@@ -1,0 +1,94 @@
+/* Backgammon's phone screens (backgammon-ui.js): the board turned upright, one point per row, in the block game's
+   flat look; between rounds, the player's result. */
+
+#view-backgammon {
+  --dark: #1f252c;
+  --light: #39434e;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: calc(10px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+#view-backgammon .bg-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-right: 48px; /* the ☰ button */ }
+#view-backgammon .bg-top .kicker { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+#view-backgammon .bg-clock { font-weight: 800; font-variant-numeric: tabular-nums; }
+#view-backgammon .bg-clock.urgent { color: var(--bad); }
+#view-backgammon .hint { color: var(--fg-dim); }
+#view-backgammon .bg-who { display: inline-flex; align-items: center; gap: 5px; }
+#view-backgammon .bg-who i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+
+#view-backgammon .bg-status { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; min-height: 40px; }
+#view-backgammon .bg-opening { width: 100%; font-size: 13px; }
+#view-backgammon .bg-dice { display: inline-flex; gap: 6px; vertical-align: middle; }
+#view-backgammon .bg-die { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 7px; background: var(--fg); color: #111; font-weight: 800; font-size: 19px; }
+#view-backgammon .bg-die.used { opacity: 0.3; }
+
+/* the board: my 12–1 down the left, 13–24 down the right, the bar across the middle, the trays below */
+#view-backgammon .bg-board {
+  flex: 1;
+  min-height: 420px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(6, 1fr) 30px repeat(6, 1fr) 38px;
+  gap: 0 6px;
+  padding: 4px;
+  border: 2px solid #2b323a;
+  border-radius: 10px;
+  background: var(--bg);
+  touch-action: manipulation;
+}
+#view-backgammon .bg-pt { position: relative; display: flex; align-items: center; gap: 1px; padding: 0 3px; border-radius: 8px; }
+#view-backgammon .bg-pt::before {
+  content: ''; position: absolute; inset: 2px 0; z-index: 0;
+  background: var(--dark); clip-path: polygon(0 0, 92% 50%, 0 100%);
+}
+#view-backgammon .bg-pt.odd::before { background: var(--light); }
+#view-backgammon .bg-pt.r { flex-direction: row-reverse; }
+#view-backgammon .bg-pt.r::before { clip-path: polygon(100% 0, 8% 50%, 100% 100%); }
+#view-backgammon .bg-ck {
+  position: relative; z-index: 1; flex: none;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.35);
+  display: grid; place-items: center;
+  color: #111; font-style: normal; font-weight: 800; font-size: 14px;
+}
+#view-backgammon .bg-ck.picked { outline: 4px solid var(--accent); outline-offset: 1px; }
+#view-backgammon .bg-pt.can .bg-ck:last-child,
+#view-backgammon .bg-pt.r.can .bg-ck:last-child { box-shadow: 0 0 0 2px var(--fg); }
+#view-backgammon .bg-bar { display: flex; align-items: center; gap: 4px; padding: 0 6px; background: var(--bg-2); border-radius: 6px; }
+#view-backgammon .bg-bar.r { justify-content: flex-end; }
+#view-backgammon .bg-bar .bg-ck { width: 24px; height: 24px; }
+#view-backgammon .bg-bar.can { outline: 2px solid var(--fg); }
+#view-backgammon .bg-tray { display: flex; align-items: center; gap: 3px; padding: 0 8px; border-top: 2px solid #2b323a; border-radius: 6px; }
+#view-backgammon .bg-tray.r { flex-direction: row-reverse; }
+#view-backgammon .bg-tray b { width: 7px; height: 24px; border-radius: 3px; flex: none; }
+#view-backgammon .bg-tray span { margin: 0 6px; color: var(--fg-dim); font-size: 14px; }
+#view-backgammon .bg-tray em { color: var(--fg-dim); font-size: 13px; font-style: normal; }
+/* where the picked checker can go */
+#view-backgammon .lit { box-shadow: inset 0 0 0 3px var(--accent), 0 0 14px color-mix(in srgb, var(--accent) 55%, transparent); }
+
+/* the bottom row leaves the frame's chat button its corner */
+#view-backgammon .bg-buttons, #view-backgammon .bg-action { margin-right: 80px; }
+#view-backgammon .bg-buttons { display: flex; gap: 8px; min-height: 56px; align-items: center; }
+#view-backgammon .bg-buttons > * { flex: 1; }
+#view-backgammon .bg-buttons p { margin: 0; text-align: center; }
+
+/* sitting out, watching, between rounds */
+#view-backgammon h2 { margin: 4px 0; font-size: 20px; }
+#view-backgammon .card { background: var(--bg-2); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+#view-backgammon .bg-game { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+#view-backgammon .bg-row { display: flex; align-items: center; gap: 8px; }
+#view-backgammon .bg-rank { width: 18px; color: var(--fg-dim); }
+#view-backgammon .bg-pts { margin-left: auto; font-variant-numeric: tabular-nums; }
+#view-backgammon .bg-hero { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; padding: 8px 0; }
+#view-backgammon .bg-hero canvas { image-rendering: pixelated; }
+#view-backgammon .bg-big { font-size: 28px; font-weight: 900; }
+#view-backgammon .bg-big-emoji { font-size: 48px; line-height: 1; }
+#view-backgammon .bg-stamp {
+  transform: rotate(-4deg); border: 3px solid var(--accent); color: var(--accent); border-radius: 10px;
+  padding: 2px 12px; font-size: 24px; font-weight: 900; letter-spacing: 2px;
+}
+#view-backgammon .bg-spacer { flex: 1; }
+#view-backgammon .bg-wait { text-align: center; margin: 0; }

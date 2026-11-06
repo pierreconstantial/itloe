@@ -9,7 +9,8 @@ import { SLOW, sleep } from '../e2e-lib.mts';
 import { PYRAMIDE_SPOTS } from '../../shared/pyramide.js';
 import { canPlace } from '../../shared/board.js';
 import { PIECES } from '../../shared/pieces.js';
-import { avatar, phone, player, tv, wisp } from './mock.mts';
+import { avatar, nameOf, phone, player, tv, wisp } from './mock.mts';
+import { allowedSteps, other as bgOther, reach } from '../../shared/backgammon.js';
 
 export type Shot = { who: string, img: string, planned: boolean, asset?: boolean, mime?: 'image/png' };
 type Drive = Awaited<ReturnType<typeof drive>>;
@@ -553,4 +554,114 @@ const moments: Sequence = {
   },
 };
 
-export const SEQUENCES: Sequence[] = [opening, youngAdult, quiz, pyramide, moments];
+// ---------------------------------------------------------------- backgammon
+
+/** The backgammon round as the TV holds it. */
+const bgRound = (b: Board): Promise<any> => b.d.tv.ev('window.bloko.minigame()?.view.round ?? null');
+
+/**
+ * Plays every unfinished board through the players' own phones (send): the checker furthest back, to its furthest
+ * point, so games end soon; stops once `stop` holds for the round.
+ */
+async function playBackgammon(b: Board, ids: Record<string, string>, stop: (s: any) => boolean) {
+  const phoneOf = (id: string) => b.phone(Object.keys(ids).find((who) => ids[who] === id)!);
+  for (let n = 0; n < 20000; n++) {
+    const s = await bgRound(b);
+    if (!s || stop(s) || s.phase !== 'playing') return s;
+    // one message per board, then wait for the round to change: a message on a stale view would be refused
+    for (const board of s.boards) {
+      if (board.end) continue;
+      const p = phoneOf(board[board.turn]);
+      if (!board.dice) { await p.send({ t: 'roll' }); continue; }
+      const mine = board.c[board.turn], theirs = board.c[bgOther(board.turn)];
+      const steps = allowedSteps(mine, theirs, board.dice);
+      if (!steps.length) { await p.send({ t: 'done' }); continue; }
+      const from = Math.max(...steps.map((x) => x.from));
+      await p.send({ t: 'move', from, to: Math.min(...reach(mine, theirs, board.dice, from).map((r) => r.to)) });
+    }
+    const before = JSON.stringify(s.boards);
+    for (let w = 0; w < 100 && JSON.stringify((await bgRound(b))?.boards) === before; w++) await sleep(20);
+  }
+  throw new Error('backgammon: the round never got there');
+}
+
+const backgammon: Sequence = {
+  id: 'backgammon',
+  title: 'Backgammon',
+  intro: 'Two to four players play each other, two boards at a time, in rounds against a clock; the game master starts each round. Élodie, Pierre, Sol and Anna play.',
+  content: 'minigame:backgammon',
+  phones: ['pierre', 'elodie', 'sol', 'anna'],
+  async run(b) {
+    const [P, E, S, A] = ['pierre', 'elodie', 'sol', 'anna'].map((w) => b.phone(w));
+    await P.join('pierre'); await E.join('elodie'); await S.join('sol'); await A.join('anna');
+    const ids: Record<string, string> = {};
+    for (const who of ['pierre', 'elodie', 'sol', 'anna']) ids[who] = await b.phone(who).ev(`localStorage.getItem('bloko-id')`);
+    const whoIs = (id: string) => Object.keys(ids).find((who) => ids[who] === id)!;
+    await guests(b, 4);
+    await P.tap('#btn-start-minigame');
+    await minigameIs(b, 'lobby');
+    for (const p of [P, E, S, A]) await p.tap('#btn-ready');
+    await readyAre(b, 4);
+    await P.tap('#btn-settings-lobby');
+    await sleep(800);
+    await b.frame('In the lobby, Pierre’s ⚙ Settings set the time limit of a round and how many games each pair plays.', [b.tv, () => b.real('pierre')]);
+
+    await P.tap('#sheet-settings [data-close]');
+    await P.tap('#btn-start');
+    await minigameIs(b, 'running');
+    let s = await bgRound(b);
+    const first = s.boards[0];
+    const mover = b.phone(whoIs(first[first.turn])), waiter = whoIs(first[bgOther(first.turn)]);
+    await mover.waitFor(`document.querySelectorAll('#view-backgammon .can').length > 1`);
+    const from = await mover.ev(`Number(document.querySelector('#view-backgammon .can[data-q="13"]') ? 13 : document.querySelector('#view-backgammon .can').dataset.q)`);
+    await mover.tap(`#view-backgammon [data-q="${from}"]`);
+    await sleep(800);
+    await b.frame('Round 1: the TV shows both boards side by side, the clock and the standings. Each player sees their own board upright on their phone: after the opening roll, the player who starts taps a checker, and the points it can reach light up. The other player waits.',
+      [b.tv, () => b.real(whoIs(first[first.turn])), () => b.real(waiter)]);
+
+    // the first move by tap, the rest of the turn through the phone, then the other player rolls
+    await mover.tap(`#view-backgammon .lit`);
+    await playBackgammon(b, ids, (r) => r.boards[0].turn !== first.turn);
+    await b.phone(waiter).waitText(/Roll/);
+    await sleep(500);
+    await b.frame(`${nameOf(waiter)}’s turn: one tap rolls the dice.`, [() => b.real(waiter)]);
+
+    // board 1 until its player to move can bear off, with a checker picked
+    s = await playBackgammon(b, ids, (r) => {
+      const bd = r.boards[0];
+      return !bd.end && !!bd.dice && allowedSteps(bd.c[bd.turn], bd.c[bgOther(bd.turn)], bd.dice).some((x) => x.to === 0);
+    });
+    const off = s.boards[0];
+    const bearer = b.phone(whoIs(off[off.turn]));
+    const steps = allowedSteps(off.c[off.turn], off.c[bgOther(off.turn)], off.dice).filter((x) => x.to === 0);
+    await bearer.waitFor(`document.querySelectorAll('#view-backgammon .can').length > 0`);
+    if (!(await bearer.ev(`!!document.querySelector('#view-backgammon .bg-tray.lit')`))) await bearer.tap(`#view-backgammon [data-q="${steps[0].from}"]`);
+    await sleep(800);
+    await b.frame(`Later, ${nameOf(whoIs(off[off.turn]))} bears off: the picked checker can leave the board, so the tray lights up.`, [b.tv, () => b.real(whoIs(off[off.turn]))]);
+
+    // the rest of round 1: the results
+    await playBackgammon(b, ids, () => false);
+    await b.d.tv.waitFor(`window.bloko.minigame()?.view.round?.phase === 'results'`);
+    s = await bgRound(b);
+    // beside Pierre's phone, the other board's winner
+    const otherBoard = s.boards.find((bd: any) => bd.a !== ids.pierre && bd.b !== ids.pierre);
+    const winner = whoIs(otherBoard[otherBoard.end.winner]);
+    await sleep(1500);
+    await b.frame(`Between rounds, the TV celebrates: each winner crowned, with a stamp saying how they won, the standings, and the next round’s games. Everyone waits for Pierre: his phone starts round 2. ${nameOf(winner)} won on the other board.`,
+      [b.tv, () => b.real('pierre'), () => b.real(winner)]);
+
+    // rounds 2 and 3, then the podium
+    for (const next of [2, 3]) {
+      await P.tap(`▶ Start round ${next}`);
+      await b.d.tv.waitFor(`window.bloko.minigame()?.view.round?.round === ${next} && window.bloko.minigame()?.view.round?.phase === 'playing'`);
+      await playBackgammon(b, ids, () => false);
+      await b.d.tv.waitFor(`window.bloko.minigame()?.view.round?.phase === 'results'`);
+    }
+    await P.tap('▶ Show the podium');
+    await minigameIs(b, 'podium');
+    await sleep(8000);
+    await b.frame('After the third round, Pierre shows the podium: the players ranked by points, with their games won and lost.', [b.tv, () => b.real('pierre')]);
+  },
+};
+
+export const SEQUENCES: Sequence[] = [opening, youngAdult, quiz, pyramide, moments, backgammon];

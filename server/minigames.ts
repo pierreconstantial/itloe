@@ -8,6 +8,7 @@ import type { Game } from './store.ts';
 import { makeBlockServer } from './blocks.ts';
 import { makeQuizServer } from './quiz.ts';
 import { makePyramideServer } from './pyramide.ts';
+import { makeBackgammonServer } from './backgammon.ts';
 import { plainLobbyServer } from './plain-lobby.ts';
 
 export type ErrCode = 'full' | 'bad-place' | 'not-gm' | 'not-playing' | 'unknown-player' | 'locked' | 'bad-room' | 'taken' | 'refused';
@@ -56,5 +57,6 @@ export function makeMinigameServers(game: Game) {
     blocks: plainLobbyServer(makeBlockServer(game)),
     quiz: plainLobbyServer(makeQuizServer()),
     pyramide: plainLobbyServer(makePyramideServer()),
+    backgammon: plainLobbyServer(makeBackgammonServer()),
   } satisfies Record<MinigameKind, MinigameServer<any, any>>;
 }

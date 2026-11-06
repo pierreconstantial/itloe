@@ -93,6 +93,8 @@ export const blocksOf = (v: any): any => (v?.minigame?.kind === 'blocks' ? v.min
 export const quizOf = (v: any): any => (v?.minigame?.kind === 'quiz' ? v.minigame.view.round ?? null : null);
 /** A view's Pyramide round (running, or finished on its podium: the round without the words still drawable), else null. */
 export const pyramideOf = (v: any): any => (v?.minigame?.kind === 'pyramide' ? v.minigame.view.round ?? null : null);
+/** A view's backgammon round (the group phase, without its seed and rolls), else null. */
+export const backgammonOf = (v: any): any => (v?.minigame?.kind === 'backgammon' ? v.minigame.view.round ?? null : null);
 /** A view's minigame in its lobby (the plain lobby's view: stage, settings, players, ready, round), else null. */
 export const lobbyOf = (v: any): any => (v?.minigame?.status === 'lobby' ? v.minigame.view : null);
 /** Who is in the room at a tableau while no minigame runs (the party members who haven't left), in a round's

@@ -15,6 +15,7 @@
     "e2e:campaign": "node scripts/e2e-campaign.mts",
     "e2e:quiz": "node scripts/e2e-quiz.mts",
     "e2e:pyramide": "node scripts/e2e-pyramide.mts",
+    "e2e:backgammon": "node scripts/e2e-backgammon.mts",
     "e2e:tv": "node scripts/e2e-tv.mts",
     "e2e:phone": "node scripts/e2e-phone.mts",
     "quiz:fetch": "node scripts/fetch-openquizzdb.mts",

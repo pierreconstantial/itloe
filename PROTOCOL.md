@@ -134,7 +134,7 @@ messages (`unsaved` below) while it runs.
 
 ### Minigames and their lobbies
 
-Blocks, quiz and Pyramide run in the plain lobby (`shared/plain-lobby.js`, `server/plain-lobby.ts`); a minigame with
+Blocks, quiz, Pyramide and backgammon run in the plain lobby (`shared/plain-lobby.js`, `server/plain-lobby.ts`); a minigame with
 its own lobby accepts the same messages where they apply. A guest's game-master message → `err "not-gm"`; the
 game master's at the wrong moment → `err "refused"`.
 
@@ -323,6 +323,32 @@ Anything refused → `err "refused"`. `retire` and a player leaving end the roun
 - **Campaign:** each word drawn, skipped ones too, is reported in the round's `asked` and never drawn again that
   evening. Each player scores their team's words found (classic) or points (duel); ranks are the teams'.
 
+### Backgammon: a tableau `activity: { kind: 'backgammon', settings: { minutes, games } }`
+
+Two to four players play each other on up to two boards, in rounds of games; one round in the plain lobby is the
+whole group phase. Rules and the round's state: `shared/backgammon.js`. Points are in each player's own numbering:
+1–24, `25` the bar, `0` off.
+
+```jsonc
+{ "t": "config", "patch": { "minutes": 12, "games": 3 } }   // game master, in the lobby: minutes 5 | 8 | 12 | 15 | 0 (no
+                                       // time limit), games 1 | 3 (best of 3)
+{ "t": "start" }                       // game master, 2 to 4 ready players: the first round's games, each with its opening roll
+{ "t": "roll" }                        // the player to move, before moving: their dice
+{ "t": "move", "from": 13, "to": 8 }   // the player to move: one checker, by one die or several in a row, as the rules allow
+{ "t": "undo" }                        // the player to move: takes back the turn's last move
+{ "t": "done" }                        // the player to move, once no move is left: the other side's turn
+{ "t": "nextRound" }                   // game master, between rounds: the next round, or after the last the podium
+```
+
+Anything refused → `err "refused"` (a guest's `nextRound` → `err "not-gm"`). A player who leaves or is taken out
+loses their game and every game left; with fewer than two players left the group phase ends (endReason `left`,
+`retired`). `endGame` ends it with the standings so far (endReason `gm`).
+
+- **The dice can't be told in advance:** they come from the round's seed and how many have been rolled, and the view
+  leaves out both.
+- **Campaign:** each player scores their points (a win 1, a gammon 2); ranks follow the standings (points, then the
+  points between the players level on points, then the pips their opponents had left).
+
 ### Show the join QR again (any player, any moment)
 
 ```jsonc
@@ -351,7 +377,7 @@ Anything refused → `err "refused"`. `retire` and a player leaving end the roun
 // The plain lobby's view: { stage, settings, players: [{ id, character }], ready: [id], round }, with "round" the round
 // server's view of the running or finished round (null in the lobby). blocks: the full State (shared/game.js), plus
 // "best" in solo games (below); quiz: the public projection (below); Pyramide: its round without the words still
-// drawable (below). In a lobby with spots, "ready" is the spots' holders.
+// drawable (below); backgammon: its round without the seed and the rolls (below). In a lobby with spots, "ready" is the spots' holders.
 // "campaign" = the whole evening (at.node, at.kind, at.results, party, facts, news, …) WITHOUT the minigame's raw state
 // (`at.activity`): that travels only through "minigame". The saved campaign keeps it.
 // "online" lists party members. "contentVersion": the
