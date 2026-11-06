@@ -53,6 +53,7 @@ Set them in front of `npm start`, e.g. `PORT=8080 npm start`.
 | `BLOKO_HOST` | The address phones should use: an interface name (`wlan0`) or an IP address. Use it when the printed address is wrong. |
 | `BLOKO_PUBLIC_ORIGIN` | Public HTTPS origin, e.g. `https://itloe.kputnik.com`. Requires `BLOKO_ACCESS_TOKEN`; replaces LAN address detection for invitations. |
 | `BLOKO_ACCESS_TOKEN` | Shared invitation secret of 6 letters or digits, short enough for guests to type from the TV. Requires `BLOKO_PUBLIC_ORIGIN`. Never put it in Git, release files or logs. |
+| `BLOKO_ADMIN_TOKEN` | Admin secret of 6 letters or digits, different from `BLOKO_ACCESS_TOKEN`. Opening any page with `?admin=<token>` once lets that browser reset the evening. Without it, a LAN server lets everyone reset, and a public one nobody. Never put it in Git, release files or logs. |
 | `BLOKO_NEW=1` | Start a brand-new game instead of resuming the saved one. Same as `npm start -- --new`. |
 | `BLOKO_VAR` | Folder for saved data (default `var/`). |
 | `BLOKO_QUIZ_DIR` | Folder of the quiz question bank (default `data/quiz/`). |
@@ -72,7 +73,7 @@ Until the evening this is a development deployment; a change may break it.
 
 Infrastructure owns the LXC, Node 24 runtime, systemd service, public HTTPS/WebSocket proxy, secrets, backups and deployment timer. The game runs as an unprivileged user, with releases under `/opt/itloe/releases/<commit>`, `/opt/itloe/current` pointing at the active release, and `BLOKO_VAR=/var/lib/itloe` outside the release. The proxy forwards to the guest's private port `3131`; it must suppress URL/Referer-bearing access and error logs for this host.
 
-Open `https://itloe.kputnik.com/?token=<shared-secret>` to authorize a browser. The server exchanges the token for a 30-day Secure/HttpOnly cookie and redirects to a clean URL. All HTTP routes and WebSocket upgrades require authorization; WebSockets also require the configured public Origin. The token-bearing join links and QR codes authorize new phones. Everyone with the invitation joins the same evening, with the five predefined character slots. Rotating the configured secret invalidates existing cookies after a restart. Without either public setting, local LAN play stays open.
+The service also needs `BLOKO_ADMIN_TOKEN`: without it, nobody can reset the evening. Open `https://itloe.kputnik.com/?token=<shared-secret>` to authorize a browser. The server exchanges the token for a 30-day Secure/HttpOnly cookie and redirects to a clean URL. All HTTP routes and WebSocket upgrades require authorization; WebSockets also require the configured public Origin. The token-bearing join links and QR codes authorize new phones. Everyone with the invitation joins the same evening, with the five predefined character slots. Rotating the configured secret invalidates existing cookies after a restart. Without either public setting, local LAN play stays open.
 
 Pushing to `production` runs [the production workflow](.github/workflows/production.yml): locked dependency install, type-checking, tests, save/resume checks, packaging and an extracted-runtime access test. It then publishes a GitHub Release tagged `prod-<full-commit-sha>` with:
 
@@ -94,7 +95,7 @@ The whole evening is saved after every move. Just run `npm start` again:
 - **everything is resumed**: where the party is, who is playing, a game in progress (a timed game keeps its remaining time), the podium, what has been unlocked so far. Phones and the TV reconnect on their own;
 - `npm start -- --new` always starts a fresh evening.
 
-To start a fresh evening on the hosted server, open `https://itloe.kputnik.com/?reset=1` and confirm. The server saves a fresh evening, as `--new` would start it, and exits with code 75; the hosted service restarts it after a failure exit, and it loads that evening. Phones and TVs reconnect on their own; players join again with the new code from the TV. Anyone who can open the game can reset it. Run locally, `/?reset=1` only stops the server: start it again with `npm start`.
+To start a fresh evening on the hosted server, open `https://itloe.kputnik.com/?reset=1&admin=<admin token>` and confirm. The server saves a fresh evening, as `--new` would start it, and exits with code 75; the hosted service restarts it after a failure exit, and it loads that evening. Phones and TVs reconnect on their own; players join again with the new code from the TV. Only a browser with the admin token can reset (see `BLOKO_ADMIN_TOKEN`). Run locally, `/?reset=1` only stops the server: start it again with `npm start`.
 
 A phone that goes to sleep or reloads also comes back to its own board automatically.
 

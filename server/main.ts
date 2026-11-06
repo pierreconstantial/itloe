@@ -5,8 +5,8 @@
 // doors, broadcast.
 // Run: npm start          (resumes the saved evening in any state; a timed clock keeps its remaining time)
 //      npm start -- --new (or BLOKO_NEW=1: always a fresh evening)
-//      /?reset=1 in a browser, once confirmed: saves a fresh evening and exits for a restart
-// Env: PORT (3131), BLOKO_BIND, BLOKO_HOST (LAN), BLOKO_VAR, BLOKO_PUBLIC_ORIGIN + BLOKO_ACCESS_TOKEN
+//      /?reset=1 in a browser, once confirmed (admins only): saves a fresh evening and exits for a restart
+// Env: PORT (3131), BLOKO_BIND, BLOKO_HOST (LAN), BLOKO_VAR, BLOKO_PUBLIC_ORIGIN + BLOKO_ACCESS_TOKEN, BLOKO_ADMIN_TOKEN
 
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { randomUUID } from 'node:crypto';
@@ -39,7 +39,7 @@ import {
 const PORT = Number(process.env.PORT ?? 3131);
 const ROOT = new URL('..', import.meta.url).pathname;
 const FORCE_NEW = process.argv.includes('--new') || process.env.BLOKO_NEW === '1';
-const access = makeAccess(process.env.BLOKO_PUBLIC_ORIGIN, process.env.BLOKO_ACCESS_TOKEN);
+const access = makeAccess(process.env.BLOKO_PUBLIC_ORIGIN, process.env.BLOKO_ACCESS_TOKEN, process.env.BLOKO_ADMIN_TOKEN);
 const STORY_MODE = CONTENT.storyId === 'elo-50';
 
 // ---------- the evening + change hooks (wrap the engine, never inside it) ----------
@@ -733,16 +733,24 @@ const RESET_CONFIRM = resetPage('', `<h1>Start a fresh evening?</h1>
 <p>The current evening is replaced: the party, the progress and the room code. The server restarts;
 phones and TVs reconnect, and players join again with the new code on the TV.</p>
 <form method="post"><button type="submit">Start a fresh evening</button><a href="/">Keep the current evening</a></form>`);
+const RESET_REFUSED = resetPage('', `<h1>Admins only</h1>
+<p>Only an admin can start a fresh evening: open this address with <code>&amp;admin=</code> and the admin token
+at the end.</p>`);
 const RESET_DONE = resetPage('<meta http-equiv="refresh" content="8;url=/">', `<h1>Starting a fresh evening…</h1>
 <p>The server is restarting. The TV page opens in a few seconds.</p>`);
 
 /** Exit code after a reset. Not 0: the hosted service restarts the server only after a failure exit. */
 const EXIT_RESET = 75;
 
-/** Any page with `?reset=1`: GET shows the confirmation page; its POST saves a fresh evening, as `--new`
+/** Any page with `?reset=1`, for admins (others get a refusal): GET shows the confirmation page; its POST saves a fresh evening, as `--new`
  *  starts it, and exits so that the restart loads it. False when the request is not a reset. */
 function serveReset(req: IncomingMessage, res: ServerResponse): boolean {
   if (new URL(req.url ?? '/', 'http://x').searchParams.get('reset') !== '1') return false;
+  if (!access.isAdmin(req)) {
+    res.writeHead(401, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+    res.end(RESET_REFUSED);
+    return true;
+  }
   if (req.method !== 'POST') {
     res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
     res.end(RESET_CONFIRM);
