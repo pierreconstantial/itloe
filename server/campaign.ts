@@ -14,17 +14,18 @@ import type { Campaign, CampaignAction, CampaignEvent, Content, GmOp } from '../
 export { newCampaign, loadCampaign, reduceCampaign, activityOf, isUnlocked, roundStatus, validateContent, zoneAt, roomAt, UnknownMinigameError };
 export type { Campaign, CampaignAction, CampaignEvent, Content, GmOp };
 
-/** The content ITLOE_CONTENT names: the birthday story by default, `sample` for the engine's fixture,
- *  `minigame:<kind>` for one minigame's development start. An unknown minigame refuses to boot. */
+/** The content ITLOE_CONTENT names: the birthday story when unset or empty, `sample` for the engine's
+ *  fixture, `minigame:<kind>` for one minigame's development start. Any other value refuses to boot. */
 function contentFor(setting: string | undefined): Content {
+  if (!setting) return STORY_CONTENT;
   if (setting === 'sample') return SAMPLE_CONTENT;
-  if (setting?.startsWith('minigame:')) {
+  if (setting.startsWith('minigame:')) {
     const kind = setting.slice('minigame:'.length);
     const content = minigameContent(kind);
     if (!content) throw new Error(`ITLOE_CONTENT=${setting}: no minigame "${kind}" (registered: ${Object.keys(MINIGAMES).join(', ')})`);
     return content;
   }
-  return STORY_CONTENT;
+  throw new Error(`ITLOE_CONTENT=${setting}: unknown content (accepted: unset for the story, sample, minigame:<kind>)`);
 }
 
 export const CONTENT: Content = contentFor(process.env.ITLOE_CONTENT);

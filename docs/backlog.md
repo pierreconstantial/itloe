@@ -29,18 +29,12 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Ids in client code](#ids-in-client-code) | Node, character and item ids written into the clients | P2 | Open | Low |
 | [Other guests in other roles](#other-guests-in-other-roles) | Guests beyond the four players, e.g. controlling NPCs or in games | P3 | Needs decision | High |
 | [Room before the content arrives](#room-before-the-content-arrives) | A reloaded phone walks the party room until the content loads | P3 | Open | Low |
-| [Unknown content setting](#unknown-content-setting) | An unknown `ITLOE_CONTENT` silently starts the story | P3 | Open | Trivial |
-| [Four-player check written twice](#four-player-check-written-twice) | The phone and the server each count the opening's players | P3 | Open | Trivial |
 | [Pickup handles one item](#pickup-handles-one-item) | `collect` only knows the first key | P3 | Open | Low |
-| [TV lobby band parameters](#tv-lobby-band-parameters) | `renderLobby` takes two option objects side by side | P3 | Open | Trivial |
-| [Protocol differences](#protocol-differences) | `PROTOCOL.md` disagrees with the code in three places | P3 | Open | Trivial |
 | [Debug accessors show only the party room](#debug-accessors-show-only-the-party-room) | `bloko.drawOrder()` and `bloko.scene()` ignore the apartment and door #4's room | P3 | Open | Trivial |
 | [Apartment sofa sparkle](#apartment-sofa-sparkle) | The sofa's sparkle overlaps its "Comfy!" bubble in the apartment | P3 | Open | Trivial |
-| [Portal drawn after use](#portal-drawn-after-use) | The TV still draws the used portal at the false start | P3 | Open | Trivial |
-| [Shared urgent keyframes](#shared-urgent-keyframes) | `blocks.css` and `quiz.css` both define `@keyframes urgent` | P3 | Open | Trivial |
 | [Minigame wording in shared folders](#minigame-wording-in-shared-folders) | Block and quiz files in `public/commun/`, block files with generic names | P3 | Open | Low |
 | [Debug view of a running screen](#debug-view-of-a-running-screen) | Nothing shows what a minigame's TV screen draws | P3 | Open | Low |
-| [GameStory.md frontmatter](#gamestorymd-frontmatter) | The story document lacks the standard frontmatter | P3 | Open | Trivial |
+| [Screen comparison flags random content](#screen-comparison-flags-random-content) | `--compare` lists room codes, QR codes, questions and scores as changes | P3 | Open | Medium |
 
 ## Items
 
@@ -87,7 +81,7 @@ Each new story step adds more branches in all three layers.
 - story steps as content data, read by generic engine code;
 - one story module per layer that shared code calls at a few named points.
 
-[Ids in client code](#ids-in-client-code) and [Four-player check written twice](#four-player-check-written-twice) would fold into it.
+[Ids in client code](#ids-in-client-code) would fold into it.
 
 ### Ids in client code
 
@@ -107,38 +101,11 @@ Phones and the TV use the bundled sample content until `/api/content` answers, a
 
 **Recommendation:** check on real phones during the manual test whether anyone notices. If it matters, send the node's room with the view, or wait for the content before enabling the joystick.
 
-### Unknown content setting
-
-`server/campaign.ts` starts the story for any `ITLOE_CONTENT` value other than `sample` or `minigame:<kind>`, without a warning. A typo such as `ITLOE_CONTENT=smaple` silently starts the story.
-
-**Recommendation:** refuse unknown values at boot, listing the accepted ones, as `minigame:<kind>` already does for unknown kinds.
-
-### Four-player check written twice
-
-The opening requires four players before its first game. The phone and the server each count them, so the rule lives in two places.
-
-**Recommendation:** one shared function, or a `required` value in the content that both read.
-
 ### Pickup handles one item
 
 The campaign's `collect` action accepts only `memory-key-intro`, at the hub. Each further item to pick up in the story would need its own code.
 
 **Recommendation:** when the story needs a second pickup, make pickups content data: which item, at which node, under which condition. Until then, leave it.
-
-### TV lobby band parameters
-
-`renderLobby` in `public/screen/lobby-view.js` takes the band (title and settings line) and Pierre's `{ required }` options as two parameters side by side, and one caller passes `undefined` for the band.
-
-**Recommendation:** fold `required` into the band object.
-
-### Protocol differences
-
-`PROTOCOL.md` and the code disagree; the end-to-end tests follow the code:
-- `chatHistory` goes to every `hello`, screens and new devices included, not only to reconnecting phones;
-- `interact` from a sender with no known position counts as standing at their spawn point;
-- `interact` also works at a scene tableau.
-
-**Recommendation:** update `PROTOCOL.md` to match the code; the code's behaviour is fine.
 
 ### Debug accessors show only the party room
 
@@ -151,18 +118,6 @@ The TV's debug accessors `bloko.drawOrder()` and `bloko.scene()` report `PARTY_R
 The sofa's object-action sparkle is placed for the party room's narrow sofa. In the apartment, where the sofa is stretched 1.7×, it overlaps the "Comfy!" bubble.
 
 **Recommendation:** place the effect from the prop's box.
-
-### Portal drawn after use
-
-If a game master sends the party back to the false start after Élodie went through the portal, the TV still draws the portal there (`public/screen/main.js`, `show`), but the server refuses to let anyone through it.
-
-**Recommendation:** draw the portal only while it can be entered: `portal.ready` set and `portal.entered` not set.
-
-### Shared urgent keyframes
-
-`public/screen/blocks.css` and the quiz's `quiz.css` both define `@keyframes urgent`. The quiz's, loaded last, also drives the block countdown's pulse. It looks as intended only because of the load order.
-
-**Recommendation:** give each its own name, scoped like the rest of the minigame's CSS.
 
 ### Minigame wording in shared folders
 
@@ -178,8 +133,8 @@ The TV's debug accessors (`window.bloko`) show the round, the room's draw order 
 
 **Recommendation:** let a running screen expose what it draws (e.g. the avatars it passed to the layer and its canvas size) through the existing accessors.
 
-### GameStory.md frontmatter
+### Screen comparison flags random content
 
-`GameStory.md` has no frontmatter, unlike the other documents.
+Every `npm run e2e -- --compare` run differs from its reference in random content: the room code (`newRoomCode` in `server/store.ts`) and the join URL's free port, both in the join QR code, and the campaign seed (`Date.now()` in `freshGame`, `server/store.ts`), so the quiz questions, the pieces and the scores. Each changed screen has to be looked at by eye, and real changes hide among them. No shot catches the urgent block countdown or the urgent quiz ring.
 
-**Recommendation:** add the four fields (purpose, audience, maintainer, kind), with Pierre as maintainer.
+**Recommendation:** in `--shots` runs, start the server with a fixed room code and campaign seed, so a comparison lists only real changes. Animation phases and the join URL's port stay random, so `--compare` might also ignore differences below a small share of pixels. Consider a shot of each urgent state.

@@ -179,9 +179,9 @@ body.has-countdown .arena { padding-top: calc(118 * var(--u)); }
   color: #fff;
   background: var(--bad);
   border-color: #fff;
-  animation: urgent 1s ease-in-out infinite;
+  animation: blocks-urgent 1s ease-in-out infinite;
 }
-@keyframes urgent {
+@keyframes blocks-urgent {
   0%, 100% { transform: translateX(-50%) scale(1); }
   50% { transform: translateX(-50%) scale(1.12); }
 }

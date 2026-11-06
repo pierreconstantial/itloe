@@ -4,6 +4,12 @@
 
 /** @type {readonly import('../characters.js').CharacterId[]} */
 export const OPENING_PLAYERS = Object.freeze(['pierre', 'elodie', 'sol', 'anna']);
+
+/** Whether every opening player is in the party and hasn't left: the opening's first round needs them all.
+ *  @param {{ order: string[], players: Record<string, { character: string, left?: boolean }> }} party @returns {boolean} */
+export function openingPlayersPresent(party) {
+  return OPENING_PLAYERS.every((character) => party.order.some((id) => !party.players[id].left && party.players[id].character === character));
+}
 export const INTRO_KEY = 'memory-key-intro';
 // mid-room, in the back half, behind the spawn row (shared/world.js)
 export const PORTAL = Object.freeze({ x: 8, y: 5.4, radius: 0.9 });

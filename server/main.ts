@@ -23,7 +23,7 @@ import { makeRound, roundOf, type Round } from './round.ts';
 import { JOIN_QR_GAP_MS, JOIN_QR_MS } from '../shared/join-qr.js';
 import { cleanSpeech, isEmote } from '../shared/social.js';
 import { CHARACTERS, isCharacterId } from '../shared/characters.js';
-import { INTRO_KEY, INTRO_KEY_SPOT, OPENING_PLAYERS, PORTAL } from '../shared/campaign/story.js';
+import { INTRO_KEY, INTRO_KEY_SPOT, PORTAL, openingPlayersPresent } from '../shared/campaign/story.js';
 import type { CharacterId } from '../shared/campaign/types.js';
 import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
 import { holding } from '../shared/campaign/index.js';
@@ -587,7 +587,7 @@ function handleMessage(ws: WebSocket, m: any): void {
 function storyRefusesRound(t: 'start' | 'again'): boolean {
   if (!STORY_MODE || game.campaign.at.node !== CONTENT.start) return false;
   if (game.campaign.facts.flags.includes('portal.ready')) return true;
-  return t === 'start' && !OPENING_PLAYERS.every((character) => party().order.some((playerId) => !party().players[playerId].left && party().players[playerId].character === character));
+  return t === 'start' && !openingPlayersPresent(party());
 }
 
 /**
