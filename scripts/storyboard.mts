@@ -5,7 +5,7 @@
 //   node scripts/storyboard.mts [--out <dir>] [sequence id…]
 // Writes <dir>/storyboard.html (self-contained: send it as one file) and <dir>/slides/<nn>.jpg, one per
 // slide. Default <dir>: shots/storyboard (ignored by git). Run it in the foreground.
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { drive } from './drive.mts';
 import { SEQUENCES, type Board, type Sequence, type Shot } from './storyboard/sequences.mts';
@@ -130,6 +130,7 @@ for (const seq of chosen) {
   console.log(`storyboard: ${seq.id}…`);
   slides.push(...await play(seq));
 }
+rmSync(join(out, 'slides'), { recursive: true, force: true }); // this run's slides only, none left from a longer run
 mkdirSync(join(out, 'slides'), { recursive: true });
 const html = viewer(slides);
 const file = join(out, 'storyboard.html');
