@@ -9,12 +9,14 @@
 // Env: PORT (3131), BLOKO_BIND, BLOKO_HOST (LAN), BLOKO_VAR, BLOKO_PUBLIC_ORIGIN + BLOKO_ACCESS_TOKEN, BLOKO_ADMIN_TOKEN
 
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { statSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import qrcodeTerminal from 'qrcode-terminal';
 import { WebSocketServer, WebSocket } from 'ws';
 import { makeStaticHandler } from './static.ts';
 import { makeApiHandler } from './http-api.ts';
 import { makeAccess } from './access.ts';
+import { makeAdmin } from './admin.ts';
 import { pickLan } from './lan.ts';
 import { makeClock } from './clock.ts';
 import { roundDeadline, shiftRound } from './resume.ts';
@@ -40,6 +42,9 @@ const PORT = Number(process.env.PORT ?? 3131);
 const ROOT = new URL('..', import.meta.url).pathname;
 const FORCE_NEW = process.argv.includes('--new') || process.env.BLOKO_NEW === '1';
 const access = makeAccess(process.env.BLOKO_PUBLIC_ORIGIN, process.env.BLOKO_ACCESS_TOKEN, process.env.BLOKO_ADMIN_TOKEN);
+const STARTED_AT = Date.now();
+/** The admin page's server side: its events, the pages' error reports, its routes (snapshot: adminSnapshot). */
+const admin = makeAdmin({ isAdmin: access.isAdmin, clientIp: access.clientIp, snapshot: adminSnapshot, saveFile: STATE_FILE });
 const STORY_MODE = CONTENT.storyId === 'elo-50';
 
 // ---------- the evening + change hooks (wrap the engine, never inside it) ----------
@@ -163,7 +168,17 @@ scheduleOpeningReturn(); // a restart on the first podium still returns to the p
 
 /** Runs an action through the campaign engine; returns false when it was refused (state unchanged). */
 function apply(action: CampaignAction): boolean {
-  return commit(reduceCampaign(game.campaign, action, CONTENT));
+  const ok = commit(reduceCampaign(game.campaign, action, CONTENT));
+  const inner = action.t === 'activity' ? action.action as { id?: string } : action;
+  admin.log('id' in inner && typeof inner.id === 'string' ? inner.id : null, actionText(action), ok);
+  return ok;
+}
+
+/** An action as the admin page's events show it: its fields but the actor and the server's inputs, short. */
+function actionText(action: CampaignAction): string {
+  const { id: _id, now: _now, inputs: _inputs, ...rest } = (action.t === 'activity' ? action.action : action) as any;
+  const text = (action.t === 'activity' ? 'activity ' : '') + JSON.stringify(rest);
+  return text.length > 200 ? text.slice(0, 199) + '…' : text;
 }
 
 /** Installs a new campaign and runs every change hook; false when nothing changed. */
@@ -193,6 +208,7 @@ function beat(): void {
   // a server-owned input moved: installed directly (not an engine transition), like the resume shift
   if (shifted !== c && commit(shifted)) {
     console.log(`[itloe] process was suspended ${Math.round(gap / 1000)} s — timed clock paused for that long`);
+    admin.log(null, `process was suspended ${Math.round(gap / 1000)} s: timed clock paused for that long`);
     return; // commit saved + broadcast
   }
   saveGame(game);
@@ -212,9 +228,11 @@ const httpServer = createServer(async (req, res) => {
   try {
     if (!access.http(req, res)) return;
     if (serveReset(req, res)) return;
+    if (await admin.handle(req, res)) return;
     if (!await serveApi(req, res)) await serveStatic(req, res);
   } catch (e) {
     console.error('[itloe] http error:', e);
+    admin.log(null, `http error on ${req.url?.split('?')[0]}: ${e}`, false);
     if (!res.headersSent) res.writeHead(500);
     res.end();
   }
@@ -249,6 +267,12 @@ const showJoinAt = new WeakMap<WebSocket, number>();
 /** Hides have their OWN limit: a quick "show, then close" must not be swallowed by the show's. */
 const hideJoinAt = new WeakMap<WebSocket, number>();
 const joinQrMsg = () => JSON.stringify({ t: 'joinQr', until: joinQrUntil, now: Date.now() });
+/** For the admin page: each socket's opening time, address, browser, and last message. In memory only. */
+const socketInfo = new WeakMap<WebSocket, { since: number, ip: string, agent: string, lastAt: number | null, last: string | null }>();
+/** For the admin page: how many sockets each player has attached since the start (reconnects, reclaims). */
+const attaches = new Map<string, number>();
+/** Who a socket is, for the admin page's events: its player, `screen`, or `unjoined` (a phone before its join). */
+const whoIs = (ws: WebSocket): string => who.get(ws) ?? (screens.has(ws) ? 'screen' : 'unjoined');
 
 /** Presence (ephemeral, never in State or on disk): party members with a live socket, in party order. */
 const online = (): string[] => party().order.filter((id) => sockets.get(id)?.readyState === WebSocket.OPEN);
@@ -305,6 +329,7 @@ function welcome(ws: WebSocket, playerId: string): void {
 
 function sendErr(ws: WebSocket, code: ErrCode): void {
   send(ws, { t: 'err', code });
+  admin.log(whoIs(ws), `err ${code}`, false);
 }
 
 /** Forget a player's socket binding (the socket stays open as a fresh client). */
@@ -328,7 +353,9 @@ function attach(ws: WebSocket, playerId: string): void {
     who.delete(old);
     send(old, { t: 'replaced' });
     old.close(CLOSE_REPLACED, 'replaced');
+    admin.log(playerId, 'replaced: another socket took this player, the old one is closed');
   }
+  if (old !== ws) attaches.set(playerId, (attaches.get(playerId) ?? 0) + 1);
   const prevId = who.get(ws);
   if (prevId && prevId !== playerId && sockets.get(prevId) === ws) sockets.delete(prevId);
   sockets.set(playerId, ws);
@@ -401,6 +428,8 @@ function handleMessage(ws: WebSocket, m: any): void {
     }
     if (String(m.room ?? '').trim().toUpperCase() === game.room) roomOk.add(ws);
     else roomOk.delete(ws);
+    admin.log(rejoin ? m.playerId : m.role === 'screen' ? 'screen' : 'unjoined', m.role === 'screen' ? 'hello as a screen'
+      : rejoin ? 'hello: rejoined' : `hello: new phone, ${roomOk.has(ws) ? 'right' : 'wrong or no'} room code`);
     // screen and fresh player get the current view; a rejoin changes presence, so everyone gets it
     if (rejoin) broadcast(); else send(ws, viewMsg());
     send(ws, { t: 'chatHistory', messages: chat });
@@ -547,6 +576,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     const holder = isCharacterId(character) ? holderOf(character) : undefined;
     if (holder && !isOnline(holder)) {
       attach(ws, holder);
+      admin.log(holder, `reclaimed ${character}`);
       welcome(ws, holder);
       broadcast();
       return;
@@ -682,9 +712,10 @@ setInterval(() => {
   sendAll({ t: 'tick', now: Date.now() });
 }, TICK_MS).unref();
 
-wss.on('connection', (ws) => {
+wss.on('connection', (ws, req) => {
   ws.on('error', () => ws.terminate()); // malformed/oversized frames must not crash the process
   alive.add(ws);
+  socketInfo.set(ws, { since: Date.now(), ip: access.clientIp(req), agent: String(req.headers['user-agent'] ?? ''), lastAt: null, last: null });
   ws.on('pong', () => alive.add(ws));
   send(ws, viewMsg()); // screen gets a view immediately on connect
 
@@ -692,15 +723,19 @@ wss.on('connection', (ws) => {
     let m: any;
     try { m = JSON.parse(String(raw)); } catch { return; }
     if (m === null || typeof m !== 'object') return;
+    const info = socketInfo.get(ws);
+    if (info) { info.lastAt = Date.now(); info.last = String(m.t); }
     try {
       handleMessage(ws, m);
     } catch (e) {
       // a bad message or a reducer bug must not kill the game for everyone
       console.error('[itloe] message handling failed:', e);
+      admin.log(whoIs(ws), `server error on ${JSON.stringify(m.t)}: ${e instanceof Error ? e.stack ?? e.message : e}`, false);
     }
   });
 
   ws.on('close', () => {
+    admin.log(whoIs(ws), 'socket closed');
     screens.delete(ws);
     const id = who.get(ws);
     who.delete(ws);
@@ -719,6 +754,36 @@ wss.on('connection', (ws) => {
     }
   });
 });
+
+// ---------- admin page (/admin/, server/admin.ts) ----------
+
+/** Everything the admin page shows that only the server knows: the in-memory side included, and the round's
+ *  raw state, answers too. */
+function adminSnapshot() {
+  const c = game.campaign;
+  const socket = (ws: WebSocket) => ({ ...socketInfo.get(ws), open: ws.readyState === WebSocket.OPEN });
+  let savedAt: number | null = null;
+  try { savedAt = statSync(STATE_FILE).mtimeMs; } catch { /* not saved yet */ }
+  const rules = minigame(c.at.kind);
+  return {
+    now: Date.now(), startedAt: STARTED_AT, loaded: loaded.how, content: process.env.ITLOE_CONTENT || 'the story',
+    contentVersion: CONTENT_VERSION,
+    hosting: access.origin ?? 'LAN', saveFile: STATE_FILE, savedAt, room: game.room, joinQrUntil,
+    players: c.party.order.map((id) => {
+      const ws = sockets.get(id);
+      return {
+        id, online: isOnline(id), attaches: attaches.get(id) ?? 0, socket: ws ? socket(ws) : null,
+        pos: positions.get(id) ?? null, roundPos: round?.positions.get(id) ?? null,
+      };
+    }),
+    screens: [...screens].map(socket),
+    strangers: [...wss.clients].filter((ws) => !who.has(ws) && !screens.has(ws)).map(socket),
+    round: c.at.kind && c.at.activity ? {
+      kind: c.at.kind, status: roundStatus(c), describe: rules?.describe(c.at.activity) ?? '', deadline: roundDeadline(c.at),
+    } : null,
+    campaign: c,
+  };
+}
 
 // ---------- reset (/?reset=1) ----------
 
@@ -780,7 +845,7 @@ httpServer.listen(PORT, process.env.BLOKO_BIND, () => {
     console.log(`[itloe] server → ${access.origin}/ (invitation token required)`);
     return; // invitation URLs and QR codes contain the secret: keep them out of service logs
   }
-  console.log(`[itloe] server → http://localhost:${PORT}/  (screen: /screen/, play: /play/, sim: /sim/)`);
+  console.log(`[itloe] server → http://localhost:${PORT}/  (screen: /screen/, play: /play/, sim: /sim/, admin: /admin/)`);
   if (!lan) {
     console.log('[itloe] no LAN IPv4 detected (internal interfaces only) — set BLOKO_HOST to the address phones reach');
     return;

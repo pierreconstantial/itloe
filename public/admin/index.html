@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Itloe — admin</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/commun/base.css">
+  <link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+  <header>
+    <h1>Itloe admin</h1>
+    <span id="summary"></span>
+    <span class="actions">
+      <button type="button" id="pause">Pause</button>
+      <a href="/api/admin/save">Download the save</a>
+      <a href="/?reset=1">Start a fresh evening…</a>
+    </span>
+  </header>
+  <p id="problem" hidden></p>
+  <main>
+    <section>
+      <h2>Players</h2>
+      <table id="players"></table>
+    </section>
+    <section>
+      <h2>Screens and unjoined sockets</h2>
+      <table id="sockets"></table>
+    </section>
+    <section>
+      <h2>Round</h2>
+      <p id="round"></p>
+      <details><summary>Raw round state (answers included)</summary><pre id="round-raw"></pre></details>
+    </section>
+    <section>
+      <h2>Page errors <span id="error-count" class="dim"></span></h2>
+      <div id="errors"></div>
+    </section>
+    <section>
+      <h2>Events <span class="dim">(newest first)</span></h2>
+      <div class="scroll"><table id="events"></table></div>
+    </section>
+    <section>
+      <h2>Server</h2>
+      <dl id="server"></dl>
+      <details><summary>Raw campaign</summary><pre id="campaign-raw"></pre></details>
+    </section>
+  </main>
+  <script type="module" src="./admin.js"></script>
+</body>
+</html>

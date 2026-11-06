@@ -4,7 +4,7 @@ Transport: WebSocket, JSON text frames. HTTP static + WS share port **3131** (`P
 
 Static serving: `public/` at `/` (`/` redirects to `/screen/`), and **`shared/` is served at `/shared/`** so browser clients import the same game logic: `import { canPlace } from '/shared/board.js'`.
 
-Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness).
+Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness), `/admin/` (admin page).
 
 ## Client → server
 
@@ -320,3 +320,10 @@ In solo games the block view gains an optional field: `"round": { "kind": "block
   also sent as the `ETag` header (application/json, no-store). Clients fetch it on load and again whenever a
   view's `contentVersion` differs from the version they hold (public/commun/content.js); the view carries the
   campaign state, never the content itself.
+- `POST /api/client-error` ← `{ "page", "playerId", "message", "source", "stack" }`: an uncaught error, unhandled
+  rejection or failed load of a page (public/commun/report-errors.js), kept in memory for the admin page → 204.
+  Any page may send it; `playerId` is what the page claims.
+- Admins only (`BLOKO_ADMIN_TOKEN`, server/access.ts): `GET /api/admin` → the server's state for the admin page,
+  in memory and on disk, the round's raw state included, with its recent events and the pages' errors
+  (server/admin.ts); `GET /api/admin/save` → the save file; `/?reset=1` → the reset. Others get 401. Any page
+  opened with `?admin=<token>` sets the admin cookie and reloads without it.

@@ -26,7 +26,7 @@ export function makeStaticHandler(rootDir: string) {
     let path = q < 0 ? url : url.slice(0, q);
     const query = q < 0 ? '' : url.slice(q); // redirects keep it: the QR's /play?room=CODE must reach the page
     if (path === '/') { res.writeHead(302, { location: '/screen/' + query }); res.end(); return; }
-    if (path === '/screen' || path === '/play' || path === '/sim') {
+    if (path === '/screen' || path === '/play' || path === '/sim' || path === '/admin') {
       res.writeHead(302, { location: path + '/' + query }); res.end(); return;
     }
     if (path.endsWith('/')) path += 'index.html';

@@ -110,7 +110,8 @@ test('public hosting gates HTTP and sockets, and invites a fresh browser', { tim
   assert.equal(invitation.searchParams.get('room'), info.code);
   assert.ok(typedUrl(info.url).includes('token=' + TOKEN), 'the displayed invitation also works without a cookie');
   assert.equal((await fetch(app.http + '/api/join-qr.svg', { headers })).status, 200);
-  // Without an admin token, a public server lets nobody reset.
+  // Without an admin token, a public server shows the admin data to nobody and lets nobody reset.
+  assert.equal((await fetch(app.http + '/api/admin', { headers })).status, 401);
   assert.equal((await fetch(app.http + '/?reset=1', { method: 'POST', headers })).status, 401);
   // A new phone has no cookies: the invitation itself must authorize it.
   assert.equal((await fetch(app.http + invitation.pathname + invitation.search, { redirect: 'manual' })).status, 302);
@@ -150,16 +151,23 @@ test('invalid public configuration exits before creating saves', { timeout: 5000
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
-test('the reset needs the admin token', { timeout: 15_000 }, async (t) => {
+test('the admin data and the reset need the admin token; every page may report its errors', { timeout: 15_000 }, async (t) => {
   const app = await server(t, { BLOKO_ADMIN_TOKEN: ADMIN });
   const login = await fetch(app.http + '/play?token=' + TOKEN, { redirect: 'manual' });
   const guest = { Cookie: String(login.headers.get('set-cookie')).split(';')[0] };
 
-  // A guest with the invitation: no reset, also when posting the confirmation.
-  assert.equal((await fetch(app.http + '/?reset=1', { headers: guest })).status, 401);
+  // A guest with the invitation: no admin data, no reset, also when posting the confirmation.
+  for (const path of ['/api/admin', '/api/admin/save', '/?reset=1']) {
+    assert.equal((await fetch(app.http + path, { headers: guest })).status, 401, path);
+  }
   assert.equal((await fetch(app.http + '/?reset=1', { method: 'POST', headers: guest })).status, 401);
   assert.equal((await fetch(app.http + '/admin/?admin=wrong1', { headers: guest, redirect: 'manual' })).status, 401);
   assert.ok(!app.exited(), 'a guest cannot reset the evening');
+
+  // A phone's error report, from a guest.
+  const report = { page: '/play/', playerId: 'p-1', message: 'boom', source: '/play/main.js:1:2', stack: 'Error: boom' };
+  const posted = await fetch(app.http + '/api/client-error', { method: 'POST', headers: guest, body: JSON.stringify(report) });
+  assert.equal(posted.status, 204);
 
   // The admin token, once, gives the cookie; the page reloads without it.
   const admin = await fetch(app.http + '/admin/?admin=' + ADMIN, { headers: guest, redirect: 'manual' });
@@ -168,6 +176,9 @@ test('the reset needs the admin token', { timeout: 15_000 }, async (t) => {
   const adminCookie = String(admin.headers.get('set-cookie'));
   assert.match(adminCookie, /^__Host-itloe_admin=[a-f0-9]{64}; Path=\/; Max-Age=2592000; Secure; HttpOnly; SameSite=Lax$/);
   const headers = { Cookie: `${guest.Cookie}; ${adminCookie.split(';')[0]}` };
+  const data = await (await fetch(app.http + '/api/admin', { headers })).json();
+  assert.equal(data.room, JSON.parse(await readFile(join(app.dir, 'bloko.state.json'), 'utf8')).room);
+  assert.equal(data.clientErrors.at(-1).message, 'boom');
   assert.equal((await fetch(app.http + '/?reset=1', { headers })).status, 200);
   assert.ok(!app.log().includes(ADMIN), 'service logs must not expose the admin token');
 });

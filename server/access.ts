@@ -104,6 +104,12 @@ export function makeAccess(publicOrigin?: string, token?: string, adminToken?: s
     http(req: IncomingMessage, res: ServerResponse): boolean {
       return invited(req, res) && adminLogin(req, res);
     },
+    /** The device's address. Behind the public proxy, the one the proxy puts in X-Real-IP: it overwrites what the
+     *  device sends. A client reaching the server directly could set its own; only Konstantin's machine can. */
+    clientIp(req: IncomingMessage): string {
+      const real = origin ? req.headers['x-real-ip'] : undefined;
+      return ((typeof real === 'string' && real) || req.socket.remoteAddress || '').replace(/^::ffff:/, '');
+    },
     /** May this request see the admin data or reset the evening? */
     isAdmin(req: IncomingMessage): boolean {
       return admin ? equal(cookieOf(req, adminCookieName) ?? '', adminCookie) : !origin;
