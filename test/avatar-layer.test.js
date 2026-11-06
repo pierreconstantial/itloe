@@ -45,3 +45,12 @@ test("after a round, the avatars stand at the room's positions at once instead o
   layer.update(1 / 60);
   assert.deepEqual(at(layer, 'p-anna'), [10, 7]); // and stays there
 });
+
+test('the campaign status still controls an avatar when a round roster omits statuses', () => {
+  const layer = createAvatarLayer();
+  layer.setPlayers(PARTY, PARTY_ROOM);
+  layer.setStatuses({ 'p-anna': { statuses: [] }, 'p-sol': { statuses: ['wisp', 'charged'] },
+    'p-pierre': { statuses: [] } });
+  layer.setPlayers(PARTY, AREA);
+  assert.deepEqual(layer.snapshot().find((a) => a.id === 'p-sol')?.statuses, ['wisp', 'charged']);
+});

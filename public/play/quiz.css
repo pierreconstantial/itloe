@@ -41,6 +41,7 @@
 .quiz-choice.c2 { border-color: var(--p2); }
 .quiz-choice.c3 { border-color: var(--p3); }
 .quiz-choice.c4 { border-color: var(--p4); }
+.quiz-choice.c5 { border-color: var(--p5); }
 .quiz-choice.mine { background: var(--accent); color: #201a08; }
 .quiz-choice:disabled:not(.mine) { opacity: 0.45; }
 

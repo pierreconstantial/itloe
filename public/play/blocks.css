@@ -131,6 +131,7 @@
 .cell.c2 { background: var(--p2); }
 .cell.c3 { background: var(--p3); }
 .cell.c4 { background: var(--p4); }
+.cell.c5 { background: var(--p5); }
 
 .piece {
   display: grid;

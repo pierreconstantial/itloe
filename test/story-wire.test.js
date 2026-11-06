@@ -98,4 +98,12 @@ test('wire: all four can leave the opening podium, rejoin, and Elo can reach the
   const returned = await until(elo, (m) => m.t === 'view' && m.campaign?.at.node === 'hub'
     && m.campaign?.facts.inventory.elodie?.[INTRO_KEY] === 1);
   assert.equal(returned.campaign.news.some((/** @type {any} */ n) => n.t === 'apparition'), false);
+  assert.equal(returned.campaign.party.hostId, elo.id, 'Élodie hosts the round after the portal');
+  assert.deepEqual(returned.campaign.party.players[host.id].statuses, ['wisp']);
+  const refusedFrom = elo.messages.length;
+  elo.send({ t: 'gm', op: { op: 'setFlag', flag: 'gm.pierre.checked', on: true } });
+  assert.equal((await until(elo, (m) => m.t === 'err', refusedFrom)).code, 'not-gm');
+  const gmFrom = host.messages.length;
+  host.send({ t: 'gm', op: { op: 'setFlag', flag: 'gm.pierre.checked', on: true } });
+  await until(host, (m) => m.t === 'view' && m.campaign?.facts.flags.includes('gm.pierre.checked'), gmFrom);
 });

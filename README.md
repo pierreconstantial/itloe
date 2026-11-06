@@ -24,7 +24,7 @@ The terminal prints a QR code and a line like:
 
 1. On the laptop, open **http://localhost:3131/** in a browser, go full screen, and send it to the TV. That's the shared screen.
 2. Each player scans the QR code with their phone camera (or types the address) and **taps their character**.
-3. The **first player to join is the host**: they start each game from their phone, and on the podium choose **Play again** or **Back to the room**.
+3. The **first active character to join is the host**: they start each game from their phone, and on the podium choose **Play again** or **Back to the room**. A Wisp does not host rounds.
 
 ## Room code
 
@@ -36,7 +36,8 @@ The code only keeps stray devices out; it is not a password.
 ## During the evening
 
 - **The hub and the worlds.** Élodie walks her character into a door (the phone's joystick) to enter a world; the host can also pick one. New places unlock as the evening goes on, and the TV celebrates each unlock.
-- **The host is the game master.** On the host's phone, **☰ → 🎲 Game master**: enter a place, go back up, unlock or lock a place, set flags and counters, and see *why* something is still locked. Every change needs a second tap to confirm.
+- **Wisp Mode.** A late player selects a predefined character and joins as a tiny floating light with a hint of their character's color. Wisps have no name label and pulse slightly while moving. They can tap **Shine** in reactions or beside nearby objects, but cannot speak, use objects, or affect the story through their Wisp action. When the story introduces that character, the phone vibrates and counts down **3, 2, 1** before the TV reveals the character with an emote. Nico is available as a fifth character slot.
+- **Pierre is the game master.** On Pierre's phone, **☰ → 🎲 Game master** is available even when he is a Wisp. He can move the party, unlock or lock a place, set flags and counters, and see *why* something is still locked. Every change needs a second tap to confirm. The current host separately controls rounds and their settings.
 - **Quizzes.** Questions in French on the TV; players answer on their phones with 4 choices or by typing (spelling mistakes, accents and articles are forgiven; years must be exact). The host can correct any verdict on the reveal. A question is never asked twice in the same evening.
 - **A phone died or got lost?** Open the address on any other phone and tap your character: it carries on with your board, score and host role. The old phone, if it comes back, shows "Continued on another device".
 - **Someone left mid-game?** The host can take an offline player out, or end the game, from ☰ on their phone.
@@ -71,7 +72,7 @@ Until the evening this is a development deployment; a change may break it.
 
 Infrastructure owns the LXC, Node 24 runtime, systemd service, public HTTPS/WebSocket proxy, secrets, backups and deployment timer. The game runs as an unprivileged user, with releases under `/opt/itloe/releases/<commit>`, `/opt/itloe/current` pointing at the active release, and `BLOKO_VAR=/var/lib/itloe` outside the release. The proxy forwards to the guest's private port `3131`; it must suppress URL/Referer-bearing access and error logs for this host.
 
-Open `https://itloe.kputnik.com/?token=<shared-secret>` to authorize a browser. The server exchanges the token for a 30-day Secure/HttpOnly cookie and redirects to a clean URL. All HTTP routes and WebSocket upgrades require authorization; WebSockets also require the configured public Origin. The token-bearing join links and QR codes authorize new phones. Everyone with the invitation joins the same evening, with the four characters. Rotating the configured secret invalidates existing cookies after a restart. Without either public setting, local LAN play stays open.
+Open `https://itloe.kputnik.com/?token=<shared-secret>` to authorize a browser. The server exchanges the token for a 30-day Secure/HttpOnly cookie and redirects to a clean URL. All HTTP routes and WebSocket upgrades require authorization; WebSockets also require the configured public Origin. The token-bearing join links and QR codes authorize new phones. Everyone with the invitation joins the same evening, with the five predefined character slots. Rotating the configured secret invalidates existing cookies after a restart. Without either public setting, local LAN play stays open.
 
 Pushing to `production` runs [the production workflow](.github/workflows/production.yml): locked dependency install, type-checking, tests, save/resume checks, packaging and an extracted-runtime access test. It then publishes a GitHub Release tagged `prod-<full-commit-sha>` with:
 

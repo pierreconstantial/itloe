@@ -7,6 +7,32 @@ import { INTRO_KEY, MEMORY_WORLDS, OPENING_PLAYERS, STORY_CONTENT } from '../sha
  * @param {import('../shared/campaign/types.js').CampaignAction} action */
 const act = (campaign, action) => reduceCampaign(campaign, action, STORY_CONTENT);
 
+test('Nico joins as a wisp, stays out of rounds, and incarnates when introduced', () => {
+  let early = act(newCampaign(STORY_CONTENT, 4), { t: 'join', id: 'nico-first', character: 'nico' });
+  assert.equal(early.party.hostId, null, 'a wisp cannot host the opening round');
+  early = act(early, { t: 'join', id: 'elo-first', character: 'elodie' });
+  assert.equal(early.party.hostId, 'elo-first');
+  let c = newCampaign(STORY_CONTENT, 42);
+  for (const character of OPENING_PLAYERS) c = act(c, { t: 'join', id: character, character });
+  c = act(c, { t: 'join', id: 'nico-player', character: 'nico' });
+  assert.deepEqual(c.party.players['nico-player'].statuses, ['wisp']);
+  c = act(c, { t: 'start', id: 'pierre', now: 1000 });
+  assert.equal(c.at.activity?.players['nico-player'], undefined);
+  c = act(c, { t: 'activity', action: { t: 'endGame', id: 'pierre' } });
+  c = act(c, { t: 'newGame', id: 'pierre' });
+  c = act(c, { t: 'portal', id: 'elodie' });
+  assert.deepEqual(c.party.players.pierre.statuses, ['wisp']);
+  assert.equal(c.party.hostId, 'elodie');
+  assert.equal(act(c, { t: 'gm', id: 'elodie', op: { op: 'setFlag', flag: 'person.nico.unlocked', on: true } }), c,
+    'the host cannot use Pierre’s game-master controls');
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'person.nico.unlocked', on: true } });
+  assert.deepEqual(c.party.players['nico-player'].statuses, ['wisp', 'incarnating']);
+  c = act(c, { t: 'incarnate', id: 'nico-player' });
+  assert.deepEqual(c.party.players['nico-player'].statuses, []);
+  c = act(c, { t: 'status', id: 'nico-player', status: 'wisp', on: true });
+  assert.deepEqual(c.party.players['nico-player'].statuses, ['wisp']);
+});
+
 test('birthday content begins with only the block game, no key or memory-world access', () => {
   assert.deepEqual(validateContent(STORY_CONTENT), []);
   const c = newCampaign(STORY_CONTENT, 42);
@@ -54,12 +80,13 @@ test('opening match, portal, apparition, pickup and door #4 are one-time and Elo
 test('future needs all seven keys, while world entrances remain unassigned', () => {
   let c = newCampaign(STORY_CONTENT, 42);
   c = act(c, { t: 'join', id: 'elodie', character: 'elodie' });
+  c = act(c, { t: 'join', id: 'pierre', character: 'pierre' });
   assert.ok(MEMORY_WORLDS.every((w) => !STORY_CONTENT.nodes[`memory.${w.id}`].door));
   for (let i = 1; i <= 6; i++) {
-    c = act(c, { t: 'gm', id: 'elodie', op: { op: 'give', item: `memory-key-${i}`, to: 'elodie' } });
+    c = act(c, { t: 'gm', id: 'pierre', op: { op: 'give', item: `memory-key-${i}`, to: 'elodie' } });
   }
   assert.equal(c.facts.unlocked.includes('future'), false);
-  c = act(c, { t: 'gm', id: 'elodie', op: { op: 'give', item: INTRO_KEY, to: 'elodie' } });
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'give', item: INTRO_KEY, to: 'elodie' } });
   assert.equal(c.facts.unlocked.includes('future'), true);
 });
 

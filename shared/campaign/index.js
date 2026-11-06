@@ -20,6 +20,7 @@
 // step as the round's running → finished, so a single atomic save persists both or neither.
 
 import { CHARACTERS, isCharacterId } from '../characters.js';
+import { OPENING_PLAYERS, REUNIONS } from './story.js';
 import { minigame } from '../minigames.js';
 import { emptyFacts, holds, record, settle, safeInventory, addItem, holding, recipients, COUNTER } from './rules.js';
 import { validateContent, zoneAt, roomAt, childrenOf } from './content.js';
@@ -124,13 +125,13 @@ function betweenRoundsAt(node) {
 }
 
 /**
- * Who a round starts with: every party member who hasn't left the evening, online or not, in party order.
+ * Who a round starts with: incarnated party members, online or not, in party order.
  * @param {Party} party @returns {{ id: string, character: import('./types.js').CharacterId }[]}
  */
 function present(party) {
   return party.order.flatMap((id) => {
     const m = party.players[id];
-    return !m.left ? [{ id, character: m.character }] : [];
+    return !m.left && !m.statuses.includes('wisp') ? [{ id, character: m.character }] : [];
   });
 }
 
@@ -165,6 +166,14 @@ function assertPartyCharacters(party) {
   if (stray) throw new Error(`party member ${stray.id} plays "${stray.character}", not a character of the roster`);
 }
 
+/** A save from before player statuses needs a fresh evening. @param {Party} party */
+function assertPartyStatuses(party) {
+  const stray = Object.values(party.players).find((p) => !Array.isArray(p.statuses)
+    || p.statuses.some((status) => typeof status !== 'string')
+    || (p.statuses.includes('incarnating') && !p.statuses.includes('wisp')));
+  if (stray) throw new Error(`party member ${stray.id} has invalid statuses`);
+}
+
 /**
  * A persisted campaign, made safe for the current content: node ids the content no longer has are
  * dropped (facts, news, position), then settle runs again (new content may open new things).
@@ -189,6 +198,7 @@ export function loadCampaign(raw, content) {
   const newsSeq = raw.newsSeq ?? Math.max(0, ...news.map((n) => n.seq));
   const party = raw.party ?? emptyParty();
   assertPartyCharacters(party);
+  assertPartyStatuses(party);
   const seed = raw.seed ?? 1;
   const kind = savedKind(raw.at); // first: a round of an unknown minigame stops the load even where the node is gone
   const activity = raw.at?.activity ?? null;
@@ -216,11 +226,16 @@ export function loadCampaign(raw, content) {
 // ---------------------------------------------------------------- reducer
 
 /** @param {Campaign} c @param {string} id */
-const isHost = (c, id) => c.party.hostId !== null && c.party.hostId === id;
+const isHost = (c, id) => c.party.hostId !== null && c.party.hostId === id && !c.party.players[id]?.statuses.includes('wisp');
+/** Pierre steers the birthday story even while he is a Wisp; sample content keeps its host GM.
+ * @param {Campaign} c @param {string} id @param {Content} content */
+const isGameMaster = (c, id, content) => content.storyId === 'elo-50'
+  ? c.party.players[id]?.character === 'pierre' && !c.party.players[id].left
+  : isHost(c, id);
 
 /** @param {Party} party @param {string} goneId @returns {string | null} */
 function nextHost(party, goneId) {
-  return party.order.find((id) => id !== goneId && !party.players[id].left) ?? null;
+  return party.order.find((id) => id !== goneId && !party.players[id].left && !party.players[id].statuses.includes('wisp')) ?? null;
 }
 
 /**
@@ -232,7 +247,17 @@ function withFacts(c, facts, content, event) {
   // the party and the triggering event decide who item rewards go to ('all', 'winner')
   const s = settle(facts, content, c.newsSeq, { party: c.party, event });
   if (s.facts === c.facts && facts === c.facts) return c;
-  return { ...c, facts: s.facts, news: [...c.news, ...s.news], newsSeq: c.newsSeq + s.news.length };
+  let party = c.party;
+  if (content.storyId === 'elo-50') {
+    const introduced = REUNIONS.filter((r) => !c.facts.flags.includes(r.flag) && s.facts.flags.includes(r.flag));
+    if (introduced.length) {
+      const players = Object.fromEntries(Object.entries(party.players).map(([id, member]) => [id,
+        !member.left && introduced.some((r) => r.id === member.character) && member.statuses.includes('wisp') && !member.statuses.includes('incarnating')
+          ? { ...member, statuses: [...member.statuses, 'incarnating'] } : member]));
+      party = { ...party, players };
+    }
+  }
+  return { ...c, party, facts: s.facts, news: [...c.news, ...s.news], newsSeq: c.newsSeq + s.news.length };
 }
 
 /** Moves the party to a node: the room there, no round. @param {Campaign} c @param {string} node @param {Content} content @returns {Campaign} */
@@ -273,11 +298,14 @@ export function reduceCampaign(c, a, content) {
       const held = c.party.order.some((id) => !c.party.players[id].left && c.party.players[id].character === a.character);
       if (held) return c;
       const { name, color } = CHARACTERS[a.character];
+      const statuses = content.storyId === 'elo-50' && !c.facts.flags.includes(REUNIONS.find((r) => r.id === a.character)?.flag ?? '') &&
+        (!OPENING_PLAYERS.includes(a.character) || (c.facts.flags.includes('portal.entered') && a.character !== content.chooser)) ? ['wisp'] : [];
       /** @type {Party} */
       const party = {
         order: [...c.party.order, a.id],
-        players: { ...c.party.players, [a.id]: { id: a.id, character: a.character, name, color, left: false } },
-        hostId: c.party.hostId ?? a.id,
+        players: { ...c.party.players, [a.id]: { id: a.id, character: a.character, name, color, left: false,
+          statuses } },
+        hostId: c.party.hostId ?? (statuses.includes('wisp') ? null : a.id),
       };
       // a round under way: they watch, and play the next one
       return { ...c, party };
@@ -294,11 +322,38 @@ export function reduceCampaign(c, a, content) {
       return withActivity(moved, next, content); // reported to the round's minigame, which decides what it means
     }
 
+    case 'status': {
+      const member = c.party.players[a.id];
+      if (!member || member.left || typeof a.status !== 'string' || !a.status || a.status.length > 64) return c;
+      if (a.status === 'incarnating') return c;
+      if (a.status === 'wisp' && a.on && roundStatus(c) === 'running') return c;
+      const statuses = member.statuses;
+      const next = a.status === 'wisp' && !a.on && statuses.includes('wisp')
+        ? (statuses.includes('incarnating') ? statuses : [...statuses, 'incarnating'])
+        : a.status === 'wisp' && a.on
+          ? [...new Set([...statuses.filter((status) => status !== 'incarnating'), 'wisp'])]
+          : a.on ? (statuses.includes(a.status) ? statuses : [...statuses, a.status])
+            : statuses.filter((status) => status !== a.status);
+      if (next === statuses || next.length === statuses.length) return c;
+      const hostId = a.status === 'wisp' && a.on && c.party.hostId === a.id ? nextHost(c.party, a.id)
+        : c.party.hostId;
+      return { ...c, party: { ...c.party, hostId, players: { ...c.party.players, [a.id]: { ...member, statuses: next } } } };
+    }
+
+    case 'incarnate': {
+      const member = c.party.players[a.id];
+      if (!member || member.left || !member.statuses.includes('wisp') || !member.statuses.includes('incarnating')) return c;
+      const statuses = member.statuses.filter((status) => status !== 'wisp' && status !== 'incarnating');
+      return { ...c, party: { ...c.party, hostId: c.party.hostId ?? a.id,
+        players: { ...c.party.players, [a.id]: { ...member, statuses } } } };
+    }
+
     case 'enter': {
       // the host, or the chooser's character (walking into a door), opens an unlocked child
       const actor = c.party.players[a.id];
       const chooser = actor && !actor.left && actor.character === content.chooser;
-      if (content.storyId === 'elo-50' && c.facts.flags.includes('portal.entered') ? !chooser : (!isHost(c, a.id) && !chooser)) return c;
+      if (!actor || actor.statuses.includes('wisp') ||
+        (content.storyId === 'elo-50' && c.facts.flags.includes('portal.entered') ? !chooser : (!isHost(c, a.id) && !chooser))) return c;
       const n = content.nodes[a.node];
       if (!n || n.parent !== c.at.node || !isUnlocked(c, n.id)) return c;
       if (roundStatus(c) === 'running') return c;
@@ -308,18 +363,21 @@ export function reduceCampaign(c, a, content) {
 
     case 'portal': {
       const actor = c.party.players[a.id];
-      if (content.storyId !== 'elo-50' || actor?.left || actor?.character !== content.chooser || c.at.node !== content.start
+      if (content.storyId !== 'elo-50' || actor?.left || actor?.statuses.includes('wisp') || actor?.character !== content.chooser || c.at.node !== content.start
         || c.at.activity !== null || !c.facts.flags.includes('portal.ready')
         || c.facts.flags.includes('portal.entered')) return c;
       const facts = { ...c.facts, flags: withId(c.facts.flags, 'portal.entered'), seen: withId(c.facts.seen, 'hub') };
-      const moved = withFacts({ ...c, at: { node: 'hub', kind: null, activity: null, settings: null } }, facts, content);
+      const players = Object.fromEntries(Object.entries(c.party.players).map(([id, member]) => [id,
+        member.character === content.chooser ? member : { ...member, statuses: [...new Set([...member.statuses, 'wisp'])] }]));
+      const chooserId = c.party.order.find((id) => c.party.players[id].character === content.chooser && !c.party.players[id].left);
+      const moved = withFacts({ ...c, party: { ...c.party, hostId: chooserId ?? c.party.hostId, players }, at: { node: 'hub', kind: null, activity: null, settings: null } }, facts, content);
       const seq = moved.newsSeq + 1;
       return { ...moved, news: [...moved.news, { seq, t: 'apparition' }], newsSeq: seq };
     }
 
     case 'collect': {
       const actor = c.party.players[a.id];
-      if (content.storyId !== 'elo-50' || actor?.left || actor?.character !== content.chooser || c.at.node !== 'hub'
+      if (content.storyId !== 'elo-50' || actor?.left || actor?.statuses.includes('wisp') || actor?.character !== content.chooser || c.at.node !== 'hub'
         || a.item !== 'memory-key-intro' || !content.items[a.item]
         || !c.facts.flags.includes('apparition.seen') || holding(c.facts, content.chooser, a.item) > 0) return c;
       const facts = { ...c.facts, inventory: addItem(c.facts.inventory, content.chooser, a.item, 1) };
@@ -329,7 +387,7 @@ export function reduceCampaign(c, a, content) {
     }
 
     case 'back': {
-      const chooser = c.party.players[a.id]?.character === content.chooser && !c.party.players[a.id]?.left;
+      const chooser = c.party.players[a.id]?.character === content.chooser && !c.party.players[a.id]?.left && !c.party.players[a.id]?.statuses.includes('wisp');
       if (content.storyId === 'elo-50' && c.facts.flags.includes('portal.entered') ? !chooser : !isHost(c, a.id)) return c;
       const n = content.nodes[c.at.node];
       if (!n || n.parent === null || roundStatus(c) === 'running') return c; // endGame first
@@ -392,7 +450,7 @@ export function reduceCampaign(c, a, content) {
     }
 
     case 'gm':
-      return isHost(c, a.id) ? gm(c, a.op, content) : c;
+      return isGameMaster(c, a.id, content) ? gm(c, a.op, content) : c;
 
     default:
       return c;
@@ -400,7 +458,7 @@ export function reduceCampaign(c, a, content) {
 }
 
 /**
- * Game-master ops: live fixes by the host. The only way to take an unlock back is `lock`.
+ * Game-master ops: live fixes. The only way to take an unlock back is `lock`.
  * @param {Campaign} c @param {GmOp} op @param {Content} content @returns {Campaign}
  */
 function gm(c, op, content) {

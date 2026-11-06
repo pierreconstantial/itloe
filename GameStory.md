@@ -9,7 +9,7 @@ kind: reference
 
 ## Premise and tone
 
-Itloe begins as an ordinary multiplayer block puzzle game. Four people join by QR code, play together, and return to the same lobby. The birthday adventure must not be visible or hinted at before this first match ends. A space portal then appears in the middle of the lobby. Élodie ("Elo") alone enters it; the other three player characters stay in the lobby.
+Itloe begins as an ordinary multiplayer block puzzle game. Four people join by QR code, play together, and return to the same lobby. The birthday adventure must not be visible or hinted at before this first match ends. A space portal then appears in the middle of the lobby. Élodie ("Elo") alone enters it; the other three players become wisps and accompany her.
 
 The portal takes Elo to her personal paradise, a Viennese apartment. The story follows her life through six memory worlds and an unknown future. Its emotional goal is to bring her loved ones together in the apartment. The tone is warm, personal and absurdly funny: a solemn mystical apparition suddenly shreds on a guitar.
 
@@ -18,8 +18,8 @@ The portal takes Elo to her personal paradise, a Viennese apartment. The story f
 1. Four players join the existing lobby normally. Only the existing multiplayer block game is available.
 2. They play the block game. Winning or losing does not affect story access.
 3. All four return to the same lobby. A space portal now stands in its centre.
-4. Elo enters. Only her character crosses; the other three remain in the lobby.
-5. Elo arrives alone in the Viennese apartment hub. Silex and Taïga are NPC cats. No other player character appears there yet.
+4. Elo enters. Only her character crosses as a person; Pierre, Sol and Anna become wisps and accompany her.
+5. Elo arrives in the Viennese apartment hub with the three wisps. Silex and Taïga are NPC cats. No other player character appears there yet.
 6. A mystical figure resembling Omraam Mikhaël Aïvanhov slowly materializes in a darker part of the room. Light grows around him. He floats above the floor at twice a normal character's size and says:
 
    > Fifty years… You turn fifty today, and you have travelled through space and time. But can you gather the keys of memory? Only they will open the path to your future.
@@ -29,6 +29,16 @@ The portal takes Elo to her personal paradise, a Viennese apartment. The story f
 7. He pulls out a guitar and plays wild rock riffs, then disappears in smoke, leaving a key. Control returns to Elo. She picks up the key and approaches the only visible door, door #4, which leads to a second room.
 
 The apparition is a story beat, never a reward for winning the block game. Its dialogue and reveal play once; reconnects and revisits do not duplicate the key.
+
+## Wisps
+
+When Elo enters the portal, Pierre, Sol and Anna remain connected as wisps. A player who selects a character outside the four opening players, or joins after the portal, starts as a wisp unless that character has already been introduced. A wisp is a very small floating light with a hint of its character's color, no name label, and a slight pulse while moving. Its only action is **Shine**, a brief increase in brightness, offered in reactions and beside nearby objects. Shine does not use the object or trigger a story event. A wisp cannot talk or use objects, NPCs, or puzzles. The server controls incarnation: when the story introduces a character, the matching player's wisp becomes that playable character. The player may return to Wisp Mode when that character is no longer active. The `wisp` status is persisted alongside any other statuses.
+
+Pierre is always the game master for the birthday story, including while his character is a wisp. Game-master controls are separate from the host's round and settings controls. After the portal, Élodie hosts rounds while Pierre can still direct the story from his game-master panel.
+
+For example, Nico can select his predefined character and join an ongoing game as a wisp. When the story grants `person.nico.unlocked`, his phone vibrates and shows **3, 2, 1**. At the end of that server-timed countdown, his light becomes the playable Nico character with a randomly chosen character emote. Character actions are held during the countdown. Story authors can also use the server's internal status action to return a player to Wisp Mode. This lets a player join without changing the current story scene or round.
+
+For incarnated players, objects have a default interaction unless their rule says otherwise. A rule may change or deny that action by player ID, character, status, or inventory. Wisp Mode always prevents object interaction regardless of the object's rule.
 
 ## Apartment hub
 
@@ -73,11 +83,13 @@ The intended reunion order is Pierre → Sol and Anna → Nico → father → mo
 
 ## Implementation boundaries
 
-Use the existing campaign engine, multiplayer block game, QR joining, phone controls and persisted facts. Represent new story facts by stable IDs and keep them across save/load. Avoid treating the existing placeholder sample campaign as the birthday story. Add real mini-games only when their interaction rules and content are defined; keep unknown scenes and door-to-world mapping configurable instead of guessing.
+Use the existing campaign engine, multiplayer block game, QR joining, phone controls and persisted facts. A future campaign engine should include a dialog engine for story conversations and scenes. Represent new story facts by stable IDs and keep them across save/load. Avoid treating the existing placeholder sample campaign as the birthday story. Add real mini-games only when their interaction rules and content are defined; keep unknown scenes and door-to-world mapping configurable instead of guessing.
 
 ## Current implementation
 
 The live campaign starts with the existing four-player block game. Its first completed match reveals the portal. Elo alone can trigger the transition, the apparition and first-key pickup, then enter and return from door #4. The apartment scene, cats, terrace, guitar moment and seven-key item catalogue are in place. The engine persists these facts, and the future node requires all seven keys.
+
+Wisp status, light rendering, server-controlled incarnation, Shine, and status and inventory based object interactions are implemented. Nico has a fifth character slot and provisional character art, so he can join during or after the opening match without entering its round. Further late-joining named characters require roster entries and art.
 
 The second room, individual memory-world scenes and their entrances, object rewards, reunion mini-games and future reveal remain to be specified and implemented. The six memory-world records have no assigned doors, so they cannot be entered in normal play yet. Nico's live remote mini-game is a required future feature; the existing QR/phone connection provides its multiplayer foundation.
 

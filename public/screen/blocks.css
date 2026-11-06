@@ -16,6 +16,10 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
 }
+.arena[data-players="5"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
 .arena[data-players="3"] .panel:nth-child(3) {
   grid-column: 1 / -1;
   justify-self: center;
@@ -31,6 +35,7 @@
 .arena[data-players="2"] { --head: calc(42 * var(--u)); --score: calc(52 * var(--u)); --pcell: calc(15 * var(--u)); --slot: calc(96 * var(--u)); }
 .arena[data-players="3"],
 .arena[data-players="4"] { --head: calc(34 * var(--u)); --score: calc(44 * var(--u)); --pcell: calc(14 * var(--u)); --slot: calc(88 * var(--u)); }
+.arena[data-players="5"] { --head: calc(28 * var(--u)); --score: calc(36 * var(--u)); --pcell: calc(11 * var(--u)); --slot: calc(68 * var(--u)); }
 
 .panel {
   min-height: 0; min-width: 0;

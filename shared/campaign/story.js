@@ -5,10 +5,11 @@
 /** @type {readonly import('../characters.js').CharacterId[]} */
 export const OPENING_PLAYERS = Object.freeze(['pierre', 'elodie', 'sol', 'anna']);
 
-/** Whether every opening player is in the party and hasn't left: the opening's first round needs them all.
- *  @param {{ order: string[], players: Record<string, { character: string, left?: boolean }> }} party @returns {boolean} */
+/** Whether every opening player is in the party, hasn't left and isn't a wisp: the opening's first round needs them all.
+ *  @param {{ order: string[], players: Record<string, { character: string, left?: boolean, statuses: string[] }> }} party @returns {boolean} */
 export function openingPlayersPresent(party) {
-  return OPENING_PLAYERS.every((character) => party.order.some((id) => !party.players[id].left && party.players[id].character === character));
+  return OPENING_PLAYERS.every((character) => party.order.some((id) => !party.players[id].left && party.players[id].character === character
+    && !party.players[id].statuses.includes('wisp')));
 }
 export const INTRO_KEY = 'memory-key-intro';
 // mid-room, in the back half, behind the spawn row (shared/world.js)

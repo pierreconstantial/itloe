@@ -1,0 +1,38 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { loadCampaign, newCampaign, reduceCampaign } from '../shared/campaign/index.js';
+import { STORY_CONTENT } from '../shared/campaign/story.js';
+
+/** @param {import('../shared/campaign/types.js').Campaign} campaign
+ * @param {import('../shared/campaign/types.js').CampaignAction} action */
+const act = (campaign, action) => reduceCampaign(campaign, action, STORY_CONTENT);
+
+test('players keep several statuses across save/load; portal and later joins grant wisp', () => {
+  let c = newCampaign(STORY_CONTENT, 3);
+  c = act(c, { t: 'join', id: 'elo', character: 'elodie' });
+  c = act(c, { t: 'join', id: 'sol', character: 'sol' });
+  c = act(c, { t: 'join', id: 'pierre', character: 'pierre' });
+  c = act(c, { t: 'status', id: 'sol', status: 'charged', on: true });
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'portal.ready', on: true } });
+  c = act(c, { t: 'portal', id: 'elo' });
+  assert.deepEqual(c.party.players.elo.statuses, []);
+  assert.deepEqual(c.party.players.sol.statuses, ['charged', 'wisp']);
+  c = act(c, { t: 'join', id: 'anna', character: 'anna' });
+  assert.deepEqual(c.party.players.anna.statuses, ['wisp']);
+  c = act(c, { t: 'status', id: 'sol', status: 'charged', on: false });
+  assert.deepEqual(c.party.players.sol.statuses, ['wisp']);
+  assert.deepEqual(loadCampaign(JSON.parse(JSON.stringify(c)), STORY_CONTENT).party, c.party);
+
+  const noWisp = act(c, { t: 'status', id: 'sol', status: 'wisp', on: false });
+  assert.deepEqual(loadCampaign(JSON.parse(JSON.stringify(noWisp)), STORY_CONTENT).party.players.sol.statuses, ['wisp', 'incarnating']);
+  const cancelled = act(noWisp, { t: 'status', id: 'sol', status: 'wisp', on: true });
+  assert.deepEqual(cancelled.party.players.sol.statuses, ['wisp']);
+  assert.equal(act(cancelled, { t: 'incarnate', id: 'sol' }), cancelled, 'a cancelled countdown cannot incarnate');
+  assert.equal(act(c, { t: 'status', id: 'sol', status: 'incarnating', on: true }), c, 'pending is engine-owned');
+  const incarnated = act(noWisp, { t: 'incarnate', id: 'sol' });
+  assert.deepEqual(incarnated.party.players.sol.statuses, []);
+
+  const old = JSON.parse(JSON.stringify(c));
+  delete old.party.players.sol.statuses;
+  assert.throws(() => loadCampaign(old, STORY_CONTENT), /invalid statuses/);
+});

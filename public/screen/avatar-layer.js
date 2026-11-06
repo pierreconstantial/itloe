@@ -14,6 +14,7 @@ import { WORLD } from '../../shared/world.js';
 import { spawnAt } from '../../shared/scene.js';
 import { isEmote } from '../../shared/social.js';
 import { makeView, renderScene, drawOrder, lerp } from './scene-render.js';
+import { drawWisp } from './wisp.js';
 
 /** @typedef {import('../../shared/world.js').Dir} Dir */
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
@@ -23,7 +24,7 @@ import { makeView, renderScene, drawOrder, lerp } from './scene-render.js';
 /** @typedef {{ playerId: string, x: number, y: number, dir: Dir, moving: boolean }} PosMsg */
 /**
  * @typedef {{
- *   id: string, name: string, color: number, character: string,
+ *   id: string, name: string, color: number, character: string, statuses: string[],
  *   x: number, y: number,      // simulated position (eased towards the target, fixed timestep)
  *   px: number, py: number,    // the same, one update earlier — drawing interpolates between them
  *   tx: number, ty: number,    // last reported position
@@ -31,7 +32,7 @@ import { makeView, renderScene, drawOrder, lerp } from './scene-render.js';
  * }} Avatar
  */
 /** A speech bubble (`text`) or an emote (`kind`) over an avatar. @typedef {{text?: string, kind?: string, until: number, started: number}} Expression */
-/** Who is shown: same roster shape as the campaign party. @typedef {{ order: string[], players: Record<string, { name: string, color: number, character: CharacterId, left?: boolean }> }} Roster */
+/** Who is shown: same roster shape as the campaign party. @typedef {{ order: string[], players: Record<string, { name: string, color: number, character: CharacterId, left?: boolean, statuses?: string[] }> }} Roster */
 
 const AVATAR_UNITS = 1.2;   // avatar height in world units
 const OFFLINE_ALPHA = 0.4;  // a dropped player's avatar fades (presence.js decides when)
@@ -91,7 +92,7 @@ export function createAvatarLayer() {
         const known = lastPos.get(id);
         const start = known ?? { x: spawn.x, y: spawn.y, dir: spawn.dir, moving: false, at: 0 };
         a = {
-          id, name: p.name, color: p.color, character,
+          id, name: p.name, color: p.color, character, statuses: p.statuses ?? [],
           x: start.x, y: start.y, px: start.x, py: start.y, tx: start.x, ty: start.y,
           dir: start.dir, moving: start.moving, lastPosAt: start.at,
         };
@@ -100,10 +101,18 @@ export function createAvatarLayer() {
       a.name = p.name;
       a.color = p.color;
       a.character = character;
+      if (p.statuses) a.statuses = p.statuses;
     }
     for (const id of avatars.keys()) if (!present.has(id)) avatars.delete(id);
     for (const id of lastPos.keys()) if (!s.players[id]) lastPos.delete(id);
   }
+
+  /** The campaign party remains authoritative when a round's view omits statuses.
+   * @param {Record<string, {statuses: string[]}>} members */
+  function setStatuses(members) {
+    for (const [id, a] of avatars) a.statuses = members[id]?.statuses ?? [];
+  }
+
 
   /** @param {unknown} m a `pos` message from the server */
   function onPos(m) {
@@ -133,7 +142,7 @@ export function createAvatarLayer() {
   /** @param {any} m a `say` or `emote` message from the server */
   function onSocial(m) {
     if (typeof m.playerId !== 'string') return;
-    if (m.t === 'say' && typeof m.text === 'string') say(m.playerId, m.text);
+    if (m.t === 'say' && typeof m.text === 'string' && !avatars.get(m.playerId)?.statuses.includes('wisp')) say(m.playerId, m.text);
     else if (m.t === 'emote' && isEmote(m.kind)) emote(m.playerId, m.kind);
   }
 
@@ -195,6 +204,10 @@ export function createAvatarLayer() {
   /** The engine's actor hook: an avatar, at the interpolated position, on its walk frame. */
   /** @param {CanvasRenderingContext2D} g @param {any} a @param {View} v */
   function drawActor(g, a, v) {
+    if (/** @type {Avatar} */ (a).statuses.includes('wisp')) {
+      drawWispAvatar(g, /** @type {Avatar} */ (a), v);
+      return;
+    }
     const walk = WALK_FRAMES[Math.floor((frameNow / 1000) * WALK_FPS) % WALK_FRAMES.length];
     drawAvatar(g, /** @type {Avatar} */ (a), isWalking(a, frameNow) ? walk : 0, v);
   }
@@ -238,6 +251,20 @@ export function createAvatarLayer() {
     g.globalAlpha = 1;
     if (active) drawExpression(g, active, sx, top, size, v, elapsed);
     label(g, a, sx, Math.min(v.h - unit * 0.3, sy + scale * 2), off, v);
+  }
+
+  /** @param {CanvasRenderingContext2D} g @param {Avatar} a @param {View} v */
+  function drawWispAvatar(g, a, v) {
+    const x = Math.min(WORLD.w - 0.5, Math.max(0.5, lerp(a.px, a.x, frameAlpha)));
+    const y = Math.min(WORLD.h - 0.2, Math.max(0.6, lerp(a.py, a.y, frameAlpha)));
+    const sx = v.ox + x * v.unit, sy = v.oy + y * v.unit;
+    const expression = expressions.get(a.id);
+    const active = !!expression && expression.until > frameNow;
+    if (expression && !active) expressions.delete(a.id);
+    const tint = ['#f6d77c', '#ffe7a8', '#a9e9ff', '#ffc5ef', '#cbb9ff'][(a.color - 1) % 5];
+    if (offline.has(a.id)) g.globalAlpha = OFFLINE_ALPHA;
+    drawWisp(g, sx, sy, v.unit, frameNow, active, tint, isWalking(a, frameNow));
+    g.globalAlpha = 1;
   }
 
   /** Comic style accents and speech, anchored to the avatar rather than a screen corner. */
@@ -334,7 +361,7 @@ export function createAvatarLayer() {
   }
 
   return {
-    setPlayers, setOffline, onPos, onSocial, say, emote, reset, settle, update, draw,
+    setPlayers, setStatuses, setOffline, onPos, onSocial, say, emote, reset, settle, update, draw,
     /**
      * Debug / tests: the ids `draw` paints into `scene`, back to front — prop ids and player ids
      * interleaved. An avatar listed BEFORE a prop is drawn behind it.
@@ -342,6 +369,6 @@ export function createAvatarLayer() {
      */
     drawOrder: (scene, only) => drawOrder(scene, shown(only)),
     /** Debug / tests: the drawn state of every avatar. */
-    snapshot: () => [...avatars.values()].map((a) => ({ id: a.id, name: a.name, character: a.character, x: a.x, y: a.y, dir: a.dir, walking: isWalking(a, performance.now()), offline: offline.has(a.id) })),
+    snapshot: () => [...avatars.values()].map((a) => ({ id: a.id, name: a.name, character: a.character, statuses: a.statuses, x: a.x, y: a.y, dir: a.dir, walking: isWalking(a, performance.now()), offline: offline.has(a.id) })),
   };
 }
