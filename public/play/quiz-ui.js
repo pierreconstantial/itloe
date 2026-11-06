@@ -1,8 +1,8 @@
-// Phone quiz screens (Contract E), mounted by the frame (./minigames.js): render strictly from the view's
+// Phone quiz screens (Contract E), mounted by the plain lobby (./plain-lobby.js): render strictly from the view's
 // PUBLIC quiz (shared/quiz/bank.js projectQuiz), which never carries an answer before the reveal. Between
 // quizzes the party is in the room (main.js); phases here:
 // question (4 big choices or a typed answer; one shot), reveal (my verdict + points, the answer, everyone's
-// answers; the game master: overrides + next). The finished quiz is the frame's podium, with each player's right answers.
+// answers; the game master: overrides + next). The finished quiz is the shared podium, with each player's right answers.
 // Controls are built once per question, so a view arriving mid-typing never resets the text field.
 import { $, addStylesheet } from './dom.js';
 import * as haptics from './haptics.js';
@@ -101,8 +101,10 @@ export function createQuizUi(io) {
     const out = !!v.players[meId]?.left; // taken out by the game master: no more answers, the score counts
     const sent = out || r.answered.includes(meId) || mine?.key === roundKey(r);
     const asChoice = !!r.question.choices;
-    $('quiz-choices').hidden = !asChoice;
-    $('quiz-text-form').hidden = asChoice;
+    const seated = !!v.players[meId]; // the game master may sit a round out: nothing to answer with
+    $('quiz-choices').hidden = !seated || !asChoice;
+    $('quiz-text-form').hidden = !seated || asChoice;
+    $('quiz-not-seated').hidden = seated;
     for (const b of /** @type {NodeListOf<HTMLButtonElement>} */ (document.querySelectorAll('#quiz-choices button'))) {
       b.disabled = sent;
       b.classList.toggle('mine', mine?.key === roundKey(r) && mine.choice === Number(b.dataset.choice));
@@ -110,7 +112,7 @@ export function createQuizUi(io) {
     input.disabled = sent;
     /** @type {HTMLButtonElement} */ ($('quiz-send')).disabled = sent;
     if (sent && mine?.text !== undefined && mine.key === roundKey(r)) input.value = mine.text;
-    $('quiz-sent').hidden = !sent;
+    $('quiz-sent').hidden = !seated || !sent;
     $('quiz-sent').textContent = out ? 'You were taken out — your score counts' : 'Answer sent ✓';
     renderAnswered(v, r);
   }
@@ -229,6 +231,7 @@ const MARKUP = `
         <button id="quiz-send" type="submit" class="primary">Send</button>
       </form>
       <p id="quiz-sent" class="quiz-sent" hidden>Answer sent ✓</p>
+      <p id="quiz-not-seated" class="dim" hidden>You're not in this round.</p>
       <ul id="quiz-answered" class="quiz-chips"></ul>
     </div>
 
@@ -244,9 +247,10 @@ const MARKUP = `
   </section>
 `;
 
-/** The quiz's entry in the phone's list (./minigames.js). @type {import('./minigames.js').PhoneScreen} */
+/** The quiz's round screens, wrapped in the plain lobby in the phone's list (./minigames.js). @type {import('./minigames.js').RoundScreen} */
 export const QUIZ_SCREEN = {
   title: 'Quiz!',
+  name: 'quiz',
   settings: QUIZ_SETTINGS,
   mount(root, io) {
     root.insertAdjacentHTML('beforeend', MARKUP);

@@ -321,8 +321,8 @@ function finishIfAllDone(state, players) {
 }
 
 /**
- * The block game's entry in the rules list (shared/minigames.js).
- * @type {import('./minigames.js').MinigameRules<State, Action, Settings>}
+ * The block game's round rules, in the rules list inside a plain lobby (shared/minigames.js).
+ * @type {import('./minigames.js').RoundRules<State, Action, Settings>}
  */
 export const BLOCK_RULES = {
   init: startGame,

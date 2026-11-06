@@ -16,10 +16,12 @@ const runC = (C, c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a,
 function party(C) {
   return runC(C, newCampaign(C, 3), { t: 'join', id: 'p', character: 'pierre' }, { t: 'join', id: 'e', character: 'elodie' }, { t: 'join', id: 's', character: 'sol' }, { t: 'join', id: 'a', character: 'anna' });
 }
-/** One block game ended by the game master (from the room, or from the podium after going back to the room). @param {Content} C @param {Campaign} c */
+/** One block game, everyone in it, from the game master's start of the minigame to his end. @param {Content} C @param {Campaign} c */
 function game(C, c) {
-  if (c.at.activity?.phase === 'finished') c = runC(C, c, { t: 'newGame', id: 'p' });
-  return runC(C, c, { t: 'start', id: 'p', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'p' } });
+  const act = (/** @type {any} */ action) => ({ t: 'activity', action });
+  c = runC(C, c, { t: 'startMinigame', id: 'p', now: 1 });
+  c = runC(C, c, ...(c.at.activity?.players ?? []).map((p) => act({ t: 'ready', id: p.id, on: true })));
+  return runC(C, c, act({ t: 'start', id: 'p', now: 1 }), act({ t: 'endGame', id: 'p' }), act({ t: 'lobby', id: 'p' }), { t: 'endMinigame', id: 'p' });
 }
 
 /** A small content where the false start rewards with a given `to`. @param {any} reward @returns {Content} */

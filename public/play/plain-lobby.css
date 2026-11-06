@@ -1,0 +1,12 @@
+/* The plain lobby's phone screens (plain-lobby.js): the lobby around a minigame's round, and the podium. */
+.minigame-round { display: contents; }
+.minigame-lobby { justify-content: flex-start; padding-top: calc(56px + env(safe-area-inset-top)); }
+#btn-ready { width: min(300px, 100%); font-size: 18px; padding: 0.8em 1.6em; touch-action: manipulation; }
+#btn-ready.on { border: 2px solid var(--ok); color: var(--ok); background: transparent; font-weight: 700; }
+.minigame-lobby-players li { justify-content: flex-start; }
+.minigame-lobby-players li small { margin-left: auto; font-size: 14px; }
+.minigame-lobby-players li .is-ready { color: var(--ok); }
+.minigame-lobby-players li.offline { opacity: 0.45; }
+#minigame-lobby-last { font-size: 18px; font-weight: 700; }
+#minigame-lobby-gm { flex-direction: column; align-items: stretch; width: min(300px, 100%); }
+.podium-body { display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%; }

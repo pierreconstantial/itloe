@@ -8,7 +8,7 @@ import { createServer } from 'node:net';
 import { OPENING_PLAYERS, INTRO_KEY, PORTAL, INTRO_KEY_SPOT, STORY_CONTENT } from '../shared/campaign/story.js';
 import { gameMasterId } from '../shared/campaign/index.js';
 
-test('wire: all four can leave the opening podium, rejoin, and Elo can reach the key', async (t) => {
+test('wire: all four can leave the opening podium and rejoin, Pierre ends the block game, and Elo can reach the key', async (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'itloe-story-'));
   const port = await new Promise((resolve) => {
     const listener = createServer();
@@ -58,17 +58,19 @@ test('wire: all four can leave the opening podium, rejoin, and Elo can reach the
   }
   const pierre = phones.get('pierre');
   assert.ok(pierre);
+  pierre.send({ t: 'startMinigame' });
+  await until(pierre, (m) => m.t === 'view' && m.minigame?.status === 'lobby');
+  for (const character of OPENING_PLAYERS) phones.get(character).send({ t: 'ready', on: true });
+  await until(pierre, (m) => m.t === 'view' && m.minigame?.view.ready.length === 4);
   pierre.send({ t: 'start' });
-  await until(pierre, (m) => m.t === 'view' && m.round?.status === 'running');
+  await until(pierre, (m) => m.t === 'view' && m.minigame?.status === 'running');
   pierre.send({ t: 'endGame' });
-  const finished = await until(pierre, (m) => m.t === 'view' && m.round?.status === 'finished');
-  assert.ok(finished.campaign.facts.flags.includes('portal.ready'));
-  for (const character of OPENING_PLAYERS.filter((character) => character !== 'pierre')) {
+  const finished = await until(pierre, (m) => m.t === 'view' && m.minigame?.status === 'podium');
+  assert.equal(finished.campaign.facts.flags.includes('portal.ready'), false, 'no portal before Pierre ends the block game');
+  for (const character of OPENING_PLAYERS) {
     phones.get(character).send({ t: 'leave' });
     await until(screen, (m) => m.t === 'view' && m.campaign.party.players[phones.get(character).id]?.left);
   }
-  pierre.send({ t: 'leave' });
-  await until(screen, (m) => m.t === 'view' && m.round === null && m.campaign.facts.flags.includes('portal.ready'));
   for (const character of OPENING_PLAYERS) {
     const phone = phones.get(character);
     const fromWelcome = phone.messages.length;
@@ -76,6 +78,13 @@ test('wire: all four can leave the opening podium, rejoin, and Elo can reach the
     const welcome = await until(phone, (m) => m.t === 'welcome' && m.playerId !== phone.id, fromWelcome);
     phones.set(character, { ...phone, id: welcome.playerId });
   }
+  // Pierre, rejoined, is the game master again: he ends the block game, and the portal appears
+  const rejoined = phones.get('pierre');
+  const fromLobby = rejoined.messages.length;
+  rejoined.send({ t: 'lobby' });
+  await until(rejoined, (m) => m.t === 'view' && m.minigame?.status === 'lobby', fromLobby);
+  rejoined.send({ t: 'endMinigame' });
+  await until(screen, (m) => m.t === 'view' && m.minigame === null && m.campaign.facts.flags.includes('portal.ready'));
   const elo = phones.get('elodie');
   assert.ok(elo);
   const from = screen.messages.length;

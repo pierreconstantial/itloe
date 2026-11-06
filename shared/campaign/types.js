@@ -6,9 +6,11 @@ export {};
 /** @typedef {import('../quiz/index.js').QuizState} QuizState */
 /** @typedef {import('../quiz/index.js').QuizSettings} QuizSettings */
 /** @typedef {import('../quiz/index.js').QuizAction} QuizAction */
-/** The nested activity a tableau runs: the block game, or a quiz (Contract E: `kind: 'quiz'`). */
-/** @typedef {BlockState | QuizState} ActivityState */
-/** A tableau's settings, by its minigame: the content's, then the game master's choice until the party leaves. */
+/** A round of a tableau's minigame: the block game, or a quiz (Contract E: `kind: 'quiz'`). */
+/** @typedef {BlockState | QuizState} RoundState */
+/** The running minigame's state, nested in the campaign: blocks and quiz run in a plain lobby. */
+/** @typedef {import('../plain-lobby.js').PlainLobbyState<RoundState, TableauSettings>} ActivityState */
+/** A minigame's settings, by its minigame: the content's, then the game master's choice in its lobby. */
 /** @typedef {import('../game.js').Settings | QuizSettings} TableauSettings */
 /** @typedef {import('../game.js').Settings} Settings */
 /** @typedef {import('../characters.js').CharacterId} CharacterId */
@@ -44,9 +46,16 @@ export {};
  */
 
 /**
- * @typedef {{ kind: 'blocks', settings?: Partial<Settings> }
+ * Who may play a tableau's minigame, and the content's ready rule. `eligible`: the characters it names
+ * (absent: every party member who isn't a story wisp); `allReady`: a round starts only with every named
+ * character in the party and ready (without names: every eligible player ready).
+ * @typedef {{ eligible?: CharacterId[], allReady?: true }} TableauPlayers
+ */
+
+/**
+ * @typedef {({ kind: 'blocks', settings?: Partial<Settings> } & TableauPlayers)
  *   | { kind: 'scene', sceneId: string }
- *   | { kind: 'quiz', settings?: Partial<QuizSettings> }} Activity     // questions from the server's bank (E1)
+ *   | ({ kind: 'quiz', settings?: Partial<QuizSettings> } & TableauPlayers)} Activity     // questions from the server's bank (E1)
  */
 
 /** Door rectangle in world units (16 × 9), on a hub/world child: walking INTO it enters the node. */
@@ -124,9 +133,9 @@ export {};
 /**
  * @typedef {{
  *   v: 1,
- *   seed: number,                                   // advanced on every block game created (deterministic)
+ *   seed: number,                                   // advanced on every minigame started (deterministic)
  *   at: { node: string, kind: MinigameKind | null, activity: ActivityState | null,   // kind: the tableau's minigame;
- *         settings: TableauSettings | null },     // activity: its round, null between rounds (the room); settings: the tableau's
+ *         results: RoundResult[] },   // activity: the running minigame, null otherwise (the room); results: its finished rounds'
  *   party: Party,
  *   facts: Facts,
  *   news: News[],                                   // not yet celebrated on the TV
@@ -134,9 +143,11 @@ export {};
  * }} Campaign
  */
 
+/** @typedef {import('../minigames.js').RoundResult} RoundResult */
+
 /**
- * The campaign as views carry it: without the round's raw state (`at.activity`), which travels only
- * through its minigame's view (the view's `round`).
+ * The campaign as views carry it: without the minigame's raw state (`at.activity`), which travels only
+ * through its server code's view (the view's `minigame`).
  * @typedef {Omit<Campaign, 'at'> & { at: Omit<Campaign['at'], 'activity'> }} CampaignView
  */
 
@@ -156,9 +167,8 @@ export {};
  */
 
 /**
- * Ids are injected by the server (socket → playerId; ack: 'screen'). `activity` carries a game
- * ServerAction already rebuilt field by field by the server (now/deadline/timeUp server-only); `now` and
- * `inputs` (the minigame's server inputs, e.g. the quiz's candidates) of start/again too.
+ * Ids are injected by the server (socket → playerId; ack: 'screen'). `activity` carries a minigame's
+ * action already rebuilt field by field by the server (now/deadline/timeUp/inputs server-only).
  * @typedef {{ t: 'join', id: string, character: CharacterId }
  *   | { t: 'leave', id: string }
  *   | { t: 'enter', id: string, node: string }
@@ -167,10 +177,9 @@ export {};
  *   | { t: 'status', id: string, status: string, on: boolean } // internal: add or remove a player status
  *   | { t: 'incarnate', id: string }                            // internal: finish the Wisp countdown
  *   | { t: 'back', id: string }
- *   | { t: 'start' | 'again', id: string, now: number, inputs?: unknown }    // game master: a round from the room / the podium
- *   | { t: 'newGame', id: string }                                         // game master, on the podium: back to the room
- *   | { t: 'activity', action: import('../game.js').Action | QuizAction }   // routed by the activity's kind
- *   | { t: 'config', id: string, patch: unknown }                            // game master: the tableau's settings
+ *   | { t: 'startMinigame', id: string, now: number }   // game master, in the room at a minigame's tableau
+ *   | { t: 'endMinigame', id: string }                  // game master, in its lobby: its results recorded
+ *   | { t: 'activity', action: import('../plain-lobby.js').PlainLobbyAction | import('../game.js').Action | QuizAction }   // to the running minigame
  *   | { t: 'event', event: CampaignEvent }
  *   | { t: 'ack', id: 'screen', upTo: number }
  *   | { t: 'gm', id: string, op: GmOp }} CampaignAction

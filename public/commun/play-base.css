@@ -9,7 +9,7 @@ html, body {
 }
 [hidden] { display: none !important; }
 /* the frame's root for a minigame's screens: they lay out as if they were the frame's own */
-#view-round { display: contents; }
+#view-minigame { display: contents; }
 
 /* ---------- "menu" views (name, lobby, game over, podium…) ---------- */
 
@@ -86,12 +86,12 @@ button.primary:active { transform: scale(0.97); }
   padding: 10px 14px;
   font-size: 17px;
 }
-#podium-list li.champion {
+.podium-list li.champion {
   border: 1px solid var(--accent);
   font-weight: 700;
   font-size: 19px;
 }
-#podium-list li.me { box-shadow: inset 3px 0 0 var(--accent); }
+.podium-list li.me { box-shadow: inset 3px 0 0 var(--accent); }
 
 .dot {
   width: 13px;
@@ -255,9 +255,9 @@ canvas.avatar {
 .pick-card:disabled { opacity: 1; } /* overrides base.css: disabled only dims when taken */
 .pick-card.taken:disabled { opacity: 0.35; }
 
-/* ---------- lobby: header + virtual stick ---------- */
+/* ---------- the room at a tableau: header + virtual stick ---------- */
 
-#view-lobby, #view-wait-lobby {
+#view-tableau, #view-wait-lobby {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -270,14 +270,14 @@ canvas.avatar {
   gap: 10px;
   text-align: center;
 }
-#lobby-me {
+#tableau-me {
   display: flex;
   align-items: center;
   gap: 12px;
   padding-right: 44px; /* room for the fixed ☰ button */
 }
-.lobby-me-name { font-size: 22px; font-weight: 800; }
-#view-lobby #lobby-players {
+.tableau-me-name { font-size: 22px; font-weight: 800; }
+#view-tableau #tableau-players {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -288,7 +288,7 @@ canvas.avatar {
   justify-content: center;
   gap: 8px;
 }
-#view-lobby #lobby-players li {
+#view-tableau #tableau-players li {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -304,7 +304,7 @@ canvas.avatar {
   flex-wrap: wrap;
 }
 .lobby-actions button { touch-action: manipulation; }
-#view-lobby p { margin: 0; }
+#view-tableau p { margin: 0; }
 
 .object-actions { display: flex; justify-content: center; padding-top: 10px; }
 #btn-interact { min-width: min(280px, 90%); min-height: 54px; background: var(--accent); color: #201a08; border: 0; font-weight: 800; font-size: 18px; touch-action: manipulation; }
@@ -400,7 +400,7 @@ canvas.avatar {
   font-size: 14px;
 }
 .lobby-actions > button:not(.primary),
-#view-podium > button:not(.primary) {
+#view-podium button:not(.primary) {
   font-size: 15px;
   padding: 0.5em 1.1em;
   touch-action: manipulation;

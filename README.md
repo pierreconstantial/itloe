@@ -24,11 +24,11 @@ The terminal prints a QR code and a line like:
 
 1. On the laptop, open **http://localhost:3131/** in a browser, go full screen, and send it to the TV. That's the shared screen.
 2. Each player scans the QR code with their phone camera (or types the address) and **taps their character**.
-3. **Pierre is the game master**: he starts each game from his phone, and on the podium chooses **Play again** or **Back to the room**. Nobody else can, so Pierre joins before the first game.
+3. **Pierre is the game master**: he starts each game from his phone, and the game opens its **lobby**. Each player taps **I'm ready**, and Pierre taps **Start**. After each round's podium, Pierre takes everyone **Back to the lobby**, where he can **Play again** or end the game, which brings everyone back to the room. Nobody else can, so Pierre joins before the first game.
 
 ## Room code
 
-The server picks a 4-letter **room code** (e.g. `MKYN`) whenever it starts a fresh game; "Play again" keeps it. It's already inside the QR code and the address, so scanning just works.
+The server picks a 4-letter **room code** (e.g. `MKYN`) whenever it starts a fresh evening; it stays the same for the whole evening. It's already inside the QR code and the address, so scanning just works.
 A phone that opens the plain address without it is asked for the code: read it from the `room` line in the terminal.
 If a phone holds an old code (the server restarted into a fresh evening), it says so ("That code (ABCD) didn't work") and asks for the new one.
 The code only keeps stray devices out; it is not a password.
@@ -36,8 +36,8 @@ The code only keeps stray devices out; it is not a password.
 ## During the evening
 
 - **The hub and the worlds.** Élodie walks her character into a door (the phone's joystick) to enter a world; the game master can also pick one. New places unlock as the evening goes on, and the TV celebrates each unlock.
-- **Wisp Mode.** A late player selects a predefined character and joins as a tiny floating light with a hint of their character's color. Wisps have no name label and pulse slightly while moving. They can tap **Shine** in reactions or beside nearby objects, but cannot speak, use objects, or affect the story through their Wisp action. When the story introduces that character, the phone vibrates and counts down **3, 2, 1** before the TV reveals the character with an emote. Nico is available as a fifth character slot.
-- **Pierre is the game master.** On Pierre's phone, **☰ → 🎲 Game master** is available even when he is a Wisp. He can move the party, unlock or lock a place, set flags and counters, and see *why* something is still locked. Every change needs a second tap to confirm. He also starts and ends rounds and sets their settings.
+- **Wisp Mode.** A late player selects a predefined character and joins as a tiny floating light with a hint of their character's color. Wisps have no name label and pulse slightly while moving. They can tap **Shine** in reactions or beside nearby objects, but cannot speak, use objects, or affect the story through their Wisp action. During a game, everyone who isn't playing (not one of its players, not ready, or out of the round) floats over the TV as a wisp too. When the story introduces that character, the phone vibrates and counts down **3, 2, 1** before the TV reveals the character with an emote. Nico is available as a fifth character slot.
+- **Pierre is the game master.** On Pierre's phone, **☰ → 🎲 Game master** is available even when he is a Wisp. He can move the party, unlock or lock a place, set flags and counters, and see *why* something is still locked. Every change needs a second tap to confirm. He also starts and ends every game, sets it up in its lobby, and starts its rounds.
 - **Quizzes.** Questions in French on the TV; players answer on their phones with 4 choices or by typing (spelling mistakes, accents and articles are forgiven; years must be exact). The game master can correct any verdict on the reveal. A question is never asked twice in the same evening.
 - **A phone died or got lost?** Open the address on any other phone and tap your character: it carries on with your board and score. The old phone, if it comes back, shows "Continued on another device".
 - **Someone left mid-game?** The game master can take an offline player out, or end the game, from ☰ on their phone.
@@ -58,7 +58,7 @@ Set them in front of `npm start`, e.g. `PORT=8080 npm start`.
 | `BLOKO_VAR` | Folder for saved data (default `var/`). |
 | `BLOKO_QUIZ_DIR` | Folder of the quiz question bank (default `data/quiz/`). |
 | `ITLOE_CONTENT=sample` | Play the sample content (`shared/campaign/sample.js`) instead of the birthday story (`shared/campaign/story.js`). The end-to-end suites run on it. |
-| `ITLOE_CONTENT=minigame:<kind>` | Start a hub and one tableau running that minigame with its sample settings (`sampleSettings` in its rules), without the story's opening, e.g. `ITLOE_CONTENT=minigame:quiz BLOKO_VAR="$(mktemp -d)" PORT=3199 npm start -- --new`. An unknown kind, or any `ITLOE_CONTENT` value other than these two, refuses to boot. |
+| `ITLOE_CONTENT=minigame:<kind>` | Start at a hub and one tableau with that minigame and its sample settings (`sampleSettings` in its rules), which Pierre starts from his phone, without the story's opening, e.g. `ITLOE_CONTENT=minigame:quiz BLOKO_VAR="$(mktemp -d)" PORT=3199 npm start -- --new`. An unknown kind, or any `ITLOE_CONTENT` value other than these two, refuses to boot. |
 
 If the laptop has several network connections (Wi-Fi + Ethernet, VPN…), `npm start` asks which one the phones are on. Press Enter for the first one.
 
@@ -92,7 +92,7 @@ For deployment readiness, derive the cookie value as hex HMAC-SHA256 with the UT
 
 The whole evening is saved after every move. Just run `npm start` again:
 
-- **everything is resumed**: where the party is, who is playing, a game in progress (a timed game keeps its remaining time), the podium, what has been unlocked so far. Phones and the TV reconnect on their own;
+- **everything is resumed**: where the party is, who is playing, a game's lobby and who is ready, a round in progress (a timed game keeps its remaining time), the podium, what has been unlocked so far. Phones and the TV reconnect on their own;
 - `npm start -- --new` always starts a fresh evening.
 
 To start a fresh evening on the hosted server, open `https://itloe.kputnik.com/?reset=1&admin=<admin token>` and confirm. The server saves a fresh evening, as `--new` would start it, and exits with code 75; the hosted service restarts it after a failure exit, and it loads that evening. Phones and TVs reconnect on their own; players join again with the new code from the TV. Only a browser with the admin token can reset (see `BLOKO_ADMIN_TOKEN`). Run locally, `/?reset=1` only stops the server: start it again with `npm start`.
@@ -106,9 +106,9 @@ A phone that goes to sleep or reloads also comes back to its own board automatic
 - **Everything freezes after a while.** The laptop went to sleep: keep it plugged in and turn off sleep while you play.
 - **A phone keeps dimming.** Turn off its screen auto-lock for the evening, or just tap it: the game picks up where it was.
 - **"That code didn't work."** Use the `room` code printed by the server that's running now: a restart into a fresh evening draws a new one.
-- **Finding out what happened.** The admin page, **/admin/** (with `?admin=<admin token>` the first time when the server has one), shows each device's connection, address and last message, the round's state with its answers, the recent actions and whether the server accepted or refused each one, and the errors the phones and TVs reported. It changes nothing. It also downloads the save, and links to the reset.
+- **Finding out what happened.** The admin page, **/admin/** (with `?admin=<admin token>` the first time when the server has one), shows each device's connection, address and last message, the running minigame's state with its answers, the recent actions and whether the server accepted or refused each one, and the errors the phones and TVs reported. It changes nothing. It also downloads the save, and links to the reset.
 - **The server refuses to start, listing problems.** The story content or the quiz bank has a mistake: the list says which question or place, and what is wrong.
-- **The server refuses to start, naming a minigame.** The save holds a round of a minigame this version of the game doesn't have, e.g. after going back to an older release. Run a version that has it: the save is left exactly as it was.
+- **The server refuses to start, naming a minigame.** The save holds a game this version of the game doesn't have, e.g. after going back to an older release. Run a version that has it: the save is left exactly as it was.
 
 ## Saved data
 
@@ -157,15 +157,15 @@ The application runs locally on Node.js 24+, with HTTP and WebSocket traffic on 
 | `data/quiz/` | Server-only question banks |
 | `test/`, `scripts/` | Node unit tests, end-to-end suites, simulation, and data import tools |
 
-Phones send actions; the server binds them to a player, validates them, runs the shared reducers, and saves and broadcasts accepted changes. The server handles the evening's own messages and passes every other one to the running minigame's server code, listed in `server/minigames.ts` beside the rules list in `shared/minigames.js`. The campaign owns the party and progression, with the current block game or quiz nested inside it. Phone placement previews use the same rules as the server and reconcile with its next view.
+Phones send actions; the server binds them to a player, validates them, runs the shared reducers, and saves and broadcasts accepted changes. The server handles the evening's own messages and passes every other one to the running minigame's server code, listed in `server/minigames.ts` beside the rules list in `shared/minigames.js`. The campaign owns the party and progression, with the running minigame (its lobby, rounds and podiums) nested inside it. Phone placement previews use the same rules as the server and reconcile with its next view.
 
-The phone and the TV each have a frame (`public/play/main.js`, `public/screen/main.js`) around the minigames: the room at a tableau, the map, the podium, the game master's round controls, the settings sheet and the cutscenes. While a round runs, the frame mounts that minigame's screens, listed in `public/play/minigames.js` and `public/screen/minigames.js` (blocks: `blocks-ui.js`, `blocks-screen.js`; quiz: `quiz-ui.js`, `quiz-screen.js`). The screens build their own markup, load their own CSS, and remove their listeners, loops, sounds and timers when the frame unmounts them.
+The phone and the TV each have a frame (`public/play/main.js`, `public/screen/main.js`) around the minigames: the room at a tableau, the map, the cutscenes, the menus, and wisps over a running minigame. The frame mounts a minigame's screens from the game master's start to his end, listed in `public/play/minigames.js` and `public/screen/minigames.js`. Blocks and quiz wrap their round screens (`blocks-ui.js`, `blocks-screen.js`; `quiz-ui.js`, `quiz-screen.js`) in the plain lobby (`plain-lobby.js`), which draws the lobby and the podium and mounts the round screens while a round runs. The screens build their own markup, load their own CSS, and remove their listeners, loops, sounds and timers when they are unmounted.
 
-Rule reducers are deterministic: time and seeds are explicit inputs, and reducers perform no I/O. Refused/no-op actions return the same state object; the server uses object identity to skip change hooks. Accepted state changes flow through `apply`/`commit` in `server/main.ts`, including atomic JSON persistence. Activity completion and the resulting campaign facts are saved together. Timed games retain their remaining time across restart or laptop suspension.
+Rule reducers are deterministic: time and seeds are explicit inputs, and reducers perform no I/O. Refused/no-op actions return the same state object; the server uses object identity to skip change hooks. Accepted state changes flow through `apply`/`commit` in `server/main.ts`, including atomic JSON persistence. A round's result is kept with the running minigame in the same save as its end, and the main game records the results as campaign facts in one save when the minigame ends. Timed games retain their remaining time across restart or laptop suspension.
 
 Positions, presence, and temporary join-QR display state are held in memory rather than saved. Avatar movement is client-authoritative under the protocol; game results and campaign progression are server-authoritative. Reconnection and character reclaim preserve the player's game; the newest socket wins, and a replaced device stops reconnecting.
 
-Both `public/` and `shared/` are publicly served. Quiz bank data stays on the server; the quiz's view uses `projectQuiz`, and the campaign on the wire carries no round state, to hide answers and submitted answers/verdicts until reveal. Question IDs and campaign content IDs are stable; inventory and campaign totals follow characters rather than devices. Player capacity comes from the character roster in `shared/characters.js`.
+Both `public/` and `shared/` are publicly served. Quiz bank data stays on the server; the quiz's view uses `projectQuiz`, and the campaign on the wire carries no minigame state, to hide answers and submitted answers/verdicts until reveal. Question IDs and campaign content IDs are stable; inventory and campaign totals follow characters rather than devices. Player capacity comes from the character roster in `shared/characters.js`.
 
 ### Code conventions
 
@@ -190,14 +190,14 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 
   | Suite | Covers |
   |---|---|
-  | `base` | a running server over sockets: room code, join, avatar positions, moves, rejoin and replaced sockets, new game, leaving |
-  | `resume` | kill -9 in every phase, timed clock kept |
+  | `base` | a running server over sockets: room code, join, avatar positions, the lobby, moves, rejoin and replaced sockets, Play again, the end, leaving |
+  | `resume` | kill -9 in the room, the lobby, a round and on a podium, timed clock kept, results recorded once at the end |
   | `presence` | reclaim a character, newest device wins, the game master's round controls |
-  | `campaign` | false start → unlocks → news acked by two TVs → doors, kill -9 at each step; chat, emotes and object actions (relay, history, rate limits, where interact works); `pos` during a round dropped unless from a wisp |
+  | `campaign` | false start → unlocks → news acked by two TVs → doors, kill -9 at each step; chat, emotes and object actions (relay, history, rate limits, where interact works); `pos` while a minigame runs dropped unless from a wisp |
   | `inventory` | rewards land in the right inventory (chooser / winner / all), survive kill -9 and a reclaim; the game master's give/take, unknown items refused |
   | `quiz` | quiz over real sockets: no answer on the wire before the reveal, judging, override, resume (plays a fixed copy of `placeholder.json`) |
-  | `tv` | the TV page in headless Chrome, including the minigame screens' teardown; one section: `tv:<section>` |
-  | `phone` | phone pages in headless Chrome: session never lost, reclaim, the game master's round controls, campaign screens, quiz and the screens' teardown, room code; one part: `phone:<n>` |
+  | `tv` | the TV page in headless Chrome: the minigame's lobby, the room again after its end, the minigame screens' teardown; one section: `tv:<section>` |
+  | `phone` | phone pages in headless Chrome: session never lost, reclaim, the minigame's lobby, the game master's round controls, campaign screens, quiz and the screens' teardown, room code, wisps over a minigame; one part: `phone:<n>` |
 
   The suite's header lists its sections or parts, and the suite refuses an unknown one with the list. `--shots <dir>` saves the TV and phone screens, each with its visible text, to `<dir>/<suite>`. `LOCK_MS` (how long the phone suite freezes a locked phone: 20 s in the runner, 5 min in the suite alone) and `E2E_SLOW=3` (multiplies every wait on a busy machine) pass through. The `e2e:<suite>` scripts run one suite bare, as CI does, with the caller's `PORT`.
 
@@ -208,7 +208,7 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 
 ### Further reading
 
-- [docs/minigames.md](docs/minigames.md): adding a minigame: its parts, registration lines, what the frame offers, the development start and tests.
+- [docs/minigames.md](docs/minigames.md): adding a minigame: its parts and its lobby, registration lines, what the main game hands it, what shared code offers, the development start and tests.
 - [PROTOCOL.md](PROTOCOL.md): WebSocket messages, HTTP endpoints, trusted inputs, view filtering, and compatibility rules.
 - [SPEC-BLOCKS.md](SPEC-BLOCKS.md): original block-game design and technical direction.
 - [BUILD-PLAN.md](BUILD-PLAN.md): implementation history, contracts, and milestone-specific working agreements.

@@ -26,7 +26,7 @@ function harness() {
     sendAll: (msg) => all.push(msg),
   });
   /** @param {string} id @param {any} m */
-  const message = (id, m) => STAND_IN.message(m, { id, now: 0, gameMasterId: null, state: {} }, round.io);
+  const message = (id, m) => STAND_IN.message(m, { id, now: 0, gameMasterId: null, state: {}, asked: [] }, round.io);
   return { round, all, applied, message };
 }
 

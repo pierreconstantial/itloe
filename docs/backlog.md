@@ -22,12 +22,11 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | Item | Description | Priority | Status | Complexity |
 |---|---|---|---|---|
 | [Lock and invitation on real phones](#lock-and-invitation-on-real-phones) | Locking a phone, and the invitation in a phone's browser, are never tested | P1 | Open | Low |
-| [Story opening in a browser test](#story-opening-in-a-browser-test) | No test plays the birthday opening on a TV and phones | P1 | Open | Low |
+| [Story opening in a browser test](#story-opening-in-a-browser-test) | No browser test plays the opening past its block game | P1 | Open | Low |
 | [Apartment drawings cover avatars](#apartment-drawings-cover-avatars) | The cats, friends, keepsakes and key are always drawn over avatars | P2 | Open | Low |
-| [A room per character at the hub](#a-room-per-character-at-the-hub) | Should the others stay in the party room while Élodie is in the apartment? | P2 | Needs decision | Medium |
 | [Story rules in shared code](#story-rules-in-shared-code) | The opening's rules are spread through shared code | P2 | Needs decision | High |
 | [Ids in client code](#ids-in-client-code) | Node, character and item ids written into the clients | P2 | Open | Low |
-| [Other guests in other roles](#other-guests-in-other-roles) | Guests beyond the four players, e.g. controlling NPCs or in games | P3 | Needs decision | High |
+| [Guests controlling NPCs](#guests-controlling-npcs) | Guests beyond the opening's four in a role of their own, e.g. controlling NPCs | P3 | Needs decision | High |
 | [Room before the content arrives](#room-before-the-content-arrives) | A reloaded phone walks the party room until the content loads | P3 | Open | Low |
 | [Pickup handles one item](#pickup-handles-one-item) | `collect` only knows the first key | P3 | Open | Low |
 | [Debug accessors show only the party room](#debug-accessors-show-only-the-party-room) | `bloko.drawOrder()` and `bloko.scene()` ignore the apartment and door #4's room | P3 | Open | Trivial |
@@ -52,9 +51,9 @@ Automate the lock only if a way to freeze a page in headless Chrome turns up.
 
 ### Story opening in a browser test
 
-Every e2e suite runs the sample content (`ITLOE_CONTENT=sample`). The birthday opening (the match, the portal, the apartment, the key, door #4 and back) has only the reducer tests in `test/story.test.js` and one happy path over raw sockets in `test/story-wire.test.js`, which puts the player on the portal instead of walking there. No test draws the apartment or door #4's room on a TV, plays the apparition cutscene, or restarts the server during the opening. The door reachability test in `test/movement.test.js` checks only the sample's doors in the party room.
+The e2e suites run the sample content (`ITLOE_CONTENT=sample`), except `e2e-phone` part 8, which plays the opening's block game on the story content, with wisps over it. The rest of the birthday opening (the portal, the apartment, the key, door #4 and back) has only the reducer tests in `test/story.test.js` and one happy path over raw sockets in `test/story-wire.test.js`, which puts the player on the portal instead of walking there. No test draws the apartment or door #4's room on a TV, plays the apparition cutscene, or restarts the server during the opening. The door reachability test in `test/movement.test.js` checks only the sample's doors in the party room.
 
-**Recommendation:** one browser scenario on the story content: a TV and four phones play the opening match, Élodie walks through the portal, picks up the key, enters door #4 and comes back, with a kill -9 in the middle. Point the door reachability test at the story's rooms too.
+**Recommendation:** one browser scenario on the story content: a TV and four phones play the opening's block game, Pierre ends it, Élodie walks through the portal, picks up the key, enters door #4 and comes back, with a kill -9 in the middle. Point the door reachability test at the story's rooms too.
 
 ### Apartment drawings cover avatars
 
@@ -62,16 +61,10 @@ In the apartment, the cats, friends, keepsakes and the key are drawn after the d
 
 **Recommendation:** make them props of the apartment's scene (`APARTMENT_ROOM`), so they sort with the avatars like the party room's furniture.
 
-### A room per character at the hub
-
-Before each node named its room (`roomAt`, see `docs/minigames.md`), Élodie walked the apartment at the hub after the portal, while the other players stayed "in the old lobby": their phones walked the party room, and the TV hid them unless a game master set `person.<id>.unlocked`. A node's room puts everyone at the hub in the apartment; who may walk and who is drawn stay the story's rules, so the others remain hidden as before.
-
-**Recommendation:** Pierre decides whether the others being somewhere else is a story moment. If it is, the story needs a rule for who is in which room, which a room chosen by node can't express.
-
 ### Story rules in shared code
 
 The opening's rules are branches on `STORY_MODE` / `storyId === 'elo-50'` spread through shared code:
-- `server/main.ts`: `walk`, `pos`, `interact`, `back`, `start`, `again`;
+- `server/main.ts`: `walk`, `pos`, `interact`, `back`;
 - the campaign reducer, `shared/campaign/index.js`: who may `enter` and `back`, `portal`, `collect`, and `ack` setting `apparition.seen`;
 - `public/play/main.js` (about ten places), `public/screen/main.js`, and the hints in `public/screen/doors.js`.
 
@@ -89,11 +82,11 @@ The clients write content ids into code: node ids (`'hub.false-start'`, `'young-
 
 **Recommendation:** read them from the content (`content.start`, `content.chooser`, item ids from the node that offers them). Do it together with [Story rules in shared code](#story-rules-in-shared-code) if that goes ahead.
 
-### Other guests in other roles
+### Guests controlling NPCs
 
-The party is the four players Pierre, Élodie, Sol and Anna. Other guests may later join in other roles, e.g. controlling NPCs or taking part in games, but the details are undecided, so nothing prepares for it yet.
+Guests beyond the opening's four join with a character from the roster as wisps, and play a minigame whose tableau names them (`eligible`, see `docs/minigames.md`). Other roles, e.g. controlling NPCs, are undecided, so nothing prepares for them yet.
 
-**Recommendation:** decide the roles first, then design how such a guest joins, which phone screens they get, and what the server lets them do. The roster stays at the four players either way.
+**Recommendation:** decide the roles first, then design how such a guest takes one, which phone screens they get, and what the server lets them do.
 
 ### Room before the content arrives
 
@@ -129,9 +122,9 @@ The block game's TV files also have generic names that hide whose they are: `pub
 
 ### Debug view of a running screen
 
-The TV's debug accessors (`window.bloko`) show the round, the room's draw order and its avatars, but nothing about what a running minigame screen draws. When the contributor guide's stand-in minigame drew its avatars off-screen, finding out took an extra run.
+The TV's debug accessors (`window.bloko`) show the running minigame's view, the room's draw order and its avatars, but nothing about what a minigame's screen draws.
 
-**Recommendation:** let a running screen expose what it draws (e.g. the avatars it passed to the layer and its canvas size) through the existing accessors.
+**Recommendation:** let a running screen expose what it draws (e.g. its canvas size) through the existing accessors.
 
 ### Screen comparison flags random content
 

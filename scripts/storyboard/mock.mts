@@ -49,7 +49,6 @@ export function mockDoc(origin: string, kind: 'tv' | 'phone', html: string): str
   html, body { margin: 0; height: 100%; overflow: hidden; }
   body { font-family: system-ui, sans-serif; }
   .sprite { image-rendering: pixelated; vertical-align: middle; }
-  img.under { position: absolute; inset: 0; width: 100%; height: 100%; }
   .who { display: inline-flex; align-items: center; gap: 8px; }
   .who i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
   .wisp { position: absolute; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none;
@@ -101,7 +100,7 @@ export function mockDoc(origin: string, kind: 'tv' | 'phone', html: string): str
   .tv .tick { color: var(--ok); }
 </style></head><body>${html}
 <script type="module">
-  import { avatarCanvas } from '${origin}/play/avatar.js';
+  import { avatarCanvas } from '${origin}/commun/avatar.js';
   for (const c of document.querySelectorAll('canvas[data-avatar]')) c.replaceWith(Object.assign(avatarCanvas(c.dataset.avatar, Number(c.dataset.scale)), { className: 'sprite' }));
   await document.fonts.ready;
   window.mockReady = true;

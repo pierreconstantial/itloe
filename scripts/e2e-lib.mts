@@ -87,20 +87,22 @@ export const TEARDOWN_PROBE = `(() => {
     ...listeners.filter((l) => l.files.some((f) => names.includes(f))).map((l) => 'listener ' + l.type + ' from ' + l.files.join(' < ')),
   ];
 })();`;
-/** A view's block game (its round's view while a block game runs), else null. */
-export const blocksOf = (v: any): any => (v?.round?.kind === 'blocks' ? v.round.view : null);
-/** A view's quiz (its round's view while a quiz runs: the public projection), else null. */
-export const quizOf = (v: any): any => (v?.round?.kind === 'quiz' ? v.round.view : null);
-/** Who is in the room at a tableau, between rounds (the party members who haven't left), in a round's
- *  { order, players } shape; null during a round or away from a minigame's tableau. */
+/** A view's block round (running, or finished on its podium), else null. */
+export const blocksOf = (v: any): any => (v?.minigame?.kind === 'blocks' ? v.minigame.view.round ?? null : null);
+/** A view's quiz round (running, or finished on its podium: the public projection), else null. */
+export const quizOf = (v: any): any => (v?.minigame?.kind === 'quiz' ? v.minigame.view.round ?? null : null);
+/** A view's minigame in its lobby (the plain lobby's view: stage, settings, players, ready, round), else null. */
+export const lobbyOf = (v: any): any => (v?.minigame?.status === 'lobby' ? v.minigame.view : null);
+/** Who is in the room at a tableau while no minigame runs (the party members who haven't left), in a round's
+ *  { order, players } shape; null while a minigame runs or away from a minigame's tableau. */
 export const roomOf = (v: any): any => {
-  if (!v?.campaign?.at.kind || v.round) return null;
+  if (!v?.campaign?.at.kind || v.minigame) return null;
   const party = v.campaign.party;
   const order = party.order.filter((id: string) => !party.players[id].left);
   return { order, players: Object.fromEntries(order.map((id: string) => [id, party.players[id]])) };
 };
-/** A view's tableau settings (the campaign keeps them), else null. */
-export const settingsOf = (v: any): any => v?.campaign?.at.settings ?? null;
+/** A view's minigame settings (the running minigame keeps them), else null. */
+export const settingsOf = (v: any): any => v?.minigame?.view.settings ?? null;
 /** A view's game master: whoever holds Pierre, the game master of every content (shared/campaign gameMasterId). */
 export const gmOf = (v: any): string | null => (v?.campaign ? gameMasterId(v.campaign.party, { gameMaster: 'pierre' } as any) : null);
 
@@ -111,11 +113,14 @@ export class Client {
   ticks: any[] = [];
   closed = false;
   label: string;
+  /** The player id of the last welcome, if any. */
+  id: string | null = null;
   constructor(label: string) { this.label = label; }
   open(): Promise<void> {
     this.ws = new WebSocket(URL_WS);
     this.ws.onmessage = (e) => {
       const m = JSON.parse(String(e.data));
+      if (m.t === 'welcome') this.id = m.playerId;
       (m.t === 'tick' ? this.ticks : this.msgs).push(m);
     };
     this.ws.onclose = () => { this.closed = true; };
@@ -124,8 +129,14 @@ export class Client {
   send(m: unknown): void { this.ws.send(JSON.stringify(m)); }
   mark(): number { return this.msgs.length; }
   since(i: number): any[] { return this.msgs.slice(i); }
-  /** The block game in the last view, or null. */
-  lastView(): any { return blocksOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
+  /** The last view message, or undefined. */
+  last(): any { return [...this.msgs].reverse().find((m) => m.t === 'view'); }
+  /** The block round in the last view, or null. */
+  lastView(): any { return blocksOf(this.last()); }
+  /** The running minigame in the last view (kind, status, view, shows, required), or null. */
+  lastMinigame(): any { return this.last()?.minigame ?? null; }
+  /** The minigame's lobby in the last view, or null. */
+  lastLobby(): any { return lobbyOf(this.last()); }
   /** Who is in the room in the last view (between rounds), or null. */
   lastRoom(): any { return roomOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
   /** The tableau's settings in the last view, or null. */
@@ -141,6 +152,36 @@ export class Client {
     }
     throw new Error(`${this.label}: timeout waiting (from ${from}); got ${JSON.stringify(this.since(from).map((m) => m.t))}`);
   }
+}
+
+/** The game master `gm` starts the tableau's minigame (unless one runs), each of `ready` who isn't ready yet
+ *  taps "I'm ready", and `gm` starts a round; resolves with gm's first view of the running round. */
+export async function startRound(gm: Client, ready: Client[]): Promise<any> {
+  let i = gm.mark();
+  if (!gm.lastMinigame()) {
+    gm.send({ t: 'startMinigame' });
+    await gm.waitFor((m) => m.t === 'view' && m.minigame?.status === 'lobby', i);
+  }
+  const already: string[] = gm.lastLobby()?.ready ?? [];
+  const tapping = ready.filter((c) => !c.id || !already.includes(c.id));
+  for (const c of tapping) c.send({ t: 'ready', on: true });
+  await settled(tapping, [gm]);
+  i = gm.mark();
+  gm.send({ t: 'start' });
+  return gm.waitFor((m) => (m.t === 'view' && m.minigame?.status === 'running') || m.t === 'err', i)
+    .then((m) => { if (m.t === 'err') throw new Error(`${gm.label}: start refused (${m.code})`); return m; });
+}
+/** The game master `gm`, on the podium, takes everyone back to the lobby; resolves with gm's view of it. */
+export async function backToLobby(gm: Client): Promise<any> {
+  const i = gm.mark();
+  gm.send({ t: 'lobby' });
+  return gm.waitFor((m) => m.t === 'view' && m.minigame?.status === 'lobby', i);
+}
+/** The game master `gm`, in the lobby, ends the minigame; resolves with gm's view of the room. */
+export async function endMinigame(gm: Client): Promise<any> {
+  const i = gm.mark();
+  gm.send({ t: 'endMinigame' });
+  return gm.waitFor((m) => m.t === 'view' && m.minigame === null, i);
 }
 
 /** A round trip on one socket: an `enter` of no node changes nothing and is answered with an err, after

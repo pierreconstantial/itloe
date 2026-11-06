@@ -1,4 +1,5 @@
-// Lobby: join QR + room code + URL, and the guest count filling live.
+// The room at a tableau's band (the file keeps its old name): join QR + room code + URL, the minigame waiting
+// here, and the guest count filling live.
 
 import { h, colorDot } from './dom.js';
 import { ROSTER_SIZE } from '../../shared/characters.js';
@@ -95,26 +96,24 @@ function renderJoin(join) {
 }
 
 /**
- * Party-room lobby: a top band (join box + title, next-game settings, status); the guests
- * themselves are the avatars walking below it (party-room.js), so there are no slot cards.
- * Every minigame's tableau shows the same band with its own title and settings line.
+ * The room at a tableau: a top band (join box + the minigame's title, status); the guests themselves are the
+ * avatars walking below it (party-room.js), so there are no slot cards. Every minigame's tableau shows the
+ * same band with its own title.
  * @param {Pick<State, 'order'> & { players: Record<string, { name: string, color: number }> }} s
  * @param {unknown} _prev
  * @param {JoinInfo} join
- * @param {{ title: string, settings: string }} band the minigame's title and the tableau's settings, summarized
- * @param {{ gameMasterId: string | null, required?: number, status?: string }} options gameMasterId: who starts games;
- *   required: the guests a round needs; status: replaces the guest count when no round starts here
+ * @param {{ title: string, name: string }} band the minigame's title, and its name in a sentence
+ * @param {{ gameMasterId: string | null, status?: string }} options gameMasterId: who starts the minigame;
+ *   status: replaces the guest count
  */
 export function renderLobby(s, _prev, join, band, options) {
   const n = s.order.length;
-  const max = options.required ?? MAX_PLAYERS;
   const gm = options.gameMasterId ? s.players[options.gameMasterId] : undefined;
   const status = options.status ?? (n === 0
     ? 'Waiting for the first guest…'
-    : `${n}/${max} guest${n === 1 ? '' : 's'}${gm ? ` · ${gm.name} starts the game from their phone` : ''}`);
+    : `${n}/${MAX_PLAYERS} guest${n === 1 ? '' : 's'}${gm ? ` · ${gm.name} starts the ${band.name} from their phone` : ''}`);
   const side = h('div', 'lobby-side', [
     h('h1', 'title', [band.title]),
-    h('p', 'settings-line', [band.settings]),
     h('p', 'lobby-count', [status]),
   ]);
   if (gm && !options.status) side.querySelector('.lobby-count')?.prepend(colorDot(gm.color), ' ');

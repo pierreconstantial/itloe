@@ -49,16 +49,12 @@
       <p id="waiting-hint" class="dim">Watch it on the big screen!</p>
     </section>
 
-    <section id="view-lobby" hidden>
+    <section id="view-tableau" hidden>
       <div class="lobby-top">
-        <div id="lobby-me"></div>
-        <ul id="lobby-players" class="player-list"></ul>
-        <p id="lobby-settings" class="settings-summary"></p>
-        <div class="lobby-actions">
-          <button id="btn-settings-lobby" type="button" data-open="settings" hidden>⚙ Settings</button>
-          <button id="btn-start" class="primary" hidden>Start game</button>
-        </div>
-        <p id="lobby-hint" class="dim"></p>
+        <div id="tableau-me"></div>
+        <ul id="tableau-players" class="player-list"></ul>
+        <button id="btn-start-minigame" class="primary" hidden></button>
+        <p id="tableau-hint" class="dim"></p>
       </div>
       <div id="object-actions" class="object-actions">
         <button id="btn-interact" type="button" disabled>Walk to an object</button>
@@ -73,7 +69,7 @@
     <section id="view-wait-lobby" hidden>
       <div class="lobby-top">
         <h2>Wisp Mode</h2>
-        <p>Move your light on the TV. Tap Shine in the reactions to glow brighter.</p>
+        <p id="wait-lobby-text">Move your light on the TV. Tap Shine in the reactions to glow brighter.</p>
       </div>
       <!-- the walking pad docks here for wisps in the current scene -->
     </section>
@@ -89,25 +85,11 @@
         <button type="button" class="bag-open" data-open="bag" hidden>🎒 Bag</button>
         <p id="place-wait" class="dim"></p>
       </div>
-      <!-- #stick-pad moves here from the lobby while the party is on the hub or in a world -->
+      <!-- #stick-pad moves here from the room at a tableau while the party is on the hub or in a world -->
     </section>
 
-    <!-- the running round: a minigame's screens, mounted here by the frame (minigames.js) -->
-    <div id="view-round" hidden></div>
-
-    <section id="view-podium" class="menu" hidden>
-      <p id="podium-kicker" class="kicker" hidden></p>
-      <h2 id="podium-title">Podium</h2>
-      <div id="podium-lines" hidden></div>
-      <ol id="podium-list" class="player-list"></ol>
-      <p id="podium-settings" class="settings-summary"></p>
-      <button id="btn-settings-podium" type="button" data-open="settings" hidden>⚙ Settings</button>
-      <div id="podium-actions" class="lobby-actions" hidden>
-        <button id="btn-again" type="button" class="primary">Play again</button>
-        <button id="btn-new-game" type="button">Back to the room</button>
-      </div>
-      <p id="podium-hint" class="dim">Waiting for the game master: rematch or back to the room…</p>
-    </section>
+    <!-- the running minigame: its screens, mounted here by the frame (minigames.js) from its start to its end -->
+    <div id="view-minigame" hidden></div>
 
   </main>
 

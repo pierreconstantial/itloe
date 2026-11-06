@@ -110,6 +110,10 @@ export function validateContent(content) {
     const rules = minigame(n.activity?.kind);
     const settings = /** @type {{ settings?: unknown } | undefined} */ (n.activity)?.settings;
     if (rules && settings !== undefined) for (const e of rules.validateSettings(settings)) errors.push(`${at}: ${e}`);
+    const players = /** @type {{ eligible?: unknown, allReady?: unknown } | undefined} */ (n.activity);
+    if (players?.eligible !== undefined && !(Array.isArray(players.eligible) && players.eligible.every(isCharacterId))) errors.push(`${at}: eligible must list characters`);
+    if (players?.allReady !== undefined && players.allReady !== true) errors.push(`${at}: allReady can only be true`);
+    if (!rules && (players?.eligible !== undefined || players?.allReady !== undefined)) errors.push(`${at}: only a minigame has eligible players`);
     if (typeof n.title !== 'string' || !n.title) errors.push(`${at}: missing title`);
     if (!isCondition(n.unlock)) errors.push(`${at}: invalid unlock condition`);
     if (n.complete !== undefined && !isCondition(n.complete)) errors.push(`${at}: invalid complete condition`);

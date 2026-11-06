@@ -15,3 +15,10 @@ export function mulberry32(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
+/**
+ * Deterministic seed step (an LCG): the campaign advances its seed for every minigame started, a lobby
+ * for every round.
+ * @param {number} s @returns {number}
+ */
+export const nextSeed = (s) => (Math.imul(s >>> 0, 1103515245) + 12345) >>> 0;

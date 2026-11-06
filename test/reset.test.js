@@ -58,8 +58,8 @@ test('/?reset=1 asks first, then saves a fresh evening and exits for the restart
   const phone = await connect('player', room);
   phone.send({ t: 'join', character: 'pierre' });
   await until(phone, (m) => m.t === 'welcome');
-  phone.send({ t: 'start' });
-  await until(phone, (m) => m.t === 'view' && m.round?.status === 'running');
+  phone.send({ t: 'startMinigame' });
+  await until(phone, (m) => m.t === 'view' && m.minigame?.status === 'lobby');
 
   const page = await fetch(`${base}/?reset=1`);
   assert.equal(page.status, 200);
@@ -77,7 +77,7 @@ test('/?reset=1 asks first, then saves a fresh evening and exits for the restart
   assert.notEqual(restarted.room, room);
   const screen = await connect('screen');
   const view = await until(screen, (m) => m.t === 'view');
-  assert.equal(view.round, null);
+  assert.equal(view.minigame, null);
   assert.deepEqual(view.campaign.party.order, []);
   phone.ws.close();
   screen.ws.close();

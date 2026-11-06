@@ -4,7 +4,7 @@
 // drawing a planned screen, replace its mockup with the steps that reach it and a capture.
 import type { drive } from '../drive.mts';
 import { sleep } from '../e2e-lib.mts';
-import { avatar, colorOf, nameOf, phone, player, tv, wisp, wispPhone } from './mock.mts';
+import { avatar, colorOf, phone, player, tv, wisp, wispPhone } from './mock.mts';
 
 export type Shot = { who: string, img: string, planned: boolean };
 type Drive = Awaited<ReturnType<typeof drive>>;
@@ -17,7 +17,6 @@ export type Board = {
   tv: () => Promise<Shot>,                        // the TV, captured
   real: (who: string) => Promise<Shot>,           // a phone, captured
   mockTv: (html: string) => Promise<Shot>,        // a planned TV screen
-  overTv: (html: string) => Promise<Shot>,        // the TV captured now, with planned things drawn over it
   mockPhone: (who: string, html: string) => Promise<Shot>,   // a planned phone screen
   frame: (caption: string, shots: (() => Promise<Shot>)[]) => Promise<void>,
 };
@@ -57,7 +56,7 @@ async function playToOut(b: Board, who: string) {
     const id = ${JSON.stringify(id)};
     const ws = new WebSocket(location.origin.replace(/^http/, 'ws') + '/ws');
     let view = null;
-    ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.t === 'view') view = m.round?.view ?? null; };
+    ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.t === 'view') view = m.minigame?.view.round ?? null; };
     await new Promise((r) => { ws.onopen = r; });
     ws.send(JSON.stringify({ t: 'hello', role: 'player', playerId: id }));
     const tick = () => new Promise((r) => setTimeout(r, 40));
@@ -78,17 +77,34 @@ async function playToOut(b: Board, who: string) {
     ws.close();
     return true;
   })()`);
-  await b.d.tv.waitFor(`window.bloko.round()?.view.players[${JSON.stringify(id)}]?.done === true`, 20_000);
+  await b.d.tv.waitFor(`window.bloko.minigame()?.view.round?.players[${JSON.stringify(id)}]?.done === true`, 20_000);
   await p.ev(`localStorage.setItem('bloko-id', ${JSON.stringify(id)})`);
   await p.goto(b.d.url + '/play/');
   await p.waitFor(`!document.getElementById('view-pick') || !!document.getElementById('view-pick').closest('[hidden]')`);
 }
 
-/** The game master ends the running round from ☰ (two taps, as on the phone). */
+/** The game master ends the running round from ☰ (two taps, as on the phone), then closes ☰ (it stays open
+ *  over the podium otherwise). */
 async function endGame(p: Phone) {
   await p.tap('#btn-menu');
   await p.tap('End game now');
   await p.tap('Tap again to end the game');
+  await p.tap('#sheet-menu [data-close]');
+}
+
+/** The TV's minigame status is `status` ('lobby' | 'running' | 'podium'). */
+const minigameIs = (b: Board, status: string, ms?: number) => b.d.tv.waitFor(`window.bloko.minigame()?.status === ${JSON.stringify(status)}`, ms);
+/** The TV's lobby has `n` players ready. */
+const readyAre = (b: Board, n: number) => b.d.tv.waitFor(`window.bloko.minigame()?.view.ready.length === ${n}`);
+/** The TV shows `n` party members who haven't left. */
+const guests = (b: Board, n: number) => b.d.tv.waitFor(`(() => { const p = window.bloko.campaign()?.party; return p && p.order.filter((id) => !p.players[id].left).length === ${n}; })()`);
+
+/** The game master ends the minigame from its lobby (two taps, as on the phone); the TV is back in the room. */
+async function endMinigame(b: Board, p: Phone) {
+  await p.tap('#btn-end-minigame');
+  await p.waitText('Tap again to end');
+  await p.tap('#btn-end-minigame');
+  await b.d.tv.waitFor('window.bloko.minigame() === null');
 }
 
 /** Answers the quiz's current question on a phone: a choice when it shows choices, else a typed answer. */
@@ -149,71 +165,62 @@ const said = (who: string, kind: 'clue' | 'guess', word: string, mark = '') =>
 const opening: Sequence = {
   id: 'opening',
   title: 'The opening',
-  intro: 'The birthday story as it starts today: a plain block game, then the portal. After the refactor, Pierre is the game master (there is no host any more), and the block game has its own lobby.',
+  intro: 'The birthday story as it starts: the block game, which Pierre, the game master, starts and ends, with its own lobby; then the portal.',
   content: '',
   phones: ['pierre', 'elodie', 'sol', 'anna', 'nico'],
   async run(b) {
     const [P, E, S, A, N] = ['pierre', 'elodie', 'sol', 'anna', 'nico'].map((w) => b.phone(w));
     await P.join('pierre'); await E.join('elodie');
-    await b.d.tv.waitText('2/4 guests');
+    await guests(b, 2);
+    await sleep(500);
     await b.frame('Everyone scans the QR code on the TV and picks their character. They walk around the party room, which belongs to the main game.',
       [b.tv, () => b.real('pierre'), () => b.real('sol')]);
 
     await S.join('sol'); await A.join('anna');
-    await b.d.tv.waitText('4/4 guests');
     await N.join('nico');
+    await guests(b, 5);
     await b.d.tv.waitFor(`window.bloko.avatars().some((a) => a.character === 'nico')`);
     await walk(b, 'nico', { x: 11, y: 6.2 });
     await sleep(500);
-    const roomPlayers = [{ who: 'pierre', in: true }, { who: 'elodie', in: true }, { who: 'sol', in: true }, { who: 'anna', in: false }];
     await b.frame('All four are in. Nico has joined too, from Sweden: he isn’t one of the opening’s four, so he’s a wisp, the small light by the table. The block game is waiting in this room; only Pierre, the game master, can start it.',
-      [b.tv,
-        () => b.mockPhone('pierre', gmRoomPhone('the block game', 'The block game is waiting here.')),
-        () => b.real('elodie'), () => b.real('nico')]);
+      [b.tv, () => b.real('pierre'), () => b.real('elodie'), () => b.real('nico')]);
 
-    await b.frame('The block game opens its own lobby. The main game hands it the players who may play (here all four); each taps “I’m ready”. Pierre picks the board and the mode, and starts once enough players are ready: the opening’s game needs all four. Nico isn’t one of them and floats over the lobby as a wisp.',
-      [() => b.mockTv(tv('Block game', `
-          <div class="col">${tvPlayers(roomPlayers)}</div>
-          <div class="col" style="flex:0 0 520px"><div class="panel"><h2>Settings</h2><p class="big">8×8 board · marathon</p>
-            <p class="dim">Pierre starts when all four are ready (3/4)</p></div></div>`, wisp('nico', 66, 70))),
-        () => b.mockPhone('pierre', phone('pierre', `<h2>Block game</h2>${phonePlayers(roomPlayers)}
-          ${seg('Board', ['8×8', '9×9', '10×10'], '8×8')}${seg('Mode', ['marathon', 'timed'], 'marathon')}
-          <button class="primary" disabled style="opacity:.5">▶ Start (3/4 ready)</button><button class="danger">End the block game</button>`)),
-        () => b.mockPhone('sol', phone('sol', `<h2>Block game</h2><button class="on">✓ I’m ready</button>
-          <p class="hint">8×8 board · marathon</p>${phonePlayers(roomPlayers)}<p class="hint">Pierre starts the game.</p>`)),
-        () => b.mockPhone('anna', phone('anna', `<h2>Block game</h2><button class="primary">I’m ready</button>
-          <p class="hint">8×8 board · marathon</p>${phonePlayers(roomPlayers)}`))]);
+    await P.tap('#btn-start-minigame');
+    await minigameIs(b, 'lobby');
+    for (const p of [P, E, S]) await p.tap('#btn-ready');
+    await readyAre(b, 3);
+    await sleep(800);
+    await b.frame('Pierre starts the block game, and its lobby opens. The main game hands it the four who may play; each taps “I’m ready”. Pierre sets the board and mode from ⚙, and the opening’s game starts only once all four are ready: Anna hasn’t tapped yet. Nico isn’t one of them and floats over the lobby as a wisp.',
+      [b.tv, () => b.real('pierre'), () => b.real('sol'), () => b.real('anna'), () => b.real('nico')]);
 
-    await P.tap('Start game');
-    await b.d.tv.waitFor('window.bloko.round()?.status === "running"');
+    await A.tap('#btn-ready');
+    await readyAre(b, 4);
+    await P.tap('#btn-start');
+    await minigameIs(b, 'running');
     await sleep(1200);
-    await b.frame('The block game, as today: everyone plays on their phone, every board on the TV. Nico’s wisp floats over the boards.',
+    await b.frame('All four ready, Pierre starts the round: everyone plays on their phone, every board on the TV. Nico’s wisp floats over the boards.',
       [b.tv, () => b.real('elodie'), () => b.real('nico')]);
 
     await playToOut(b, 'sol');
     await sleep(1500);
     await b.frame('Sol has no room left for any piece and is out of this round; the others play on. Sol roams over the TV as a wisp until the round ends.',
-      [() => b.overTv(wisp('sol', 30, 58)),
-        () => b.mockPhone('sol', phone('sol', `<h2>You’re out</h2><p class="hint">Score kept: you’re on the podium when the round ends. Meanwhile, float around the TV.</p>
-          <div class="pad">Touch and drag here to float around the TV</div><button class="ghost">✨ Shine</button>`, { wisp: true }))]);
+      [b.tv, () => b.real('sol')]);
 
     await endGame(P);
-    await b.d.tv.waitFor('window.bloko.round()?.status === "finished"');
+    await minigameIs(b, 'podium');
     await sleep(2500);
-    await b.frame('The podium, as today.', [b.tv, () => b.real('elodie')]);
+    await b.frame('Pierre ends the round: the podium. Only Pierre’s phone has “Back to the lobby”.', [b.tv, () => b.real('pierre'), () => b.real('elodie')]);
 
-    const lobbyAgain = roomPlayers.map((r) => ({ ...r, in: true }));
-    await b.frame('After the podium, everyone is back in the block game’s lobby. Pierre can start another round, or end the block game, which takes everyone back to the main game.',
-      [() => b.mockTv(tv('Block game', `
-          <div class="col">${tvPlayers(lobbyAgain)}</div>
-          <div class="col" style="flex:0 0 520px"><div class="panel"><h2>Last game</h2><p class="big">🥇 ${nameOf('elodie')}</p>
-            <p class="dim">8×8 board · marathon</p></div></div>`)),
-        () => b.mockPhone('pierre', phone('pierre', `<h2>Block game</h2>${phonePlayers(lobbyAgain)}
-          ${seg('Board', ['8×8', '9×9', '10×10'], '8×8')}<button class="primary">▶ Play again</button><button class="danger">End the block game</button>`))]);
+    await P.tap('#btn-back-to-lobby');
+    await minigameIs(b, 'lobby');
+    await sleep(1000);
+    await b.frame('Back in the block game’s lobby, everyone who played is ready again and the last game’s winner is shown. Pierre can play again at once, or end the block game.',
+      [b.tv, () => b.real('pierre'), () => b.real('anna')]);
 
-    await b.d.tv.waitFor('window.bloko.round() === null', 20_000);
+    await endMinigame(b, P);
+    await b.d.tv.waitFor('window.bloko.campaign()?.facts.flags.includes("portal.ready")');
     await sleep(1500);
-    await b.frame('Back in the main game’s party room, a portal has appeared. Only Élodie can walk into it.',
+    await b.frame('Pierre ends the block game (two taps): everyone is back in the main game’s party room, where a portal has appeared. Only Élodie can walk into it.',
       [b.tv, () => b.real('elodie'), () => b.real('anna')]);
 
     await walk(b, 'elodie', { x: 8, y: 5.4 }, hasFlag(b, 'portal.entered'));
@@ -242,60 +249,69 @@ const opening: Sequence = {
 const quiz: Sequence = {
   id: 'quiz',
   title: 'A quiz',
-  intro: 'The quiz has no place in the story yet: here it runs from its development start, in a placeholder room. Anna isn’t playing this one and watches as a wisp.',
+  intro: 'The quiz has no place in the story yet: here it runs from its development start, in a placeholder room. Anna joins but doesn’t get ready: she stays “not ready” in the lobby and watches the questions as a wisp.',
   content: 'minigame:quiz',
-  phones: ['pierre', 'elodie', 'sol'],
+  phones: ['pierre', 'elodie', 'sol', 'anna'],
   async run(b) {
-    const [P, E, S] = ['pierre', 'elodie', 'sol'].map((w) => b.phone(w));
-    await P.join('pierre'); await E.join('elodie'); await S.join('sol');
-    await b.d.tv.waitText('3/');
+    const [P, E, S, A] = ['pierre', 'elodie', 'sol', 'anna'].map((w) => b.phone(w));
+    await P.join('pierre'); await E.join('elodie'); await S.join('sol'); await A.join('anna');
+    await guests(b, 4);
     await sleep(500);
-    await b.frame('The party reaches the quiz. Pierre starts it from the room.',
-      [b.tv, () => b.mockPhone('pierre', gmRoomPhone('the quiz', 'A quiz is waiting here.')), () => b.real('elodie')]);
+    await b.frame('The party reaches the quiz. Pierre starts it from the room; everyone else waits for him.',
+      [b.tv, () => b.real('pierre'), () => b.real('elodie')]);
 
-    const rows = [{ who: 'pierre', in: true }, { who: 'elodie', in: true }, { who: 'sol', in: true }];
-    await b.frame('The quiz’s lobby. Pierre picks how many questions, how long for each, and the kind of answers. Anna isn’t among the quiz’s players today and floats around the screen as a wisp.',
-      [() => b.mockTv(tv('Quiz', `
-          <div class="col">${tvPlayers(rows)}</div>
-          <div class="col" style="flex:0 0 560px"><div class="panel"><h2>Settings</h2><p class="big">3 questions · 20 s each</p>
-            <p class="dim">mixed answers: choices or typed</p><p class="dim">Pierre starts when everyone’s ready</p></div></div>`,
-          wisp('anna', 60, 62))),
-        () => b.mockPhone('pierre', phone('pierre', `<h2>Quiz</h2>${phonePlayers(rows)}
-          ${seg('Questions', ['3', '5', '10'], '3')}${seg('Time', ['10 s', '20 s', '30 s'], '20 s')}${seg('Answers', ['choices', 'typed', 'mixed'], 'mixed')}
-          <button class="primary">▶ Start</button><button class="danger">End the quiz</button>`)),
-        () => b.mockPhone('elodie', phone('elodie', `<h2>Quiz</h2><button class="on">✓ I’m ready</button><p class="hint">3 questions · 20 s each · mixed answers</p>${phonePlayers(rows)}`)),
-        () => b.mockPhone('anna', wispPhone('anna', 'The quiz is about to start. You’re watching as a wisp.'))]);
+    await P.tap('#btn-start-minigame');
+    await minigameIs(b, 'lobby');
+    for (const p of [P, E, S]) await p.tap('#btn-ready');
+    await readyAre(b, 3);
+    await sleep(800);
+    await b.frame('The quiz’s lobby. Pierre sets how many questions, how long for each and the kind of answers from ⚙. Élodie, Sol and Pierre are ready; Anna joined but stays “not ready”: she won’t play this round.',
+      [b.tv, () => b.real('pierre'), () => b.real('elodie'), () => b.real('anna')]);
 
-    await P.tap('Start game');
-    await b.d.tv.waitFor('window.bloko.round()?.status === "running"');
+    await P.tap('#btn-start');
+    await minigameIs(b, 'running');
     await sleep(1500);
-    await b.frame('A question, as today; on the TV, Anna’s wisp floats over it.',
-      [() => b.overTv(wisp('anna', 70, 22)), () => b.real('elodie'), () => b.real('sol'), () => b.mockPhone('anna', wispPhone('anna', 'The quiz is on. You’re watching as a wisp.'))]);
+    await b.frame('A question. Anna isn’t in this round: her wisp floats over the question on the TV, and her phone is the wisp’s pad with Shine.',
+      [b.tv, () => b.real('elodie'), () => b.real('sol'), () => b.real('anna')]);
 
     await answer(E, 1, 'Paris'); await answer(S, 2, 'Lyon');
     await answer(P, 3, 'Marseille');
-    await b.d.tv.waitFor('window.bloko.round()?.view.phase === "reveal"', 30_000);
+    await b.d.tv.waitFor('window.bloko.minigame()?.view.round?.phase === "reveal"', 30_000);
     await sleep(1500);
-    await b.frame('The reveal, as today. Pierre can correct any verdict, then moves on.', [b.tv, () => b.real('pierre'), () => b.real('elodie')]);
+    await b.frame('The reveal. Pierre can correct any verdict, then moves on.', [b.tv, () => b.real('pierre'), () => b.real('elodie')]);
 
     for (let q = 2; q <= 3; q++) {
       await P.tap('#quiz-next');
-      await b.d.tv.waitFor('window.bloko.round()?.view.phase === "question"');
+      await b.d.tv.waitFor('window.bloko.minigame()?.view.round?.phase === "question"');
       await sleep(500);
       await answer(E, 1, 'Paris'); await answer(S, 2, 'Lyon'); await answer(P, 3, 'Marseille');
-      await b.d.tv.waitFor('window.bloko.round()?.view.phase === "reveal"', 30_000);
+      await b.d.tv.waitFor('window.bloko.minigame()?.view.round?.phase === "reveal"', 30_000);
     }
     await P.tap('#quiz-next');
-    await b.d.tv.waitFor('window.bloko.round()?.status === "finished"');
+    await minigameIs(b, 'podium');
     await sleep(3000);
-    await b.frame('The podium, as today.', [b.tv, () => b.real('sol')]);
+    await b.frame('The podium. Pierre takes everyone back to the lobby.', [b.tv, () => b.real('pierre'), () => b.real('sol')]);
 
-    await b.frame('Back in the quiz’s lobby: another quiz, or Pierre ends it and everyone is back in the main game. (Later, every game’s results feed an end-of-evening summary.)',
-      [() => b.mockTv(tv('Quiz', `
-          <div class="col">${tvPlayers(rows)}</div>
-          <div class="col" style="flex:0 0 560px"><div class="panel"><h2>Last quiz</h2><p class="big">🥇 the winner</p><p class="dim">3 questions · 20 s each</p></div></div>`,
-          wisp('anna', 52, 70))),
-        () => b.mockPhone('pierre', phone('pierre', `<h2>Quiz</h2>${phonePlayers(rows)}<button class="primary">▶ Play again</button><button class="danger">End the quiz</button>`))]);
+    await P.tap('#btn-back-to-lobby');
+    await minigameIs(b, 'lobby');
+    await sleep(1000);
+    await b.frame('Back in the quiz’s lobby: the three who played are ready again, Anna still isn’t. Pierre can play again or end the quiz.',
+      [b.tv, () => b.real('pierre'), () => b.real('anna')]);
+
+    await P.tap('#btn-start');
+    await minigameIs(b, 'running');
+    await sleep(1500);
+    await b.frame('Play again: a new round at once, with the ready players and questions not asked yet this evening.',
+      [b.tv, () => b.real('pierre')]);
+
+    await endGame(P);
+    await minigameIs(b, 'podium');
+    await P.tap('#btn-back-to-lobby');
+    await minigameIs(b, 'lobby');
+    await endMinigame(b, P);
+    await sleep(1500);
+    await b.frame('Pierre ends the round, goes back to the lobby and ends the quiz: everyone is back in the main game’s room, and the quiz’s results count from now. (Later, every game’s results feed an end-of-evening summary.)',
+      [b.tv, () => b.real('pierre'), () => b.real('elodie')]);
   },
 };
 
@@ -399,9 +415,13 @@ const moments: Sequence = {
   async run(b) {
     const [P, E, S] = ['pierre', 'elodie', 'sol'].map((w) => b.phone(w));
     await P.join('pierre'); await E.join('elodie'); await S.join('sol');
-    await b.d.tv.waitText('3/');
-    await P.tap('Start game');
-    await b.d.tv.waitFor('window.bloko.round()?.status === "running"');
+    await guests(b, 3);
+    await P.tap('#btn-start-minigame');
+    await minigameIs(b, 'lobby');
+    for (const p of [P, E, S]) await p.tap('#btn-ready');
+    await readyAre(b, 3);
+    await P.tap('#btn-start');
+    await minigameIs(b, 'running');
     await sleep(1000);
 
     await S.goto('about:blank'); // the phone's page goes away: its socket closes, as when a phone locks or loses Wi-Fi

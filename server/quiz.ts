@@ -6,7 +6,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { candidatesFor, judgeAnswer, projectQuiz, validateBank, type Question } from '../shared/quiz/bank.js';
 import { MAX_TEXT, type Candidate, type QuizAction, type QuizState } from '../shared/quiz/index.js';
-import type { ErrCode, MinigameServer } from './minigames.ts';
+import type { ErrCode, RoundServer } from './minigames.ts';
 
 export type { Question };
 
@@ -75,7 +75,7 @@ export function withTimeout(judge: Judge, ms: number): Judge {
 const JUDGE_TIMEOUT_MS = 4000;
 
 /** The quiz's server code. Loads the bank at boot: a broken bank refuses to boot. */
-export function makeQuizServer(): MinigameServer<QuizState, QuizAction, Candidate[]> {
+export function makeQuizServer(): RoundServer<QuizState, QuizAction, Candidate[]> {
   const bank = loadBank();
   const judge = withTimeout(nullJudge, JUDGE_TIMEOUT_MS);
   console.log(`[itloe] quiz bank: ${bank.questions.length} questions (${bank.files.join(', ') || 'no files'}), judge: none (uncertain typed answers → wrong, the game master overrides)`);
@@ -117,8 +117,9 @@ export function makeQuizServer(): MinigameServer<QuizState, QuizAction, Candidat
       }
     },
 
-    // candidates: the bank filtered by the quiz settings, minus every question asked this evening
-    inputs: (settings, facts) => candidatesFor(bank.questions, settings, facts.asked),
+    // candidates: the bank filtered by the quiz settings, minus every question asked this evening (the
+    // running quiz's finished rounds included)
+    inputs: (settings, asked) => candidatesFor(bank.questions, settings, asked),
 
     // the public quiz: never an answer before the reveal (shared/quiz/bank.js projectQuiz)
     view: (s) => projectQuiz(s, (qid) => bank.byId.get(qid), bank.credits),

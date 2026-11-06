@@ -5,12 +5,12 @@
 
 import { loadBests, saveBests, type Game } from './store.ts';
 import type { ServerAction, State } from './rules.ts';
-import type { MinigameServer } from './minigames.ts';
+import type { RoundServer } from './minigames.ts';
 
 const keyOf = (s: State): string => `${s.rules.size}:${s.rules.mode}`;
 const isSolo = (s: State): boolean => s.order.length === 1;
 
-export function makeBlockServer(game: Game): MinigameServer<State, ServerAction> {
+export function makeBlockServer(game: Game): RoundServer<State, ServerAction> {
   const bests = loadBests();
   const recordOf = (s: State): number => bests[keyOf(s)]?.score ?? 0;
 

@@ -20,37 +20,39 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness), `/admin/` (adm
                                                             // with the EXISTING playerId (+ own pos), same board/score/hand (Pierre
                                                             // stays game master). Held by an ONLINE player → err "taken". A left player's character
                                                             // is free (never reclaimable). Needs the room code like any join. Refusal codes
-                                                            // unchanged: game under way or roster exhausted → "full", else "taken".
-{ "t": "start" }                                            // the round messages: see Campaign, Routing
-{ "t": "again" }
+                                                            // unchanged: a minigame running or roster exhausted → "full", else "taken".
+{ "t": "startMinigame" }                                    // the main game's minigame messages: see Campaign, Routing
+{ "t": "endMinigame" }
+{ "t": "ready", "on": true }                                // the plain lobby's messages: see Minigames and their lobbies
+{ "t": "config", "patch": { "mode": "timed" } }
+{ "t": "start" }
+{ "t": "lobby" }
 { "t": "place", "piece": 0, "x": 3, "y": 5 }                // piece = index 0..2 in own hand; (x,y) = piece origin
-{ "t": "config", "patch": { "mode": "timed" } }             // the tableau's settings (Campaign below); invalid keys/values ignored
 { "t": "leave" }                                            // leaves the evening; a block game: playing → marked done, podium → removed
-{ "t": "newGame" }
-{ "t": "endGame" }                                          // game master, phase playing → finished: every not-done player is marked
-                                                            // done (board frozen, score kept), endReason "gm"
-{ "t": "retire", "target": "p-abc123" }                     // game master, phase playing: the target is marked done + retired (board frozen,
+{ "t": "endGame" }                                          // game master, a block round playing → finished: every not-done player is
+                                                            // marked done (board frozen, score kept), endReason "gm"
+{ "t": "retire", "target": "p-abc123" }                     // game master, a block round playing: the target is marked done + retired (board frozen,
                                                             // still ranked, NOT left: keeps seat + character, can reconnect). Everyone
                                                             // done → finished, endReason "stuck". Unknown, done or left target →
                                                             // silent no-op. The game master may retire themself.
 { "t": "pos", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
-{ "t": "jump" }                                             // joined, incarnated player between rounds; visual hop only
+{ "t": "jump" }                                             // joined, incarnated player while no minigame runs; visual hop only
 // M3 avatar movement — EPHEMERAL, never enters the reducer State. Client-authoritative:
 // the phone integrates its joystick locally and sends throttled updates (≤ 15/s, only when
 // something changed). World coordinates: x ∈ [0,16], y ∈ [0,9] (16:9 units, avatar ≈ 1.2 units
 // tall); dir ∈ up|down|left|right. Server clamps to bounds and drops malformed or non-joined
-// senders silently. Between rounds, pos moves the player in the room (doors below). During a round
-// (until its podium closes), pos is kept and relayed only from wisps, in the room's positions and
-// without doors; anyone else's is dropped silently, and the room's positions stay where everyone
-// stood (no longer moving).
+// senders silently. While no minigame runs, pos moves the player in the room (doors below). While one
+// runs (from the game master's start to his end), pos is kept and relayed only from wisps, in the room's
+// positions and without doors; anyone else's is dropped silently, and the room's positions stay where
+// everyone stood (no longer moving).
 { "t": "say", "text": "Hello!" }                         // joined player; 1–100 printable characters
 { "t": "emote", "kind": "victory" }                      // incarnated: victory | fart | annoy; wisp: shine
 { "t": "interact", "object": "table" }                    // near an object of the room where the party is (roomAt)
 // Speech and emotes are short lived, server relayed events, limited to one per 650 ms per socket.
 // Every `hello` (phones, new devices and screens alike) is answered with { t: "chatHistory", messages: [...] }
 // holding up to 30 recent speech events. The history is in memory only and is cleared by a server restart.
-// Interaction is available between rounds, wherever the party is (hub/world, a scene tableau, the room at a
-// tableau), not during a round or on its podium. The server checks the sender's latest position (none yet:
+// Interaction is available while no minigame runs, wherever the party is (hub/world, a scene tableau, the room
+// at a tableau). The server checks the sender's latest position (none yet:
 // their spawn point in the party room) and their statuses and inventory against the closest allowed object,
 // then relays an `interact` event with playerId, object, action, feedback and at. It is limited to one
 // per 700 ms per socket. Object rules live in shared/interactions.js: player override, character
@@ -72,58 +74,99 @@ For example, the table is a scene object with `id: "table"` and a `box`, `solid`
 An optional `byPlayer` entry may define a different action for one player ID. Conditions can combine
 `statuses: ["charged"]` with `items: { "memory-key-intro": 1 }` to require a status and a key.
 
-Server-internal reducer inputs (`now` on start/again, the `timeUp` action, `deadline`) are NEVER accepted from the wire: the server injects them itself and strips them from client messages.
+Server-internal reducer inputs (`now` on startMinigame/start, a round's server `inputs`, the `timeUp` action,
+`deadline`) are NEVER accepted from the wire: the server injects them itself and strips them from client messages.
 
-### Campaign (slice 3, Contract D v2 + A1): the evening around the block game
+### Campaign (slice 3, Contract D v2 + A1): the evening around its minigames
 
 The server runs the campaign engine (`shared/campaign/`). The party (who is in the evening, their characters)
 lives in `campaign.party`. The game master is whoever holds the character the content names (`gameMaster`:
 Pierre in every content), wisp or not, and nobody while that character isn't in the evening: the role never
 passes on (`gameMasterId`, shared/campaign/index.js). A minigame stores none: the server passes the game master
-with every action, and the round's view carries none; a minigame's round (the block game, a quiz) is `campaign.at.activity`,
-nested in its tableau, with its kind in `campaign.at.kind` and the tableau's settings in `campaign.at.settings`
-(the content's, then the game master's choice until the party leaves the tableau; a round locks them in when it starts).
-Between rounds (`campaign.at.activity` null) the party is in the room at the tableau; `campaign.at.kind` names
-the tableau's minigame there too (null on the hub, in a world, at a scene).
-`join` and `leave` act on the EVENING: `join` adds a party member (during a round they watch, and play the
-next round, including a rematch), `leave` leaves the evening (reported to the round's minigame, which decides
-what it means: a block game marks them done; the stored id stops rejoining). Every id is
-injected by the server (socket → playerId; screens: `"screen"`), never taken from the wire.
+with every action, and the minigame's view carries none.
+
+A minigame runs from the game master's `startMinigame` to his `endMinigame`: its lobby, its rounds and their
+podiums. Its state is `campaign.at.activity`, nested in its tableau, with its kind in `campaign.at.kind`; the
+finished rounds' results are kept in `campaign.at.results` until it ends. While none runs (`campaign.at.activity`
+null) the party is in the room at the tableau; `campaign.at.kind` names the tableau's minigame there too (null on
+the hub, in a world, at a scene).
+
+**Eligible players** (`eligibleOf`, shared/campaign/index.js): the characters the tableau's `activity.eligible`
+names, among the party members who haven't left, story wisps included; without names, every member who hasn't
+left and isn't a story wisp; online or not, in party order. The minigame starts with them, and hears of every
+change while it runs: someone who becomes eligible (joins the evening, is incarnated) as its `join`, someone who
+stops being eligible (leaves the evening, becomes a story wisp where the tableau names nobody) as its `leave`.
+**The content's ready rule** (`activity.allReady`, `readyRuleMet`): a round starts only when every character the
+tableau names is in the party and ready (without names: every eligible player is ready); the main game refuses
+any step into a running round otherwise, whatever the minigame.
+
+**Results.** When a round reaches its podium, its result is kept in `campaign.at.results`, in the same step.
+When the game master ends the minigame, every kept result is recorded in order, each with its counters and the
+settling that follows (unlocks, rewards, news), in one step and one save: a `winner` reward goes to the winners of
+the round that completed the node. A minigame ended before any round finished records nothing.
+
+`join` and `leave` act on the EVENING: `join` adds a party member, `leave` leaves the evening (the stored id stops
+rejoining). Every id is injected by the server (socket → playerId; screens: `"screen"`), never taken from the wire.
 
 **Routing.** The server handles `hello`, `join`, `leave`, `enter`, `back`, `gm`, `ack`, `pos`, `say`,
-`emote`, `interact`, `showJoin`, `hideJoin`, `config` and the round messages itself. `config { patch }` sets
-the tableau's settings, from its minigame's schema: game master only (else `err "not-gm"`), not while a round runs
-(`err "locked"`), and not where no minigame is (`err "not-playing"`); the game master's no-op patch is silent.
+`emote`, `interact`, `showJoin`, `hideJoin`, `startMinigame` and `endMinigame` itself:
 
-The round messages, the same for every minigame, at a minigame's tableau (elsewhere → `err "not-playing"`):
-`start` (from the room: a round with every party member who hasn't left, online or not; the quiz picks its
-questions among the bank's candidates, none left → refused), `again` (on the podium: a new round at once with
-every party member who has not left, including newcomers), `newGame` (on the podium: back to the room at the tableau),
-`endGame` (a running round → its podium, endReason "gm") and `retire { target }` (the minigame decides what
-taking a player out means; a minigame without its own rule, like the quiz, takes the player out of the round as
-if they had left it: no more answers, the score kept). A guest's round message → `err "not-gm"`;
-the game master's at the wrong moment → `err "refused"`, except the game master's `retire` of an unknown, done or left player
-while the round runs, which is a silent no-op. Every round starts with a new seed.
+- `startMinigame`: the game master, in the room at a minigame's tableau: the minigame starts, in its lobby, with
+  the eligible players and the tableau's settings (the content's, over the minigame's defaults). Every start has
+  a new seed.
+- `endMinigame`: the game master, in the minigame's lobby: the results are recorded, and the party is in the
+  room at the tableau.
 
-Every other message from a party member goes to the running round's minigame (its server code,
-`server/minigames.ts`), with the sender's id, the time and the game master injected; the minigame turns it
-into an action or refuses it, and answers a message it does not know with `err "not-playing"`. With no round
-running → `err "not-playing"`; from a socket that is not a party member → `err "unknown-player"`. A message
-sent just before a round ends may reach the next round.
+Elsewhere than at a minigame's tableau → `err "not-playing"`; a guest's → `err "not-gm"`; the game master's at
+the wrong moment → `err "refused"`.
+
+Every other message from a party member goes to the running minigame's server code (`server/minigames.ts`),
+with the sender's id, the time, the game master and the questions asked this evening (`asked`, the running
+minigame's finished rounds included) injected; it turns the message into an action or refuses it, and answers a
+message it does not know with `err "not-playing"`. With no minigame running → `err "not-playing"`; from a socket
+that is not a party member → `err "unknown-player"`. A message sent just before a round ends may reach the next
+round.
 
 A minigame's server code may handle a message without changing saved state, and may answer with unsaved
-messages (`unsaved` below) during its round.
+messages (`unsaved` below) while it runs.
+
+### Minigames and their lobbies
+
+Blocks and quiz run in the plain lobby (`shared/plain-lobby.js`, `server/plain-lobby.ts`); a minigame with its
+own lobby accepts the same messages where they apply. A guest's game-master message → `err "not-gm"`; the
+game master's at the wrong moment → `err "refused"`.
+
+```jsonc
+{ "t": "ready", "on": true }           // an eligible player, in the lobby: ready for the next round, or (false) no longer
+{ "t": "config", "patch": { … } }      // game master, in the lobby: the minigame's settings, from its schema; invalid
+                                       // keys/values ignored, his no-op patch silent; outside the lobby → err "locked"
+{ "t": "start" }                       // game master, in the lobby, with one ready player or more (and the content's
+                                       // ready rule met): a round with the ready players, in party order; the quiz picks
+                                       // its questions among the bank's candidates, none left → refused
+{ "t": "endGame" }                     // game master, a round running → its podium, endReason "gm"
+{ "t": "retire", "target": "p-abc" }   // game master, a round running: the minigame decides what taking a player out
+                                       // means; without its own rule (the quiz) it is the target's leave from the round:
+                                       // no more answers, the score kept. An unknown, done or left target → silent no-op
+{ "t": "lobby" }                       // game master, on the podium: back to the lobby; the round's players come back
+                                       // ready, except who left or was taken out, or is no longer eligible
+```
+
+Every other message goes to the running round's server code (blocks: `place`; quiz: `answer`, `next`,
+`override`); in the lobby or on the podium → `err "not-playing"`. A player who becomes eligible during a round
+is listed in the lobby and plays from the next round on.
 
 ```jsonc
 { "t": "enter", "node": "childhood" }   // game master, or the content's chooser (Élodie), into an UNLOCKED child of where
-                                        // the party is; refused while a game is played, or on a done one-shot
-                                        // tableau → err "refused". Entering a minigame's tableau: the room there, no round
-                                        // with the whole party seated (the game master starts).
-{ "t": "back" }                         // game master only (birthday story after the portal: the chooser only): up one
-                                        // level (tableau → world → hub). Refused while a game is played (endGame first)
-                                        // → err "refused"; anyone else → err "not-gm".
+                                        // the party is; refused while a minigame runs, or on a done one-shot
+                                        // tableau → err "refused". Entering a minigame's tableau: the room there, no
+                                        // minigame running (the game master starts it).
+{ "t": "back" }                         // game master only (birthday story after the portal: the chooser only, while no
+                                        // minigame runs): up one level (tableau → world → hub). A running minigame ends
+                                        // first, as endMinigame (a running round dropped). At the hub → err "refused";
+                                        // anyone else → err "not-gm".
 { "t": "gm", "op": { "op": "unlock", "node": "teens" } }
-                                        // game master only, even while he is a Wisp. Ops: goto / unlock / lock /
+                                        // game master only, even while he is a Wisp. A goto while a minigame runs
+                                        // ends it first, as back does. Ops: goto / unlock / lock /
                                         // setFlag / count / reset-node (shapes: shared/campaign/types.js GmOp).
                                         // Anyone else → err "not-gm"; a GM's no-op is silent, except give/take (Contract F:
                                         // { op:'give', item, to, count? } / { op:'take', item, from, count? }):
@@ -131,29 +174,31 @@ messages (`unsaved` below) during its round.
                                         // (no partial take).
 { "t": "gm", "op": { "op": "wisp", "character": "sol", "on": true } }
                                         // GM only: switch a joined character into Wisp Mode at any time.
-                                        // on:false starts the existing 3-second incarnation. During a
-                                        // running round, on:true takes that player out of that round;
-                                        // turning them back lets them play the next round.
+                                        // on:false starts the existing 3-second incarnation. While a
+                                        // minigame runs whose tableau names nobody, on:true makes that player
+                                        // no longer eligible (out of a running round); once incarnated they
+                                        // are eligible again and play from the next round.
 { "t": "ack", "upTo": 3 }               // SCREENS only: the TV finished the cutscenes of every news entry with
                                         // seq <= upTo; they leave `campaign.news`. upTo is required. Two TVs, or a
                                         // TV reconnecting mid-cutscene, never drop a cutscene they did not play.
 ```
 
-- **Doors:** `pos` stays ephemeral, but between rounds the server reads it against the current node's doors (`zoneAt`):
+- **Doors:** `pos` stays ephemeral, but while no minigame runs the server reads it against the current node's doors (`zoneAt`):
   stepping INTO a door (edge, not standing in it) records `zone.entered` for that character, and for the
   content's chooser on an unlocked door applies `enter`. After the party moves, standing where a door
   now is does not fire it: only a fresh step in does.
-- **Exactly once:** a block game's playing → finished (stuck, time, game master) is recorded as the round's result
-  (`round.finished`) by the engine in the SAME step, and the server saves once per step: a kill -9 persists both or neither, so
-  a restart on the podium never counts a game twice.
+- **Exactly once:** a round's running → podium (stuck, time, game master) keeps its result in `campaign.at.results`
+  in the SAME step, and the minigame's end records them all (`round.finished`) in one step; the server saves once per
+  step: a kill -9 persists both or neither, so a restart never counts a round twice.
 
 ### Birthday opening (`story.elo-50`)
 
-The first match requires Pierre, Élodie, Sol and Anna. After it finishes, `campaign.facts.flags` contains
-`portal.ready`; the server returns everyone to the room after the podium reveal, or the game master can send
-`{ "t": "newGame" }` sooner. If Pierre is the last to leave the evening during the round or at its podium, he
-finishes the round if needed and returns to the room before leaving, so everyone can rejoin. A portal is then drawn
-in the middle of the room, behind the row where the guests start. Elo walks into it with the ordinary
+The opening's tableau names Pierre, Élodie, Sol and Anna (`eligible`) and requires them all ready (`allReady`):
+a round starts only with the four in the party and ready. Once Pierre ends the block game after at least one
+finished round, `campaign.facts.flags` contains `portal.ready`. Nothing refuses another block game there later.
+If everyone leaves during a round or on its podium, the block game stays where it was; Pierre, rejoining, is the
+game master again and ends it. A portal is then drawn in the middle of the room, behind the row where the guests
+start. Elo walks into it with the ordinary
 `pos` message; the server applies the portal transition only for her and queues
 `{ "seq": 1, "t": "apparition" }` in `campaign.news`. The other players gain the persisted `wisp`
 status and appear as small moving lights in the apartment. A later joiner who selects a predefined
@@ -161,7 +206,8 @@ character starts in Wisp Mode unless that character has already been introduced.
 label, keep a hint of their character's color, and pulse slightly while moving. They can move and send
 `{ "t": "emote", "kind": "shine" }`, which briefly brightens their light. The phone offers Shine
 beside nearby objects, but sends the same emote without interacting with the object. Wisps cannot speak,
-interact with objects or NPCs, or trigger zone/story events. They are excluded from round seats.
+interact with objects or NPCs, or trigger zone/story events. They are eligible for a minigame only where its
+tableau names their character.
 Pierre may still use game-master commands while a Wisp; those commands are separate from Wisp actions.
 The server incarnates a wisp when the story grants its `person.<character>.unlocked` flag (for
 example `person.nico.unlocked`), via its internal status action, or from the GM's `wisp` operation.
@@ -188,16 +234,14 @@ memory-world entrances and reunion mini-games are not wired yet; their story spe
 
 ### Quiz (Contract E + addendum E1): a tableau `activity: { kind: 'quiz', settings }`
 
-The bank (`data/quiz/*.json`) stays on the server and is never served. While a quiz runs, its messages
+The bank (`data/quiz/*.json`) stays on the server and is never served. While a quiz round runs, its messages
 below go to the quiz (Routing above); block-only messages (`place`) get `err "not-playing"`, and `retire`
 marks the target `left` in the running quiz (the round stops waiting for their answer).
 
 ```jsonc
-{ "t": "start" }                       // game master, in the room: picks `count` questions among the bank (filtered by the
-                                       // settings, minus every question asked this evening); none left → err "refused"
-{ "t": "again" }                       // game master, quiz finished: a new quiz at once, every non-left party member (newcomers too),
-                                       // questions picked as for start
-{ "t": "newGame" }                     // game master, quiz finished → back to the room at the tableau
+{ "t": "start" }                       // game master, in the quiz's lobby: picks `count` questions among the bank (filtered by
+                                       // the settings, minus every question asked this evening, the quiz's earlier rounds
+                                       // included); none left → err "refused"
 { "t": "answer", "choice": 2 }         // a choice round: the DISPLAYED index (choices are shuffled per round)
 { "t": "answer", "text": "Victor Hugo" } // a text round. Once per round, before the deadline; else err "refused".
                                        // The server judges it (choice: index; text: local French matcher; 'uncertain' →
@@ -205,13 +249,13 @@ marks the target `left` in the running quiz (the round stops waiting for their a
                                        // enters the reducer. The last answer closes the round at once.
 { "t": "next" }                        // game master, on the reveal: next question, or finished after the last
 { "t": "override", "target": "p-abc", "ok": true }   // game master, on the reveal: fixes any answer, both ways, re-scoring it
-{ "t": "config", "patch": { "count": 10, "seconds": 20, "mode": "mixed" } }  // the tableau's settings (Routing)
+{ "t": "config", "patch": { "count": 10, "seconds": 20, "mode": "mixed" } }  // the quiz's settings, in its lobby
                                        // (count 3–30, seconds 10–60 step 5, mode choice | text | mixed; also
                                        // categories: string[] | null, level: 1 | 2 | 3 | null)
 ```
 
 - **Never the answer before the reveal:** during a quiz the round's view is the PUBLIC projection
-  (shared/quiz/bank.js `projectQuiz`), and the campaign on the wire carries no round state. During
+  (shared/quiz/bank.js `projectQuiz`), and the campaign on the wire carries no minigame state. During
   `question`: the question text, category, level, the displayed choices (choice rounds), and `answered`
   (who answered, never what). From `reveal` on: `answers` (choice/text, ok, points) and `answer`
   `{ choice: displayed index | null, text, anecdote? }`. The anecdote (a bank question's
@@ -223,8 +267,8 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 - **Timed fairness:** an open question's deadline shifts on resume and after a suspended laptop, like the timed
   block game. An answer left waiting for the judge when the server stopped is never re-judged: it is wrong,
   and the game master can override it.
-- **Campaign:** a finished quiz (last question, or the game master's endGame) records its result in the same
-  step: counters `quiz.played`, `quiz.won.<character>`, `quiz.correct.<character>`, `node.<id>.finished`,
+- **Campaign:** a finished quiz round (last question, or the game master's endGame) keeps its result, and the
+  quiz's end records it: counters `quiz.played`, `quiz.won.<character>`, `quiz.correct.<character>`, `node.<id>.finished`,
   totals per character, and the shown question ids appended to `facts.asked` (never asked again).
 
 ### Show the join QR again (any player, any moment)
@@ -242,15 +286,20 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 
 ```jsonc
 { "t": "welcome", "playerId": "p-abc123" }   // to a player client after join or successful rejoin
-{ "t": "view", "round": { "kind": "blocks", "status": "running", "view": { /* the minigame's view */ } },
+{ "t": "view", "minigame": { "kind": "blocks", "status": "running", "view": { /* the minigame's view */ },
+  "shows": ["p-abc123"], "required": { "eligible": ["pierre", "elodie", "sol", "anna"], "allReady": true } },
   "campaign": { /* CampaignView, see shared/campaign/types.js */ }, "contentVersion": "3f9a1c0b2d4e",
   "online": ["p-abc123"], "now": 1730700000000 }
-// "round" = the running round (shared/minigames.js RoundView), null between rounds (the hub, a world, a
-// scene, the room at a tableau): its minigame "kind", its "status" (running | finished: the podium) and its minigame's
-// "view" of its state, the same for everyone (server/minigames.ts). blocks: the full State (shared/game.js),
-// plus "best" in solo games (below); quiz: the public projection (below).
-// "campaign" = the whole evening (at.node, at.kind, at.settings, party, facts, news, …) WITHOUT the round's raw state
-// (`at.activity`): that travels only through "round". The saved campaign keeps it.
+// "minigame" = the running minigame (shared/minigames.js MinigameView), null while none runs (the hub, a world, a
+// scene, the room at a tableau): its "kind", its "status" (lobby | running | podium), its server code's "view" of its
+// state, the same for everyone (server/minigames.ts), the players it shows itself ("shows": in the lobby the eligible
+// players, during a round those still playing, on the podium the round's players), and the tableau's content rules
+// for the Start button ("required": its `eligible` and `allReady`, absent ones left out).
+// The plain lobby's view: { stage, settings, players: [{ id, character }], ready: [id], round }, with "round" the round
+// server's view of the running or finished round (null in the lobby). blocks: the full State (shared/game.js), plus
+// "best" in solo games (below); quiz: the public projection (below).
+// "campaign" = the whole evening (at.node, at.kind, at.results, party, facts, news, …) WITHOUT the minigame's raw state
+// (`at.activity`): that travels only through "minigame". The saved campaign keeps it.
 // "online" lists party members. "contentVersion": the
 // hash served by GET /api/content: re-fetch the content when it changes (content edited + server restarted).
 // broadcast to ALL after every change; "now" = server epoch ms (M2 Q4): clients compute
@@ -276,17 +325,17 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 // newest socket wins. Sent to the OLD socket, which the server then closes (code 4001). The client
 // must NOT auto-reconnect; it shows "Continued on another device" and offers the picker.
 { "t": "unsaved", "data": { "t": "fart", "x": 7.2, "y": 4.5 } }
-// to EVERY socket: an unsaved message from the running round's minigame (its server code's io.send,
-// server/minigames.ts), never saved. "data" is the minigame's own object, for its running screens, which get
-// the whole message; a client with no minigame screen running ignores it. Only during its round: once the
-// round has ended (its podium closed, or Play again replaced it), the server drops what the server code
-// still sends. Messages on a socket keep their order, so one sent before the round ended arrives before
-// the view that ends it.
+// to EVERY socket: an unsaved message from the running minigame (its server code's io.send,
+// server/minigames.ts), never saved. "data" is the minigame's own object, for its screens, which get
+// the whole message; a client with no minigame screen running ignores it. Only while it runs: once the
+// game master has ended it, the server drops what the server code still sends. Messages on a socket keep
+// their order, so one sent before the minigame ended arrives before the view that ends it.
 { "t": "err", "code": "full" | "bad-place" | "not-gm" | "not-playing" | "unknown-player" | "locked" | "bad-room" | "taken" | "refused" }
-// "refused" (slice 3): enter/back not allowed here (locked node, game being played, one-shot already done)
-// Round buttons (start, again, newGame, endGame, retire) answer alike in every minigame: a guest's →
-// "not-gm", the game master's at the wrong moment → "refused"; "not-gm" also answers anyone else's config, back and gm
-// "locked": config refused because a game is in progress
+// "refused" (slice 3): enter/back not allowed here (locked node, minigame running, one-shot already done)
+// The game master's buttons (startMinigame, endMinigame, config, start, lobby, endGame, retire) answer alike in every
+// minigame: a guest's → "not-gm", the game master's at the wrong moment → "refused"; "not-gm" also answers anyone
+// else's back and gm
+// "locked": config refused outside the minigame's lobby
 // "bad-room": join refused — wrong or missing room code (phone shows "ask for the code on the TV")
 // "taken": join refused — that character is already picked by an active player (M3)
 { "t": "pos", "playerId": "p-abc123", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
@@ -307,7 +356,7 @@ marks the target `left` in the running quiz (the round stops waiting for their a
 
 ## Solo best scores (M2 Q3)
 
-In solo games the block view gains an optional field: `"round": { "kind": "blocks", …, "view": { …, "best": { "score": 4210, "previous": 3980 } } }` for the current (size, mode) — `previous` is the record before this game, so a client shows "New best!" when its score exceeds it. Absent in multiplayer.
+In solo games the block view gains an optional field: `"minigame": { "kind": "blocks", …, "view": { …, "round": { …, "best": { "score": 4210, "previous": 3980 } } } }` for the current (size, mode) — `previous` is the record before this game, so a client shows "New best!" when its score exceeds it. Absent in multiplayer.
 
 ## HTTP API (M2 Q2)
 

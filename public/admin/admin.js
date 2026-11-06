@@ -68,8 +68,8 @@ function draw(d) {
   /** @param {string | null} id */
   const name = (id) => id === null ? 'server' : id === 'screen' ? 'TV' : id === 'unjoined' ? 'unjoined phone' : players[id]?.name ?? id;
 
-  const round = d.round ? `${d.round.kind} ${d.round.status}` : 'no round';
-  $('summary').textContent = `room ${d.room} · at ${c.at.node} · ${round} · ${d.hosting} · up ${duration(now - d.startedAt)}`
+  const running = d.minigame ? `${d.minigame.kind} ${d.minigame.status}` : 'no minigame';
+  $('summary').textContent = `room ${d.room} · at ${c.at.node} · ${running} · ${d.hosting} · up ${duration(now - d.startedAt)}`
     + ` · saved ${d.savedAt ? ago(d.savedAt, now) : 'never'}${d.joinQrUntil > now ? ' · join QR showing' : ''}`;
 
   fillTable($('players'), ['Player', 'Id', 'Role', 'State', 'Statuses', 'Socket since', 'Last message', 'Address', 'Browser', 'Sockets', 'Position'],
@@ -89,10 +89,10 @@ function draw(d) {
     ...d.strangers.map((/** @type {any} */ s) => ['not joined', ...socketCells(s, now)]),
   ]);
 
-  const deadline = d.round?.deadline;
-  $('round').textContent = d.round
-    ? `${d.round.kind}, ${d.round.status}: ${d.round.describe}${typeof deadline === 'number' ? `, ${duration(deadline - now)} left on the clock` : ''}`
-    : `No round: the party is at ${c.at.node}.`;
+  const deadline = d.minigame?.deadline;
+  $('round').textContent = d.minigame
+    ? `${d.minigame.kind}, ${d.minigame.status}: ${d.minigame.describe}${typeof deadline === 'number' ? `, ${duration(deadline - now)} left on the clock` : ''}`
+    : `No minigame running: the party is at ${c.at.node}.`;
   $('round-raw').textContent = JSON.stringify(c.at.activity, null, 2);
 
   $('error-count').textContent = d.clientErrorCount > d.clientErrors.length

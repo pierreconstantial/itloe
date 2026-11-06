@@ -1,4 +1,4 @@
-// Character sprites on the phone: crisp canvases drawn with shared/sprites.js (P4).
+// Character sprites on the phone and the TV: crisp canvases drawn with shared/sprites.js (P4).
 import { drawSprite, SPRITE_SIZE } from '../../shared/sprites.js';
 
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */

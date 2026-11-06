@@ -5,12 +5,6 @@
 /** @type {readonly import('../characters.js').CharacterId[]} */
 export const OPENING_PLAYERS = Object.freeze(['pierre', 'elodie', 'sol', 'anna']);
 
-/** Whether every opening player is in the party, hasn't left and isn't a wisp: the opening's first round needs them all.
- *  @param {{ order: string[], players: Record<string, { character: string, left?: boolean, statuses: string[] }> }} party @returns {boolean} */
-export function openingPlayersPresent(party) {
-  return OPENING_PLAYERS.every((character) => party.order.some((id) => !party.players[id].left && party.players[id].character === character
-    && !party.players[id].statuses.includes('wisp')));
-}
 export const INTRO_KEY = 'memory-key-intro';
 // mid-room, in the back half, behind the spawn row (shared/world.js)
 export const PORTAL = Object.freeze({ x: 8, y: 5.4, radius: 0.9 });
@@ -52,7 +46,8 @@ export const STORY_CONTENT = {
     hub: { id: 'hub', kind: 'hub', parent: null, title: "Elo's dream place", room: 'apartment-room', unlock: { always: true } },
     'hub.false-start': {
       id: 'hub.false-start', kind: 'tableau', parent: 'hub', title: 'Block game',
-      activity: { kind: 'blocks' }, replayable: true, unlock: { always: true },
+      // the four play it, and a round starts only with all four ready
+      activity: { kind: 'blocks', eligible: [...OPENING_PLAYERS], allReady: true }, replayable: true, unlock: { always: true },
       complete: { count: 'node.hub.false-start.finished', gte: 1 },
       rewards: [{ flag: 'portal.ready' }],
     },

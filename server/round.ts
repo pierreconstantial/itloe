@@ -1,16 +1,16 @@
-// A running round's in-memory side: what it holds outside the saved campaign, from the round's start
-// until its podium closes or a new round replaces it. The `io` handed to its minigame's server code
-// belongs to that one round: once the round has ended, what the server code still does through it
-// (a late verdict, an unsaved message from a timer) is dropped, so it never reaches the next round.
+// A running minigame's in-memory side: what it holds outside the saved campaign, from the game master's
+// start until his end. The `io` handed to its server code belongs to that one run: once it has ended, what
+// the server code still does through it (a late verdict, an unsaved message from a timer) is dropped, so it
+// never reaches the next run.
 
 import type { Campaign } from './campaign.ts';
 import type { MinigameIo } from './minigames.ts';
 
-/** The round's identity: the campaign's seed, which every round start advances; null between rounds. */
+/** The running minigame's identity: the campaign's seed, which every minigame start advances; null while none runs. */
 export const roundOf = (c: Campaign): number | null => (c.at.activity ? c.seed : null);
 
 export type RoundDeps<A> = {
-  apply: (action: A) => boolean,   // an action on the campaign's running round
+  apply: (action: A) => boolean,   // an action on the campaign's running minigame
   sendAll: (msg: object) => void,  // to every phone and TV
 };
 

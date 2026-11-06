@@ -2,7 +2,8 @@
 // sockets against a real server this script kill -9s. Checks: the answer NEVER on the wire before the
 // reveal (every raw message of every client is grepped), server-side judging, the round timer, game master
 // next/override/endGame, resume mid-question (deadline shifted, same question) and on the reveal,
-// quiz.finished recorded once (counters, asked), no question asked twice in an evening, the bank never
+// the rounds recorded once, when the game master ends the quiz (counters, asked), no question asked twice in an
+// evening (across the rounds of one run too), the bank never
 // served, and with a tiny custom bank: an 'uncertain' typed answer → no judge → wrong → game master override,
 // and a verdict left pending by a crash is never re-judged (wrong on resume).
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR). Usage:
@@ -11,7 +12,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, gmOf, HTTP, quizOf, roomOf, settingsOf, sleep } from './e2e-lib.mts';
+import { backToLobby, blocksOf, check, Client, endMinigame, finish, gmOf, HTTP, lobbyOf, quizOf, roomOf, settingsOf, sleep, startRound } from './e2e-lib.mts';
 import { expectedAnswers } from '../shared/quiz/judge-local.js';
 
 const PORT = process.env.PORT ?? '3141';
@@ -158,17 +159,21 @@ try {
   P.send({ t: 'gm', op: { op: 'unlock', node: 'childhood' } });
   P.send({ t: 'gm', op: { op: 'goto', node: QUIZ } });
   const v0 = await P.waitFor((m) => m.t === 'view' && m.campaign.at.node === QUIZ, i);
-  check(v0.campaign.at.kind === 'quiz' && v0.round === null && roomOf(v0).order.length === 2 && gmOf(v0) === idP,
-    'quiz tableau → the room at it, with the party; no round yet, so no block game in the view (block clients never see a quiz)');
+  check(v0.campaign.at.kind === 'quiz' && v0.minigame === null && roomOf(v0).order.length === 2 && gmOf(v0) === idP,
+    'quiz tableau → the room at it, with the party; no minigame yet, so no block game in the view (block clients never see a quiz)');
+  check(await errOf(P, { t: 'config', patch: { count: 3 } }) === 'not-playing', 'quiz config in the room (no quiz running) → not-playing');
+  check(await errOf(E, { t: 'startMinigame' }) === 'not-gm', 'starting the quiz: game master only');
+  i = P.mark(); P.send({ t: 'startMinigame' });
+  const lobby0 = lobbyOf(await P.waitFor((m) => m.t === 'view' && !!lobbyOf(m), i));
+  check(lobby0.settings.count === 5 && lobby0.players.length === 2, 'game master starts the quiz → its lobby, with the tableau\'s settings (5 questions) and both eligible');
   check(await errOf(E, { t: 'config', patch: { count: 3 } }) === 'not-gm', 'quiz config: game master only');
   i = P.mark(); P.send({ t: 'config', patch: { count: 3, seconds: 10, mode: 'mixed' } });
   await P.waitFor((m) => m.t === 'view' && settingsOf(m)?.count === 3 && settingsOf(m).seconds === 10, i);
-  check(true, 'game master configures the quiz (3 questions, 10 s)');
+  check(true, 'game master configures the quiz in its lobby (3 questions, 10 s)');
   check(await errOf(E, { t: 'start' }) === 'not-gm', 'quiz start: game master only');
   check(await errOf(E, { t: 'place', piece: 0, x: 0, y: 0 }) === 'not-playing', 'block messages during a quiz → not-playing');
 
-  i = P.mark(); P.send({ t: 'start' });
-  let q = await untilQuiz(P, (x) => x.phase === 'question', i);
+  let q = quizOf(await startRound(P, [P, E]));
   check(Array.isArray(q.credits) && q.credits.some((c: string) => /Itloe/.test(c)), `credits in the quiz view (${q.credits?.join(' | ')})`);
   check(q.order.length === 2, 'the quiz starts with the party seated');
   const shown: Q[] = [];
@@ -242,19 +247,16 @@ try {
   i = T.mark(); P.send({ t: 'next' });
   q = await untilQuiz(T, (x) => x.phase === 'finished', i);
   let f = lastView(T).campaign.facts;
-  check(q.endReason === 'done' && f.counters['quiz.played'] === 1 && f.counters[`node.${QUIZ}.finished`] === 1, 'last question → finished, quiz.played = 1, node finished');
-  check(f.counters['quiz.correct.pierre'] === 3 && f.counters['quiz.correct.elodie'] === 1 && f.counters['quiz.won.pierre'] === 1, 'counters: correct answers per character, the winner');
-  check(JSON.stringify([...f.asked].sort()) === JSON.stringify(shown.map((x) => x.id).sort()), `facts.asked = the 3 questions shown (${f.asked.join(', ')})`);
-  check(f.totals.quiz?.pierre === q.players[idP].score, 'quiz totals carry the quiz score (per kind)');
+  const score1 = q.players[idP].score;
+  check(q.endReason === 'done' && lastView(T).campaign.at.results.length === 1 && !f.counters['quiz.played'],
+    'last question → the podium, its result kept, nothing recorded yet');
   await restart('on the finished quiz', 'finished');
-  f = lastView(T).campaign.facts;
-  check(f.counters['quiz.played'] === 1, 'restart on the podium: still counted once');
+  check(lastView(T).campaign.at.results.length === 1 && !lastView(T).campaign.facts.counters['quiz.played'], 'restart on the podium: the result kept once');
 
-  // ---------- a second quiz never repeats a question of the evening ----------
-  i = T.mark(); P.send({ t: 'newGame' });
-  await T.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
+  // ---------- a second round of the same quiz never repeats a question of the first ----------
+  await backToLobby(P);
   const second: string[] = [];
-  i = T.mark(); P.send({ t: 'start' });
+  i = T.mark(); P.send({ t: 'start' }); // both played the first round: back in the lobby ready
   q = await untilQuiz(T, (x) => x.phase === 'question', i);
   for (let r = 0; r < 3; r++) {
     question = byText.get(q.round.question.q)!;
@@ -264,19 +266,34 @@ try {
     i = T.mark(); P.send({ t: 'next' });
     q = await untilQuiz(T, (x) => (x.phase === 'question' && x.round.index === r + 1) || x.phase === 'finished', i);
   }
-  check(second.every((id) => !shown.some((x) => x.id === id)), `second quiz: 3 new questions (${second.join(', ')}), none asked earlier`);
-  check(lastView(T).campaign.facts.asked.length === 6, 'asked grows to 6');
-  // play again from the podium: a new quiz at once, as in the block game
-  check(await errOf(P, { t: 'start' }) === 'refused', 'quiz start on the podium → refused (start is for the room)');
-  check(await errOf(E, { t: 'again' }) === 'not-gm', 'quiz again: game master only');
+  check(second.every((id) => !shown.some((x) => x.id === id)), `second round: 3 new questions (${second.join(', ')}), none asked in the first`);
+  const score2 = q.players[idP].score;
+  // Play again: back to the lobby first, then start
+  check(await errOf(P, { t: 'start' }) === 'refused', 'quiz start on the podium → refused (start is for the lobby)');
+  check(await errOf(E, { t: 'lobby' }) === 'not-gm', 'quiz back to the lobby: game master only');
   check(await errOf(E, { t: 'retire', target: idP }) === 'not-gm' && await errOf(P, { t: 'retire', target: idE }) === 'refused',
-    'quiz retire, like every round button: a guest → not-gm, the game master → refused');
-  i = T.mark(); P.send({ t: 'again' });
-  q = await untilQuiz(T, (x) => x.phase === 'question', i);
-  check(q.round.index === 0 && q.order.length === 2 && Object.values<any>(q.players).every((p) => p.score === 0), 'game master again on the podium → question 1 of a new quiz, same players, scores reset');
+    'quiz retire, like every game-master button: a guest → not-gm, the game master → refused');
+  check(await errOf(P, { t: 'endMinigame' }) === 'refused', 'ending the quiz on the podium → refused (from the lobby)');
+  await backToLobby(P);
+  i = T.mark();
+  await endMinigame(P);
+  const ended = await T.waitFor((m) => m.t === 'view' && m.minigame === null, i);
+  f = ended.campaign.facts;
+  check(f.counters['quiz.played'] === 2 && f.counters[`node.${QUIZ}.finished`] === 2 && ended.campaign.at.results.length === 0,
+    'game master ends the quiz → both rounds recorded at once: quiz.played = 2, node finished');
+  check(f.counters['quiz.correct.pierre'] === 6 && f.counters['quiz.correct.elodie'] === 1 && f.counters['quiz.won.pierre'] === 2, 'counters: correct answers per character, the winner of each round');
+  check(JSON.stringify([...f.asked].sort()) === JSON.stringify([...shown.map((x) => x.id), ...second].sort()), `facts.asked = the 6 questions shown (${f.asked.join(', ')})`);
+  check(f.totals.quiz?.pierre === score1 + score2, 'quiz totals carry both rounds\' scores (per kind)');
+
+  // ---------- a new run of the quiz never repeats a question of the evening ----------
+  q = quizOf(await startRound(P, [P, E]));
+  check(q.round.index === 0 && q.order.length === 2 && Object.values<any>(q.players).every((p) => p.score === 0)
+    && !f.asked.includes(byText.get(q.round.question.q)!.id), 'the quiz started again → question 1 of a new round, same players, scores reset, a new question');
   i = T.mark(); P.send({ t: 'endGame' });
   q = await untilQuiz(T, (x) => x.phase === 'finished', i);
-  check(q.endReason === 'gm' && lastView(T).campaign.facts.counters['quiz.played'] === 3, 'game master endGame finishes a quiz (counts as played)');
+  await backToLobby(P);
+  await endMinigame(P);
+  check(q.endReason === 'gm' && lastView(P).campaign.facts.counters['quiz.played'] === 3, 'game master endGame finishes a quiz round (counts as played, at the end)');
 
   // ---------- a tiny custom bank: uncertain → no judge → wrong → override; pending never re-judged ----------
   for (const c of [P, E, T]) c.ws.close();
@@ -296,9 +313,12 @@ try {
   P.send({ t: 'gm', op: { op: 'unlock', node: 'childhood' } });
   P.send({ t: 'gm', op: { op: 'goto', node: QUIZ } });
   await P.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz');
+  i = P.mark(); P.send({ t: 'startMinigame' });
+  await P.waitFor((m) => m.t === 'view' && !!lobbyOf(m), i);
   i = P.mark(); P.send({ t: 'config', patch: { count: 3, mode: 'text' } });
   await P.waitFor((m) => m.t === 'view' && settingsOf(m)?.count === 3 && settingsOf(m).mode === 'text', i);
-  i = T.mark(); P.send({ t: 'start' });
+  i = T.mark();
+  await startRound(P, [P, E]);
   q = await untilQuiz(T, (x) => x.phase === 'question', i);
   const tq = tiny.find((x) => x.q === q.round.question.q)!;
   const surname = tq.answer.split(' ').pop()!;
@@ -321,8 +341,8 @@ try {
   await kill9();
   const FILE = join(VAR, 'bloko.state.json');
   const env = JSON.parse(readFileSync(FILE, 'utf8'));
-  env.campaign.at.activity.round.answers[idP].ok = null; // as if the judge had not answered yet
-  env.campaign.at.activity.round.answers[idP].verdict = 'uncertain';
+  env.campaign.at.activity.round.round.answers[idP].ok = null; // the quiz round's open question: as if the judge had not answered yet
+  env.campaign.at.activity.round.round.answers[idP].verdict = 'uncertain';
   writeFileSync(FILE, JSON.stringify(env));
   await boot(false, { BLOKO_QUIZ_DIR: dir });
   for (const c of [P, E, T]) c.ws.close();

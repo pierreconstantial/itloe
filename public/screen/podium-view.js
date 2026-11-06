@@ -1,9 +1,12 @@
-// Finished: ranking with a staged reveal (last place → … → champion(s)).
-// The reveal is driven by `elapsedMs` since the game ended, so a re-render mid-sequence resumes
-// where it was (negative CSS delays) instead of restarting; elapsed = Infinity shows it settled.
+// The TV's podium, the same for every minigame (a building block a lobby draws): ranking with a staged reveal
+// (last place → … → champion(s)), and its sounds and confetti. The reveal is driven by `elapsedMs` since the
+// game ended, so a re-render mid-sequence resumes where it was (negative CSS delays) instead of restarting;
+// elapsed = Infinity shows it settled.
 
 import { ranking } from '../../shared/ranking.js';
 import { h, colorDot, playerColor, formatScore } from './dom.js';
+import { sfx } from './audio.js';
+import * as fx from './fx.js';
 
 /** A round's players, as every minigame's view carries them. @typedef {import('../../shared/minigames.js').RoundPlayers} RoundPlayers */
 
@@ -34,12 +37,26 @@ export function revealSchedule(s) {
 }
 
 /**
+ * Sounds + confetti in step with the podium's CSS reveal (same schedule), each step through `later`.
+ * @param {RoundPlayers} s @param {(fn: () => void, ms: number) => void} later
+ */
+export function podiumSequence(s, later) {
+  const schedule = revealSchedule(s);
+  const championAt = Math.min(...schedule.filter((r) => r.rank === 1).map((r) => r.atMs));
+  const steps = new Set(schedule.filter((r) => r.rank > 1).map((r) => r.atMs));
+  for (const at of steps) later(() => sfx.reveal(), at);
+  later(() => {
+    sfx.fanfare();
+    fx.confetti(schedule.filter((r) => r.rank === 1).map((r) => fx.colorHex(s.players[r.id].color)).concat('#ffd166', '#ffffff'));
+  }, championAt);
+}
+
+/**
  * The podium of every minigame: its round's players, ranked by the shared rule.
  * @param {RoundPlayers} s  the round's view (its common players and how it ended)
  * @param {number} elapsedMs time since the game finished (Infinity = no animation)
- * @param {{ title?: string, next: string, again?: boolean, hint?: string, rowExtra?: (id: string) => (Node | string)[] }} opts
- *   next: the "Next game: …" line (the tableau's settings, summarized); again: false when no round follows,
- *   only the way back to the room; rowExtra: cells after the score
+ * @param {{ title?: string, hint: string, rowExtra?: (id: string) => (Node | string)[] }} opts
+ *   hint: what comes next, under the ranking; rowExtra: cells after the score
  */
 export function renderPodium(s, elapsedMs, opts) {
   const schedule = revealSchedule(s);
@@ -66,10 +83,7 @@ export function renderPodium(s, elapsedMs, opts) {
   const ending = s.endReason ? ENDINGS[s.endReason] : undefined;
   const sub = ending ? [h('p', 'podium-ending reveal', [ending])] : [];
   for (const el of sub) delay(el, 0);
-  const again = opts.again ?? true;
-  const hint = h('p', 'podium-hint reveal', [opts.hint ?? (again ? "Play again on the game master's phone" : "Back to the room on the game master's phone")]);
+  const hint = h('p', 'podium-hint reveal', [opts.hint]);
   delay(hint, lastAt + 1200);
-  const next = again ? [h('p', 'settings-line reveal', [`Next game: ${opts.next}`])] : [];
-  for (const el of next) delay(el, lastAt + 1200);
-  return h('section', 'podium', [title, ...sub, list, hint, ...next]);
+  return h('section', 'podium', [title, ...sub, list, hint]);
 }

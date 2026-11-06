@@ -1,7 +1,7 @@
-// Phone block-game screens, mounted by the frame (./minigames.js) while a block round runs: the board with
+// Phone block-game screens, mounted by the plain lobby (./plain-lobby.js) while a block round runs: the board with
 // drag & drop (view-game) and, once out of moves, the game-over screen (view-over). They render strictly
 // from the round's view; the only optimistic paint (a local placement) is reconciled by the next view or err.
-// The podium is the frame's; the block game adds the solo "New best!" to it.
+// The podium is the shared one; the block game adds the solo "New best!" to it.
 import { canPlace, place, findClears, applyClears } from '../../shared/board.js';
 import { PIECES } from '../../shared/pieces.js';
 import { ranking } from '../../shared/ranking.js';
@@ -91,6 +91,11 @@ const MARKUP = `
     <ul id="final-others" class="player-list"></ul>
     <p class="dim">Eyes on the big screen!</p>
   </section>
+
+  <section id="view-not-in-round" class="menu" hidden>
+    <p>You're not in this round.</p>
+    <p id="not-in-round-gm" class="dim" hidden>End it or take a player out from ☰</p>
+  </section>
 `;
 
 /** @param {number} rank 1-based @returns {string} */
@@ -121,7 +126,7 @@ function outcome(prev, next, id) {
 
 /**
  * @param {HTMLElement} root @param {import('./minigames.js').PhoneIo} io
- * @returns {import('./minigames.js').Mounted}
+ * @returns {import('./minigames.js').RoundMounted}
  */
 function mount(root, io) {
   root.insertAdjacentHTML('beforeend', MARKUP);
@@ -140,10 +145,11 @@ function mount(root, io) {
   /** Board cell elements, rebuilt on every paint. @type {HTMLElement[]} */
   let cellEls = [];
 
-  /** @param {'game' | 'over'} name */
+  /** @param {'game' | 'over' | 'not-in-round'} name */
   function show(name) {
     $('view-game').hidden = name !== 'game';
     $('view-over').hidden = name !== 'over';
+    $('view-not-in-round').hidden = name !== 'not-in-round';
   }
 
   function paint() {
@@ -153,7 +159,8 @@ function mount(root, io) {
     if (drag && (!me || me.hand[drag.index] !== drag.pieceId)) endDrag();
     if (!io.connected() && drag) endDrag(); // a drop can't be sent while offline
     updateClock();
-    if (!v || !me) return;
+    if (!v) return;
+    if (!me) { show('not-in-round'); $('not-in-round-gm').hidden = !io.isGameMaster(); return; } // the game master sat it out
     if (me.done) { show('over'); renderGameOver(v, me); return; }
     show('game');
     renderGame(v, me);
@@ -391,9 +398,10 @@ function mount(root, io) {
   };
 }
 
-/** The block game's entry in the phone's list (./minigames.js). @type {import('./minigames.js').PhoneScreen} */
+/** The block game's round screens, wrapped in the plain lobby in the phone's list (./minigames.js). @type {import('./minigames.js').RoundScreen} */
 export const BLOCK_SCREEN = {
   title: 'ITLOE',
+  name: 'block game',
   rules: RULES.map(({ piece, text }, i) => ({ icon: () => pieceEl(piece, (i % 4) + 1, RULE_CELL), text })),
   settings: { schema: SETTINGS_SCHEMA, text: settingText, format: formatSetting, summarize: summarizeSettings },
   mount,

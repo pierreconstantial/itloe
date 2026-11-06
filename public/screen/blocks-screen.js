@@ -1,6 +1,6 @@
-// The block game's TV screen, mounted by the frame (./minigames.js) while a block round runs: one board per
+// The block game's TV screen, mounted by the plain lobby (./plain-lobby.js) while a block round runs: one board per
 // player (game-view.js), with the juice — sounds, particles, call-outs, shake — reacting to events derived
-// from consecutive views, the danger pulse and the timed countdown. The podium is the frame's; the block
+// from consecutive views, the danger pulse and the timed countdown. The podium is the shared one; the block
 // game holds it back while "Time's up!" plays.
 
 import { renderGame } from './game-view.js';
@@ -68,7 +68,7 @@ function react(e, s) {
 
 /**
  * @param {HTMLElement} root @param {import('./minigames.js').TvIo} io
- * @returns {import('./minigames.js').Mounted}
+ * @returns {import('./minigames.js').RoundMounted}
  */
 function mount(root, io) {
   /** The block game in the last view this screen showed. @type {State | null} */
@@ -99,9 +99,10 @@ function mount(root, io) {
   };
 }
 
-/** The block game's entry in the TV's list (./minigames.js). @type {import('./minigames.js').TvScreen} */
+/** The block game's round screen, wrapped in the plain lobby in the TV's list (./minigames.js). @type {import('./minigames.js').RoundScreen} */
 export const BLOCK_SCREEN = {
   title: 'ITLOE',
+  name: 'block game',
   settings: { summarize: summarizeSettings },
   mount,
   /** Time ran out: "Time's up!" holds the screen before the podium reveal. */

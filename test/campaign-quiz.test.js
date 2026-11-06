@@ -2,7 +2,7 @@
 // started with the party → finished exactly once → its result: counters, totals and the evening's asked ids.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newCampaign, reduceCampaign, loadCampaign, roundStatus, SAMPLE_CONTENT, record, holds } from '../shared/campaign/index.js';
+import { newCampaign, reduceCampaign, loadCampaign, minigameStatus, SAMPLE_CONTENT, record, holds } from '../shared/campaign/index.js';
 import { startQuiz, QUIZ_COUNTER, QUIZ_RULES } from '../shared/quiz/index.js';
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
@@ -15,8 +15,8 @@ const CANDIDATES = ['k1', 'k2', 'k3', 'k4', 'k5', 'k6', 'k7'].map((id, i) => ({ 
 
 /** @param {Campaign} c @param {...CampaignAction} actions */
 const run = (c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a, C), c);
-/** @param {Campaign} c @returns {QuizState} */
-const quiz = (c) => /** @type {any} */ (c.at.activity);
+/** The running quiz round. @param {Campaign} c @returns {QuizState} */
+const quiz = (c) => /** @type {any} */ (c.at.activity?.round);
 const act = (/** @type {any} */ action) => /** @type {CampaignAction} */ ({ t: 'activity', action });
 
 /** Pierre (the game master), Élodie and Sol, standing in the room at the World 1 quiz. */
@@ -30,9 +30,15 @@ function inQuiz() {
   return c;
 }
 
+/** The game master starts the quiz, the three get ready, and he starts its round. @param {Campaign} c */
+function startQuizRound(c, now = 1) {
+  return run(c, { t: 'startMinigame', id: 'p', now }, act({ t: 'ready', id: 'p', on: true }), act({ t: 'ready', id: 'e', on: true }),
+    act({ t: 'ready', id: 's', on: true }), act({ t: 'start', id: 'p', now, inputs: CANDIDATES }));
+}
+
 /** Plays the whole quiz: Élodie right every time, Pierre and Sol wrong. */
 function playThrough(/** @type {Campaign} */ c, now = 1000) {
-  c = run(c, { t: 'start', id: 'p', now, inputs: CANDIDATES });
+  c = startQuizRound(c, now);
   while (quiz(c).phase === 'question') {
     const r = /** @type {any} */ (quiz(c).round);
     const given = r.asChoice ? { choice: 0 } : { text: 'x' };
@@ -41,19 +47,18 @@ function playThrough(/** @type {Campaign} */ c, now = 1000) {
     now += 30_000;
     c = run(c, act({ t: 'next', id: 'p', now }));
   }
-  return c;
+  return run(c, act({ t: 'lobby', id: 'p' }), { t: 'endMinigame', id: 'p' });
 }
 
-test('quiz under way: enter/back refused; a newcomer waits for the next round', () => {
-  let c = run(inQuiz(), { t: 'start', id: 'p', now: 1, inputs: CANDIDATES });
-  assert.equal(roundStatus(c), 'running');
-  assert.equal(run(c, { t: 'back', id: 'p' }), c, 'back refused while the quiz runs');
+test('quiz under way: a newcomer waits for the next round', () => {
+  let c = startQuizRound(inQuiz());
+  assert.equal(minigameStatus(c), 'running');
   c = run(c, { t: 'join', id: 'a', character: 'anna' });
   assert.ok(c.party.players.a && !quiz(c).players.a, 'joined the evening, not seated mid-quiz');
 });
 
 test('taking a player out of a quiz counts as their leaving: the game master only, while it runs', () => {
-  let c = run(inQuiz(), { t: 'start', id: 'p', now: 1, inputs: CANDIDATES });
+  let c = startQuizRound(inQuiz());
   assert.equal(run(c, act({ t: 'retire', id: 's', target: 'e' })), c, 'a guest can\'t');
   c = run(c, act({ t: 'retire', id: 'p', target: 's' }));
   assert.equal(quiz(c).players.s.left, true, 'Sol is out of the quiz');
@@ -65,7 +70,7 @@ test('taking a player out of a quiz counts as their leaving: the game master onl
   c = run(c, act({ t: 'answer', id: 'e', ...given, now: 2, verdict: 'right' }), act({ t: 'answer', id: 'p', ...given, now: 2, verdict: 'wrong' }));
   assert.equal(quiz(c).phase, 'reveal', 'the round no longer waits for Sol');
   c = run(c, act({ t: 'endGame', id: 'p' }));
-  assert.equal(roundStatus(c), 'finished');
+  assert.equal(minigameStatus(c), 'podium');
   assert.equal(run(c, act({ t: 'retire', id: 'p', target: 'e' })), c, 'on the podium: refused');
 });
 

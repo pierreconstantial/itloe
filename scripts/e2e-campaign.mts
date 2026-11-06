@@ -1,4 +1,4 @@
-// Campaign end-to-end (slice 3, server side): the false start → 3 block games → reward + two worlds
+// Campaign end-to-end (slice 3, server side): the false start → 3 block rounds in one run of its minigame → reward + two worlds
 // unlocked at once → news acked by seq with TWO TVs → doors (the chooser walks in, edge-triggered) →
 // game master back/enter/gm — with a kill -9 + restart after every step that must resume the SAME evening and
 // never count a game twice. Then chat, emotes and object actions: relay, history, rate limits, and where
@@ -9,7 +9,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, HTTP, quizOf, roomOf, roundTrip, settled, sleep } from './e2e-lib.mts';
+import { backToLobby, blocksOf, check, Client, endMinigame, finish, HTTP, lobbyOf, quizOf, roomOf, roundTrip, settled, sleep, startRound } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -40,8 +40,10 @@ async function kill9(): Promise<void> {
 }
 const roomCode = async (): Promise<string> => (await (await fetch(`${HTTP}/api/join`)).json()).code;
 
-/** A view's campaign with its round's view where the save keeps the round (`at.activity`), comparable with the save. */
-const campaignOf = (m: any): any => m?.campaign && { ...m.campaign, at: { ...m.campaign.at, activity: m.round?.view ?? null } };
+/** A view's campaign with its minigame's view where the save keeps the minigame (`at.activity`), comparable with the save. */
+const campaignOf = (m: any): any => m?.campaign && { ...m.campaign, at: { ...m.campaign.at, activity: m.minigame?.view ?? null } };
+/** The block round in a campaign (running, or on its podium), or undefined. */
+const roundIn = (k: any): any => k.at.activity?.round ?? undefined;
 /** The last campaign a client saw. */
 const camp = (c: Client): any => campaignOf([...c.msgs].reverse().find((m) => m.t === 'view'));
 /** Waits for a view whose campaign satisfies `pred`. */
@@ -49,8 +51,11 @@ const until = async (c: Client, pred: (k: any) => boolean, from = 0, ms = 3000) 
   campaignOf(await c.waitFor((m) => m.t === 'view' && !!m.campaign && pred(campaignOf(m)), from, ms));
 /** The persisted part of the evening, comparable across a restart (the seed is checked on its own). */
 const core = (k: any) => JSON.stringify({
-  // a timed game's deadline moves by the downtime on purpose (checked on its own)
-  at: { node: k.at.node, kind: k.at.kind, activity: k.at.activity && { ...k.at.activity, deadline: null }, settings: k.at.settings },
+  // the plain lobby's view leaves out its seed; a round's view adds "best" in solo games; a timed game's deadline
+  // moves by the downtime on purpose (checked on its own)
+  at: { node: k.at.node, kind: k.at.kind, results: k.at.results, activity: k.at.activity && {
+    stage: k.at.activity.stage, settings: k.at.activity.settings, players: k.at.activity.players, ready: k.at.activity.ready,
+    round: k.at.activity.round && { ...k.at.activity.round, deadline: null, best: undefined } } },
   party: k.party, facts: k.facts, news: k.news, newsSeq: k.newsSeq,
 });
 /** The err `msg` is answered with (every use expects one: waiting long costs a normal run nothing), or null. */
@@ -134,17 +139,17 @@ async function restartSame(step: string): Promise<void> {
 
 const played = (k: any) => k.facts.counters['blocks.played'] ?? 0;
 
-/** The game master starts a block game and ends it at once (endGame counts as a game played, A1). */
+/** The game master starts a block round (and the minigame, unless it runs) and ends it at once (endGame counts as
+ *  a round played): the podium of round `n`, its result kept, nothing recorded yet. */
 async function playOne(n: number): Promise<void> {
-  let i = P.mark();
-  P.send({ t: camp(P).at.activity === null ? 'start' : 'again' });
-  await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
-  i = P.mark();
+  await startRound(P, [P, E]);
+  const i = P.mark();
   const tvFrom = T1.mark();
   P.send({ t: 'endGame' });
-  const k = await until(P, (x) => x.at.activity?.phase === 'finished', i);
-  await until(T1, (x) => x.at.activity?.phase === 'finished' && played(x) === n, tvFrom);
-  check(played(k) === n && k.at.activity.endReason === 'gm', `block game ${n} ended by the game master → blocks.played = ${played(k)}`);
+  const k = await until(P, (x) => roundIn(x)?.phase === 'finished', i);
+  await until(T1, (x) => roundIn(x)?.phase === 'finished' && x.at.results.length === n, tvFrom);
+  check(k.at.results.length === n && played(k) === 0 && roundIn(k).endReason === 'gm',
+    `block round ${n} ended by the game master → its result kept (${k.at.results.length}), blocks.played still 0 until the end`);
 }
 
 try {
@@ -164,24 +169,34 @@ try {
   check(!k.facts.unlocked.includes('childhood') && k.news.length === 0, 'worlds locked, no news yet');
   await restartSame('in the room at the false start');
 
-  // ---------- 3 block games; a kill -9 mid-game and on each podium never double-counts ----------
+  // ---------- 3 block rounds in one run; a kill -9 in the lobby, mid-game and on each podium never double-counts ----------
   await playOne(1);
   const v = T1.msgs.findLast((m) => m.t === 'view');
-  check(v.round?.kind === 'blocks' && v.round.status === 'finished' && v.round.view.order.join() === `${idP},${idE}`
-    && JSON.stringify(v.round.view) === JSON.stringify(saved().at.activity) && !('activity' in v.campaign.at),
-    'view: the round carries the block game (both seated); the campaign on the wire carries no raw round state');
+  check(v.minigame?.kind === 'blocks' && v.minigame.status === 'podium' && v.minigame.view.round.order.join() === `${idP},${idE}`
+    && JSON.stringify(v.minigame.view.round) === JSON.stringify(saved().at.activity.round) && !('activity' in v.campaign.at),
+    'view: the minigame carries the block round (both seated); the campaign on the wire carries no raw minigame state');
   await restartSame('on podium 1');
-  check(played(camp(T1)) === 1, 'podium 1 after restart: still 1 game played (counted once)');
-  let i = P.mark(); P.send({ t: 'again' });
+  check(camp(T1).at.results.length === 1 && played(camp(T1)) === 0, 'podium 1 after restart: its result still kept once, nothing recorded');
+  await backToLobby(P);
+  await restartSame('in the lobby');
+  check(camp(T1).at.activity.ready.join() === `${idP},${idE}`, 'the lobby after restart: both still ready');
+  let i = P.mark(); P.send({ t: 'start' });
   await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   await restartSame('mid-game 2 (playing)');
-  check(played(camp(T1)) === 1, 'mid-game restart counts nothing');
-  check(await errOf(P, { t: 'back' }) === 'refused', 'back while a game is played → refused (endGame first)');
+  check(camp(T1).at.results.length === 1, 'mid-game restart keeps nothing more');
+  check(await errOf(P, { t: 'endMinigame' }) === 'refused', 'endMinigame while a round is played → refused (endGame first)');
   i = P.mark(); P.send({ t: 'endGame' });
-  k = await until(P, (x) => x.at.activity?.phase === 'finished', i);
-  check(played(k) === 2, 'block game 2 → blocks.played = 2');
+  k = await until(P, (x) => roundIn(x)?.phase === 'finished', i);
+  check(k.at.results.length === 2 && played(k) === 0, 'block round 2 → 2 results kept');
   await restartSame('on podium 2');
+  await backToLobby(P);
   await playOne(3);
+  await backToLobby(P);
+  i = T1.mark();
+  await endMinigame(P);
+  k = await until(T1, (x) => x.at.activity === null, i);
+  check(played(k) === 3 && k.at.results.length === 0 && !!roomOf(T1.msgs.findLast((m) => m.t === 'view')),
+    'game master ends the minigame → the three rounds recorded at once (blocks.played = 3), the room at the tableau');
 
   // ---------- the unlock: reward + two worlds AT ONCE, queued as news ----------
   k = camp(T1);
@@ -192,7 +207,7 @@ try {
   check(k.facts.unlocked.includes('childhood') && k.facts.unlocked.includes('teens') && !k.facts.unlocked.includes('adult'), 'childhood AND teens unlocked at once; adult still locked');
   check(kinds.includes('unlocked:childhood') && kinds.includes('unlocked:teens') && kinds.includes('item:old-key'), `news queued: ${kinds.join(', ')}`);
   check(k.news.every((n: any, j: number) => n.seq === j + 1) && k.newsSeq === k.news.length, 'news seq = 1, 2, 3… (newsSeq = last handed out)');
-  await restartSame('on podium 3 with news pending');
+  await restartSame('in the room with news pending');
   check(core(camp(T2)) === core(camp(T1)), 'both TVs see the same news');
 
   // ---------- acks by seq, two TVs ----------
@@ -216,7 +231,7 @@ try {
   check(await errOf(E, { t: 'back' }) === 'not-gm', 'non-game-master back → not-gm');
   i = P.mark(); P.send({ t: 'back' });
   k = await until(P, (x) => x.at.node === 'hub', i);
-  check(k.at.activity === null && T1.msgs.findLast((m) => m.t === 'view').round === null, 'game master back → hub, no block game (view round null)');
+  check(k.at.activity === null && T1.msgs.findLast((m) => m.t === 'view').minigame === null, 'game master back → hub, no minigame (view minigame null)');
   await restartSame('on the hub');
 
   const at = () => camp(T1).at.node;
@@ -258,28 +273,34 @@ try {
   await until(P, (x) => x.at.node === 'teens', i);
   i = P.mark(); P.send({ t: 'enter', node: 'teens.blocks' });
   k = await until(P, (x) => x.at.node === 'teens.blocks', i);
-  check(k.at.activity === null && k.at.settings.mode === 'timed' && roomOf(P.msgs.findLast((m) => m.t === 'view')).order.length === 2,
-    "game master enters a world's blocks tableau → its room with the node's settings (timed), the whole party there");
-  i = P.mark(); P.send({ t: 'start' });
-  const timedStart = await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
-  check(blocksOf(timedStart).order.length === 2, '…and the round starts with the whole party seated');
+  check(k.at.activity === null && roomOf(P.msgs.findLast((m) => m.t === 'view')).order.length === 2,
+    "game master enters a world's blocks tableau → its room, the whole party there");
+  i = P.mark(); P.send({ t: 'startMinigame' });
+  const timedLobby = lobbyOf(await P.waitFor((m) => m.t === 'view' && !!lobbyOf(m), i));
+  check(timedLobby.settings.mode === 'timed' && timedLobby.players.length === 2, '…its minigame starts with the node\'s settings (timed), both eligible');
+  const timedStart = await startRound(P, [P, E]);
+  check(blocksOf(timedStart).order.length === 2, '…and the round starts with both seated');
   const deadline = blocksOf(timedStart).deadline;
   await restartSame('in a timed world game');
-  const after = camp(T1).at.activity;
+  const after = roundIn(camp(T1));
   check(after.phase === 'playing' && after.deadline >= deadline, 'timed world game resumed, its deadline shifted by the downtime (never shortened)');
 
   // ---------- a newcomer mid-evening ----------
   const { c: N, id: idN } = await player('N', 'anna');
   k = await until(T1, (x) => !!x.party.players[idN]);
-  check(!k.at.activity.players[idN], 'newcomer during a game joins the evening and watches (not seated)');
-  i = P.mark(); P.send({ t: 'endGame' }); await until(P, (x) => x.at.activity?.phase === 'finished', i);
-  i = P.mark(); P.send({ t: 'newGame' });
-  const roomView = await P.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
-  check(!!roomOf(roomView).players[idN], '…and is in the room after the round (seated by the next start, below)');
+  check(!roundIn(k).players[idN], 'newcomer during a game joins the evening and watches (not seated)');
+  i = P.mark(); P.send({ t: 'endGame' }); await until(P, (x) => roundIn(x)?.phase === 'finished', i);
+  const lobbyView = lobbyOf(await backToLobby(P));
+  check(lobbyView.players.some((p: any) => p.id === idN) && !lobbyView.ready.includes(idN),
+    '…and is in the lobby after the round, not ready (plays from a later start, below)');
   N.ws.close();
 
   // ---------- chat, emotes and object actions, as they work today ----------
   let N2 = await rejoin('N2', idN); // back online: the quiz below reveals once every seated player answered
+  i = T1.mark();
+  await endMinigame(P);
+  k = await until(T1, (x) => x.at.activity === null, i);
+  check(played(k) === 4, 'game master ends the world\'s minigame → its round recorded (blocks.played = 4), the room');
   const everyone = () => [P, E, N2, T1, T2];
   const marks = () => everyone().map((c) => c.mark());
   /** Once what `senders` sent has settled: the first `t` event each client got since `from`, or null for a
@@ -389,17 +410,21 @@ try {
   await step(E, floor);
   check(isDropped(await interact()), 'interact far from every object → dropped');
   await step(E, TABLE);
+  i = P.mark(); P.send({ t: 'startMinigame' });
+  await P.waitFor((m) => m.t === 'view' && !!lobbyOf(m), i);
+  await interactsHere('in a minigame\'s lobby', false);
 
-  i = P.mark(); P.send({ t: 'start' });
-  const next = await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
-  check(!!blocksOf(next).players[idN], 'the newcomer is seated in the round started from the room');
+  const next = await startRound(P, [P, E, N2]);
+  check(!!blocksOf(next).players[idN], 'the newcomer is seated in the round started from the lobby');
   i = P.mark(); P.send({ t: 'gm', op: { op: 'wisp', character: 'anna', on: true } });
   k = await until(P, (x) => x.party.players[idN].statuses.includes('wisp'), i);
-  check(k.at.activity.players[idN].left === true, 'GM switches a player to Wisp Mode during a round and removes their seat');
+  check(roundIn(k).players[idN].left === true && !k.at.activity.players.some((p: any) => p.id === idN),
+    'GM switches a player to Wisp Mode during a round: no longer eligible, out of the round');
   i = P.mark(); P.send({ t: 'gm', op: { op: 'wisp', character: 'anna', on: false } });
   await until(P, (x) => x.party.players[idN].statuses.includes('incarnating'), i);
   k = await until(P, (x) => !x.party.players[idN].statuses.includes('wisp'), i, 5000);
-  check(k.at.activity.players[idN].left === true, 'incarnation restores the character for the next round, not this one');
+  check(roundIn(k).players[idN].left === true && k.at.activity.players.some((p: any) => p.id === idN),
+    'incarnation makes them eligible again, for the next round, not this one');
   await interactsHere('during a running block game', false);
   // during a round, only wisps walk: a pos from anyone else is dropped
   i = T1.mark();
@@ -415,11 +440,12 @@ try {
     `a TV saying hello during the round gets the room's positions: Élodie stands at the table, not walking (${JSON.stringify(standing)})`);
   T4.ws.close();
   i = P.mark(); P.send({ t: 'endGame' });
-  await until(P, (x) => x.at.activity?.phase === 'finished', i);
+  await until(P, (x) => roundIn(x)?.phase === 'finished', i);
   await interactsHere('on a block podium', false);
   const iP = P.mark();
   P.send({ t: 'gm', op: { op: 'goto', node: 'hub' } });
-  await until(P, (x) => x.at.node === 'hub', iP);
+  k = await until(P, (x) => x.at.node === 'hub', iP);
+  check(k.at.activity === null && played(k) === 5, 'gm goto from the podium ends the minigame first: its round recorded (blocks.played = 5)');
   await interactsHere('on the hub', true);
   i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'childhood' } });
   await until(P, (x) => x.at.node === 'childhood', i);
@@ -427,8 +453,7 @@ try {
   i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'childhood.quiz' } });
   await P.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz', i);
   await interactsHere('in the room at a quiz tableau', true);
-  i = P.mark(); P.send({ t: 'start' });
-  const question = quizOf(await P.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'question', i));
+  const question = quizOf(await startRound(P, [P, E, N2]));
   await interactsHere('during a quiz question', false);
   i = P.mark();
   for (const c of [P, E, N2]) c.send(question.round.question.choices ? { t: 'answer', choice: 0 } : { t: 'answer', text: 'x' });

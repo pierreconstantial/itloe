@@ -6,18 +6,27 @@ import {
   record, reduceCampaign, settle, validateContent, zoneAt, holding, gameMasterId,
 } from '../shared/campaign/index.js';
 import { minigameContent } from '../shared/campaign/sample.js';
-import { DEFAULT_SETTINGS } from '../shared/game.js';
 import { MINIGAMES } from '../shared/minigames.js';
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
 /** @typedef {import('../shared/campaign/types.js').CampaignAction} CampaignAction */
 /** @typedef {import('../shared/campaign/types.js').Content} Content */
 
-/** The seed of a campaign's block game (these tests' rounds are block games). @param {Campaign} c */
-const blockSeed = (c) => /** @type {import('../shared/game.js').State | null} */ (c.at.activity)?.seed;
+/** The seed of a campaign's block round (these tests' rounds are block games). @param {Campaign} c */
+const blockSeed = (c) => /** @type {import('../shared/game.js').State | null | undefined} */ (c.at.activity?.round)?.seed;
 
 /** @param {Campaign} c @param {CampaignAction[]} actions */
 const run = (c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a, C), c);
+/** An action of the running minigame. @param {any} action @returns {CampaignAction} */
+const act = (action) => ({ t: 'activity', action });
+
+/** The game master starts the tableau's minigame, everyone eligible gets ready, and he starts a round. @param {Campaign} c */
+function startRound(c, now = 1000) {
+  if (!c.at.activity) c = run(c, { t: 'startMinigame', id: 'p', now });
+  if (!c.at.activity) return c; // no game master here
+  const players = c.at.activity.players;
+  return run(c, ...players.map((p) => act({ t: 'ready', id: p.id, on: true })), act({ t: 'start', id: 'p', now }));
+}
 
 /** Campaign with Pierre (the game master), Élodie (the chooser) and Sol in the party, at the false start. */
 function party() {
@@ -25,10 +34,9 @@ function party() {
     { t: 'join', id: 's', character: 'sol' });
 }
 
-/** One block game in the current tableau, ended by the game master (counts as played). @param {Campaign} c */
+/** One block game in the current tableau, from the game master's start of the minigame to his end (counts as played). @param {Campaign} c */
 function playOnce(c) {
-  if (c.at.activity) c = run(c, { t: 'newGame', id: 'p' }); // the podium → the room
-  return run(c, { t: 'start', id: 'p', now: 1000 }, { t: 'activity', action: { t: 'endGame', id: 'p' } });
+  return run(startRound(c), act({ t: 'endGame', id: 'p' }), act({ t: 'lobby', id: 'p' }), { t: 'endMinigame', id: 'p' });
 }
 
 /** @param {Campaign} c */
@@ -169,23 +177,24 @@ test('3 block games → reward item + two worlds unlock AT ONCE (one step), seq 
   assert.equal(c.newsSeq, seqs.at(-1));
 });
 
-test('round.finished is derived exactly once per game, in the same step, any end reason', () => {
-  let c = party();
-  c = run(c, { t: 'start', id: 'p', now: 1 });
-  const playing = c;
-  c = run(c, { t: 'activity', action: { t: 'endGame', id: 'p' } });
-  assert.equal(c.facts.counters[COUNTER.played('blocks')], 1);
+test('round.finished is recorded exactly once per round, when the minigame ends, any end reason', () => {
+  let c = startRound(party());
+  c = run(c, act({ t: 'endGame', id: 'p' }));
+  assert.equal(c.facts.counters[COUNTER.played('blocks')], undefined, 'kept, not recorded, on the podium');
+  assert.equal(c.at.results.length, 1);
   // replays of the finished state, or an injected round.finished event, never count twice
-  assert.equal(run(c, { t: 'activity', action: { t: 'endGame', id: 'p' } }), c);
+  assert.equal(run(c, act({ t: 'endGame', id: 'p' })), c);
   assert.equal(run(c, { t: 'event', event: { t: 'round.finished', kind: 'blocks', node: 'hub.false-start', ranking: [], endReason: 'stuck' } }), c);
+  c = run(c, act({ t: 'lobby', id: 'p' }), { t: 'endMinigame', id: 'p' });
+  assert.equal(c.facts.counters[COUNTER.played('blocks')], 1);
+  assert.deepEqual(c.at.results, []);
   // the bell
-  const timed = run(newCampaign(C, 5), { t: 'join', id: 'p', character: 'pierre' },
-    { t: 'config', id: 'p', patch: { mode: 'timed' } },
-    { t: 'start', id: 'p', now: 1000 });
-  const d = /** @type {number} */ (/** @type {any} */ (timed.at.activity)?.deadline);
-  const rung = run(timed, { t: 'activity', action: { t: 'timeUp', deadline: d } });
+  let timed = run(newCampaign(C, 5), { t: 'join', id: 'p', character: 'pierre' }, { t: 'startMinigame', id: 'p', now: 1000 },
+    act({ t: 'config', id: 'p', patch: { mode: 'timed' } }));
+  timed = startRound(timed);
+  const d = /** @type {number} */ (/** @type {any} */ (timed.at.activity?.round)?.deadline);
+  const rung = run(timed, act({ t: 'timeUp', deadline: d }), act({ t: 'lobby', id: 'p' }), { t: 'endMinigame', id: 'p' });
   assert.equal(rung.facts.counters[COUNTER.played('blocks')], 1);
-  assert.notEqual(playing.facts, c.facts);
 });
 
 test('chain: both tableaux done → world done → third world unlocks', () => {
@@ -210,32 +219,15 @@ test('chain: both tableaux done → world done → third world unlocks', () => {
   assert.ok(unlockedNews(c).includes('adult'));
 });
 
-test('node settings reach the room at the tableau (teens.blocks is timed)', () => {
+test('a tableau\'s settings reach its minigame when it starts (teens.blocks is timed)', () => {
   let c = run(playOnce(playOnce(playOnce(party()))), { t: 'back', id: 'p' }, { t: 'enter', id: 'e', node: 'teens' }, { t: 'enter', id: 'e', node: 'teens.blocks' });
-  assert.equal(/** @type {any} */ (c.at.settings).mode, 'timed');
-  assert.equal(/** @type {any} */ (c.at.settings).timedSeconds, 120);
+  const started = run(c, { t: 'startMinigame', id: 'p', now: 1 });
+  assert.equal(/** @type {any} */ (started.at.activity?.settings).mode, 'timed');
+  assert.equal(/** @type {any} */ (started.at.activity?.settings).timedSeconds, 120);
   c = run(c, { t: 'back', id: 'p' }, { t: 'enter', id: 'e', node: 'childhood' });
   assert.equal(c.at.node, 'teens', 'enter only a child of where the party is (childhood is a sibling)');
 });
 
-test('config: the game master sets the tableau settings, not while a round runs; a round locks them in; leaving resets them', () => {
-  const c = party();
-  const timed = run(c, { t: 'config', id: 'p', patch: { mode: 'timed', size: 11 } });
-  assert.deepEqual(/** @type {any} */ (timed.at.settings), { ...DEFAULT_SETTINGS, mode: 'timed' }, 'invalid values ignored');
-  assert.equal(run(timed, { t: 'config', id: 's', patch: { size: 9 } }), timed, 'guest → refused');
-  assert.equal(run(timed, { t: 'config', id: 'p', patch: { mode: 'timed' } }), timed, 'no change → same campaign');
-  const playing = run(timed, { t: 'start', id: 'p', now: 1000 });
-  assert.equal(/** @type {any} */ (playing.at.activity).rules.mode, 'timed', 'start locks them in');
-  assert.equal(run(playing, { t: 'config', id: 'p', patch: { size: 9 } }), playing, 'running → refused');
-  const podium = run(playing, { t: 'activity', action: { t: 'endGame', id: 'p' } });
-  const next = run(podium, { t: 'config', id: 'p', patch: { size: 9 } });
-  assert.equal(/** @type {any} */ (next.at.settings).size, 9, 'the podium takes the next settings');
-  assert.equal(/** @type {any} */ (next.at.activity).rules.size, 8, '…and keeps showing the game played');
-  const again = run(next, { t: 'again', id: 'p', now: 2000 });
-  assert.equal(/** @type {any} */ (again.at.activity).rules.size, 9, 'again locks them in');
-  const back = run(next, { t: 'gm', id: 'p', op: { op: 'goto', node: 'hub' } }, { t: 'gm', id: 'p', op: { op: 'goto', node: C.start } });
-  assert.deepEqual(back.at.settings, DEFAULT_SETTINGS, 'leaving the tableau resets them to the content');
-});
 
 test('rewards apply once; replayable games re-enter, one-shot scenes do not', () => {
   let c = playOnce(playOnce(playOnce(party())));
@@ -250,13 +242,12 @@ test('rewards apply once; replayable games re-enter, one-shot scenes do not', ()
 
 // ---------------------------------------------------------------- party, enter, back
 
-test('enter: the game master or the chooser only; locked nodes refused; back is the game master\'s, refused while playing', () => {
+test('enter: the game master or the chooser only; locked nodes refused; back is the game master\'s', () => {
   let c = playOnce(playOnce(playOnce(party())));
-  c = run(c, { t: 'newGame', id: 'p' }, { t: 'start', id: 'p', now: 1 });
-  assert.equal(run(c, { t: 'back', id: 'p' }), c, 'back refused while playing');
-  c = run(c, { t: 'activity', action: { t: 'endGame', id: 'p' } });
+  c = run(c, { t: 'startMinigame', id: 'p', now: 1 });
   assert.equal(run(c, { t: 'back', id: 'e' }), c, 'back: the game master only');
   c = run(c, { t: 'back', id: 'p' });
+  assert.equal(c.at.node, 'hub', 'his back ends the minigame first');
   assert.equal(run(c, { t: 'enter', id: 's', node: 'teens' }), c, 'neither the game master nor the chooser');
   assert.equal(run(c, { t: 'enter', id: 'e', node: 'adult' }), c, 'locked');
   assert.equal(run(c, { t: 'enter', id: 'e', node: 'teens' }).at.node, 'teens', 'the chooser walks in');
@@ -266,49 +257,28 @@ test('enter: the game master or the chooser only; locked nodes refused; back is 
 test('the game master is whoever holds the content\'s character: never passed on, back when Pierre rejoins', () => {
   let c = run(newCampaign(C, 42), { t: 'join', id: 'e', character: 'elodie' }, { t: 'join', id: 's', character: 'sol' });
   assert.equal(gameMasterId(c.party, C), null, 'before Pierre joins, nobody');
-  assert.equal(run(c, { t: 'start', id: 'e', now: 1 }), c, 'the first to join is not the game master');
+  assert.equal(run(c, { t: 'startMinigame', id: 'e', now: 1 }), c, 'the first to join is not the game master');
   c = run(c, { t: 'join', id: 'p', character: 'pierre' });
   assert.equal(gameMasterId(c.party, C), 'p');
-  c = run(c, { t: 'start', id: 'p', now: 1 }, { t: 'leave', id: 'p' });
+  c = run(startRound(c), { t: 'leave', id: 'p' });
   assert.equal(gameMasterId(c.party, C), null, 'once he left, nobody');
-  assert.equal(run(c, { t: 'activity', action: { t: 'endGame', id: 'e' } }), c, 'nobody else ends the round');
-  c = run(c, { t: 'join', id: 'p2', character: 'pierre' }, { t: 'activity', action: { t: 'endGame', id: 'p2' } });
-  assert.equal(c.at.activity?.phase, 'finished', 'Pierre back, under a new id');
+  assert.equal(run(c, act({ t: 'endGame', id: 'e' })), c, 'nobody else ends the round');
+  c = run(c, { t: 'join', id: 'p2', character: 'pierre' }, act({ t: 'endGame', id: 'p2' }));
+  assert.equal(c.at.activity?.stage, 'podium', 'Pierre back, under a new id');
   c = run(c, { t: 'status', id: 'p2', status: 'wisp', on: true });
   assert.ok(c.party.players.p2.statuses.includes('wisp'));
-  assert.equal(run(c, { t: 'newGame', id: 'p2' }).at.activity, null, 'wisp or not');
+  assert.equal(run(c, act({ t: 'lobby', id: 'p2' })).at.activity?.stage, 'lobby', 'wisp or not');
 });
 
-test('party: a round starts with every member present; mid-round joiners watch and play the next round from the room', () => {
-  let c = run(party(), { t: 'join', id: 'g', character: 'anna' }, { t: 'leave', id: 'g' });
-  assert.equal(c.at.activity, null, 'the room: no round');
-  assert.equal(run(c, { t: 'start', id: 's', now: 1 }), c, 'start: the game master only');
-  c = run(c, { t: 'start', id: 'p', now: 1 });
-  assert.deepEqual(c.at.activity?.order, ['p', 'e', 's'], 'every member who has not left, online or not');
-  assert.equal(run(c, { t: 'start', id: 'p', now: 2 }), c, 'a round already runs');
-  c = run(c, { t: 'join', id: 'a', character: 'anna' });
-  assert.ok(c.party.players.a && !c.at.activity?.players.a, 'mid-round joiner watches');
-  c = run(c, { t: 'activity', action: { t: 'endGame', id: 'p' } });
-  const again = run(c, { t: 'again', id: 'p', now: 3 });
-  assert.deepEqual(again.at.activity?.order, ['p', 'e', 's', 'a'], 'again: everyone present, the newcomer included');
-  assert.notEqual(again.seed, c.seed, 'a new seed for every round');
-  assert.equal(run(c, { t: 'newGame', id: 's' }), c, 'back to the room: the game master only');
-  c = run(c, { t: 'newGame', id: 'p' });
-  assert.equal(c.at.activity, null);
-  assert.equal(run(c, { t: 'newGame', id: 'p' }), c, 'back to the room: from the podium only');
-  c = run(c, { t: 'start', id: 'p', now: 4 });
-  assert.deepEqual(c.at.activity?.order, ['p', 'e', 's', 'a'], 'the newcomer plays the round started from the room');
-  assert.equal(run(c, { t: 'join', id: 'x', character: 'sol' }), c, 'character held → refused');
-  assert.equal(run(c, { t: 'join', id: 'e', character: 'anna' }), c, 'id already in the party');
-});
 
-test('party: leave forwards to the game and frees the character', () => {
-  let c = run(party(), { t: 'start', id: 'p', now: 1 }, { t: 'leave', id: 'e' });
+test('party: a left member\'s character is free', () => {
+  let c = run(party(), { t: 'leave', id: 'e' });
   assert.equal(c.party.players.e.left, true);
-  assert.equal(c.at.activity?.players.e.left, true, 'forwarded: marked left in the game');
   c = run(c, { t: 'join', id: 'e2', character: 'elodie' });
   assert.ok(c.party.players.e2, 'a left member\'s character is free');
   assert.equal(run(c, { t: 'leave', id: 'e' }), c, 'already left');
+  assert.equal(run(c, { t: 'join', id: 'x', character: 'sol' }), c, 'character held → refused');
+  assert.equal(run(c, { t: 'join', id: 'e2', character: 'anna' }), c, 'id already in the party');
 });
 
 // ---------------------------------------------------------------- ack
@@ -365,13 +335,14 @@ test('gm: the game master only; goto / unlock / lock (sticks) / setFlag / count 
 
 // ---------------------------------------------------------------- loading a save
 
-test('loadCampaign: a round its minigame cannot give a status (a lobby from an earlier version) is refused', () => {
-  const c = run(party(), { t: 'start', id: 'p', now: 1 });
-  const lobby = JSON.parse(JSON.stringify(c));
-  lobby.at.activity.phase = 'lobby';
-  assert.throws(() => loadCampaign(lobby, C), /can resume/);
-  const quiz = { ...lobby, at: { ...lobby.at, kind: 'quiz', activity: { kind: 'quiz', phase: 'lobby' } } };
-  assert.throws(() => loadCampaign(quiz, C), /can resume/);
+test('loadCampaign: a minigame that cannot give a status (a round from before minigame lobbies) is refused', () => {
+  const c = startRound(party());
+  const old = JSON.parse(JSON.stringify(c));
+  old.at.activity = old.at.activity.round; // a round saved without its lobby
+  assert.throws(() => loadCampaign(old, C), /can resume/);
+  const stage = JSON.parse(JSON.stringify(c));
+  stage.at.activity.stage = 'podium'; // a podium whose round still runs
+  assert.throws(() => loadCampaign(stage, C), /can resume/);
 });
 
 test('content tolerance: unknown ids dropped, settle re-runs, nothing re-locked', () => {
@@ -395,39 +366,42 @@ test('content tolerance: unknown ids dropped, settle re-runs, nothing re-locked'
   assert.ok(l2.facts.unlocked.includes('bonus'));
   assert.ok(l2.news.some((n) => n.t === 'unlocked' && n.node === 'bonus' && n.seq > raw.newsSeq));
   // the party stood in a node that no longer exists → back at the start
-  const lost = loadCampaign({ ...raw, at: { node: 'removed.world', kind: null, activity: null, settings: null } }, C);
+  const lost = loadCampaign({ ...raw, at: { node: 'removed.world', kind: null, activity: null, results: [] } }, C);
   assert.equal(lost.at.node, C.start);
   assert.deepEqual([lost.at.kind, lost.at.activity], ['blocks', null], 'the room at the start');
 });
 
-test('determinism: same actions → same campaign (seeds advance on every round started)', () => {
+test('determinism: same actions → same campaign (seeds advance on every minigame and round started)', () => {
   const a = playOnce(playOnce(party()));
   const b = playOnce(playOnce(party()));
   assert.deepEqual(a, b);
-  const r1 = run(party(), { t: 'start', id: 'p', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'p' } });
-  const r2 = run(r1, { t: 'again', id: 'p', now: 2 });
-  assert.notEqual(blockSeed(r1), blockSeed(r2));
+  const r1 = run(startRound(party()), act({ t: 'endGame', id: 'p' }), act({ t: 'lobby', id: 'p' }));
+  const r2 = run(r1, act({ t: 'start', id: 'p', now: 2 }));
+  assert.equal(r2.at.activity?.stage, 'running', 'the round\'s players came back ready');
+  assert.notEqual(blockSeed(startRound(party())), blockSeed(r2), 'the next round, a new seed');
 });
 
 test('loadCampaign: a JSON round-trip (a server restart) is deep-equal in every phase — no reshuffled seed', () => {
   const room = party();
-  const playing = run(room, { t: 'start', id: 'p', now: 1 });
-  const finished = run(playing, { t: 'activity', action: { t: 'endGame', id: 'p' } });
+  const lobby = run(room, { t: 'startMinigame', id: 'p', now: 1 }, act({ t: 'ready', id: 'e', on: true }));
+  const playing = startRound(room);
+  const podium = run(playing, act({ t: 'endGame', id: 'p' }));
+  const lobbyAgain = run(podium, act({ t: 'lobby', id: 'p' }));
   const withNews = playOnce(playOnce(playOnce(room)));
   const hub = run(withNews, { t: 'back', id: 'p' });
   const world = run(hub, { t: 'enter', id: 'e', node: 'childhood' });
   const scene = run(world, { t: 'enter', id: 'e', node: 'childhood.scene' });
   const fresh = newCampaign(C, 42);
   /** @type {Record<string, Campaign>} */
-  const cases = { fresh, room, playing, finished, withNews, hub, world, scene };
+  const cases = { fresh, room, lobby, playing, podium, lobbyAgain, withNews, hub, world, scene };
   for (const [name, c] of Object.entries(cases)) {
     const back = loadCampaign(JSON.parse(JSON.stringify(c)), C);
     assert.deepEqual(back, JSON.parse(JSON.stringify(c)), `${name}: deep-equal after load`);
     assert.equal(back.seed, c.seed, `${name}: seed kept`);
     // and the NEXT block game is the same one as without the restart
-    const next = (/** @type {Campaign} */ x) => blockSeed(run(x, { t: 'back', id: 'p' }, { t: 'gm', id: 'p', op: { op: 'goto', node: 'teens.blocks' } },
-      { t: 'start', id: 'p', now: 5 }));
+    const next = (/** @type {Campaign} */ x) => blockSeed(startRound(run(x, { t: 'gm', id: 'p', op: { op: 'goto', node: 'teens.blocks' } }), 5));
     assert.equal(next(back), next(c), `${name}: next block game unchanged by the restart`);
   }
   assert.ok(withNews.news.length > 0, 'pending news survive too');
+  assert.equal(lobbyAgain.at.results.length, 1, 'a finished round\'s result survives in the lobby');
 });

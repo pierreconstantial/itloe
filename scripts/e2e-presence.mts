@@ -7,7 +7,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { WebSocket as WsClient } from 'ws';
-import { blocksOf, check, Client, finish, HTTP, legalMoves, playToDone, roomOf, sleep, URL_WS } from './e2e-lib.mts';
+import { backToLobby, blocksOf, check, Client, finish, HTTP, legalMoves, lobbyOf, playToDone, sleep, startRound, URL_WS } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -84,7 +84,7 @@ try {
   room = (await (await fetch(`${HTTP}/api/join`)).json()).code;
   let screen = new Client('screen'); await screen.open(); screen.send({ t: 'hello', role: 'screen' });
   const v0 = await screen.waitFor((m) => m.t === 'view');
-  check(Array.isArray(v0.online) && v0.online.length === 0 && !('online' in (v0.round?.view ?? {})), 'view carries online[] beside the State, empty at first');
+  check(Array.isArray(v0.online) && v0.online.length === 0 && !('online' in (v0.minigame?.view ?? {})), 'view carries online[] beside the State, empty at first');
 
   // ---------- the room at the tableau: presence + reclaim ----------
   const A = await device('A');
@@ -119,10 +119,10 @@ try {
   const A3 = await device('A3');
   check((await tap(A3, 'pierre')).id === idA, 'game master character reclaimed on a new device → same playerId');
   check(screen.lastGm() === idA, 'reclaimed Pierre is still game master');
-  let i = A3.mark(); A3.send({ t: 'start' });
-  await A3.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
+  await startRound(A3, [A3, B2]);
   await B2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing');
-  check(A3.lastView().phase === 'playing', 'reclaimed game master can start the game');
+  check(A3.lastView().phase === 'playing', 'reclaimed game master can start the minigame and a round');
+  let i: number;
 
   // ---------- mid-game reclaim keeps board, score, hand ----------
   i = A3.mark(); B2.send({ t: 'place', ...legalMoves(B2.lastView(), idB)[0] });
@@ -175,18 +175,17 @@ try {
   const Egm = await device('Egm');
   check((await tap(Egm, 'pierre')).id === idA, 'podium: offline game master reclaimed by character');
   check(Egm.lastGm() === idA && Egm.lastView().phase === 'finished', '…still game master, still on the podium');
-  i = Egm.mark(); Egm.send({ t: 'newGame' });
-  const lob = roomOf(await Egm.waitFor((m) => m.t === 'view' && !!roomOf(m), i));
-  check(!lob.players[idB], 'newGame drops the left player');
+  const lob = lobbyOf(await backToLobby(Egm));
+  check(!lob.players.some((p: any) => p.id === idB), 'back in the lobby: the left player is gone');
   const F = await device('F');
   const idF = (await tap(F, 'sol')).id ?? '';
-  check(!!idF && idF !== idB, "the left player's character is FREE in the room → a NEW player, not the old id");
+  check(!!idF && idF !== idB, "the left player's character is FREE in the lobby → a NEW player, not the old id");
 
   // ---------- kill -9 + restart: online starts empty, everyone reconnects ----------
   await kill9(); await boot();
   screen = new Client('screen2'); await screen.open(); screen.send({ t: 'hello', role: 'screen' });
   const vr = await screen.waitFor((m) => m.t === 'view');
-  check(vr.online.length === 0 && roomOf(vr).order.join() === `${idA},${idF}`, 'after restart: same players, online empty');
+  check(vr.online.length === 0 && lobbyOf(vr)?.players.map((p: any) => p.id).join() === `${idA},${idF}`, 'after restart: still in the lobby, same players, online empty');
   const E2 = await rejoin('E2', idA);
   await onlineIs(screen, [idA], 'stored id reconnects → online');
   const F2 = await device('F2');
@@ -195,8 +194,7 @@ try {
   check(screen.lastGm() === idA, 'game master kept through the restart');
   // ---------- game master controls: a dropped player can never block the game ----------
   const G = await device('G'); const idG = (await tap(G, 'anna')).id!;
-  i = E2.mark(); E2.send({ t: 'start' });
-  await E2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
+  await startRound(E2, [E2, F2, G]);
   await closed(F2); // sol drops while NOT stuck: the game would wait for her forever
   await onlineIs(screen, [idA, idG], 'controls: a player drops mid-game');
   const errOf = async (c: Client, msg: object) => {
@@ -224,10 +222,10 @@ try {
   check(await errOf(E2, { t: 'endGame' }) === 'refused', 'game master endGame on the podium → err refused');
   check(await errOf(E2, { t: 'retire', target: idG }) === 'refused', 'game master retire on the podium → err refused');
   // solo: a game ended by the game master is a real score → solo best recorded
-  i = E2.mark(); E2.send({ t: 'newGame' }); await E2.waitFor((m) => m.t === 'view' && !!roomOf(m), i);
-  F3.send({ t: 'leave' }); G.send({ t: 'leave' });
-  await E2.waitFor((m) => m.t === 'view' && roomOf(m)?.order.length === 1);
-  i = E2.mark(); E2.send({ t: 'start' }); await E2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
+  await backToLobby(E2);
+  i = E2.mark(); F3.send({ t: 'leave' }); G.send({ t: 'leave' });
+  await E2.waitFor((m) => m.t === 'view' && lobbyOf(m)?.players.length === 1, i);
+  await startRound(E2, [E2]);
   i = E2.mark(); E2.send({ t: 'place', ...legalMoves(E2.lastView(), idA)[0] }); await E2.waitFor((m) => m.t === 'view', i);
   const solo = E2.lastView().players[idA].score;
   i = E2.mark(); E2.send({ t: 'endGame' });

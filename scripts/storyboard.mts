@@ -50,10 +50,6 @@ async function play(seq: Sequence): Promise<Slide[]> {
       tv: async () => ({ who: 'TV', img: await d.tv.capture(), planned: false }),
       real: async (who) => ({ who: nameOf(who), img: await board.phone(who).capture(), planned: false }),
       mockTv: async (html) => ({ who: 'TV', img: await render(mockTv, 'tv', html), planned: true }),
-      overTv: async (html) => {
-        const under = await d.tv.capture();
-        return { who: 'TV', img: await render(mockTv, 'tv', `<img class="under" src="data:image/jpeg;base64,${under}">${html}`), planned: true };
-      },
       mockPhone: async (who, html) => ({ who: nameOf(who), img: await render(mockPhone, 'phone', html), planned: true }),
       frame: async (caption, shots) => { slides.push({ sequence: seq.id, caption, shots: await sequential(shots) }); },
     };

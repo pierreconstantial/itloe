@@ -3,7 +3,7 @@
 // (kill -9 / resume across phases: scripts/e2e-resume.mts, which runs its own server)
 import { PIECES } from '../shared/pieces.js';
 import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
-import { blocksOf, check, Client, finish, gmOf, HTTP, illegalMove, roomOf, legalMoves, playToDone, sleep, URL_WS } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, gmOf, HTTP, illegalMove, lobbyOf, roomOf, legalMoves, playToDone, settled, sleep, URL_WS } from './e2e-lib.mts';
 
 let s = 12345;
 const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 4294967296);
@@ -41,8 +41,8 @@ await A.waitFor((m) => m.t === 'view'); await B.waitFor((m) => m.t === 'view');
 
 // unidentified start
 i = A.mark();
-A.send({ t: 'start' });
-check((await A.waitFor((m) => m.t === 'err', i)).code === 'unknown-player', 'start before join → err unknown-player');
+A.send({ t: 'startMinigame' });
+check((await A.waitFor((m) => m.t === 'err', i)).code === 'unknown-player', 'startMinigame before join → err unknown-player');
 
 // --- join ---
 i = A.mark(); A.send({ t: 'join', character: 'pierre' });
@@ -161,12 +161,27 @@ i = A.mark(); W2.send({ t: 'leave' });
 await A.waitFor((m) => m.t === 'view' && !roomOf(m)?.players[idW], i);
 W2.ws.close();
 
-// --- start: game master guard ---
+// --- startMinigame, ready, start: game master guard ---
 let ia = A.mark(); ib = B.mark();
-B.send({ t: 'start' });
-check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'non-game-master start → err not-gm');
+B.send({ t: 'startMinigame' });
+check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'non-game-master startMinigame → err not-gm');
 await sleep(250);
-check(A.since(ia).length === 0, 'non-game-master start → no broadcast');
+check(A.since(ia).length === 0, 'non-game-master startMinigame → no broadcast');
+ib = B.mark(); B.send({ t: 'ready', on: true });
+check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-playing', 'ready with no minigame running → err not-playing');
+
+ia = A.mark(); ib = B.mark();
+A.send({ t: 'startMinigame' });
+const lobby0 = lobbyOf(await B.waitFor((m) => m.t === 'view' && !!lobbyOf(m), ib));
+await A.waitFor((m) => m.t === 'view' && !!lobbyOf(m), ia);
+check(lobby0.players.map((p: any) => p.id).join() === `${idA},${idB}` && lobby0.ready.length === 0,
+  'game master startMinigame → the lobby, both eligible, nobody ready, broadcast');
+ib = B.mark(); B.send({ t: 'start' });
+check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'non-game-master start → err not-gm');
+ia = A.mark(); A.send({ t: 'start' });
+check((await A.waitFor((m) => m.t === 'err', ia)).code === 'refused', 'game master start with nobody ready → err refused');
+A.send({ t: 'ready', on: true }); B.send({ t: 'ready', on: true });
+await A.waitFor((m) => m.t === 'view' && lobbyOf(m)?.ready.length === 2);
 
 ia = A.mark(); ib = B.mark();
 A.send({ t: 'start' });
@@ -230,7 +245,8 @@ i = X.mark(); X.send({ t: 'join', character: 'anna' });
 // A1: a newcomer joins the EVENING mid-game and watches: welcomed, in the party, not seated in the game
 const xw = await X.waitFor((m) => m.t === 'welcome' || m.t === 'err', i);
 const xv = await X.waitFor((m) => m.t === 'view' && m.campaign?.party.players[xw.playerId], i);
-check(xw.t === 'welcome' && !blocksOf(xv).players[xw.playerId], 'join during playing → joins the evening as a watcher (not seated)');
+check(xw.t === 'welcome' && !blocksOf(xv).players[xw.playerId] && xv.minigame.view.players.some((p: any) => p.id === xw.playerId),
+  'join during playing → joins the evening and the lobby\'s list, watching the round (not seated)');
 i = X.mark(); X.send({ t: 'leave' });
 await X.waitFor((m) => m.t === 'view' && m.campaign.party.players[xw.playerId].left, i);
 X.ws.close();
@@ -242,8 +258,8 @@ i = Acur.mark();
 Acur.send({ t: 'place', ...legalMoves({ ...Acur.lastView(), players: { [idA]: { ...Acur.lastView().players[idA], board: new Array(64).fill(0) } } }, idA)[0] });
 check((await Acur.waitFor((m) => m.t === 'err', i)).code === 'bad-place', 'place by done player → err bad-place');
 ib = B.mark();
-B.send({ t: 'again' });
-check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'again while playing (non-game-master) → err');
+B.send({ t: 'lobby' });
+check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'back to the lobby while playing (non-game-master) → err');
 
 const nB = await playToDone(B, idB, Acur, rnd);
 const fin = Acur.lastView();
@@ -253,55 +269,63 @@ i = B.mark();
 B.send({ t: 'place', piece: 0, x: 0, y: 0 });
 check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-playing', 'place in finished → err not-playing');
 
-// --- newGame: podium → the room, same players, newcomers can join, start works again ---
+// --- lobby: podium → the lobby, its players ready, newcomers can join, start works again ---
 ib = B.mark();
-B.send({ t: 'newGame' });
-check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'non-game-master newGame → err not-gm');
+B.send({ t: 'lobby' });
+check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'non-game-master lobby → err not-gm');
+i = B.mark(); B.send({ t: 'endMinigame' });
+check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-gm', 'non-game-master endMinigame → err not-gm');
+ia = Acur.mark(); Acur.send({ t: 'endMinigame' });
+check((await Acur.waitFor((m) => m.t === 'err', ia)).code === 'refused', 'game master endMinigame on the podium → err refused');
 ia = Acur.mark(); ib = B.mark();
-Acur.send({ t: 'newGame' });
+Acur.send({ t: 'lobby' });
 const vnMsg = await B.waitFor((m) => m.t === 'view', ib);
-const vn = roomOf(vnMsg);
-await screen.waitFor((m) => m.t === 'view' && !!roomOf(m));
-check(!!vn && gmOf(vnMsg) === idA && vn.order.join() === `${idA},${idB}`,
-  'game master newGame → the room, same players + game master, broadcast');
-check(vn.players[idA].character === 'pierre' && vn.players[idB].character === 'sol', 'newGame keeps each character');
+const vn = lobbyOf(vnMsg);
+await screen.waitFor((m) => m.t === 'view' && !!lobbyOf(m));
+check(!!vn && gmOf(vnMsg) === idA && vn.players.map((p: any) => p.id).join() === `${idA},${idB}` && vn.ready.join() === `${idA},${idB}`,
+  'game master lobby → the lobby, same players ready + game master, broadcast');
+check(vn.players[0].character === 'pierre' && vn.players[1].character === 'sol', 'the lobby keeps each character');
 const joinAfter = await (await fetch(`${HTTP}/api/join`)).json();
-check(joinAfter.code === room, 'newGame keeps the room code');
+check(joinAfter.code === room, 'the lobby keeps the room code');
 ia = Acur.mark();
-Acur.send({ t: 'newGame' });
-check((await Acur.waitFor((m) => m.t === 'err', ia)).code === 'refused', 'game master newGame outside finished (the room) → err refused');
+Acur.send({ t: 'lobby' });
+check((await Acur.waitFor((m) => m.t === 'err', ia)).code === 'refused', 'game master lobby outside the podium (the lobby) → err refused');
 const N = new Client('N'); await N.open(); N.send({ t: 'hello', role: 'player', room });
 i = N.mark(); N.send({ t: 'join', character: 'anna' });
 const idN = (await N.waitFor((m) => m.t === 'welcome', i)).playerId;
-await Acur.waitFor((m) => m.t === 'view' && roomOf(m)?.players[idN]);
-check(Acur.lastRoom().order.join() === `${idA},${idB},${idN}`, 'a newcomer joins the room after newGame');
+await Acur.waitFor((m) => m.t === 'view' && lobbyOf(m)?.players.some((p: any) => p.id === idN));
+check(Acur.lastLobby().players.map((p: any) => p.id).join() === `${idA},${idB},${idN}` && !Acur.lastLobby().ready.includes(idN),
+  'a newcomer joins the lobby, not ready');
 i = N.mark(); N.send({ t: 'start' });
 check((await N.waitFor((m) => m.t === 'err', i)).code === 'not-gm', 'newcomer (non-game-master) start → err not-gm');
+N.send({ t: 'ready', on: true });
+await settled([N], [Acur]);
 ia = Acur.mark();
 Acur.send({ t: 'start' });
 const vs = blocksOf(await Acur.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', ia));
-check(vs.order.length === 3 && vs.seed !== fin.seed, 'game master start after newGame → playing with 3 players, new seed');
+check(vs.order.length === 3 && vs.seed !== fin.seed, 'game master start from the lobby → playing with 3 players, new seed');
 await Promise.all([N, B].map((c) => c.waitFor((m) => m.t === 'view' && blocksOf(m)?.seed === vs.seed)));
 await playToDone(N, idN, Acur, rnd);
 await playToDone(B, idB, Acur, rnd);
 await playToDone(Acur, idA, B, rnd);
 await B.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished');
 check(B.lastView().phase === 'finished', 'second game played to the podium');
-N.send({ t: 'leave' });
-await B.waitFor((m) => m.t === 'view' && !blocksOf(m)?.players[idN]);
+ib = B.mark(); N.send({ t: 'leave' });
+const vLeft = await B.waitFor((m) => m.t === 'view' && !blocksOf(m)?.players[idN], ib);
+check(!vLeft.minigame.view.players.some((p: any) => p.id === idN), 'leaving on the podium → off the podium and the lobby\'s list');
 N.ws.close();
 
-// --- again ---
-ib = B.mark();
-B.send({ t: 'again' });
-check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'non-game-master again → err not-gm');
+// --- Play again: back to the lobby, then start at once ---
+ia = Acur.mark();
+Acur.send({ t: 'lobby' });
+await Acur.waitFor((m) => m.t === 'view' && !!lobbyOf(m), ia);
 ia = Acur.mark(); ib = B.mark();
-Acur.send({ t: 'again' });
-const va = blocksOf(await B.waitFor((m) => m.t === 'view', ib));
+Acur.send({ t: 'start' });
+const va = blocksOf(await B.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', ib));
 const pa = va.players[idA], pb = va.players[idB];
-check(va.phase === 'playing' && va.seed !== seed1, `game master again → playing, new seed (${seed1} → ${va.seed})`);
+check(va.phase === 'playing' && va.seed !== seed1, `game master lobby + start → playing, new seed (${seed1} → ${va.seed})`);
 check(va.order.join() === `${idA},${idB}` && pa.score === 0 && pb.score === 0 && pa.board.every((c: number) => c === 0) && !pa.done && !pb.done
-  && JSON.stringify(pa.hand) === JSON.stringify(pb.hand), 'again → same players, fresh boards/scores, identical new hand 0');
+  && JSON.stringify(pa.hand) === JSON.stringify(pb.hand), 'start again → same players, fresh boards/scores, identical new hand 0');
 
 // --- leave mid-game: player stays, marked done; the other keeps playing ---
 ia = Acur.mark();
@@ -311,6 +335,17 @@ check(!!vm.players[idB] && vm.players[idB].done && vm.phase === 'playing', 'mid-
 ia = Acur.mark();
 Acur.send({ t: 'place', ...legalMoves(vm, idA)[0] });
 check((await Acur.waitFor((m) => m.t === 'view' || m.t === 'err', ia)).t === 'view', 'remaining player can still place');
+
+// --- the end: endGame, the lobby, endMinigame → the room; the three finished rounds recorded then ---
+ia = Acur.mark(); Acur.send({ t: 'endGame' });
+await Acur.waitFor((m) => m.t === 'view' && m.minigame?.status === 'podium', ia);
+ia = Acur.mark(); Acur.send({ t: 'lobby' });
+const vl3 = await Acur.waitFor((m) => m.t === 'view' && !!lobbyOf(m), ia);
+check(vl3.campaign.at.results.length === 3 && !vl3.campaign.facts.counters['blocks.played'], 'three finished rounds kept, nothing recorded yet');
+ia = Acur.mark(); Acur.send({ t: 'endMinigame' });
+const vEnd = await Acur.waitFor((m) => m.t === 'view' && m.minigame === null, ia);
+check(!!roomOf(vEnd) && vEnd.campaign.facts.counters['blocks.played'] === 3 && vEnd.campaign.at.results.length === 0,
+  'game master endMinigame → the room at the tableau, the three rounds recorded');
 
 for (const c of [screen, Acur, B]) c.ws.close();
 finish();

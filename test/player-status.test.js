@@ -37,26 +37,26 @@ test('players keep several statuses across save/load; portal and later joins gra
   assert.throws(() => loadCampaign(old, STORY_CONTENT), /invalid statuses/);
 });
 
-test('the game master switches Wisp Mode during a round without putting the player back in it', () => {
+test('the game master switches Wisp Mode during a round; the opening\'s four stay its players, wisp or not', () => {
   let c = newCampaign(STORY_CONTENT, 7);
   for (const character of ['pierre', 'elodie', 'sol', 'anna']) {
     c = act(c, { t: 'join', id: character, character: /** @type {import('../shared/characters.js').CharacterId} */ (character) });
   }
-  c = act(c, { t: 'start', id: 'pierre', now: 1000 });
-  assert.equal(c.at.activity?.players.sol.left, false);
+  c = act(c, { t: 'startMinigame', id: 'pierre', now: 1000 });
+  for (const id of ['pierre', 'elodie', 'sol', 'anna']) c = act(c, { t: 'activity', action: { t: 'ready', id, on: true } });
+  c = act(c, { t: 'activity', action: { t: 'start', id: 'pierre', now: 1000 } });
+  assert.equal(c.at.activity?.round?.players.sol.left, false);
   assert.equal(act(c, { t: 'gm', id: 'elodie', op: { op: 'wisp', character: 'sol', on: true } }), c);
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'wisp', character: 'sol', on: true } });
   assert.deepEqual(c.party.players.sol.statuses, ['wisp']);
-  assert.equal(c.at.activity?.players.sol.left, true);
+  assert.equal(c.at.activity?.round?.players.sol.left, false, 'the opening names Sol: still eligible, still playing');
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'wisp', character: 'sol', on: false } });
   assert.deepEqual(c.party.players.sol.statuses, ['wisp', 'incarnating']);
   c = act(c, { t: 'incarnate', id: 'sol' });
   assert.deepEqual(c.party.players.sol.statuses, []);
-  assert.equal(c.at.activity?.players.sol.left, true);
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'wisp', character: 'pierre', on: true } });
   assert.deepEqual(c.party.players.pierre.statuses, ['wisp']);
   assert.equal(gameMasterId(c.party, STORY_CONTENT), 'pierre', 'still the game master as a wisp');
-  assert.equal(c.at.activity?.players.pierre.left, true);
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'wisp', character: 'pierre', on: false } });
   assert.deepEqual(c.party.players.pierre.statuses, ['wisp', 'incarnating']);
   assert.equal(act(c, { t: 'gm', id: 'pierre', op: { op: 'wisp', character: 'nico', on: true } }), c,

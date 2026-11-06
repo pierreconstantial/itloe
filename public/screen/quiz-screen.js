@@ -1,6 +1,6 @@
-// The quiz's TV screen, mounted by the frame (./minigames.js) while a quiz runs: question → reveal → …,
+// The quiz's TV screen, mounted by the plain lobby (./plain-lobby.js) while a quiz runs: question → reveal → …,
 // drawn by quiz-view.js from the round's view, the PUBLIC projection (no answer before the reveal); this
-// module owns the countdown ring's timer and the sounds. The finished quiz is the frame's podium, with
+// module owns the countdown ring's timer and the sounds. The finished quiz is the shared podium, with
 // each player's right answers and the dataset credits.
 
 import { renderQuestion, renderReveal, creditsOf } from './quiz-view.js';
@@ -17,7 +17,7 @@ addStylesheet(new URL('./quiz.css', import.meta.url));
 
 /**
  * @param {HTMLElement} root @param {import('./minigames.js').TvIo} _io
- * @returns {import('./minigames.js').Mounted}
+ * @returns {import('./minigames.js').RoundMounted}
  */
 function mount(root, _io) {
   /** The quiz in the last view this screen showed. @type {QuizView | null} */
@@ -60,9 +60,10 @@ function mount(root, _io) {
   };
 }
 
-/** The quiz's entry in the TV's list (./minigames.js). @type {import('./minigames.js').TvScreen} */
+/** The quiz's round screen, wrapped in the plain lobby in the TV's list (./minigames.js). @type {import('./minigames.js').RoundScreen} */
 export const QUIZ_SCREEN = {
   title: 'Quiz!',
+  name: 'quiz',
   settings: { summarize: summarizeQuiz },
   mount,
   /** Each player's right answers, and the dataset attribution (licences such as CC BY-SA require it). */

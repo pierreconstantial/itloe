@@ -9,7 +9,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, HTTP, quizOf, roomOf, settingsOf, sleep } from './e2e-lib.mts';
+import { backToLobby, blocksOf, check, Client, endMinigame, finish, HTTP, lobbyOf, quizOf, roomOf, settingsOf, sleep, startRound } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -79,13 +79,16 @@ async function screen(): Promise<Client> {
 }
 const gm = (c: Client, op: object) => c.send({ t: 'gm', op });
 
-/** Plays one quiz in childhood.quiz (choice mode, 3 questions): `right` players answer right, others wrong. */
+/** Plays one quiz in childhood.quiz (choice mode, 3 questions), from the game master's start to his end:
+ *  `right` players answer right, others wrong. */
 async function playQuiz(gm: Client, players: { c: Client, right: boolean }[], T: Client): Promise<void> {
-  let i = T.mark();
+  let i = gm.mark();
+  gm.send({ t: 'startMinigame' });
+  await gm.waitFor((m) => m.t === 'view' && !!lobbyOf(m), i);
+  i = T.mark();
   gm.send({ t: 'config', patch: { count: 3, mode: 'choice' } });
   await T.waitFor((m) => m.t === 'view' && settingsOf(m)?.mode === 'choice' && settingsOf(m).count === 3, i);
-  i = T.mark(); gm.send({ t: 'start' });
-  let q = quizOf(await T.waitFor((m) => m.t === 'view' && quizOf(m)?.phase === 'question', i));
+  let q = quizOf(await startRound(gm, players.map((p) => p.c)));
   for (let r = 0; r < 3; r++) {
     const bq = BANK.find((x) => x.q === q.round.question.q)!;
     const right = q.round.question.choices.indexOf(bq.choices![bq.answer as number]);
@@ -95,6 +98,8 @@ async function playQuiz(gm: Client, players: { c: Client, right: boolean }[], T:
     i = T.mark(); gm.send({ t: 'next' });
     q = quizOf(await T.waitFor((m) => m.t === 'view' && (quizOf(m)?.phase === 'finished' || (quizOf(m)?.phase === 'question' && quizOf(m).round.index === r + 1)), i));
   }
+  await backToLobby(gm);
+  await endMinigame(gm);
 }
 
 let P!: Client, E!: Client, S!: Client, T!: Client;
@@ -115,12 +120,13 @@ try {
   ({ c: S, id: idS } = await player('S', 'sol'));
   T = await screen();
   for (let n = 1; n <= 3; n++) {
-    let i = P.mark();
-    P.send({ t: n === 1 ? 'start' : 'again' });
-    await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
-    i = P.mark(); P.send({ t: 'endGame' });
+    await startRound(P, [P, E, S]);
+    const i = P.mark(); P.send({ t: 'endGame' });
     await P.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i);
+    await backToLobby(P);
   }
+  check(!inv(T).elodie, 'three block rounds played: no reward before the game master ends the block game');
+  await endMinigame(P);
   let k = await until(T, (x) => !!x.facts.inventory.elodie?.['old-key']);
   check(k.facts.inventory.elodie['old-key'] === 1 && !k.facts.inventory.pierre && !k.facts.inventory.sol, 'false start done → the old key to the chooser only');
   const news = k.news.find((n: any) => n.t === 'item' && n.item === 'old-key');

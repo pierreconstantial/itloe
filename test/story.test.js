@@ -6,20 +6,32 @@ import { INTRO_KEY, MEMORY_WORLDS, OPENING_PLAYERS, STORY_CONTENT } from '../sha
 /** @param {import('../shared/campaign/types.js').Campaign} campaign
  * @param {import('../shared/campaign/types.js').CampaignAction} action */
 const act = (campaign, action) => reduceCampaign(campaign, action, STORY_CONTENT);
+/** @param {import('../shared/campaign/types.js').Campaign} campaign @param {...any} actions
+ * @returns {import('../shared/campaign/types.js').Campaign} */
+const inGame = (campaign, ...actions) => actions.reduce((c, action) => act(c, { t: 'activity', action }), campaign);
+
+/** The four join; Pierre starts the block game, all four get ready, and he starts its round. */
+function openingRound() {
+  let c = newCampaign(STORY_CONTENT, 42);
+  for (const character of OPENING_PLAYERS) c = act(c, { t: 'join', id: character, character });
+  c = act(c, { t: 'startMinigame', id: 'pierre', now: 1000 });
+  return inGame(c, ...OPENING_PLAYERS.map((id) => ({ t: 'ready', id, on: true })), { t: 'start', id: 'pierre', now: 1000 });
+}
 
 test('Nico joins as a wisp, stays out of rounds, and incarnates when introduced', () => {
   let early = act(newCampaign(STORY_CONTENT, 4), { t: 'join', id: 'nico-first', character: 'nico' });
   early = act(early, { t: 'join', id: 'elo-first', character: 'elodie' });
   assert.equal(gameMasterId(early.party, STORY_CONTENT), null, 'nobody but Pierre is the game master');
-  assert.equal(act(early, { t: 'start', id: 'elo-first', now: 1000 }), early, 'nobody can start before Pierre joins');
+  assert.equal(act(early, { t: 'startMinigame', id: 'elo-first', now: 1000 }), early, 'nobody can start before Pierre joins');
   let c = newCampaign(STORY_CONTENT, 42);
   for (const character of OPENING_PLAYERS) c = act(c, { t: 'join', id: character, character });
   c = act(c, { t: 'join', id: 'nico-player', character: 'nico' });
   assert.deepEqual(c.party.players['nico-player'].statuses, ['wisp']);
-  c = act(c, { t: 'start', id: 'pierre', now: 1000 });
-  assert.equal(c.at.activity?.players['nico-player'], undefined);
-  c = act(c, { t: 'activity', action: { t: 'endGame', id: 'pierre' } });
-  c = act(c, { t: 'newGame', id: 'pierre' });
+  c = act(c, { t: 'startMinigame', id: 'pierre', now: 1000 });
+  assert.equal(c.at.activity?.players.some((p) => p.id === 'nico-player'), false, 'not among the opening\'s players');
+  c = inGame(c, ...OPENING_PLAYERS.map((id) => ({ t: 'ready', id, on: true })), { t: 'start', id: 'pierre', now: 1000 },
+    { t: 'endGame', id: 'pierre' }, { t: 'lobby', id: 'pierre' });
+  c = act(c, { t: 'endMinigame', id: 'pierre' });
   c = act(c, { t: 'portal', id: 'elodie' });
   assert.deepEqual(c.party.players.pierre.statuses, ['wisp']);
   assert.equal(gameMasterId(c.party, STORY_CONTENT), 'pierre', 'Pierre stays the game master as a wisp');
@@ -43,15 +55,33 @@ test('birthday content begins with only the block game, no key or memory-world a
   assert.equal(c.facts.unlocked.includes('young-adult'), false);
 });
 
-test('opening match, portal, apparition, pickup and Young Adult are one-time and Elo-only', () => {
+test('the opening\'s block game starts a round only with all four in the party and ready', () => {
   let c = newCampaign(STORY_CONTENT, 42);
-  for (const character of OPENING_PLAYERS) c = act(c, { t: 'join', id: character, character });
-  c = act(c, { t: 'start', id: 'pierre', now: 1000 });
-  c = act(c, { t: 'activity', action: { t: 'endGame', id: 'pierre' } });
-  assert.equal(c.facts.flags.includes('portal.ready'), true);
+  for (const character of ['pierre', 'elodie', 'sol']) c = act(c, { t: 'join', id: character, character: /** @type {any} */ (character) });
+  c = act(c, { t: 'join', id: 'nico', character: 'nico' });
+  c = act(c, { t: 'startMinigame', id: 'pierre', now: 1000 });
+  c = inGame(c, ...['pierre', 'elodie', 'sol', 'nico'].map((id) => ({ t: 'ready', id, on: true })));
+  assert.deepEqual(c.at.activity?.ready, ['pierre', 'elodie', 'sol'], 'Nico isn\'t one of the four');
+  assert.equal(inGame(c, { t: 'start', id: 'pierre', now: 1000 }), c, 'three ready, Anna not in the party');
+  c = act(c, { t: 'join', id: 'anna', character: 'anna' });
+  assert.deepEqual(c.at.activity?.players.map((p) => p.id), ['pierre', 'elodie', 'sol', 'anna'], 'Anna joins the opening\'s players');
+  assert.equal(inGame(c, { t: 'start', id: 'pierre', now: 1000 }), c, 'Anna not ready');
+  c = inGame(c, { t: 'ready', id: 'anna', on: true }, { t: 'start', id: 'pierre', now: 1000 });
+  assert.deepEqual(c.at.activity?.round?.order, ['pierre', 'elodie', 'sol', 'anna']);
+});
+
+test('opening match, portal, apparition, pickup and Young Adult are one-time and Elo-only', () => {
+  let c = inGame(openingRound(), { t: 'endGame', id: 'pierre' });
+  assert.equal(c.facts.flags.includes('portal.ready'), false, 'no portal on the podium');
+  c = inGame(c, { t: 'lobby', id: 'pierre' });
+  assert.equal(c.facts.flags.includes('portal.ready'), false, 'nor in the lobby');
+  c = act(c, { t: 'endMinigame', id: 'pierre' });
+  assert.equal(c.facts.flags.includes('portal.ready'), true, 'the portal, once Pierre ends the block game');
   assert.equal(holding(c.facts, 'elodie', INTRO_KEY), 0);
-  c = act(c, { t: 'newGame', id: 'pierre' });
   assert.equal(c.at.activity, null, 'back in the room');
+  const again = act(c, { t: 'startMinigame', id: 'pierre', now: 2000 });
+  assert.equal(again.at.activity?.stage, 'lobby', 'nothing refuses a second block game once the portal is ready');
+  assert.equal(act(again, { t: 'portal', id: 'elodie' }), again, 'no portal while the block game runs');
   assert.equal(act(c, { t: 'portal', id: 'pierre' }), c);
   c = act(c, { t: 'portal', id: 'elodie' });
   assert.equal(c.at.node, 'hub');
@@ -90,18 +120,17 @@ test('future needs all seven keys, while world entrances remain unassigned', () 
   assert.equal(c.facts.unlocked.includes('future'), true);
 });
 
-test('a saved opening podium with nobody left resumes in the portal room', () => {
-  let c = newCampaign(STORY_CONTENT, 42);
-  for (const character of OPENING_PLAYERS) c = act(c, { t: 'join', id: character, character });
-  c = act(c, { t: 'start', id: 'pierre', now: 1000 });
-  c = act(c, { t: 'activity', action: { t: 'endGame', id: 'pierre' } });
+test('a saved opening podium with nobody left resumes there; Pierre, rejoining, ends the block game and the portal appears', () => {
+  let c = inGame(openingRound(), { t: 'endGame', id: 'pierre' });
   for (const character of OPENING_PLAYERS) c = act(c, { t: 'leave', id: character });
   assert.equal(gameMasterId(c.party, STORY_CONTENT), null);
-  assert.equal(c.at.activity !== null, true);
-  const resumed = loadCampaign(c, STORY_CONTENT);
-  assert.equal(resumed.at.activity, null);
-  assert.equal(resumed.facts.flags.includes('portal.ready'), true);
-  assert.equal(resumed.facts.counters['blocks.played'], 1);
-  const joined = act(resumed, { t: 'join', id: 'elo-returned', character: 'elodie' });
+  const resumed = loadCampaign(JSON.parse(JSON.stringify(c)), STORY_CONTENT);
+  assert.equal(resumed.at.activity?.stage, 'podium', 'still on the podium');
+  assert.equal(resumed.at.results.length, 1, 'with the round\'s result');
+  let back = act(resumed, { t: 'join', id: 'pierre-returned', character: 'pierre' });
+  back = act(inGame(back, { t: 'lobby', id: 'pierre-returned' }), { t: 'endMinigame', id: 'pierre-returned' });
+  assert.equal(back.facts.flags.includes('portal.ready'), true);
+  assert.equal(back.facts.counters['blocks.played'], 1);
+  const joined = act(back, { t: 'join', id: 'elo-returned', character: 'elodie' });
   assert.equal(act(joined, { t: 'portal', id: 'elo-returned' }).at.node, 'hub');
 });

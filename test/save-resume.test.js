@@ -1,6 +1,6 @@
 // A save whose minigame this release does not have stops the boot and is left untouched, and a save it
 // cannot resume starts a fresh evening and is quarantined. Real server, scratch data.
-// test/fixtures/save-v2-blocks.json is a save as the server writes it, in a timed block game.
+// test/fixtures/save-v2-blocks.json is a save as the server wrote it before minigame lobbies, in a timed block game.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
@@ -100,15 +100,13 @@ test('a save with a minigame this release does not have stops the boot and is le
   }
 });
 
-test('a save holding a round in a lobby starts a fresh evening and is quarantined, not deleted', { timeout: 20_000 }, async (t) => {
-  const v2 = JSON.parse(await fixture('save-v2-blocks.json'));
-  v2.campaign.at.activity.phase = 'lobby';
-  const text = JSON.stringify(v2);
+test('a save from before minigame lobbies starts a fresh evening and is quarantined, not deleted', { timeout: 20_000 }, async (t) => {
+  const text = await fixture('save-v2-blocks.json');
   const app = await boot(t, text);
   const view = await firstView(app.port, app.running, app.log);
-  assert.equal(view.round, null, 'a fresh evening: the room at the start, no round');
+  assert.equal(view.minigame, null, 'a fresh evening: the room at the start, no minigame');
   assert.deepEqual(view.campaign.party.order, [], '…with nobody in it yet');
-  assert.match(app.log(), /new evening \(save could not be loaded: the saved round is not one this release can resume/);
+  assert.match(app.log(), /new evening \(save could not be loaded: the saved minigame is not one this release can resume/);
   const files = await readdir(app.varDir);
   const kept = files.filter((f) => f.startsWith('bloko.state.json.corrupt-'));
   assert.equal(kept.length, 1, `the old save is quarantined next to the new one (${files.join(', ')})`);
@@ -125,7 +123,7 @@ test('a save with missing or removed characters starts fresh and keeps the old f
         const text = JSON.stringify(save);
         const app = await boot(t, text);
         const view = await firstView(app.port, app.running, app.log);
-        assert.equal(view.round, null);
+        assert.equal(view.minigame, null);
         assert.deepEqual(view.campaign.party.order, []);
         assert.match(app.log(), /save could not be loaded: party member .*not a character of the roster/);
         const kept = (await readdir(app.varDir)).filter((f) => f.startsWith('bloko.state.json.corrupt-'));

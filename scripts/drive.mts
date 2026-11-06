@@ -6,7 +6,9 @@
 //   import { drive } from '<repo>/scripts/drive.mts';
 //   const d = await drive({ content: 'minigame:quiz', phones: 2, shots: '/tmp/my-shots' });
 //   const [a, b] = d.phones;
-//   await a.join('pierre'); await b.join('sol'); await a.tap('Start game');   // Pierre, the game master, starts
+//   await a.join('pierre'); await b.join('sol');
+//   await a.tap('▶ Start the quiz');                           // Pierre, the game master, opens its lobby
+//   await a.tap("I'm ready"); await b.tap("I'm ready"); await a.tap('#btn-start');   // and starts a round
 //   await d.tv.waitText(/QUESTION 1/); await d.tv.shot('tv-question');
 //   await d.close();
 // A phone can also walk its avatar with the joystick (steer); capture() returns a screen as a JPEG, and

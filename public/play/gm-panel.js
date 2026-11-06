@@ -11,7 +11,7 @@ import { catalogue } from './bag.js';
 import { CHARACTERS } from '../../shared/characters.js';
 
 /** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
-/** @typedef {import('../../shared/minigames.js').RoundStatus} RoundStatus */
+/** @typedef {import('../../shared/minigames.js').MinigameStatus} MinigameStatus */
 /** @typedef {import('../../shared/campaign/types.js').GmOp} GmOp */
 /** @typedef {import('../../shared/campaign/types.js').Condition} Condition */
 
@@ -50,7 +50,7 @@ function fillDatalist(list, values) {
 /** @param {{ send: (msg: unknown) => void }} io */
 export function createGmPanel(io) {
   /** @type {Campaign | null} */ let last = null;
-  /** @type {RoundStatus | null} */ let lastStatus = null;
+  /** @type {MinigameStatus | null} */ let lastStatus = null;
   const confirm = createConfirm(() => redraw());
   let names = contentNames();
 
@@ -172,12 +172,11 @@ export function createGmPanel(io) {
     const nodes = content().nodes;
     const here = nodes[c.at.node];
     $('gm-where').textContent = `The party is at: ${titleOf(c.at.node)}`;
-    // the campaign's own rule (the one the server refuses enter/back by): a block game or quiz under way
-    const playing = lastStatus === 'running';
+    // a minigame runs: going back ends it first (the campaign's rule)
+    const playing = lastStatus !== null;
     const back = /** @type {HTMLButtonElement} */ ($('gm-back'));
     back.hidden = !here?.parent;
-    back.disabled = playing;
-    back.textContent = playing ? '⬆ Back (end the game first)' : `⬆ Back to ${here?.parent ? titleOf(here.parent) : ''}`;
+    back.textContent = `⬆ Back to ${here?.parent ? titleOf(here.parent) : ''}${playing ? ' (ends the game)' : ''}`;
 
     // enter: one button per child, locked ones shown greyed with their condition
     const enter = $('gm-enter');
@@ -243,7 +242,7 @@ export function createGmPanel(io) {
   }
 
   return {
-    /** @param {Campaign} c @param {RoundStatus | null} status  the view's round status (null between rounds) */
+    /** @param {Campaign} c @param {MinigameStatus | null} status  the running minigame's status (null while none runs) */
     render(c, status) {
       last = c;
       lastStatus = status;

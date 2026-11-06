@@ -8,13 +8,13 @@ import { composeMoment, createCutscenes } from '../public/screen/cutscenes.js';
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
 /** @param {Campaign} c @param {any[]} actions */
 const run = (c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a, C), c);
-/** @param {Campaign} c */
-const game = (c) => run(c, { t: 'newGame', id: 'p' }, { t: 'start', id: 'p', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'p' } });
+/** One block game, from the game master's start of the minigame to his end. @param {Campaign} c */
+const game = (c) => run(c, { t: 'startMinigame', id: 'p', now: 1 }, ...[{ t: 'ready', id: 'p', on: true }, { t: 'start', id: 'p', now: 1 },
+  { t: 'endGame', id: 'p' }, { t: 'lobby', id: 'p' }].map((action) => ({ t: 'activity', action })), { t: 'endMinigame', id: 'p' });
 
 function threeGames() {
-  let c = run(newCampaign(C, 3), { t: 'join', id: 'p', character: 'pierre' }, { t: 'join', id: 'e', character: 'elodie' });
-  c = run(c, { t: 'start', id: 'p', now: 1 }, { t: 'activity', action: { t: 'endGame', id: 'p' } });
-  return game(game(c));
+  const c = run(newCampaign(C, 3), { t: 'join', id: 'p', character: 'pierre' }, { t: 'join', id: 'e', character: 'elodie' });
+  return game(game(game(c)));
 }
 
 test('doorStates: locked / new / open / done from the facts', () => {

@@ -1,9 +1,8 @@
 // P4 — /screen: the TV page, the frame around every minigame. Renders purely from each `view`
-// (PROTOCOL.md): the room at a tableau, the map, the podium and the cutscenes are the frame's; while a round
-// runs, its minigame's screen (./minigames.js) is mounted in #app.
+// (PROTOCOL.md): the room at a tableau, the map and the cutscenes are the frame's; while a minigame runs,
+// its screen (./minigames.js) is mounted in #app, from its start to its end.
 
 import { renderLobby, fetchJoinInfo, fallbackJoinInfo } from './lobby-view.js';
-import { renderPodium, revealSchedule } from './podium-view.js';
 import { sfx, installAudioUnlock, onAudioState } from './audio.js';
 import * as fx from './fx.js';
 import { syncClock, serverNow } from '../commun/clock.js';
@@ -15,15 +14,15 @@ import { h } from './dom.js';
 import { createContentSource } from '../commun/content.js';
 import { doorStates, mapCopy, nameOf } from './doors.js';
 import { roomAt } from '../../shared/campaign/content.js';
-import { gameMasterId } from '../../shared/campaign/index.js';
+import { gameMasterId, isWisp } from '../../shared/campaign/index.js';
 import { room as sceneRoom } from '../../shared/scene.js';
 import { createCutscenes } from './cutscenes.js';
 import { screenOf } from './minigames.js';
 import { applyJoinQr, joinQrState } from './join-qr.js';
-import { INTRO_KEY, OPENING_PLAYERS, REUNIONS } from '../../shared/campaign/story.js';
+import { CHARACTERS } from '../../shared/characters.js';
+import { INTRO_KEY, REUNIONS } from '../../shared/campaign/story.js';
 
-/** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
-/** @typedef {import('../../shared/minigames.js').RoundPlayers} RoundPlayers */
+/** @typedef {import('../../shared/minigames.js').MinigameView} MinigameView */
 
 const RECONNECT_MS = 1000;
 /** A socket still CONNECTING after this is abandoned and retried (Chrome throttles/queues attempts after failures). */
@@ -40,11 +39,13 @@ const wispContext = /** @type {CanvasRenderingContext2D} */ (wispOverlay.getCont
 let wispFrame = 0;
 let lastWispFrame = 0;
 
-/** @param {number} now */
+/** The connected party members the running minigame doesn't show (isWisp), as wisps over its screen. @type {string[]} */
+let minigameWisps = [];
+
+/** Draws `minigameWisps` over the running minigame's screen, frame by frame. @param {number} now */
 function drawRoundWisps(now) {
-  if (!shownRound || !campaign) { wispFrame = 0; return; }
+  if (!shownMinigame || !campaign) { wispFrame = 0; return; }
   const c = campaign;
-  const r = shownRound;
   const dpr = devicePixelRatio || 1;
   const w = window.innerWidth, h = window.innerHeight;
   if (wispOverlay.width !== Math.round(w * dpr) || wispOverlay.height !== Math.round(h * dpr)) {
@@ -52,7 +53,7 @@ function drawRoundWisps(now) {
   }
   wispContext.setTransform(dpr, 0, 0, dpr, 0, 0);
   wispContext.clearRect(0, 0, w, h);
-  const ids = c.party.order.filter((id) => !c.party.players[id].left && !r.view.players[id]);
+  const ids = minigameWisps;
   if (!ids.length) { wispFrame = 0; return; }
   const base = roomAt(content.get(), c.at.node);
   wispAvatars.update(Math.min(.05, (now - lastWispFrame) / 1000 || .016));
@@ -68,40 +69,23 @@ const party = createPartyRoom(
 );
 const soundHint = /** @type {HTMLElement} */ (document.getElementById('sound-hint'));
 
-/** The round last shown (running, or its podium); null between rounds. @type {RoundView | null} */
-let shownRound = null;
-/** The minigame screen mounted in #app while a round runs: its kind and handle, else null.
+/** Party members with a live socket, from the last view. @type {string[]} */
+let onlineNow = [];
+/** The minigame last shown; null while none runs. @type {MinigameView | null} */
+let shownMinigame = null;
+/** The minigame screen mounted in #app while a minigame runs: its kind and handle, else null.
  *  @type {{ kind: string, screen: import('./minigames.js').Mounted } | null} */
 let running = null;
 /** No view shown since the page loaded or the socket reconnected: what happened in between is not replayed. */
 let gap = true;
 /** Who was in the room at a tableau when it was last drawn (newcomers get a sound); null: the room isn't showing. */
 let roomIds = /** @type {string[] | null} */ (null);
-/** performance.now() when the shown podium's reveal starts (-Infinity: settled, shown without animation). */
-let finishedAt = -Infinity;
 /** @type {WebSocket | null} */
 let ws = null;
 /** @type {import('./lobby-view.js').JoinInfo} */
 let joinInfo = fallbackJoinInfo();
-/** Pending podium sounds/confetti: cancelled as soon as the phase leaves 'finished' (rematch, back to the room). */
-const podiumTimers = new Set();
-
-/** setTimeout tracked in podiumTimers. @param {() => void} fn @param {number} ms */
-function podiumLater(fn, ms) {
-  const id = setTimeout(() => { podiumTimers.delete(id); fn(); }, ms);
-  podiumTimers.add(id);
-}
-
-function cancelPodium() {
-  for (const id of podiumTimers) clearTimeout(id);
-  podiumTimers.clear();
-}
-
 /** Who has dropped (debounced): dims their board / avatar so the game master can say "tap your character". */
 const presence = createPresence({ onChange: applyPresence });
-
-/** A round's seated players, who can be offline (a left player is gone, not offline). @param {RoundPlayers} s */
-const seated = (s) => s.order.filter((id) => s.players[id] && !s.players[id].left);
 
 /** Marks offline players on the current DOM and in the party room, without a re-render. */
 function applyPresence() {
@@ -118,11 +102,8 @@ const portalReady = () => !!campaign?.facts.flags.includes('story.elo-50') && ca
 /** The portal stands in the room until Élodie went through it. */
 const portalOpen = () => portalReady() && !campaign?.facts.flags.includes('portal.entered');
 
-/** The tableau's settings: the campaign keeps them (null where no minigame is). @returns {any} */
-const tableauSettings = () => campaign?.at.settings ?? null;
-
 /** What the frame offers a minigame's screen. @type {import('./minigames.js').TvIo} */
-const io = { continuous: () => !gap };
+const io = { continuous: () => !gap, gameMasterName: () => CHARACTERS[content.get().gameMaster].name };
 
 /** Removes the running minigame's screen, with its listeners, loops, sounds and timers. */
 function unmountScreen() {
@@ -131,100 +112,79 @@ function unmountScreen() {
   r?.screen.unmount();
 }
 
-/** Leaving a round for the room or the map: its screen goes, its podium's sounds stop, and the avatars
- *  stand where they stood in the room, without walking there. */
-function leaveRound() {
+/** Leaving a minigame for the room or the map: its screen goes, and the avatars stand where they stood in
+ *  the room, without walking there. */
+function leaveMinigame() {
   unmountScreen();
-  if (!shownRound) return;
-  shownRound = null;
+  if (!shownMinigame) return;
+  shownMinigame = null;
   wispOverlay.hidden = true;
   if (wispFrame) cancelAnimationFrame(wispFrame);
   wispFrame = 0;
   avatars.settle();
-  finishedAt = -Infinity;
-  cancelPodium();
   fx.clearAll();
 }
 
 /**
- * A round: its minigame's screen while it runs, then the frame's podium with the minigame's extras.
- * @param {RoundView} r @param {Campaign} c
+ * A running minigame: its screen, from its start to its end (its lobby, its rounds, their podiums), with the
+ * party members it doesn't show as wisps over it.
+ * @param {MinigameView} m @param {Campaign} c
  */
-function showRound(r, c) {
-  const screens = /** @type {import('./minigames.js').TvScreen} */ (screenOf(r.kind));
-  const prev = shownRound;
-  shownRound = r;
+function showMinigame(m, c) {
+  const screen = /** @type {import('./minigames.js').TvScreen} */ (screenOf(m.kind));
+  shownMinigame = m;
   roomIds = null;
   party.setRoom(roomAt(content.get(), c.at.node));
   party.setPortal(false);
   party.setKey(false);
-  party.setPlayers(r.view);
   wispAvatars.setPlayers(c.party, roomAt(content.get(), c.at.node));
-  wispAvatars.setStatuses(c.party.players);
+  minigameWisps = c.party.order.filter((id) => onlineNow.includes(id) && isWisp(c.party, id, m.shows));
+  // whom the minigame doesn't show is drawn as a wisp, whatever their story status
+  wispAvatars.setStatuses(Object.fromEntries(c.party.order.map((id) => [id, {
+    statuses: minigameWisps.includes(id) ? [...new Set([...c.party.players[id].statuses, 'wisp'])] : c.party.players[id].statuses,
+  }])));
   avatars.setStatuses(c.party.players);
   party.setDoors([]);
   party.setVisible(false);
   wispOverlay.hidden = false;
   if (!wispFrame) wispFrame = requestAnimationFrame(drawRoundWisps);
   document.body.classList.remove('party');
-  if (r.status === 'running') {
-    if (prev?.status === 'finished') { finishedAt = -Infinity; cancelPodium(); } // Play again
-    if (running?.kind !== r.kind) {
-      unmountScreen();
-      app.replaceChildren();
-      running = { kind: r.kind, screen: screens.mount(app, io) };
-    }
-    running.screen.update(r, c);
-  } else {
-    const extras = screens.podium?.(r) ?? {};
-    if (running) { // the round ends on this TV: the screen plays its end, then the podium reveals
-      running.screen.update(r, c);
-      unmountScreen();
-      cancelPodium();
-      if (io.continuous() && prev?.status === 'running') {
-        const delay = extras.delayMs ?? 0;
-        finishedAt = performance.now() + delay;
-        podiumLater(() => podiumSequence(/** @type {RoundPlayers} */ (r.view)), delay);
-      } else finishedAt = -Infinity;
-    } else if (prev?.status !== 'finished') finishedAt = -Infinity; // arrived on a finished podium: settled
-    const podium = renderPodium(r.view, performance.now() - finishedAt, {
-      title: extras.title, next: screens.settings.summarize(tableauSettings()), again: !portalReady(),
-      hint: portalReady() ? 'Returning to the room shortly…' : undefined, rowExtra: extras.rowExtra,
-    });
-    podium.append(...(extras.lines ?? []));
-    app.replaceChildren(podium);
+  if (running?.kind !== m.kind) {
+    unmountScreen();
+    app.replaceChildren();
+    running = { kind: m.kind, screen: screen.mount(app, io) };
   }
+  running.screen.update(m, c);
   applyPresence();
 }
 
 /** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
 
 /** Campaign content (titles, doors): fetched from the server, refreshed on a new contentVersion. */
-const content = createContentSource({ onChange: () => { if (campaign && !shownRound) showPlace(campaign); } });
-/** Last campaign from the server (views carry it next to `round`). @type {Campaign | null} */
+const content = createContentSource({ onChange: () => { if (campaign && !shownMinigame) showPlace(campaign); } });
+/** Last campaign from the server (views carry it next to `minigame`). @type {Campaign | null} */
 let campaign = null;
 
 /**
- * The room at a tableau, between rounds: the party room under the minigame's band (title, the tableau's
- * settings, who's in, the join QR); the guests are the avatars walking below it. A guest arriving gets a
- * sound; the next round starts fresh, with its start sound.
+ * The room at a tableau, while its minigame doesn't run: the party room under the minigame's band (title,
+ * who's in, who starts it, the join QR); the guests are the avatars walking below it. A guest arriving gets a
+ * sound.
  * @param {Campaign} c
  */
 function showRoom(c) {
-  leaveRound();
+  leaveMinigame();
   fx.clearAll();
   const here = c.party.order.filter((id) => !c.party.players[id].left && c.party.players[id].character);
   // not after a page load or a reconnect: who arrived in between isn't announced
   if (roomIds && io.continuous()) for (const id of here) if (!roomIds.includes(id)) sfx.joined();
   roomIds = here;
   const band = /** @type {import('./minigames.js').TvScreen} */ (screenOf(c.at.kind));
-  const opening = c.facts.flags.includes('story.elo-50') && c.at.node === 'hub.false-start';
   const gm = gameMasterId(c.party, content.get());
   app.replaceChildren(renderLobby({ order: here, players: c.party.players }, null, joinInfo,
-    { title: band.title, settings: band.settings.summarize(c.at.settings) },
+    { title: band.title, name: band.name },
     portalOpen() ? { gameMasterId: gm, status: 'A portal has appeared. Élodie, walk into it!' }
       : portalReady() ? { gameMasterId: gm, status: 'Élodie went through the portal.' }
-        : { gameMasterId: gm, required: opening ? OPENING_PLAYERS.length : undefined }));
+        : { gameMasterId: gm }));
   party.setRoom(roomAt(content.get(), c.at.node));
   party.setPortal(portalOpen());
   party.setKey(false);
@@ -236,7 +196,7 @@ function showRoom(c) {
   applyPresence();
 }
 
-/** Between rounds: the room at a minigame's tableau, else the hub / world map. @param {Campaign} c */
+/** While no minigame runs: the room at a minigame's tableau, else the hub / world map. @param {Campaign} c */
 const showPlace = (c) => (c.at.kind ? showRoom(c) : showMap(c));
 
 /**
@@ -245,7 +205,7 @@ const showPlace = (c) => (c.at.kind ? showRoom(c) : showMap(c));
  * @param {Campaign} c
  */
 function showMap(c) {
-  leaveRound();
+  leaveMinigame();
   roomIds = null;
   const storyScene = c.facts.flags.includes('story.elo-50') && c.facts.flags.includes('portal.entered');
   const inApartment = storyScene && c.at.node === 'hub';
@@ -333,14 +293,11 @@ const CUTSCENE_MS = 4200;
 let acksSent = 0;
 let momentsPlayed = 0;
 
-/** A moment may start: no round running, and a podium has finished its reveal. */
+/** A moment may start: no minigame running (its results reach the main game when it ends). */
 function canPlayCutscene() {
   // a hidden TV tab plays nothing (and so never acks what nobody saw); it plays once shown again
   if (document.visibilityState !== 'visible') return false;
-  if (!shownRound) return true; // between rounds: the room at a tableau, the hub, a world
-  if (shownRound.status !== 'finished') return false;
-  const reveal = Math.max(0, ...revealSchedule(/** @type {RoundPlayers} */ (shownRound.view)).map((r) => r.atMs));
-  return performance.now() - finishedAt > reveal + 1800;
+  return !shownMinigame; // the room at a tableau, the hub, a world
 }
 
 /**
@@ -417,19 +374,7 @@ const cutscenes = createCutscenes({
   nameOf: (ch) => nameOf(ch, campaign ?? undefined),
   ackDelay: () => 200 + Math.random() * 1300,
 });
-setInterval(() => cutscenes.poke(), 500); // a deferred moment starts once the podium settles
-
-/** Sounds + confetti in step with the podium's CSS reveal (same schedule). @param {RoundPlayers} s */
-function podiumSequence(s) {
-  const schedule = revealSchedule(s);
-  const championAt = Math.min(...schedule.filter((r) => r.rank === 1).map((r) => r.atMs));
-  const steps = new Set(schedule.filter((r) => r.rank > 1).map((r) => r.atMs));
-  for (const at of steps) podiumLater(() => sfx.reveal(), at);
-  podiumLater(() => {
-    sfx.fanfare();
-    fx.confetti(schedule.filter((r) => r.rank === 1).map((r) => fx.colorHex(s.players[r.id].color)).concat('#ffd166', '#ffffff'));
-  }, championAt);
-}
+setInterval(() => cutscenes.poke(), 500); // a deferred moment starts once the minigame ends
 
 /** Server → screen messages; any other `t` is ignored (forward-compatibility rule, PROTOCOL.md). */
 /** @type {Record<string, (msg: any) => void>} */
@@ -438,18 +383,17 @@ const HANDLERS = {
     syncClock(msg.now);
     if (msg.campaign) campaign = msg.campaign;
     const ready = content.sync(msg.contentVersion);
-    /** @type {import('../../shared/minigames.js').RoundView | null} */
-    const round = msg.round ?? null;
+    /** @type {MinigameView | null} */
+    const minigame = msg.minigame ?? null;
     if (!campaign) return;
     const online = Array.isArray(msg.online) ? msg.online : [];
-    if (round && screenOf(round.kind)) {
-      showRound(round, campaign);
-      presence.update(online, seated(round.view));
-    } else {
-      // between rounds: the room at a tableau, or the hub / world map (re-drawn once fresh content arrives)
+    onlineNow = online;
+    presence.update(online, campaign.party.order.filter((id) => !campaign?.party.players[id].left));
+    if (minigame && screenOf(minigame.kind)) showMinigame(minigame, campaign);
+    else {
+      // no minigame: the room at a tableau, or the hub / world map (re-drawn once fresh content arrives)
       showPlace(campaign);
-      ready.then(() => { if (campaign && !shownRound) showPlace(campaign); });
-      presence.update(online, campaign.party.order.filter((id) => !campaign?.party.players[id].left));
+      ready.then(() => { if (campaign && !shownMinigame) showPlace(campaign); });
     }
     gap = false;
     if (campaign) cutscenes.update(campaign.news, campaign.newsSeq);
@@ -562,8 +506,8 @@ function loadJoinInfo() {
 connect();
 
 /** @type {any} */ (window).bloko = {
-  /** The round shown (running, or its podium): { kind, status, view }; null between rounds. */
-  round: () => shownRound,
+  /** The minigame shown: { kind, status, view, shows, required }; null while none runs. */
+  minigame: () => shownMinigame,
   /** Feed a fake `pos` (self-tests before the server relays them). @param {object} m */
   pos: (m) => avatars.onPos(m),
   avatars: () => avatars.snapshot(),
@@ -572,6 +516,8 @@ connect();
   /** Contract G: the room's colliders and prop anchors. */
   scene: () => party.scene(),
   offline: () => [...presence.offline()],
+  /** Who floats as a wisp over the running minigame, and where (none while none runs). */
+  wisps: () => (shownMinigame ? wispAvatars.snapshot().filter((a) => minigameWisps.includes(a.id)).map(({ id, x, y }) => ({ id, x, y })) : []),
   campaign: () => campaign,
   doors: () => party.doors(),
   joinQr: () => ({ ...joinQrState(joinWindow, serverNow()), until: joinWindow?.until ?? null }),

@@ -6,7 +6,7 @@
 //  - taken: held by an online player → greyed.
 import { CHARACTERS } from '../../shared/characters.js';
 import { $ } from './dom.js';
-import { avatarCanvas } from './avatar.js';
+import { avatarCanvas } from '../commun/avatar.js';
 
 /** @typedef {import('../../shared/characters.js').CharacterId} CharacterId */
 /** @typedef {'free' | 'continue' | 'taken'} PickState */

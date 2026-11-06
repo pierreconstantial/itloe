@@ -2,13 +2,15 @@
 // separate browser context (= a separate device), driven by real taps and navigations, against a real
 // server this script kills, freezes and restarts. Checks the session is never lost (reload, back/forward,
 // bfcache, QR re-scan, locked phone, server restart, silent dead link), the picker only shows when the
-// server does not know us (then preselects "Continue as …"), the podium choices, reclaim from another
-// device with no tug of war, the game master's controls during a game (take a player out, end the game), and the
-// campaign screens (hub/world "where we are", game-master panel, the chooser walking into a door).
+// server does not know us (then preselects "Continue as …"), the minigame's lobby (I'm ready, the game master's
+// Start, the podium's "Back to the lobby", the end), reclaim from another device with no tug of war, the game
+// master's controls during a game (take a player out, end the game, sitting a round out), and the campaign
+// screens (hub/world "where we are", game-master panel, the chooser walking into a door).
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3182 CDP=9222 [LOCK_MS=300000] node scripts/e2e-phone.mts    (never PORT 3131: the live server)
 // LOCK_MS is how long the "phone locked" case freezes the page (default 5 min, as in the acceptance list).
-// ONLY=1 … 7 runs just that part (continuity / game master controls / campaign / quiz / room code / inventory / QR);
+// ONLY=1 … 8 runs just that part (continuity / game master controls / campaign / quiz / room code / inventory / QR /
+// wisps over a minigame);
 // an unknown part is refused.
 // a full run is the acceptance.
 // SHOTS=<dir> saves screenshots of the block, quiz and campaign screens, each with its visible text (<name>.txt).
@@ -25,7 +27,7 @@ if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT
 const CDP = process.env.CDP ?? '9222';
 const LOCK_MS = Number(process.env.LOCK_MS ?? 5 * 60_000);
 const SHOTS = process.env.SHOTS; // a folder: screenshots of the screens land there
-const ONLY = onlyPart(['1', '2', '3', '4', '5', '6', '7']); // e.g. ONLY=3: just the campaign part (quick iteration)
+const ONLY = onlyPart(['1', '2', '3', '4', '5', '6', '7', '8']); // e.g. ONLY=3: just the campaign part (quick iteration)
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-phone-'));
 // the quiz part plays a FIXED bank (a copy of the placeholder file), whatever the real bank holds
 const FIXED_BANK = join(VAR, 'fixed-bank');
@@ -40,10 +42,11 @@ const expect = (cond: boolean, label: string, note = '') => check(cond, note ? `
 let server: ChildProcess | null = null;
 let log = '';
 let room = '';
-async function boot(fresh = false): Promise<void> {
+/** @param content ITLOE_CONTENT: the sample content, or '' for the story */
+async function boot(fresh = false, content = 'sample'): Promise<void> {
   log = '';
   server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK, ITLOE_CONTENT: 'sample' },
+    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK, ITLOE_CONTENT: content },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   server.stdout!.on('data', (d) => { log += d; });
@@ -276,14 +279,47 @@ async function resumes(p: Phone, label: string, view: string, id: string | null,
   await p.watch(true);
 }
 
-/** Joins a fresh phone as `character`; returns its stored id. */
-async function joinAs(p: Phone, character: string): Promise<string | null> {
+/** Joins a fresh phone as `character`, landing on `view` (the room at the tableau, or a running minigame's
+ *  lobby); returns its stored id. */
+async function joinAs(p: Phone, character: string, view = 'view-tableau'): Promise<string | null> {
   await p.navigate(joinUrl());
   await p.waitFor((x) => x.view === 'view-pick');
   await p.tap(`.pick-card[data-id="${character}"]`);
-  const x = await p.waitFor((y) => y.view === 'view-lobby');
+  const x = await p.waitFor((y) => y.view === view);
   await p.watch(true);
-  return x?.view === 'view-lobby' ? x.id : null;
+  return x?.view === view ? x.id : null;
+}
+
+/** The game master starts the tableau's minigame from the room: `gm` and `others` land in its lobby. */
+async function openMinigame(gm: Phone, others: Phone[] = []): Promise<boolean> {
+  await gm.tap('#btn-start-minigame');
+  const at = await Promise.all([gm, ...others].map((p) => p.waitFor((x) => x.view === 'view-minigame-lobby', 5000)));
+  return at.every((x) => x?.view === 'view-minigame-lobby');
+}
+
+/** "I'm ready" on a lobby phone (a no-op when it already is): waits until the server's view says so. */
+async function ready(p: Phone): Promise<void> {
+  const on = () => p.ev(`document.getElementById('btn-ready')?.classList.contains('on') ?? false`);
+  if (!(await on())) await p.tap('#btn-ready');
+  for (let k = 0; k < 50 && !(await on()); k++) await sleep(100);
+}
+
+/** The game master's Start in the lobby, once the server's view enables it. */
+async function startRound(gm: Phone): Promise<void> {
+  for (let k = 0; k < 50 && await gm.ev(`document.getElementById('btn-start').disabled`); k++) await sleep(100);
+  await gm.tap('#btn-start');
+}
+
+/** The game master ends the minigame from its lobby (two taps): everyone is back in the room. */
+async function endMinigame(gm: Phone): Promise<void> {
+  await gm.tap('#btn-end-minigame');
+  await gm.tap('#btn-end-minigame');
+}
+
+/** The game master's Back to the lobby from the podium (the ☰ sheet closed first: it covers the podium). */
+async function backToLobby(gm: Phone): Promise<void> {
+  await gm.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+  await gm.tap('#btn-back-to-lobby');
 }
 
 /** The game master's settings by tapping the sheet's controls (the sheet stays closed: elements exist anyway). */
@@ -311,17 +347,40 @@ try {
   const painted = await A.ev(`[...document.querySelectorAll('#picker-grid .pick-card')].every((c) => getComputedStyle(c).getPropertyValue('--pc').trim() !== '')`);
   expect(painted === true, 'every picker card resolves its --pc colour token');
   await A.tap('.pick-card[data-id="pierre"]');
-  const a0 = await A.waitFor((x) => x.view === 'view-lobby');
-  expect(a0?.view === 'view-lobby', 'A joins as Pierre (game master)');
+  const a0 = await A.waitFor((x) => x.view === 'view-tableau');
+  expect(a0?.view === 'view-tableau', 'A joins as Pierre (game master)');
   await A.watch(true);
   const idA = a0?.id ?? null;
   const idB = await joinAs(B, 'sol');
   expect(idB !== null, 'B joins as Sol');
+  expect(await A.visible('btn-start-minigame') && /Start the block game/.test(await A.text('btn-start-minigame')) && !(await B.visible('btn-start-minigame'))
+    && /Waiting for Pierre to start the block game/.test(await B.text('tableau-hint')),
+    'the room: the game master has "▶ Start the block game", the guest waits for him', await B.text('tableau-hint'));
   await A.shot('blocks-room-gm');
   await B.shot('blocks-room-guest');
 
   await A.ev('location.reload()');
-  await resumes(A, 'lobby: reload → silent resume', 'view-lobby', idA);
+  await resumes(A, 'room: reload → silent resume', 'view-tableau', idA);
+
+  // ---- the block game's lobby: I'm ready, Start disabled until someone is ----
+  expect(await openMinigame(A, [B]), 'the game master starts the block game → both phones in its lobby');
+  const startState = () => A.ev(`(() => { const b = document.getElementById('btn-start'); return { shown: b.offsetParent !== null, disabled: b.disabled, text: b.textContent }; })()`);
+  let st = await startState();
+  expect(st.shown && st.disabled && /0\/2 ready/.test(st.text), 'lobby: the game master\'s Start is disabled while nobody is ready', st.text);
+  expect(await B.visible('btn-ready') && !(await B.visible('btn-start')) && !(await B.visible('btn-end-minigame'))
+    && /Pierre starts the game/.test(await B.text('minigame-lobby-hint')), 'lobby: the guest gets "I\'m ready", no Start, no End');
+  expect(/Pierre\s*not ready/.test(await B.text('minigame-lobby-players')) && /Sol\s*not ready/.test(await B.text('minigame-lobby-players')),
+    'lobby: the eligible players, each "not ready"', await B.text('minigame-lobby-players'));
+  await A.shot('blocks-lobby-gm');
+  await ready(B);
+  st = await startState();
+  expect(!st.disabled && /1\/2 ready/.test(st.text) && /Sol\s*✓ ready/.test(await A.text('minigame-lobby-players')),
+    'lobby: Sol taps "I\'m ready" → "✓ ready" on the list, the game master\'s Start enabled', st.text);
+  await B.shot('blocks-lobby-guest');
+  await B.ev('location.reload()');
+  await resumes(B, 'lobby: reload → silent resume, still ready', 'view-minigame-lobby', idB);
+  expect(await B.ev(`document.getElementById('btn-ready').classList.contains('on')`), '…the guest\'s "✓ I\'m ready" kept');
+  await ready(A);
 
   // game 1: timed 1:00 (default 3:00, four steps down) so it ends on its own
   // each step waits for the sheet to show the server's new value: a click on a stale stepper patches
@@ -341,7 +400,7 @@ try {
     await A.shot('blocks-settings');
     await A.ev(`document.querySelector('#sheet-settings [data-close]').click()`);
   }
-  await A.tap('#btn-start');
+  await startRound(A);
   await resumes(A, 'the game master starts game 1 (timed 1:00)', 'view-game', idA);
   await resumes(B, 'guest follows into game 1', 'view-game', idB);
   await A.shot('blocks-game-timed');
@@ -420,9 +479,9 @@ try {
   // ---- podium ----
   const pa = await A.waitFor((x) => x.view === 'view-podium', 70_000);
   const pb = await B.waitFor((x) => x.view === 'view-podium', 5000);
-  const gmSees = await A.ev(`[!document.getElementById('podium-actions').hidden, !document.getElementById('btn-again').hidden, !document.getElementById('btn-new-game').hidden]`);
-  const guestSees = await B.ev(`[!document.getElementById('podium-actions').hidden, !document.getElementById('podium-hint').hidden]`);
-  expect(pa?.view === 'view-podium' && gmSees.every(Boolean), 'podium: the game master has Play again + Back to the room');
+  const gmSees = await A.ev(`[!document.getElementById('btn-back-to-lobby').hidden, document.getElementById('podium-hint').hidden]`);
+  const guestSees = await B.ev(`[!document.getElementById('btn-back-to-lobby').hidden, !document.getElementById('podium-hint').hidden]`);
+  expect(pa?.view === 'view-podium' && gmSees.every(Boolean), 'podium: the game master has "Back to the lobby"');
   expect(pb?.view === 'view-podium' && guestSees[0] === false && guestSees[1] === true, 'podium: guest has no buttons, a waiting hint');
   await A.shot('blocks-podium-time-gm');
   await B.shot('blocks-podium-time-guest');
@@ -431,36 +490,46 @@ try {
   await B.navigate(joinUrl());
   await resumes(B, 'podium: guest re-scan → podium again', 'view-podium', idB);
 
-  await A.tap('#btn-again');
-  const rematch = await B.waitFor((x) => x.view === 'view-game' && !!x.toast, 5000);
-  expect(rematch?.view === 'view-game' && /rematch/i.test(rematch.toast ?? ''), 'Play again: guest follows with a "Rematch" toast', `toast="${rematch?.toast}"`);
+  await A.tap('#btn-back-to-lobby');
+  const lobby1 = await B.waitFor((x) => x.view === 'view-minigame-lobby' && !!x.toast, 5000);
+  expect(lobby1?.view === 'view-minigame-lobby' && /back to the lobby/i.test(lobby1.toast ?? ''), 'Back to the lobby: the guest follows with a toast', `toast="${lobby1?.toast}"`);
+  st = await startState();
+  expect(!st.disabled && /Play again \(2\/2 ready\)/.test(st.text) && /Last game: 🥇/.test(await B.text('minigame-lobby-last')),
+    'lobby after a round: both players back ready, "▶ Play again", the last game\'s winner', `${st.text} / ${await B.text('minigame-lobby-last')}`);
+  await startRound(A);
+  const round2 = await B.waitFor((x) => x.view === 'view-game', 5000);
+  expect(round2?.view === 'view-game', 'Play again: a second round, the guest follows');
   await A.tap('#btn-menu');
   await A.tap('#btn-end-game');
   await A.tap('#btn-end-game');
   await A.waitFor((x) => x.view === 'view-podium', 5000);
   await B.waitFor((x) => x.view === 'view-podium', 5000);
-  await A.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+  await backToLobby(A);
+  await A.waitFor((x) => x.view === 'view-minigame-lobby', 5000);
+  await B.waitFor((x) => x.view === 'view-minigame-lobby', 5000);
 
-  await A.tap('#btn-new-game');
-  const room1 = await B.waitFor((x) => x.view === 'view-lobby' && !!x.toast, 5000);
-  const gmRoom = await A.waitFor((x) => x.view === 'view-lobby', 5000);
-  expect(gmRoom?.view === 'view-lobby' && gmRoom.id === idA, 'Back to the room: the game master in the lobby, same id');
-  expect(room1?.view === 'view-lobby' && /back to the room/i.test(room1.toast ?? '') && room1.id === idB, 'Back to the room: guest follows with a toast, same id', `toast="${room1?.toast}"`);
-  expect(!(await A.snap())?.sawPick && !(await B.snap())?.sawPick, 'Back to the room: picker never shown');
+  await endMinigame(A);
+  const room1 = await B.waitFor((x) => x.view === 'view-tableau' && !!x.toast, 5000);
+  const gmRoom = await A.waitFor((x) => x.view === 'view-tableau', 5000);
+  expect(gmRoom?.view === 'view-tableau' && gmRoom.id === idA, 'End the block game: the game master in the room, same id');
+  expect(room1?.view === 'view-tableau' && /back to the room/i.test(room1.toast ?? '') && room1.id === idB, 'End the block game: guest follows with a toast, same id', `toast="${room1?.toast}"`);
+  expect(!(await A.snap())?.sawPick && !(await B.snap())?.sawPick, 'End the block game: picker never shown');
   await B.shot('blocks-room-back');
 
   // ---- dead links ----
   freeze(true); // idle lobby, Wi-Fi silently gone: only the liveness watchdog can notice
   let t0 = Date.now();
   const idle = await B.waitFor((x) => x.banner, 40_000);
-  expect(idle?.banner === true && idle.view === 'view-lobby' && Date.now() - t0 < 30_000, 'idle lobby, silent dead link (SIGSTOP): banner ≤ ~25 s, stays in the lobby', `${((Date.now() - t0) / 1000).toFixed(1)} s`);
+  expect(idle?.banner === true && idle.view === 'view-tableau' && Date.now() - t0 < 30_000, 'idle room, silent dead link (SIGSTOP): banner ≤ ~25 s, stays in the room', `${((Date.now() - t0) / 1000).toFixed(1)} s`);
   freeze(false);
-  await resumes(B, 'idle lobby: SIGCONT → resumes, same player', 'view-lobby', idB, 15_000);
-  await resumes(A, 'idle lobby: the game master resumes too', 'view-lobby', idA, 15_000);
+  await resumes(B, 'idle room: SIGCONT → resumes, same player', 'view-tableau', idB, 15_000);
+  await resumes(A, 'idle room: the game master resumes too', 'view-tableau', idA, 15_000);
 
+  await openMinigame(A, [B]);
   await setMode(A, 'Marathon');
   await sleep(400);
-  await A.tap('#btn-start');
+  await ready(A); await ready(B);
+  await startRound(A);
   await resumes(A, 'game 3 started (marathon)', 'view-game', idA);
 
   freeze(true);
@@ -513,7 +582,7 @@ try {
     expect(x?.view === 'view-pick' && cont.shown && cont.text === `Continue as ${name}`, `unknown stored id → picker preselects "Continue as ${name}"`, JSON.stringify(cont));
   }
   await A.tap('#btn-continue');
-  expect((await A.waitFor((x) => x.view === 'view-lobby'))?.view === 'view-lobby', '"Continue as Pierre" joins in one tap');
+  expect((await A.waitFor((x) => x.view === 'view-tableau'))?.view === 'view-tableau', '"Continue as Pierre" joins in one tap');
 
   } // part 1
 
@@ -525,9 +594,11 @@ try {
   const H = await phone('H'), G = await phone('G'), R = await phone('R');
   await joinAs(H, 'pierre');
   // a solo game on a fresh server, ended by the game master after one placement: a first record, "New best!"
+  await openMinigame(H);
   await setMode(H, 'Marathon');
   await sleep(400);
-  await H.tap('#btn-start');
+  await ready(H);
+  await startRound(H);
   await H.waitFor((x) => x.view === 'view-game');
   await H.placeOne();
   await H.tap('#btn-menu');
@@ -535,16 +606,18 @@ try {
   await H.tap('#btn-end-game');
   await H.waitFor((x) => x.view === 'view-podium', 5000);
   await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
-  const solo: string = await H.text('podium-title');
+  const solo: string = await H.ev(`document.querySelector('#view-podium .podium-title')?.textContent ?? ''`);
   expect(/New best/.test(solo), 'solo game ended after one placement: the podium says "New best!"', solo);
   await H.shot('blocks-podium-solo-best');
-  await H.tap('#btn-new-game');
-  await H.waitFor((x) => x.view === 'view-lobby', 5000);
-  await joinAs(G, 'sol');
-  await joinAs(R, 'anna');
+  await H.tap('#btn-back-to-lobby');
+  await H.waitFor((x) => x.view === 'view-minigame-lobby', 5000);
+  // players joining while the block game runs land in its lobby
+  expect(await joinAs(G, 'sol', 'view-minigame-lobby') !== null && await joinAs(R, 'anna', 'view-minigame-lobby') !== null,
+    'players joining while the block game runs land in its lobby');
   await setMode(H, 'Marathon');
   await sleep(400);
-  await H.tap('#btn-start');
+  for (const p of [G, R]) await ready(p);
+  await startRound(H);
   for (const p of [H, G, R]) await p.waitFor((x) => x.view === 'view-game');
   expect((await R.snap())?.view === 'view-game', '3 players in a marathon game');
   expect((await G.roundControls()).length === 0, 'guest menu has no game master controls');
@@ -553,9 +626,9 @@ try {
   await W.navigate(joinUrl());
   expect((await W.waitFor((x) => x.view === 'view-pick'))?.view === 'view-pick', 'a new phone during a round can pick a free character');
   await W.tap('.pick-card[data-id="nico"]');
-  const watcher = await W.waitFor((x) => x.view === 'view-waiting' && x.id !== null);
-  expect(watcher?.view === 'view-waiting' && !!watcher.id && /next one/.test(await W.text('waiting-text')),
-    'the newcomer joins the evening and waits for the next round');
+  const watcher = await W.waitFor((x) => x.view === 'view-wait-lobby' && x.id !== null);
+  expect(watcher?.view === 'view-wait-lobby' && !!watcher.id && /block game is on/.test(await W.text('wait-lobby-text')) && await W.visible('stick-pad'),
+    'the newcomer joins the evening and floats over this round as a wisp (the pad)', await W.text('wait-lobby-text'));
   await W.shot('blocks-waiting-newcomer');
 
   await R.navigate('about:blank'); // Anna's phone dies
@@ -579,10 +652,10 @@ try {
   await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
 
   await R.history(-1); // Anna's phone comes back
-  const over = await R.waitFor((x) => x.view === 'view-over', 8000);
-  const overTitle: string = await R.ev(`document.getElementById('over-title').textContent`);
-  expect(over?.view === 'view-over' && /taken out.*score counts/.test(overTitle), 'retired phone: calm "taken out" screen, no board', overTitle);
-  await R.shot('blocks-over-retired');
+  const over = await R.waitFor((x) => x.view === 'view-wait-lobby', 8000);
+  expect(over?.view === 'view-wait-lobby' && await R.visible('stick-pad') && !(await R.visible('board')),
+    'retired phone: a wisp until the round ends (the pad), no board');
+  await R.shot('blocks-out-wisp');
 
   await H.tap('#btn-menu');
   await H.tap('#btn-end-game');
@@ -590,21 +663,47 @@ try {
   expect(/Tap again/.test(armed) && (await G.snap())?.view === 'view-game', 'End game: first tap arms, nothing ends yet', armed);
   await H.tap('#btn-end-game');
   const ends = await Promise.all([H, G, R].map((p) => p.waitFor((x) => x.view === 'view-podium', 5000)));
-  const kicker: string = await G.ev(`document.getElementById('podium-kicker').hidden ? '' : document.getElementById('podium-kicker').textContent`);
+  const kicker: string = await G.ev(`document.querySelector('#view-podium .podium-kicker')?.textContent ?? ''`);
   expect(ends.every((x) => x?.view === 'view-podium') && kicker === 'The game master ended the game.', 'End game: all phones (retired one too) on the podium, "The game master ended the game."', `kicker="${kicker}"`);
   expect((await H.roundControls()).length === 0, 'podium: no in-game game master controls left');
-  const ranks: string[] = await H.ev(`[...document.querySelectorAll('#podium-list li')].map((e) => e.textContent)`);
+  const ranks: string[] = await H.ev(`[...document.querySelectorAll('#view-podium .podium-list li')].map((e) => e.textContent)`);
   expect(ranks.length === 3 && ranks.some((t) => t.includes('Anna')), 'podium ranks all 3, Anna included', JSON.stringify(ranks));
   await H.shot('blocks-podium-ended-gm');
   await G.shot('blocks-podium-ended-guest');
 
-  expect((await W.snap())?.view === 'view-waiting', 'the newcomer waits through the podium');
-  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
-  await H.tap('#btn-again');
+  expect((await W.snap())?.view === 'view-wait-lobby', 'the newcomer floats through the podium');
+  await backToLobby(H);
+  const wLobby = await W.waitFor((x) => x.view === 'view-minigame-lobby', 5000);
+  expect(wLobby?.view === 'view-minigame-lobby' && !(await W.ev(`document.getElementById('btn-ready').classList.contains('on')`)),
+    'back in the lobby, the newcomer is listed, not ready yet');
+  await ready(W);
+  await startRound(H);
   const rematch = await W.waitFor((x) => x.view === 'view-game', 5000);
-  expect(rematch?.view === 'view-game' && rematch.id === watcher?.id, 'Play again seats the newcomer with the same identity');
+  expect(rematch?.view === 'view-game' && rematch.id === watcher?.id, 'ready, the newcomer plays the next round with the same identity');
   await W.placeOne();
-  expect(Number(await W.text('my-score')) > 0, 'the newcomer can place a piece in the rematch');
+  expect(Number(await W.text('my-score')) > 0, 'the newcomer can place a piece in the new round');
+
+  // ---- the game master sits a round out: no board for him, his round controls in ☰ ----
+  await H.tap('#btn-menu');
+  await H.tap('#btn-end-game');
+  await H.tap('#btn-end-game');
+  await H.waitFor((x) => x.view === 'view-podium', 5000);
+  await backToLobby(H);
+  await H.waitFor((x) => x.view === 'view-minigame-lobby', 5000);
+  await H.tap('#btn-ready'); // he came back ready: untap
+  await ready(G);
+  await startRound(H);
+  const sat = await H.waitFor((x) => x.view === 'view-not-in-round', 5000);
+  const satText = await H.ev(`document.getElementById('view-not-in-round').innerText`);
+  expect(sat?.view === 'view-not-in-round' && /not in this round/.test(satText) && /End it or take a player out from ☰/.test(satText)
+    && !(await H.visible('board')) && (await G.snap())?.view === 'view-game',
+    'a game master who sat the round out: "You\'re not in this round", no board; the others play', satText);
+  await H.shot('blocks-not-seated-gm');
+  await H.tap('#btn-menu');
+  hb = await H.roundControls();
+  expect(hb.some((t) => /Take Sol out/.test(t)) && /End game/.test(hb[hb.length - 1]) && !hb.some((t) => /Take Pierre out/.test(t)),
+    '…his ☰ still offers the round controls, for the players in the round', JSON.stringify(hb));
+  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
 
   } // part 2
 
@@ -770,7 +869,9 @@ try {
     return left;
   };
   // ---- teardown: a block game → the map → the quiz leaves nothing of the block game running ----
-  await H.tap('#btn-start');
+  await openMinigame(H, [Q]);
+  await ready(H); await ready(Q);
+  await startRound(H);
   expect(await showing(H, 'view-game') && await showing(Q, 'view-game'), 'teardown: a block game runs on both phones');
   // Élodie lifts a piece and is still holding it when the game ends
   await Q.ev(`document.getElementById('slot-0').dispatchEvent(new PointerEvent('pointerdown', { pointerId: 7, clientX: 100, clientY: 700, bubbles: true }))`);
@@ -780,8 +881,10 @@ try {
   await H.tap('#btn-end-game');
   await H.tap('#btn-end-game');
   expect(await showing(H, 'view-podium') && await showing(Q, 'view-podium'), 'teardown: the game master ends it → the podium');
-  await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
-  await H.tap('#btn-new-game');
+  await backToLobby(H);
+  await H.waitFor((x) => x.view === 'view-minigame-lobby', 5000);
+  await endMinigame(H);
+  await H.waitFor((x) => x.view === 'view-tableau', 5000);
   await H.tap('#btn-menu');
   await H.tap('#btn-gm');
   await H.tap('#gm-back');
@@ -798,12 +901,12 @@ try {
   await H.tap('[data-gm="goto"]');
   await H.tap('[data-gm="goto"]');
   await H.ev(`document.querySelector('#sheet-gm [data-close]').click()`);
-  // the quiz's lobby is the room, like a block lobby: the walking screen
-  const inRoom = async (p: Phone) => { for (let k = 0; k < 40; k++) { if ((await p.snap())?.view === 'view-lobby') return true; await sleep(100); } return false; };
+  // the room at the quiz tableau, like a block game's: the walking screen
+  const inRoom = async (p: Phone) => { for (let k = 0; k < 40; k++) { if ((await p.snap())?.view === 'view-tableau') return true; await sleep(100); } return false; };
   expect(await inRoom(H) && await inRoom(Q), 'Go there → both phones in the room (the walking screen)');
-  expect(/Waiting for Pierre to start/.test(await Q.text('lobby-hint')) && !(await Q.visible('btn-start')) && !(await Q.visible('btn-settings-lobby')),
-    'guest: "Waiting for Pierre to start…", no Start, no Settings', await Q.text('lobby-hint'));
-  expect(await H.visible('btn-start') && await H.visible('btn-settings-lobby'), 'game master: Start + ⚙ Settings');
+  expect(/Waiting for Pierre to start the quiz/.test(await Q.text('tableau-hint')) && !(await Q.visible('btn-start-minigame')),
+    'guest: "Waiting for Pierre to start the quiz…", no Start', await Q.text('tableau-hint'));
+  expect(await H.visible('btn-start-minigame') && /Start the quiz/.test(await H.text('btn-start-minigame')), 'game master: "▶ Start the quiz"');
   expect(await Q.visible('stick-pad') && await Q.visible('btn-interact') && await H.visible('stick-pad'), 'the joystick and the object button');
   // Élodie walks to the birthday table (the TV socket sees her relayed pos) and blows the candles
   const qtv = new Client('qtv'); await qtv.open(); qtv.send({ t: 'hello', role: 'screen' });
@@ -837,19 +940,24 @@ try {
     await H.ev(`document.querySelector('#sheet-settings [data-close]').click()`);
     return labels;
   };
+  expect(await openMinigame(H, [Q]), '"▶ Start the quiz" → both phones in the quiz\'s lobby');
+  expect(await H.visible('btn-settings-lobby') && !(await Q.visible('btn-settings-lobby')), 'lobby: ⚙ Settings for the game master only');
   const labels = await setQuiz(3, 'Choices');
   expect(labels === 'Questions|Time per question|Answers', 'quiz settings sheet from the quiz schema', labels);
-  expect(/^3 questions .* multiple choice$/.test(await Q.text('lobby-settings')), 'guests see the settings summary', await Q.text('lobby-settings'));
+  let summary = '';
+  for (let k = 0; k < 30 && !/^3 questions .* multiple choice$/.test(summary); k++) { summary = await Q.text('minigame-lobby-settings'); await sleep(100); }
+  expect(/^3 questions .* multiple choice$/.test(summary), 'guests see the settings summary in the lobby', summary);
 
   const phaseIs = async (p: Phone, id: string) => { for (let k = 0; k < 60; k++) { if (await p.visible(id)) return true; await sleep(100); } return false; };
-  await H.tap('#btn-start');
+  await ready(H); await ready(Q);
+  await startRound(H);
   expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), 'Start → the first question on both phones');
   expect(/\d:\d\d/.test(await Q.text('quiz-clock')), 'countdown shown', await Q.text('quiz-clock'));
-  // the game master's Back follows the server: refused while the quiz runs, so shown disabled
+  // the game master's Back ends the running quiz first: offered, and it says so
   await H.tap('#btn-menu');
   await H.tap('#btn-gm');
   const gmBack = await H.ev(`(() => { const b = document.getElementById('gm-back'); return { disabled: b.disabled, text: b.textContent }; })()`);
-  expect(gmBack.disabled && /end the game first/.test(gmBack.text), 'game master during a question: Back disabled ("end the game first")', JSON.stringify(gmBack));
+  expect(!gmBack.disabled && /ends the game/.test(gmBack.text), 'game master during a question: Back offered, "ends the game"', JSON.stringify(gmBack));
   await H.ev(`document.querySelector('#sheet-gm [data-close]').click()`);
 
   // ---- quiz 1: choices. H taps the right one, Élodie a wrong one; override on the first reveal ----
@@ -890,19 +998,17 @@ try {
     if (round < 2) expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), `Next → question ${round + 2}`);
   }
   expect(await phaseIs(H, 'view-podium') && await phaseIs(Q, 'view-podium'), 'after the last question: finished on both phones');
-  const rank: string = await Q.text('podium-list');
+  const rank: string = await Q.ev(`document.querySelector('#view-podium .podium-list')?.textContent ?? ''`);
   expect(/🥇\s+Pierre — \d+ \(\d ✓\)/.test(rank) && /Élodie/.test(rank), 'the podium ranks the quiz, with each player\'s right answers', rank);
   await H.shot('quiz-finished-gm');
-  expect(await H.visible('btn-again') && await H.visible('btn-new-game') && await H.visible('btn-settings-podium')
-    && !(await Q.visible('btn-again')) && !(await Q.visible('btn-new-game')) && await Q.visible('podium-hint'),
-    'the shared podium: the game master has Play again / Back to the room and the settings; guests wait');
-  expect(await H.text('btn-new-game') === 'Back to the room', 'the game master\'s second button says "Back to the room"', await H.text('btn-new-game'));
+  expect(await H.visible('btn-back-to-lobby') && !(await Q.visible('btn-back-to-lobby')) && await Q.visible('podium-hint'),
+    'the shared podium: the game master has "Back to the lobby"; guests wait');
 
-  // ---- quiz 2 (Back to the room, new settings): typed answers, really typed ----
-  await H.tap('#btn-new-game');
-  expect(await phaseIs(H, 'view-lobby') && await phaseIs(Q, 'view-lobby'), 'Back to the room → both phones in the room at the tableau');
+  // ---- quiz 2 (back to the lobby, new settings): typed answers, really typed ----
+  await H.tap('#btn-back-to-lobby');
+  expect(await phaseIs(H, 'view-minigame-lobby') && await phaseIs(Q, 'view-minigame-lobby'), 'Back to the lobby → both phones in the quiz\'s lobby');
   await setQuiz(3, 'Typed');
-  await H.tap('#btn-start');
+  await startRound(H);
   expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question') && await Q.visible('quiz-text-form') && !(await Q.visible('quiz-choices')),
     'typed round: a text field, no choices');
   const attrs = await Q.ev(`(() => { const i = document.getElementById('quiz-text'); return [i.getAttribute('autocorrect'), i.getAttribute('autocapitalize'), i.spellcheck, i.lang].join(','); })()`);
@@ -934,10 +1040,12 @@ try {
   expect(await phaseIs(H, 'view-podium'), 'typed quiz finished');
   await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
 
-  // ---- quiz 3 (Play again): straight into a new quiz; the game master ends it from the ☰ menu during a question ----
-  await H.tap('#btn-again');
+  // ---- quiz 3 (Play again from the lobby): the game master ends it from the ☰ menu during a question ----
+  await H.tap('#btn-back-to-lobby');
+  await phaseIs(H, 'view-minigame-lobby');
+  await startRound(H);
   expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question') && /^Question 1\//.test(await Q.text('quiz-progress')),
-    'Play again → question 1 of a new quiz at once, on both phones', await Q.text('quiz-progress'));
+    'Play again → question 1 of a new quiz, on both phones', await Q.text('quiz-progress'));
   expect((await Q.roundControls()).length === 0, 'quiz: guest menu has no game master controls');
   await H.tap('#btn-menu');
   const qhb = await H.roundControls();
@@ -946,22 +1054,45 @@ try {
   const qGuest = `[data-retire="${await Q.ev(`localStorage.getItem('bloko-id')`)}"]`;
   await H.tap(qGuest);
   await H.tap(qGuest);
-  let outLine = '';
-  for (let k = 0; k < 50 && !/taken out/.test(outLine); k++) { await sleep(100); outLine = await Q.text('quiz-sent'); }
-  expect(/taken out/.test(outLine) && await Q.ev(`[...document.querySelectorAll('#quiz-choices button, #quiz-send')].every((b) => b.disabled)`)
-    && (await H.roundControls()).length === 3, 'quiz: the game master takes the guest out (second tap): their answers close, End game stays', outLine);
+  const outQ = await Q.waitFor((x) => x.view === 'view-wait-lobby', 5000);
+  expect(outQ?.view === 'view-wait-lobby' && await Q.visible('stick-pad') && (await H.roundControls()).length === 3,
+    'quiz: the game master takes the guest out (second tap): she floats as a wisp until it ends (the pad), End game stays');
   await H.tap('#btn-end-game');
   const qArmed: string = await H.ev(`document.getElementById('btn-end-game').textContent`);
-  expect(/Tap again/.test(qArmed) && await Q.visible('quiz-question'), 'quiz End game: first tap arms, nothing ends yet', qArmed);
+  expect(/Tap again/.test(qArmed) && await H.visible('quiz-question'), 'quiz End game: first tap arms, nothing ends yet', qArmed);
   await H.tap('#btn-end-game');
   expect(await phaseIs(H, 'view-podium') && await phaseIs(Q, 'view-podium'), 'quiz End game: second tap → finished on both phones');
-  expect(await Q.text('podium-kicker') === 'The game master ended the quiz.' && (await H.roundControls()).length === 0,
-    'quiz ended: "The game master ended the quiz.", no game master controls left', await Q.text('podium-kicker'));
+  const qKicker: string = await Q.ev(`document.querySelector('#view-podium .podium-kicker')?.textContent ?? ''`);
+  expect(qKicker === 'The game master ended the quiz.' && (await H.roundControls()).length === 0,
+    'quiz ended: "The game master ended the quiz.", no game master controls left', qKicker);
   await H.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
   await Q.shot('quiz-finished-guest');
-  await H.tap('#btn-new-game');
-  expect(await phaseIs(H, 'view-lobby') && await phaseIs(Q, 'view-lobby') && await H.visible('btn-start') && await Q.visible('stick-pad'),
-    'Back to the room → the room again: the game master\'s Start, the joystick');
+
+  // ---- quiz 4: the game master sits it out: the question without answer controls, his reveal with Next ----
+  await H.tap('#btn-back-to-lobby');
+  await phaseIs(H, 'view-minigame-lobby');
+  await H.tap('#btn-ready'); // he came back ready: untap
+  await ready(Q); // taken out last round: she comes back not ready
+  await startRound(H);
+  expect(await phaseIs(H, 'quiz-question') && await phaseIs(Q, 'quiz-question'), 'a quiz without the game master: the question on both phones');
+  expect(await H.visible('quiz-not-seated') && !(await H.visible('quiz-choices')) && !(await H.visible('quiz-text-form'))
+    && (await Q.visible('quiz-choices') || await Q.visible('quiz-text-form')),
+    'the game master who sat it out: "You\'re not in this round", no answer controls; Élodie answers', await H.text('quiz-not-seated'));
+  await H.shot('quiz-not-seated-gm');
+  if (await Q.visible('quiz-choices')) await Q.tap('#quiz-choices [data-choice="0"]');
+  else { await Q.type('#quiz-text', 'zzz'); await Q.tap('#quiz-send'); }
+  expect(await phaseIs(H, 'quiz-reveal') && await H.visible('quiz-next') && await H.ev(`!!document.querySelector('[data-override="${idQ}"]')`),
+    '…the reveal: he keeps Next and the overrides');
+  await H.shot('quiz-not-seated-reveal-gm');
+  await H.tap('#btn-menu');
+  await H.tap('#btn-end-game');
+  await H.tap('#btn-end-game');
+  expect(await phaseIs(H, 'view-podium'), 'he ends it from ☰ → the podium');
+  await backToLobby(H);
+  await phaseIs(H, 'view-minigame-lobby');
+  await endMinigame(H);
+  expect(await phaseIs(H, 'view-tableau') && await phaseIs(Q, 'view-tableau') && await H.visible('btn-start-minigame') && await Q.visible('stick-pad'),
+    'End the quiz → the room again: the game master\'s "▶ Start the quiz", the joystick');
   // ---- teardown: the quiz → the map leaves nothing of the quiz running ----
   await H.tap('#btn-menu');
   await H.tap('#btn-gm');
@@ -995,7 +1126,7 @@ try {
   expect(await R.ev(`localStorage.getItem('bloko-room')`) === null, 'the refused code is forgotten (not stored)');
   await R.type('#room-input', room.toLowerCase());
   await R.tap('#room-form button[type="submit"]');
-  expect((await R.waitFor((x) => x.view === 'view-lobby', 5000))?.view === 'view-lobby', 'typing the new code joins (in the same character)');
+  expect((await R.waitFor((x) => x.view === 'view-tableau', 5000))?.view === 'view-tableau', 'typing the new code joins (in the same character)');
   // a phone that never had a code: the prompt asks for one, with no error
   const N = await phone('N');
   await N.navigate(`${HTTP}/play/`);
@@ -1113,6 +1244,51 @@ try {
   expect(!!close2 && close2.until <= close2.now, 'closing the QR sheet → the TV closes it too');
   tv7.ws.close();
   } // part 7
+
+  if (!ONLY || ONLY === '8') {
+  // ================= part 8: wisps over a minigame (the story's opening) =================
+  console.log('\n— part 8: wisps over the opening\'s block game —');
+  await kill9();
+  await boot(true, ''); // the story: the opening's block game names its four players and needs them all ready
+  const [P8, E8, S8, A8, N8] = await Promise.all(['P8', 'E8', 'S8', 'A8', 'N8'].map((l) => phone(l)));
+  for (const [p, ch] of [[P8, 'pierre'], [E8, 'elodie'], [S8, 'sol'], [A8, 'anna'], [N8, 'nico']] as const) await joinAs(p, ch);
+  const tv8 = await phone('TV8'); // a TV page (window.bloko), in its own context
+  await tv8.navigate(`${HTTP}/screen/`);
+  await tv8.ev(`new Promise((r) => { const t = setInterval(() => { if (window.bloko?.campaign()) { clearInterval(t); r(true); } }, 50); })`);
+  const tvWisps = async (want: string[]) => {
+    let got: string[] = [];
+    for (let k = 0; k < 50; k++) { got = await tv8.ev('window.bloko.wisps().map((w) => w.id)'); if (JSON.stringify([...got].sort()) === JSON.stringify([...want].sort())) break; await sleep(100); }
+    return got;
+  };
+  const idOf = async (p: Phone) => (await p.snap())?.id ?? '';
+  const [idS8, idN8] = [await idOf(S8), await idOf(N8)];
+  expect(await openMinigame(P8, [E8, S8, A8]), 'the opening: Pierre starts the block game → the four in its lobby');
+  const n8 = await N8.waitFor((x) => x.view === 'view-wait-lobby', 5000);
+  expect(n8?.view === 'view-wait-lobby' && await N8.visible('stick-pad'), 'Nico, not one of the four: the wisp pad on his phone');
+  expect(JSON.stringify(await tvWisps([idN8])) === JSON.stringify([idN8]), '…and he floats as a wisp over the lobby on the TV');
+  for (const p of [P8, E8, S8, A8]) await ready(p);
+  await startRound(P8);
+  for (const p of [P8, E8, S8, A8]) await p.waitFor((x) => x.view === 'view-game', 5000);
+  await P8.tap('#btn-menu');
+  await P8.tap(`[data-retire="${idS8}"]`);
+  await P8.tap(`[data-retire="${idS8}"]`);
+  await P8.ev(`document.querySelector('#sheet-menu [data-close]').click()`);
+  const s8 = await S8.waitFor((x) => x.view === 'view-wait-lobby', 5000);
+  expect(s8?.view === 'view-wait-lobby' && await S8.visible('stick-pad') && /until you play/.test(await S8.text('wait-lobby-text')),
+    'Sol, taken out of the round: the wisp pad on his phone until it ends', await S8.text('wait-lobby-text'));
+  const both = await tvWisps([idN8, idS8]);
+  expect(both.length === 2 && both.includes(idN8) && both.includes(idS8) && (await E8.snap())?.view === 'view-game',
+    'over the running block game on the TV: Nico and Sol as wisps; the others play on', JSON.stringify(both));
+  // the pad moves the wisp: the server relays a wisp's pos while a minigame runs
+  const sx = () => tv8.ev(`window.bloko.wisps().find((w) => w.id === ${JSON.stringify(idS8)})?.x ?? null`);
+  const x0 = await sx();
+  await S8.push(1, 0, 800);
+  let x1 = x0;
+  for (let k = 0; k < 30 && x1 === x0; k++) { await sleep(100); x1 = await sx(); }
+  expect(x0 !== null && x1 !== null && x1 > x0, 'Sol\'s pad moves his light on the TV', `${x0} → ${x1}`);
+  await S8.shot('opening-out-wisp');
+  await N8.shot('opening-wisp-lobby');
+  } // part 8
 
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}`);

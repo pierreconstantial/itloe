@@ -1,10 +1,11 @@
-// The game master's settings sheet, generated from the tableau's minigame's settings schema and wording (its entry in
-// ./minigames.js). Any minigame with a schema and a text table gets its sheet for free.
+// The game master's settings sheet, generated from a minigame's settings schema and wording (its round screens'
+// entry, ./minigames.js). A building block: the plain lobby fills it (./plain-lobby.js). Any minigame with a schema
+// and a text table gets its sheet for free.
 import { $ } from './dom.js';
 
 /** @typedef {Record<string, unknown>} AnySettings */
 /**
- * What the sheet needs to show one minigame's settings, and the one-line summary the room and the podium show.
+ * What the sheet needs to show one minigame's settings, and the one-line summary its lobby shows.
  * @typedef {{
  *   schema: Readonly<Record<string, { kind: string, min?: number, max?: number, step?: number, values?: readonly unknown[] }>>,
  *   text: (key: string) => { label: string, showIf?: (s: AnySettings) => boolean },
@@ -15,7 +16,7 @@ import { $ } from './dom.js';
 
 /**
  * Fills #settings-body. Every tap sends one `config` patch; the controls show
- * the tableau's settings only (campaign.at.settings), so they update when the server's next view arrives.
+ * the running minigame's settings only (from its view), so they update when the server's next view arrives.
  * @param {{ send: (msg: unknown) => void }} io
  */
 export function createSettingsSheet(io) {

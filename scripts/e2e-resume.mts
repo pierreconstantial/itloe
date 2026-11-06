@@ -1,11 +1,12 @@
-// P2 end-to-end: kill -9 + restart in every phase (the room at a tableau / playing / finished / timed playing).
+// P2 end-to-end: kill -9 + restart in every phase of a minigame's run: the room at a tableau, its lobby, a round
+// playing, its podium, the lobby again, a second (timed) round, and the end, where the rounds are recorded once.
 // Runs its OWN server (a child process on PORT, scratch BLOKO_VAR) so it can SIGKILL it.
 // Usage: PORT=3178 node scripts/e2e-resume.mts      (never 3131: that's the live server)
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { blocksOf, check, Client, finish, HTTP, legalMoves, playToDone, roomOf, settingsOf, sleep } from './e2e-lib.mts';
+import { backToLobby, blocksOf, check, Client, endMinigame, finish, HTTP, legalMoves, lobbyOf, playToDone, roomOf, settingsOf, sleep } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
 if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
@@ -53,6 +54,8 @@ async function rejoin(label: string, playerId: string): Promise<Client> {
 
 /** Comparable game content (the deadline is checked separately). */
 const core = (s: any) => JSON.stringify({ ...s, deadline: null });
+/** What the last view says about the evening's results: kept in the running minigame, and recorded. */
+const results = (c: Client) => ({ kept: c.last().campaign.at.results.length, played: c.last().campaign.facts.counters['blocks.played'] ?? 0 });
 
 let s = 777;
 const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 4294967296);
@@ -70,22 +73,35 @@ try {
   await A.waitFor((m) => m.t === 'view' && roomOf(m)?.order.length === 2);
   A.send({ t: 'pos', x: 4, y: 4, dir: 'up', moving: false });
   await sleep(100);
-  i = A.mark(); A.send({ t: 'config', patch: { grace: 2 } }); // settings changed in the room
-  await A.waitFor((m) => m.t === 'view' && settingsOf(m)?.grace === 2, i);
   const inRoom = A.lastRoom();
-  const roomSettings = JSON.stringify(A.lastSettings());
   check(!readFileSync(join(VAR, 'bloko.state.json'), 'utf8').includes('"pos"'), 'avatar positions are never persisted');
 
   await kill9(); await boot();
   check((await roomCode()) === room, `kill -9 in the room → same room code (${room})`);
   A = await rejoin('A', idA); B = await rejoin('B', idB);
-  check(JSON.stringify(A.lastRoom()) === JSON.stringify(inRoom) && A.lastView() === null && A.lastGm() === idA
-    && JSON.stringify(A.lastSettings()) === roomSettings && A.lastSettings().grace === 2,
-    'kill -9 in the room at the tableau → the room again: same players, game master and settings (changed there); stored ids rejoin');
+  check(JSON.stringify(A.lastRoom()) === JSON.stringify(inRoom) && A.lastMinigame() === null && A.lastGm() === idA,
+    'kill -9 in the room at the tableau → the room again: same players and game master, no minigame; stored ids rejoin');
   check(!A.msgs.some((m) => m.t === 'pos'), 'positions are ephemeral: none replayed after a restart');
   check(/RESUMED .* at hub\.false-start, room /.test(log), 'server log says it resumed the room at the tableau');
 
+  // ---------- the lobby ----------
+  i = A.mark(); A.send({ t: 'startMinigame' });
+  await A.waitFor((m) => m.t === 'view' && !!lobbyOf(m), i);
+  i = A.mark(); A.send({ t: 'config', patch: { grace: 2 } }); // settings changed in the lobby
+  await A.waitFor((m) => m.t === 'view' && settingsOf(m)?.grace === 2, i);
+  i = A.mark(); A.send({ t: 'ready', on: true });
+  await A.waitFor((m) => m.t === 'view' && lobbyOf(m)?.ready.length === 1, i);
+  const inLobby = JSON.stringify(A.lastLobby());
+
+  await kill9(); await boot();
+  A = await rejoin('A', idA); B = await rejoin('B', idB);
+  check(JSON.stringify(A.lastLobby()) === inLobby && A.lastLobby().ready.join() === idA && A.lastSettings().grace === 2,
+    'kill -9 in the lobby → the lobby again: same players, who is ready, the settings changed there');
+  check(/RESUMED .* at hub\.false-start, lobby, 1 of 2 ready, room /.test(log), 'server log says it resumed the lobby');
+
   // ---------- playing (marathon) ----------
+  i = A.mark(); B.send({ t: 'ready', on: true });
+  await A.waitFor((m) => m.t === 'view' && lobbyOf(m)?.ready.length === 2, i);
   i = A.mark(); A.send({ t: 'start' });
   await A.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing', i);
   await B.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'playing');
@@ -97,7 +113,8 @@ try {
 
   await kill9(); await boot();
   A = await rejoin('A', idA); B = await rejoin('B', idB);
-  check(core(A.lastView()) === core(playing) && A.lastView().deadline === null, 'playing kill -9 → same boards, hands, scores');
+  check(core(A.lastView()) === core(playing) && A.lastView().deadline === null && A.lastView().rules.grace === 2,
+    'playing kill -9 → same boards, hands, scores, with the lobby\'s settings');
   i = B.mark(); A.send({ t: 'place', ...legalMoves(A.lastView(), idA)[0] });
   check((await B.waitFor((m) => m.t === 'view' || m.t === 'err', i)).t === 'view', 'resumed game accepts the next move');
 
@@ -105,28 +122,28 @@ try {
   await playToDone(A, idA, B, rnd);
   await playToDone(B, idB, A, rnd);
   await A.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished');
-  i = A.mark(); A.send({ t: 'config', patch: { cleanBoardBonus: 450 } }); // the next game's settings, set on the podium
-  await A.waitFor((m) => m.t === 'view' && settingsOf(m)?.cleanBoardBonus === 450, i);
+  i = A.mark(); A.send({ t: 'config', patch: { cleanBoardBonus: 450 } });
+  check((await A.waitFor((m) => m.t === 'err', i)).code === 'locked', 'settings on the podium → err locked (they are the lobby\'s)');
   const podium = A.lastView();
-  const podiumSettings = JSON.stringify(A.lastSettings());
+  check(results(A).kept === 1 && results(A).played === 0, 'round 1 on its podium: its result kept, nothing recorded yet');
 
   await kill9(); await boot();
   A = await rejoin('A', idA); B = await rejoin('B', idB);
-  check(core(A.lastView()) === core(podium) && A.lastView().phase === 'finished', 'finished kill -9 → same podium');
-  check(JSON.stringify(A.lastSettings()) === podiumSettings && A.lastSettings().grace === 2 && A.lastSettings().cleanBoardBonus === 450,
-    'finished kill -9 → the settings changed in the room and on the podium are kept');
-  i = B.mark(); B.send({ t: 'newGame' });
-  check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-gm', 'after resume: non-game-master newGame → err not-gm');
-  i = A.mark(); A.send({ t: 'newGame' });
-  const back = roomOf(await A.waitFor((m) => m.t === 'view' && !!roomOf(m), i));
-  check(back.order.join() === `${idA},${idB}` && A.lastGm() === idA && (await roomCode()) === room, 'after resume: game master newGame → the room, same players + room code');
+  check(core(A.lastView()) === core(podium) && A.lastView().phase === 'finished' && A.lastMinigame().status === 'podium', 'finished kill -9 → same podium');
+  check(results(A).kept === 1 && results(A).played === 0 && A.lastSettings().grace === 2,
+    'finished kill -9 → the result kept once, nothing recorded, the settings kept');
+  i = B.mark(); B.send({ t: 'lobby' });
+  check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-gm', 'after resume: non-game-master lobby → err not-gm');
+  const back = lobbyOf(await backToLobby(A));
+  check(back.players.map((p: any) => p.id).join() === `${idA},${idB}` && back.ready.join() === `${idA},${idB}` && A.lastGm() === idA
+    && (await roomCode()) === room, 'after resume: game master lobby → the lobby, same players, both ready again, same room code');
 
-  // the room after newGame survives a kill too (the case of the first playtest)
+  // the lobby after a round survives a kill too (the case of the first playtest)
   await kill9(); await boot();
   A = await rejoin('A', idA); B = await rejoin('B', idB);
-  check(JSON.stringify(A.lastRoom()) === JSON.stringify(back), 'kill -9 in the room after newGame → the same room');
+  check(JSON.stringify(A.lastLobby()) === JSON.stringify(back) && results(A).kept === 1, 'kill -9 in the lobby after a round → the same lobby, the result kept');
 
-  // ---------- playing (timed): the clock keeps its REMAINING time ----------
+  // ---------- a second round (timed): the clock keeps its REMAINING time ----------
   A.send({ t: 'config', patch: { mode: 'timed', timedSeconds: 60 } });
   await A.waitFor((m) => m.t === 'view' && settingsOf(m)?.mode === 'timed');
   i = A.mark(); A.send({ t: 'start' });
@@ -177,14 +194,14 @@ try {
     await boot();
     A = await rejoin('A', idA);
     const v = A.lastView();
-    check(v.phase === 'playing' && v.players[idA].score === env.campaign.at.activity.players[idA].score && (await roomCode()) === room,
+    check(v.phase === 'playing' && v.players[idA].score === env.campaign.at.activity.round.players[idA].score && (await roomCode()) === room,
       `envelope with ${label} still resumes`);
   }
   // ---------- the bell falls due DURING a suspend: wake must pause the clock, not end the game ----------
   await kill9();
   const env = JSON.parse(readFileSync(FILE, 'utf8'));
   env.savedAt = Date.now();
-  env.campaign.at.activity.deadline = Date.now() + 2500;
+  env.campaign.at.activity.round.deadline = Date.now() + 2500;
   writeFileSync(FILE, JSON.stringify(env));
   await boot();
   A = await rejoin('A', idA);
@@ -199,6 +216,21 @@ try {
     `overdue bell on wake → ignored, clock paused (${Math.round((woke.deadline - Date.now()) / 100) / 10} s left)`);
   const ended = await A.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i, 6000);
   check(blocksOf(ended).endReason === 'time', `…and the bell still rings at the shifted deadline (endReason ${blocksOf(ended).endReason})`);
+
+  // ---------- the end: both rounds recorded once, when the game master ends the minigame ----------
+  await A.waitFor((m) => m.t === 'view' && m.campaign.at.results.length === 2, i);
+  check(results(A).kept === 2 && results(A).played === 0, 'round 2 on its podium: two results kept, nothing recorded yet');
+  await backToLobby(A);
+  await kill9(); await boot();
+  A = await rejoin('A', idA); B = await rejoin('B', idB);
+  check(A.lastMinigame()?.status === 'lobby' && results(A).kept === 2 && results(A).played === 0, 'kill -9 in the lobby after round 2 → the lobby, both results kept');
+  i = B.mark(); B.send({ t: 'endMinigame' });
+  check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-gm', 'non-game-master endMinigame → err not-gm');
+  await endMinigame(A);
+  check(!!roomOf(A.last()) && results(A).kept === 0 && results(A).played === 2, 'game master ends the minigame → the room, both rounds recorded (blocks.played = 2)');
+  await kill9(); await boot();
+  A = await rejoin('A', idA);
+  check(!!roomOf(A.last()) && results(A).played === 2, 'kill -9 after the end → the room, blocks.played still 2 (recorded once)');
 
   for (const c of [A, B]) c.ws.close();
 } catch (e) {

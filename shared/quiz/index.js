@@ -350,8 +350,8 @@ export function quizRanking(s) {
 }
 
 /**
- * The quiz's entry in the rules list (shared/minigames.js).
- * @type {import('../minigames.js').MinigameRules<QuizState, QuizAction, QuizSettings>}
+ * The quiz's round rules, in the rules list inside a plain lobby (shared/minigames.js).
+ * @type {import('../minigames.js').RoundRules<QuizState, QuizAction, QuizSettings>}
  */
 export const QUIZ_RULES = {
   init: startQuiz,

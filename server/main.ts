@@ -1,5 +1,5 @@
 // Itloe server: HTTP static + WebSocket on one port, PROTOCOL.md over the shared pure campaign engine
-// (the evening: party, hub/worlds/tableaux, facts, news) with a minigame's round nested as its activity;
+// (the evening: party, hub/worlds/tableaux, facts, news) with the running minigame nested as its activity;
 // each minigame's server code is in the server list (server/minigames.ts).
 // Every change goes through apply() → the minigame's hook (solo best), save to disk, arm the round's clock,
 // doors, broadcast.
@@ -20,21 +20,21 @@ import { makeAdmin } from './admin.ts';
 import { pickLan } from './lan.ts';
 import { makeClock } from './clock.ts';
 import { roundDeadline, shiftRound } from './resume.ts';
-import { minigame, type MinigameKind } from '../shared/minigames.js';
+import { minigame, type MinigameKind, type MinigameView } from '../shared/minigames.js';
 import { makeMinigameServers, type ErrCode, type MinigameServer } from './minigames.ts';
 import { makeRound, roundOf, type Round } from './round.ts';
 import { JOIN_QR_GAP_MS, JOIN_QR_MS } from '../shared/join-qr.js';
 import { cleanSpeech, isEmote, EMOTES } from '../shared/social.js';
 import { CHARACTERS, isCharacterId } from '../shared/characters.js';
-import { INTRO_KEY, INTRO_KEY_SPOT, PORTAL, openingPlayersPresent } from '../shared/campaign/story.js';
-import type { CharacterId } from '../shared/campaign/types.js';
+import { INTRO_KEY, INTRO_KEY_SPOT, PORTAL } from '../shared/campaign/story.js';
+import type { CharacterId, TableauPlayers } from '../shared/campaign/types.js';
 import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
-import { holding } from '../shared/campaign/index.js';
+import { holding, isWisp } from '../shared/campaign/index.js';
 import { PARTY_ROOM, spawnAt } from '../shared/scene.js';
 import { interactionActor, nearbyObject, objectAction } from '../shared/interactions.js';
 import { freshGame, loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import {
-  CONTENT, CONTENT_VERSION, assertContent, reduceCampaign, isUnlocked, roundStatus, gameMasterId, zoneAt, roomAt,
+  CONTENT, CONTENT_VERSION, assertContent, reduceCampaign, isUnlocked, minigameStatus, gameMasterId, askedSoFar, zoneAt, roomAt,
   type Campaign, type CampaignAction, type GmOp,
 } from './campaign.ts';
 
@@ -55,7 +55,7 @@ const game: Game = { campaign: loaded.campaign, room: loaded.room, bestPrevious:
 
 /** Every minigame's server code (server/minigames.ts), by kind. */
 const servers = makeMinigameServers(game);
-const serverOf = (kind: MinigameKind): MinigameServer<any, any, any> => servers[kind];
+const serverOf = (kind: MinigameKind): MinigameServer<any, any> => servers[kind];
 const party = () => game.campaign.party;
 /** The game master's id (Pierre, by the content), or null while he isn't in the evening. */
 const gameMaster = () => gameMasterId(party(), CONTENT);
@@ -88,11 +88,11 @@ function scheduleIncarnation(id: string): void {
   }, 3000);
 }
 
-/** The running round's in-memory side (round.ts): its server code's io, with unsaved messages. Null between rounds. */
+/** The running minigame's in-memory side (round.ts): its server code's io, with unsaved messages. Null while none runs. */
 let round: Round<unknown> | null = null;
 const openRound = (c: Campaign): Round<unknown> | null => {
   if (!c.at.kind || !c.at.activity) return null;
-  // Nobody keeps walking in the room while the round runs (a phone's last "stop" may arrive after it started).
+  // Nobody keeps walking in the room while the minigame runs (a phone's last "stop" may arrive after it started).
   for (const [id, pos] of positions.entries()) if (pos.moving) positions.set(id, { ...pos, moving: false });
   return makeRound({
     apply: (action) => apply({ t: 'activity', action: action as any }),
@@ -102,26 +102,6 @@ const openRound = (c: Campaign): Round<unknown> | null => {
 round = openRound(game.campaign); // a resumed round
 /** Door each walker currently stands in (edge trigger: entering a door fires once). In memory only. */
 const zones = new Map<string, string | null>();
-const OPENING_PODIUM_MS = 8000;
-let openingReturnTimer: ReturnType<typeof setTimeout> | null = null;
-
-/** The opening's ranking gets a short reveal, then the game master's newGame returns to the room. */
-function scheduleOpeningReturn(): void {
-  const c = game.campaign;
-  const shouldReturn = STORY_MODE && c.at.node === CONTENT.start && c.facts.flags.includes('portal.ready')
-    && roundStatus(c) === 'finished';
-  if (!shouldReturn) {
-    if (openingReturnTimer) clearTimeout(openingReturnTimer);
-    openingReturnTimer = null;
-    return;
-  }
-  if (openingReturnTimer) return;
-  openingReturnTimer = setTimeout(() => {
-    openingReturnTimer = null;
-    const gm = gameMaster();
-    if (gm) apply({ t: 'newGame', id: gm });
-  }, OPENING_PODIUM_MS);
-}
 
 const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   (prev, next) => { // before saveGame: a minigame's own records land in the same save (the block game's best)
@@ -151,9 +131,7 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
     }
   },
   () => broadcast(),
-  () => scheduleOpeningReturn(),
 ];
-scheduleOpeningReturn(); // a restart on the first podium still returns to the portal room
 
 /** Runs an action through the campaign engine; returns false when it was refused (state unchanged). */
 function apply(action: CampaignAction): boolean {
@@ -266,19 +244,34 @@ const whoIs = (ws: WebSocket): string => who.get(ws) ?? (screens.has(ws) ? 'scre
 /** Presence (ephemeral, never in State or on disk): party members with a live socket, in party order. */
 const online = (): string[] => party().order.filter((id) => sockets.get(id)?.readyState === WebSocket.OPEN);
 
-/** The running round as the view carries it: its kind, status and its minigame's view, the same for
- *  everyone (the quiz hides answers until the reveal). Null between rounds. */
-const roundView = () => {
+/** The players the running minigame shows itself, null while none runs (everyone else is a wisp: isWisp). */
+const shown = (): string[] | null => {
   const { kind, activity } = game.campaign.at;
-  return kind && activity ? { kind, status: roundStatus(game.campaign), view: serverOf(kind).view(activity) } : null;
+  return kind && activity ? minigame(kind)!.shows(activity) : null;
+};
+/** Does this member show as a wisp now (the story's, or one the running minigame doesn't show)? @param id a member */
+const wisp = (id: string): boolean => isWisp(party(), id, shown());
+
+/** The running minigame as the view carries it (shared/minigames.js MinigameView): its kind, status, its server
+ *  code's view, the same for everyone (the quiz hides answers until the reveal), whom it shows itself, and the
+ *  tableau's content rules for the Start button. Null while none runs. */
+const minigameView = (): MinigameView | null => {
+  const { kind, activity, node } = game.campaign.at;
+  if (!kind || !activity) return null;
+  const rules = minigame(kind)!;
+  const content = CONTENT.nodes[node]?.activity as TableauPlayers | undefined;
+  return {
+    kind, status: minigameStatus(game.campaign)!, view: serverOf(kind).view(activity), shows: rules.shows(activity),
+    required: { ...(content?.eligible ? { eligible: content.eligible } : {}), ...(content?.allReady ? { allReady: true } : {}) },
+  };
 };
 
-/** `round`: the running round; `campaign`: the whole evening (TV hub/cutscenes, phone game-master panel), without
- *  the round's raw state, which travels only through its minigame's view (raw quiz verdicts would leak). */
+/** `minigame`: the running minigame; `campaign`: the whole evening (TV hub/cutscenes, phone game-master panel), without
+ *  the minigame's raw state, which travels only through its server code's view (raw quiz verdicts would leak). */
 const viewMsg = () => {
   const { activity: _raw, ...at } = game.campaign.at;
   return JSON.stringify({
-    t: 'view', round: roundView(), campaign: { ...game.campaign, at }, contentVersion: CONTENT_VERSION,
+    t: 'view', minigame: minigameView(), campaign: { ...game.campaign, at }, contentVersion: CONTENT_VERSION,
     online: online(), incarnations: Object.fromEntries(incarnations), now: Date.now(),
   });
 };
@@ -361,7 +354,7 @@ const isMember = (id: unknown): id is string => typeof id === 'string' && !!part
 const isOnline = (playerId: string): boolean => sockets.get(playerId)?.readyState === WebSocket.OPEN;
 
 /** Why a (non-reclaim) join was refused: every character held → full; held by an online member → taken
- *  between rounds, full while a round is under way or on its podium; not a character → taken. */
+ *  while no minigame runs, full while one does; not a character → taken. */
 function joinRefusal(): ErrCode {
   const held = new Set(party().order.filter((id) => !party().players[id].left).map((id) => party().players[id].character));
   if (Object.keys(CHARACTERS).every((c) => held.has(c as CharacterId))) return 'full';
@@ -385,7 +378,7 @@ function walk(id: string, pos: Pos): void {
   zones.set(id, zone);
   if (!known || !zone || zone === before) return;
   if (!character) return;
-  if (c.party.players[id].statuses.includes('wisp') || isIncarnating(id)) return;
+  if (wisp(id) || isIncarnating(id)) return;
   if (zone === '@portal') {
     if (character !== CONTENT.chooser || !apply({ t: 'portal', id })) return;
     const arrival: Pos = { x: 6.2, y: 7.3, dir: 'up', moving: false };
@@ -435,9 +428,9 @@ function handleMessage(ws: WebSocket, m: any): void {
     const id = who.get(ws);
     if (!id || !canMove(party(), id) || !positions.allow(ws)) return;
     if (isIncarnating(id)) return;
-    if (round) { // during a round only wisps walk, in the room's positions and without doors
+    if (round) { // while a minigame runs only its wisps walk, in the room's positions and without doors
       const pos = parsePos(m);
-      if (pos && party().players[id].statuses.includes('wisp')) {
+      if (pos && wisp(id)) {
         positions.set(id, pos);
         relayPos(id, pos);
       }
@@ -457,7 +450,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     const id = who.get(ws);
     if (!id || !canMove(party(), id) || round || isIncarnating(id)) return;
     const member = party().players[id];
-    if (member.statuses.includes('wisp')) return;
+    if (wisp(id)) return;
     if (STORY_MODE && game.campaign.at.node === 'hub' && member.character === CONTENT.chooser
       && !game.campaign.facts.flags.includes('apparition.seen')) return;
     const now = Date.now();
@@ -473,7 +466,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     const now = Date.now();
     if (now - (socialAt.get(ws) ?? 0) < 650) return;
     if (m.t === 'say') {
-      if (party().players[id].statuses.includes('wisp') || isIncarnating(id)) return;
+      if (wisp(id) || isIncarnating(id)) return;
       const text = cleanSpeech(m.text);
       if (!text) return;
       socialAt.set(ws, now);
@@ -481,7 +474,7 @@ function handleMessage(ws: WebSocket, m: any): void {
       chat.push(event);
       if (chat.length > 30) chat.shift();
       sendAll(event);
-    } else if (isEmote(m.kind) && !isIncarnating(id) && (party().players[id].statuses.includes('wisp') ? m.kind === 'shine' : m.kind !== 'shine')) {
+    } else if (isEmote(m.kind) && !isIncarnating(id) && (wisp(id) ? m.kind === 'shine' : m.kind !== 'shine')) {
       socialAt.set(ws, now);
       const event = { t: 'emote', playerId: id, kind: m.kind, at: now };
       sendAll(event);
@@ -491,11 +484,11 @@ function handleMessage(ws: WebSocket, m: any): void {
 
   if (m.t === 'interact') {
     const id = who.get(ws);
-    // the furniture of the room where the party is (roomAt): wherever avatars walk, between rounds (hub, world,
-    // the room at a tableau)
+    // the furniture of the room where the party is (roomAt): wherever avatars walk, while no minigame runs (hub,
+    // world, the room at a tableau)
     if (!id || !isMember(id) || game.campaign.at.activity) return;
     const member = party().players[id];
-    if (member.statuses.includes('wisp') || isIncarnating(id)) return;
+    if (wisp(id) || isIncarnating(id)) return;
     const actor = interactionActor(member, game.campaign.facts);
     if (STORY_MODE && m.object === INTRO_KEY && game.campaign.at.node === 'hub') {
       if (!objectAction(INTRO_KEY, actor) || !game.campaign.facts.flags.includes('apparition.seen')) return;
@@ -584,17 +577,8 @@ function handleMessage(ws: WebSocket, m: any): void {
 
   switch (m.t) {
     case 'leave':
-      // leaving the EVENING (forwarded to a live game: a lobby drops them, a game marks them done);
-      // the stored id must not rejoin, so the socket goes back to being a stranger
-      // The game master leaving last finishes an abandoned opening round, then closes its podium before
-      // leaving; the portal room remains joinable even with nobody still present.
-      if (STORY_MODE && game.campaign.at.node === CONTENT.start && gameMaster() === id
-        && party().order.filter((memberId) => !party().players[memberId].left).length === 1) {
-        if (roundStatus(game.campaign) === 'running') apply({ t: 'activity', action: { t: 'endGame', id } });
-        if (roundStatus(game.campaign) === 'finished' && game.campaign.facts.flags.includes('portal.ready')) {
-          apply({ t: 'newGame', id });
-        }
-      }
+      // leaving the EVENING (a running minigame hears their leave: its lobby drops them, a block game marks
+      // them done); the stored id must not rejoin, so the socket goes back to being a stranger
       if (apply({ t: 'leave', id })) detach(id);
       return;
 
@@ -604,8 +588,8 @@ function handleMessage(ws: WebSocket, m: any): void {
       return;
 
     case 'back':
-      // the game master (the chooser after the portal), up one level; refused while a game is being played
-      // (endGame first) → 'refused'
+      // the game master (the chooser after the portal, while no minigame runs), up one level; a running
+      // minigame ends first → 'refused' at the hub
       if (!apply({ t: 'back', id })) sendErr(ws, id === gameMaster() || (STORY_MODE && party().players[id]?.character === CONTENT.chooser) ? 'refused' : 'not-gm');
       return;
 
@@ -620,59 +604,30 @@ function handleMessage(ws: WebSocket, m: any): void {
       return;
     }
 
-    case 'config':
-      // the tableau's settings: game master only, not while a round runs; their no-op patch is silent
+    // the main game's minigame messages, at a minigame's tableau (elsewhere → not-playing): a guest gets
+    // not-gm, the game master at the wrong moment refused
+    case 'startMinigame':
+    case 'endMinigame': {
       if (game.campaign.at.kind === null) { sendErr(ws, 'not-playing'); return; }
-      if (!isPlainObject(m.patch) || apply({ t: 'config', id, patch: m.patch })) return;
-      if (id !== gameMaster()) sendErr(ws, 'not-gm');
-      else if (roundStatus(game.campaign) === 'running') sendErr(ws, 'locked');
-      return;
-
-    // the round messages: the RPG's, at a minigame's tableau (elsewhere → not-playing). A guest gets
-    // not-gm, the game master at the wrong moment refused, in every minigame
-    case 'start':
-    case 'again':
-    case 'newGame':
-    case 'endGame':
-    case 'retire': {
-      const { kind } = game.campaign.at;
-      if (kind === null) { sendErr(ws, 'not-playing'); return; }
-      if (m.t === 'retire' && typeof m.target !== 'string') return;
-      if ((m.t === 'start' || m.t === 'again') && storyRefusesRound(m.t)) { sendErr(ws, 'refused'); return; }
-      const gm = id === gameMaster();
-      const action: CampaignAction = m.t === 'start' || m.t === 'again'
-        ? { t: m.t, id, now: Date.now(), inputs: serverOf(kind).inputs?.(game.campaign.at.settings, game.campaign.facts) }
-        : m.t === 'newGame' ? { t: 'newGame', id }
-          : { t: 'activity', action: m.t === 'endGame' ? { t: 'endGame', id } : { t: 'retire', id, target: m.target } };
-      if (apply(action)) return;
-      // the game master taking out an unknown, done or left player while the round runs: a no-op, not an error
-      if (m.t === 'retire' && gm && roundStatus(game.campaign) === 'running') return;
-      sendErr(ws, gm ? 'refused' : 'not-gm');
+      const action: CampaignAction = m.t === 'startMinigame' ? { t: 'startMinigame', id, now: Date.now() } : { t: 'endMinigame', id };
+      if (!apply(action)) sendErr(ws, id === gameMaster() ? 'refused' : 'not-gm');
       return;
     }
   }
 
-  roundMessage(ws, id, m);
-}
-
-/** The story's opening: its first round needs the four opening players, and none follows once the portal
- *  is ready. */
-function storyRefusesRound(t: 'start' | 'again'): boolean {
-  if (!STORY_MODE || game.campaign.at.node !== CONTENT.start) return false;
-  if (game.campaign.facts.flags.includes('portal.ready')) return true;
-  return t === 'start' && !openingPlayersPresent(party());
+  minigameMessage(ws, id, m);
 }
 
 /**
- * Every other message goes to the running round's minigame (no round → not-playing), with the sender's
- * id and the time.
+ * Every other message goes to the running minigame's server code (none running → not-playing), with the
+ * sender's id, the time, the game master and the evening's asked ids.
  */
-function roundMessage(ws: WebSocket, id: string, m: any): void {
+function minigameMessage(ws: WebSocket, id: string, m: any): void {
   const { kind, activity: state } = game.campaign.at;
   if (kind === null || !state || !round) { sendErr(ws, 'not-playing'); return; }
-  // the round's own io: a later action (the quiz's verdict) lands only while this round runs
+  // the minigame's own io: a later action (the quiz's verdict) lands only while this minigame runs
   const { io } = round;
-  const reply = serverOf(kind).message(m, { id, now: Date.now(), gameMasterId: gameMaster(), state }, io);
+  const reply = serverOf(kind).message(m, { id, now: Date.now(), gameMasterId: gameMaster(), state, asked: askedSoFar(game.campaign) }, io);
   if (!reply) return;
   if (!('action' in reply)) sendErr(ws, reply.refused);
   else if (!io.apply(reply.action) && reply.refused) sendErr(ws, reply.refused);
@@ -743,8 +698,8 @@ wss.on('connection', (ws, req) => {
 
 // ---------- admin page (/admin/, server/admin.ts) ----------
 
-/** Everything the admin page shows that only the server knows: the in-memory side included, and the round's
- *  raw state, answers too. */
+/** Everything the admin page shows that only the server knows: the in-memory side included, and the running
+ *  minigame's raw state, answers too. */
 function adminSnapshot() {
   const c = game.campaign;
   const socket = (ws: WebSocket) => ({ ...socketInfo.get(ws), open: ws.readyState === WebSocket.OPEN });
@@ -765,8 +720,8 @@ function adminSnapshot() {
     screens: [...screens].map(socket),
     strangers: [...wss.clients].filter((ws) => !who.has(ws) && !screens.has(ws)).map(socket),
     gameMaster: gameMaster(),
-    round: c.at.kind && c.at.activity ? {
-      kind: c.at.kind, status: roundStatus(c), describe: rules?.describe(c.at.activity) ?? '', deadline: roundDeadline(c.at),
+    minigame: c.at.kind && c.at.activity ? {
+      kind: c.at.kind, status: minigameStatus(c), describe: rules?.describe(c.at.activity) ?? '', deadline: roundDeadline(c.at),
     } : null,
     campaign: c,
   };
