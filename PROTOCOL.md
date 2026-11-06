@@ -125,7 +125,9 @@ messages (`unsaved` below) during its round.
 ### Birthday opening (`story.elo-50`)
 
 The first match requires Pierre, Élodie, Sol and Anna. After it finishes, `campaign.facts.flags` contains
-`portal.ready`; the host sends `{ "t": "newGame" }` to return everyone to the room. A portal is then drawn
+`portal.ready`; the server returns everyone to the room after the podium reveal, or the host can send
+`{ "t": "newGame" }` sooner. If everyone leaves the evening during the round or at its podium, the
+last host finishes the round if needed and returns to the room before leaving, so they can rejoin. A portal is then drawn
 in the middle of the room, behind the row where the guests start. Elo walks into it with the ordinary
 `pos` message; the server applies the portal transition only for her and queues
 `{ "seq": 1, "t": "apparition" }` in `campaign.news`. The other phones

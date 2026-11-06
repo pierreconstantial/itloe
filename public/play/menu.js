@@ -27,7 +27,7 @@ export function initMenu(hooks) {
     $('btn-leave').hidden = !hooks.canLeave();
     $('btn-gm').hidden = !hooks.isGameMaster();
     leaveArmed = false;
-    $('btn-leave').textContent = 'Leave game';
+    $('btn-leave').textContent = 'Leave evening';
   }
 
   /** Shows exactly the sheets `keep` says, telling the hook about each open sheet that closes. @param {(s: string) => boolean} keep */
@@ -78,7 +78,7 @@ export function initMenu(hooks) {
   $('btn-leave').addEventListener('click', () => {
     if (!leaveArmed) {
       leaveArmed = true;
-      $('btn-leave').textContent = 'Tap again to leave';
+      $('btn-leave').textContent = 'Tap again to leave evening';
       return;
     }
     close();

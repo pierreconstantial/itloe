@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newCampaign, reduceCampaign, validateContent, holding } from '../shared/campaign/index.js';
+import { newCampaign, loadCampaign, reduceCampaign, validateContent, holding } from '../shared/campaign/index.js';
 import { INTRO_KEY, MEMORY_WORLDS, OPENING_PLAYERS, STORY_CONTENT } from '../shared/campaign/story.js';
 
 /** @param {import('../shared/campaign/types.js').Campaign} campaign
@@ -61,4 +61,21 @@ test('future needs all seven keys, while world entrances remain unassigned', () 
   assert.equal(c.facts.unlocked.includes('future'), false);
   c = act(c, { t: 'gm', id: 'elodie', op: { op: 'give', item: INTRO_KEY, to: 'elodie' } });
   assert.equal(c.facts.unlocked.includes('future'), true);
+});
+
+test('a saved opening podium with no remaining host resumes in the portal room', () => {
+  let c = newCampaign(STORY_CONTENT, 42);
+  for (const character of OPENING_PLAYERS) c = act(c, { t: 'join', id: character, character });
+  c = act(c, { t: 'start', id: 'pierre', now: 1000 });
+  c = act(c, { t: 'activity', action: { t: 'endGame', id: 'pierre' } });
+  for (const character of OPENING_PLAYERS) c = act(c, { t: 'leave', id: character });
+  assert.equal(c.party.hostId, null);
+  assert.equal(c.at.activity !== null, true);
+  const resumed = loadCampaign(c, STORY_CONTENT);
+  assert.equal(resumed.at.activity, null);
+  assert.equal(resumed.facts.flags.includes('portal.ready'), true);
+  assert.equal(resumed.facts.counters['blocks.played'], 1);
+  const joined = act(resumed, { t: 'join', id: 'elo-returned', character: 'elodie' });
+  assert.equal(joined.party.hostId, 'elo-returned');
+  assert.equal(act(joined, { t: 'portal', id: 'elo-returned' }).at.node, 'hub');
 });

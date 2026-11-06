@@ -200,6 +200,12 @@ export function loadCampaign(raw, content) {
     node, kind: stays && activity ? kind : room.kind, activity: stays ? activity : null,
     settings: (stays ? raw.at.settings : null) ?? room.settings,
   };
+  // A saved first podium with nobody left in the evening has no host who can close it. Resume
+  // in the portal room; the completed match and its reward facts remain intact.
+  if (content.storyId === 'elo-50' && node === content.start && at.activity && facts.flags.includes('portal.ready')
+    && !party.order.some((id) => !party.players[id].left) && minigame(at.kind)?.status(at.activity) === 'finished') {
+    at.activity = null;
+  }
   const s = settle(facts, content, newsSeq);
   return {
     v: 1, seed, party, at,

@@ -37,7 +37,7 @@ export function revealSchedule(s) {
  * The podium of every minigame: its round's players, ranked by the shared rule.
  * @param {RoundPlayers} s  the round's view (its common players and how it ended)
  * @param {number} elapsedMs time since the game finished (Infinity = no animation)
- * @param {{ title?: string, next: string, again?: boolean, rowExtra?: (id: string) => (Node | string)[] }} opts
+ * @param {{ title?: string, next: string, again?: boolean, hint?: string, rowExtra?: (id: string) => (Node | string)[] }} opts
  *   next: the "Next game: …" line (the tableau's settings, summarized); again: false when no round follows,
  *   only the way back to the room; rowExtra: cells after the score
  */
@@ -67,7 +67,7 @@ export function renderPodium(s, elapsedMs, opts) {
   const sub = ending ? [h('p', 'podium-ending reveal', [ending])] : [];
   for (const el of sub) delay(el, 0);
   const again = opts.again ?? true;
-  const hint = h('p', 'podium-hint reveal', [again ? "Play again on the host's phone" : "Back to the room on the host's phone"]);
+  const hint = h('p', 'podium-hint reveal', [opts.hint ?? (again ? "Play again on the host's phone" : "Back to the room on the host's phone")]);
   delay(hint, lastAt + 1200);
   const next = again ? [h('p', 'settings-line reveal', [`Next game: ${opts.next}`])] : [];
   for (const el of next) delay(el, lastAt + 1200);

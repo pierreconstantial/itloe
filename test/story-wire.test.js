@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { createServer } from 'node:net';
 import { OPENING_PLAYERS, INTRO_KEY, PORTAL, INTRO_KEY_SPOT } from '../shared/campaign/story.js';
 
-test('wire: four-player match reveals portal, only Elo crosses and collects the key', async (t) => {
+test('wire: all four can leave the opening podium, rejoin, and Elo can reach the key', async (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'itloe-story-'));
   const port = await new Promise((resolve) => {
     const listener = createServer();
@@ -56,21 +56,33 @@ test('wire: four-player match reveals portal, only Elo crosses and collects the 
     phones.set(character, { ...phone, id: welcome.playerId });
   }
   const host = phones.get('pierre');
-  const elo = phones.get('elodie');
-  assert.ok(host && elo);
+  assert.ok(host);
   host.send({ t: 'start' });
   await until(host, (m) => m.t === 'view' && m.round?.status === 'running');
   host.send({ t: 'endGame' });
   const finished = await until(host, (m) => m.t === 'view' && m.round?.status === 'finished');
   assert.ok(finished.campaign.facts.flags.includes('portal.ready'));
-  host.send({ t: 'newGame' });
-  await until(host, (m) => m.t === 'view' && m.round === null && m.campaign.facts.flags.includes('portal.ready'));
+  for (const character of OPENING_PLAYERS.filter((character) => character !== 'pierre')) {
+    phones.get(character).send({ t: 'leave' });
+    await until(screen, (m) => m.t === 'view' && m.campaign.party.players[phones.get(character).id]?.left);
+  }
+  host.send({ t: 'leave' });
+  await until(screen, (m) => m.t === 'view' && m.round === null && m.campaign.facts.flags.includes('portal.ready'));
+  for (const character of OPENING_PLAYERS) {
+    const phone = phones.get(character);
+    const fromWelcome = phone.messages.length;
+    phone.send({ t: 'join', character });
+    const welcome = await until(phone, (m) => m.t === 'welcome' && m.playerId !== phone.id, fromWelcome);
+    phones.set(character, { ...phone, id: welcome.playerId });
+  }
+  const elo = phones.get('elodie');
+  assert.ok(elo);
   const from = screen.messages.length;
   elo.send({ t: 'pos', x: 6.4, y: 7.6, dir: 'right', moving: false });
   await until(screen, (m) => m.t === 'pos' && m.playerId === elo.id, from);
   elo.send({ t: 'pos', x: PORTAL.x, y: PORTAL.y, dir: 'up', moving: false });
   const hub = await until(elo, (m) => m.t === 'view' && m.campaign?.at.node === 'hub');
-  assert.equal(hub.campaign.party.order.length, 4);
+  assert.equal(hub.campaign.party.order.filter((/** @type {string} */ id) => !hub.campaign.party.players[id].left).length, 4);
   assert.equal(hub.campaign.facts.flags.includes('apparition.seen'), false);
   const apparition = hub.campaign.news.find((/** @type {any} */ n) => n.t === 'apparition');
   assert.ok(apparition);

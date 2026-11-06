@@ -85,6 +85,26 @@ const openRound = (c: Campaign): Round<unknown> | null => {
 round = openRound(game.campaign); // a resumed round
 /** Door each walker currently stands in (edge trigger: entering a door fires once). In memory only. */
 const zones = new Map<string, string | null>();
+const OPENING_PODIUM_MS = 8000;
+let openingReturnTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** The opening's ranking gets a short reveal, then the existing host action returns to the room. */
+function scheduleOpeningReturn(): void {
+  const c = game.campaign;
+  const shouldReturn = STORY_MODE && c.at.node === CONTENT.start && c.facts.flags.includes('portal.ready')
+    && roundStatus(c) === 'finished';
+  if (!shouldReturn) {
+    if (openingReturnTimer) clearTimeout(openingReturnTimer);
+    openingReturnTimer = null;
+    return;
+  }
+  if (openingReturnTimer) return;
+  openingReturnTimer = setTimeout(() => {
+    openingReturnTimer = null;
+    const hostId = party().hostId;
+    if (hostId) apply({ t: 'newGame', id: hostId });
+  }, OPENING_PODIUM_MS);
+}
 
 const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   (prev, next) => { // before saveGame: a minigame's own records land in the same save (the block game's best)
@@ -111,7 +131,9 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   (_prev, next) => { positions.prune(next.party); round?.positions.prune(next.party); },
   (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
   () => broadcast(),
+  () => scheduleOpeningReturn(),
 ];
+scheduleOpeningReturn(); // a restart on the first podium still returns to the portal room
 
 /** Runs an action through the campaign engine; returns false when it was refused (state unchanged). */
 function apply(action: CampaignAction): boolean {
@@ -493,6 +515,15 @@ function handleMessage(ws: WebSocket, m: any): void {
     case 'leave':
       // leaving the EVENING (forwarded to a live game: a lobby drops them, a game marks them done);
       // the stored id must not rejoin, so the socket goes back to being a stranger
+      // The last person is also the last host. Finish an abandoned opening round, then close its
+      // podium before they leave; the portal room remains joinable even with nobody still present.
+      if (STORY_MODE && game.campaign.at.node === CONTENT.start && party().hostId === id
+        && party().order.filter((memberId) => !party().players[memberId].left).length === 1) {
+        if (roundStatus(game.campaign) === 'running') apply({ t: 'activity', action: { t: 'endGame', id } });
+        if (roundStatus(game.campaign) === 'finished' && game.campaign.facts.flags.includes('portal.ready')) {
+          apply({ t: 'newGame', id });
+        }
+      }
       if (apply({ t: 'leave', id })) detach(id);
       return;
 

@@ -149,7 +149,8 @@ function showRound(r, c) {
       } else finishedAt = -Infinity;
     } else if (prev?.status !== 'finished') finishedAt = -Infinity; // arrived on a finished podium: settled
     const podium = renderPodium(r.view, performance.now() - finishedAt, {
-      title: extras.title, next: screens.settings.summarize(tableauSettings()), again: !portalReady(), rowExtra: extras.rowExtra,
+      title: extras.title, next: screens.settings.summarize(tableauSettings()), again: !portalReady(),
+      hint: portalReady() ? 'Returning to the room shortly…' : undefined, rowExtra: extras.rowExtra,
     });
     podium.append(...(extras.lines ?? []));
     app.replaceChildren(podium);

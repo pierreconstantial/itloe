@@ -415,7 +415,12 @@ function render() {
     const states = campaign ? pickStates(campaign.party, online) : null;
     if (!states || (!anyPickable(states) && pendingPick === null)) {
       show('waiting');
-      $('waiting-text').textContent = round?.status === 'finished' ? 'A game just ended.' : 'A game is already running.';
+      const openingPodium = isStory() && campaign?.at.node === content().start
+        && campaign.facts.flags.includes('portal.ready') && round?.status === 'finished';
+      $('waiting-text').textContent = openingPodium ? 'Returning to the room…'
+        : round?.status === 'finished' ? 'A game just ended.' : 'A game is already running.';
+      $('waiting-hint').textContent = openingPodium ? 'The portal will appear shortly. Rejoin in the room.'
+        : 'Watch it on the big screen!';
       return;
     }
     show('pick');
@@ -644,7 +649,7 @@ function renderPodium(r, screens, meId, isHost) {
     : `Next game: ${screens.settings.summarize(tableauSettings())}`;
   $('btn-settings-podium').hidden = !isHost || !!portalReady;
   $('btn-again').hidden = !!portalReady;
-  $('podium-hint').textContent = portalReady ? 'Waiting for the host to return to the room…'
+  $('podium-hint').textContent = portalReady ? 'Returning to the room shortly…'
     : 'Waiting for the host: rematch or back to the room…';
   $('podium-actions').hidden = !isHost;
   $('podium-hint').hidden = isHost;
