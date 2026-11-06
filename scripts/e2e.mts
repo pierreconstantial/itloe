@@ -72,9 +72,21 @@ const M = new Client('M'); await M.open(); M.send({ t: 'hello', role: 'player', 
 i = M.mark(); M.send({ t: 'join', character: 'elodie' });
 const idM = (await M.waitFor((m) => m.t === 'welcome', i)).playerId;
 await A.waitFor((m) => m.t === 'view' && roomOf(m)?.players[idL] && roomOf(m)?.players[idM]);
+// the rest of the roster (Nico, …) is held too, so nothing is left to pick
+const extra: { c: Client, id: string }[] = [];
+for (const character of Object.keys(CHARACTERS).filter((c) => !['anna', 'sol', 'pierre', 'elodie'].includes(c))) {
+  const c = new Client(character); await c.open(); c.send({ t: 'hello', role: 'player', room });
+  i = c.mark(); c.send({ t: 'join', character });
+  extra.push({ c, id: (await c.waitFor((m) => m.t === 'welcome', i)).playerId });
+}
 
 i = T.mark(); T.send({ t: 'join', character: 'pierre' });
 check((await T.waitFor((m) => m.t === 'err', i)).code === 'full', `every character held (${ROSTER_SIZE}) → err full`);
+for (const { c, id } of extra) {
+  i = A.mark(); c.send({ t: 'leave' });
+  await A.waitFor((m) => m.t === 'view' && !roomOf(m)?.players[id], i);
+  c.ws.close();
+}
 i = A.mark(); M.send({ t: 'leave' });
 await A.waitFor((m) => m.t === 'view' && !roomOf(m)?.players[idM], i);
 i = T.mark(); T.send({ t: 'join', character: 'elodie' });
