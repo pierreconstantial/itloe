@@ -101,8 +101,9 @@ const SHELTER_OFFER_EVENTS = {
 const FOOSBALL_OFFER = { node: FOOSBALL, text: 'Pierre: “Élodie! A game of table football?”', accept: '⚽ Yes' };
 const PLAY_FOOSBALL = { 'shelter-foosball': { actions: [{ key: 'play', text: '⚽ Play table football' }] } };
 /** Élodie talking to Pierre in the flat: he offers backgammon again (her dismissed offer shows again). */
+/** Pierre arriving in the flat: a hello, no question yet. */
+const PIERRE_HELLO = 'Hello Élodie! I brought beers and cigarettes!';
 const TALK_TO_PIERRE = { pierre: { actions: [{ key: 'talk', text: '💬 Talk to Pierre', say: 'Let’s play backgammon!', speaker: /** @type {const} */ ('target') }] } };
-const PIERRE_LINE = 'I brought beers and cigarettes! But first, let’s play backgammon.';
 const BACKGAMMON_OFFER = { node: BACKGAMMON, text: 'Pierre: “Let’s play backgammon!”', accept: '🎲 Yes' };
 
 /** Marokkanergasse's people: talking to any of them offers Pyramide. */
@@ -286,22 +287,22 @@ export const YOUNG_ADULT = {
         'crowbar-taken': { hide: [TONI, DOG] },
       },
     },
-    // Pierre arrives after three in-game hours, whatever Élodie did: from wisp to avatar, with his line, and he offers
-    // backgammon (Yes or Dismiss; talking to him offers it again). Yes opens its lobby. Once a game has
+    // Pierre arrives after three in-game hours, whatever Élodie did: from wisp to avatar, he says hello and that he
+    // brought beers and cigarettes, then waits for Élodie to come to him. Talking to him, he offers backgammon (Yes or Dismiss;
+    // talking to him again offers it again). Yes opens its lobby. Once a game has
     // finished there, he is a wisp again, back in the flat, and the beers and the cigarettes lie on the floor.
     'pierre-visit': {
       initial: 'not-yet',
       states: {
         'not-yet': { when: [{ if: { count: CLOCK, gte: 3 }, to: 'arrived' }] },
-        // Pierre's wisp becomes his avatar (the 3-2-1 countdown), then he says his line over it
+        // Pierre's wisp becomes his avatar (the 3-2-1 countdown), he says hello, and waits for Élodie to talk to him
         arrived: {
           enter: [{ incarnate: 'pierre' }],
-          speech: { pierre: PIERRE_LINE },
-          offer: BACKGAMMON_OFFER,
+          speech: { pierre: PIERRE_HELLO },
           characters: TALK_TO_PIERRE,
           on: { [`entered:${BACKGAMMON}`]: 'backgammon', 'talk:pierre': 'invites' },
         },
-        // talking to Pierre offers the game again (a dismissed offer shows again)
+        // talking to Pierre offers the game (again, after a Dismiss)
         invites: {
           offer: BACKGAMMON_OFFER,
           characters: TALK_TO_PIERRE,

@@ -335,13 +335,13 @@ test('Young Adult to its end: backgammon with Pierre, the kiss at the Shelter, P
   let c = act(afterOpening(), { t: 'gm', id: 'pierre', op: { op: 'goto', node: FLAT } });
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'count', counter: 'young-adult.clock.hours', set: 3 } });
   c = act(c, { t: 'incarnate', id: 'pierre' });
-  // Pierre's backgammon: Yes or Dismiss; talking to Pierre offers it again; Yes opens its lobby; a finished game
-  // sends him back to a wisp, in the flat
-  assert.equal(offerAt(c.facts, STORY_CONTENT, FLAT)?.node, `${FLAT}/backgammon`);
+  // Pierre's backgammon: he waits for Élodie to talk to him, then offers it (Yes or Dismiss; talking again offers it
+  // again); Yes opens its lobby; a finished game sends him back to a wisp, in the flat
+  assert.equal(offerAt(c.facts, STORY_CONTENT, FLAT), null, 'Pierre waits for Élodie to come to him');
   assert.equal(objectAction('pierre', c.party.players.elodie, characterRules(c.facts, STORY_CONTENT))?.key, 'talk');
   c = act(c, { t: 'use', id: 'elodie', character: 'pierre', action: 'talk' });
   assert.equal(stateOf(c, 'pierre-visit'), 'invites');
-  assert.equal(offerAt(c.facts, STORY_CONTENT, FLAT)?.node, `${FLAT}/backgammon`, 'offered again');
+  assert.equal(offerAt(c.facts, STORY_CONTENT, FLAT)?.node, `${FLAT}/backgammon`, 'talking to him brings the offer');
   c = act(c, { t: 'enter', id: 'elodie', node: `${FLAT}/backgammon` });
   assert.equal(c.at.node, `${FLAT}/backgammon`);
   assert.ok(c.at.activity, 'Yes opens the backgammon lobby');

@@ -71,6 +71,7 @@ const BEATS = {
   ],
   // backgammon (Pierre a wisp again), the beers and cigarettes, Toni and his crowbar, back home for the ticket
   'tram-night': [
+    by('elodie', { t: 'use', character: 'pierre', action: 'talk' }),
     by('elodie', { t: 'enter', node: `${FLAT}/backgammon` }),
     by('pierre', { t: 'endMinigame' }),
     finished(`${FLAT}/backgammon`),
@@ -107,7 +108,7 @@ const PRESETS: Preset[] = [
   { path: 'hub/base', title: 'Élodie’s dream apartment', about: 'Just after the opening: Élodie has the first key; Pierre, Sol and Anna are wisps.', upTo: 'opening' },
   { path: `${TRAM_5}/base`, title: 'Day · the Shelter closed', about: 'Élodie has walked to Tram 5; Tschick-Toni waits beside the automat.', upTo: 'tram-day' },
   { path: `${FLAT}/arrived`, title: 'First visit, in the dark', about: 'After the first tram quiz: the lamp is off, Pierre has not come yet.', upTo: 'flat-dark' },
-  { path: `${FLAT}/pierre`, title: 'Pierre arrives · backgammon', about: 'The lamp on, three hours later: Pierre is himself and offers backgammon.', upTo: 'flat-pierre' },
+  { path: `${FLAT}/pierre`, title: 'Pierre arrives · backgammon', about: 'The lamp on, three hours later: Pierre is himself and waits for Élodie to talk to him, then offers backgammon.', upTo: 'flat-pierre' },
   { path: `${TRAM_5}/night`, title: 'Night · the Shelter open', about: 'After backgammon, Toni and the floorboard: Élodie holds the beers, the cigarettes, the crowbar and the ticket; Pierre is a wisp again.', upTo: 'tram-night' },
   { path: `${SHELTER}/arrived`, title: 'Just walked in · table football', about: 'Through its entrance at night: Pierre is himself and waits for Élodie to come to him (holding the beers, she gives him one first), then offers table football.', upTo: 'shelter' },
   { path: `${SHELTER}/after-match`, title: 'After the match · the kiss', about: 'Back in the bar after table football: Élodie can kiss Pierre.', upTo: 'after-match' },
