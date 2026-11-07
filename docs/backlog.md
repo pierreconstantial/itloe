@@ -25,6 +25,13 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Story opening in a browser test](#story-opening-in-a-browser-test) | No browser test plays the opening past its block game | P1 | Open | Low |
 | [Pyramide in the story](#pyramide-in-the-story) | Pyramide has no tableau in the story yet | P1 | Needs decision | Low |
 | [Apartment drawings cover avatars](#apartment-drawings-cover-avatars) | The cats, friends, keepsakes and key are always drawn over avatars | P2 | Open | Low |
+| [Players who leave or are taken out](#players-who-leave-or-are-taken-out) | Each minigame handles leaving and taking out its own way; two podium bugs come from it | P2 | Open | Medium |
+| [Trim the e2e suites and share their setup](#trim-the-e2e-suites-and-share-their-setup) | The suites re-check what unit tests pin and each copy their setup | P2 | Open | Medium |
+| [Browser suites ignore page errors](#browser-suites-ignore-page-errors) | The phone and TV suites pass when a page throws | P2 | Open | Low |
+| [Backgammon's restart and hidden dice untested](#backgammons-restart-and-hidden-dice-untested) | No test resumes a backgammon round or checks its view hides the dice | P2 | Open | Low |
+| [Questions of a dropped round come back](#questions-of-a-dropped-round-come-back) | A round dropped by `back` or `goto` doesn't use up its questions or words | P2 | Open | Low |
+| [Join QR card covers minigame screens](#join-qr-card-covers-minigame-screens) | On the TV the card covers Pyramide, backgammon and the lobby's panel | P2 | Open | Trivial |
+| [TV frame cost unmeasured](#tv-frame-cost-unmeasured) | The room redraws everything at 60 fps; nobody measured it on the evening's laptop | P2 | Open | Low |
 | [Guests controlling NPCs](#guests-controlling-npcs) | Players controlling Marokkanergasse's NPCs, Nico and Mathieu | P3 | Needs decision | High |
 | [Room before the content arrives](#room-before-the-content-arrives) | A reloaded phone walks the party room until the content loads | P3 | Open | Low |
 | [Debug accessors show only the party room](#debug-accessors-show-only-the-party-room) | `bloko.drawOrder()` and `bloko.scene()` ignore the apartment and Young Adult's rooms | P3 | Open | Trivial |
@@ -33,6 +40,20 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Minigame wording in shared folders](#minigame-wording-in-shared-folders) | Block and quiz files in `public/commun/`, block files with generic names | P3 | Open | Low |
 | [Screen comparison flags random content](#screen-comparison-flags-random-content) | `--compare` lists room codes, QR codes, questions and scores as changes | P3 | Open | Medium |
 | [Two kinds of round in backgammon](#two-kinds-of-round-in-backgammon) | Backgammon's rounds of games share the word "round" with a minigame's round | P3 | Needs decision | Low |
+| [Pyramide's interrupted round and hyphenated guesses](#pyramides-interrupted-round-and-hyphenated-guesses) | A round ended at 0–0 goes to team 2; "grandmère" is refused for "grand-mère" | P3 | Open | Low |
+| [Blocks preview undone by other players](#blocks-preview-undone-by-other-players) | Another player's update puts a dropped piece back in the tray for a moment | P3 | Open | Low |
+| [TV after a reconnect](#tv-after-a-reconnect) | A stray socket, avatars gliding in, quiz sounds for what it missed | P3 | Open | Medium |
+| [Confetti cut short](#confetti-cut-short) | Backgammon's and the rewards' confetti vanish with the next update | P3 | Open | Trivial |
+| [Phone updates reset the chat and Leave](#phone-updates-reset-the-chat-and-leave) | Every update scrolls the chat down and disarms "Leave evening" | P3 | Open | Low |
+| [Full game reported as another phone](#full-game-reported-as-another-phone) | During a minigame, a full roster reads "back online on another phone" | P3 | Open | Trivial |
+| [Quiz out of questions](#quiz-out-of-questions) | Start is refused with the generic "That can't be done right now" | P3 | Open | Low |
+| [Admin page open on a LAN server](#admin-page-open-on-a-lan-server) | Without `BLOKO_ADMIN_TOKEN`, every LAN guest is an admin | P3 | Open | Trivial |
+| [Walking state in the server](#walking-state-in-the-server) | Positions, doors, spots and placement each reset in their own place in `server/main.ts` | P3 | Open | Medium |
+| [Round clock and ranking per minigame](#round-clock-and-ranking-per-minigame) | Each round's rules write their own clock and result ranking | P3 | Open | Medium |
+| [Round screens' helpers and wording](#round-screens-helpers-and-wording) | DOM helpers, countdowns and wording repeated across screens and between phone and TV | P3 | Open | Low |
+| [Three meanings of round in the server](#three-meanings-of-round-in-the-server) | `server/round.ts` calls a whole run of a minigame a round | P3 | Open | Low |
+| [Dead code](#dead-code) | Screens only Pierre's phone shows, unused exports and CSS, a duplicate range check | P3 | Open | Low |
+| [Small e2e script bugs](#small-e2e-script-bugs) | `--compare` misses two suites, a suite exiting 75 reruns, a scratch folder leaks | P3 | Open | Low |
 
 ## Items
 
@@ -68,6 +89,58 @@ In the apartment, the cats, friends, keepsakes and the key are drawn after the d
 
 **Recommendation:** make them props of the apartment's scene (`apartment-room` in `shared/campaign/story/hub.js`), so they sort with the avatars like the party room's furniture.
 
+### Players who leave or are taken out
+
+Each minigame's round rules handle a player who leaves or is taken out in their own way (`shared/game.js`, `shared/quiz/index.js`, `shared/pyramide.js`, `shared/backgammon.js`, `shared/foosball.js`), and the plain lobby offers `retire: true` for rules that take the game master's "Take a player out" themselves. Two bugs come from the differences:
+
+- A blocks player who leaves on the podium is removed from it, where the other minigames mark them left. In a two-player game, the remaining player's podium then shows "New best!" for a score that was never recorded (`isSolo` in `server/blocks.ts`), and the podium no longer matches the recorded result.
+- The quiz is the only minigame without `retire: true`, so a quiz player taken out is recorded as having left, and the TV podium never shows them "out".
+
+**Decision (Konstantin):** the plain lobby marks `left`, `retired` and `done` on the round's players itself (the fields `RoundPlayers` already defines in `shared/minigames.js`), and each round's rules supply one hook for what it means: blocks checks whether everyone is done, the quiz may reveal early, Pyramide ends the round, backgammon and table football award forfeits. The `retire` option goes. Update `docs/minigames.md` with it.
+
+### Trim the e2e suites and share their setup
+
+The unit tests are proportionate; the e2e suites are not. A full run makes about 720 checks, many of them re-checking over sockets what a unit test already pins, and each suite carries its own copy of the setup:
+
+- Server start-up is copied in seven e2e suites and six unit tests that start a real server, because `startServer` in `scripts/e2e-lib.mts` always passes `--new` and suites that restart the server can't use it. `rejoin`, `player`/`tap`, `screen()` and `errOf` are copied too, `errOf` with four different timeouts.
+- There are three ways of driving Chrome (`openPage` in `e2e-lib.mts`, the TV suite's `Page`, the phone suite's own connection) and three wait behaviours: one throws, one returns false, one returns the last snapshot, and several phone helpers carry on silently after a timeout.
+- Re-checks: "a guest gets `not-gm`" about 20 times across six suites (it is one line in `server/plain-lobby.ts`, whose `message` has no unit test); the join QR about 40 times in four places, including a 13 s wait for the card to expire and two 2.2 s sleeps; three real 25 s silent-socket waits for one watchdog module that has a fake-clock unit test; a 70 s timed round in the phone suite that asserts nothing about the timer; the inventory suite's winner tie, which accepts either outcome; the two-tap confirm six times and pinned wording.
+- Flaky: the phone suite's back/forward-cache check failed on its own in 2 of 93 logged runs; it tests Chrome, not the game. `scripts/e2e.mts` uses fixed sleeps for "nothing arrived" checks where `settled()` exists.
+
+**Decision (Konstantin):**
+1. One restartable-server helper (a `fresh` option on `startServer`) and one socket client, shared by the e2e suites and the unit tests that start a real server. Then the TV and phone suites move onto `openPage`, with one wait that fails loudly.
+2. Each rule keeps its unit test plus one wiring check over sockets; the re-checks above go (a unit table over `plainLobbyServer.message` replaces the `not-gm` ones). Expected: about 650 fewer lines, and a full run from about 3 minutes to about 2.
+
+### Browser suites ignore page errors
+
+`scripts/e2e-phone.mts` only logs a page's uncaught exceptions, and `scripts/e2e-tv.mts` empties the TV's error list before its campaign section, so anything thrown during the reloads, the kill -9, the wake and the silent-socket test is discarded. The Pyramide and backgammon suites fail on them.
+
+**Recommendation:** fail every browser suite on a page exception, in one place once the suites share `openPage` ([Trim the e2e suites and share their setup](#trim-the-e2e-suites-and-share-their-setup)).
+
+### Backgammon's restart and hidden dice untested
+
+`test/backgammon.test.js` never resumes a round through `loadCampaign` (a restart) and never shifts its deadline, and nothing checks that backgammon's view leaves out `seed` and `rolls` (`server/backgammon.ts`), without which a phone could predict the dice. The campaign suite checks that the campaign's own seed stays off the wire; backgammon's view isn't checked.
+
+**Recommendation:** add both to `test/backgammon.test.js`, as `test/pyramide.test.js` does for its words; the same for table football once it has a clock.
+
+### Questions of a dropped round come back
+
+`askedSoFar` (`shared/campaign/index.js`) counts only finished rounds. When the game master leaves a tableau or takes the party elsewhere (`back`, `gm goto`) while a round runs, the questions that round showed, or the Pyramide words it drew, aren't used up and can come up again that evening.
+
+**Recommendation:** when a running round is dropped, record what it asked in `facts.asked`; each round's rules know it (the quiz's shown questions, Pyramide's drawn words).
+
+### Join QR card covers minigame screens
+
+The join QR card sits fixed at the TV's bottom right, above everything. Only `public/screen/blocks.css` and `public/screen/quiz.css` leave room for it, so when someone shows the QR it covers Team 2's pyramid, backgammon's second board and the plain lobby's panel. Inferred from the CSS, not seen.
+
+**Recommendation:** one rule in the frame (on `#app`) in place of the two per-minigame ones.
+
+### TV frame cost unmeasured
+
+For most of the evening the TV's room redraws everything 60 times a second: about 800 furniture rectangles pixel by pixel (`public/screen/party-room.js`; sprites, by contrast, are cached as bitmaps in `shared/sprites.js`), each door plaque measured again, each name label reading the page's computed style (`public/screen/avatar-layer.js`), and the wisp overlay building its room each frame (`public/screen/main.js`). Nobody has measured whether the evening's laptop keeps up.
+
+**Recommendation:** measure the frame time on that laptop with four phones walking. If it's tight: cache the furniture like the sprites, read the player colours once, build the overlay's room once per minigame.
+
 ### Guests controlling NPCs
 
 `GameStory.md` ("Young Adult game flow") has Nico and Mathieu at Marokkanergasse as NPCs "who may be controlled by connected players". Elsewhere, guests beyond the opening's four join as wisps until the story introduces their character, and a wisp can't use NPCs. Nothing says who controls an NPC, how they take it, or what they can do with it, so nothing prepares for it yet.
@@ -100,7 +173,7 @@ A guess matches only if it equals the word once case, accents, surrounding space
 
 ### Minigame wording in shared folders
 
-`public/commun/settings-text.js` and `public/commun/quiz-text.js` are the block game's and the quiz's own wording, shared between phone and TV, but they sit in the shared folder. `public/screen/fx.js` holds block-only effects next to the confetti the frame uses.
+`public/commun/settings-text.js` and `public/commun/quiz-text.js` are the block game's and the quiz's own wording, shared between phone and TV, but they sit in the shared folder. `public/screen/fx.js` holds block-only effects next to the confetti the frame uses, and `public/commun/screen-main.css`, which every TV page loads, holds about 120 lines of block-only effect styles.
 
 The block game's TV files also have generic names that hide whose they are: `public/screen/game-view.js` and `public/screen/countdown.js`.
 
@@ -117,3 +190,93 @@ Every `npm run e2e -- --compare` run differs from its reference in random conten
 A minigame's round is one play from its start to its podium ([minigames.md](minigames.md), "Terms"). Backgammon's round is its whole group phase, made of rounds of games: the boards played at the same time, which the players see as "Round 2 of 3". Its code calls those `round` and `nextRound` too ([`shared/backgammon.js`](../shared/backgammon.js)), so one word names two things.
 
 **Recommendation:** keep "Round" in what players see, and give the rounds of games their own name in the code and docs.
+
+### Pyramide's interrupted round and hyphenated guesses
+
+- A classic round's tie-break is fewer bricks used, and team 1 always plays first. A round ended at 0–0 after team 1's first clue (the game master's End game, or someone leaving) is won by team 2 (`shared/pyramide.js`). It matters once a Pyramide tableau gives a `winner` reward.
+- The guess check (`judgeGuess` in `server/pyramide.ts`) keeps spaces, while the clue check (`squash` in `shared/pyramide.js`) removes them: "grandmère" is refused as a guess for "grand-mère". Five words in the bank have hyphens.
+
+**Recommendation:** a round ended with no word found has no winner; guesses and clues compare words the same way (see also [Smarter guess check in Pyramide](#smarter-guess-check-in-pyramide)).
+
+### Blocks preview undone by other players
+
+The phone clears a dropped piece's preview on any update (`public/play/blocks-ui.js`). If another player's update arrives first, the piece pops back into the tray for one round trip, and can be dragged again. `place` names only the slot, so if the first drop emptied the hand and a new one was dealt, the second drop places a different piece than the one dragged. Inferred, not reproduced.
+
+**Recommendation:** keep the preview until this player's own last placement (`last.n`) moves on, or an `err` arrives.
+
+### TV after a reconnect
+
+- `public/screen/main.js` has its own copy of the phone's connection (`public/play/connection.js`), and it has diverged: its retry timer is never cancelled, so a close followed within a second by a wake or the watchdog opens two sockets and abandons one, which stays open as a stranger on the admin page.
+- After every reconnect or laptop wake, avatars glide in from their spawn points: the server sends the view before the positions, and only one of the TV's two avatar layers (the room's, and the one over minigames, kept in step by hand) is reset. Players walking over a minigame also glide in from where they stood in the previous one.
+- The quiz's TV screen plays its start and reveal sounds for what it missed while disconnected (`public/screen/quiz-screen.js` ignores `io.continuous`).
+
+**Recommendation:** one connection module in `public/commun/` for both clients; one avatar layer that places an avatar at its first position instead of gliding; the plain lobby plays a round's start sound when it mounts the round, for every minigame.
+
+### Confetti cut short
+
+Backgammon's TV screen adds its confetti inside its stage (`public/screen/backgammon-screen.js`), which the next update replaces, while `fx.confetti` survives updates. After a minigame ends, the reward cutscene's confetti is cleared by the next update in the room (`fx.clearAll` in `public/screen/main.js`).
+
+### Phone updates reset the chat and Leave
+
+Every update renders the chat again (`social.render()` in `public/play/main.js`), which scrolls it to the bottom: someone reading back is pulled down whenever anyone acts. Every update also disarms "Leave evening"'s second tap (`public/play/menu.js`).
+
+**Recommendation:** render the chat when a message arrives; keep the confirmation armed across updates.
+
+### Full game reported as another phone
+
+While a minigame runs, the server refuses a join for a character held by an online member with `full`, and the phone reads `full` during a minigame as "That character is back online on another phone" (`joinRefusal` in `server/main.ts`, the `err` handling in `public/play/main.js`). So when the roster really is full during a minigame, the phone says the wrong thing.
+
+**Recommendation:** `taken` for a held character, `full` only for a full roster; both special cases go.
+
+### Quiz out of questions
+
+When no question is left for the quiz's settings, Start is refused with the generic "That can't be done right now". The phone can't know beforehand, since the bank stays on the server.
+
+**Recommendation:** a refusal code of its own, which the game master's phone words ("No questions left for these settings").
+
+### Admin page open on a LAN server
+
+Without `BLOKO_ADMIN_TOKEN`, a LAN server (no `BLOKO_PUBLIC_ORIGIN`) treats every request as an admin's (`isAdmin` in `server/access.ts`): any guest can open `/admin/` and see the quiz answers and Pyramide's words, or reset the evening. The hosted server requires the token.
+
+**Recommendation:** if the evening falls back to a LAN server, set the token.
+
+### Walking state in the server
+
+`server/main.ts` keeps positions, the door each walker stands in, the spot under each walker and who a walkable lobby has placed, each reset at its own point; standing in the portal when it opened sent Élodie through because one of them wasn't re-read. `main.ts` also loads the save and starts listening as soon as it is imported, so none of this can be unit-tested, and the portal fix (re-reading doors when a minigame starts or ends) has no permanent test.
+
+**Recommendation:** a `server/walking.ts` that owns walking (a position, a tapped spot, each change, a closed socket) with unit tests, about 150 of `main.ts`'s lines.
+
+### Round clock and ranking per minigame
+
+Each round's rules still write their own clock (`deadline`, `deadlineAction`, `shiftDeadline`, and refusing a stale deadline; Pyramide and table football write placeholders) and build their result's ranking themselves. The block game's settings don't use the shared merge (`shared/settings.js`).
+
+**Recommendation:** the plain lobby owns the clock (the round says what happens when time runs out) and builds the ranking with the shared rule (`shared/ranking.js`); blocks moves onto `shared/settings.js`. Worth it when a new minigame would otherwise copy them again.
+
+### Round screens' helpers and wording
+
+- A small `el()` DOM helper is written in four phone files (`quiz-ui.js`, `pyramide-ui.js`, `backgammon-ui.js`, `podium.js`), next to the TV's `h()` in `public/screen/dom.js`.
+- A countdown from the server's deadline is written three times on each side.
+- "The last message, refused by an `err` until the next update" is identical in `pyramide-ui.js` and `backgammon-ui.js`.
+- The phone and the TV each write the plain lobby's `names` and `lastWinners`, backgammon's stamps, settings summary and `totalRounds`, and Pyramide's mode names.
+
+**Recommendation:** one DOM helper and one countdown for both clients; each minigame's wording once for phone and TV, placed as [Minigame wording in shared folders](#minigame-wording-in-shared-folders) says.
+
+### Three meanings of round in the server
+
+`server/round.ts` (`Round`, `roundOf`, `openRound`) and `main.ts`'s `round` mean one run of a minigame, from the game master's start to his end; `roundOf` doesn't change between rounds. `roundDeadline`, `shiftRound` (`server/resume.ts`) and `resumeRound` (`server/store.ts`) work on the running minigame. The documents and the plain lobby mean one round, start to podium.
+
+**Recommendation:** rename the first to `run…` and the second to `minigame…`.
+
+### Dead code
+
+- Screens only Pierre's phone ever shows: a player out of a round becomes a wisp, and their minigame screens unmount, so blocks' game-over screen (`public/play/blocks-ui.js`, about 45 lines), the quiz's "taken out" state and backgammon's "You're out of this game." reach the game master only.
+- `THRESHOLDS` in `shared/quiz/judge-local.js`, most of `server/rules.ts`, the `ranking` re-export in `shared/game.js`.
+- CSS: `.settings-line` and `@keyframes pop-in` in `public/commun/screen-main.css`; `.quiz-title` and `.lobby > .quiz-credits` in `public/screen/quiz.css`.
+- `startFoosball` (`shared/foosball.js`) checks the player range that the plain lobby now enforces from its `players`.
+- Apartment drawing in `public/screen/party-room.js` that its painted background replaced (`paintTerrace` and the sofa stretch): check what is still reachable after the story engine.
+
+### Small e2e script bugs
+
+- `--shots`/`--compare`: the runner takes screenshots for every browser suite (`scripts/e2e-run.mts`), but the Pyramide and backgammon suites write to fixed folders of their own and take none, so a comparison reports "no reference folder" for both.
+- `scripts/e2e-slot.sh` treats a suite that exits with code 75 as "slot busy" and runs it again.
+- `scripts/e2e-phone.mts` throws before its `try` on a bare run, leaking its scratch folder.
