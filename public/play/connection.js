@@ -127,9 +127,11 @@ export function createConnection(hooks) {
     hooks.onReplaced();
   }
 
-  /** @param {WebSocket} sock @param {unknown} msg */
+  /** @param {WebSocket} sock @param {unknown} msg @returns {boolean} whether it went out */
   function sendRaw(sock, msg) {
-    if (sock.readyState === WebSocket.OPEN) sock.send(JSON.stringify(msg));
+    if (sock.readyState !== WebSocket.OPEN) return false;
+    sock.send(JSON.stringify(msg));
+    return true;
   }
 
   /** Is the link alive? Re-hello and wait for any answer; reconnect now if there is no socket. */
@@ -163,8 +165,8 @@ export function createConnection(hooks) {
 
   return {
     start: open,
-    /** @param {unknown} msg */
-    send(msg) { if (ws) sendRaw(ws, msg); },
+    /** False when the link is down: the message didn't go out, and nothing resends it. @param {unknown} msg */
+    send(msg) { return !!ws && sendRaw(ws, msg); },
     /** Drop the socket on purpose and open a fresh one at once (no banner); also ends a stop(). */
     restart() {
       stopped = false;

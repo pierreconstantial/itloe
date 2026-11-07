@@ -1,4 +1,4 @@
-// P1 — test suite for shared/ (see BUILD-PLAN.md §P1).
+// Tests for the block game's shared rules: pieces, board, scoring, the reducer, settings and ranking.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { emptyBoard, canPlace, place, findClears, applyClears, anyFit, legalPlacementCount } from '../shared/board.js';

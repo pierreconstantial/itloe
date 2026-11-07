@@ -21,6 +21,7 @@
 
 import { CHARACTERS } from './characters.js';
 import { mulberry32 } from './rng.js';
+import { mergeBySchema, settingsProblems } from './settings.js';
 
 /** @typedef {import('./characters.js').CharacterId} CharacterId */
 /** @typedef {'a' | 'b'} Side */
@@ -98,23 +99,10 @@ export const BACKGAMMON_SETTINGS_SCHEMA = Object.freeze({
 });
 
 /** `base` with every valid key of `patch`. @param {BackgammonSettings} base @param {unknown} patch @returns {BackgammonSettings} */
-export function mergeBackgammonSettings(base, patch) {
-  const p = /** @type {any} */ (patch);
-  const next = { ...base };
-  for (const key of /** @type {const} */ (['minutes', 'games'])) {
-    if (BACKGAMMON_SETTINGS_SCHEMA[key].values.includes(p?.[key])) next[key] = p[key];
-  }
-  return next;
-}
+export const mergeBackgammonSettings = (base, patch) => mergeBySchema(BACKGAMMON_SETTINGS_SCHEMA, base, patch);
 
 /** A content node's settings: problems, as readable lines. @param {unknown} settings @returns {string[]} */
-export function validateBackgammonSettings(settings) {
-  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) return ['settings must be an object'];
-  return Object.entries(settings).flatMap(([key, v]) => {
-    if (key !== 'minutes' && key !== 'games') return [`unknown setting "${key}"`];
-    return BACKGAMMON_SETTINGS_SCHEMA[key].values.includes(v) ? [] : [`setting "${key}" can't be ${JSON.stringify(v)}`];
-  });
-}
+export const validateBackgammonSettings = (settings) => settingsProblems(BACKGAMMON_DEFAULTS, mergeBackgammonSettings, settings);
 
 // ---------------------------------------------------------------- moves
 
@@ -385,11 +373,10 @@ function gone(s, id, why) {
 }
 
 /**
- * A new group phase, its first round being played. null with fewer than MIN_PLAYERS or more than MAX_PLAYERS.
+ * A new group phase, its first round being played: MIN_PLAYERS to MAX_PLAYERS, as `players` in its rules says.
  * @param {import('./minigames.js').RoundStart<Partial<BackgammonSettings>>} start @returns {BackgammonState | null}
  */
 export function startBackgammon({ seed, settings, players, now }) {
-  if (players.length < MIN_PLAYERS || players.length > MAX_PLAYERS) return null;
   /** @type {Record<string, BackgammonPlayer>} */
   const seated = {};
   for (const { id, character } of players) {
@@ -530,6 +517,7 @@ export const BACKGAMMON_RULES = {
   deadlineAction: (deadline) => ({ t: 'timeUp', deadline }),
   shiftDeadline: (s, by) => (running(s) && s.phase === 'playing' && s.deadline !== null ? { ...s, deadline: s.deadline + by } : s),
   retire: true,
+  players: { min: MIN_PLAYERS, max: MAX_PLAYERS },
   describe: (s) => `backgammon round ${s.round}, ${s.phase}, ${s.games.length} games counted`
     + ` (${standings(s).map((r) => `${s.players[r.id].name} ${r.points}`).join(', ')})`,
 };

@@ -1,4 +1,4 @@
-// P0 contract — FROZEN. Implemented in P0; do not change the signature.
+// Seeded randomness for the rules: the same seed gives the same numbers on the server and in the browsers.
 
 /**
  * Deterministic PRNG (mulberry32).

@@ -1,5 +1,5 @@
-// P0 contract + Q4 addendum (2026-11-04) — signatures and State/Action shapes FROZEN.
-// Rules: BUILD-PLAN.md «Contract A» (normative) + the Q4 settings/timed-mode addendum.
+// The block game's round rules: boards, hands, placements, clears, scores, the settings and the timed mode.
+// The game's rules: SPEC-BLOCKS.md §5, its settings §8.
 
 import { emptyBoard, canPlace, place, findClears, applyClears, anyFit } from './board.js';
 import { PIECES, handAt } from './pieces.js';
@@ -196,7 +196,7 @@ export { ranking };
 /**
  * Pure reducer. Invalid or out-of-phase actions return `state` unchanged
  * (the SAME object, reference-equal — the server uses that to skip broadcasts).
- * Rules: BUILD-PLAN.md «Contract A», normative paragraph, + Q4 addendum.
+ * Rules: SPEC-BLOCKS.md §5 and §8.
  * @param {State} state
  * @param {Action} action
  * @param {import('./minigames.js').RoundCtx} ctx  the game master (the game-master-only actions)

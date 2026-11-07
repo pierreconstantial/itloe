@@ -21,6 +21,7 @@
 import { CHARACTERS } from '../characters.js';
 import { mulberry32 } from '../rng.js';
 import { ranking } from '../ranking.js';
+import { mergeBySchema, settingsProblems } from '../settings.js';
 
 /** @typedef {import('../characters.js').CharacterId} CharacterId */
 /** @typedef {'choice' | 'text' | 'mixed'} QuizMode */
@@ -99,17 +100,9 @@ const LEVELS = [1, 2, 3];
  * @param {QuizSettings} base @param {unknown} patch @returns {QuizSettings}
  */
 export function mergeQuizSettings(base, patch) {
-  const out = { ...base };
+  const out = mergeBySchema(QUIZ_SETTINGS_SCHEMA, base, patch);
   if (!patch || typeof patch !== 'object') return out;
   const p = /** @type {Record<string, unknown>} */ (patch);
-  for (const [key, spec] of Object.entries(QUIZ_SETTINGS_SCHEMA)) {
-    const v = p[key];
-    if (v === undefined) continue;
-    if (spec.kind === 'range' && typeof v === 'number' && Number.isInteger(v) && v >= spec.min && v <= spec.max && (v - spec.min) % spec.step === 0) {
-      /** @type {any} */ (out)[key] = v;
-    }
-    if (spec.kind === 'choice' && typeof v === 'string' && spec.values.includes(v)) /** @type {any} */ (out)[key] = v;
-  }
   if (p.categories === null || (Array.isArray(p.categories) && p.categories.every((c) => typeof c === 'string'))) {
     out.categories = p.categories === null || p.categories.length === 0 ? null : [...new Set(/** @type {string[]} */ (p.categories))];
   }
@@ -123,12 +116,7 @@ export function mergeQuizSettings(base, patch) {
  * @param {unknown} settings @returns {string[]}
  */
 export function validateQuizSettings(settings) {
-  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) return ['settings must be an object'];
-  return Object.entries(settings).flatMap(([key, v]) => {
-    if (!Object.hasOwn(QUIZ_DEFAULTS, key)) return [`unknown setting "${key}"`];
-    const kept = /** @type {Record<string, unknown>} */ (mergeQuizSettings(QUIZ_DEFAULTS, { [key]: v }))[key];
-    return JSON.stringify(kept) === JSON.stringify(v) ? [] : [`setting "${key}" can't be ${JSON.stringify(v)}`];
-  });
+  return settingsProblems(QUIZ_DEFAULTS, mergeQuizSettings, settings);
 }
 
 /**

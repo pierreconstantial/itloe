@@ -99,6 +99,8 @@ export function createJoystick(o) {
   const release = (e) => { if (e.pointerId === pointerId) cancel(); };
   o.pad.addEventListener('pointerup', release);
   o.pad.addEventListener('pointercancel', release);
+  // the frame moved the pad to another screen under the finger: its pointerup may never reach the pad
+  o.pad.addEventListener('lostpointercapture', release);
 
   /** Where the avatar stands: `free`, or the spot centre it snaps onto. */
   function snap() {

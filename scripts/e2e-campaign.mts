@@ -123,7 +123,8 @@ async function restartSame(step: string): Promise<void> {
   const disk = saved();
   const onDisk = core(disk) === core(before);
   if (!onDisk) console.log(`  [${step}] disk ≠ what every client sees:\n    ${diff(JSON.parse(core(before)), JSON.parse(core(disk))).join('\n    ')}`);
-  check(onDisk && disk.seed === before.seed, `${step}: what every client sees is already saved (before the kill)`);
+  check(onDisk, `${step}: what every client sees is already saved (before the kill)`);
+  check(!('seed' in before), `${step}: the campaign on the wire carries no seed (it tells the next dice)`);
   await kill9();
   await boot();
   for (const c of [P, E, T1, T2]) c?.ws.close();
@@ -134,7 +135,7 @@ async function restartSame(step: string): Promise<void> {
   const same = core(camp(T1)) === core(before);
   if (!same) console.log(`  [${step}] resumed ≠ before (T1's last view):\n    ${diff(JSON.parse(core(before)), JSON.parse(core(camp(T1)))).join('\n    ')}`);
   check(same && (await roomCode()) === room, `kill -9 ${step} → same evening resumed`);
-  check(camp(T1).seed === before.seed, `kill -9 ${step} → same campaign seed (next games deal the same)`);
+  check(saved().seed === disk.seed, `kill -9 ${step} → same campaign seed (next games deal the same)`);
 }
 
 const played = (k: any) => k.facts.counters['blocks.played'] ?? 0;
@@ -435,9 +436,11 @@ try {
   T4.send({ t: 'hello', role: 'screen' });
   await T4.waitFor((m) => m.t === 'chatHistory');
   await roundTrip(T4); // after the positions a hello sends
+  // the lobby placed its walkers on its start positions: Élodie stands where the TVs last saw her
   const standing = T4.msgs.find((m) => m.t === 'pos' && m.playerId === idE);
-  check(standing?.x === TABLE.x && standing?.y === TABLE.y && standing?.moving === false,
-    `a TV saying hello during the round gets the room's positions: Élodie stands at the table, not walking (${JSON.stringify(standing)})`);
+  const seen = T1.msgs.findLast((m) => m.t === 'pos' && m.playerId === idE);
+  check(standing?.x === seen?.x && standing?.y === seen?.y && standing?.moving === false,
+    `a TV saying hello during the round gets the room's positions: Élodie stands where she was placed, not walking (${JSON.stringify(standing)})`);
   T4.ws.close();
   i = P.mark(); P.send({ t: 'endGame' });
   await until(P, (x) => roundIn(x)?.phase === 'finished', i);
@@ -446,6 +449,7 @@ try {
   P.send({ t: 'gm', op: { op: 'goto', node: 'hub' } });
   k = await until(P, (x) => x.at.node === 'hub', iP);
   check(k.at.activity === null && played(k) === 5, 'gm goto from the podium ends the minigame first: its round recorded (blocks.played = 5)');
+  await step(E, TABLE); // back from the lobby's start position
   await interactsHere('on the hub', true);
   i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'childhood' } });
   await until(P, (x) => x.at.node === 'childhood', i);

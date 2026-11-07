@@ -5,6 +5,7 @@ import { BLOCK_RULES } from './game.js';
 import { QUIZ_RULES } from './quiz/index.js';
 import { PYRAMIDE_RULES } from './pyramide.js';
 import { BACKGAMMON_RULES } from './backgammon.js';
+import { FOOSBALL_RULES } from './foosball.js';
 import { plainLobby } from './plain-lobby.js';
 
 /** @typedef {import('./characters.js').CharacterId} CharacterId */
@@ -101,6 +102,8 @@ import { plainLobby } from './plain-lobby.js';
  * @typedef {{ seed: number, settings: T, players: { id: string, character: CharacterId }[], now: number }} MinigameStart
  */
 
+/** How many ready players a round takes, both ends included: backgammon's 2 to 4. @typedef {{ min: number, max: number }} PlayerRange */
+
 /**
  * What a round's rules supply: one play of a minigame, from its start to its podium. Every function is
  * pure; time, randomness and ids come in through actions. Refused actions return the SAME state object.
@@ -122,6 +125,7 @@ import { plainLobby } from './plain-lobby.js';
  *   retire?: true,                              // the reducer takes the game master's retire itself (else: the target's leave)
  *   spots?: readonly Omit<Spot, 'holder'>[],    // the lobby's spots: holding one is being ready, with no "I'm ready"
  *   startPositions?: readonly StartPosition[],  // where its lobby's walkers start (MinigameRules; absent: the plain lobby's)
+ *   players?: PlayerRange,                      // how many ready players a round takes (absent: one or more)
  *   describe: (s: S) => string,                 // the round in the boot log
  * }} RoundRules
  */
@@ -142,6 +146,7 @@ import { plainLobby } from './plain-lobby.js';
  *   shows: (s: S) => string[],                  // the players it draws itself (everyone else is a wisp)
  *   spots?: (s: S) => Spot[] | null,            // a walkable lobby: its spots while the players it shows walk, else null
  *   startPositions?: readonly StartPosition[],  // where a player stands on becoming a walker, if not holding a spot
+ *   players?: PlayerRange,                      // how many ready players a round takes (absent: one or more)
  *   settings: (patch: unknown, base?: T) => T,  // `base` (default: the minigame's defaults) with every valid key of `patch`
  *   validateSettings: (settings: unknown) => string[],   // a content node's settings: problems, as readable lines
  *   sampleSettings: object,                     // the development start's settings (ITLOE_CONTENT=minigame:<kind>)
@@ -158,6 +163,7 @@ export const MINIGAMES = {
   quiz: plainLobby(QUIZ_RULES),
   pyramide: plainLobby(PYRAMIDE_RULES),
   backgammon: plainLobby(BACKGAMMON_RULES),
+  foosball: plainLobby(FOOSBALL_RULES),
 };
 
 /** @typedef {keyof typeof MINIGAMES} MinigameKind */

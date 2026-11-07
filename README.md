@@ -41,6 +41,7 @@ The code only keeps stray devices out; it is not a password.
 - **Quizzes.** Questions in French on the TV; players answer on their phones with 4 choices or by typing (spelling mistakes, accents and articles are forgiven; years must be exact). The game master can correct any verdict on the reveal. A question is never asked twice in the same evening.
 - **Pyramide.** A word game in French, in teams of two: one player gives one-word clues and the other guesses the secret word, and each clue costs a brick. Players walk their characters onto spots in its lobby to choose their team and role. There is a classic mode (each team plays its own words with a few bricks) and a bidding duel (both teams play the same words and bid how few clues they need). The word shows only on its clue givers' phones, and a remote player can play from the phone alone, with no TV. A word is never used twice in the same evening.
 - **Backgammon.** Two to four players play each other on up to two boards side by side, in rounds against a clock the game master sets, then the most points win (a gammon counts double). Each player plays on their phone, where their board stands upright and the points a checker can reach light up. Between rounds the TV celebrates the winners, and the game master starts the next round.
+- **Table football.** Two to six players in two teams, Blue and Red, play live on a table on the TV. Each player slides a finger up and down their phone to move their rods; a man the ball touches kicks it, and holding the power button makes the next touch a strong shot. The game master tunes the ball's speeds in the settings. A prototype: a match runs until the game master ends it.
 - **A phone died or got lost?** Open the address on any other phone and tap your character: it carries on with your board and score. The old phone, if it comes back, shows "Continued on another device".
 - **Someone left mid-game?** The game master can take an offline player out, or end the game, from ☰ on their phone.
 
@@ -231,10 +232,9 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 - [docs/minigames.md](docs/minigames.md): adding a minigame: its parts and its lobby, registration lines, what the main game hands it, what shared code offers, the development start and tests.
 - [PROTOCOL.md](PROTOCOL.md): WebSocket messages, HTTP endpoints, trusted inputs, view filtering, and compatibility rules.
 - [SPEC-BLOCKS.md](SPEC-BLOCKS.md): original block-game design and technical direction.
-- [BUILD-PLAN.md](BUILD-PLAN.md): implementation history, contracts, and milestone-specific working agreements.
 - [AGENTS.md](AGENTS.md): instructions for coding agents working in this repository.
 
-The spec and build plan include earlier designs and examples. Quizzes introduce hidden answers and French content; the current wire format uses `t` messages as documented in `PROTOCOL.md`. Historical P1–P4 ownership and commit prefixes belong to those coordinated work packages. For a change to a shared contract, compare its documentation with the current implementation and tests and resolve any discrepancy explicitly. Draft proposals describe future work, not existing interfaces.
+The spec includes earlier designs and examples. Quizzes introduce hidden answers and French content; the current wire format uses `t` messages as documented in `PROTOCOL.md`. For a change to a shared contract, compare its documentation with the current implementation and tests and resolve any discrepancy explicitly.
 
 ### Konstantin's devbox setup
 

@@ -4,7 +4,7 @@
 // can reach light up) and tap where it goes; Undo takes a move back, Done ends the turn once no move is left. A
 // player who sits out, or watches, sees the games and the standings. Between rounds: their result, their next game,
 // the standings, and on the game master's phone the button that starts the next round (or shows the podium).
-import { addStylesheet } from './dom.js';
+import { addStylesheet, oneTap } from './dom.js';
 import * as haptics from './haptics.js';
 import { avatarCanvas } from '../commun/avatar.js';
 import { secondsLeft, mmss } from '../commun/clock.js';
@@ -91,6 +91,8 @@ export const BACKGAMMON_SCREEN = {
       pending = t;
       io.send({ t, ...rest });
     }
+    /** The game master's next round: its button is drawn again with every view, its tap is one. */
+    const nextRound = oneTap(() => send('nextRound'));
 
     const tick = setInterval(() => {
       if (!clock || !last || last.deadline === null) return;
@@ -261,7 +263,7 @@ export const BACKGAMMON_SCREEN = {
       if (io.isGameMaster()) {
         action = el('button', 'primary bg-action', [next ? `▶ Start round ${s.round + 1}` : '▶ Show the podium']);
         /** @type {HTMLButtonElement} */ (action).disabled = !io.connected();
-        action.addEventListener('click', () => send('nextRound'));
+        action.addEventListener('click', nextRound);
       } else action = el('p', 'hint bg-wait bg-action', [`Waiting for ${io.gameMasterName()} to ${what}`]);
 
       return [

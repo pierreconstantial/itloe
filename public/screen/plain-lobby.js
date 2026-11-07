@@ -8,8 +8,9 @@ import { h, colorDot, addStylesheet, worldBox, placeInWorld } from './dom.js';
 import { renderPodium, podiumSequence } from './podium-view.js';
 import { sfx } from './audio.js';
 import * as fx from './fx.js';
+import { resetScores } from './score-ticker.js';
 import { CHARACTERS } from '../../shared/characters.js';
-import { readyRuleMet } from '../../shared/campaign/index.js';
+import { startWaitsFor } from '../../shared/campaign/index.js';
 
 /** @typedef {import('../../shared/minigames.js').MinigameView} MinigameView */
 /** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
@@ -119,6 +120,7 @@ export function plainLobbyScreen(roundScreen) {
             if (!round) {
               cancelPodium();
               root.replaceChildren();
+              resetScores(); // a round's scores count from 0, not from the last round's
               round = roundScreen.mount(root, io);
             }
             round.update(roundView(m, v), c);
@@ -176,20 +178,18 @@ function spotsBoard(spots, v) {
 }
 
 /**
- * What the game master's Start waits for: the content's ready rule (the main game's) and the plain lobby's own,
- * one ready player or more.
+ * What the game master's Start waits for (startWaitsFor: the content's ready rule, the main game's, then how many
+ * ready players a round takes), in words.
  * @param {MinigameView} m @param {MinigameView['spots']} spots a lobby's spots, null without
  * @param {PlainLobbyView} v @param {string} gm the game master's name
  */
 function startLine(m, spots, v, gm) {
-  if (spots) { // a lobby with spots: ready is holding one
-    const taken = spots.filter((s) => s.holder).length;
-    return taken === spots.length ? `${gm} can start` : `${gm} starts when every spot is taken (${taken}/${spots.length})`;
-  }
-  const count = `(${v.ready.length}/${v.players.length})`;
-  const missing = (m.required.eligible ?? []).filter((ch) => !v.players.some((p) => p.character === ch));
-  if (m.required.allReady && missing.length) return `Waiting for ${names(missing)} to join`;
-  if (v.ready.length >= 1 && readyRuleMet(m.required, v.players, v.ready)) return `${gm} can start ${count}`;
-  if (m.required.allReady) return `${gm} starts when all ${v.players.length} are ready ${count}`;
-  return `${gm} starts when someone is ready`;
+  const wait = startWaitsFor(m, v);
+  const count = spots ? `(${spots.filter((s) => s.holder).length}/${spots.length})` : `(${v.ready.length}/${v.players.length})`;
+  if (!wait) return `${gm} can start ${count}`;
+  if (wait.t === 'missing') return `Waiting for ${names(wait.characters)} to join`;
+  if (wait.t === 'allReady') return `${gm} starts when all ${v.players.length} are ready ${count}`;
+  if (spots) return `${gm} starts when every spot is taken ${count}`; // a lobby with spots: ready is holding one
+  if (wait.ready === 0) return `${gm} starts when someone is ready`;
+  return `${gm} starts with ${wait.max === Infinity ? `${wait.min} or more` : `${wait.min} to ${wait.max}`} players ${count}`;
 }

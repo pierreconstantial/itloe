@@ -6,13 +6,13 @@
 // round runs (mounted inside, with the same update and message as before), and the shared podium (./podium.js)
 // with the game master's "Back to the lobby". The frame mounts them for the players the minigame shows, and
 // for the game master; everyone else floats over it as a wisp. The round controls in ☰ follow the running round.
-import { $, addStylesheet, dotEl } from './dom.js';
+import { $, addStylesheet, dotEl, oneTap } from './dom.js';
 import { createConfirm } from './confirm.js';
 import { createSettingsSheet } from './settings-ui.js';
 import { createRoundControls } from './round-controls.js';
 import { renderPodium } from './podium.js';
 import { CHARACTERS } from '../../shared/characters.js';
-import { readyRuleMet } from '../../shared/campaign/index.js';
+import { startWaitsFor } from '../../shared/campaign/index.js';
 
 /** @typedef {import('../../shared/minigames.js').MinigameView} MinigameView */
 /** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
@@ -70,13 +70,13 @@ export function plainLobbyScreen(roundScreen) {
       /** @type {{ minigame: MinigameView, campaign: Campaign } | null} */
       let last = null;
 
-      $('btn-ready').addEventListener('click', () => {
+      $('btn-ready').addEventListener('click', oneTap(() => {
         const v = /** @type {PlainLobbyView | undefined} */ (last?.minigame.view);
         if (v) io.send({ t: 'ready', on: !v.ready.includes(io.meId()) });
-      });
-      $('btn-start').addEventListener('click', () => io.send({ t: 'start' }));
+      }));
+      $('btn-start').addEventListener('click', oneTap(() => io.send({ t: 'start' })));
       $('btn-end-minigame').addEventListener('click', () => confirm.tap('end', () => io.send({ t: 'endMinigame' })));
-      $('btn-back-to-lobby').addEventListener('click', () => io.send({ t: 'lobby' }));
+      $('btn-back-to-lobby').addEventListener('click', oneTap(() => io.send({ t: 'lobby' })));
 
       /** @param {PlainLobbyView} v @returns {RoundView} the round as its screens see it */
       const roundView = (v) => ({ kind: last?.minigame.kind ?? /** @type {any} */ (''), status: v.stage === 'running' ? 'running' : 'finished', view: v.round });
@@ -183,24 +183,23 @@ export function plainLobbyScreen(roundScreen) {
           return li;
         }));
 
-        // the content's ready rule (the main game's) and the plain lobby's own: one ready player or more, and in
-        // a lobby with spots every spot held
+        // what Start waits for: the content's ready rule (the main game's), then how many ready players a round takes
+        const wait = startWaitsFor(m, v);
         const taken = spots?.filter((spot) => spot.holder !== null).length ?? 0;
-        const canStart = v.ready.length >= 1 && (!spots || taken === spots.length) && readyRuleMet(m.required, v.players, v.ready);
         $('minigame-lobby-gm').hidden = !isGm;
         const start = /** @type {HTMLButtonElement} */ ($('btn-start'));
         start.textContent = `▶ ${c.at.results.length ? 'Play again' : 'Start'} (${spots ? `${taken}/${spots.length} spots taken` : `${v.ready.length}/${v.players.length} ready`})`;
-        start.disabled = !canStart;
+        start.disabled = wait !== null;
         $('btn-end-minigame').textContent = confirm.isArmed('end') ? `Tap again to end the ${roundScreen.name}` : `End the ${roundScreen.name}`;
         if (!isGm) confirm.disarm();
 
-        const missing = (m.required.eligible ?? []).filter((ch) => !v.players.some((p) => p.character === ch));
         $('minigame-lobby-hint').textContent = !isGm ? `${io.gameMasterName()} starts the game.`
-          : canStart ? ''
-            : m.required.allReady && missing.length ? `Waiting for ${names(missing)} to join.`
-              : m.required.allReady ? 'Everyone must be ready to start.'
+          : !wait ? ''
+            : wait.t === 'missing' ? `Waiting for ${names(wait.characters)} to join.`
+              : wait.t === 'allReady' ? 'Everyone must be ready to start.'
                 : spots ? '' // the Start button counts the spots taken
-                  : 'Waiting for someone to be ready.';
+                  : wait.ready === 0 ? 'Waiting for someone to be ready.'
+                    : `The ${roundScreen.name} takes ${wait.max === Infinity ? `${wait.min} or more` : `${wait.min} to ${wait.max}`} players.`;
       }
 
       return {

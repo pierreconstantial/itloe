@@ -3,6 +3,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BACKGAMMON_RULES as R, CHECKERS, OFF, allowedSteps, other, reach, standings } from '../shared/backgammon.js';
+import { minigame } from '../shared/minigames.js';
+import { startWaitsFor } from '../shared/campaign/index.js';
 
 /** @typedef {import('../shared/backgammon.js').BackgammonState} BackgammonState */
 /** @typedef {import('../shared/backgammon.js').BackgammonAction} BackgammonAction */
@@ -140,4 +142,20 @@ test('the ranking: points, then points between the players level on points, then
   // level on points and between them: the bigger wins (pips left) rank higher
   const level = [g('p1', 'p2', 'p1', 1, 10), g('p2', 'p1', 'p2', 1, 50)];
   assert.deepEqual(standings({ ...s, games: level }).map((r) => [r.id, r.rank]), [['p2', 1], ['p1', 2], ['p3', 3], ['p4', 3]]);
+});
+
+test('a round takes 2 to 4 ready players: the lobby refuses another count, and Start says why', () => {
+  const M = /** @type {import('../shared/minigames.js').MinigameRules<any, any>} */ (minigame('backgammon'));
+  const five = [...FOUR, { id: 'p5', character: /** @type {const} */ ('nico') }];
+  const lobby = M.open({ seed: 7, settings: M.settings({}), players: five, now: 1000 });
+  const readyFor = (/** @type {number} */ n) => five.slice(0, n).reduce((s, p) => M.reduce(s, { t: 'ready', id: p.id, on: true }, CTX), lobby);
+  const view = /** @type {import('../shared/minigames.js').MinigameView} */ (/** @type {unknown} */ ({ kind: 'backgammon', required: {} }));
+  for (const n of [1, 5]) {
+    const s = readyFor(n);
+    assert.equal(M.reduce(s, { t: 'start', id: 'p1', now: 2000 }, CTX), s, `${n} ready: refused`);
+    assert.deepEqual(startWaitsFor(view, s), { t: 'players', min: 2, max: 4, ready: n }, `${n} ready: Start says why`);
+  }
+  const two = readyFor(2);
+  assert.equal(startWaitsFor(view, two), null);
+  assert.equal(M.status(M.reduce(two, { t: 'start', id: 'p1', now: 2000 }, CTX)), 'running');
 });

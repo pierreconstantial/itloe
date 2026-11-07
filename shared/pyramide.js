@@ -23,6 +23,7 @@ import { CHARACTERS } from './characters.js';
 import { mulberry32 } from './rng.js';
 import { normalize } from './normalize.js';
 import { ranking } from './ranking.js';
+import { mergeBySchema, settingsProblems } from './settings.js';
 
 /** @typedef {import('./characters.js').CharacterId} CharacterId */
 /** @typedef {'easy' | 'medium' | 'hard'} Level */
@@ -128,19 +129,10 @@ export const PYRAMIDE_SETTINGS_SCHEMA = Object.freeze({
 });
 
 /** @param {PyramideSettings} base @param {unknown} patch @returns {PyramideSettings} */
-export function mergePyramideSettings(base, patch) {
-  const mode = /** @type {any} */ (patch)?.mode;
-  return PYRAMIDE_SETTINGS_SCHEMA.mode.values.includes(mode) ? { ...base, mode } : { ...base };
-}
+export const mergePyramideSettings = (base, patch) => mergeBySchema(PYRAMIDE_SETTINGS_SCHEMA, base, patch);
 
 /** A content node's settings: problems, as readable lines. @param {unknown} settings @returns {string[]} */
-export function validatePyramideSettings(settings) {
-  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) return ['settings must be an object'];
-  return Object.entries(settings).flatMap(([key, v]) => {
-    if (key !== 'mode') return [`unknown setting "${key}"`];
-    return mergePyramideSettings(PYRAMIDE_DEFAULTS, { mode: v }).mode === v ? [] : [`setting "mode" can't be ${JSON.stringify(v)}`];
-  });
-}
+export const validatePyramideSettings = (settings) => settingsProblems(PYRAMIDE_DEFAULTS, mergePyramideSettings, settings);
 
 /** A clue this long or longer is refused when the word contains it; a shorter one ("son" in maison) passes. */
 export const MIN_CONTAINED_CLUE = 4;
@@ -468,6 +460,7 @@ export const PYRAMIDE_RULES = {
   shiftDeadline: (s) => s,
   retire: true,
   spots: PYRAMIDE_SPOTS,
+  players: { min: PYRAMIDE_SPOTS.length, max: PYRAMIDE_SPOTS.length }, // a clue giver and a guesser per team
   startPositions: PYRAMIDE_START_POSITIONS,
   describe: (s) => `pyramide ${s.mode} ${s.endReason ? 'finished' : `word ${s.mode === 'duel' ? s.index + 1 : '…'}`}`
     + ` (team 1 ${s.teams[0].score}, team 2 ${s.teams[1].score})`,

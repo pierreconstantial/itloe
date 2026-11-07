@@ -4,7 +4,7 @@
 // question (4 big choices or a typed answer; one shot), reveal (my verdict + points, the answer, everyone's
 // answers; the game master: overrides + next). The finished quiz is the shared podium, with each player's right answers.
 // Controls are built once per question, so a view arriving mid-typing never resets the text field.
-import { $, addStylesheet } from './dom.js';
+import { $, addStylesheet, oneTap } from './dom.js';
 import * as haptics from './haptics.js';
 import { createConfirm } from './confirm.js';
 import { secondsLeft, mmss } from '../commun/clock.js';
@@ -32,7 +32,7 @@ function el(tag, cls, text) {
   return e;
 }
 
-/** @param {{ send: (msg: unknown) => void }} io */
+/** @param {{ send: (msg: unknown) => boolean }} io */
 export function createQuizUi(io) {
   /** @type {QuizView | null} */ let last = null;
   /** @type {string} */ let meId = '';
@@ -51,19 +51,19 @@ export function createQuizUi(io) {
     const text = input.value.trim();
     const r = last?.round;
     if (!text || !r || last?.phase !== 'question' || mine?.key === roundKey(r)) return;
+    if (!io.send({ t: 'answer', text })) return; // the link is down: not sent, so not shown as sent
     mine = { key: roundKey(r), text };
-    io.send({ t: 'answer', text });
     haptics.buzz('place');
     input.blur(); // the keyboard goes away: the answer is sent
     render(/** @type {QuizView} */ (last), meId);
   });
-  $('quiz-next').addEventListener('click', () => io.send({ t: 'next' }));
+  $('quiz-next').addEventListener('click', oneTap(() => io.send({ t: 'next' })));
 
   /** @param {number} choice @param {RoundView} r */
   function pick(choice, r) {
     if (last?.phase !== 'question' || mine?.key === roundKey(r)) return;
+    if (!io.send({ t: 'answer', choice })) return; // the link is down: not sent, so not shown as sent
     mine = { key: roundKey(r), choice };
-    io.send({ t: 'answer', choice });
     haptics.buzz('place');
     render(/** @type {QuizView} */ (last), meId);
   }

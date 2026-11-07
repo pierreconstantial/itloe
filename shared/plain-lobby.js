@@ -12,9 +12,9 @@
 //   spot { id, spot }           the server, in a lobby with spots: an eligible player now stands on that spot, or
 //                               on none (null); a free spot is taken, the one held before is let go
 //   config { id, patch }        the game master, in the lobby: the minigame's settings
-//   start { id, now, inputs }   the game master, in the lobby, with one ready player or more: a round with the
-//                               ready players (each with their spot, in a lobby with spots), its seed from the
-//                               lobby's, which then advances
+//   start { id, now, inputs }   the game master, in the lobby, with as many ready players as a round takes
+//                               (lobbyWaitsFor): a round with the ready players (each with their spot, in a lobby
+//                               with spots), its seed from the lobby's, which then advances
 //   lobby { id }                the game master, on the podium: back to the lobby; the round's players come back
 //                               ready, except those who left or were taken out, or are no longer eligible; in a
 //                               lobby with spots, they hold the spots they left
@@ -72,6 +72,20 @@ import { nextSeed } from './rng.js';
 export const PLAIN_LOBBY_START_POSITIONS = Object.freeze([
   { x: 3.2, y: 5 }, { x: 7.2, y: 5 }, { x: 3.2, y: 7.8 }, { x: 7.2, y: 7.8 }, { x: 5.2, y: 5 }, { x: 5.2, y: 7.8 },
 ]);
+
+/** A round's player range when its rules give none: one ready player or more. @type {import('./minigames.js').PlayerRange} */
+const ONE_OR_MORE = Object.freeze({ min: 1, max: Infinity });
+
+/**
+ * The plain lobby's own rule for Start, or null when it is met: the ready players (in a lobby with spots, the
+ * spots' holders) within the round's range (`players` in its rules; absent: one or more). The screens show it
+ * through startWaitsFor (shared/campaign/index.js), after the main game's rule.
+ * @param {number} ready how many are ready @param {import('./minigames.js').PlayerRange} [range]
+ * @returns {{ t: 'players', min: number, max: number, ready: number } | null}
+ */
+export function lobbyWaitsFor(ready, range = ONE_OR_MORE) {
+  return ready < range.min || ready > range.max ? { t: 'players', min: range.min, max: range.max, ready } : null;
+}
 
 /** @param {RoundCtx} ctx @param {unknown} id */
 const isGameMaster = (ctx, id) => ctx.gameMasterId !== null && id === ctx.gameMasterId;
@@ -156,7 +170,7 @@ export function plainLobby(rules) {
         if (s.stage !== 'lobby' || !isGameMaster(ctx, a.id)) return s;
         const spotOf = (/** @type {string} */ id) => Object.keys(s.holders).find((spot) => s.holders[spot] === id);
         const players = s.players.filter((p) => s.ready.includes(p.id)).map((p) => (rules.spots ? { ...p, spot: spotOf(p.id) } : p));
-        if (players.length === 0) return s;
+        if (lobbyWaitsFor(players.length, rules.players)) return s;
         const round = rules.init({ seed: s.seed, settings: s.settings, players, now: a.now, inputs: a.inputs });
         return round ? { ...s, stage: 'running', seed: nextSeed(s.seed), ready: [], round } : s;
       }
@@ -198,6 +212,7 @@ export function plainLobby(rules) {
     result: (s, node) => rules.result(/** @type {R} */ (s.round), node),
     ready: (s) => s.ready,
     startPositions: rules.startPositions ?? PLAIN_LOBBY_START_POSITIONS,
+    players: rules.players,
     spots: (s) => (s.stage === 'lobby'
       ? (rules.spots ?? []).map(({ id, label, x, y, w, h }) => ({ id, label, x, y, w, h, holder: s.holders[id] ?? null }))
       : null),

@@ -1,5 +1,5 @@
-// P0 contract — signatures FROZEN. Full 29-piece set per SPEC-BLOCKS.md §5.2.
-// P1 may tune weights, never ids or the cell convention.
+// The block pieces: the full 29-piece set per SPEC-BLOCKS.md §5.2, and the hands dealt from a seed.
+// Weights may be tuned; ids and the cell convention stay, as saved hands name them.
 // Cell convention: [x, y], x → right, y → down, origin = top-left of the piece's bounding box.
 
 import { mulberry32 } from './rng.js';

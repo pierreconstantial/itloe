@@ -63,7 +63,7 @@ flag (no `portal.entered` next to an `opening` machine). Read the machine instea
 
 | Field | Meaning |
 |---|---|
-| `start`, `chooser`, `gameMaster`, `nodes`, `items` | As in Contract D v2 and F (`BUILD-PLAN.md`) |
+| `start`, `chooser`, `gameMaster`, `nodes`, `items` | As `Content` in `shared/campaign/types.js` defines them |
 | `rooms` | `Record<roomId, Scene>`: the rooms nodes name in `room`, built with `room()` and `prop()` from `shared/scene.js`. Without `room`, a node uses `PARTY_ROOM` |
 | `cast` | `{ opening: CharacterId[], introducedBy: Record<id, flag> }`: who plays the opening as themselves, and the flag that introduces each character (setting it turns their wisp back into their character). Absent: nobody starts as a wisp |
 | `leadAfter` | A condition. Once it holds, outside a minigame only the chooser moves the party (`enter`, `back`); the game master moves it with `gm goto` |

@@ -59,7 +59,8 @@ function describe(c: Campaign, room: string): string {
  * The saved evening in any state → resume it (room code, party, nested game, facts, news kept);
  * missing/corrupt/--new → a fresh campaign at content.start. A timed game keeps its remaining time.
  * A corrupt save is quarantined (kept for inspection), never deleted. A round of a minigame this release
- * does not have throws: the boot stops and the save stays as it is, for the release that has it.
+ * does not have throws: the boot stops and the save stays as it is, for the release that has it. A minigame
+ * this release has but can't resume (a fix deployed while it ran) is ended; the evening is kept (loadCampaign).
  */
 export function loadGame(forceNew: boolean, content: Content, now = Date.now()): Game & { how: string } {
   const fresh = (why: string) => {
@@ -74,7 +75,7 @@ export function loadGame(forceNew: boolean, content: Content, now = Date.now()):
   const env = r.data;
   let campaign: Campaign;
   try {
-    campaign = loadCampaign(env.campaign, content);
+    campaign = loadCampaign(env.campaign, content, now);
   } catch (e: any) {
     if (e instanceof UnknownMinigameError) {
       throw new Error(`cannot resume ${STATE_FILE}: ${e.message}. Boot stopped; the save is left untouched for a release that has "${e.kind}".`);
@@ -89,9 +90,11 @@ export function loadGame(forceNew: boolean, content: Content, now = Date.now()):
     ? `, timed clock paused ${Math.round((now - (since as number)) / 1000)} s while down (${Math.round((deadline - now) / 1000)} s left)`
     : '';
   const at = since === null ? 'at an unknown time' : new Date(since).toISOString();
+  const ended = env.campaign.at?.activity && !campaign.at.activity && campaign.at.node === env.campaign.at.node
+    ? `; its ${env.campaign.at.kind} could not be resumed, so it was ended (its finished rounds recorded)` : '';
   return {
     campaign: shiftedCampaign, room: env.room, bestPrevious: env.bestPrevious ?? null,
-    how: `RESUMED evening saved ${at}: ${describe(shiftedCampaign, env.room)}${shifted}`,
+    how: `RESUMED evening saved ${at}: ${describe(shiftedCampaign, env.room)}${shifted}${ended}`,
   };
 }
 

@@ -1,10 +1,11 @@
 // The TV's minigame screens: one entry per minigame, by kind (shared/minigames.js). Adding a minigame is one
 // import line and one entry here. The frame (main.js) mounts an entry's screen into #app from the minigame's
-// start to its end. Blocks, quiz, Pyramide and backgammon wrap their round screens in the plain lobby (./plain-lobby.js).
+// start to its end. Blocks, quiz, Pyramide, backgammon and table football wrap their round screens in the plain lobby (./plain-lobby.js).
 import { BLOCK_SCREEN } from './blocks-screen.js';
 import { QUIZ_SCREEN } from './quiz-screen.js';
 import { PYRAMIDE_SCREEN } from './pyramide-screen.js';
 import { BACKGAMMON_SCREEN } from './backgammon-screen.js';
+import { FOOSBALL_SCREEN } from './foosball-screen.js';
 import { plainLobbyScreen } from './plain-lobby.js';
 
 /** @typedef {import('../../shared/minigames.js').RoundView} RoundView */
@@ -69,6 +70,7 @@ export const SCREENS = {
   quiz: plainLobbyScreen(QUIZ_SCREEN),
   pyramide: plainLobbyScreen(PYRAMIDE_SCREEN),
   backgammon: plainLobbyScreen(BACKGAMMON_SCREEN),
+  foosball: plainLobbyScreen(FOOSBALL_SCREEN),
 };
 
 /** A minigame's TV screen, or null (none registered). @param {string | null | undefined} kind @returns {TvScreen | null} */

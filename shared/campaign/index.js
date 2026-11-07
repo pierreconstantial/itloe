@@ -4,7 +4,8 @@
 //
 // PUBLIC API (types in ./types.js; reducers return the SAME object when they refuse an action)
 //   newCampaign(content, seed)               → Campaign in the room at content.start, empty party
-//   loadCampaign(raw, content)               → Campaign; drops ids the content no longer has, re-settles
+//   loadCampaign(raw, content, now)          → Campaign; drops ids the content no longer has, re-settles, ends a
+//                                              minigame it can't resume
 //   reduceCampaign(campaign, action, content)→ Campaign; actions: join leave status incarnate enter use pickup zone choose
 //                                              tick back startMinigame endMinigame activity event ack gm
 //                                              (`action.now`: the server's clock, injected on every action)
@@ -15,6 +16,7 @@
 //   isWisp(party, id, shows)                  → does this member show as a wisp (the story's, or one a minigame doesn't show)
 //   eligibleOf(party, nodeId, content)        → who may play the node's minigame: { id, character }[], party order
 //   readyRuleMet(activity, players, ready)    → the content's ready rule (`allReady`) over a lobby's players
+//   startWaitsFor(minigame, lobby)           → what the game master's Start waits for, for the screens
 //   askedSoFar(campaign)                      → content ids used up this evening, the running minigame's rounds too
 //   holds(cond, facts) · record(facts, event) · settle(facts, content, fromSeq) → { facts, news }
 //   validateContent(content) → string[] · zoneAt(content, nodeId, x, y) → child id | null
@@ -30,6 +32,7 @@
 
 import { CHARACTERS, isCharacterId } from '../characters.js';
 import { minigame } from '../minigames.js';
+import { lobbyWaitsFor } from '../plain-lobby.js';
 import { nextSeed } from '../rng.js';
 import { emptyFacts, holds, record, settle, safeInventory, addItem, holding, recipients, COUNTER } from './rules.js';
 import { validateContent, zoneAt, roomAt, sceneAt, childrenOf } from './content.js';
@@ -203,6 +206,22 @@ export function readyRuleMet(rule, players, ready) {
 }
 
 /**
+ * What the game master's Start waits for, or null: a round can start. The main game's rule first, the content's
+ * (`missing`: characters the tableau names who haven't joined; `allReady`: who it names, or everyone, not all
+ * ready), then the minigame's own (`players`: more or fewer ready than a round takes, lobbyWaitsFor). The phone
+ * and the TV word it; the engine (readyRuleMet) and the plain lobby (lobbyWaitsFor) refuse the start on the same
+ * rules.
+ * @param {import('../minigames.js').MinigameView} m @param {{ players: { id: string, character: CharacterId }[], ready: string[] }} lobby
+ * @returns {{ t: 'missing', characters: CharacterId[] } | { t: 'allReady' } | { t: 'players', min: number, max: number, ready: number } | null}
+ */
+export function startWaitsFor(m, lobby) {
+  const missing = (m.required.eligible ?? []).filter((ch) => !lobby.players.some((p) => p.character === ch));
+  if (m.required.allReady && missing.length) return { t: 'missing', characters: missing };
+  if (!readyRuleMet(m.required, lobby.players, lobby.ready)) return { t: 'allReady' };
+  return lobbyWaitsFor(lobby.ready.length, minigame(m.kind)?.players);
+}
+
+/**
  * Content ids used up this evening (quiz questions): the facts' and the running minigame's finished rounds'.
  * @param {Campaign} c @returns {string[]}
  */
@@ -225,12 +244,16 @@ export function newCampaign(content, seed) {
 }
 
 /**
- * A saved minigame that can't give a status (a round from before minigame lobbies) can't be resumed:
- * throws, and the caller starts a fresh evening and keeps the file.
+ * Can this release resume a saved minigame? Not when its rules can't give it a status (its state is from an
+ * earlier version: a fix deployed while it ran).
  * @param {MinigameKind | null} kind @param {ActivityState} activity
  */
-function assertResumable(kind, activity) {
-  if (!minigame(kind)?.status(activity)) throw new Error('the saved minigame is not one this release can resume (from an earlier version)');
+function resumable(kind, activity) {
+  try {
+    return !!minigame(kind)?.status(activity);
+  } catch {
+    return false;
+  }
 }
 
 /** A party member whose character the roster doesn't have cannot be reclaimed or seated in a new round.
@@ -251,12 +274,15 @@ function assertPartyStatuses(party) {
 /**
  * A persisted campaign, made safe for the current content: node ids the content no longer has are
  * dropped (facts, news, position), machines are reset where the content changed them, then settle runs again
- * (new content may open new things). Never re-locks what was unlocked and still exists.
+ * (new content may open new things). Never re-locks what was unlocked and still exists. A minigame this release
+ * can't resume ends as the game master's `back` ends one: its finished rounds are recorded, the running one is
+ * dropped, and the party is in the room at its tableau; the rest of the evening is kept.
  * @param {Campaign} raw
  * @param {Content} content
+ * @param {number} [now] the time, for the story's machines when such a minigame ends
  * @returns {Campaign}
  */
-export function loadCampaign(raw, content) {
+export function loadCampaign(raw, content, now = 0) {
   const known = (/** @type {string} */ id) => !!content.nodes[id];
   const f = raw.facts ?? emptyFacts();
   /** @type {Facts} */
@@ -276,16 +302,17 @@ export function loadCampaign(raw, content) {
   const seed = raw.seed ?? 1;
   const kind = savedKind(raw.at); // first: an unknown minigame stops the load even where the node is gone
   const activity = raw.at?.activity ?? null;
-  if (activity) assertResumable(kind, activity);
   const stays = known(raw.at?.node); // else the room at the start: the content lost that node
   const node = stays ? raw.at.node : content.start;
   const room = noMinigameAt(content.nodes[node]);
   const at = stays && activity ? { node, kind, activity, results: raw.at.results ?? [] } : { node, ...room };
   const s = settle(facts, content, newsSeq);
-  return {
+  /** @type {Campaign} */
+  const c = {
     v: 1, seed, party, at,
     facts: s.facts, news: [...news, ...s.news], newsSeq: newsSeq + s.news.length,
   };
+  return c.at.activity && !resumable(kind, c.at.activity) ? endMinigame(c, content, now) : c;
 }
 
 // ---------------------------------------------------------------- the party's roles
