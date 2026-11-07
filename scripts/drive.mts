@@ -37,13 +37,10 @@ export async function drive(opts: { content?: string, phones?: number, shots?: s
   process.once('SIGINT', interrupt);
   process.once('SIGTERM', interrupt);
 
-  let log = '';
   const port = await freePort();
   const server = await startServer(port, join(scratch, 'var'), opts.content ?? '', { detached: true, stdio: 'pipe', env: { ...process.env, ...opts.env } })
     .catch((e) => { kill(); throw e; });
-  groups.push(server.pid!);
-  server.stdout!.on('data', (d) => { log += d; });
-  server.stderr!.on('data', (d) => { log += d; });
+  groups.push(server.proc.pid!);
   const chrome = await startChrome(join(scratch, 'chrome'), true).catch((e) => { kill(); throw e; });
   groups.push(chrome.proc.pid!);
   const cdp = await cdpConnect(chrome.cdp);
@@ -81,5 +78,5 @@ export async function drive(opts: { content?: string, phones?: number, shots?: s
   }
   /** A page outside the game, at a phone's or the TV's size (blank until goto). */
   const page = (kind: 'tv' | 'phone', label: string = kind) => openPage(cdp, label, kind === 'phone', shotDir);
-  return { tv, phones, page, room: room as string, url: http, log: () => log, close };
+  return { tv, phones, page, room: room as string, url: http, log: server.log, close };
 }

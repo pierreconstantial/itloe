@@ -15,7 +15,7 @@ import { createWriteStream, existsSync, mkdirSync, mkdtempSync, readdirSync, rea
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { compareShots } from './e2e-compare.mts';
-import { freePort, killGroups, startChrome, startServer } from './e2e-lib.mts';
+import { freePort, killGroups, startChrome, startServer, stop } from './e2e-lib.mts';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const SELF = new URL(import.meta.url).pathname;
@@ -45,13 +45,6 @@ function parse(spec: string): { suite: string, only?: string } | null {
   return { suite, only };
 }
 
-function stop(proc: ChildProcess | null): Promise<void> {
-  if (!proc || proc.exitCode !== null || proc.signalCode !== null) return Promise.resolve();
-  const gone = new Promise<void>((r) => proc.once('exit', () => r()));
-  proc.kill('SIGTERM');
-  return gone;
-}
-
 // ---------- a job: one suite, inside a slot ----------
 async function job(spec: string): Promise<number> {
   const { suite, only } = parse(spec)!;
@@ -67,7 +60,7 @@ async function job(spec: string): Promise<number> {
       console.log(`e2e-run: Chrome on CDP=${env.CDP}`);
     }
     if (def.server) {
-      server = await startServer(env.PORT!, join(scratch, 'var'), 'sample', { env });
+      server = (await startServer(env.PORT!, join(scratch, 'var'), 'sample', { env })).proc;
     }
     const run = spawn(process.execPath, [join(ROOT, 'scripts', def.script)], { env, stdio: 'inherit' });
     return await new Promise<number>((r) => run.once('exit', (code) => r(code ?? 1)));

@@ -5,16 +5,13 @@
 // chooser, ticket → quiz winner, photo → all).
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR, a fixed quiz bank). Usage:
 //   PORT=3197 node scripts/e2e-inventory.mts      (never 3131: that's the live server)
-import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { backToLobby, blocksOf, check, Client, endMinigame, finish, HTTP, lobbyOf, quizOf, roomOf, settingsOf, sleep, startRound } from './e2e-lib.mts';
+import { backToLobby, blocksOf, check, Client, endMinigame, errOf, finish, lobbyOf, player as playerIn, quizOf, rejoin, roomCode, roomOf, screen as screenIn, type Server, settingsOf, sleep, startRound, startServer, stop } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
-if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-inventory-'));
-const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 const PLACEHOLDER = new URL('../data/quiz/placeholder.json', import.meta.url).pathname;
 const FIXED_BANK = join(VAR, 'fixed-bank');
 mkdirSync(FIXED_BANK, { recursive: true });
@@ -22,61 +19,21 @@ copyFileSync(PLACEHOLDER, join(FIXED_BANK, 'placeholder.json'));
 const BANK: { q: string, choices?: string[], answer: string | number }[] = JSON.parse(readFileSync(PLACEHOLDER, 'utf8')).questions;
 const QUIZ = 'childhood.quiz';
 
-let server: ChildProcess | null = null;
-let log = '';
-async function boot(fresh = false): Promise<void> {
-  log = '';
-  server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK, ITLOE_CONTENT: 'sample' },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  server.stdout!.on('data', (d) => { log += d; });
-  server.stderr!.on('data', (d) => { log += d; });
-  for (let k = 0; k < 100; k++) {
-    try { room = (await (await fetch(`${HTTP}/api/join`)).json()).code; return; } catch { await sleep(50); }
-  }
-  throw new Error(`server did not come up:\n${log}`);
-}
-async function kill9(): Promise<void> {
-  const s = server!;
-  const gone = new Promise((r) => s.once('exit', r));
-  s.kill('SIGKILL');
-  await gone;
-  server = null;
-}
-
+let server: Server | null = null;
+const log = () => server?.log() ?? '';
 let room = '';
+async function boot(fresh = false): Promise<void> {
+  server = await startServer(PORT, VAR, 'sample', { fresh, stdio: 'pipe', env: { ...process.env, BLOKO_QUIZ_DIR: FIXED_BANK } });
+  room = await roomCode();
+}
+const kill9 = () => stop(server!.proc, 'SIGKILL');
+
 const camp = (c: Client): any => [...c.msgs].reverse().find((m) => m.t === 'view')?.campaign;
 const inv = (c: Client): Record<string, Record<string, number>> => camp(c)?.facts.inventory ?? {};
 const until = async (c: Client, pred: (k: any) => boolean, from = 0, ms = 4000) =>
   (await c.waitFor((m) => m.t === 'view' && !!m.campaign && pred(m.campaign), from, ms)).campaign;
-const errOf = async (c: Client, msg: object): Promise<string | null> => {
-  const i = c.mark();
-  c.send(msg);
-  try { return (await c.waitFor((m) => m.t === 'err', i, 700)).code; } catch { return null; }
-};
-async function player(label: string, character: string): Promise<{ c: Client, id: string }> {
-  const c = new Client(label); await c.open();
-  c.send({ t: 'hello', role: 'player', room });
-  const i = c.mark();
-  c.send({ t: 'join', character });
-  return { c, id: (await c.waitFor((m) => m.t === 'welcome', i)).playerId };
-}
-async function rejoin(label: string, playerId: string): Promise<Client> {
-  const c = new Client(label); await c.open();
-  const i = c.mark();
-  c.send({ t: 'hello', role: 'player', playerId });
-  await c.waitFor((m) => m.t === 'welcome' && m.playerId === playerId, i);
-  await c.waitFor((m) => m.t === 'view', i);
-  return c;
-}
-async function screen(): Promise<Client> {
-  const c = new Client('T'); await c.open();
-  const i = c.mark();
-  c.send({ t: 'hello', role: 'screen' });
-  await c.waitFor((m) => m.t === 'view', i);
-  return c;
-}
+const player = (label: string, character: string) => playerIn(label, character, room);
+const screen = () => screenIn('T');
 const gm = (c: Client, op: object) => c.send({ t: 'gm', op });
 
 /** Plays one quiz in childhood.quiz (choice mode, 3 questions), from the game master's start to his end:
@@ -202,7 +159,7 @@ try {
 
   for (const c of [P, E, S, T]) c.ws.close();
 } catch (e) {
-  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${log}`);
+  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${log()}`);
 } finally {
   if (server) await kill9();
   rmSync(VAR, { recursive: true, force: true });

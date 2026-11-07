@@ -8,17 +8,14 @@
 // and a verdict left pending by a crash is never re-judged (wrong on resume).
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR). Usage:
 //   PORT=3193 node scripts/e2e-quiz.mts      (never 3131: that's the live server)
-import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { backToLobby, blocksOf, check, Client, endMinigame, finish, gmOf, HTTP, lobbyOf, quizOf, roomOf, settingsOf, sleep, startRound } from './e2e-lib.mts';
+import { backToLobby, blocksOf, check, Client, endMinigame, errOf, finish, gmOf, HTTP, lobbyOf, player as playerIn, quizOf, rejoin as rejoinIn, roomCode, roomOf, screen as screenIn, type Server, settingsOf, sleep, startRound, startServer, stop } from './e2e-lib.mts';
 import { expectedAnswers } from '../shared/quiz/judge-local.js';
 
 const PORT = process.env.PORT ?? '3141';
-if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-quiz-'));
-const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 const BANK_FILE = new URL('../data/quiz/placeholder.json', import.meta.url).pathname;
 const QUIZ = 'childhood.quiz';
 // a FIXED bank (a copy of the placeholder file): the real bank (data/quiz/*.json) grows and changes, and
@@ -29,78 +26,32 @@ copyFileSync(BANK_FILE, join(FIXED_BANK, 'placeholder.json'));
 
 type Q = { id: string, q: string, choices?: string[], answer: string | number, accept?: string[], anecdote?: string };
 
-let server: ChildProcess | null = null;
-let log = '';
+let server: Server | null = null;
+const log = () => server?.log() ?? '';
 async function boot(fresh = false, env: Record<string, string> = {}): Promise<void> {
-  log = '';
-  server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK, ITLOE_CONTENT: 'sample', ...env },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  server.stdout!.on('data', (d) => { log += d; });
-  server.stderr!.on('data', (d) => { log += d; });
-  for (let k = 0; k < 100; k++) {
-    try { await fetch(`${HTTP}/api/join`); return; } catch { await sleep(50); }
-  }
-  throw new Error(`server did not come up:\n${log}`);
+  server = await startServer(PORT, VAR, 'sample', { fresh, stdio: 'pipe', env: { ...process.env, BLOKO_QUIZ_DIR: FIXED_BANK, ...env } });
 }
-async function kill9(): Promise<void> {
-  const s = server!;
-  const gone = new Promise((r) => s.once('exit', r));
-  s.kill('SIGKILL');
-  await gone;
-  server = null;
-}
+const kill9 = () => stop(server!.proc, 'SIGKILL');
 
-/** Every raw frame a client received, for the wire-level leak grep. */
-const raws = new Map<Client, string[]>();
-function tap(c: Client): Client {
-  const list: string[] = [];
-  raws.set(c, list);
-  c.ws.addEventListener('message', (e) => list.push(String(e.data)));
-  return c;
-}
+/** Every client of the run, for the wire-level leak grep (their raw frames). */
+const clients: Client[] = [];
+const keep = (c: Client) => { clients.push(c); return c; };
 const lastView = (c: Client) => [...c.msgs].reverse().find((m) => m.t === 'view');
 const qv = (c: Client) => quizOf(lastView(c));
 const untilQuiz = async (c: Client, pred: (q: any) => boolean, from = 0, ms = 4000) =>
   quizOf(await c.waitFor((m) => m.t === 'view' && !!quizOf(m) && pred(quizOf(m)), from, ms));
-const errOf = async (c: Client, msg: object): Promise<string | null> => {
-  const i = c.mark();
-  c.send(msg);
-  try { return (await c.waitFor((m) => m.t === 'err', i, 600)).code; } catch { return null; }
-};
 
 let room = '';
-async function player(label: string, character: string) {
-  const c = new Client(label); await c.open(); tap(c);
-  c.send({ t: 'hello', role: 'player', room });
-  const i = c.mark();
-  c.send({ t: 'join', character });
-  const id = (await c.waitFor((m) => m.t === 'welcome', i)).playerId as string;
-  return { c, id };
-}
-async function rejoin(label: string, playerId: string): Promise<Client> {
-  const c = new Client(label); await c.open(); tap(c);
-  const i = c.mark();
-  c.send({ t: 'hello', role: 'player', playerId });
-  await c.waitFor((m) => m.t === 'welcome' && m.playerId === playerId, i);
-  await c.waitFor((m) => m.t === 'view', i);
-  return c;
-}
-async function screen(label: string): Promise<Client> {
-  const c = new Client(label); await c.open(); tap(c);
-  const i = c.mark();
-  c.send({ t: 'hello', role: 'screen' });
-  await c.waitFor((m) => m.t === 'view', i);
-  return c;
-}
+const player = async (label: string, character: string) => { const p = await playerIn(label, character, room); keep(p.c); return p; };
+const rejoin = async (label: string, playerId: string) => keep(await rejoinIn(label, playerId));
+const screen = async (label: string) => keep(await screenIn(label));
 
 /** The leak grep: in every raw frame where this question is open, no accepted spelling of its answer
  *  appears as a JSON string (other than a displayed choice: that is the question itself). */
 function leakFree(question: Q): { ok: boolean, frames: number, leak?: string } {
   let frames = 0;
-  for (const list of raws.values()) {
-    for (const raw of list) {
+  for (const c of clients) {
+    for (const raw of c.frames) {
       if (!raw.includes(JSON.stringify(question.q))) continue;
       const m = JSON.parse(raw);
       if (m.t !== 'view' || quizOf(m)?.phase !== 'question') continue;
@@ -146,8 +97,8 @@ try {
   const byText = new Map(bank.map((q) => [q.q, q]));
 
   await boot(true);
-  room = (await (await fetch(`${HTTP}/api/join`)).json()).code;
-  check(/quiz bank: \d+ questions/.test(log), 'boot log: the quiz bank was loaded and validated');
+  room = await roomCode();
+  check(/quiz bank: \d+ questions/.test(log()), 'boot log: the quiz bank was loaded and validated');
   check((await fetch(`${HTTP}/data/quiz/placeholder.json`)).status === 404, 'the bank is never served (GET /data/quiz/… → 404)');
 
   ({ c: P, id: idP } = await player('P', 'pierre'));
@@ -306,7 +257,7 @@ try {
   }));
   writeFileSync(join(dir, 'tiny.json'), JSON.stringify({ questions: tiny }));
   await boot(true, { BLOKO_QUIZ_DIR: dir });
-  room = (await (await fetch(`${HTTP}/api/join`)).json()).code;
+  room = await roomCode();
   ({ c: P, id: idP } = await player('P', 'pierre'));
   ({ c: E, id: idE } = await player('E', 'elodie'));
   T = await screen('T');
@@ -353,7 +304,7 @@ try {
 
   for (const c of [P, E, T]) c.ws.close();
 } catch (e) {
-  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${log}`);
+  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${log()}`);
 } finally {
   if (server) await kill9();
   rmSync(VAR, { recursive: true, force: true });

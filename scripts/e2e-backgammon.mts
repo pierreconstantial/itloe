@@ -9,22 +9,19 @@
 // last, it shows the podium, ranked as the standings.
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3194 CDP=9222 node scripts/e2e-backgammon.mts      (never PORT 3131: the live server)
-import type { ChildProcess } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { backgammonOf, cdpConnect, check, Client, finish, HTTP, lobbyOf, openPage, type Page, SOCKET_PROBE, startServer } from './e2e-lib.mts';
+import { backgammonOf, cdpConnect, check, Client, finish, HTTP, lobbyOf, openPage, type Page, type Server, SOCKET_PROBE, startServer, stop } from './e2e-lib.mts';
 import { BAR, OFF, allowedSteps, nextPairs, other, reach, standings } from '../shared/backgammon.js';
 
 const PORT = process.env.PORT ?? '3142';
-if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const CDP = process.env.CDP ?? '9222';
 const VAR = mkdtempSync(join(tmpdir(), 'itloe-backgammon-'));
 const SHOTS = '/tmp/bg-shots-e2e';
 const NAMES = ['pierre', 'elodie', 'sol', 'anna']; // Pierre first: the game master
 
-let server: ChildProcess | null = null;
-let log = '';
+let server: Server | null = null;
 const pages: Page[] = [];
 let T!: Client; // the screen socket: every view
 let tv!: Page;
@@ -211,8 +208,6 @@ async function checkResults(s: any): Promise<void> {
 
 try {
   server = await startServer(PORT, join(VAR, 'var'), 'minigame:backgammon', { stdio: 'pipe' });
-  server.stdout!.on('data', (d) => { log += d; });
-  server.stderr!.on('data', (d) => { log += d; });
   const room = (await (await fetch(`${HTTP}/api/join`)).json()).code;
   const cdp = await cdpConnect(CDP);
   const open = async (label: string, phone: boolean) => {
@@ -285,15 +280,11 @@ try {
   const errors = pages.flatMap((p) => p.errors);
   check(errors.length === 0, `no page threw${errors.length ? `: ${errors[0]}` : ''}`);
 } catch (e) {
-  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${log}`);
+  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${server?.log() ?? ''}`);
 } finally {
   T?.ws.close();
   for (const p of pages) await p.close();
-  if (server && server.exitCode === null) {
-    const gone = new Promise((r) => server!.once('exit', r));
-    server.kill('SIGTERM');
-    await gone;
-  }
+  await stop(server?.proc ?? null);
   rmSync(VAR, { recursive: true, force: true, maxRetries: 5 });
 }
 finish();

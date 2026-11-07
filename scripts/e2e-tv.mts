@@ -6,7 +6,6 @@
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3180 CDP=9222 [SHOTS=dir] node scripts/e2e-tv.mts       (never PORT 3131: the live server)
 // SHOTS=<dir> saves screenshots, each with its visible text (<name>.txt).
-import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -16,41 +15,19 @@ import { PLAIN_LOBBY_START_POSITIONS } from '../shared/plain-lobby.js';
 
 /** A node's title (the server runs the sample content). @param {string} id */
 const C_TITLE = (id: string): string => SAMPLE_CONTENT.nodes[id].title;
-import { backToLobby, blocksOf, check, Client, endMinigame, finish, gmOf, HTTP, legalMoves, quizOf, onlyPart, roomOf, settled, sleep, SLOW, SOCKET_PROBE, startRound, TEARDOWN_PROBE } from './e2e-lib.mts';
+import { backToLobby, blocksOf, check, Client, endMinigame, finish, gmOf, HTTP, legalMoves, player as playerIn, quizOf, onlyPart, rejoin as rejoinIn, roomCode, roomOf, type Server, settled, sleep, SLOW, SOCKET_PROBE, startRound, startServer, stop, TEARDOWN_PROBE } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
-if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const CDP = process.env.CDP ?? '9222';
 const SHOTS = process.env.SHOTS;
 const ONLY = onlyPart(['connection', 'campaign', 'quiz']);
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-tv-'));
-const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 
 // ---------- server ----------
-let server: ChildProcess | null = null;
-let log = '';
-async function boot(fresh = false): Promise<void> {
-  log = '';
-  // a server left over from an aborted run would silently answer instead of ours
-  if (await fetch(`${HTTP}/api/join`).then(() => true, () => false)) throw new Error(`port ${PORT} is busy: fuser -k ${PORT}/tcp`);
-  server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', ITLOE_CONTENT: 'sample' },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  server.stdout!.on('data', (d) => { log += d; });
-  server.stderr!.on('data', (d) => { log += d; });
-  for (let k = 0; k < 100; k++) {
-    try { await fetch(`${HTTP}/api/join`); return; } catch { await sleep(50); }
-  }
-  throw new Error(`server did not come up:\n${log}`);
-}
-async function kill9(): Promise<void> {
-  const s = server!;
-  const gone = new Promise((r) => s.once('exit', r));
-  s.kill('SIGKILL');
-  await gone;
-  server = null;
-}
+let server: Server | null = null;
+const log = () => server?.log() ?? '';
+const boot = async (fresh = false) => { server = await startServer(PORT, VAR, 'sample', { fresh, stdio: 'pipe' }); };
+const kill9 = () => stop(server!.proc, 'SIGKILL');
 
 // ---------- minimal CDP page ----------
 class Page {
@@ -144,26 +121,8 @@ class Page {
 
 // ---------- phones ----------
 let room = '';
-async function device(label: string): Promise<Client> {
-  const c = new Client(label); await c.open();
-  c.send({ t: 'hello', role: 'player', room });
-  await c.waitFor((m) => m.t === 'view');
-  return c;
-}
-async function tap(c: Client, character: string): Promise<string> {
-  const i = c.mark();
-  c.send({ t: 'join', character });
-  const r = await c.waitFor((m) => m.t === 'welcome' || m.t === 'err', i);
-  if (r.t !== 'welcome') throw new Error(`${c.label}: tap ${character} → err ${r.code}`);
-  return r.playerId;
-}
-async function rejoin(label: string, playerId: string): Promise<Client> {
-  const c = new Client(label); await c.open();
-  const i = c.mark();
-  c.send({ t: 'hello', role: 'player', room, playerId });
-  await c.waitFor((m) => m.t === 'welcome', i);
-  return c;
-}
+const player = (label: string, character: string) => playerIn(label, character, room);
+const rejoin = (label: string, playerId: string) => rejoinIn(label, playerId, room);
 const drop = async (c: Client) => { c.ws.close(); for (let k = 0; k < 100 && !c.closed; k++) await sleep(10); };
 
 /** The block game the TV shows: the running minigame's round (null in its lobby, or while none runs). */
@@ -247,7 +206,7 @@ try {
     if (t.type === 'page' && String(t.url).startsWith(`${HTTP}/screen`)) await fetch(`http://127.0.0.1:${CDP}/json/close/${t.id}`);
   }
   await boot(true);
-  room = (await (await fetch(`${HTTP}/api/join`)).json()).code;
+  room = await roomCode();
   tv = await Page.open(`${HTTP}/screen/`);
   await tv.cmd('Page.addScriptToEvaluateOnNewDocument', { source: TEARDOWN_PROBE }); // the teardown checks
   await tv.cmd('Page.addScriptToEvaluateOnNewDocument', { source: SOUND_PROBE });
@@ -261,13 +220,13 @@ try {
     return [...document.querySelectorAll('${sel}')].every((e) => { const r = e.getBoundingClientRect(); return r.right <= c.left || r.bottom <= c.top || r.left >= c.right || r.top >= c.bottom; }); })()`;
 
   // ---------- lobby, avatars, presence ----------
-  const A = await device('A'); const idA = await tap(A, 'pierre'); // the game master
+  const { c: A, id: idA } = await player('A', 'pierre'); // the game master
   check(await tv.until(`${tvJoined} === 1`, 'joined sound'), 'the first guest arriving in the room gets the "joined" sound');
   if (SHOTS) { // the evening's first screen, with its first guest
     await tv.until('window.bloko.avatars().length === 1', '1 avatar');
     await tv.shot('start-room');
   }
-  let B = await device('B'); const idB = await tap(B, 'sol');
+  let { c: B } = await player('B', 'sol'); const idB = B.id!;
   check(await tv.until(`${tvJoined} === 2`, 'joined sound'), '…and so does the second');
   let A2 = A;
   let N: Client | undefined, E: Client | undefined;
@@ -281,7 +240,7 @@ try {
   check(await tv.until(`${tvOffline} === ${JSON.stringify(JSON.stringify([idB]))}`, 'offline tag', 3000), 'lobby drop: tagged offline after ~2 s');
   check(await tv.js(`window.bloko.avatars().find((a) => a.id === '${idB}').offline === true`), "…the dropped guest's avatar is dimmed");
   await tv.shot('lobby-offline');
-  B = await device('B2'); await tap(B, 'sol');
+  B = (await player('B2', 'sol')).c;
   check(await tv.until(`${tvOffline} === '[]'`, 'back', 1500), 'reclaim → back to normal at once');
   // blip: drop + back within 1 s → never tagged
   let flicker = false;
@@ -449,7 +408,7 @@ try {
   const tag = await tv.js(`getComputedStyle(document.querySelector('.panel[data-id="${idB}"] .panel-head'), '::after').content`);
   check(String(tag).includes('offline'), `…with the "offline" tag (${tag})`);
   await tv.shot('playing-offline');
-  B = await device('B6'); await tap(B, 'sol');
+  B = (await player('B6', 'sol')).c;
   check(await tv.until(`!document.querySelector('.panel[data-id="${idB}"]').classList.contains('is-offline')`, 'undim', 1500), 'reclaim mid-game → board back to normal');
   i = A2.mark(); B.send({ t: 'place', ...legalMoves(B.lastView(), idB)[0] }); await A2.waitFor((m) => m.t === 'view', i);
   await killAndBack(tv, 'playing', A2);
@@ -479,7 +438,7 @@ try {
   await tv.front();
   tv.console.length = 0;
   const stoppedAt = Date.now();
-  server!.kill('SIGSTOP');
+  server!.proc.kill('SIGSTOP');
   const silentHit = await (async () => {
     const end = Date.now() + 36_000;
     while (Date.now() < end) { if (tv!.console.some((l) => l.includes('no message for 25 s'))) return true; await sleep(100); }
@@ -487,7 +446,7 @@ try {
   })();
   const silentAfter = Date.now() - stoppedAt;
   check(silentHit && silentAfter <= 26_000, `silent socket → TV gives up on it by itself (${Math.round(silentAfter / 1000)} s after the server froze; ≤ 25 s of silence)`);
-  server!.kill('SIGCONT');
+  server!.proc.kill('SIGCONT');
   check(await tv.until(`!${tvOnlineBanner}`, 'back after SIGCONT', 8000), '…server back → TV live again');
   i = B.mark(); A2.send({ t: 'place', ...legalMoves(A2.lastView(), idA)[0] });
   const sc2 = blocksOf(await B.waitFor((m) => m.t === 'view', i)).players[idA].score;
@@ -531,7 +490,7 @@ try {
     '…and avatars resume walking (pos relayed)');
   check(await soundOn(tv), "the TV's sound is on again (the page reloaded above)");
   const joinedBefore = await tv.js(tvJoined);
-  N = await device('N'); const idN = await tap(N, 'anna');
+  N = (await player('N', 'anna')).c; const idN = N.id!;
   check(await tv.until(`window.bloko.avatars().some((a) => a.id === '${idN}') && document.querySelector('.lobby-count').textContent.includes('3/')`, 'newcomer'),
     'a newcomer joins after the end and appears on the TV');
   check(await tv.until(`${tvJoined} === ${joinedBefore + 1}`, 'joined sound'), '…with the "joined" sound, once');
@@ -540,7 +499,7 @@ try {
   } // connection
 
   if (!ONLY || ONLY === 'campaign' || ONLY === 'quiz') {
-  if (!N) { N = await device('N'); await tap(N, 'anna'); }
+  if (!N) N = (await player('N', 'anna')).c;
 
   const doorsJs = `JSON.stringify(Object.fromEntries(window.bloko.doors().map((d) => [d.id, d.state])))`;
 
@@ -614,7 +573,7 @@ try {
   await tv.shot('hub-map-new');
 
   // the chooser (Élodie) joins and walks into the childhood door → the TV switches to that world
-  E = await device('E'); await tap(E, 'elodie');
+  E = (await player('E', 'elodie')).c;
   await tv.until('window.bloko.avatars().length === 4', 'elodie avatar');
   check(await tv.until(`[...document.querySelectorAll('.map-bag')].some((b) => b.textContent.includes('Élodie') && b.querySelector('[data-item="old-key"]'))`, 'bag'),
     "Élodie joins → the band shows her item icons (🗝️), the inventory hung on her character");
@@ -635,7 +594,7 @@ try {
     A2.send({ t: 'gm', op: { op: 'unlock', node: 'childhood' } });
     A2.send({ t: 'gm', op: { op: 'goto', node: 'childhood' } });
     await A2.waitFor((m) => m.t === 'view' && m.campaign?.at.node === 'childhood', i);
-    E = await device('E'); await tap(E, 'elodie');
+    E = (await player('E', 'elodie')).c;
   }
 
   if (!ONLY || ONLY === 'quiz') {
@@ -747,7 +706,7 @@ try {
 
   for (const c of [A2, B, N, E]) c?.ws.close();
 } catch (e) {
-  check(false, `crashed: ${(e as Error).stack}\n--- server log ---\n${log}`);
+  check(false, `crashed: ${(e as Error).stack}\n--- server log ---\n${log()}`);
 } finally {
   await tv?.close(); await tv2?.close();
   if (server) await kill9();

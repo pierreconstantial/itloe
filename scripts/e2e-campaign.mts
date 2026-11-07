@@ -5,40 +5,18 @@
 // interact works. Uses the placeholder SAMPLE_CONTENT (shared/campaign/sample.js).
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR) so it can kill -9 it.
 // Usage: PORT=3186 node scripts/e2e-campaign.mts      (never 3131: that's the live server)
-import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { backToLobby, blocksOf, check, Client, endMinigame, finish, HTTP, lobbyOf, quizOf, roomOf, roundTrip, settled, sleep, startRound } from './e2e-lib.mts';
+import { backToLobby, blocksOf, check, Client, endMinigame, errOf, finish, HTTP, lobbyOf, player as playerIn, quizOf, rejoin, roomCode, roomOf, roundTrip, screen, type Server, settled, sleep, startRound, startServer, stop } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
-if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-campaign-'));
-const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 
-let server: ChildProcess | null = null;
-let log = '';
-async function boot(fresh = false): Promise<void> {
-  log = '';
-  server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', ITLOE_CONTENT: 'sample' },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  server.stdout!.on('data', (d) => { log += d; });
-  server.stderr!.on('data', (d) => { log += d; });
-  for (let k = 0; k < 100; k++) {
-    try { await fetch(`${HTTP}/api/join`); return; } catch { await sleep(50); }
-  }
-  throw new Error(`server did not come up:\n${log}`);
-}
-async function kill9(): Promise<void> {
-  const s = server!;
-  const gone = new Promise((r) => s.once('exit', r));
-  s.kill('SIGKILL');
-  await gone;
-  server = null;
-}
-const roomCode = async (): Promise<string> => (await (await fetch(`${HTTP}/api/join`)).json()).code;
+let server: Server | null = null;
+const log = () => server?.log() ?? '';
+const boot = async (fresh = false) => { server = await startServer(PORT, VAR, 'sample', { fresh, stdio: 'pipe' }); };
+const kill9 = () => stop(server!.proc, 'SIGKILL');
 
 /** A view's campaign with its minigame's view where the save keeps the minigame (`at.activity`), comparable with the save. */
 const campaignOf = (m: any): any => m?.campaign && { ...m.campaign, at: { ...m.campaign.at, activity: m.minigame?.view ?? null } };
@@ -58,37 +36,8 @@ const core = (k: any) => JSON.stringify({
     round: k.at.activity.round && { ...k.at.activity.round, deadline: null, best: undefined } } },
   party: k.party, facts: k.facts, news: k.news, newsSeq: k.newsSeq,
 });
-/** The err `msg` is answered with (every use expects one: waiting long costs a normal run nothing), or null. */
-const errOf = async (c: Client, msg: object): Promise<string | null> => {
-  const i = c.mark();
-  c.send(msg);
-  try { return (await c.waitFor((m) => m.t === 'err', i, 5000)).code; } catch { return null; }
-};
-
 let room = '';
-async function player(label: string, character: string): Promise<{ c: Client, id: string }> {
-  const c = new Client(label); await c.open();
-  c.send({ t: 'hello', role: 'player', room });
-  const i = c.mark();
-  c.send({ t: 'join', character });
-  const id = (await c.waitFor((m) => m.t === 'welcome', i)).playerId;
-  return { c, id };
-}
-async function rejoin(label: string, playerId: string): Promise<Client> {
-  const c = new Client(label); await c.open();
-  const i = c.mark();
-  c.send({ t: 'hello', role: 'player', playerId });
-  await c.waitFor((m) => m.t === 'welcome' && m.playerId === playerId, i);
-  await c.waitFor((m) => m.t === 'view', i);
-  return c;
-}
-async function screen(label: string): Promise<Client> {
-  const c = new Client(label); await c.open();
-  const i = c.mark();
-  c.send({ t: 'hello', role: 'screen' });
-  await c.waitFor((m) => m.t === 'view', i);
-  return c;
-}
+const player = (label: string, character: string) => playerIn(label, character, room);
 
 let P: Client, E: Client, T1: Client, T2: Client;
 let idP = '', idE = '';
@@ -470,7 +419,7 @@ try {
 
   for (const c of [P, E, T1, T2]) c.ws.close();
 } catch (e) {
-  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${log}`);
+  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${log()}`);
 } finally {
   if (server) await kill9();
   rmSync(VAR, { recursive: true, force: true });

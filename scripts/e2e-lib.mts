@@ -1,6 +1,6 @@
 // Shared e2e helpers: WebSocket test client, PASS/FAIL tally, legal-move search, play-to-done; and for the
-// runner (e2e-run.mts) and the driver (drive.mts): free ports, a server and headless Chrome started and
-// stopped, a CDP connection.
+// suites, the runner (e2e-run.mts), the driver (drive.mts) and the unit tests that start a real server: free
+// ports, a server and headless Chrome started and stopped, a CDP connection.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
@@ -113,16 +113,21 @@ export const gmOf = (v: any): string | null => (v?.campaign ? gameMasterId(v.cam
 export class Client {
   ws!: WebSocket;
   msgs: any[] = [];
+  /** every frame as received, unparsed (the quiz's leak grep) */
+  frames: string[] = [];
   /** liveness ticks, kept apart so "no broadcast" checks never trip on one */
   ticks: any[] = [];
   closed = false;
   label: string;
+  url: string;
   /** The player id of the last welcome, if any. */
   id: string | null = null;
-  constructor(label: string) { this.label = label; }
+  /** @param url the server's socket (default: the suite's PORT) */
+  constructor(label: string, url = URL_WS) { this.label = label; this.url = url; }
   open(): Promise<void> {
-    this.ws = new WebSocket(URL_WS);
+    this.ws = new WebSocket(this.url);
     this.ws.onmessage = (e) => {
+      this.frames.push(String(e.data));
       const m = JSON.parse(String(e.data));
       if (m.t === 'welcome') this.id = m.playerId;
       (m.t === 'tick' ? this.ticks : this.msgs).push(m);
@@ -158,6 +163,55 @@ export class Client {
   }
 }
 
+/** A phone opening the join URL: hello with the room code, no stored id; resolves once it has a view. */
+export async function device(label: string, room: string, url = URL_WS): Promise<Client> {
+  const c = new Client(label, url); await c.open();
+  const i = c.mark();
+  c.send({ t: 'hello', role: 'player', room });
+  await c.waitFor((m) => m.t === 'view', i);
+  return c;
+}
+/** Taps a character on phone `c`: the welcome's player id, or the err code. */
+export async function tap(c: Client, character: string): Promise<{ id?: string, err?: string }> {
+  const i = c.mark();
+  c.send({ t: 'join', character });
+  const r = await c.waitFor((m) => m.t === 'welcome' || m.t === 'err', i);
+  return r.t === 'welcome' ? { id: r.playerId } : { err: r.code };
+}
+/** A new phone joined as `character` (an err throws). */
+export async function player(label: string, character: string, room: string, url = URL_WS): Promise<{ c: Client, id: string }> {
+  const c = await device(label, room, url);
+  const r = await tap(c, character);
+  if (!r.id) throw new Error(`${label}: join as ${character} → err ${r.err}`);
+  return { c, id: r.id };
+}
+/** A phone with a stored id (and the room code, when given): hello → welcome + view. */
+export async function rejoin(label: string, playerId: string, room?: string, url = URL_WS): Promise<Client> {
+  const c = new Client(label, url); await c.open();
+  const i = c.mark();
+  c.send({ t: 'hello', role: 'player', playerId, ...(room ? { room } : {}) });
+  await c.waitFor((m) => m.t === 'welcome' && m.playerId === playerId, i);
+  await c.waitFor((m) => m.t === 'view', i);
+  return c;
+}
+/** A TV's socket: hello as a screen; resolves once it has a view. */
+export async function screen(label: string, url = URL_WS): Promise<Client> {
+  const c = new Client(label, url); await c.open();
+  const i = c.mark();
+  c.send({ t: 'hello', role: 'screen' });
+  await c.waitFor((m) => m.t === 'view', i);
+  return c;
+}
+/** The err code `msg` is answered with, or null for none (no fixed wait: a round trip follows it). */
+export async function errOf(c: Client, msg: object): Promise<string | null> {
+  const i = c.mark();
+  c.send(msg);
+  const probe = await roundTrip(c);
+  return c.since(i).slice(0, c.since(i).indexOf(probe)).find((m) => m.t === 'err')?.code ?? null;
+}
+/** The room code the server hands out now. */
+export const roomCode = async (http = HTTP): Promise<string> => (await (await fetch(`${http}/api/join`)).json()).code;
+
 /** The game master `gm` starts the tableau's minigame (unless one runs), each of `ready` who isn't ready yet
  *  taps "I'm ready", and `gm` starts a round; resolves with gm's first view of the running round. */
 export async function startRound(gm: Client, ready: Client[]): Promise<any> {
@@ -188,12 +242,14 @@ export async function endMinigame(gm: Client): Promise<any> {
   return gm.waitFor((m) => m.t === 'view' && m.minigame === null, i);
 }
 
-/** A round trip on one socket: an `enter` of no node changes nothing and is answered with an err, after
- *  everything the server sent this socket before. */
-export async function roundTrip(c: Client): Promise<void> {
+/** The codes a join of no character is answered with: nothing else sends them to a joined phone or a TV. */
+const PROBE_ERRS = ['bad-room', 'taken', 'full'];
+/** A round trip on one socket: a join of no character changes nothing and is answered with an err, after
+ *  everything the server sent this socket before; resolves with that err. */
+export async function roundTrip(c: Client): Promise<any> {
   const i = c.mark();
-  c.send({ t: 'enter', node: '' });
-  await c.waitFor((m) => m.t === 'err', i, 5000);
+  c.send({ t: 'join', character: '' });
+  return c.waitFor((m) => m.t === 'err' && PROBE_ERRS.includes(m.code), i, 5000);
 }
 /** Everything the senders sent has been handled, and the receivers have got whatever it caused: what a
  *  check reads then is final, with no fixed wait (a round trip per sender, then per receiver). */
@@ -249,25 +305,49 @@ export function freePort(): Promise<number> {
 
 /** Resolves once `url` answers; kills `proc` and throws if it exits first or after 30 s. */
 async function waitHttp(url: string, what: string, proc: ChildProcess): Promise<void> {
-  for (let k = 0; k < 300; k++) {
+  for (let k = 0; k < 600; k++) {
     if (proc.exitCode !== null) throw new Error(`${what} exited (${proc.exitCode}) before answering`);
     if (await fetch(url).then(() => true, () => false)) return;
-    await sleep(100);
+    await sleep(50);
   }
   proc.kill('SIGKILL');
   throw new Error(`${what} did not answer on ${url} within 30 s`);
 }
 
-/** The real server on `port`: a fresh evening of `content` (ITLOE_CONTENT), saved in `dataDir`. In its own
- *  process group when `detached`; output to the caller's unless `stdio: 'pipe'`. Resolves once it answers. */
+export type Server = { proc: ChildProcess, log: () => string };
+/** The real server on `port`: `content` (ITLOE_CONTENT; '' the story) saved in `dataDir`, a fresh evening unless
+ *  `fresh` is false (then the saved one). In its own process group when `detached`; output to the caller's,
+ *  unless `stdio: 'pipe'`: then kept, as `log()`. Resolves once it answers; throws, with the exit code and
+ *  the output kept, if it exits first. */
 export async function startServer(port: string | number, dataDir: string, content: string,
-  opts: { detached?: boolean, stdio?: 'inherit' | 'pipe', env?: NodeJS.ProcessEnv } = {}): Promise<ChildProcess> {
-  const proc = spawn(process.execPath, [MAIN, '--new'], {
+  opts: { fresh?: boolean, detached?: boolean, stdio?: 'inherit' | 'pipe', env?: NodeJS.ProcessEnv } = {}): Promise<Server> {
+  if (String(port) === '3131') throw new Error('3131 is the live server: pick another PORT');
+  // a server left over from an aborted run would answer instead of this one
+  if (await fetch(`http://127.0.0.1:${port}/api/join`).then(() => true, () => false)) throw new Error(`port ${port} is busy: fuser -k ${port}/tcp`);
+  const proc = spawn(process.execPath, [MAIN, ...(opts.fresh === false ? [] : ['--new'])], {
     env: { ...(opts.env ?? process.env), PORT: String(port), BLOKO_VAR: dataDir, BLOKO_HOST: '127.0.0.1', ITLOE_CONTENT: content },
     stdio: ['ignore', opts.stdio ?? 'inherit', opts.stdio ?? 'inherit'], detached: opts.detached,
   });
-  await waitHttp(`http://127.0.0.1:${port}/api/join`, 'the server', proc);
-  return proc;
+  let log = '';
+  proc.stdout?.on('data', (d) => { log += d; });
+  proc.stderr?.on('data', (d) => { log += d; });
+  const exited = new Promise((r) => proc.once('close', r)); // its output read to the end
+  try {
+    await waitHttp(`http://127.0.0.1:${port}/api/join`, 'the server', proc);
+  } catch (e) {
+    await exited;
+    throw new Error(`${(e as Error).message}${log ? `\n${log}` : ''}`);
+  }
+  return { proc, log: () => log };
+}
+
+/** Sends `signal` to a process (a SIGKILL: kill -9, no last save) and resolves once it has exited. */
+export function stop(proc: ChildProcess | null, signal: NodeJS.Signals = 'SIGTERM'): Promise<void> {
+  if (!proc || proc.exitCode !== null || proc.signalCode !== null) return Promise.resolve();
+  const gone = new Promise<void>((r) => proc.once('exit', () => r()));
+  proc.kill('SIGCONT'); // a frozen (SIGSTOP) server never handles a SIGTERM
+  proc.kill(signal);
+  return gone;
 }
 
 /** Headless Chrome on a scratch profile, in its own process group when `detached`; resolves once CDP answers. */

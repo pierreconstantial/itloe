@@ -9,15 +9,13 @@
 // reason to show.
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
 //        PORT=3194 CDP=9222 node scripts/e2e-pyramide.mts      (never PORT 3131: the live server)
-import type { ChildProcess } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { cdpConnect, check, Client, finish, HTTP, lobbyOf, openPage, type Page, pyramideOf, settingsOf, SOCKET_PROBE, startServer } from './e2e-lib.mts';
+import { cdpConnect, check, Client, finish, HTTP, lobbyOf, openPage, type Page, pyramideOf, settingsOf, type Server, SOCKET_PROBE, startServer, stop } from './e2e-lib.mts';
 import { clueProblem } from '../shared/pyramide.js';
 
 const PORT = process.env.PORT ?? '3141';
-if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const CDP = process.env.CDP ?? '9222';
 const VAR = mkdtempSync(join(tmpdir(), 'itloe-pyramide-'));
 const SHOTS = '/tmp/pyr-shots-e2e';
@@ -48,8 +46,7 @@ function clueFor(word: string): string {
 const WRONG = 'pomme';
 
 // ---------- processes and pages ----------
-let server: ChildProcess | null = null;
-let log = '';
+let server: Server | null = null;
 const pages: Page[] = [];
 let T!: Client; // the screen socket: every view
 let tv!: Page;
@@ -210,8 +207,6 @@ async function duel(): Promise<any> {
 
 try {
   server = await startServer(PORT, join(VAR, 'var'), 'minigame:pyramide', { stdio: 'pipe', env: { ...process.env, BLOKO_PYRAMIDE_DIR: BANK_DIR } });
-  server.stdout!.on('data', (d) => { log += d; });
-  server.stderr!.on('data', (d) => { log += d; });
   const room = (await (await fetch(`${HTTP}/api/join`)).json()).code;
   const cdp = await cdpConnect(CDP);
   const open = async (label: string, phone: boolean) => {
@@ -276,15 +271,11 @@ try {
   const errors = pages.flatMap((p) => p.errors);
   check(errors.length === 0, `no page threw${errors.length ? `: ${errors[0]}` : ''}`);
 } catch (e) {
-  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${log}`);
+  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${server?.log() ?? ''}`);
 } finally {
   T?.ws.close();
   for (const p of pages) await p.close();
-  if (server && server.exitCode === null) {
-    const gone = new Promise((r) => server!.once('exit', r));
-    server.kill('SIGTERM');
-    await gone;
-  }
+  await stop(server?.proc ?? null);
   rmSync(VAR, { recursive: true, force: true, maxRetries: 5 });
 }
 finish();

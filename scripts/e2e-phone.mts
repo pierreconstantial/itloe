@@ -14,16 +14,14 @@
 // an unknown part is refused.
 // a full run is the acceptance.
 // SHOTS=<dir> saves screenshots of the block, quiz and campaign screens, each with its visible text (<name>.txt).
-import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { check, Client, finish, HTTP, onlyPart, sleep, SLOW, TEARDOWN_PROBE } from './e2e-lib.mts';
+import { check, finish, HTTP, onlyPart, roomCode, screen, type Server, sleep, SLOW, startServer, stop, TEARDOWN_PROBE } from './e2e-lib.mts';
 import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
 import { FEET, PARTY_ROOM } from '../shared/scene.js';
 
 const PORT = process.env.PORT ?? '3141';
-if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const CDP = process.env.CDP ?? '9222';
 const LOCK_MS = Number(process.env.LOCK_MS ?? 5 * 60_000);
 const SHOTS = process.env.SHOTS; // a folder: screenshots of the screens land there
@@ -33,44 +31,26 @@ const VAR = mkdtempSync(join(tmpdir(), 'bloko-phone-'));
 const FIXED_BANK = join(VAR, 'fixed-bank');
 mkdirSync(FIXED_BANK, { recursive: true });
 copyFileSync(new URL('../data/quiz/placeholder.json', import.meta.url), join(FIXED_BANK, 'placeholder.json'));
-const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 
 /** check() with the observed detail appended to the label. */
 const expect = (cond: boolean, label: string, note = '') => check(cond, note ? `${label}  — ${note}` : label);
 
 // ---------- server ----------
-let server: ChildProcess | null = null;
-let log = '';
+let server: Server | null = null;
+const log = () => server?.log() ?? '';
 let room = '';
 /** @param content ITLOE_CONTENT: the sample content, or '' for the story */
 async function boot(fresh = false, content = 'sample'): Promise<void> {
-  log = '';
-  server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK, ITLOE_CONTENT: content },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  server.stdout!.on('data', (d) => { log += d; });
-  server.stderr!.on('data', (d) => { log += d; });
-  for (let k = 0; k < 100; k++) {
-    try { room = (await (await fetch(`${HTTP}/api/join`)).json()).code; return; } catch { await sleep(50); }
-  }
-  throw new Error(`server did not come up:\n${log}`);
+  server = await startServer(PORT, VAR, content, { fresh, stdio: 'pipe', env: { ...process.env, BLOKO_QUIZ_DIR: FIXED_BANK } });
+  room = await roomCode();
 }
-async function kill9(): Promise<void> {
-  const s = server!;
-  const gone = new Promise((r) => s.once('exit', r));
-  s.kill('SIGCONT'); // in case it was frozen
-  s.kill('SIGKILL');
-  await gone;
-  server = null;
-}
-const freeze = (on: boolean) => server!.kill(on ? 'SIGSTOP' : 'SIGCONT');
+const kill9 = () => stop(server!.proc, 'SIGKILL');
+const freeze = (on: boolean) => server!.proc.kill(on ? 'SIGSTOP' : 'SIGCONT');
 const joinUrl = () => `${HTTP}/play?room=${room}`;
 
 // ---------- hygiene: never share the port, never leave ghost tabs ----------
 // A test server must be ours alone; tabs left over from a killed run would keep reconnecting to it as
 // ghost clients (extra load, extra broadcasts). Close them by target id (closing a CDP socket does not).
-if (await fetch(`${HTTP}/api/join`).then(() => true, () => false)) throw new Error(`port ${PORT} is busy: stop whatever runs there first`);
 {
   const tabs: { id: string, url: string }[] = await (await fetch(`http://127.0.0.1:${CDP}/json/list`)).json();
   const ghosts = tabs.filter((t) => t.url.includes(`:${PORT}/`));
@@ -721,8 +701,7 @@ try {
   await joinAs(P3, 'pierre'); // the game master
   await joinAs(E3, content.chooser); // the chooser walks into doors
   // a screen socket watches the relayed avatar positions (closed-loop steering)
-  const tv = new Client('tv'); await tv.open(); tv.send({ t: 'hello', role: 'screen' });
-  await tv.waitFor((m) => m.t === 'view');
+  const tv = await screen('tv');
   const idE3 = (await E3.snap())?.id;
   const lastPos = () => { const m = [...tv.msgs].reverse().find((x) => x.t === 'pos' && x.playerId === idE3); return m ? { x: m.x, y: m.y } : null; };
   const node = () => [...tv.msgs].reverse().find((m) => m.t === 'view')?.campaign?.at.node;
@@ -909,7 +888,7 @@ try {
   expect(await H.visible('btn-start-minigame') && /Start the quiz/.test(await H.text('btn-start-minigame')), 'game master: "▶ Start the quiz"');
   expect(await Q.visible('stick-pad') && await Q.visible('btn-interact') && await H.visible('stick-pad'), 'the joystick and the object button');
   // Élodie walks to the birthday table (the TV socket sees her relayed pos) and blows the candles
-  const qtv = new Client('qtv'); await qtv.open(); qtv.send({ t: 'hello', role: 'screen' });
+  const qtv = await screen('qtv');
   const qPos = () => { const m = [...qtv.msgs].reverse().find((x) => x.t === 'pos' && x.playerId === idQ); return m ? { x: m.x, y: m.y } : null; };
   const TABLE = { x: 11.1, y: 7.5 }; // in front of the table
   await Q.steer(TABLE, () => { const p = qPos(); return !!p && Math.hypot(p.x - TABLE.x, p.y - TABLE.y) < 0.35; }, qPos, 15_000);
@@ -1201,8 +1180,7 @@ try {
   await boot(true);
   const J = await phone('J');
   await joinAs(J, 'sol');
-  const tv7 = new Client('tv7'); await tv7.open(); tv7.send({ t: 'hello', role: 'screen' });
-  await tv7.waitFor((m) => m.t === 'view');
+  const tv7 = await screen('tv7');
   const i7 = tv7.mark();
   await J.tap('#btn-menu');
   expect((await J.text('btn-show-join')).includes('Show the join QR'), '☰ → "📱 Show the join QR"');
@@ -1292,7 +1270,7 @@ try {
 
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}`);
-  if (log) console.log(`--- server log ---\n${log}`);
+  if (log()) console.log(`--- server log ---\n${log()}`);
 } finally {
   for (const id of contexts) await cmd('Target.disposeBrowserContext', { browserContextId: id }).catch(() => {});
   browser.close();

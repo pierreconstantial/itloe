@@ -1,59 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
-import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { setTimeout as delay } from 'node:timers/promises';
 import WebSocket from 'ws';
 import { makeAccess } from '../server/access.ts';
 import { typedUrl } from '../public/screen/lobby-view.js';
+import { freePort, startServer, stop } from '../scripts/e2e-lib.mts';
 
-const ROOT = process.env.ITLOE_TEST_ROOT ?? new URL('..', import.meta.url).pathname;
 const ORIGIN = 'https://itloe.example.test';
 const TOKEN = 'Tq7wZk';
 const ADMIN = 'Ad3mN9';
 
-/** A port nothing listens on: never the live server's 3131. */
-async function freePort() {
-  const listener = createServer();
-  listener.listen(0, '127.0.0.1');
-  await once(listener, 'listening');
-  const port = /** @type {import('node:net').AddressInfo} */ (listener.address()).port;
-  await new Promise((resolve) => listener.close(resolve));
-  return port;
-}
-
-/** @param {import('node:test').TestContext} t @param {Record<string, string>} [env] */
+/** The real server, public: on a free port and a scratch data folder, the story, gated by TOKEN.
+ *  @param {import('node:test').TestContext} t @param {Record<string, string>} [env] */
 async function server(t, env = {}) {
   const dir = await mkdtemp(join(tmpdir(), 'itloe-hosting-'));
   const port = await freePort();
-  const child = spawn(process.execPath, [join(ROOT, 'server/main.ts')], {
-    env: { ...process.env, PORT: String(port), BLOKO_BIND: '127.0.0.1', BLOKO_VAR: dir,
-      BLOKO_PUBLIC_ORIGIN: ORIGIN, BLOKO_ACCESS_TOKEN: TOKEN, BLOKO_NEW: '0', ...env },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  let log = '';
-  child.stdout?.on('data', (data) => { log += data; });
-  child.stderr?.on('data', (data) => { log += data; });
-  t.after(async () => {
-    if (child.exitCode === null && child.signalCode === null) {
-      child.kill();
-      await once(child, 'exit');
-    }
-    await rm(dir, { recursive: true, force: true });
-  });
-  const http = `http://127.0.0.1:${port}`;
-  for (let i = 0; i < 100; i++) {
-    assert.equal(child.exitCode, null, log);
-    try {
-      await fetch(http, { signal: AbortSignal.timeout(200) });
-      return { http, ws: `ws://127.0.0.1:${port}/ws`, dir, log: () => log, exited: () => child.exitCode !== null };
-    } catch { await delay(30); }
-  }
-  throw new Error(`Server did not start: ${log}`);
+  const app = await startServer(port, dir, '', { fresh: false, stdio: 'pipe', env: { ...process.env, BLOKO_BIND: '127.0.0.1',
+    BLOKO_PUBLIC_ORIGIN: ORIGIN, BLOKO_ACCESS_TOKEN: TOKEN, BLOKO_NEW: '0', ...env } })
+    .catch(async (e) => { await rm(dir, { recursive: true, force: true }); throw e; });
+  t.after(async () => { await stop(app.proc); await rm(dir, { recursive: true, force: true }); });
+  return { http: `http://127.0.0.1:${port}`, ws: `ws://127.0.0.1:${port}/ws`, dir, log: app.log, exited: () => app.proc.exitCode !== null };
 }
 
 /** @param {string} url @param {Record<string, string>} headers */
@@ -146,18 +115,13 @@ test('public hosting gates HTTP and sockets, and invites a fresh browser', { tim
 
 test('invalid public configuration exits before creating saves', { timeout: 5000 }, async (t) => {
   const dir = await mkdtemp(join(tmpdir(), 'itloe-invalid-hosting-'));
-  try {
-    // a free port all the same: were the check to fail, this server must not take the live one, nor outlive the test
-    const child = spawn(process.execPath, [join(ROOT, 'server/main.ts')], {
-      env: { ...process.env, PORT: String(await freePort()), BLOKO_BIND: '127.0.0.1', BLOKO_VAR: dir,
-        BLOKO_PUBLIC_ORIGIN: ORIGIN, BLOKO_ACCESS_TOKEN: '' },
-      stdio: 'ignore',
-    });
-    t.after(() => child.kill());
-    const [code] = await once(child, 'exit');
-    assert.notEqual(code, 0);
-    assert.deepEqual(await readdir(dir), []);
-  } finally { await rm(dir, { recursive: true, force: true }); }
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  // a free port all the same: were the check to fail, this server must not take the live one, nor outlive the test
+  const app = await startServer(await freePort(), dir, '', { fresh: false, stdio: 'pipe', env: { ...process.env, BLOKO_BIND: '127.0.0.1',
+    BLOKO_PUBLIC_ORIGIN: ORIGIN, BLOKO_ACCESS_TOKEN: '' } }).catch((/** @type {Error} */ e) => e);
+  if (!(app instanceof Error)) { await stop(app.proc); assert.fail('the server started'); }
+  assert.match(app.message, /exited \([1-9]\d*\) before answering/);
+  assert.deepEqual(await readdir(dir), []);
 });
 
 test('the admin data and the reset need the admin token; every page may report its errors', { timeout: 15_000 }, async (t) => {
