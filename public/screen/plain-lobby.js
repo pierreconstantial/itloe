@@ -8,6 +8,7 @@ import { h, colorDot, addStylesheet, worldBox, placeInWorld } from './dom.js';
 import { renderPodium, podiumSequence } from './podium-view.js';
 import { sfx } from './audio.js';
 import * as fx from './fx.js';
+import { resetScores } from './score-ticker.js';
 import { CHARACTERS } from '../../shared/characters.js';
 import { readyRuleMet } from '../../shared/campaign/index.js';
 
@@ -119,6 +120,7 @@ export function plainLobbyScreen(roundScreen) {
             if (!round) {
               cancelPodium();
               root.replaceChildren();
+              resetScores(); // a round's scores count from 0, not from the last round's
               round = roundScreen.mount(root, io);
             }
             round.update(roundView(m, v), c);
