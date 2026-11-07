@@ -4,7 +4,7 @@
 // question (4 big choices or a typed answer; one shot), reveal (my verdict + points, the answer, everyone's
 // answers; the game master: overrides + next). The finished quiz is the shared podium, with each player's right answers.
 // Controls are built once per question, so a view arriving mid-typing never resets the text field.
-import { $, addStylesheet } from './dom.js';
+import { $, addStylesheet, oneTap } from './dom.js';
 import * as haptics from './haptics.js';
 import { createConfirm } from './confirm.js';
 import { secondsLeft, mmss } from '../commun/clock.js';
@@ -57,7 +57,7 @@ export function createQuizUi(io) {
     input.blur(); // the keyboard goes away: the answer is sent
     render(/** @type {QuizView} */ (last), meId);
   });
-  $('quiz-next').addEventListener('click', () => io.send({ t: 'next' }));
+  $('quiz-next').addEventListener('click', oneTap(() => io.send({ t: 'next' })));
 
   /** @param {number} choice @param {RoundView} r */
   function pick(choice, r) {

@@ -6,7 +6,7 @@
 // round runs (mounted inside, with the same update and message as before), and the shared podium (./podium.js)
 // with the game master's "Back to the lobby". The frame mounts them for the players the minigame shows, and
 // for the game master; everyone else floats over it as a wisp. The round controls in ☰ follow the running round.
-import { $, addStylesheet, dotEl } from './dom.js';
+import { $, addStylesheet, dotEl, oneTap } from './dom.js';
 import { createConfirm } from './confirm.js';
 import { createSettingsSheet } from './settings-ui.js';
 import { createRoundControls } from './round-controls.js';
@@ -70,13 +70,13 @@ export function plainLobbyScreen(roundScreen) {
       /** @type {{ minigame: MinigameView, campaign: Campaign } | null} */
       let last = null;
 
-      $('btn-ready').addEventListener('click', () => {
+      $('btn-ready').addEventListener('click', oneTap(() => {
         const v = /** @type {PlainLobbyView | undefined} */ (last?.minigame.view);
         if (v) io.send({ t: 'ready', on: !v.ready.includes(io.meId()) });
-      });
-      $('btn-start').addEventListener('click', () => io.send({ t: 'start' }));
+      }));
+      $('btn-start').addEventListener('click', oneTap(() => io.send({ t: 'start' })));
       $('btn-end-minigame').addEventListener('click', () => confirm.tap('end', () => io.send({ t: 'endMinigame' })));
-      $('btn-back-to-lobby').addEventListener('click', () => io.send({ t: 'lobby' }));
+      $('btn-back-to-lobby').addEventListener('click', oneTap(() => io.send({ t: 'lobby' })));
 
       /** @param {PlainLobbyView} v @returns {RoundView} the round as its screens see it */
       const roundView = (v) => ({ kind: last?.minigame.kind ?? /** @type {any} */ (''), status: v.stage === 'running' ? 'running' : 'finished', view: v.round });

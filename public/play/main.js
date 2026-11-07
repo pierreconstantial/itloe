@@ -2,7 +2,7 @@
 // (PROTOCOL.md); a running minigame's screens are its own (./minigames.js), mounted in #view-minigame.
 // Path ../../shared: resolved on disk by tsc, normalized to /shared/ by the browser.
 import { KEYS, load, save, forget } from './storage.js';
-import { $, toast } from './dom.js';
+import { $, toast, oneTap, heardBack } from './dom.js';
 import * as haptics from './haptics.js';
 import { initMenu } from './menu.js';
 import { syncClock, serverNow } from '../commun/clock.js';
@@ -166,6 +166,7 @@ function send(msg) {
 function receive(raw) {
   /** @type {any} */ let m;
   try { m = JSON.parse(raw); } catch { return; }
+  if (m.t === 'view' || m.t === 'err') heardBack(); // what answers a tap (oneTap)
   if (m.t === 'welcome' && typeof m.playerId === 'string') {
     if (m.playerId !== playerId) myPos = null; // a different player: its own echo or spawn
     playerId = m.playerId;
@@ -762,7 +763,7 @@ $('room-form').addEventListener('submit', (e) => {
   else { roomPrompt = null; render(); } // nothing picked yet: back to the picker
 });
 
-$('btn-start-minigame').addEventListener('click', () => send({ t: 'startMinigame' }));
+$('btn-start-minigame').addEventListener('click', oneTap(() => send({ t: 'startMinigame' })));
 $('btn-jump').addEventListener('pointerdown', (e) => e.stopPropagation());
 $('btn-jump').addEventListener('click', () => {
   if (canWalk() && !minigame && !amWisp() && conn.isOnline()) send({ t: 'jump' });
