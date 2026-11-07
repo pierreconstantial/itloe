@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import {
   newCampaign, loadCampaign, reduceCampaign, activityOf, isUnlocked, minigameStatus, gameMasterId, eligibleOf, askedSoFar,
   validateContent, zoneAt, roomAt, sceneAt, UnknownMinigameError, SAMPLE_CONTENT,
-  chooserHeld, pickupsAt, zonesAt, objectRules, nextTimer, within, leads,
+  chooserHeld, pickupsAt, zonesAt, objectRules, characterRules, characterTarget, nextTimer, within, leads,
 } from '../shared/campaign/index.js';
 import { STORY_CONTENT } from '../shared/campaign/story/index.js';
 import { minigameContent } from '../shared/campaign/sample.js';
@@ -13,7 +13,7 @@ import { MINIGAMES } from '../shared/minigames.js';
 import type { Campaign, CampaignAction, CampaignEvent, Content, GmOp } from '../shared/campaign/types.js';
 
 export { newCampaign, loadCampaign, reduceCampaign, activityOf, isUnlocked, minigameStatus, gameMasterId, eligibleOf, askedSoFar, validateContent, zoneAt, roomAt, sceneAt, UnknownMinigameError };
-export { chooserHeld, pickupsAt, zonesAt, objectRules, nextTimer, within, leads };
+export { chooserHeld, pickupsAt, zonesAt, objectRules, characterRules, characterTarget, nextTimer, within, leads };
 export type { Campaign, CampaignAction, CampaignEvent, Content, GmOp };
 
 /** The content ITLOE_CONTENT names: the birthday story when unset or empty, `sample` for the engine's

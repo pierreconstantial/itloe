@@ -55,6 +55,7 @@ Mathieu and Johanna use the existing join/reclaim messages and story wisp/incarn
 { "t": "emote", "kind": "victory" }                      // incarnated: victory | fart | annoy; wisp: shine
 { "t": "interact", "object": "table" }                    // near an object of the room where the party is (sceneAt),
                                                          // or the chooser near an item on the floor: object = item id
+{ "t": "interact", "character": "pierre" }                // on another character in reach (the server's `reach`, below)
 // Speech and emotes are short lived, server relayed events, limited to one per 650 ms per socket.
 // Every `hello` (phones, new devices and screens alike) is answered with { t: "chatHistory", messages: [...] }
 // holding up to 30 recent speech events. The history is in memory only and is cleared by a server restart.
@@ -68,6 +69,11 @@ Mathieu and Johanna use the existing join/reclaim messages and story wisp/incarn
 // condition, then the default. Each action has key, text, feedback; null denies interaction. A story action
 // is then applied to the campaign as `use` (a machine may move on). Wisps cannot use any object action, even a
 // player override. An item lying where the party is (a story pickup) is picked up by the chooser within reach.
+// An action on a character: the story's actions on characters (characterRules, the machines' `characters`), for a
+// character in the sender's reach (the server's own list, the one it sends as `reach`). The server relays
+// `interact` with playerId, character, target (the target's player id), action, feedback, at, and
+// `speaker: "target"` when the target says the feedback; the story action is applied as `use` with `character`.
+// Same rate limit as object actions.
 ```
 
 For example, the table is a scene object with `id: "table"` and a `box`, `solid`, `anchorY` and `layer` in
@@ -404,6 +410,11 @@ its live state about 20 times a second:
 
 ```jsonc
 { "t": "welcome", "playerId": "p-abc123" }   // to a player client after join or successful rejoin
+{ "t": "reach", "characters": ["pierre"] }    // to a player client: the characters it can act on now, closest first
+// A character is in reach when its player is shown as themselves (not a wisp, not mid-incarnation), not the receiver,
+// and its feet are within 0.8 of the receiver's (a position nobody sent yet: the spawn point), while no minigame runs.
+// Sent after welcome and whenever the list changes, never the others' positions. The receiver must be shown as
+// themselves too, else the list is empty.
 { "t": "view", "minigame": { "kind": "blocks", "status": "running", "view": { /* the minigame's view */ },
   "shows": ["p-abc123"], "spots": null, "required": { "eligible": ["pierre", "elodie", "sol", "anna"], "allReady": true } },
   "campaign": { /* CampaignView, see shared/campaign/types.js */ }, "contentVersion": "3f9a1c0b2d4e",

@@ -14,7 +14,7 @@ const KEY_SPOT = /** @type {NonNullable<typeof OPENING['key-on-floor']['pickups'
 /** @param {any} view @param {string} machine */
 const stateIn = (view, machine) => view.campaign?.facts.machines[machine]?.state;
 
-test('wire: all four can leave the opening podium and rejoin, Pierre ends the block game, Elo reaches the key, Toni leaves on time, and the tram takes her home', { timeout: 20_000 }, async (t) => {
+test('wire: all four can leave the opening podium and rejoin, Pierre ends the block game, Elo reaches the key, Toni leaves on time, the tram takes her home, and she talks to Pierre there', { timeout: 30_000 }, async (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'itloe-story-'));
   const port = await new Promise((resolve) => {
     const listener = createServer();
@@ -149,4 +149,22 @@ test('wire: all four can leave the opening podium and rejoin, Pierre ends the bl
   await until(elo, (m) => m.t === 'view' && m.minigame === null && stateIn(m, 'tram') === 'riding', rideFrom);
   elo.send({ t: 'choose', option: 'flat' });
   await until(elo, (m) => m.t === 'view' && m.campaign?.at.node === 'young-adult/appart-elo-1', rideFrom);
+
+  // Pierre arrives (three in-game hours), becomes himself; standing next to him, Élodie's phone is told he is in
+  // reach, and talking to him reaches the story and the TV
+  const me = phones.get('pierre');
+  pierre.send({ t: 'gm', op: { op: 'count', counter: 'young-adult.clock.hours', set: 3 } });
+  await until(elo, (m) => m.t === 'view' && m.campaign?.party.players[me.id]?.statuses.length === 0, rideFrom, 6000);
+  const reachFrom = elo.messages.length;
+  elo.send({ t: 'pos', x: 5, y: 7.6, dir: 'right', moving: false });
+  me.send({ t: 'pos', x: 5.5, y: 7.6, dir: 'left', moving: false });
+  await until(elo, (m) => m.t === 'reach' && m.characters.includes('pierre'), reachFrom);
+  const talkFrom = screen.messages.length, eloTalkFrom = elo.messages.length;
+  elo.send({ t: 'interact', character: 'pierre' });
+  const said = await until(screen, (m) => m.t === 'interact' && m.character === 'pierre', talkFrom);
+  assert.deepEqual([said.playerId, said.target, said.speaker], [elo.id, me.id, 'target'], 'Pierre answers');
+  await until(elo, (m) => m.t === 'view' && stateIn(m, 'pierre-visit') === 'invites', eloTalkFrom);
+  // out of reach again: the phone is told
+  me.send({ t: 'pos', x: 12, y: 7.6, dir: 'left', moving: false });
+  await until(elo, (m) => m.t === 'reach' && m.characters.length === 0, reachFrom + 1);
 });

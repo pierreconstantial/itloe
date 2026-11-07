@@ -1,7 +1,21 @@
 # Proposal: interactions between characters
 
-Status: **Draft proposal**, to discuss with Konstantin. Not implemented; it defines no API until agreed.
+Status: **Agreed with Konstantin** (his review, 2026-11-07). Story actions are implemented (branch
+`character-interactions`: `PROTOCOL.md`, `docs/story-engine.md`); generic actions are next.
 Date: 2026-11-07. Author: Pierre (written with Claude).
+
+## Decisions after Konstantin's review
+
+- **Phones learn who is in reach from the server** (his option A): `{ "t": "reach", "characters": [...] }`, sent
+  only when the list changes. Phones never get the others' positions.
+- **Story actions have full priority:** whenever a story action is available to a player, their generic actions
+  are hidden. A story action replaces generic ones only for the players it's offered to.
+- **Generic actions act on everyone in reach** (Pierre): one tap makes a group hug, a group cheers.
+- **Smaller points, all taken:** a prop id can't be a character id (validation), a target who hasn't moved stands
+  at their spawn point, and character actions share `interact`'s 700 ms limit.
+- **No version for wisps:** a wisp moves and Shines, nothing else.
+
+The sections below are the original proposal; where they differ, the decisions above win.
 
 ## In one minute
 

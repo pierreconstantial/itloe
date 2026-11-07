@@ -561,9 +561,16 @@ export function createPartyRoom(bg, fg, avatars) {
   /** @param {any} m a server-validated action at an object: the prop says its line, or the furniture moves and the
    *  player says the feedback */
   function onInteract(m) {
-    if (typeof m.playerId !== 'string' || typeof m.object !== 'string') return;
+    if (typeof m.playerId !== 'string') return;
     const now = performance.now();
     const feedback = typeof m.feedback === 'string' ? m.feedback : '';
+    if (typeof m.character === 'string') {
+      // an action on another character: the line over the actor, or over the target when the target says it
+      const speaker = m.speaker === 'target' && typeof m.target === 'string' ? m.target : m.playerId;
+      if (feedback) avatars.say(speaker, feedback.replace(/\n/g, ' '), 2000);
+      return;
+    }
+    if (typeof m.object !== 'string') return;
     if (m.speaker === 'object') {
       if (feedback) propSpeech.set(m.object, { text: feedback, until: now + 4000 });
       return;

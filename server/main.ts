@@ -31,11 +31,11 @@ import type { CharacterId, TableauPlayers } from '../shared/campaign/types.js';
 import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
 import { isWisp } from '../shared/campaign/index.js';
 import { spawnAt } from '../shared/scene.js';
-import { interactionActor, nearbyObject, objectAction } from '../shared/interactions.js';
+import { feetInReach, interactionActor, nearbyObject, objectAction } from '../shared/interactions.js';
 import { freshGame, loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import {
   CONTENT, CONTENT_VERSION, IS_STORY, assertContent, reduceCampaign, isUnlocked, minigameStatus, gameMasterId, askedSoFar, zoneAt,
-  sceneAt, chooserHeld, pickupsAt, zonesAt, objectRules, nextTimer, within, leads,
+  sceneAt, chooserHeld, pickupsAt, zonesAt, objectRules, characterRules, characterTarget, nextTimer, within, leads,
   type Campaign, type CampaignAction, type GmOp,
 } from './campaign.ts';
 
@@ -82,6 +82,8 @@ const clock = makeClock((kind, deadline) => guarded(null, `the ${kind} deadline`
 
 /** The room's avatar positions: in memory only, outside the reducer (see pos.ts). */
 const positions = makePositions<WebSocket>();
+/** The characters each phone was last told are in its reach (`reach`, updateReach). In memory only. */
+const reachSent = new Map<string, string>();
 /** A server-timed presentation window after a Wisp gains playable status. */
 const incarnations = new Map<string, { at: number, kind: string }>();
 const isIncarnating = (id: string) => !!party().players[id] && !party().players[id].left
@@ -155,6 +157,7 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
     }
   },
   () => broadcast(),
+  () => updateReach(), // after the view: who is shown as themselves, where the party is, a minigame
 ];
 
 /** Runs an action through the campaign engine, with the server's clock (`now`: when a story machine state
@@ -399,6 +402,8 @@ function welcome(ws: WebSocket, playerId: string): void {
   send(ws, { t: 'welcome', playerId });
   const pos = positions.get(playerId);
   if (pos) send(ws, posMsg(playerId, pos));
+  reachSent.delete(playerId); // this socket hasn't been told yet
+  updateReach();
 }
 
 function sendErr(ws: WebSocket, code: ErrCode): void {
@@ -553,6 +558,35 @@ function resetZones(): void {
   for (const [id, pos] of positions.entries()) zones.set(id, zoneHere(pos));
 }
 
+/** The characters a player can act on now, closest first: shown as themselves, within reach of their feet, in the
+ *  room where the party is, while no minigame runs. A position nobody sent yet is the spawn point. */
+function reachOf(id: string): CharacterId[] {
+  const c = game.campaign;
+  if (c.at.activity || !isMember(id) || wisp(id) || isIncarnating(id)) return [];
+  const scene = sceneAt(CONTENT, c.facts, c.at.node);
+  const here = positions.get(id) ?? spawnAt(scene, party().players[id].character);
+  return party().order.flatMap((other) => {
+    const character = party().players[other].character;
+    if (!character || characterTarget(party(), character, id) !== other) return [];
+    const there = positions.get(other) ?? spawnAt(scene, character);
+    return feetInReach(here, there) ? [{ character, d: Math.hypot(here.x - there.x, here.y - there.y) }] : [];
+  }).sort((a, b) => a.d - b.d).map((r) => r.character);
+}
+
+/** Tells each online phone the characters in its reach, only when that list changed (Konstantin's review, option A:
+ *  phones never get the others' positions). */
+function updateReach(): void {
+  for (const id of party().order) {
+    const ws = sockets.get(id);
+    if (!ws || who.get(ws) !== id) continue;
+    const characters = reachOf(id);
+    const key = characters.join(',');
+    if (reachSent.get(id) === key) continue;
+    reachSent.set(id, key);
+    send(ws, { t: 'reach', characters });
+  }
+}
+
 function handleMessage(ws: WebSocket, m: any): void {
   if (m.t === 'hello') {
     const rejoin = m.role === 'player' && isMember(m.playerId);
@@ -599,6 +633,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     positions.set(id, pos);
     relayPos(id, pos);
     walk(id, pos);
+    updateReach();
     return;
   }
 
@@ -646,6 +681,19 @@ function handleMessage(ws: WebSocket, m: any): void {
     if (wisp(id) || isIncarnating(id)) return;
     const c = game.campaign;
     const actor = interactionActor(member, c.facts);
+    if (typeof m.character === 'string') {
+      // an action on another character, within reach (reachOf)
+      const now = Date.now();
+      if (now - (interactionAt.get(ws) ?? 0) < 700) return;
+      if (!reachOf(id).includes(m.character)) return;
+      const action = objectAction(m.character, actor, characterRules(c.facts, CONTENT));
+      if (!action) return;
+      interactionAt.set(ws, now);
+      sendAll({ t: 'interact', playerId: id, character: m.character, target: characterTarget(party(), m.character, id),
+        action: action.key, feedback: action.feedback, ...(action.speaker ? { speaker: action.speaker } : {}), at: now });
+      if (action.event) apply({ t: 'use', id, character: m.character, action: action.key });
+      return;
+    }
     // an item lying on the floor (a story machine's pickup), within reach: the chooser picks it up
     const pickup = pickupsAt(c.facts, CONTENT, c.at.node).find((p) => p.item === m.object);
     if (pickup) {

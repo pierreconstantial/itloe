@@ -156,11 +156,37 @@ export const within = (spot, pos) => Number.isFinite(pos.x) && Number.isFinite(p
 
 /** @type {WeakMap<Facts, { content: Content, rules: Record<string, ObjectRule> }>} */
 const rulesCache = new WeakMap();
+/** @type {WeakMap<Facts, { content: Content, rules: Record<string, ObjectRule> }>} */
+const characterRulesCache = new WeakMap();
+
+/**
+ * A machine state's action list on one target (a prop or a character), as an interaction rule: per acting
+ * character, its first action that character may use and whose condition holds. Machine actions carry
+ * `event: true`: using one is a campaign action (`use`).
+ * @param {import('./types.js').MachineAction[]} actions @param {Facts} facts @param {Content} content @returns {ObjectRule}
+ */
+function machineRule(actions, facts, content) {
+  const open = actions.filter((a) => !a.if || holds(a.if, facts));
+  /** @param {import('./types.js').MachineAction} a @returns {ObjectAction} */
+  const asAction = (a) => ({ key: a.key, text: a.text, feedback: a.say ?? '', event: true, ...(a.speaker ? { speaker: a.speaker } : {}) });
+  /** @param {string} character */
+  const forCharacter = (character) => {
+    const a = open.find((x) => {
+      const by = x.by ?? 'chooser';
+      return by === 'anyone' || by === character || (by === 'chooser' && character === content.chooser);
+    });
+    return a ? asAction(a) : null;
+  };
+  const anyone = open.find((a) => a.by === 'anyone');
+  return {
+    default: anyone ? asAction(anyone) : null,
+    byCharacter: Object.fromEntries(Object.keys(CHARACTERS).map((ch) => [ch, forCharacter(ch)])),
+  };
+}
 
 /**
  * Every object's interaction rule now: the shared furniture's (OBJECT_ACTIONS), with the current states'
- * objects over it. A state's action list becomes, per character, its first action that character may use and
- * whose condition holds. Machine actions carry `event: true`: using one is a campaign action (`use`).
+ * objects over it (machineRule).
  * @param {Facts} facts @param {Content} content @returns {Record<string, ObjectRule>}
  */
 export function objectRules(facts, content) {
@@ -169,25 +195,25 @@ export function objectRules(facts, content) {
   /** @type {Record<string, ObjectRule>} */
   const rules = { ...OBJECT_ACTIONS };
   for (const c of currentStates(facts, content)) {
-    for (const [prop, spec] of Object.entries(c.state.objects ?? {})) {
-      const open = spec.actions.filter((a) => !a.if || holds(a.if, facts));
-      /** @param {import('./types.js').MachineAction} a @returns {ObjectAction} */
-      const asAction = (a) => ({ key: a.key, text: a.text, feedback: a.say ?? '', event: true, ...(a.speaker ? { speaker: a.speaker } : {}) });
-      /** @param {string} character */
-      const forCharacter = (character) => {
-        const a = open.find((x) => {
-          const by = x.by ?? 'chooser';
-          return by === 'anyone' || by === character || (by === 'chooser' && character === content.chooser);
-        });
-        return a ? asAction(a) : null;
-      };
-      const anyone = open.find((a) => a.by === 'anyone');
-      rules[prop] = {
-        default: anyone ? asAction(anyone) : null,
-        byCharacter: Object.fromEntries(Object.keys(CHARACTERS).map((ch) => [ch, forCharacter(ch)])),
-      };
-    }
+    for (const [prop, spec] of Object.entries(c.state.objects ?? {})) rules[prop] = machineRule(spec.actions, facts, content);
   }
   rulesCache.set(facts, { content, rules });
+  return rules;
+}
+
+/**
+ * The story's actions on characters now, by target character: the current states' `characters` (machineRule).
+ * A character no current state names has none.
+ * @param {Facts} facts @param {Content} content @returns {Record<string, ObjectRule>}
+ */
+export function characterRules(facts, content) {
+  const hit = characterRulesCache.get(facts);
+  if (hit && hit.content === content) return hit.rules;
+  /** @type {Record<string, ObjectRule>} */
+  const rules = {};
+  for (const c of currentStates(facts, content)) {
+    for (const [character, spec] of Object.entries(c.state.characters ?? {})) rules[character] = machineRule(spec.actions, facts, content);
+  }
+  characterRulesCache.set(facts, { content, rules });
   return rules;
 }

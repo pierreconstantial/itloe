@@ -38,13 +38,13 @@ import { emptyFacts, holds, record, settle, safeInventory, addItem, holding, rec
 import { validateContent, zoneAt, roomAt, sceneAt, childrenOf } from './content.js';
 import {
   initialMachines, safeMachines, eventSteps, conditionStep, dueSteps, nextTimer, hintAt, chooserHeld, pickupsAt,
-  zonesAt, npcsAt, hiddenProps, offerAt, objectRules, within, speechAt, choiceIn,
+  zonesAt, npcsAt, hiddenProps, offerAt, objectRules, characterRules, within, speechAt, choiceIn,
 } from './machines.js';
 import { objectAction } from '../interactions.js';
 import { SAMPLE_CONTENT } from './sample.js';
 
 export { holds, record, settle, emptyFacts, holding, recipients, COUNTER, validateContent, zoneAt, roomAt, sceneAt, childrenOf, SAMPLE_CONTENT };
-export { hintAt, chooserHeld, pickupsAt, zonesAt, npcsAt, hiddenProps, offerAt, objectRules, nextTimer, within, speechAt };
+export { hintAt, chooserHeld, pickupsAt, zonesAt, npcsAt, hiddenProps, offerAt, objectRules, characterRules, nextTimer, within, speechAt };
 
 /** @typedef {import('./types.js').Campaign} Campaign */
 /** @typedef {import('./types.js').CampaignAction} CampaignAction */
@@ -89,6 +89,18 @@ const actingMember = (c, id) => {
 };
 /** The chooser, acting as their character (not a wisp). @param {Campaign} c @param {string} id @param {Content} content */
 const actingChooser = (c, id, content) => actingMember(c, id)?.character === content.chooser;
+
+/**
+ * The party member another player can act on as `character`: in the party, shown as themselves (not a wisp, not
+ * mid-incarnation), and not the actor. Null otherwise.
+ * @param {import('./types.js').Party} party @param {string} character @param {string} actorId @returns {string | null}
+ */
+export function characterTarget(party, character, actorId) {
+  const id = party.order.find((p) => !party.players[p].left && party.players[p].character === character);
+  if (!id || id === actorId) return null;
+  const statuses = party.players[id].statuses ?? [];
+  return statuses.includes('wisp') || statuses.includes('incarnating') ? null : id;
+}
 
 /** Adds one news entry with the next seq. @param {Campaign} c
  * @param {{ t: 'unlocked', node: string } | { t: 'item', item: string, to: CharacterId[] } | { t: 'cutscene', id: string }} entry
@@ -650,7 +662,15 @@ function step(c, a, content, now) {
     case 'use': {
       // a story machine's object action, offered to this member now (the server checked they stand next to it)
       const actor = actingMember(c, a.id);
-      if (!actor || c.at.activity || typeof a.object !== 'string' || typeof a.action !== 'string') return c;
+      if (!actor || c.at.activity || typeof a.action !== 'string') return c;
+      if ('character' in a) {
+        // an action on a character: the server checked they stand within reach of each other
+        if (typeof a.character !== 'string' || !characterTarget(c.party, a.character, a.id)) return c;
+        const action = objectAction(a.character, actor, characterRules(c.facts, content));
+        if (!action?.event || action.key !== a.action) return c;
+        return fire(c, `${a.action}:${a.character}`, content, now);
+      }
+      if (typeof a.object !== 'string') return c;
       const action = objectAction(a.object, actor, objectRules(c.facts, content));
       if (!action?.event || action.key !== a.action) return c;
       return fire(c, `${a.action}:${a.object}`, content, now);

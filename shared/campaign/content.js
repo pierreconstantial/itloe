@@ -214,7 +214,7 @@ function allConditions(content) {
   for (const [id, m] of Object.entries(content.machines ?? {})) {
     for (const [sid, st] of Object.entries(m?.states ?? {})) {
       for (const w of st.when ?? []) out.push([`machine "${id}", state "${sid}", when`, w.if]);
-      for (const o of Object.values(st.objects ?? {})) for (const a of o.actions ?? []) if (a.if) out.push([`machine "${id}", state "${sid}", action "${a.key}"`, a.if]);
+      for (const o of [...Object.values(st.objects ?? {}), ...Object.values(st.characters ?? {})]) for (const a of o.actions ?? []) if (a.if) out.push([`machine "${id}", state "${sid}", action "${a.key}"`, a.if]);
       for (const o of st.choice?.options ?? []) if (o?.if) out.push([`machine "${id}", state "${sid}", choice "${o.key}"`, o.if]);
     }
   }
@@ -240,7 +240,10 @@ function machineErrors(content, knownItem) {
   const allEffects = states.flatMap((st) => [...(st.enter ?? []), ...(st.after?.do ?? []), ...(st.when ?? []).flatMap((w) => w.do ?? []),
     ...Object.values(st.on ?? {}).flatMap((t) => (t && typeof t === 'object' ? t.do ?? [] : []))]);
   const cutscenes = new Set(allEffects.flatMap((e) => (e && typeof e === 'object' && 'cutscene' in e ? [e.cutscene] : [])));
-  const actions = new Set(states.flatMap((st) => Object.entries(st.objects ?? {}).flatMap(([prop, o]) => (o?.actions ?? []).map((a) => `${a.key}:${prop}`))));
+  const actions = new Set(states.flatMap((st) => [...Object.entries(st.objects ?? {}), ...Object.entries(st.characters ?? {})]
+    .flatMap(([target, o]) => (o?.actions ?? []).map((a) => `${a.key}:${target}`))));
+  // `<key>:<target>` names a prop or a character: one id can't be both
+  for (const prop of props) if (isCharacterId(prop)) errors.push(`prop "${prop}" has a character's id`);
   const choices = new Set(states.flatMap((st) => (st.choice?.options ?? []).map((o) => o?.key)));
   /** Why an event key can never happen, or null. @param {string} event @returns {string | null} */
   const eventError = (event) => {
@@ -251,7 +254,7 @@ function machineErrors(content, knownItem) {
     if (kind === 'pickup') return pickupItems.has(target) ? null : `no pickup of "${target}"`;
     if (kind === 'cutscene') return cutscenes.has(target) ? null : `no cutscene "${target}" is ever played`;
     if (kind === 'choose') return choices.has(target) ? null : `no choice offers "${target}"`;
-    return actions.has(event) ? null : `no object action "${kind}" on "${target}"`;
+    return actions.has(event) ? null : `no action "${kind}" on "${target}"`;
   };
   for (const [id, m] of Object.entries(content.machines ?? {})) {
     const at = `machine "${id}"`;
@@ -313,11 +316,15 @@ function machineErrors(content, knownItem) {
       for (const prop of [...Object.keys(s.objects ?? {}), ...Object.keys(s.npcs ?? {}), ...(s.hide ?? [])]) {
         if (!props.has(prop)) errors.push(`${where}: unknown prop "${prop}"`);
       }
-      for (const [prop, o] of Object.entries(s.objects ?? {})) {
-        for (const a of o.actions ?? []) {
-          if (typeof a.key !== 'string' || typeof a.text !== 'string') errors.push(`${where}: object "${prop}" has an action without key or text`);
-          if (a.if !== undefined && !isCondition(a.if)) errors.push(`${where}: object "${prop}" action "${a.key}": invalid if`);
-          if (a.by !== undefined && a.by !== 'chooser' && a.by !== 'anyone' && !isCharacterId(a.by)) errors.push(`${where}: object "${prop}" action "${a.key}": invalid by`);
+      for (const ch of Object.keys(s.characters ?? {})) if (!isCharacterId(ch)) errors.push(`${where}: actions on "${ch}", not a character`);
+      for (const [kind, targets, speaker] of /** @type {const} */ ([['object', s.objects, 'object'], ['character', s.characters, 'target']])) {
+        for (const [target, o] of Object.entries(targets ?? {})) {
+          for (const a of o.actions ?? []) {
+            if (typeof a.key !== 'string' || typeof a.text !== 'string') errors.push(`${where}: ${kind} "${target}" has an action without key or text`);
+            if (a.if !== undefined && !isCondition(a.if)) errors.push(`${where}: ${kind} "${target}" action "${a.key}": invalid if`);
+            if (a.by !== undefined && a.by !== 'chooser' && a.by !== 'anyone' && !isCharacterId(a.by)) errors.push(`${where}: ${kind} "${target}" action "${a.key}": invalid by`);
+            if (a.speaker !== undefined && a.speaker !== speaker) errors.push(`${where}: ${kind} "${target}" action "${a.key}": speaker is "${speaker}" or none`);
+          }
         }
       }
       if (s.offer && !(nodes[s.offer.node] && typeof s.offer.text === 'string' && typeof s.offer.accept === 'string')) errors.push(`${where}: invalid offer`);

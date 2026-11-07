@@ -82,7 +82,9 @@ const APPART_PIERRE_ROOM = room('young-adult/appart-pierre', { x: 0.5, y: 5.45, 
 
 const FOOSBALL_OFFER = { node: FOOSBALL, text: 'Pierre: “Élodie! A game of table football?”', accept: '⚽ Yes' };
 const PLAY_FOOSBALL = { 'shelter-foosball': { actions: [{ key: 'play', text: '⚽ Play table football' }] } };
-const PIERRE_LINE ='I brought beers and cigarettes! But first, let’s play backgammon.';
+/** Talking to Pierre in the flat: he offers backgammon again. */
+const TALK_TO_PIERRE = { pierre: { actions: [{ key: 'talk', text: '💬 Talk to Pierre', say: 'Let’s play backgammon!', speaker: /** @type {const} */ ('target'), by: /** @type {const} */ ('anyone') }] } };
+const PIERRE_LINE = 'I brought beers and cigarettes! But first, let’s play backgammon.';
 const BACKGAMMON_OFFER = { node: BACKGAMMON, text: 'Pierre: “Let’s play backgammon!”', accept: '🎲 Yes' };
 
 /** Marokkanergasse's people: talking to any of them offers Pyramide. */
@@ -251,7 +253,7 @@ export const YOUNG_ADULT = {
       },
     },
     // Pierre arrives after three in-game hours, whatever Élodie did: from wisp to avatar, with his line, and he offers
-    // backgammon (Yes or Dismiss; dismissed, he asks again a little later). Yes opens its lobby. Once a game has
+    // backgammon (Yes or Dismiss; talking to him offers it again). Yes opens its lobby. Once a game has
     // finished there, he is a wisp again, back in the flat, and the beers and the cigarettes lie on the floor.
     'pierre-visit': {
       initial: 'not-yet',
@@ -263,16 +265,15 @@ export const YOUNG_ADULT = {
           speech: { pierre: PIERRE_LINE },
           hints: { [FLAT]: `Pierre: “${PIERRE_LINE}”` },
           offer: BACKGAMMON_OFFER,
-          after: { ms: 30_000, to: 'later' },
-          on: { [`entered:${BACKGAMMON}`]: 'backgammon' },
+          characters: TALK_TO_PIERRE,
+          on: { [`entered:${BACKGAMMON}`]: 'backgammon', 'talk:pierre': 'invites' },
         },
-        // the offer is gone for a moment, so a dismissed one shows again
-        later: { hints: { [FLAT]: `Pierre: “${PIERRE_LINE}”` }, after: { ms: 10_000, to: 'invites' } },
+        // talking to Pierre offers the game again (a dismissed offer shows again)
         invites: {
           hints: { [FLAT]: `Pierre: “${PIERRE_LINE}”` },
           offer: BACKGAMMON_OFFER,
-          after: { ms: 30_000, to: 'later' },
-          on: { [`entered:${BACKGAMMON}`]: 'backgammon' },
+          characters: TALK_TO_PIERRE,
+          on: { [`entered:${BACKGAMMON}`]: 'backgammon', 'talk:pierre': 'invites' },
         },
         backgammon: {
           hints: { [BACKGAMMON]: 'Backgammon with Pierre.' },
@@ -349,7 +350,7 @@ export const YOUNG_ADULT = {
     },
     // The Shelter: Pierre is there again (his wisp becomes his avatar) and offers table football (Yes or Dismiss;
     // the table offers it again). Yes opens its lobby. After a finished match, back in the bar, Élodie can kiss
-    // him: Marokkanergasse opens as a tram destination, her flat closes.
+    // him (her action on Pierre): Marokkanergasse opens as a tram destination, her flat closes.
     shelter: {
       initial: 'not-yet',
       states: {
@@ -374,19 +375,13 @@ export const YOUNG_ADULT = {
           // the game master took the party back to the bar before a match finished: the table offers it again
           on: { [`entered:${SHELTER}`]: 'offered' },
         },
-        // back in the bar; Yes or Dismiss, and dismissed, the question comes back a little later
+        // back in the bar: Élodie can kiss Pierre
         'after-match': {
           enter: [{ goto: SHELTER }],
           hints: { [SHELTER]: 'What a match!' },
-          choice: { at: SHELTER, text: 'What a match! Kiss Pierre?', options: [{ key: 'kiss', text: '💋 Yes' }, { key: 'kiss-later', text: 'Dismiss' }] },
-          on: { 'choose:kiss': { to: 'kissed', do: [{ flag: KISSED }] }, 'choose:kiss-later': 'kiss-later' },
-        },
-        'kiss-later': { hints: { [SHELTER]: 'What a match!' }, after: { ms: 30_000, to: 'kiss-again' } },
-        // the question again, without going back to the bar (`after-match` moves the party)
-        'kiss-again': {
-          hints: { [SHELTER]: 'What a match!' },
-          choice: { at: SHELTER, text: 'What a match! Kiss Pierre?', options: [{ key: 'kiss', text: '💋 Yes' }, { key: 'kiss-later', text: 'Dismiss' }] },
-          on: { 'choose:kiss': { to: 'kissed', do: [{ flag: KISSED }] }, 'choose:kiss-later': 'kiss-later' },
+          // Élodie's action on Pierre, standing next to him
+          characters: { pierre: { actions: [{ key: 'kiss', text: '💋 Kiss Pierre', by: 'elodie' }] } },
+          on: { 'kiss:pierre': { to: 'kissed', do: [{ flag: KISSED }] } },
         },
         kissed: {
           speech: { pierre: '❤️' },

@@ -9,7 +9,8 @@ import { syncClock, serverNow } from '../commun/clock.js';
 import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.js';
 import { WORLD, spawnPoint } from '../../shared/world.js';
 import {
-  gameMasterId, isWisp, leads, roomAt, sceneAt, hintAt, chooserHeld, pickupsAt, offerAt, objectRules, within, choiceAt,
+  gameMasterId, isWisp, leads, roomAt, sceneAt, hintAt, chooserHeld, pickupsAt, offerAt, objectRules, characterRules, within,
+  choiceAt,
 } from '../../shared/campaign/index.js';
 import { room as sceneRoom } from '../../shared/scene.js';
 import { interactionActor, nearbyObject, nearbyProp, objectAction } from '../../shared/interactions.js';
@@ -88,6 +89,8 @@ let pendingPick = null;
 let myPos = null;
 /** The story offer (offerAt) this phone dismissed; it shows again once it is gone and comes back. @type {object | null} */
 let dismissedOffer = null;
+/** The characters in this phone's reach, closest first, as the server last said (`reach`). @type {string[]} */
+let reach = [];
 let incarnationAt = 0;
 let incarnationTimer = /** @type {ReturnType<typeof setInterval> | null} */ (null);
 
@@ -169,6 +172,7 @@ function receive(raw) {
   if (m.t === 'view' || m.t === 'err') heardBack(); // what answers a tap (oneTap)
   if (m.t === 'welcome' && typeof m.playerId === 'string') {
     if (m.playerId !== playerId) myPos = null; // a different player: its own echo or spawn
+    reach = []; // the server tells this socket again
     playerId = m.playerId;
     roomPrompt = null;
     pendingPick = null;
@@ -182,6 +186,9 @@ function receive(raw) {
     // the one pos a phone receives: our own last position, echoed right after welcome
     const echoed = m.playerId === playerId ? posFromEcho(m) : null;
     if (echoed) { myPos = echoed; joystick.moveTo(echoed); render(); }
+  } else if (m.t === 'reach' && Array.isArray(m.characters)) {
+    reach = m.characters.filter((/** @type {unknown} */ c) => typeof c === 'string');
+    updateInteraction();
   } else if (m.t === 'unsaved') {
     running?.screen.message(m); // the running minigame's own; none running: ignored
   } else if (m.t === 'say' || m.t === 'chatHistory') {
@@ -513,8 +520,9 @@ function wispNearObject(pos) {
   return !!nearbyProp(sceneAt(content(), campaign.facts, campaign.at.node), pos) || !!pickupNear(pos);
 }
 
-/** What the interact button does at `pos`: pick up an item (the chooser), or use the nearest object.
- * @param {{x: number, y: number}} pos @returns {{ object: string, text: string } | null} */
+/** What the interact button does at `pos`: pick up an item (the chooser), else the story's action on the nearest
+ * object, else its action on the closest character in reach (`reach`), else the nearest furniture's.
+ * @param {{x: number, y: number}} pos @returns {{ object?: string, character?: string, text: string } | null} */
 function actionAt(pos) {
   const mem = member();
   if (!mem || !campaign) return null;
@@ -524,6 +532,14 @@ function actionAt(pos) {
   const rules = objectRules(campaign.facts, content());
   const object = nearbyObject(roomHere(), pos, actor, rules);
   const action = object ? objectAction(object.id, actor, rules) : null;
+  if (object && action?.event) return { object: object.id, text: action.text };
+  if (!minigame) {
+    const onCharacters = characterRules(campaign.facts, content());
+    for (const character of reach) {
+      const story = objectAction(character, actor, onCharacters);
+      if (story) return { character, text: story.text };
+    }
+  }
   return object && action ? { object: object.id, text: action.text } : null;
 }
 
@@ -562,6 +578,7 @@ function updateInteraction() {
   button.hidden = false;
   $('object-actions').hidden = false;
   button.dataset.object = action?.object ?? '';
+  button.dataset.character = action?.character ?? '';
   button.disabled = !action || !conn.isOnline();
   button.textContent = action?.text ?? 'Walk to an object';
 }
@@ -788,7 +805,8 @@ $('btn-interact').addEventListener('click', () => {
   joystick.cancel(); // flush the exact position before the interaction on the same socket
   const character = myCharacter();
   const action = character ? actionAt(currentPos(character)) : null;
-  if (action) send({ t: 'interact', object: action.object });
+  if (action?.character) send({ t: 'interact', character: action.character });
+  else if (action) send({ t: 'interact', object: action.object });
   updateInteraction();
 });
 $('btn-play-here').addEventListener('click', () => {

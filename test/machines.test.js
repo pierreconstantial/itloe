@@ -203,11 +203,31 @@ test('content validation names broken machines', () => {
     enter: [{ explode: true }, { item: 'fish', to: 'winner' }, { count: 'clock.hours', by: 'one' }], after: { ms: 10, to: 'a' },
     when: [{ if: { machine: 'ghost', in: ['x'] }, to: 'a' }], speech: { nobody: 'Hi' },
     zones: [{ id: 'z', node: 'hub' }], b: 1,
-  } } } } };
+    characters: { ghost: { actions: [{ key: 'hug', text: 'Hug' }] }, pierre: { actions: [{ key: 'kiss', text: 'Kiss', speaker: 'object' }] } },
+  } } } }, rooms: { ...CONTENT.rooms, odd: { ...ROOM, id: 'odd', props: [prop('sol', { x: 1, y: 6, w: 1, h: 1 })] } } };
   const errors = validateContent(broken).join('\n');
   for (const part of ['unknown state "nowhere"', 'must leave the state', 'unknown prop "ghost-prop"', 'invalid effect',
     '"winner" is for node rewards', 'count needs a counter name', 'speech by "nobody"',
-    'no object action "ridee" on "well"', 'event "n:ull" goes to unknown state', 'flag needs a name', 'zone "z" needs numbers', 'initial state "a" cannot have after', 'unknown machine "ghost"', 'unknown state "trough"']) {
+    'no action "ridee" on "well"', 'event "n:ull" goes to unknown state', 'flag needs a name', 'zone "z" needs numbers', 'initial state "a" cannot have after', 'unknown machine "ghost"', 'unknown state "trough"',
+    'actions on "ghost", not a character', 'speaker is "target" or none', 'prop "sol" has a character\'s id']) {
     assert.ok(errors.includes(part), `reports: ${part}\n${errors}`);
   }
+});
+
+test('an action on a character: fired by another member, never on themselves or on a wisp', () => {
+  /** @type {any} */
+  const content = { ...CONTENT, machines: { ...CONTENT.machines, greet: { initial: 'waiting', states: {
+    waiting: { characters: { pierre: { actions: [{ key: 'greet', text: 'Greet', by: 'anyone' }] } }, on: { 'greet:pierre': 'greeted' } },
+    greeted: {},
+  } } } };
+  assert.deepEqual(validateContent(content), []);
+  let c = newCampaign(content, 1);
+  c = reduceCampaign(c, { t: 'join', id: 'elo', character: 'elodie' }, content);
+  c = reduceCampaign(c, { t: 'join', id: 'gm', character: 'pierre' }, content);
+  const use = (/** @type {Campaign} */ x, /** @type {string} */ id) => reduceCampaign(x, { t: 'use', id, character: 'pierre', action: 'greet' }, content);
+  assert.equal(use(c, 'gm'), c, 'not on themselves');
+  const wisp = reduceCampaign(c, { t: 'gm', id: 'gm', op: { op: 'wisp', character: 'pierre', on: true } }, content);
+  assert.ok(wisp.party.players.gm.statuses.includes('wisp'));
+  assert.equal(use(wisp, 'elo'), wisp, 'not on a wisp');
+  assert.equal(stateOf(use(c, 'elo'), 'greet'), 'greeted');
 });

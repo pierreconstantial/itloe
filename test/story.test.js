@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   newCampaign, loadCampaign, reduceCampaign, validateContent, holding, gameMasterId, roomAt, sceneAt, objectRules, offerAt,
-  nextTimer, npcsAt, pickupsAt, choiceAt, zonesAt,
+  nextTimer, npcsAt, pickupsAt, choiceAt, zonesAt, characterRules,
 } from '../shared/campaign/index.js';
 import { objectAction, nearbyObject } from '../shared/interactions.js';
 import { isWalkable } from '../shared/scene.js';
@@ -322,15 +322,14 @@ test('Young Adult to its end: backgammon with Pierre, the kiss at the Shelter, P
   let c = act(afterOpening(), { t: 'gm', id: 'pierre', op: { op: 'goto', node: FLAT } });
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'count', counter: 'young-adult.clock.hours', set: 3 } });
   c = act(c, { t: 'incarnate', id: 'pierre' });
-  // Pierre's backgammon: Yes or Dismiss; dismissed, the offer comes back; Yes opens its lobby; a finished game
+  // Pierre's backgammon: Yes or Dismiss; talking to Pierre offers it again; Yes opens its lobby; a finished game
   // sends him back to a wisp, in the flat
   assert.equal(offerAt(c.facts, STORY_CONTENT, FLAT)?.node, `${FLAT}/backgammon`);
-  const since = c.facts.machines['pierre-visit'].since;
-  c = act(c, { t: 'tick', now: since + 30_000 });
-  assert.equal(offerAt(c.facts, STORY_CONTENT, FLAT), null, 'gone for a moment');
-  c = act(c, { t: 'tick', now: since + 40_000 });
-  assert.equal(offerAt(c.facts, STORY_CONTENT, FLAT)?.node, `${FLAT}/backgammon`, 'and asked again');
-  c = act(c, { t: 'enter', id: 'elodie', node: `${FLAT}/backgammon`, now: since + 41_000 });
+  assert.equal(objectAction('pierre', c.party.players.elodie, characterRules(c.facts, STORY_CONTENT))?.key, 'talk');
+  c = act(c, { t: 'use', id: 'elodie', character: 'pierre', action: 'talk' });
+  assert.equal(stateOf(c, 'pierre-visit'), 'invites');
+  assert.equal(offerAt(c.facts, STORY_CONTENT, FLAT)?.node, `${FLAT}/backgammon`, 'offered again');
+  c = act(c, { t: 'enter', id: 'elodie', node: `${FLAT}/backgammon` });
   assert.equal(c.at.node, `${FLAT}/backgammon`);
   assert.ok(c.at.activity, 'Yes opens the backgammon lobby');
   c = act(act(c, { t: 'endMinigame', id: 'pierre' }), finished(`${FLAT}/backgammon`));
@@ -338,7 +337,7 @@ test('Young Adult to its end: backgammon with Pierre, the kiss at the Shelter, P
   assert.deepEqual(pickupsAt(c.facts, STORY_CONTENT, FLAT).map((p) => p.item), ['beers', 'cigarette-pack']);
 
   // the Shelter: Pierre is there and offers table football; the table offers it again; Yes opens its lobby; after
-  // a finished match, back in the bar, the kiss (Yes or Dismiss)
+  // a finished match, back in the bar, Élodie can kiss Pierre (her action on him, only while he is himself)
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.shelter.open', on: true } });
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'goto', node: SHELTER } });
   assert.equal(stateOf(c, 'shelter'), 'pierre-here');
@@ -355,11 +354,11 @@ test('Young Adult to its end: backgammon with Pierre, the kiss at the Shelter, P
   assert.ok(c.at.kind === 'foosball' && c.at.activity, 'Yes opens the table football lobby');
   c = act(act(c, { t: 'endMinigame', id: 'pierre', now: 50_000 }), { ...finished(`${SHELTER}/foosball`), now: 50_000 });
   assert.deepEqual([stateOf(c, 'shelter'), c.at.node], ['after-match', SHELTER], 'back in the bar');
-  assert.deepEqual(choiceAt(c, STORY_CONTENT)?.options.map((o) => o.key), ['kiss', 'kiss-later'], 'Yes or Dismiss');
-  c = act(c, { t: 'choose', id: 'elodie', option: 'kiss-later', now: 51_000 });
-  assert.equal(choiceAt(c, STORY_CONTENT), null);
-  c = act(c, { t: 'tick', now: 81_000 });
-  c = act(c, { t: 'choose', id: 'elodie', option: 'kiss', now: 82_000 });
+  assert.equal(objectAction('pierre', c.party.players.elodie, characterRules(c.facts, STORY_CONTENT))?.key, 'kiss');
+  const asWisp = act(c, { t: 'gm', id: 'pierre', op: { op: 'wisp', character: 'pierre', on: true } });
+  assert.ok(asWisp.party.players.pierre.statuses.includes('wisp'));
+  assert.equal(act(asWisp, { t: 'use', id: 'elodie', character: 'pierre', action: 'kiss' }), asWisp, 'not Pierre’s wisp');
+  c = act(c, { t: 'use', id: 'elodie', character: 'pierre', action: 'kiss' });
   assert.ok(c.facts.flags.includes('young-adult.appart-pierre.open') && c.facts.unlocked.includes(MAROK), 'Marokkanergasse opens');
 
   // Marokkanergasse: Johanna, Nico and Mathieu stand there as NPCs, Nico's player still a wisp; any of the three
