@@ -1,7 +1,7 @@
 // Inventory end-to-end (Contract F, server side) over real sockets and a server this script kill -9s:
-// rewards land in the right inventory (chooser / winner incl. a tie / all non-left members), survive
-// kill -9 and a reclaim from another device, the game master's gm give/take work and are refused for an unknown
-// item or character, for taking more than held, and for a non-game-master. Uses the sample content (old key →
+// rewards land in the right inventory (chooser / winner / all non-left members), survive
+// kill -9 and a reclaim from another device, the game master's gm give/take work and taking more than held is
+// refused (the other refusals: test/inventory.test.js). Uses the sample content (old key →
 // chooser, ticket → quiz winner, photo → all).
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR, a fixed quiz bank). Usage:
 //   PORT=3197 node scripts/e2e-inventory.mts      (never 3131: that's the live server)
@@ -107,9 +107,6 @@ try {
   check(true, 'game master gives a ticket to Sol');
   check(await errOf(P, { t: 'gm', op: { op: 'take', item: 'ticket', from: 'sol', count: 2 } }) === 'refused', 'take more than held → refused (no partial take)');
   check(inv(T).sol?.ticket === 1, '…and nothing was taken');
-  check(await errOf(P, { t: 'gm', op: { op: 'give', item: 'unicorn', to: 'sol' } }) === 'refused', 'unknown item → refused (items must exist)');
-  check(await errOf(P, { t: 'gm', op: { op: 'give', item: 'ticket', to: 'zorro' } }) === 'refused', 'unknown character → refused');
-  check(await errOf(S, { t: 'gm', op: { op: 'give', item: 'ticket', to: 'sol' } }) === 'not-gm', 'give from a non-game-master → not-gm');
   check(await errOf(P, { t: 'gm', op: { op: 'unlock', node: 'hub' } }) === null, 'other no-op gm ops stay silent');
   i = T.mark(); gm(P, { op: 'take', item: 'ticket', from: 'sol' });
   await until(T, (x) => !x.facts.inventory.sol?.ticket, i);
@@ -137,25 +134,6 @@ try {
   k = await until(T, (x) => x.facts.done.includes(QUIZ));
   check(k.facts.inventory.pierre?.ticket === 1 && !k.facts.inventory.elodie?.ticket && !k.facts.inventory.sol?.ticket, 'quiz won by Pierre → the ticket to the winner only');
   await restart('after the quiz reward');
-
-  // ---------- winner tie (a fresh evening: rewards apply once per node) ----------
-  for (const c of [P, E, S, T]) c.ws.close();
-  await kill9(); await boot(true);
-  ({ c: P, id: idP } = await player('P', 'pierre'));
-  ({ c: E, id: idE } = await player('E', 'elodie'));
-  ({ c: S, id: idS } = await player('S', 'sol'));
-  T = await screen();
-  i = T.mark();
-  gm(P, { op: 'unlock', node: 'childhood' }); gm(P, { op: 'unlock', node: QUIZ }); gm(P, { op: 'goto', node: QUIZ });
-  await T.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz', i);
-  // P and E answer right at the same moment → same points → a tie at rank 1
-  await playQuiz(P, [{ c: P, right: true }, { c: E, right: true }, { c: S, right: false }], T);
-  k = await until(T, (x) => x.facts.done.includes(QUIZ));
-  const ranks = quizOf([...T.msgs].reverse().find((m) => m.t === 'view' && quizOf(m)));
-  const tie = ranks.players[idP].score === ranks.players[idE].score;
-  const tickets = [k.facts.inventory.pierre?.ticket ?? 0, k.facts.inventory.elodie?.ticket ?? 0, k.facts.inventory.sol?.ticket ?? 0];
-  check(tie ? tickets.join() === '1,1,0' : tickets.filter((n) => n === 1).length === 1,
-    tie ? `a tie at rank 1 → a ticket for EVERY co-winner (${tickets})` : `no exact tie this run (speed bonus differed by a ms): one winner, one ticket (${tickets})`);
 
   for (const c of [P, E, S, T]) c.ws.close();
 } catch (e) {

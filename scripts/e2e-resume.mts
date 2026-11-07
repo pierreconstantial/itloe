@@ -83,8 +83,6 @@ try {
   await playToDone(A, idA, B, rnd);
   await playToDone(B, idB, A, rnd);
   await A.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished');
-  i = A.mark(); A.send({ t: 'config', patch: { cleanBoardBonus: 450 } });
-  check((await A.waitFor((m) => m.t === 'err', i)).code === 'locked', 'settings on the podium → err locked (they are the lobby\'s)');
   const podium = A.lastView();
   check(results(A).kept === 1 && results(A).played === 0, 'round 1 on its podium: its result kept, nothing recorded yet');
 
@@ -93,8 +91,6 @@ try {
   check(core(A.lastView()) === core(podium) && A.lastView().phase === 'finished' && A.lastMinigame().status === 'podium', 'finished kill -9 → same podium');
   check(results(A).kept === 1 && results(A).played === 0 && A.lastSettings().grace === 2,
     'finished kill -9 → the result kept once, nothing recorded, the settings kept');
-  i = B.mark(); B.send({ t: 'lobby' });
-  check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-gm', 'after resume: non-game-master lobby → err not-gm');
   const back = lobbyOf(await backToLobby(A));
   check(back.players.map((p: any) => p.id).join() === `${idA},${idB}` && back.ready.join() === `${idA},${idB}` && A.lastGm() === idA
     && (await roomCode()) === room, 'after resume: game master lobby → the lobby, same players, both ready again, same room code');
@@ -185,8 +181,6 @@ try {
   await kill9(); await boot();
   A = await rejoin('A', idA); B = await rejoin('B', idB);
   check(A.lastMinigame()?.status === 'lobby' && results(A).kept === 2 && results(A).played === 0, 'kill -9 in the lobby after round 2 → the lobby, both results kept');
-  i = B.mark(); B.send({ t: 'endMinigame' });
-  check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-gm', 'non-game-master endMinigame → err not-gm');
   await endMinigame(A);
   check(!!roomOf(A.last()) && results(A).kept === 0 && results(A).played === 2, 'game master ends the minigame → the room, both rounds recorded (blocks.played = 2)');
   await kill9(); await boot();

@@ -25,7 +25,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Story opening in a browser test](#story-opening-in-a-browser-test) | No browser test plays the opening past its block game | P1 | Open | Low |
 | [Pyramide in the story](#pyramide-in-the-story) | Pyramide has no tableau in the story yet | P1 | Needs decision | Low |
 | [Apartment drawings cover avatars](#apartment-drawings-cover-avatars) | The cats, friends, keepsakes and key are always drawn over avatars | P2 | Open | Low |
-| [Trim the e2e suites and share their setup](#trim-the-e2e-suites-and-share-their-setup) | The suites re-check what unit tests pin and each copy their setup | P2 | Open | Medium |
 | [Backgammon's restart and hidden dice untested](#backgammons-restart-and-hidden-dice-untested) | No test resumes a backgammon round or checks its view hides the dice | P2 | Open | Low |
 | [Questions of a dropped round come back](#questions-of-a-dropped-round-come-back) | A round dropped by `back` or `goto` doesn't use up its questions or words | P2 | Open | Low |
 | [Join QR card covers minigame screens](#join-qr-card-covers-minigame-screens) | On the TV the card covers Pyramide, backgammon and the lobby's panel | P2 | Open | Trivial |
@@ -86,19 +85,6 @@ This is Pierre's content.
 In the apartment, the cats, friends, keepsakes and the key are drawn after the depth-sorted list of props and avatars (`public/screen/party-room.js`). An avatar walking in front of a cat still has the cat drawn over it.
 
 **Recommendation:** make them props of the apartment's scene (`apartment-room` in `shared/campaign/story/hub.js`), so they sort with the avatars like the party room's furniture.
-
-### Trim the e2e suites and share their setup
-
-The unit tests are proportionate; the e2e suites are not. A full run makes about 720 checks, many of them re-checking over sockets what a unit test already pins, and each suite carries its own copy of the setup:
-
-- Server start-up is copied in seven e2e suites and six unit tests that start a real server, because `startServer` in `scripts/e2e-lib.mts` always passes `--new` and suites that restart the server can't use it. `rejoin`, `player`/`tap`, `screen()` and `errOf` are copied too, `errOf` with four different timeouts.
-- There are three ways of driving Chrome (`openPage` in `e2e-lib.mts`, the TV suite's `Page`, the phone suite's own connection) and three wait behaviours: one throws, one returns false, one returns the last snapshot, and several phone helpers carry on silently after a timeout.
-- Re-checks: "a guest gets `not-gm`" about 20 times across six suites (it is one line in `server/plain-lobby.ts`, whose `message` has no unit test); the join QR about 40 times in four places, including a 13 s wait for the card to expire and two 2.2 s sleeps; three real 25 s silent-socket waits for one watchdog module that has a fake-clock unit test; a 70 s timed round in the phone suite that asserts nothing about the timer; the inventory suite's winner tie, which accepts either outcome; the two-tap confirm six times and pinned wording.
-- Flaky: the phone suite's back/forward-cache check failed on its own in 2 of 93 logged runs; it tests Chrome, not the game. `scripts/e2e.mts` uses fixed sleeps for "nothing arrived" checks where `settled()` exists.
-
-**Decision (Konstantin):**
-1. One restartable-server helper (a `fresh` option on `startServer`) and one socket client, shared by the e2e suites and the unit tests that start a real server. Then the TV and phone suites move onto `openPage`, with one wait that fails loudly.
-2. Each rule keeps its unit test plus one wiring check over sockets; the re-checks above go (a unit table over `plainLobbyServer.message` replaces the `not-gm` ones). Expected: about 650 fewer lines, and a full run from about 3 minutes to about 2.
 
 ### Backgammon's restart and hidden dice untested
 

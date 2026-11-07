@@ -249,9 +249,6 @@ try {
   const lobbyWalkers = `JSON.stringify(window.bloko.avatars().filter((a) => a.drawnAs === 'character').map((a) => [Math.round(a.x * 10) / 10, Math.round(a.y * 10) / 10]).sort((p, q) => p[0] - q[0]))`;
   check(await tv.waitFor(`${lobbyWalkers} === ${JSON.stringify(firstStarts)}`),
     `…walking the lobby as their characters, from its start positions (${await tv.ev(lobbyWalkers)})`);
-  check(/Settings/.test(await tv.ev(`document.querySelector('.minigame-lobby-panel')?.textContent ?? ''`))
-    && /starts when someone is ready/.test(await tv.ev(`document.querySelector('.minigame-lobby-status')?.textContent ?? ''`)),
-    '…the settings, and what Start waits for');
   i = A2.mark(); B.send({ t: 'ready', on: true });
   await A2.waitFor((m) => m.t === 'view' && m.minigame?.view.ready.length === 1, i);
   check(await tv.waitFor(`${tvLobbyPlayers} === ${JSON.stringify(JSON.stringify(['Pierre:not ready', 'Sol:✓ ready']))}`)
@@ -265,46 +262,17 @@ try {
   check(await tv.waitFor(`${tvState}?.phase === 'playing'`), 'TV shows the game');
 
   // ---------- "show the QR again": any player asks → side card on the TVs, never over a board ----------
-  let qrPhoneMark = B.mark();
+  // (the window's rules: test/join-qr.test.js; the server's: the presence suite)
+  const qrMark = B.mark();
   B.send({ t: 'showJoin', requestId: 1 }); // not the game master
-  const firstJoinAck = await B.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 1, qrPhoneMark);
-  check(firstJoinAck.accepted, 'the requesting player receives a show acknowledgement');
-  check(await tv.waitFor(cardOn), 'a player asks → the TV shows the join card mid-game');
+  const joinAck = await B.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 1, qrMark);
   const code = (await (await fetch(`${HTTP}/api/join`)).json()).code;
-  check(await tv.waitFor(`document.querySelector('.join-qr-code')?.textContent === ${JSON.stringify(code)} && !!document.querySelector('.join-qr-img')?.getAttribute('src')`),
-    `…with the QR and the room code (${code})`);
+  check(await tv.waitFor(`${cardOn} && document.querySelector('.join-qr-code')?.textContent === ${JSON.stringify(code)} && !!document.querySelector('.join-qr-img')?.getAttribute('src')`),
+    `a player asks → the TV shows the join card mid-game, with the QR and the room code (${code})`);
   check(await tv.waitFor(noOverlap('.board-wrap')), '…and the boards make room: no board under the card');
-  const j0 = await tv.ev('window.bloko.joinQr()');
-  check(j0.secondsLeft > 10 && j0.secondsLeft <= 15 && j0.fraction > 0.7, `…a 15 s window, bar full (${j0.secondsLeft} s, ${Math.round(j0.fraction * 100)} %)`);
   await tv.shot('join-qr-game');
-  await sleep(2200);                    // the server allows one request per socket per 2 s
-  qrPhoneMark = A2.mark(); A2.send({ t: 'showJoin', requestId: 2 });
-  const extendedJoinAck = await A2.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 2, qrPhoneMark);
-  check(extendedJoinAck.accepted, 'a second player gets the new window token');
-  check(await tv.waitFor(`window.bloko.joinQr().until > ${j0.until}`), 'a later request extends the window');
-  await tv.send('Page.reload');
-  check(await tv.waitFor(`!!window.bloko && ${cardOn}`, 8000), 'a TV reloading mid-window shows the card again (re-sent on hello)');
-  const left = (await tv.ev('window.bloko.joinQr()')).secondsLeft;
-  check(await tv.waitFor(`!${cardOn} && !document.body.classList.contains('join-qr-open')`, (left + 3) * 1000),
-    `…and hides by itself at until (${left} s later), boards back to full width`);
-  await tv.send('Page.reload');
-  await tv.waitFor(`!!window.bloko?.minigame()?.view.round`, 8000);
-  await sleep(800);
-  check(!(await tv.ev(cardOn)), 'a reload after until does not show it again');
-  // An old window cannot close a newer one; the current owner can close it early.
-  await sleep(2200);
-  qrPhoneMark = B.mark(); B.send({ t: 'showJoin', requestId: 3 });
-  const currentJoinAck = await B.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 3, qrPhoneMark);
-  check(await tv.waitFor(`${cardOn} && document.body.classList.contains('join-qr-open')`), 'asked again → open again');
-  qrPhoneMark = A2.mark(); A2.send({ t: 'hideJoin', token: extendedJoinAck.token, requestId: 4 });
-  const staleAck = await A2.waitFor((m) => m.t === 'joinQrAck' && m.requestId === 4, qrPhoneMark);
-  check(!staleAck.accepted && await tv.ev(cardOn), 'the previous player cannot close the newer window');
-  const tClose = Date.now();
-  B.send({ t: 'hideJoin', token: currentJoinAck.token, requestId: 5 });
-  check(await tv.waitFor(`!${cardOn} && !document.body.classList.contains('join-qr-open')`, 2000),
-    `the current requester closes it → hidden at once (${Date.now() - tClose} ms), boards back to full width`);
-  await sleep(600);
-  check(!(await tv.ev(cardOn)), '…and it stays closed');
+  B.send({ t: 'hideJoin', token: joinAck.token, requestId: 2 }); // closed again for what follows
+  await tv.waitFor(`!${cardOn}`, 2000);
   i = B.mark(); A2.send({ t: 'place', ...legalMoves(A2.lastView(), idA)[0] }); await B.waitFor((m) => m.t === 'view', i);
   await drop(B);
   check(await tv.waitFor(`document.querySelector('.panel[data-id="${idB}"]')?.classList.contains('is-offline')`, 3500),
@@ -359,9 +327,8 @@ try {
   await tv.shot('retired');
   i = A2.mark(); A2.send({ t: 'endGame' });
   await A2.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i);
-  check(await tv.waitFor(`${tvState}?.phase === 'finished' && document.querySelector('.podium-ending')?.textContent === 'Game ended by the game master'`),
-    'the game master ends the game → TV podium says "Game ended by the game master"');
-  check(await tv.ev(`document.querySelector('.podium-hint')?.textContent === "Back to the lobby on Pierre's phone"`), '…and "Back to the lobby on Pierre\'s phone"');
+  check(await tv.waitFor(`${tvState}?.phase === 'finished' && !!document.querySelector('.podium-ending')?.textContent`),
+    'the game master ends the game → TV podium says how it ended');
   check(await tv.ev(`[...document.querySelectorAll('.rank-row')].some((r) => r.textContent.includes('Sol') && r.querySelector('.out-tag'))`),
     '…and the retired player is ranked with an "out" tag');
   if (SHOTS) await sleep(4000);
@@ -387,7 +354,6 @@ try {
   A2.send({ t: 'pos', x: 6, y: 6, dir: 'left', moving: false });
   check(await tv.waitFor(`(() => { const a = window.bloko.avatars().find((a) => a.id === '${idA}'); return a && Math.abs(a.x - 6) < 0.2; })()`),
     '…and avatars resume walking (pos relayed)');
-  check(await soundOn(tv), "the TV's sound is on again (the page reloaded above)");
   const joinedBefore = await tv.ev(tvJoined);
   N = (await player('N', 'anna')).c; const idN = N.id!;
   check(await tv.waitFor(`window.bloko.avatars().some((a) => a.id === '${idN}') && document.querySelector('.lobby-count').textContent.includes('3/')`),
@@ -436,8 +402,7 @@ try {
   await endMinigame(A2);
   const pending = cv()?.news ?? [];
   check(pending.length > 0 && cv().facts.counters['blocks.played'] === played + 3, `the game master ends it → the three rounds recorded, news queued (${pending.length} entries, seq ${pending[0]?.seq}…${pending.at(-1)?.seq})`);
-  check(await tv.waitFor(`window.bloko.cutscene().playing && /New worlds unlocked/.test(window.bloko.cutscene().text)`, 12000),
-    'back in the room → ONE combined moment: "New worlds unlocked!"');
+  check(await tv.waitFor(`window.bloko.cutscene().playing`, 12000), 'back in the room → ONE combined moment');
   const csText = await tv.ev('window.bloko.cutscene().text');
   check(csText.includes(C_TITLE('childhood')) && csText.includes(C_TITLE('teens')) && csText.includes(`Élodie gets ${SAMPLE_CONTENT.items['old-key'].icon} ${SAMPLE_CONTENT.items['old-key'].name}`), `…naming both worlds and who got what (${csText})`);
   if (SHOTS) await sleep(1500);
@@ -514,7 +479,6 @@ try {
     && !document.getElementById('party-bg').hidden && window.bloko.avatars().length === ${roomOf(ql).order.length}`),
     `the room at the quiz tableau on the TV: the party room with the "Quiz!" band and the ${roomOf(ql).order.length} players' avatars`);
   check(await tv.ev(`!!document.querySelector('.lobby .join-qr') && document.querySelector('.lobby-count')?.textContent.includes('${roomOf(ql).order.length}/')`), '…the join QR and who\'s in');
-  check(/Pierre starts the quiz from their phone/.test(await tv.ev(`document.querySelector('.lobby-count')?.textContent ?? ''`)), '…and who starts the quiz');
   A2.send({ t: 'pos', x: 9, y: 6, dir: 'right', moving: false });
   check(await tv.waitFor(`(() => { const a = window.bloko.avatars().find((a) => a.id === '${idA}'); return a && Math.abs(a.x - 9) < 0.2; })()`),
     '…and avatars walk there (pos relayed)');
@@ -550,7 +514,7 @@ try {
       check(!(await tv.ev(`!!document.querySelector('.cutscene')`)), '…no unlock cutscene covers the question (interrupted, replayed when calm)');
       await tv.shot('quiz-question');
       phoneOf(seated[1])!.send({ t: 'showJoin' });
-      check(await tv.waitFor(cardOn), 'quiz: a player asks → the join card shows');
+      await tv.waitFor(cardOn);
       check(await tv.waitFor(noOverlap('.quiz-q, .quiz-choice, .quiz-type-hint, .quiz-ring')), '…beside the question: never over its text, tiles or ring');
       await tv.shot('join-qr-quiz');
     }
@@ -582,7 +546,7 @@ try {
     qv = quizOf(await A2.waitFor((m) => m.t === 'view' && (quizOf(m)?.phase === 'question' || quizOf(m)?.phase === 'finished'), i));
   }
   check(qv?.phase === 'finished', `quiz played through (${rounds} questions, ${anecdotes} with an anecdote)`);
-  check(await tv.waitFor(`document.querySelector('.podium .title')?.textContent === 'Quiz podium' && document.querySelectorAll('.rank-row').length === ${seated.length}`),
+  check(await tv.waitFor(`!!document.querySelector('.podium') && document.querySelectorAll('.rank-row').length === ${seated.length}`),
     'finished → the quiz podium, every player ranked');
   check(await tv.ev(`[...document.querySelectorAll('.rank-correct')].every((e) => e.textContent.includes('/') && e.textContent.trim().endsWith('✓'))`), '…with each player\'s right answers');
   if ((qv.credits ?? []).length) check(await tv.ev(`!!document.querySelector('.podium .quiz-credits')`), 'quiz podium: dataset credits line');

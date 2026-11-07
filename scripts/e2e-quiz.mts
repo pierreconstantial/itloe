@@ -112,16 +112,12 @@ try {
   const v0 = await P.waitFor((m) => m.t === 'view' && m.campaign.at.node === QUIZ, i);
   check(v0.campaign.at.kind === 'quiz' && v0.minigame === null && roomOf(v0).order.length === 2 && gmOf(v0) === idP,
     'quiz tableau → the room at it, with the party; no minigame yet, so no block game in the view (block clients never see a quiz)');
-  check(await errOf(P, { t: 'config', patch: { count: 3 } }) === 'not-playing', 'quiz config in the room (no quiz running) → not-playing');
-  check(await errOf(E, { t: 'startMinigame' }) === 'not-gm', 'starting the quiz: game master only');
   i = P.mark(); P.send({ t: 'startMinigame' });
   const lobby0 = lobbyOf(await P.waitFor((m) => m.t === 'view' && !!lobbyOf(m), i));
   check(lobby0.settings.count === 5 && lobby0.players.length === 2, 'game master starts the quiz → its lobby, with the tableau\'s settings (5 questions) and both eligible');
-  check(await errOf(E, { t: 'config', patch: { count: 3 } }) === 'not-gm', 'quiz config: game master only');
   i = P.mark(); P.send({ t: 'config', patch: { count: 3, seconds: 10, mode: 'mixed' } });
   await P.waitFor((m) => m.t === 'view' && settingsOf(m)?.count === 3 && settingsOf(m).seconds === 10, i);
   check(true, 'game master configures the quiz in its lobby (3 questions, 10 s)');
-  check(await errOf(E, { t: 'start' }) === 'not-gm', 'quiz start: game master only');
   check(await errOf(E, { t: 'place', piece: 0, x: 0, y: 0 }) === 'not-playing', 'block messages during a quiz → not-playing');
 
   let q = quizOf(await startRound(P, [P, E]));
@@ -219,12 +215,6 @@ try {
   }
   check(second.every((id) => !shown.some((x) => x.id === id)), `second round: 3 new questions (${second.join(', ')}), none asked in the first`);
   const score2 = q.players[idP].score;
-  // Play again: back to the lobby first, then start
-  check(await errOf(P, { t: 'start' }) === 'refused', 'quiz start on the podium → refused (start is for the lobby)');
-  check(await errOf(E, { t: 'lobby' }) === 'not-gm', 'quiz back to the lobby: game master only');
-  check(await errOf(E, { t: 'retire', target: idP }) === 'not-gm' && await errOf(P, { t: 'retire', target: idE }) === 'refused',
-    'quiz retire, like every game-master button: a guest → not-gm, the game master → refused');
-  check(await errOf(P, { t: 'endMinigame' }) === 'refused', 'ending the quiz on the podium → refused (from the lobby)');
   await backToLobby(P);
   i = T.mark();
   await endMinigame(P);

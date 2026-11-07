@@ -158,8 +158,6 @@ try {
   await startRound(E2, [E2, F2, G]);
   await closed(F2); // sol drops while NOT stuck: the game would wait for her forever
   await onlineIs(screen, [idA, idG], 'controls: a player drops mid-game');
-  check(await errOf(G, { t: 'retire', target: idF }) === 'not-gm', 'non-game-master retire → err not-gm');
-  check(await errOf(G, { t: 'endGame' }) === 'not-gm', 'non-game-master endGame → err not-gm');
   i = screen.mark(); E2.send({ t: 'retire', target: idF });
   const vr2 = blocksOf(await screen.waitFor((m) => m.t === 'view' && blocksOf(m)?.players[idF]?.done, i));
   const pf = vr2.players[idF];
@@ -174,8 +172,6 @@ try {
   const ve = blocksOf(await screen.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i));
   check(ve.endReason === 'gm' && ve.order.every((id: string) => ve.players[id].done && ve.players[id].score === scores[id]),
     'game master endGame → finished, endReason gm, everyone done, scores kept');
-  check(await errOf(E2, { t: 'endGame' }) === 'refused', 'game master endGame on the podium → err refused');
-  check(await errOf(E2, { t: 'retire', target: idG }) === 'refused', 'game master retire on the podium → err refused');
   // solo: a game ended by the game master is a real score → solo best recorded
   await backToLobby(E2);
   i = E2.mark(); F3.send({ t: 'leave' }); G.send({ t: 'leave' });
