@@ -349,14 +349,16 @@ test('Young Adult to its end: backgammon with Pierre, the kiss at the Shelter, P
   assert.deepEqual([stateOf(c, 'pierre-visit'), c.at.node, c.party.players.pierre.statuses], ['after-backgammon', FLAT, ['wisp']]);
   assert.deepEqual(pickupsAt(c.facts, STORY_CONTENT, FLAT).map((p) => p.item), ['beers', 'cigarette-pack']);
 
-  // the Shelter: Pierre is there and offers table football; the table offers it again; Yes opens its lobby; after
+  // the Shelter: Pierre is there, quiet; talking to him (or using the table) offers table football; Yes opens its lobby; after
   // a finished match, back in the bar, Élodie can kiss Pierre (her action on him, only while he is himself)
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.shelter.open', on: true } });
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'goto', node: SHELTER } });
   assert.equal(stateOf(c, 'shelter'), 'pierre-here');
   assert.deepEqual(c.party.players.pierre.statuses, ['wisp', 'incarnating']);
   c = act(c, { t: 'incarnate', id: 'pierre' });
-  assert.equal(offerAt(c.facts, STORY_CONTENT, SHELTER)?.node, `${SHELTER}/foosball`);
+  assert.equal(offerAt(c.facts, STORY_CONTENT, SHELTER), null, 'Pierre waits for Élodie to come to him');
+  const talked = act(c, { t: 'use', id: 'elodie', character: 'pierre', action: 'talk' });
+  assert.equal(offerAt(talked.facts, STORY_CONTENT, SHELTER)?.node, `${SHELTER}/foosball`, 'talking to him brings the offer');
   const bar = sceneAt(STORY_CONTENT, c.facts, SHELTER);
   const atTable = { x: 8.3, y: 6.2 };
   assert.ok(isWalkable(bar, atTable.x, atTable.y));

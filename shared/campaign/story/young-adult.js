@@ -300,20 +300,17 @@ export const YOUNG_ADULT = {
         arrived: {
           enter: [{ incarnate: 'pierre' }],
           speech: { pierre: PIERRE_LINE },
-          hints: { [FLAT]: `Pierre: “${PIERRE_LINE}”` },
           offer: BACKGAMMON_OFFER,
           characters: TALK_TO_PIERRE,
           on: { [`entered:${BACKGAMMON}`]: 'backgammon', 'talk:pierre': 'invites' },
         },
         // talking to Pierre offers the game again (a dismissed offer shows again)
         invites: {
-          hints: { [FLAT]: `Pierre: “${PIERRE_LINE}”` },
           offer: BACKGAMMON_OFFER,
           characters: TALK_TO_PIERRE,
           on: { [`entered:${BACKGAMMON}`]: 'backgammon', 'talk:pierre': 'invites' },
         },
         backgammon: {
-          hints: { [BACKGAMMON]: 'Backgammon with Pierre.' },
           when: [{ if: { done: BACKGAMMON }, to: 'after-backgammon' }],
           // the game master took the party back to the flat before a game finished: Pierre asks again
           on: { [`entered:${FLAT}`]: 'invites' },
@@ -385,31 +382,27 @@ export const YOUNG_ADULT = {
         lifted: {},
       },
     },
-    // The Shelter: Pierre is there again (his wisp becomes his avatar) and offers table football (Yes or Dismiss;
-    // talking to him or using the table offers it again; holding the beers, Élodie can give him one first). Yes opens its lobby. After a finished match, back in the bar, Élodie can kiss
-    // him (her action on Pierre): Marokkanergasse opens as a tram destination, her flat closes.
+    // The Shelter: Pierre is there again (his wisp becomes his avatar), quiet until Élodie comes to him. Talking to
+    // him (or giving him a beer, holding the beers, or using the table) makes him offer table football (Yes or
+    // Dismiss; talking to him again offers it again). Yes opens its lobby. After a finished match, back in the bar,
+    // Élodie can kiss him (her action on Pierre): Marokkanergasse opens as a tram destination, her flat closes.
     shelter: {
       initial: 'not-yet',
       states: {
         'not-yet': { on: { [`entered:${SHELTER}`]: 'pierre-here' } },
         'pierre-here': {
           enter: [{ incarnate: 'pierre' }],
-          speech: { pierre: 'Élodie! A game of table football?' },
-          hints: { [SHELTER]: 'Pierre: “Élodie! A game of table football?”' },
           objects: PLAY_FOOSBALL,
           characters: PIERRE_AT_THE_SHELTER,
-          offer: FOOSBALL_OFFER,
           on: SHELTER_OFFER_EVENTS,
         },
         offered: {
-          hints: { [SHELTER]: 'Pierre: “Élodie! A game of table football?”' },
           objects: PLAY_FOOSBALL,
           characters: PIERRE_AT_THE_SHELTER,
           offer: FOOSBALL_OFFER,
           on: SHELTER_OFFER_EVENTS,
         },
         match: {
-          hints: { [FOOSBALL]: 'Table football at the Shelter.' },
           when: [{ if: { done: FOOSBALL }, to: 'after-match' }],
           // the game master took the party back to the bar before a match finished: the table offers it again
           on: { [`entered:${SHELTER}`]: 'offered' },
@@ -417,7 +410,7 @@ export const YOUNG_ADULT = {
         // back in the bar: Élodie can kiss Pierre
         'after-match': {
           enter: [{ goto: SHELTER }],
-          hints: { [SHELTER]: 'What a match!' },
+          hints: { [SHELTER]: 'Pierre can’t take his eyes off Élodie…' },
           // Élodie's action on Pierre, standing next to him
           characters: { pierre: { actions: [{ key: 'kiss', text: '💋 Kiss Pierre', by: 'elodie' }] } },
           on: { 'kiss:pierre': { to: 'kissed', do: [{ flag: KISSED }] } },
@@ -438,7 +431,7 @@ export const YOUNG_ADULT = {
       states: {
         'not-yet': { on: { [`entered:${MAROKKANERGASSE}`]: 'party' } },
         party: {
-          hints: { [MAROKKANERGASSE]: 'Johanna, Nico and Mathieu are here.' },
+          hints: { [MAROKKANERGASSE]: 'Someone here is humming a familiar tune…' },
           objects: TALK_TO_FRIENDS,
           on: Object.fromEntries(FRIENDS.map(([id]) => [`talk:${id}`, /** @type {const} */ ('offered')])),
         },

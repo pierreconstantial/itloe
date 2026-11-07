@@ -95,15 +95,15 @@ export const HUB = {
         apparition: {
           enter: [{ wisp: 'others' }, { goto: 'hub' }, { cutscene: 'apparition' }],
           holdChooser: 'hub',
-          hints: { hub: 'A visitor is appearing… watch the TV.', 'hub.false-start': 'Élodie went through the portal.' },
+          hints: { hub: 'A visitor is appearing… watch the TV.' },
           on: { 'cutscene:apparition': 'key-on-floor' },
         },
         'key-on-floor': {
-          hints: { hub: 'Élodie, pick up the glowing key.', 'hub.false-start': 'Élodie went through the portal.' },
+          hints: { hub: 'Élodie, pick up the glowing key.' },
           pickups: [{ item: INTRO_KEY, node: 'hub', x: 6.4, y: 6.6, radius: 0.8 }],
           on: { [`pickup:${INTRO_KEY}`]: 'done' },
         },
-        done: { hints: { 'hub.false-start': 'Élodie went through the portal.' } },
+        done: {},
       },
     },
   },
