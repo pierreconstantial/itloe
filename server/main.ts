@@ -236,10 +236,10 @@ const joinUrl = (hostHeader?: string): string =>
   access.joinUrl(game.room, `http://${lan ? `${lan.address}:${PORT}` : (hostHeader ?? `localhost:${PORT}`)}`);
 const serveApi = makeApiHandler((req) => ({ url: joinUrl(req?.headers.host), code: game.room }), { version: CONTENT_VERSION, data: CONTENT });
 
-/** A local scratch URL replaces the current test evening with a known Tram 5 scene. */
+/** A local scratch URL shows the test scenes' tree, or replaces the current test evening with a known story moment. */
 function serveTestScene(req: IncomingMessage, res: ServerResponse): boolean {
   const url = new URL(req.url ?? '/', 'http://localhost');
-  if (!url.pathname.startsWith('/test/')) return false;
+  if (url.pathname !== '/test' && !url.pathname.startsWith('/test/')) return false;
   if (!TEST_SCENES_ENABLED || req.method !== 'GET') {
     res.writeHead(404).end();
     return true;

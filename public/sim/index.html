@@ -6,7 +6,7 @@
   <style>
     body { margin: 0; background: #000; display: grid; grid-template-rows: 1fr 1fr; height: 100vh; }
     iframe { border: 1px solid #333; width: 100%; height: 100%; background: #111418; }
-    .phones { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .phones { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
   </style>
 </head>
 <body>
@@ -14,7 +14,7 @@
   <div class="phones" id="phones"></div>
   <script>
     // slot= namespaces localStorage per iframe (otherwise all four rejoin as the same player);
-    // room= comes from /api/join so the server's room check passes.
+    // room= comes from /api/join so the server's room check passes. ?phones=N shows N phones side by side (4 by default, up to 8).
     (async () => {
       let room = '';
       try {
@@ -22,7 +22,8 @@
         if (res.ok) room = '&room=' + encodeURIComponent((await res.json()).code);
       } catch { /* request failed: the phones ask for the code */ }
       const phones = document.getElementById('phones');
-      for (let i = 1; i <= 4; i++) {
+      const count = Math.min(8, Math.max(1, Number(new URLSearchParams(location.search).get('phones')) || 4));
+      for (let i = 1; i <= count; i++) {
         const frame = document.createElement('iframe');
         frame.src = `/play/?slot=${i}${room}`;
         frame.title = `player ${i}`;
