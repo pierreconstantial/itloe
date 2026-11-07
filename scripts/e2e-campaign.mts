@@ -436,9 +436,11 @@ try {
   T4.send({ t: 'hello', role: 'screen' });
   await T4.waitFor((m) => m.t === 'chatHistory');
   await roundTrip(T4); // after the positions a hello sends
+  // the lobby placed its walkers on its start positions: Élodie stands where the TVs last saw her
   const standing = T4.msgs.find((m) => m.t === 'pos' && m.playerId === idE);
-  check(standing?.x === TABLE.x && standing?.y === TABLE.y && standing?.moving === false,
-    `a TV saying hello during the round gets the room's positions: Élodie stands at the table, not walking (${JSON.stringify(standing)})`);
+  const seen = T1.msgs.findLast((m) => m.t === 'pos' && m.playerId === idE);
+  check(standing?.x === seen?.x && standing?.y === seen?.y && standing?.moving === false,
+    `a TV saying hello during the round gets the room's positions: Élodie stands where she was placed, not walking (${JSON.stringify(standing)})`);
   T4.ws.close();
   i = P.mark(); P.send({ t: 'endGame' });
   await until(P, (x) => roundIn(x)?.phase === 'finished', i);
@@ -447,6 +449,7 @@ try {
   P.send({ t: 'gm', op: { op: 'goto', node: 'hub' } });
   k = await until(P, (x) => x.at.node === 'hub', iP);
   check(k.at.activity === null && played(k) === 5, 'gm goto from the podium ends the minigame first: its round recorded (blocks.played = 5)');
+  await step(E, TABLE); // back from the lobby's start position
   await interactsHere('on the hub', true);
   i = P.mark(); P.send({ t: 'gm', op: { op: 'goto', node: 'childhood' } });
   await until(P, (x) => x.at.node === 'childhood', i);

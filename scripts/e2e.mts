@@ -218,7 +218,9 @@ const rv = blocksOf(await A2.waitFor((m) => m.t === 'view', i));
 check(w.playerId === idA && JSON.stringify(rv) === JSON.stringify(B.lastView()), 'rejoin after socket death → welcome(same id) + current view');
 const afterWelcome = A2.since(i).slice(A2.since(i).indexOf(w) + 1)[0];
 const ownPos = A2.since(i).filter((m) => m.t === 'pos');
-check(afterWelcome?.t === 'pos' && ownPos.length === 1 && ownPos[0].playerId === idA && ownPos[0].x === 5 && ownPos[0].moving === false,
+const lastPos = screen.msgs.findLast((m) => m.t === 'pos' && m.playerId === idA); // the lobby's start position
+check(afterWelcome?.t === 'pos' && ownPos.length === 1 && ownPos[0].playerId === idA && ownPos[0].x === lastPos?.x
+  && ownPos[0].y === lastPos?.y && ownPos[0].moving === false,
   'rejoin → own last pos right after welcome (stopped), and no one else\'s');
 i = A2.mark(); ib = B.mark();
 const mv2 = legalMoves(A2.lastView(), idA)[0];
