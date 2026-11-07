@@ -118,6 +118,13 @@ const openRound = (c: Campaign): Round<unknown> | null => {
 round = openRound(game.campaign); // a resumed round
 /** Door each walker currently stands in (edge trigger: entering a door fires once). In memory only. */
 const zones = new Map<string, string | null>();
+/** Where a story zone's `arrive` just put a walker. Until they have walked ARRIVAL_CLEAR away from it, their
+ *  doors and zones stay quiet: a stick still held after a door (the Shelter's entrance and its stair, one above
+ *  the other) does not carry them straight back through the way they came; stepping away and back in does.
+ *  `seen`: their phone has reported a position near the spot (positions sent before it got the move are stale).
+ *  In memory only. */
+const arrivals = new Map<string, { x: number, y: number, seen: boolean }>();
+const ARRIVAL_CLEAR = 1.5;
 /** Spot each walker of a walkable lobby currently stands on (edge trigger, as the doors). In memory only. */
 const onSpot = new Map<string, string | null>();
 /** The players the running minigame shows who were placed on its walkable lobby since it last showed them
@@ -322,7 +329,7 @@ const attaches = new Map<string, number>();
  *  shortcut replaces the evening. Every map of in-memory state above belongs here. */
 function resetEphemeral(): void {
   who.clear(); sockets.clear(); screens.clear();
-  zones.clear(); onSpot.clear(); placed.clear(); incarnations.clear(); chat.length = 0;
+  zones.clear(); arrivals.clear(); onSpot.clear(); placed.clear(); incarnations.clear(); chat.length = 0;
   joinQrUntil = 0; joinQrToken = null;
 }
 
@@ -478,6 +485,17 @@ const zoneHere = (pos: { x: number, y: number }): string | null => {
 const heldStill = (id: string): boolean => party().players[id]?.character === CONTENT.chooser
   && chooserHeld(game.campaign.facts, CONTENT, game.campaign.at.node);
 
+/** False while a walker's doors and zones are off after an arrival; true (and forgotten) once they stepped away. */
+function clearOfArrival(id: string, pos: { x: number, y: number }): boolean {
+  const spot = arrivals.get(id);
+  if (!spot) return true;
+  const near = Math.hypot(pos.x - spot.x, pos.y - spot.y) < ARRIVAL_CLEAR;
+  if (near) spot.seen = true;
+  if (near || !spot.seen) return false;
+  arrivals.delete(id);
+  return true;
+}
+
 /** Edge-triggered doors and story zones: entering a door fires `zone.entered` (any member) and, for the chooser
  *  on an unlocked door, `enter` (A1: Élodie walks into a door; the game master can also enter directly); the
  *  chooser entering a story machine's zone fires `zone` (a portal), then stands where the zone says. */
@@ -491,6 +509,7 @@ function walk(id: string, pos: Pos): void {
   const known = zones.has(id);
   const before = zones.get(id) ?? null;
   zones.set(id, zone);
+  if (!clearOfArrival(id, pos)) return;
   if (!known || !zone || zone === before) return;
   if (!character) return;
   if (wisp(id) || isIncarnating(id)) return;
@@ -498,6 +517,8 @@ function walk(id: string, pos: Pos): void {
     if (character !== CONTENT.chooser || !apply({ t: 'zone', id, zone: storyZone.id }) || !storyZone.arrive) return;
     const arrival: Pos = { x: storyZone.arrive.x, y: storyZone.arrive.y, dir: 'up', moving: false };
     positions.set(id, arrival);
+    zones.set(id, zoneHere(arrival));
+    arrivals.set(id, { x: arrival.x, y: arrival.y, seen: false });
     const ws = sockets.get(id);
     if (ws) send(ws, posMsg(id, arrival));
     relayPos(id, arrival);
@@ -558,6 +579,7 @@ function placeWalkers(): void {
  *  fresh step in does. */
 function resetZones(): void {
   zones.clear();
+  arrivals.clear();
   for (const [id, pos] of positions.entries()) zones.set(id, zoneHere(pos));
 }
 
