@@ -276,9 +276,6 @@ try {
   const top = rows.filter((row) => row.rank === 1);
   await tv.waitText(top.length === 1 ? new RegExp(`${final.players[top[0].id].name} wins!`) : /It's a tie!/);
   check(true, 'the TV\'s podium names the winner');
-
-  const errors = pages.flatMap((p) => p.errors);
-  check(errors.length === 0, `no page threw${errors.length ? `: ${errors[0]}` : ''}`);
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${server?.log() ?? ''}`);
 } finally {

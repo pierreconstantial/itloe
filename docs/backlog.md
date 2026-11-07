@@ -26,7 +26,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Pyramide in the story](#pyramide-in-the-story) | Pyramide has no tableau in the story yet | P1 | Needs decision | Low |
 | [Apartment drawings cover avatars](#apartment-drawings-cover-avatars) | The cats, friends, keepsakes and key are always drawn over avatars | P2 | Open | Low |
 | [Trim the e2e suites and share their setup](#trim-the-e2e-suites-and-share-their-setup) | The suites re-check what unit tests pin and each copy their setup | P2 | Open | Medium |
-| [Browser suites ignore page errors](#browser-suites-ignore-page-errors) | The phone and TV suites pass when a page throws | P2 | Open | Low |
 | [Backgammon's restart and hidden dice untested](#backgammons-restart-and-hidden-dice-untested) | No test resumes a backgammon round or checks its view hides the dice | P2 | Open | Low |
 | [Questions of a dropped round come back](#questions-of-a-dropped-round-come-back) | A round dropped by `back` or `goto` doesn't use up its questions or words | P2 | Open | Low |
 | [Join QR card covers minigame screens](#join-qr-card-covers-minigame-screens) | On the TV the card covers Pyramide, backgammon and the lobby's panel | P2 | Open | Trivial |
@@ -52,7 +51,7 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Round screens' helpers and wording](#round-screens-helpers-and-wording) | DOM helpers, countdowns and wording repeated across screens and between phone and TV | P3 | Open | Low |
 | [Three meanings of round in the server](#three-meanings-of-round-in-the-server) | `server/round.ts` calls a whole run of a minigame a round | P3 | Open | Low |
 | [Dead code](#dead-code) | Screens only Pierre's phone shows, unused exports and CSS, a duplicate range check | P3 | Open | Low |
-| [Small e2e script bugs](#small-e2e-script-bugs) | `--compare` misses two suites, a suite exiting 75 reruns, a scratch folder leaks | P3 | Open | Low |
+| [Small e2e script bugs](#small-e2e-script-bugs) | `--compare` misses two suites, a suite exiting 75 reruns | P3 | Open | Low |
 
 ## Items
 
@@ -100,12 +99,6 @@ The unit tests are proportionate; the e2e suites are not. A full run makes about
 **Decision (Konstantin):**
 1. One restartable-server helper (a `fresh` option on `startServer`) and one socket client, shared by the e2e suites and the unit tests that start a real server. Then the TV and phone suites move onto `openPage`, with one wait that fails loudly.
 2. Each rule keeps its unit test plus one wiring check over sockets; the re-checks above go (a unit table over `plainLobbyServer.message` replaces the `not-gm` ones). Expected: about 650 fewer lines, and a full run from about 3 minutes to about 2.
-
-### Browser suites ignore page errors
-
-`scripts/e2e-phone.mts` only logs a page's uncaught exceptions, and `scripts/e2e-tv.mts` empties the TV's error list before its campaign section, so anything thrown during the reloads, the kill -9, the wake and the silent-socket test is discarded. The Pyramide and backgammon suites fail on them.
-
-**Recommendation:** fail every browser suite on a page exception, in one place once the suites share `openPage` ([Trim the e2e suites and share their setup](#trim-the-e2e-suites-and-share-their-setup)).
 
 ### Backgammon's restart and hidden dice untested
 
@@ -269,4 +262,3 @@ Each round's rules still write their own clock (`deadline`, `deadlineAction`, `s
 
 - `--shots`/`--compare`: the runner takes screenshots for every browser suite (`scripts/e2e-run.mts`), but the Pyramide and backgammon suites write to fixed folders of their own and take none, so a comparison reports "no reference folder" for both.
 - `scripts/e2e-slot.sh` treats a suite that exits with code 75 as "slot busy" and runs it again.
-- `scripts/e2e-phone.mts` throws before its `try` on a bare run, leaking its scratch folder.

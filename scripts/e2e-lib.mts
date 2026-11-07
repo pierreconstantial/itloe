@@ -18,12 +18,30 @@ export function check(cond: boolean, label: string): void {
   console.log(`${cond ? 'PASS' : 'FAIL'}  ${label}`);
   if (!cond) failures++;
 }
-/** Prints the verdict and exits 1 on any failure. */
+/** Every page a suite opened (openPage), with the uncaught exceptions it threw. */
+const opened: { label: string, errors: string[] }[] = [];
+/** Prints the verdict and exits 1 on any failure; a browser suite fails on any page's uncaught exception. */
 export function finish(): never {
+  if (opened.length) {
+    const errors = opened.flatMap((p) => p.errors.map((e) => `${p.label}: ${e}`));
+    check(errors.length === 0, `no page threw${errors.length ? ` (${errors.length}): ${errors.map((e) => e.split('\n')[0]).join(' | ')}` : ''}`);
+    for (const e of errors) console.log(`      ${e}`); // with its stack
+  }
   console.log(failures ? `\n${failures} FAILURE(S)` : '\nALL PASS');
   process.exit(failures ? 1 : 0);
 }
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** The suites' one wait: polls `get` until it gives a truthy value and returns it; after `ms` (× E2E_SLOW) it
+ *  throws, with `why()` saying what it waited for and what it saw. */
+export async function waitUntil<T>(get: () => T | Promise<T>, ms: number, why: () => string | Promise<string>, every = 50): Promise<T> {
+  const end = Date.now() + ms * SLOW;
+  for (;;) {
+    const v = await get();
+    if (v) return v;
+    if (Date.now() > end) throw new Error(await why());
+    await sleep(every);
+  }
+}
 /** The part ONLY names (one of a suite's `parts`), or undefined for a full run. An unknown part exits 2 with
  *  the list: a suite would otherwise run nothing of it, and pass. */
 export function onlyPart(parts: string[]): string | undefined {
@@ -152,14 +170,9 @@ export class Client {
   lastSettings(): any { return settingsOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
   /** The game master in the last view. */
   lastGm(): string | null { return gmOf([...this.msgs].reverse().find((m) => m.t === 'view')); }
-  async waitFor(pred: (m: any) => boolean, from = 0, ms = 2000): Promise<any> {
-    const end = Date.now() + ms * SLOW;
-    while (Date.now() < end) {
-      const hit = this.msgs.slice(from).find(pred);
-      if (hit) return hit;
-      await sleep(10);
-    }
-    throw new Error(`${this.label}: timeout waiting (from ${from}); got ${JSON.stringify(this.since(from).map((m) => m.t))}`);
+  waitFor(pred: (m: any) => boolean, from = 0, ms = 2000): Promise<any> {
+    return waitUntil(() => this.msgs.slice(from).find(pred), ms,
+      () => `${this.label}: timeout waiting (from ${from}); got ${JSON.stringify(this.since(from).map((m) => m.t))}`, 10);
   }
 }
 
@@ -423,8 +436,10 @@ const FIND = `(target) => {
 
 export type Page = Awaited<ReturnType<typeof openPage>>;
 
-/** `probes`: test-only scripts the page runs before its own (e.g. SOCKET_PROBE). */
-export async function openPage(cdp: Awaited<ReturnType<typeof cdpConnect>>, label: string, phone: boolean, shots: () => string, probes: string[] = []) {
+/** A TV or a phone, each its own device (a browser context). `shots`: the folder screenshots go to, or
+ *  undefined to take none. `probes`: test-only scripts the page runs before its own (e.g. SOCKET_PROBE). Its
+ *  uncaught exceptions fail the suite at finish(). */
+export async function openPage(cdp: Awaited<ReturnType<typeof cdpConnect>>, label: string, phone: boolean, shots: () => string | undefined, probes: string[] = []) {
   const { cmd, events } = cdp;
   const { browserContextId } = await cmd('Target.createBrowserContext');
   const { targetId } = await cmd('Target.createTarget', { url: 'about:blank', browserContextId });
@@ -437,9 +452,12 @@ export async function openPage(cdp: Awaited<ReturnType<typeof cdpConnect>>, labe
   for (const source of probes) await cmd('Page.addScriptToEvaluateOnNewDocument', { source }, s);
   /** The page's uncaught exceptions, as they happened. */
   const errors: string[] = [];
+  opened.push({ label, errors });
   events.push((m) => {
     if (m.sessionId === s && m.method === 'Runtime.exceptionThrown') errors.push(m.params.exceptionDetails.exception?.description ?? m.params.exceptionDetails.text);
   });
+  /** A CDP command to this page, for what the helpers below don't do (reload, lifecycle, history, keys). */
+  const command = (method: string, params: object = {}): Promise<any> => cmd(method, params, s);
 
   /** Evaluates an expression in the page (promises awaited) and returns its value. */
   const ev = async (expr: string): Promise<any> => {
@@ -449,45 +467,36 @@ export async function openPage(cdp: Awaited<ReturnType<typeof cdpConnect>>, labe
   };
   /** The visible text of the page. */
   const text = (): Promise<string> => ev('document.body?.innerText ?? ""');
-  /** Waits until the expression is truthy and returns its value; throws with the page's text after `ms`. */
-  const waitFor = async (expr: string, ms = 8000): Promise<any> => {
-    const end = Date.now() + ms * SLOW;
-    while (Date.now() < end) {
-      const v = await ev(expr).catch(() => null);
-      if (v) return v;
-      await sleep(100);
-    }
-    throw new Error(`${label}: timed out waiting for ${expr}\n--- ${label}'s text ---\n${await text().catch(() => '')}`);
-  };
+  /** Waits until the expression is truthy and returns its value; throws with the page's text after `ms`, and
+   *  with the value of `show` when given (e.g. what is still left). */
+  const waitFor = (expr: string, ms = 8000, show?: string): Promise<any> => waitUntil(() => ev(expr).catch(() => null), ms, async () =>
+    `${label}: timed out waiting for ${expr}${show ? `\n--- ${show}: ${JSON.stringify(await ev(show).catch((e) => String(e)))}` : ''}\n--- ${label}'s text ---\n${await text().catch(() => '')}`, 100);
   /** Waits until the visible text contains `want`. */
   const waitText = async (want: string | RegExp, ms = 8000): Promise<void> => {
-    const end = Date.now() + ms * SLOW;
     let now = '';
-    while (Date.now() < end) {
-      now = await text().catch(() => '');
-      if (typeof want === 'string' ? now.includes(want) : want.test(now)) return;
-      await sleep(100);
-    }
-    throw new Error(`${label}: timed out waiting for the text ${want}\n--- ${label}'s text ---\n${now}`);
+    await waitUntil(async () => { now = await text().catch(() => ''); return typeof want === 'string' ? now.includes(want) : want.test(now); }, ms,
+      () => `${label}: timed out waiting for the text ${want}\n--- ${label}'s text ---\n${now}`, 100);
   };
-  const find = async (target: string, ms: number): Promise<{ x: number, y: number }> => {
-    const end = Date.now() + ms * SLOW;
-    for (;;) {
-      const at = await ev(`(${FIND})(${JSON.stringify(target)})`);
-      if (at) return at;
-      if (Date.now() > end) throw new Error(`${label}: nothing visible matches ${JSON.stringify(target)}\n--- ${label}'s text ---\n${await text().catch(() => '')}`);
-      await sleep(100);
-    }
-  };
+  const find = (target: string, ms: number): Promise<{ x: number, y: number }> => waitUntil(() => ev(`(${FIND})(${JSON.stringify(target)})`), ms,
+    async () => `${label}: nothing visible matches ${JSON.stringify(target)}\n--- ${label}'s text ---\n${await text().catch(() => '')}`, 100);
   /** A real tap on a phone, a real click on the TV, on what `target` names (see FIND); waits for it to show. */
   const tap = async (target: string, ms = 8000): Promise<void> => {
     await cmd('Page.bringToFront', {}, s); // headless: a background page never acks synthetic input
     const { x, y } = await find(target, ms);
-    if (phone) {
-      await cmd('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] }, s);
-      await cmd('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }, s);
-    } else {
-      for (const type of ['mousePressed', 'mouseReleased']) await cmd('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1 }, s);
+    const touched = (async () => {
+      if (phone) {
+        await cmd('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] }, s);
+        await cmd('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }, s);
+      } else {
+        for (const type of ['mousePressed', 'mouseReleased']) await cmd('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1 }, s);
+      }
+      return true;
+    })();
+    // a page that went through Page.setWebLifecycleState can stop acking synthetic input in headless Chrome:
+    // a DOM click on the element at that point instead (no user activation, fine for buttons) rather than hang
+    if (!(await Promise.race([touched, sleep(3000).then(() => false)]))) {
+      console.log(`  [${label}] synthetic input not acked (headless lifecycle quirk): clicking ${target} instead`);
+      await ev(`document.elementFromPoint(${x}, ${y})?.click()`);
     }
     await sleep(150);
   };
@@ -496,9 +505,10 @@ export async function openPage(cdp: Awaited<ReturnType<typeof cdpConnect>>, labe
     await tap(target);
     await cmd('Input.insertText', { text: words }, s);
   };
-  /** Saves <shots>/<name>.png and the visible text as <name>.txt; returns the PNG's path. */
-  const shot = async (name: string): Promise<string> => {
+  /** Saves <shots>/<name>.png and the visible text as <name>.txt; returns the PNG's path (none without a folder). */
+  const shot = async (name: string): Promise<string | undefined> => {
     const dir = shots();
+    if (!dir) return undefined;
     mkdirSync(dir, { recursive: true });
     await cmd('Page.bringToFront', {}, s);
     const { data } = await cmd('Page.captureScreenshot', { format: 'png' }, s);
@@ -539,5 +549,5 @@ export async function openPage(cdp: Awaited<ReturnType<typeof cdpConnect>>, labe
   const view = (): Promise<string | null> => ev(`[...document.querySelectorAll('main section[id^="view-"]')].filter((e) => !e.closest('[hidden]')).pop()?.id ?? null`);
   /** Closes the page and its browser context (the device), for a suite on a Chrome that outlives it. */
   const close = async (): Promise<void> => { await cmd('Target.disposeBrowserContext', { browserContextId }).catch(() => undefined); };
-  return { label, errors, ev, text, waitFor, waitText, tap, type, shot, capture, steer, goto, view, close };
+  return { label, errors, command, ev, text, waitFor, waitText, tap, type, shot, capture, steer, goto, view, close };
 }

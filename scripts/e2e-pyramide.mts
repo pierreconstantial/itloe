@@ -267,9 +267,6 @@ try {
   await podium('duel round');
   await backToLobby();
   check(true, 'duel round: back to the lobby');
-
-  const errors = pages.flatMap((p) => p.errors);
-  check(errors.length === 0, `no page threw${errors.length ? `: ${errors[0]}` : ''}`);
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${server?.log() ?? ''}`);
 } finally {
