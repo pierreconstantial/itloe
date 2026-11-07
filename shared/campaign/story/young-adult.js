@@ -474,7 +474,7 @@ export const YOUNG_ADULT = {
       states: {
         there: {
           objects: {
-            'tram-5-old-woman': { actions: [{ key: 'talk', text: '💬 Talk to the lady', say: 'Na, Mädl, der Fünfer kommt eh gleich.', speaker: 'object', by: 'anyone' }] },
+            'tram-5-old-woman': { actions: [{ key: 'talk', text: '💬 Talk to the lady', say: 'Na, Mädl, der Fünfer kommt eh gleich.\nOba derf ma wirklich mit solchane Schuach aussigeh?', speaker: 'object', by: 'anyone' }] },
             'tram-5-ice-kid': { actions: [{ key: 'talk', text: '💬 Talk to the kid', say: 'Mmh… Eis!', speaker: 'object', by: 'anyone' }] },
             'tram-5-lazy-guy': { actions: [{ key: 'talk', text: '💬 Talk to the man', say: 'Heute nicht.', speaker: 'object', by: 'anyone' }] },
           },

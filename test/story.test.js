@@ -437,7 +437,7 @@ test('Young Adult\'s people answer: the passers-by, the dog, the Shelter\'s crow
     }
   };
   answers(TRAM_5, [
-    ['tram-5-old-woman', 'Na, Mädl, der Fünfer kommt eh gleich.', { x: 2.9, y: 5.6 }], ['tram-5-ice-kid', 'Mmh… Eis!', { x: 4.6, y: 5.6 }],
+    ['tram-5-old-woman', 'Na, Mädl, der Fünfer kommt eh gleich.\nOba derf ma wirklich mit solchane Schuach aussigeh?', { x: 2.9, y: 5.6 }], ['tram-5-ice-kid', 'Mmh… Eis!', { x: 4.6, y: 5.6 }],
     ['tram-5-lazy-guy', 'Heute nicht.', { x: 1.4, y: 5.6 }], ['tram-5-dog', 'Wuff!', { x: 10.1, y: 7 }],
   ]);
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.shelter.open', on: true } });
