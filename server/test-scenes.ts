@@ -95,6 +95,10 @@ export function makeTestScene(initial: Campaign, content: Content, setup: SceneS
     campaign = reduceCampaign(campaign, { t: 'status', id: gm, status: 'wisp', on: true }, content);
   }
   if (setup.context === 'night') {
+    // as the story gets there: Toni left and his crowbar lifted the floorboard, which gave the ticket
+    gmOp({ op: 'machine', machine: 'toni', state: 'crowbar-taken' });
+    gmOp({ op: 'give', item: 'crowbar', to: 'elodie', count: 1 });
+    gmOp({ op: 'machine', machine: 'floorboard', state: 'lifted' });
     gmOp({ op: 'setFlag', flag: 'young-adult.shelter.open', on: true });
     gmOp({ op: 'give', item: 'shelter-ticket', to: 'elodie', count: 1 });
   }
@@ -124,7 +128,7 @@ export function testSceneIndex(scene: Scene): string {
 <h1>${hub ? 'Hub' : 'Tram 5'} test scenes</h1><p>Each link starts a fresh scratch scene and opens the simulator.</p>
 ${hub ? `<ul><li><a href="${TEST_HUB_ROOT}base">Base · Élodie’s dream apartment</a><br>Élodie, Pierre, Sol and Anna are present.</li></ul>`
     : `<ul><li><a href="${TEST_SCENE_ROOT}base">Base · Wallensteinplatz</a><br>The Shelter is closed. Élodie can speak to Tschick-Toni beside the automat; Pierre is the game master in wisp mode.</li>
-<li><a href="${TEST_SCENE_ROOT}night">Night · The Shelter is open</a><br>Élodie has a Shelter ticket in her bag.</li></ul>`}
+<li><a href="${TEST_SCENE_ROOT}night">Night · The Shelter is open</a><br>Tschick-Toni has left; Élodie has his crowbar and a Shelter ticket in her bag.</li></ul>`}
 <p>Optional overrides: <code>characters=elodie,pierre</code>, <code>inventory=elodie:shelter-ticket:1</code>,
 <code>flags=young-adult.shelter.open</code>, <code>statuses=pierre:wisp</code>, <code>context=base|night</code>.</p></html>`;
 }

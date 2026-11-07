@@ -1,6 +1,8 @@
 // Small ambient people, drawn on the same 16-pixel grid as the playable characters.
 // They are scene props: no dialogue, inventory, collision, or player slot.
 
+import { YOUNG_ADULT_PIXELS } from './art/young-adult.js';
+
 const sprite = (/** @type {string[]} */ ...rows) => rows.map((row) => row.padEnd(16, '.'));
 
 const OLD_WOMAN = sprite(
@@ -233,13 +235,19 @@ const RAT = [
   '..pooggggggggggr',
   '.....oo.o..o.o..',
 ].map((row) => row.padEnd(16, '.'));
+/** A grid facing the other way. @param {string[]} grid */
+const mirrored = (grid) => grid.map((row) => [...row].reverse().join(''));
 /** The same rat facing left. */
-const RAT_LEFT = RAT.map((row) => [...row].reverse().join(''));
+const RAT_LEFT = mirrored(RAT);
+/** Toni's dog, back at night: its Tram 5 art, chasing the rat. */
+const NIGHT_DOG = YOUNG_ADULT_PIXELS['tram-5-dog'];
 
 /** Ambient art and its quiet two-step movement. Every grid is 16 wide and 16 high, but the rat's (low on the
  *  ground); `scurry` runs to and fro, facing its way (`altGrid` facing left). */
 export const AMBIENT_NPCS = Object.freeze({
   'tram-5-rat': { grid: RAT, altGrid: RAT_LEFT, pal: { o: '#1d1a1f', g: '#6d6670', w: '#e8e0d0', p: '#c98b93', r: '#d98f9a' }, motion: 'scurry', period: 5200, phase: 0 },
+  // the rat's run, a moment late: always on its tail
+  'tram-5-night-dog': { grid: NIGHT_DOG.grid, altGrid: mirrored(NIGHT_DOG.grid), pal: NIGHT_DOG.pal, motion: 'scurry', period: 5200, phase: -0.7 },
   'tram-5-old-woman': { grid: OLD_WOMAN, pal: { ...shared, h: '#d5d0c4', i: '#eee7d8', c: '#4d7063', d: '#33524b' }, motion: 'nod', period: 2700, phase: 0 },
   'tram-5-ice-kid': { grid: ICE_KID, pal: { ...shared, r: '#c5494d', c: '#4a85a4', i: '#79b5c7' }, motion: 'bounce', period: 1500, phase: 1 },
   'tram-5-lazy-guy': { grid: LAZY_GUY, pal: { ...shared, h: '#393845', c: '#8b6854', i: '#b68d65', d: '#644d47' }, motion: 'nod', period: 4100, phase: 2 },

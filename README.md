@@ -195,7 +195,7 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 - **Simulator:** open **/sim/** on a running server: the TV screen plus player phones side by side in one page. The phones get the room code from `/api/join`.
 - **Tram 5 scene shortcuts:** run `BLOKO_VAR="$(mktemp -d /tmp/itloe-scene.XXXXXX)" PORT=3199 npm run start:local -- --new`,
   then open `http://127.0.0.1:3199/test/young-adult/tram-5/`. The index lists `base` (day, Shelter closed)
-  and `night` (Shelter open, Élodie has a Shelter ticket). Opening a preset starts a fresh scratch evening
+  and `night` (Shelter open, Tschick-Toni gone, Élodie has his crowbar and a Shelter ticket). Opening a preset starts a fresh scratch evening
   at Tram 5 and opens `/sim/` with Élodie ready to play and Pierre as game master in wisp mode. Optional query parameters override the setup:
   `characters=elodie,pierre` (up to four simulator phones), `inventory=elodie:shelter-ticket:1`,
   `flags=young-adult.shelter.open`, `statuses=pierre:wisp`, and `context=base|night`. Separate entries in a
