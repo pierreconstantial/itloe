@@ -5,11 +5,19 @@
 /** @typedef {{ id: string, character?: string | null, statuses?: string[], inventory?: Record<string, number> }} Actor */
 
 /** Scene objects expose a default action. A null default means only listed players can act. */
+export const TRAM_5_MAN_NAME = 'Tschick-Toni';
 /** @type {Readonly<Record<string, ObjectRule>>} */
 export const OBJECT_ACTIONS = Object.freeze({
   sofa: { default: { key: 'sit', text: '🛋 Sit', feedback: 'Comfy!' } },
   table: { default: { key: 'blow-candles', text: '🎂 Blow candles', feedback: 'Make a wish!' } },
   plant: { default: { key: 'shake', text: '🪴 Shake plant', feedback: 'Rustle!' } },
+  'tram-5-tram': { default: null, byCharacter: { elodie: {
+    key: 'quiz-offer', text: '🚋 Tram 5', feedback: 'A ticket for a quizz!',
+  } } },
+  'tram-5-weird-man': { default: null, byCharacter: { elodie: {
+    key: 'talk', text: `💬 Talk to ${TRAM_5_MAN_NAME}`,
+    feedback: `${TRAM_5_MAN_NAME}: Host a Tschick? I brauch dringend ane!`,
+  } } },
   'memory-key-intro': { default: null, byCharacter: { elodie: { key: 'collect', text: '🗝️ Pick up key', feedback: 'A key of memory!' } } },
 });
 

@@ -235,10 +235,10 @@ const youngAdult: Sequence = {
     await b.frame('Élodie’s dream apartment · hub. The current pixel-art background has one large interior door, plants, art posters, an oriental rug and a sunny terrace for four with beer and an ashtray. The door leads to Young Adult.',
       [async () => hubTvImage()]);
 
-    await b.frame('Tram 5 · young-adult/tram-5. Élodie arrives alone at Wallensteinplatz. A dog barks at a man trying to break into a Zigarettenautomat with a crowbar; The Shelter is closed.',
-      [art('tram-5-shelter-closed-v5.png'), elo('<h2>Wallensteinplatz</h2><p>🐕 A dog barks at a man by the cigarette machine.</p><button class="primary">Talk to the man</button>')]);
-    await b.frame('The man asks, “Host a Tschick? I brauch dringend ane!” Élodie has no cigarette yet. Later, giving him one makes him say “Oida, geil!”, disappear and leave his crowbar.',
-      [art('tram-5-shelter-closed-v5.png'), elo('<h2>By the Zigarettenautomat</h2><div class="card">“Host a Tschick? I brauch dringend ane!”</div><button disabled>Give a cigarette</button>')]);
+    await b.frame('Tram 5 · young-adult/tram-5. Élodie arrives alone at Wallensteinplatz. A dog barks at Tschick-Toni as he tries to break into a Zigarettenautomat with a crowbar; The Shelter is closed.',
+      [art('tram-5-shelter-closed-v5.png'), elo('<h2>Wallensteinplatz</h2><p>🐕 A dog barks at Tschick-Toni by the cigarette machine.</p><button class="primary">Talk to Tschick-Toni</button>')]);
+    await b.frame('Tschick-Toni asks, “Host a Tschick? I brauch dringend ane!” Élodie has no cigarette yet. Later, giving him one makes him say “Oida, geil!”, disappear and leave his crowbar.',
+      [art('tram-5-shelter-closed-v5.png'), elo('<h2>Tschick-Toni · Zigarettenautomat</h2><div class="card">“Host a Tschick? I brauch dringend ane!”</div><button disabled>Give a cigarette</button>')]);
     await b.frame('Élodie interacts with Tram 5. Every journey begins with a quiz: she chooses one of three topics, then everyone who is not hidden may answer five questions.',
       [art('tram-5-shelter-closed-v5.png'), elo('<h2>Tram 5 · quiz</h2><p>Choose a topic</p><div class="card list"><button>Topic 1</button><button>Topic 2</button><button>Topic 3</button></div><p class="hint">5 questions · all visible players can answer</p>')]);
     await b.frame('After every answer, the quiz shows the correct answer and an explanation in the style Élodie likes. After question five, the first available destination is Élodie’s flat.',

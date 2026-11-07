@@ -86,6 +86,8 @@ let wantedCharacter = null;
 let pendingPick = null;
 /** Where our avatar stands: from the server's echo after welcome, else our spawn point. @type {Pos | null} */
 let myPos = null;
+/** A server-validated interaction with the tram opens this local choice. */
+let tramQuizOfferOpen = false;
 let incarnationAt = 0;
 let incarnationTimer = /** @type {ReturnType<typeof setInterval> | null} */ (null);
 
@@ -181,7 +183,8 @@ function receive(raw) {
   } else if (m.t === 'say' || m.t === 'chatHistory') {
     social.onMessage(m);
   } else if (m.t === 'interact' && m.playerId === playerId && typeof m.feedback === 'string') {
-    toast(m.feedback);
+    if (m.object === 'tram-5-tram') { tramQuizOfferOpen = true; render(); }
+    else toast(m.feedback);
   } else if (m.t === 'view') {
     syncClock(m.now);
     const prev = minigame;
@@ -198,6 +201,7 @@ function receive(raw) {
       ? PHASE_TOASTS[`${prev.status}>${next ? next.status : 'room'}`] : undefined;
     // the party moved (a door, the game master): say where we are now
     const moved = prevNode !== null && campaign !== null && campaign.at.node !== prevNode && member() ? `→ ${titleOf(campaign.at.node)}` : undefined;
+    if (campaign?.at.node !== prevNode) tramQuizOfferOpen = false;
     if (turn || moved) { menu.close(); toast(/** @type {string} */ (moved ?? turn)); }
     render();
   } else if (m.t === 'err') {
@@ -532,7 +536,7 @@ function updateInteraction() {
     $('object-actions').hidden = button.hidden;
     return;
   }
-  if (campaign?.at.node.startsWith('young-adult')) {
+  if (campaign?.at.node.startsWith('young-adult') && !action) {
     button.hidden = true;
     $('object-actions').hidden = true;
     return;
@@ -562,10 +566,13 @@ function renderWalkPanel() {
  *  @param {Campaign} c @param {PartyMember} mem */
 function renderPlace(c, mem) {
   const here = content().nodes[c.at.node];
+  const atTram = isStory() && c.at.node === 'young-adult/tram-5';
+  $('view-place').classList.toggle('tram-5-compact', atTram);
+  $('place-kind').hidden = atTram;
   $('place-kind').textContent = here?.kind === 'hub' ? 'The hub' : here?.kind === 'world' ? 'A world' : '';
   $('place-title').textContent = titleOf(c.at.node);
   const intro = $('place-intro');
-  intro.hidden = !here?.intro;
+  intro.hidden = atTram || !here?.intro;
   intro.textContent = here?.intro ?? '';
 
   // open places only (no spoilers): done ✓, never entered ✨; the locked ones are just counted
@@ -587,31 +594,18 @@ function renderPlace(c, mem) {
     li.textContent = `🔒 ${locked} more to discover`;
     ul.append(li);
   }
-  ul.hidden = marks.length === 0;
+  ul.hidden = atTram || marks.length === 0;
 
   const chooser = CHARACTERS[content().chooser];
   const isChooser = mem.character === content().chooser;
   const doors = open.length > 0;
-  const atTram = isStory() && c.at.node === 'young-adult/tram-5';
-  const destinations = $('tram-destinations');
-  destinations.hidden = !(atTram && isChooser);
-  if (!destinations.hidden) {
-    $('tram-destination-buttons').replaceChildren(...children.filter((m) => m.unlocked).map((m) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'primary';
-      button.dataset.node = m.node.id;
-      button.textContent = `🚋 ${m.node.title}`;
-      button.disabled = !conn.isOnline();
-      return button;
-    }));
-  }
+  $('tram-quiz-offer').hidden = !(atTram && isChooser && tramQuizOfferOpen);
   const back = /** @type {HTMLButtonElement} */ ($('btn-place-back'));
-  back.hidden = !(isStory() && c.at.node.startsWith('young-adult') && isChooser);
+  back.hidden = !(isStory() && c.at.node.startsWith('young-adult') && isChooser) || atTram;
   if (!back.hidden) back.textContent = c.at.node === 'young-adult' ? '← Back to Élodie’s dream apartment'
     : ['young-adult/tram-5', 'young-adult/shelter'].includes(c.at.node) ? '← Stay at Wallensteinplatz'
       : `← Back to ${here?.parent ? titleOf(here.parent) : 'Tram 5'}`;
-  $('place-hint').hidden = !(isChooser && doors);
+  $('place-hint').hidden = atTram || !(isChooser && doors);
   $('place-hint').textContent = c.at.node === 'young-adult'
     ? c.facts.unlocked.includes('young-adult/shelter') ? 'Walk to Tram 5 or the Shelter entrance' : 'Walk to Tram 5'
     : 'Walk into a door to enter';
@@ -625,7 +619,8 @@ function renderPlace(c, mem) {
     dockStick('view-place');
     return;
   }
-  $('place-wait').textContent = !(doors || (atTram && children.some((m) => m.unlocked)))
+  $('place-wait').hidden = atTram;
+  $('place-wait').textContent = atTram ? '' : !doors
     ? (here?.kind === 'tableau' ? 'Eyes on the big screen!' : '')
     : isChooser ? ''
       : isGameMaster() ? `${chooser.name} walks into a door, or you pick one from ☰ 🎲 Game master.`
@@ -750,11 +745,13 @@ $('btn-jump').addEventListener('click', () => {
   if (canWalk() && !minigame && !amWisp() && conn.isOnline()) send({ t: 'jump' });
 });
 $('btn-place-back').addEventListener('click', () => send({ t: 'back' }));
-$('tram-destination-buttons').addEventListener('click', (event) => {
-  if (!(event.target instanceof Element)) return;
-  const button = /** @type {HTMLButtonElement | null} */ (event.target.closest('button[data-node]'));
-  if (button?.dataset.node && conn.isOnline()) send({ t: 'enter', node: button.dataset.node });
+$('tram-quiz-accept').addEventListener('click', () => {
+  if (!conn.isOnline() || !tramQuizOfferOpen) return;
+  tramQuizOfferOpen = false;
+  send({ t: 'enter', node: 'young-adult/tram-5/quiz' });
+  render();
 });
+$('tram-quiz-dismiss').addEventListener('click', () => { tramQuizOfferOpen = false; render(); });
 $('btn-interact').addEventListener('click', () => {
   if (!canWalk() || !conn.isOnline()) return;
   if (amWisp()) {

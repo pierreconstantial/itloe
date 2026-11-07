@@ -15,7 +15,7 @@
 import { PARTY_ROOM, APARTMENT_ROOM } from '../../shared/scene.js';
 import { WORLD } from '../../shared/world.js';
 import { INTRO_KEY, INTRO_KEY_SPOT, PORTAL } from '../../shared/campaign/story.js';
-import { OBJECT_ACTIONS } from '../../shared/interactions.js';
+import { OBJECT_ACTIONS, TRAM_5_MAN_NAME } from '../../shared/interactions.js';
 import { createLoop, py as snapY } from './scene-render.js';
 import { worldView } from './avatar-layer.js';
 
@@ -120,8 +120,80 @@ const PLANT = [
   '....ooooo....',
 ];
 
+/** A tired punk leaning on the cigarette machine, crowbar in hand. */
+const TRAM_MAN_PAL = { o: '#241c2b', h: '#3b2739', s: '#dca477', e: '#241c2b', c: '#614263', C: '#3e2d50',
+  p: '#303744', b: '#20212a', r: '#acb5be' };
+const TRAM_MAN = [
+  '....oooooooo....',
+  '...ohhhhhhhho...',
+  '..ohhhhhhhhhho..',
+  '..ohssssssssho..',
+  '..ohsesssessho..',
+  '..ohssssssssho..',
+  '...ohssssssho...',
+  '....oooooooo....',
+  '...occcccccco...',
+  '..ocCccccccCor..',
+  '..ocCccccccCor..',
+  '...oCCCCCCCo.r..',
+  '....opppppo..r..',
+  '....opppppo..r..',
+  '....oppooppo.r..',
+  '....obboobbo.rr.',
+];
+
+/** Small shaggy dog, looking up at the man. */
+const TRAM_DOG_PAL = { o: '#32252a', f: '#a66a45', F: '#d29861', e: '#1e1b20', n: '#1e1b20', c: '#d6a64d' };
+const TRAM_DOG = [
+  '........ooo.....',
+  '.......ofFFo....',
+  '......ofFeFFo...',
+  '......oFFFFno...',
+  '.......oFFFoo...',
+  '.oo...oFcFFo....',
+  'ofFoooFFFFFoo...',
+  'oFFFFFFFFFFo....',
+  '.oFFFFFfFfFo....',
+  '..oFFFfFfFFo....',
+  '...oFFo.oFFo....',
+  '...oooo.oooo....',
+];
+
+/** Red Vienna cigarette automat with packs behind glass and a coin slot. */
+const TRAM_AUTOMAT_PAL = { o: '#312b36', r: '#a33f47', R: '#c45458', d: '#78333d', g: '#7a8990',
+  G: '#bdc5b7', w: '#ead9b9', y: '#e5b964', k: '#352e37' };
+const TRAM_AUTOMAT = [
+  '.oooooooooooo.',
+  'oRRRRRRRRRRRRo',
+  'orrrrrrrrrrrro',
+  'orwwwwwwwwwrro',
+  'orwGGGGGGGwwro',
+  'orwGwwwwwGwGro',
+  'orwGrrrrrGwGro',
+  'orwGwwwwwGwGro',
+  'orwGGGGGGGwwro',
+  'orrrrrrrrrrrro',
+  'orGGGGGGGGGrro',
+  'orGwwGwwGwwGro',
+  'orGrrGrrGrrGro',
+  'orGGGGGGGGGrro',
+  'orrrrrrrrrrrro',
+  'orGGGGGGGGGrro',
+  'orGwwGwwGwwGro',
+  'orGrrGrrGrrGro',
+  'orGGGGGGGGGrro',
+  'orrrrrrrrrkkro',
+  'orrrrrrrrryyro',
+  'orrrrdddddddro',
+  'oddddddddddddo',
+  '.oooooooooooo.',
+];
+
 /** Every prop grid, for the test that keeps them rectangular and inside their palette. */
-export const PROP_PIXELS = { sofa: { grid: SOFA, pal: SOFA_PAL }, table: { grid: TABLE, pal: TABLE_PAL }, plant: { grid: PLANT, pal: PLANT_PAL } };
+export const PROP_PIXELS = { sofa: { grid: SOFA, pal: SOFA_PAL }, table: { grid: TABLE, pal: TABLE_PAL },
+  plant: { grid: PLANT, pal: PLANT_PAL }, 'tram-5-weird-man': { grid: TRAM_MAN, pal: TRAM_MAN_PAL },
+  'tram-5-dog': { grid: TRAM_DOG, pal: TRAM_DOG_PAL },
+  'tram-5-cigarette-automat': { grid: TRAM_AUTOMAT, pal: TRAM_AUTOMAT_PAL } };
 
 /** @param {number} v @param {number} p */
 const snap = (v, p) => Math.round(v / p) * p;
@@ -446,6 +518,7 @@ export function createPartyRoom(bg, fg, avatars) {
 
   /** @type {Map<string, {started: number, until: number}>} */
   const objectEffects = new Map();
+  let tramManSpeechUntil = 0;
 
   /** One prop's art from a pixel grid. @param {string[]} grid @param {Record<string, string>} pal */
   const pixelProp = (grid, pal) =>
@@ -489,6 +562,9 @@ export function createPartyRoom(bg, fg, avatars) {
     sofa: pixelProp(SOFA, SOFA_PAL),
     table: pixelProp(TABLE, TABLE_PAL),
     plant: pixelProp(PLANT, PLANT_PAL),
+    'tram-5-weird-man': pixelProp(TRAM_MAN, TRAM_MAN_PAL),
+    'tram-5-dog': pixelProp(TRAM_DOG, TRAM_DOG_PAL),
+    'tram-5-cigarette-automat': pixelProp(TRAM_AUTOMAT, TRAM_AUTOMAT_PAL),
   };
 
   // ---- players, doors & object actions ----
@@ -514,6 +590,10 @@ export function createPartyRoom(bg, fg, avatars) {
   function onInteract(m) {
     if (typeof m.playerId !== 'string' || typeof m.object !== 'string' || !Object.hasOwn(OBJECT_ACTIONS, m.object)) return;
     const now = performance.now();
+    if (m.object === 'tram-5-weird-man') {
+      tramManSpeechUntil = now + 4000;
+      return;
+    }
     objectEffects.set(m.object, { started: now, until: now + 2800 });
     avatars.say(m.playerId, typeof m.feedback === 'string' ? m.feedback : OBJECT_ACTIONS[m.object]?.default?.feedback ?? '', 2000);
   }
@@ -532,12 +612,37 @@ export function createPartyRoom(bg, fg, avatars) {
     // The apartment's sofa and plants are painted into its background; the scene props remain
     // for collision and object interactions without drawing duplicate pixel furniture over them.
     avatars.draw(g, geo, alpha, now, room, room === APARTMENT_ROOM ? {} : PROP_ART);
+    if (room.id === 'young-adult/tram-5') drawTramPeople(g, now);
     if (room === APARTMENT_ROOM) {
       drawCats(g, now);
       drawHubPeople(g, now);
       drawDecorations(g);
       if (keyVisible) drawIntroKey(g, now);
     }
+  }
+
+  /** The dog's repeated bark draws attention to the man; his line belongs to him, not Élodie's avatar. */
+  /** @param {CanvasRenderingContext2D} g @param {number} now */
+  function drawTramPeople(g, now) {
+    const bubble = (/** @type {number} */ x, /** @type {number} */ y, /** @type {string[]} */ lines) => {
+      const size = Math.max(12, Math.round(geo.unit * 0.23));
+      g.font = `bold ${size}px monospace`;
+      const width = Math.max(...lines.map((line) => g.measureText(line).width)) + size;
+      const height = lines.length * size * 1.3 + size * 0.5;
+      const cx = geo.ox + x * geo.unit;
+      const top = geo.oy + y * geo.unit - height;
+      const left = Math.max(geo.ox + 5, Math.min(cx - width / 2, geo.ox + WORLD.w * geo.unit - width - 5));
+      g.fillStyle = '#241c2b';
+      g.fillRect(left - 3, top - 3, width + 6, height + 6);
+      g.fillStyle = '#f8e8cf';
+      g.fillRect(left, top, width, height);
+      g.fillStyle = '#241c2b';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      lines.forEach((line, i) => g.fillText(line, left + width / 2, top + size * (i + 0.8) * 1.3));
+    };
+    if (Math.floor(now / 3600) % 2 === 0) bubble(10.1, 6.95, ['Wuff!']);
+    if (tramManSpeechUntil > now) bubble(11.15, 6.35, [TRAM_5_MAN_NAME, 'Host a Tschick?', 'I brauch dringend ane!']);
   }
 
   /** Friends without a player avatar gather here after their reunion has been earned. */
@@ -774,6 +879,7 @@ export function createPartyRoom(bg, fg, avatars) {
   /** Forget the furniture effects (reconnect); the avatar layer resets its own. */
   function reset() {
     objectEffects.clear();
+    tramManSpeechUntil = 0;
   }
 
   addEventListener('resize', () => { if (visible) layout(); });

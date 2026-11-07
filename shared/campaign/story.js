@@ -37,6 +37,8 @@ export const STORY_CONTENT = {
   gameMaster: 'pierre',
   items: Object.fromEntries([
     [INTRO_KEY, { id: INTRO_KEY, name: 'First key of memory', icon: '🗝️', description: 'Left behind by the mysterious visitor.' }],
+    ['shelter-ticket', { id: 'shelter-ticket', name: 'The Shelter concert ticket', icon: '🎟️',
+      description: 'A ticket to a night at The Shelter.' }],
     ...MEMORY_WORLDS.map((world, i) => {
       const id = `memory-key-${i + 1}`;
       return [id, { id, name: `Memory key ${i + 1}`, icon: '🗝️', description: `A key from ${world.title.toLowerCase()}.` }];
@@ -60,6 +62,11 @@ export const STORY_CONTENT = {
       id: 'young-adult/tram-5', kind: 'world', parent: 'young-adult', title: 'Tram 5 — Wallensteinplatz',
       room: 'young-adult/tram-5', unlock: { unlocked: 'young-adult' },
       door: { x: 2.4, y: 5.75, w: 3.2, h: 1.05 },
+    },
+    'young-adult/tram-5/quiz': {
+      id: 'young-adult/tram-5/quiz', kind: 'tableau', parent: 'young-adult/tram-5', title: 'Tram 5 quiz',
+      activity: { kind: 'quiz', settings: { count: 5, seconds: 20, mode: 'mixed' } }, replayable: true,
+      unlock: { unlocked: 'young-adult/tram-5' },
     },
     'young-adult/shelter': {
       id: 'young-adult/shelter', kind: 'world', parent: 'young-adult', title: 'The Shelter',

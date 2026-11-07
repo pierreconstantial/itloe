@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  FEET, PARTY_ROOM, blocked, feetBox, isWalkable, prop, resolve, room, spawnAt, wallsAround,
+  FEET, PARTY_ROOM, TRAM_5_ROOM, blocked, feetBox, isWalkable, prop, resolve, room, spawnAt, wallsAround,
 } from '../shared/scene.js';
 import { WORLD } from '../shared/world.js';
 import { SAMPLE_CONTENT } from '../shared/campaign/index.js';
@@ -131,14 +131,14 @@ test('draw order: the list is reused between frames without leaking entries', ()
   assert.deepEqual(out.map((e) => e.id), ['a', 'table'], 'the avatar that left is gone');
 });
 
-test('party room: the prop grids are rectangular and only use their own palette', () => {
+test('scene prop grids are rectangular and only use their own palette', () => {
   for (const [id, { grid, pal }] of Object.entries(PROP_PIXELS)) {
     const w = grid[0].length;
     grid.forEach((row, y) => {
       assert.equal(row.length, w, `${id} row ${y} is ${row.length} wide, expected ${w}`);
       for (const ch of row) assert.ok(ch === '.' || ch in pal, `${id} row ${y}: '${ch}' is not in the palette`);
     });
-    const art = PARTY_ROOM.props.find((p) => p.kind === id);
-    assert.ok(art, `${id} is a prop of the party room`);
+    const art = [...PARTY_ROOM.props, ...TRAM_5_ROOM.props].find((p) => p.kind === id);
+    assert.ok(art, `${id} is a prop of a scene`);
   }
 });

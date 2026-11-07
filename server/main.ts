@@ -17,6 +17,7 @@ import { makeStaticHandler } from './static.ts';
 import { makeApiHandler } from './http-api.ts';
 import { makeAccess } from './access.ts';
 import { makeAdmin } from './admin.ts';
+import { makeTestScene, parseTestScene, testSceneIndex, testScenePage, testScenesEnabled } from './test-scenes.ts';
 import { pickLan } from './lan.ts';
 import { makeClock } from './clock.ts';
 import { roundDeadline, shiftRound } from './resume.ts';
@@ -46,6 +47,7 @@ const STARTED_AT = Date.now();
 /** The admin page's server side: its events, the pages' error reports, its routes (snapshot: adminSnapshot). */
 const admin = makeAdmin({ isAdmin: access.isAdmin, clientIp: access.clientIp, snapshot: adminSnapshot, saveFile: STATE_FILE });
 const STORY_MODE = CONTENT.storyId === 'elo-50';
+const TEST_SCENES_ENABLED = STORY_MODE && testScenesEnabled(PORT, process.env.BLOKO_BIND, process.env.BLOKO_VAR, access.origin);
 
 // ---------- the evening + change hooks (wrap the engine, never inside it) ----------
 
@@ -130,7 +132,7 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   },
   (_prev, next) => positions.prune(next.party),
   () => placeWalkers(),
-  (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
+  (prev, next) => { if (prev.at.node !== next.at.node) { resetZones(); tramQuizOffers.clear(); } },
   (prev, next) => {
     for (const id of next.party.order) {
       const before = prev.party.players[id], after = next.party.players[id];
@@ -199,9 +201,46 @@ const joinUrl = (hostHeader?: string): string =>
   access.joinUrl(game.room, `http://${lan ? `${lan.address}:${PORT}` : (hostHeader ?? `localhost:${PORT}`)}`);
 const serveApi = makeApiHandler((req) => ({ url: joinUrl(req?.headers.host), code: game.room }), { version: CONTENT_VERSION, data: CONTENT });
 
+/** A local scratch URL replaces the current test evening with a known Tram 5 scene. */
+function serveTestScene(req: IncomingMessage, res: ServerResponse): boolean {
+  const url = new URL(req.url ?? '/', 'http://localhost');
+  if (!url.pathname.startsWith('/test/')) return false;
+  if (!TEST_SCENES_ENABLED || req.method !== 'GET') {
+    res.writeHead(404).end();
+    return true;
+  }
+  let setup;
+  try { setup = parseTestScene(url, CONTENT); }
+  catch (e) {
+    res.writeHead(400, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' });
+    res.end(e instanceof Error ? e.message : 'Invalid test scene');
+    return true;
+  }
+  if (setup === null) { res.writeHead(404).end(); return true; }
+  if ('index' in setup) {
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+    res.end(testSceneIndex(setup.index));
+    return true;
+  }
+  const fresh = freshGame(CONTENT);
+  const scene = makeTestScene(fresh.campaign, CONTENT, setup);
+  // Old simulator tabs belong to the previous scratch room; they must not rejoin the new one.
+  for (const ws of wss.clients) ws.terminate();
+  who.clear(); sockets.clear(); screens.clear();
+  zones.clear(); onSpot.clear(); placed.clear(); incarnations.clear(); tramQuizOffers.clear(); chat.length = 0;
+  joinQrUntil = 0; joinQrToken = null;
+  game.room = fresh.room;
+  game.bestPrevious = null;
+  commit(scene.campaign);
+  res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+  res.end(testScenePage(setup, scene.ids, game.room));
+  return true;
+}
+
 const httpServer = createServer(async (req, res) => {
   try {
     if (!access.http(req, res)) return;
+    if (serveTestScene(req, res)) return;
     if (serveReset(req, res)) return;
     if (await admin.handle(req, res)) return;
     if (!await serveApi(req, res)) await serveStatic(req, res);
@@ -233,6 +272,8 @@ const chat: { t: 'say'; playerId: string; text: string; at: number }[] = [];
 const socialAt = new WeakMap<WebSocket, number>();
 const jumpAt = new WeakMap<WebSocket, number>();
 const interactionAt = new WeakMap<WebSocket, number>();
+/** Players who interacted with the painted tram can accept its quiz offer until leaving the scene. */
+const tramQuizOffers = new Set<string>();
 
 /** The join QR on the TVs (showJoin / hideJoin): until when, in epoch ms; until ≤ now = closed.
  *  Ephemeral, like presence and pos. */
@@ -573,6 +614,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     const action = objectAction(object.id, actor);
     if (!action) return;
     interactionAt.set(ws, now);
+    if (STORY_MODE && object.id === 'tram-5-tram') tramQuizOffers.add(id);
     const event = { t: 'interact', playerId: id, object: object.id, action: action.key, feedback: action.feedback, at: now };
     sendAll(event);
     return;
@@ -649,6 +691,15 @@ function handleMessage(ws: WebSocket, m: any): void {
 
     case 'enter':
       // the game master, or the chooser, into an unlocked child of where the party is; refused → 'refused'
+      if (STORY_MODE && m.node === 'young-adult/tram-5/quiz') {
+        const gm = gameMaster();
+        if (party().players[id]?.character !== CONTENT.chooser || game.campaign.at.node !== 'young-adult/tram-5'
+          || !tramQuizOffers.has(id) || !gm) { sendErr(ws, 'refused'); return; }
+        if (!apply({ t: 'enter', id, node: m.node })) { sendErr(ws, 'refused'); return; }
+        tramQuizOffers.delete(id);
+        if (!apply({ t: 'startMinigame', id: gm, now: Date.now() })) throw new Error('Tram 5 quiz could not open');
+        return;
+      }
       if (typeof m.node !== 'string' || !apply({ t: 'enter', id, node: m.node })) sendErr(ws, 'refused');
       return;
 

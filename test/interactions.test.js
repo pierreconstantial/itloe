@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { PARTY_ROOM } from '../shared/scene.js';
+import { PARTY_ROOM, TRAM_5_ROOM } from '../shared/scene.js';
 import { interactionActor, nearbyObject, nearbyProp, objectAction, resolveObjectAction } from '../shared/interactions.js';
 
 test('context action follows the closest furniture and disappears out of reach', () => {
@@ -48,4 +48,19 @@ test('status and inventory together can change the action on an object', () => {
   assert.equal(objectAction('table', { ...actor, statuses: ['wisp'] }), null);
   assert.equal(nearbyObject(PARTY_ROOM, { x: 11, y: 7.6 }, { ...actor, statuses: ['wisp'] }), null);
   assert.equal(nearbyProp(PARTY_ROOM, { x: 11, y: 7.6 })?.id, 'table', 'a Wisp can find furniture to shine beside');
+});
+
+test('Élodie can talk to the man and request the tram quiz; the dog and automat are scenery', () => {
+  const elo = { id: 'p-elo', character: 'elodie', statuses: [] };
+  const pierre = { id: 'p-pierre', character: 'pierre', statuses: [] };
+  assert.equal(nearbyObject(TRAM_5_ROOM, { x: 10.5, y: 8 }, elo)?.id, 'tram-5-weird-man');
+  assert.equal(objectAction('tram-5-weird-man', elo)?.feedback, 'Tschick-Toni: Host a Tschick? I brauch dringend ane!');
+  assert.equal(nearbyObject(TRAM_5_ROOM, { x: 10.5, y: 8 }, pierre), null);
+  assert.equal(nearbyObject(TRAM_5_ROOM, { x: 10.5, y: 8 }, { ...elo, statuses: ['wisp'] }), null);
+  assert.equal(objectAction('tram-5-dog', elo), null);
+  assert.equal(objectAction('tram-5-cigarette-automat', elo), null);
+  assert.equal(nearbyObject(TRAM_5_ROOM, { x: 7.5, y: 6.8 }, elo)?.id, 'tram-5-tram');
+  assert.equal(objectAction('tram-5-tram', elo)?.feedback, 'A ticket for a quizz!');
+  assert.equal(objectAction('tram-5-tram', pierre), null);
+  assert.equal(TRAM_5_ROOM.props.length, 4);
 });

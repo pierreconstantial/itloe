@@ -254,8 +254,18 @@ export const APARTMENT_ROOM = room('apartment-room', PARTY_FLOOR, [
   { x: 12.35, y: 4.75, w: 2.8, h: 1.1 }, // terrace table and chairs
 ]);
 
-/** Young Adult backgrounds use their visible furniture as movement obstacles. */
-export const TRAM_5_ROOM = room('young-adult/tram-5', { x: 0.5, y: 5.6, w: 15, h: 3.2 }, []);
+/** The man and his dog stand by the cigarette machine in front of the Tram 5 stop. */
+export const TRAM_5_ROOM = room('young-adult/tram-5', { x: 0.5, y: 5.6, w: 15, h: 3.2 }, [
+  // The tram is painted into the background; this is its interaction area, without duplicate art.
+  prop('tram-5-tram', { x: 5.2, y: 4.65, w: 4.9, h: 1.55 }, { layer: 'back' }),
+  prop('tram-5-dog', { x: 9.5, y: 7.05, w: 1.2, h: 0.9 },
+    { solid: { x: 9.75, y: 7.7, w: 0.7, h: 0.25 } }),
+  prop('tram-5-weird-man', { x: 10.55, y: 6.45, w: 1.2, h: 1.2 },
+    { solid: { x: 10.85, y: 7.3, w: 0.6, h: 0.35 } }),
+  prop('tram-5-cigarette-automat', { x: 11.85, y: 5.7, w: 1.05, h: 1.8 },
+    { solid: { x: 11.95, y: 7.15, w: 0.85, h: 0.35 } }),
+]);
+/** Other Young Adult backgrounds use their visible furniture as movement obstacles. */
 export const SHELTER_ROOM = room('young-adult/shelter', { x: 0.5, y: 4.4, w: 15, h: 4.4 }, [], [
   { x: 7.1, y: 4.5, w: 2.5, h: 1.2 }, // foosball
   { x: 10.5, y: 4.1, w: 4.8, h: 1.2 }, // bar and pinball machine

@@ -16,6 +16,9 @@
 }
 .place-top p, .place-top h2 { margin: 0; }
 #place-title { font-size: 26px; }
+#view-place.tram-5-compact .place-top { align-items: flex-start; text-align: left; }
+#view-place.tram-5-compact #place-title { font-size: 15px; font-weight: 600; color: var(--fg-dim); }
+#view-place.tram-5-compact .bag-open { display: none; }
 #place-children {
   list-style: none;
   margin: 4px 0 0;
@@ -37,10 +40,10 @@
   color: var(--accent);
   font-weight: 700;
 }
-.tram-destinations { width: min(100%, 340px); }
-.tram-destinations p { margin: 4px 0 8px; color: var(--accent); font-weight: 700; }
-#tram-destination-buttons { display: flex; flex-direction: column; gap: 8px; }
-#tram-destination-buttons button { width: 100%; }
+.tram-quiz-offer { width: min(100%, 340px); padding: 12px; border-radius: 12px; background: var(--bg-2); }
+.tram-quiz-offer p { margin: 0 0 10px; color: var(--accent); font-weight: 700; }
+.tram-quiz-offer div { display: flex; gap: 8px; }
+.tram-quiz-offer button { flex: 1; }
 
 /* game-master sheet: rows of small controls (the panel's own rules style only direct buttons) */
 .gm-panel { text-align: left; }

@@ -205,6 +205,10 @@ world units, with the player holding it, or null; who holds it is the minigame's
                                         // TV reconnecting mid-cutscene, never drop a cutscene they did not play.
 ```
 
+- **Tram 5 quiz offer:** When Élodie interacts with the tram at `young-adult/tram-5`, the server gives her a
+  quiz offer. Accept sends `enter` for `young-adult/tram-5/quiz`; the server checks that offer, enters the
+  tableau and applies the game master's `startMinigame` in sequence. The quiz opens in its lobby, where eligible
+  players ready up and the game master chooses settings and starts a round. Dismiss sends no campaign action.
 - **Doors:** `pos` stays ephemeral, but while no minigame runs the server reads it against the current node's doors (`zoneAt`):
   stepping INTO a door (edge, not standing in it) records `zone.entered` for that character, and for the
   content's chooser on an unlocked door applies `enter`. After the party moves, standing where a door
