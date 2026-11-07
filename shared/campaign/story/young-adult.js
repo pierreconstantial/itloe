@@ -157,7 +157,6 @@ export const YOUNG_ADULT = {
       room: TRAM_5, unlock: { unlocked: 'young-adult' },
       door: { x: 2.4, y: 5.75, w: 3.2, h: 1.05 },
       back: false, compact: true,
-      hints: [{ text: 'The tram waits at Wallensteinplatz.' }],
     },
     [TRAM_QUIZ]: {
       id: TRAM_QUIZ, kind: 'tableau', parent: TRAM_5, title: 'Tram 5 quiz',
@@ -173,14 +172,12 @@ export const YOUNG_ADULT = {
       room: SHELTER, unlock: { all: [{ unlocked: TRAM_5 }, { flag: 'young-adult.shelter.open' }] },
       // in through its entrance on Wallensteinplatz, out up its stair (the `exits` machine's zones)
       back: false,
-      hints: [{ text: 'The stairs lead back up to Wallensteinplatz.' }],
     },
     [FLAT]: {
       id: FLAT, kind: 'world', parent: TRAM_5, title: 'Appart Elo 1',
       room: FLAT, unlock: { unlocked: TRAM_5 },
       // out through its front door (the `exits` machine's zone)
       back: false,
-      hints: [{ text: 'The front door leads out to Tram 5.' }],
     },
     // the Shelter's table football: only through Pierre's offer (the `shelter` machine), and its lobby opens at
     // once. Everyone may play, wisps too, as themselves
