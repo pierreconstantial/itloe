@@ -144,7 +144,8 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   },
   (_prev, next) => positions.prune(next.party),
   () => placeWalkers(),
-  (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
+  // doors are read only while no minigame runs: at its start and end too (its lobby moves walkers without them)
+  (prev, next) => { if (prev.at.node !== next.at.node || !prev.at.activity !== !next.at.activity) resetZones(); },
   () => armMachineTimer(),
   (prev, next) => {
     for (const id of next.party.order) {
@@ -543,8 +544,9 @@ function placeWalkers(): void {
   }
 }
 
-/** The party moved to another node: every walker's door is re-read on the new map, so standing where
- *  a door now is does not fire it — only a fresh step in does. */
+/** The party moved to another node, or a minigame started or ended: every walker's door is re-read where they
+ *  stand, so standing where a door now is (or the portal, after the opening's game) does not fire it — only a
+ *  fresh step in does. */
 function resetZones(): void {
   zones.clear();
   for (const [id, pos] of positions.entries()) zones.set(id, zoneHere(pos));
