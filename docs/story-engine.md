@@ -214,8 +214,8 @@ with a misuse of another field (e.g. an `after` for in-game time: see Patterns).
 
 | Story need | Missing |
 |---|---|
-| Table football at the Shelter | The minigame itself (`docs/minigames.md`) |
 | The tram quiz's three topics, chosen by Élodie | Quiz settings a machine can set (today: the tableau's fixed `settings`) |
+| Talking to Pierre, kissing Pierre (actions on a character) | Actions on characters ([draft proposal](planning/proposal-character-interactions.md); today: a timer re-offers, the kiss is a question) |
 
 ## Example: Tschick-Toni
 

@@ -2,6 +2,7 @@
 // the Shelter and the two flats. Story data only (docs/story-engine.md).
 import { room, prop } from '../../scene.js';
 import { INTRO_KEY } from './hub.js';
+import { CHARACTERS } from '../../characters.js';
 
 /** @typedef {import('../types.js').Content} Content */
 
@@ -13,6 +14,7 @@ const FLAT = 'young-adult/appart-elo-1';
 const SHELTER = 'young-adult/shelter';
 const MAROKKANERGASSE = 'young-adult/appart-pierre';
 const BACKGAMMON = 'young-adult/appart-elo-1/backgammon';
+const FOOSBALL = 'young-adult/shelter/foosball';
 const PYRAMIDE = 'young-adult/appart-pierre/pyramide';
 const ADULT_KEY = 'young-adult-adult-key';
 /** Set by the kiss at the Shelter: Marokkanergasse opens, Élodie's flat closes. */
@@ -42,6 +44,8 @@ const SHELTER_ROOM = room('young-adult/shelter', { x: 0.5, y: 4.4, w: 15, h: 4.4
   prop('shelter-barman', { x: 12.9, y: 3.25, w: 0.8, h: 1.05 }, { layer: 'back' }),
   prop('shelter-beer-guy', { x: 13.7, y: 5.1, w: 0.8, h: 1.15 }, { layer: 'back' }),
   prop('shelter-hyped-punk', { x: 3.4, y: 5.25, w: 0.9, h: 1.1 }, { layer: 'back' }),
+  // the painted foosball table: its interaction area, without art
+  prop('shelter-foosball', { x: 7.1, y: 4.5, w: 2.5, h: 1.2 }, { layer: 'back' }),
 ], [
   { x: 7.1, y: 4.5, w: 2.5, h: 1.2 }, // foosball
   { x: 10.5, y: 4.1, w: 4.8, h: 1.2 }, // bar and pinball machine
@@ -76,7 +80,9 @@ const APPART_PIERRE_ROOM = room('young-adult/appart-pierre', { x: 0.5, y: 5.45, 
   { x: 9.3, y: 5.35, w: 3.6, h: 0.95 }, // cream-covered sofa
 ]);
 
-const PIERRE_LINE = 'I brought beers and cigarettes! But first, let’s play backgammon.';
+const FOOSBALL_OFFER = { node: FOOSBALL, text: 'Pierre: “Élodie! A game of table football?”', accept: '⚽ Yes' };
+const PLAY_FOOSBALL = { 'shelter-foosball': { actions: [{ key: 'play', text: '⚽ Play table football' }] } };
+const PIERRE_LINE ='I brought beers and cigarettes! But first, let’s play backgammon.';
 const BACKGAMMON_OFFER = { node: BACKGAMMON, text: 'Pierre: “Let’s play backgammon!”', accept: '🎲 Yes' };
 
 /** Marokkanergasse's people: talking to any of them offers Pyramide. */
@@ -138,6 +144,13 @@ export const YOUNG_ADULT = {
       room: FLAT, unlock: { unlocked: TRAM_5 },
       back: '← Back to Tram 5',
       hints: [{ text: 'Élodie can return to Tram 5.' }],
+    },
+    // the Shelter's table football: only through Pierre's offer (the `shelter` machine), and its lobby opens at
+    // once. Everyone may play, wisps too, as themselves
+    [FOOSBALL]: {
+      id: FOOSBALL, kind: 'tableau', parent: SHELTER, title: 'Table football',
+      activity: { kind: 'foosball', eligible: /** @type {import('../../characters.js').CharacterId[]} */ (Object.keys(CHARACTERS)) }, unlock: { unlocked: SHELTER },
+      enterWhen: { machine: 'shelter', in: ['pierre-here', 'offered'] }, startsOnEnter: true,
     },
     // Pierre's game, in the flat: only through his offer (the `pierre-visit` machine), and its lobby opens at once
     [BACKGAMMON]: {
@@ -334,9 +347,9 @@ export const YOUNG_ADULT = {
         lifted: {},
       },
     },
-    // The Shelter: Pierre is there again (his wisp becomes his avatar) and proposes table football. After the
-    // match Élodie can kiss him: Marokkanergasse opens as a tram destination, her flat closes. Table football
-    // doesn't exist yet: the game master moves this machine to `after-match`.
+    // The Shelter: Pierre is there again (his wisp becomes his avatar) and offers table football (Yes or Dismiss;
+    // the table offers it again). Yes opens its lobby. After a finished match, back in the bar, Élodie can kiss
+    // him: Marokkanergasse opens as a tram destination, her flat closes.
     shelter: {
       initial: 'not-yet',
       states: {
@@ -345,14 +358,36 @@ export const YOUNG_ADULT = {
           enter: [{ incarnate: 'pierre' }],
           speech: { pierre: 'Élodie! A game of table football?' },
           hints: { [SHELTER]: 'Pierre: “Élodie! A game of table football?”' },
+          objects: PLAY_FOOSBALL,
+          offer: FOOSBALL_OFFER,
+          on: { [`entered:${FOOSBALL}`]: 'match', 'play:shelter-foosball': 'offered' },
         },
-        // Yes or Dismiss; dismissed, the question comes back a little later
+        offered: {
+          hints: { [SHELTER]: 'Pierre: “Élodie! A game of table football?”' },
+          objects: PLAY_FOOSBALL,
+          offer: FOOSBALL_OFFER,
+          on: { [`entered:${FOOSBALL}`]: 'match', 'play:shelter-foosball': 'offered' },
+        },
+        match: {
+          hints: { [FOOSBALL]: 'Table football at the Shelter.' },
+          when: [{ if: { done: FOOSBALL }, to: 'after-match' }],
+          // the game master took the party back to the bar before a match finished: the table offers it again
+          on: { [`entered:${SHELTER}`]: 'offered' },
+        },
+        // back in the bar; Yes or Dismiss, and dismissed, the question comes back a little later
         'after-match': {
+          enter: [{ goto: SHELTER }],
           hints: { [SHELTER]: 'What a match!' },
           choice: { at: SHELTER, text: 'What a match! Kiss Pierre?', options: [{ key: 'kiss', text: '💋 Yes' }, { key: 'kiss-later', text: 'Dismiss' }] },
           on: { 'choose:kiss': { to: 'kissed', do: [{ flag: KISSED }] }, 'choose:kiss-later': 'kiss-later' },
         },
-        'kiss-later': { hints: { [SHELTER]: 'What a match!' }, after: { ms: 30_000, to: 'after-match' } },
+        'kiss-later': { hints: { [SHELTER]: 'What a match!' }, after: { ms: 30_000, to: 'kiss-again' } },
+        // the question again, without going back to the bar (`after-match` moves the party)
+        'kiss-again': {
+          hints: { [SHELTER]: 'What a match!' },
+          choice: { at: SHELTER, text: 'What a match! Kiss Pierre?', options: [{ key: 'kiss', text: '💋 Yes' }, { key: 'kiss-later', text: 'Dismiss' }] },
+          on: { 'choose:kiss': { to: 'kissed', do: [{ flag: KISSED }] }, 'choose:kiss-later': 'kiss-later' },
+        },
         kissed: {
           speech: { pierre: '❤️' },
           hints: { [SHELTER]: 'The tram can take you to Marokkanergasse now.' },
