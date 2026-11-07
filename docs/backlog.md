@@ -28,6 +28,7 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Backgammon's restart and hidden dice untested](#backgammons-restart-and-hidden-dice-untested) | No test resumes a backgammon round or checks its view hides the dice | P2 | Open | Low |
 | [Questions of a dropped round come back](#questions-of-a-dropped-round-come-back) | A round dropped by `back` or `goto` doesn't use up its questions or words | P2 | Open | Low |
 | [TV frame cost unmeasured](#tv-frame-cost-unmeasured) | The room redraws everything at 60 fps; nobody measured it on the evening's laptop | P2 | Open | Low |
+| [Walkable floor in painted rooms](#walkable-floor-in-painted-rooms) | Players walk over painted chairs, tables and edges that should block them | P2 | Open | Low |
 | [Guests controlling NPCs](#guests-controlling-npcs) | Players controlling Marokkanergasse's NPCs, Nico and Mathieu | P3 | Needs decision | High |
 | [Room before the content arrives](#room-before-the-content-arrives) | A reloaded phone walks the party room until the content loads | P3 | Open | Low |
 | [Debug accessors show only the party room](#debug-accessors-show-only-the-party-room) | `bloko.drawOrder()` and `bloko.scene()` ignore the apartment and Young Adult's rooms | P3 | Open | Trivial |
@@ -101,6 +102,12 @@ In the apartment, the cats, friends, keepsakes and the key are drawn after the d
 For most of the evening the TV's room redraws everything 60 times a second: about 800 furniture rectangles pixel by pixel (`public/screen/party-room.js`; sprites, by contrast, are cached as bitmaps in `shared/sprites.js`), each door plaque measured again, each name label reading the page's computed style (`public/screen/avatar-layer.js`), and the wisp overlay building its room each frame (`public/screen/main.js`). Nobody has measured whether the evening's laptop keeps up.
 
 **Recommendation:** measure the frame time on that laptop with four phones walking. If it's tight: cache the furniture like the sprites, read the player colours once, build the overlay's room once per minigame.
+
+### Walkable floor in painted rooms
+
+The painted rooms (Tram 5, Élodie's flat, the Shelter, Marokkanergasse) block only a few areas: their walkable floor is one rectangle, minus the props' `solid` boxes and the room's extra solids (`room(id, floor, props, solids)` in `shared/campaign/story/young-adult.js`). Everything else painted in the picture can be walked on: players cross the Shelter's chairs and side tables, stand on painted edges and in corners that aren't floor, or half under furniture. Each room needs an invisible exclusion layer drawn over its painting, so the floor where avatars can walk matches what the picture shows.
+
+**Recommendation:** add the missing solids room by room, as story data (the extra solids already are that layer), and give the TV a debug view that draws the walkable floor and the solids over the painting (e.g. `?solids=1`), so they can be tuned by eye. A test per room can keep the doors, zones, pickups and actions reachable from walkable floor, as `test/story.test.js` does for some of them.
 
 ### Guests controlling NPCs
 
