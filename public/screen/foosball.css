@@ -35,3 +35,4 @@
 }
 .fb-lag { display: inline-flex; align-items: center; gap: calc(8 * var(--u)); }
 .fb-lag i { width: calc(14 * var(--u)); height: calc(14 * var(--u)); border-radius: 50%; display: inline-block; }
+.fb-podium-line { margin: 0; font-size: calc(32 * var(--u)); color: var(--fg-dim); }

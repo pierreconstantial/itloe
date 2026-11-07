@@ -5,7 +5,7 @@
 
 import { h, addStylesheet, playerColor } from './dom.js';
 import { sfx } from './audio.js';
-import { ROLES, TEAMS, TEAM_COLORS, TEAM_NAMES, TUNING, holders, menY, rodX, summarizeFoosballSettings } from '../../shared/foosball.js';
+import { ROLES, TEAMS, TEAM_COLORS, TEAM_NAMES, TUNING, forfeitLine, holders, menY, rodX, summarizeFoosballSettings, winner } from '../../shared/foosball.js';
 
 /** The round's view: its state without the seed (server/foosball.ts). @typedef {Omit<import('../../shared/foosball.js').FoosballState, 'seed'>} View */
 /** @typedef {import('../../shared/foosball.js').Team} Team */
@@ -194,12 +194,14 @@ export const FOOSBALL_SCREEN = {
   name: 'table football',
   settings: { summarize: summarizeFoosballSettings },
   mount,
-  /** The winning team as the title. */
+  /** The winning team as the title, and why when the other had nobody left. */
   podium(round) {
     const s = /** @type {View} */ (round.view);
-    const won = s.score.a === s.score.b ? null : s.score.a > s.score.b ? 'a' : 'b';
+    const won = winner(s);
+    const why = forfeitLine(s);
     return {
       title: won ? `${TEAM_NAMES[won]} wins!` : "It's a draw!",
+      ...(why ? { lines: [h('p', 'fb-podium-line', [why])] } : {}),
       rowExtra: (id) => [h('span', '', [TEAM_NAMES[s.players[id].team]])],
     };
   },
