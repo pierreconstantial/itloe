@@ -2,7 +2,7 @@
 // then prints one line per suite, the FAIL lines of failed ones, and an overall line; exits 1 on a failure.
 // Usage: npm run e2e [-- [--shots <dir> [--compare <ref>]] <suite>…]      (no suite: all of them)
 //   suites: base resume presence campaign quiz pyramide backgammon inventory tv phone; phone:<n> = ONLY=<n>, tv:<section> = ONLY=<section>
-//   --shots <dir>: SHOTS=<dir>/<suite> for the tv and phone suites (each must be new or empty).
+//   --shots <dir>: SHOTS=<dir>/<suite> for the browser suites (each must be new or empty).
 //   --compare <ref>: then compares those screenshots with <ref>/<suite>, an earlier --shots folder (e2e-compare.mts).
 //   LOCK_MS and E2E_SLOW pass through.
 // Each suite runs as a job through scripts/e2e-slot.sh (the machine's shared slots), all of them in parallel.
@@ -98,7 +98,7 @@ async function runner(args: string[]): Promise<number> {
   const shooting = specs.filter((s) => SUITES[parse(s)!.suite].browser).map((s) => s.replace(':', '-'));
   if (compare && !shots) return usage('--compare needs --shots <dir> for the new screenshots');
   if (compare && !existsSync(compare)) return usage(`no reference folder ${compare}`);
-  if (shots && !shooting.length) return usage('only the tv and phone suites take screenshots');
+  if (shots && !shooting.length) return usage('only the browser suites take screenshots');
   // a fresh folder per suite: no stale screen from an earlier run, and a reference is never overwritten
   const used = shooting.filter((n) => shots && existsSync(join(shots, n)) && readdirSync(join(shots, n)).length);
   if (used.length) return usage(`${used.map((n) => join(shots!, n)).join(', ')} already holds screenshots: pick another --shots folder`);

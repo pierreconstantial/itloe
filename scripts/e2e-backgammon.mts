@@ -8,7 +8,8 @@
 // results and the next games, the phones wait for Pierre, and his phone's button starts the next round; after the
 // last, it shows the podium, ranked as the standings.
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
-//        PORT=3194 CDP=9222 node scripts/e2e-backgammon.mts      (never PORT 3131: the live server)
+//        PORT=3194 CDP=9222 [SHOTS=dir] node scripts/e2e-backgammon.mts      (never PORT 3131: the live server)
+// SHOTS=<dir> saves screenshots of a round, the results between rounds and the podium, each with its visible text.
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -18,7 +19,7 @@ import { BAR, OFF, allowedSteps, nextPairs, other, reach, standings } from '../s
 const PORT = process.env.PORT ?? '3142';
 const CDP = process.env.CDP ?? '9222';
 const VAR = mkdtempSync(join(tmpdir(), 'itloe-backgammon-'));
-const SHOTS = '/tmp/bg-shots-e2e';
+const SHOTS = process.env.SHOTS;
 const NAMES = ['pierre', 'elodie', 'sol', 'anna']; // Pierre first: the game master
 
 let server: Server | null = null;
@@ -198,6 +199,7 @@ async function checkResults(s: any): Promise<void> {
   check(next ? next.pairs.every(([a, b]) => tvText.includes(names(a)) && tvText.includes(names(b))) && tvText.includes(`Up next · Round ${s.round + 1}`) : tvText.includes('That was the last round'),
     `round ${s.round}: the TV shows ${next ? 'the next round\'s games' : 'that it was the last round'}`);
   check(tvText.includes(`Waiting for Pierre to ${what}`), `round ${s.round}: the TV waits for Pierre to ${what}`);
+  await tv.shot(`backgammon-results-${s.round}`);
   for (const seat of Object.values(seats)) {
     if (seat.name === 'pierre') continue;
     await seat.page.waitText(new RegExp(`Waiting for Pierre to ${what}`));
@@ -240,11 +242,13 @@ try {
   await say(seats.pierre.id, { t: 'start' });
   let s = await untilRound((r) => r.phase === 'playing', i);
   check(s.boards.length === 2 && s.round === 1, 'four players: round 1 on two boards');
+  await tv.shot('backgammon-round-1');
 
   // ---------- round 1, board 1: a move by each side through the phones' taps ----------
   const first = s.boards[0].turn;
   await byId(s.boards[0][first]).page.waitFor(`document.querySelectorAll('#view-backgammon .can').length > 0`);
   const moved = await tapMove('first side');
+  await byId(s.boards[0][first]).page.shot('backgammon-moved-phone');
   i = T.mark();
   await byId(s.boards[0][first]).page.tap('Undo');
   const undone = await untilRound((r) => r.boards[0].undo.length === 0, i);
@@ -276,6 +280,7 @@ try {
   const top = rows.filter((row) => row.rank === 1);
   await tv.waitText(top.length === 1 ? new RegExp(`${final.players[top[0].id].name} wins!`) : /It's a tie!/);
   check(true, 'the TV\'s podium names the winner');
+  await tv.shot('backgammon-podium');
 } catch (e) {
   check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${server?.log() ?? ''}`);
 } finally {

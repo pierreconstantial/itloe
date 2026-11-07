@@ -12,9 +12,10 @@ while :; do
   i=1
   while [ "$i" -le "$n" ]; do
     if [ "$i" -eq 1 ]; then lock=/tmp/itloe-e2e.lock; else lock="/tmp/itloe-e2e.slot$i.lock"; fi
-    flock -n -E 75 "$lock" "$@"
-    rc=$?
-    [ "$rc" -ne 75 ] && exit "$rc"
+    # the lock on fd 9, held by the command (and what it starts) until it ends; its exit code passes through
+    exec 9>"$lock"
+    if flock -n 9; then exec "$@"; fi
+    exec 9>&-
     i=$((i + 1))
   done
   sleep 2

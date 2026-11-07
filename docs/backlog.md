@@ -50,7 +50,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Round screens' helpers and wording](#round-screens-helpers-and-wording) | DOM helpers, countdowns and wording repeated across screens and between phone and TV | P3 | Open | Low |
 | [Three meanings of round in the server](#three-meanings-of-round-in-the-server) | `server/round.ts` calls a whole run of a minigame a round | P3 | Open | Low |
 | [Dead code](#dead-code) | Screens only Pierre's phone shows, unused exports and CSS, a duplicate range check | P3 | Open | Low |
-| [Small e2e script bugs](#small-e2e-script-bugs) | `--compare` misses two suites, a suite exiting 75 reruns | P3 | Open | Low |
 
 ## Items
 
@@ -243,8 +242,3 @@ Each round's rules still write their own clock (`deadline`, `deadlineAction`, `s
 - CSS: `.settings-line` and `@keyframes pop-in` in `public/commun/screen-main.css`; `.quiz-title` and `.lobby > .quiz-credits` in `public/screen/quiz.css`.
 - `startFoosball` (`shared/foosball.js`) checks the player range that the plain lobby now enforces from its `players`.
 - Apartment drawing in `public/screen/party-room.js` that its painted background replaced (`paintTerrace` and the sofa stretch): check what is still reachable after the story engine.
-
-### Small e2e script bugs
-
-- `--shots`/`--compare`: the runner takes screenshots for every browser suite (`scripts/e2e-run.mts`), but the Pyramide and backgammon suites write to fixed folders of their own and take none, so a comparison reports "no reference folder" for both.
-- `scripts/e2e-slot.sh` treats a suite that exits with code 75 as "slot busy" and runs it again.
