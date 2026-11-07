@@ -143,6 +143,8 @@ A bank file is `{ "dataset": { "name", "licence", "attribution" }, "questions": 
 
 ---
 
+Exploratory proposals live in [ideas.md](docs/planning/ideas.md), with usage instructions at the top. Consult it only when requested; ideas are separate from the [backlog](docs/planning/backlog.md).
+
 ## For developers
 
 ### Architecture

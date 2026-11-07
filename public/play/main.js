@@ -10,9 +10,10 @@ import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.
 import { WORLD, spawnPoint } from '../../shared/world.js';
 import {
   gameMasterId, isWisp, leads, roomAt, sceneAt, hintAt, chooserHeld, pickupsAt, offerAt, objectRules, within, choiceAt,
+  storyActionAt,
 } from '../../shared/campaign/index.js';
 import { room as sceneRoom } from '../../shared/scene.js';
-import { interactionActor, nearbyObject, nearbyProp, objectAction } from '../../shared/interactions.js';
+import { interactionActor, nearbyObject, nearbyProp, objectAction, groupAction } from '../../shared/interactions.js';
 import { createPicker, pickStates, anyPickable } from './picker.js';
 import { createJoystick } from './joystick.js';
 import { avatarCanvas, paintAvatar } from '../commun/avatar.js';
@@ -88,6 +89,8 @@ let pendingPick = null;
 let myPos = null;
 /** The story offer (offerAt) this phone dismissed; it shows again once it is gone and comes back. @type {object | null} */
 let dismissedOffer = null;
+/** The characters in this phone's reach, closest first, as the server last said (`reach`). @type {string[]} */
+let reach = [];
 let incarnationAt = 0;
 let incarnationTimer = /** @type {ReturnType<typeof setInterval> | null} */ (null);
 
@@ -169,6 +172,7 @@ function receive(raw) {
   if (m.t === 'view' || m.t === 'err') heardBack(); // what answers a tap (oneTap)
   if (m.t === 'welcome' && typeof m.playerId === 'string') {
     if (m.playerId !== playerId) myPos = null; // a different player: its own echo or spawn
+    reach = []; // the server tells this socket again
     playerId = m.playerId;
     roomPrompt = null;
     pendingPick = null;
@@ -182,10 +186,18 @@ function receive(raw) {
     // the one pos a phone receives: our own last position, echoed right after welcome
     const echoed = m.playerId === playerId ? posFromEcho(m) : null;
     if (echoed) { myPos = echoed; joystick.moveTo(echoed); render(); }
+  } else if (m.t === 'reach' && Array.isArray(m.characters)) {
+    reach = m.characters.filter((/** @type {unknown} */ c) => typeof c === 'string');
+    updateInteraction();
   } else if (m.t === 'unsaved') {
     running?.screen.message(m); // the running minigame's own; none running: ignored
   } else if (m.t === 'say' || m.t === 'chatHistory') {
     social.onMessage(m);
+  } else if (m.t === 'interact' && groupAction(m.group) && Array.isArray(m.with) && playerId
+    && (m.playerId === playerId || m.with.includes(playerId))) {
+    const a = /** @type {NonNullable<ReturnType<typeof groupAction>>} */ (groupAction(m.group));
+    const name = (/** @type {unknown} */ id) => { const p = campaign?.party.players[String(id)]; return p ? CHARACTERS[p.character]?.name ?? '' : ''; };
+    toast(m.playerId === playerId ? `${a.emoji} ${a.label} with ${m.with.map(name).join(', ')}` : `${a.emoji} ${a.label} from ${name(m.playerId)}`);
   } else if (m.t === 'interact' && m.playerId === playerId && typeof m.feedback === 'string') {
     dismissedOffer = null; // using an object again may renew its offer
     if (m.feedback) toast(m.feedback.replace(/\n/g, ' '));
@@ -513,13 +525,20 @@ function wispNearObject(pos) {
   return !!nearbyProp(sceneAt(content(), campaign.facts, campaign.at.node), pos) || !!pickupNear(pos);
 }
 
-/** What the interact button does at `pos`: pick up an item (the chooser), or use the nearest object.
- * @param {{x: number, y: number}} pos @returns {{ object: string, text: string } | null} */
+/** What the interact button does at `pos`: the story's action there (storyActionAt: an item to pick up, a story
+ * object, a story action on a character in reach), else the nearest furniture's. `story`: one of the story's, which
+ * hides the group actions.
+ * @param {{x: number, y: number}} pos @returns {{ object?: string, character?: string, text: string, story?: true } | null} */
 function actionAt(pos) {
   const mem = member();
   if (!mem || !campaign) return null;
-  const pickup = mem.character === content().chooser ? pickupNear(pos) : null;
-  if (pickup) return { object: pickup.item, text: `${content().items[pickup.item]?.icon ?? '✋'} Pick up ${content().items[pickup.item]?.name ?? pickup.item}` };
+  const story = minigame ? null : storyActionAt(campaign, content(), mem, pos, reach);
+  if (story && 'pickup' in story) {
+    const item = content().items[story.pickup.item];
+    return { object: story.pickup.item, text: `${item?.icon ?? '✋'} Pick up ${item?.name ?? story.pickup.item}`, story: true };
+  }
+  if (story && 'object' in story) return { object: story.object, text: story.action.text, story: true };
+  if (story) return { character: story.character, text: story.action.text, story: true };
   const actor = interactionActor(mem, campaign.facts);
   const rules = objectRules(campaign.facts, content());
   const object = nearbyObject(roomHere(), pos, actor, rules);
@@ -537,6 +556,10 @@ function updateInteraction() {
   const jump = /** @type {HTMLButtonElement} */ ($('btn-jump'));
   jump.hidden = !mem || amWisp() || !canWalk() || !!minigame;
   jump.disabled = !conn.isOnline();
+  // the group actions: someone in reach, and no story action available (a story action hides them)
+  const group = !!pos && !!mem && !amWisp() && !minigame && incarnationAt <= serverNow() && reach.length > 0 && !action?.story;
+  $('group-actions').hidden = !group;
+  for (const b of document.querySelectorAll('#group-actions button')) /** @type {HTMLButtonElement} */ (b).disabled = !conn.isOnline();
   if (mem && amWisp()) {
     const near = pos && wispNearObject(pos);
     button.dataset.object = '';
@@ -549,7 +572,7 @@ function updateInteraction() {
   // the "walk to an object" prompt belongs to the party room; a story room shows the button only next to something
   if (!action && campaign && content().nodes[campaign.at.node]?.room) {
     button.hidden = true;
-    $('object-actions').hidden = true;
+    $('object-actions').hidden = !group;
     return;
   }
   if (incarnationAt > serverNow() || minigame) { // over a minigame there is no furniture
@@ -562,6 +585,7 @@ function updateInteraction() {
   button.hidden = false;
   $('object-actions').hidden = false;
   button.dataset.object = action?.object ?? '';
+  button.dataset.character = action?.character ?? '';
   button.disabled = !action || !conn.isOnline();
   button.textContent = action?.text ?? 'Walk to an object';
 }
@@ -788,9 +812,17 @@ $('btn-interact').addEventListener('click', () => {
   joystick.cancel(); // flush the exact position before the interaction on the same socket
   const character = myCharacter();
   const action = character ? actionAt(currentPos(character)) : null;
-  if (action) send({ t: 'interact', object: action.object });
+  if (action?.character) send({ t: 'interact', character: action.character });
+  else if (action) send({ t: 'interact', object: action.object });
   updateInteraction();
 });
+for (const b of document.querySelectorAll('#group-actions button')) {
+  b.addEventListener('click', () => {
+    if (!canWalk() || !conn.isOnline() || amWisp()) return;
+    joystick.cancel(); // flush the exact position first, as for the action button
+    send({ t: 'interact', group: /** @type {HTMLElement} */ (b).dataset.group });
+  });
+}
 $('btn-play-here').addEventListener('click', () => {
   replaced = false;
   conn.restart(); // a hello without our old id: the picker shows who can be continued

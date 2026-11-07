@@ -20,6 +20,7 @@ import { AMBIENT_NPCS } from './ambient-npcs.js';
 import { drawSprite, SPRITE_SIZE } from '../../shared/sprites.js';
 import { createLoop, py as snapY } from './scene-render.js';
 import { worldView } from './avatar-layer.js';
+import { groupAction } from '../../shared/interactions.js';
 
 const UPDATE_HZ = 60;       // fixed simulation rate; drawing interpolates between two updates
 
@@ -521,16 +522,22 @@ export function createPartyRoom(bg, fg, avatars) {
       g.restore();
     });
 
-  /** prop.kind → art: PROP_PIXELS, the animated ambient people over them, and Johanna's character sprite.
-   *  @type {import('./scene-render.js').PropArt} */
+  /** A character's sprite standing still, facing the room, as a prop. @param {string} sprite */
+  const characterProp = (sprite) =>
+    /** @type {import('./scene-render.js').DrawProp} */ ((g, prop, v) => {
+      const size = SPRITE_SIZE * v.scale;
+      const cx = geo.ox + (prop.box.x + prop.box.w / 2) * v.unit;
+      drawSprite(g, sprite, 'down', 0, cx - size / 2, snapY(v, prop.anchorY) - size, v.scale);
+    });
+
+  /** prop.kind → art: PROP_PIXELS, the animated ambient people over them, and Marokkanergasse's people as their
+   *  character sprites. @type {import('./scene-render.js').PropArt} */
   const PROP_ART = {
     ...Object.fromEntries(Object.entries(PROP_PIXELS).map(([kind, { grid, pal }]) => [kind, pixelProp(grid, pal)])),
     ...Object.fromEntries(Object.entries(AMBIENT_NPCS).map(([id, npc]) => [id, ambientProp(npc)])),
-    'marokkanergasse-johanna': (g, prop, v) => {
-      const size = SPRITE_SIZE * v.scale;
-      const cx = geo.ox + (prop.box.x + prop.box.w / 2) * v.unit;
-      drawSprite(g, 'johanna', 'down', 0, cx - size / 2, snapY(v, prop.anchorY) - size, v.scale);
-    },
+    'marokkanergasse-johanna': characterProp('johanna'),
+    'marokkanergasse-nico': characterProp('nico'),
+    'marokkanergasse-mathieu': characterProp('mathieu'),
   };
 
   // ---- players, doors & object actions ----
@@ -555,9 +562,22 @@ export function createPartyRoom(bg, fg, avatars) {
   /** @param {any} m a server-validated action at an object: the prop says its line, or the furniture moves and the
    *  player says the feedback */
   function onInteract(m) {
-    if (typeof m.playerId !== 'string' || typeof m.object !== 'string') return;
+    if (typeof m.playerId !== 'string') return;
     const now = performance.now();
     const feedback = typeof m.feedback === 'string' ? m.feedback : '';
+    const group = groupAction(m.group);
+    if (group && Array.isArray(m.with)) {
+      // a group action: its emoji over the player and everyone they reached
+      for (const id of [m.playerId, ...m.with]) if (typeof id === 'string') avatars.say(id, group.emoji, 1800);
+      return;
+    }
+    if (typeof m.character === 'string') {
+      // an action on another character: the line over the actor, or over the target when the target says it
+      const speaker = m.speaker === 'target' && typeof m.target === 'string' ? m.target : m.playerId;
+      if (feedback) avatars.say(speaker, feedback.replace(/\n/g, ' '), 2000);
+      return;
+    }
+    if (typeof m.object !== 'string') return;
     if (m.speaker === 'object') {
       if (feedback) propSpeech.set(m.object, { text: feedback, until: now + 4000 });
       return;

@@ -120,6 +120,7 @@ button.primary:active { transform: scale(0.97); }
 .dot.c5 { background: var(--p5); }
 .dot.c6 { background: var(--p6); }
 .dot.c7 { background: var(--p7); }
+.dot.c8 { background: var(--p8); }
 
 /* ---------- ☰ menu + sheets ---------- */
 
@@ -256,6 +257,7 @@ canvas.avatar {
 .pick-card.c5 { --pc: var(--p5); }
 .pick-card.c6 { --pc: var(--p6); }
 .pick-card.c7 { --pc: var(--p7); }
+.pick-card.c8 { --pc: var(--p8); }
 .pick-card:not(:disabled):active { transform: scale(0.97); border-color: var(--pc); }
 .pick-name { font-size: 18px; font-weight: 700; }
 .pick-badge {
@@ -321,7 +323,9 @@ canvas.avatar {
 .lobby-actions button { touch-action: manipulation; }
 #view-tableau p { margin: 0; }
 
-.object-actions { display: flex; justify-content: center; padding-top: 10px; }
+.object-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; padding-top: 10px; }
+.group-actions { display: flex; gap: 8px; }
+.group-actions button { min-width: 54px; min-height: 54px; font-size: 26px; padding: 0; touch-action: manipulation; }
 #btn-interact { min-width: min(280px, 90%); min-height: 54px; background: var(--accent); color: #201a08; border: 0; font-weight: 800; font-size: 18px; touch-action: manipulation; }
 #btn-interact:disabled { background: var(--bg-2); color: var(--fg-dim); border: 1px solid var(--fg-dim); }
 

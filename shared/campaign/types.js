@@ -104,8 +104,9 @@ export {};
  * }} Node
  */
 
-/** A story machine's object action; the first one the character may use and whose `if` holds is offered.
- * @typedef {{ key: string, text: string, say?: string, speaker?: 'object', by?: 'chooser' | 'anyone' | CharacterId,
+/** A story machine's action on a prop or a character; the first one the acting character may use and whose `if`
+ * holds is offered. `speaker`: who says `say` instead of the actor, `'object'` for a prop, `'target'` for a character.
+ * @typedef {{ key: string, text: string, say?: string, speaker?: 'object' | 'target', by?: 'chooser' | 'anyone' | CharacterId,
  *   if?: Condition }} MachineAction */
 /** An item lying on the floor, picked up by the chooser. @typedef {{ item: string, node: string, x: number, y: number, radius: number }} Pickup */
 /** A spot the chooser walks into (edge-triggered); `look`: how the TV draws it; `arrive`: where the walker stands after.
@@ -128,6 +129,7 @@ export {};
  *   hints?: Record<string, string>,                           // node id → line
  *   holdChooser?: string,                                     // node id where the chooser cannot walk
  *   objects?: Record<string, { actions: MachineAction[] }>,   // prop id → actions
+ *   characters?: Record<string, { actions: MachineAction[] }>,  // character id → actions on that character's avatar
  *   pickups?: Pickup[],
  *   zones?: Zone[],
  *   npcs?: Record<string, Npc>,                               // prop id → line and emote
@@ -243,6 +245,7 @@ export {};
  *   | { t: 'leave', id: string }
  *   | { t: 'enter', id: string, node: string }
  *   | { t: 'use', id: string, object: string, action: string }   // a story machine's object action
+ *   | { t: 'use', id: string, character: string, action: string }   // a story machine's action on a character
  *   | { t: 'pickup', id: string, item: string }                   // the chooser picks up a pickup where the party is
  *   | { t: 'zone', id: string, zone: string }                     // the chooser walked into a zone where the party is
  *   | { t: 'choose', id: string, option: string }                 // the chooser answered the choice asked where the party is

@@ -2,6 +2,7 @@
 // the Shelter and the two flats. Story data only (docs/story-engine.md).
 import { room, prop } from '../../scene.js';
 import { INTRO_KEY } from './hub.js';
+import { CHARACTERS } from '../../characters.js';
 
 /** @typedef {import('../types.js').Content} Content */
 
@@ -12,7 +13,11 @@ const TRAM_QUIZ = 'young-adult/tram-5/quiz';
 const FLAT = 'young-adult/appart-elo-1';
 const SHELTER = 'young-adult/shelter';
 const MAROKKANERGASSE = 'young-adult/appart-pierre';
-/** Set by the kiss at the Shelter (not implemented yet): Marokkanergasse opens, Élodie's flat closes. */
+const BACKGAMMON = 'young-adult/appart-elo-1/backgammon';
+const FOOSBALL = 'young-adult/shelter/foosball';
+const PYRAMIDE = 'young-adult/appart-pierre/pyramide';
+const ADULT_KEY = 'young-adult-adult-key';
+/** Set by the kiss at the Shelter: Marokkanergasse opens, Élodie's flat closes. */
 const KISSED = 'young-adult.appart-pierre.open';
 /** In-game time in Élodie's flat: hours that only her actions move (docs/story-engine.md, "In-game time"). */
 const CLOCK = 'young-adult.clock.hours';
@@ -39,6 +44,8 @@ const SHELTER_ROOM = room('young-adult/shelter', { x: 0.5, y: 4.4, w: 15, h: 4.4
   prop('shelter-barman', { x: 12.9, y: 3.25, w: 0.8, h: 1.05 }, { layer: 'back' }),
   prop('shelter-beer-guy', { x: 13.7, y: 5.1, w: 0.8, h: 1.15 }, { layer: 'back' }),
   prop('shelter-hyped-punk', { x: 3.4, y: 5.25, w: 0.9, h: 1.1 }, { layer: 'back' }),
+  // the painted foosball table: its interaction area, without art
+  prop('shelter-foosball', { x: 7.1, y: 4.5, w: 2.5, h: 1.2 }, { layer: 'back' }),
 ], [
   { x: 7.1, y: 4.5, w: 2.5, h: 1.2 }, // foosball
   { x: 10.5, y: 4.1, w: 4.8, h: 1.2 }, // bar and pinball machine
@@ -57,9 +64,12 @@ const APPART_ELO_1_ROOM = room(FLAT, { x: 0.5, y: 5.3, w: 15, h: 3.5 }, [
   { x: 5.25, y: 5.15, w: 4.6, h: 1.05 }, // mattress
   { x: 9.9, y: 5.1, w: 1.55, h: 0.9 }, // television
 ]);
-/** Marokkanergasse (marokkanergasse-eureka-v1.png): Johanna stands by the window. */
+/** Marokkanergasse (marokkanergasse-eureka-v1.png): Johanna stands by the window, Nico by the armchair, Mathieu by
+ *  the cream sofa (their character sprites, public/screen/party-room.js). */
 const APPART_PIERRE_ROOM = room('young-adult/appart-pierre', { x: 0.5, y: 5.45, w: 15, h: 3.35 }, [
   prop('marokkanergasse-johanna', { x: 13.25, y: 6.0, w: 0.9, h: 1.2 }),
+  prop('marokkanergasse-nico', { x: 2.6, y: 6.0, w: 0.9, h: 1.2 }),
+  prop('marokkanergasse-mathieu', { x: 10.5, y: 6.0, w: 0.9, h: 1.2 }),
 ], [
   { x: 1.3, y: 5.45, w: 0.8, h: 0.3 }, // bookshelf base
   { x: 2.0, y: 5.8, w: 1.95, h: 0.6 }, // navy armchair
@@ -69,6 +79,22 @@ const APPART_PIERRE_ROOM = room('young-adult/appart-pierre', { x: 0.5, y: 5.45, 
   { x: 5.65, y: 5.55, w: 3.65, h: 0.75 }, // coffee table; the foreground stays open
   { x: 9.3, y: 5.35, w: 3.6, h: 0.95 }, // cream-covered sofa
 ]);
+
+const FOOSBALL_OFFER = { node: FOOSBALL, text: 'Pierre: “Élodie! A game of table football?”', accept: '⚽ Yes' };
+const PLAY_FOOSBALL = { 'shelter-foosball': { actions: [{ key: 'play', text: '⚽ Play table football' }] } };
+/** Élodie talking to Pierre in the flat: he offers backgammon again (her dismissed offer shows again). */
+const TALK_TO_PIERRE = { pierre: { actions: [{ key: 'talk', text: '💬 Talk to Pierre', say: 'Let’s play backgammon!', speaker: /** @type {const} */ ('target') }] } };
+const PIERRE_LINE = 'I brought beers and cigarettes! But first, let’s play backgammon.';
+const BACKGAMMON_OFFER = { node: BACKGAMMON, text: 'Pierre: “Let’s play backgammon!”', accept: '🎲 Yes' };
+
+/** Marokkanergasse's people: talking to any of them offers Pyramide. */
+const FRIENDS = /** @type {const} */ ([['marokkanergasse-johanna', 'Johanna'], ['marokkanergasse-nico', 'Nico'], ['marokkanergasse-mathieu', 'Mathieu']]);
+const TALK_TO_FRIENDS = Object.fromEntries(FRIENDS.map(([id, name]) => [id, { actions: [{ key: 'talk', text: `💬 Talk to ${name}` }] }]));
+const SHIKABOOM = 'Shikababy Shikaboom!\nLet’s play a Pyramide game!';
+/** Their NPCs, gone once their players are introduced, as Pyramide opens. */
+const INTRODUCED_FRIENDS = FRIENDS.map(([id]) => id);
+/** Introducing them: their players' wisps become them for good (cast.introducedBy). */
+const INTRODUCE_FRIENDS = ['nico', 'mathieu', 'johanna'].map((who) => ({ flag: `person.${who}.unlocked` }));
 
 /** Toni's prop, and the dog that leaves with him. */
 const TONI = 'tram-5-weird-man';
@@ -81,13 +107,15 @@ export const YOUNG_ADULT = {
     'cigarette-pack': { id: 'cigarette-pack', name: 'Pack of cigarettes', icon: '🚬', description: 'Pierre brought them, with the beers.', keepsake: false, art: `${ITEM_ART}cigarettes.svg` },
     crowbar: { id: 'crowbar', name: 'Crowbar', icon: '🔧', description: 'Tschick-Toni left it behind. Good for a stuck floorboard.', keepsake: false, art: `${ITEM_ART}crowbar.svg` },
     beers: { id: 'beers', name: 'Beers', icon: '🍺', description: 'Pierre brought them, as promised.', keepsake: false, art: `${ITEM_ART}beer.svg` },
-    // found after the Pyramide game at Marokkanergasse (not given yet)
-    'young-adult-adult-key': { id: 'young-adult-adult-key', name: 'Adult Age key', icon: '🗝️', description: 'The key found after the Pyramide game.', art: `${ITEM_ART}adult-key.svg` },
+    // on the floor after the Pyramide game at Marokkanergasse
+    [ADULT_KEY]: { id: ADULT_KEY, name: 'Adult Age key', icon: '🗝️', description: 'The key found after the Pyramide game.', art: `${ITEM_ART}adult-key.svg` },
   },
   nodes: {
     'young-adult': {
       id: 'young-adult', kind: 'world', parent: 'hub', title: 'Young Adult', room: TRAM_5,
       unlock: { has: INTRO_KEY, who: 'elodie' },
+      // completed through the portal at Marokkanergasse
+      complete: { machine: 'marokkanergasse', in: ['done'] },
       door: { x: 7, y: 4.7, w: 2.3, h: 1.2 },
       back: '← Back to Élodie’s dream apartment',
       hints: [{ text: 'Élodie, walk to Tram 5.' }],
@@ -119,11 +147,30 @@ export const YOUNG_ADULT = {
       back: '← Back to Tram 5',
       hints: [{ text: 'Élodie can return to Tram 5.' }],
     },
-    // no normal exit (GameStory.md): the completion key and portal will lead on
+    // the Shelter's table football: only through Pierre's offer (the `shelter` machine), and its lobby opens at
+    // once. Everyone may play, wisps too, as themselves
+    [FOOSBALL]: {
+      id: FOOSBALL, kind: 'tableau', parent: SHELTER, title: 'Table football',
+      activity: { kind: 'foosball', eligible: /** @type {import('../../characters.js').CharacterId[]} */ (Object.keys(CHARACTERS)) }, unlock: { unlocked: SHELTER },
+      enterWhen: { machine: 'shelter', in: ['pierre-here', 'offered'] }, startsOnEnter: true,
+    },
+    // Pierre's game, in the flat: only through his offer (the `pierre-visit` machine), and its lobby opens at once
+    [BACKGAMMON]: {
+      id: BACKGAMMON, kind: 'tableau', parent: FLAT, title: 'Backgammon with Pierre',
+      activity: { kind: 'backgammon' }, unlock: { unlocked: FLAT },
+      enterWhen: { machine: 'pierre-visit', in: ['arrived', 'invites'] }, startsOnEnter: true,
+    },
+    // no normal exit (GameStory.md): the portal after Pyramide leads to the hub
     [MAROKKANERGASSE]: {
       id: MAROKKANERGASSE, kind: 'world', parent: TRAM_5, title: 'Marokkanergasse',
       room: MAROKKANERGASSE, unlock: { all: [{ unlocked: TRAM_5 }, { flag: KISSED }] },
       back: false,
+    },
+    // the offer of Johanna, Nico or Mathieu (the `marokkanergasse` machine): its lobby opens at once
+    [PYRAMIDE]: {
+      id: PYRAMIDE, kind: 'tableau', parent: MAROKKANERGASSE, title: 'Pyramide',
+      activity: { kind: 'pyramide' }, unlock: { unlocked: MAROKKANERGASSE },
+      enterWhen: { machine: 'marokkanergasse', in: ['offered', 'introduced'] }, startsOnEnter: true,
     },
   },
   rooms: Object.fromEntries([TRAM_5_ROOM, SHELTER_ROOM, APPART_ELO_1_ROOM, APPART_PIERRE_ROOM].map((r) => [r.id, r])),
@@ -205,9 +252,9 @@ export const YOUNG_ADULT = {
         'crowbar-taken': { hide: [TONI, DOG] },
       },
     },
-    // Pierre arrives after three in-game hours, whatever Élodie did: from wisp to avatar, with his line. After
-    // backgammon he is a wisp again, and the beers and the cigarettes lie on the floor. Backgammon doesn't exist
-    // yet: the game master moves this machine to `after-backgammon`.
+    // Pierre arrives after three in-game hours, whatever Élodie did: from wisp to avatar, with his line, and he offers
+    // backgammon (Yes or Dismiss; talking to him offers it again). Yes opens its lobby. Once a game has
+    // finished there, he is a wisp again, back in the flat, and the beers and the cigarettes lie on the floor.
     'pierre-visit': {
       initial: 'not-yet',
       states: {
@@ -215,12 +262,28 @@ export const YOUNG_ADULT = {
         // Pierre's wisp becomes his avatar (the 3-2-1 countdown), then he says his line over it
         arrived: {
           enter: [{ incarnate: 'pierre' }],
-          speech: { pierre: 'I brought beers and cigarettes! But first, let’s play backgammon.' },
-          hints: { [FLAT]: 'Pierre: “I brought beers and cigarettes! But first, let’s play backgammon.”' },
+          speech: { pierre: PIERRE_LINE },
+          hints: { [FLAT]: `Pierre: “${PIERRE_LINE}”` },
+          offer: BACKGAMMON_OFFER,
+          characters: TALK_TO_PIERRE,
+          on: { [`entered:${BACKGAMMON}`]: 'backgammon', 'talk:pierre': 'invites' },
         },
-        // back to his wisp after the game
+        // talking to Pierre offers the game again (a dismissed offer shows again)
+        invites: {
+          hints: { [FLAT]: `Pierre: “${PIERRE_LINE}”` },
+          offer: BACKGAMMON_OFFER,
+          characters: TALK_TO_PIERRE,
+          on: { [`entered:${BACKGAMMON}`]: 'backgammon', 'talk:pierre': 'invites' },
+        },
+        backgammon: {
+          hints: { [BACKGAMMON]: 'Backgammon with Pierre.' },
+          when: [{ if: { done: BACKGAMMON }, to: 'after-backgammon' }],
+          // the game master took the party back to the flat before a game finished: Pierre asks again
+          on: { [`entered:${FLAT}`]: 'invites' },
+        },
+        // back to his wisp after the game, back in the flat
         'after-backgammon': {
-          enter: [{ wisp: 'pierre' }],
+          enter: [{ wisp: 'pierre' }, { goto: FLAT }],
           pickups: [{ item: 'beers', node: FLAT, x: 7.6, y: 7.4, radius: 0.7 }, { item: 'cigarette-pack', node: FLAT, x: 8.6, y: 7.4, radius: 0.7 }],
           on: { 'pickup:beers': 'cigarettes-left', 'pickup:cigarette-pack': 'beers-left' },
         },
@@ -283,6 +346,97 @@ export const YOUNG_ADULT = {
           on: { 'lift:appart-elo-1-floorboard': { to: 'lifted', do: [{ item: 'shelter-ticket' }, { flag: 'young-adult.shelter.open' }] } },
         },
         lifted: {},
+      },
+    },
+    // The Shelter: Pierre is there again (his wisp becomes his avatar) and offers table football (Yes or Dismiss;
+    // the table offers it again). Yes opens its lobby. After a finished match, back in the bar, Élodie can kiss
+    // him (her action on Pierre): Marokkanergasse opens as a tram destination, her flat closes.
+    shelter: {
+      initial: 'not-yet',
+      states: {
+        'not-yet': { on: { [`entered:${SHELTER}`]: 'pierre-here' } },
+        'pierre-here': {
+          enter: [{ incarnate: 'pierre' }],
+          speech: { pierre: 'Élodie! A game of table football?' },
+          hints: { [SHELTER]: 'Pierre: “Élodie! A game of table football?”' },
+          objects: PLAY_FOOSBALL,
+          offer: FOOSBALL_OFFER,
+          on: { [`entered:${FOOSBALL}`]: 'match', 'play:shelter-foosball': 'offered' },
+        },
+        offered: {
+          hints: { [SHELTER]: 'Pierre: “Élodie! A game of table football?”' },
+          objects: PLAY_FOOSBALL,
+          offer: FOOSBALL_OFFER,
+          on: { [`entered:${FOOSBALL}`]: 'match', 'play:shelter-foosball': 'offered' },
+        },
+        match: {
+          hints: { [FOOSBALL]: 'Table football at the Shelter.' },
+          when: [{ if: { done: FOOSBALL }, to: 'after-match' }],
+          // the game master took the party back to the bar before a match finished: the table offers it again
+          on: { [`entered:${SHELTER}`]: 'offered' },
+        },
+        // back in the bar: Élodie can kiss Pierre
+        'after-match': {
+          enter: [{ goto: SHELTER }],
+          hints: { [SHELTER]: 'What a match!' },
+          // Élodie's action on Pierre, standing next to him
+          characters: { pierre: { actions: [{ key: 'kiss', text: '💋 Kiss Pierre', by: 'elodie' }] } },
+          on: { 'kiss:pierre': { to: 'kissed', do: [{ flag: KISSED }] } },
+        },
+        kissed: {
+          speech: { pierre: '❤️' },
+          hints: { [SHELTER]: 'The tram can take you to Marokkanergasse now.' },
+        },
+      },
+    },
+    // Marokkanergasse: Johanna, Nico and Mathieu stand in the room as NPCs; their players are still wisps. Talking
+    // to any of the three offers a Pyramide game (Yes or Dismiss). When its lobby opens, the three are introduced:
+    // their NPCs leave the room and their players' wisps become them for good, so they play, move and talk as
+    // themselves. After the game the Adult Age key lies on the floor; picking it up opens the Adult
+    // Age door in the hub, and a portal appears: walking into it takes everyone to the hub and completes Young Adult.
+    marokkanergasse: {
+      initial: 'not-yet',
+      states: {
+        'not-yet': { on: { [`entered:${MAROKKANERGASSE}`]: 'party' } },
+        party: {
+          hints: { [MAROKKANERGASSE]: 'Johanna, Nico and Mathieu are here.' },
+          objects: TALK_TO_FRIENDS,
+          on: Object.fromEntries(FRIENDS.map(([id]) => [`talk:${id}`, /** @type {const} */ ('offered')])),
+        },
+        offered: {
+          npcs: Object.fromEntries(FRIENDS.map(([id]) => [id, { say: SHIKABOOM }])),
+          objects: TALK_TO_FRIENDS,
+          offer: { node: PYRAMIDE, text: SHIKABOOM.replace('\n', ' '), accept: 'Yes' },
+          after: { ms: 30_000, to: 'party' },
+          on: { [`entered:${PYRAMIDE}`]: 'pyramide', ...Object.fromEntries(FRIENDS.map(([id]) => [`talk:${id}`, 'offered'])) },
+        },
+        pyramide: {
+          enter: INTRODUCE_FRIENDS,
+          hide: INTRODUCED_FRIENDS,
+          when: [{ if: { done: PYRAMIDE }, to: 'key-on-floor' }],
+          // the game master took the party back before a game finished: the game is offered again
+          on: { [`entered:${MAROKKANERGASSE}`]: 'introduced' },
+        },
+        // the three are themselves now (no NPCs left to talk to): the offer stays until the game is played
+        introduced: {
+          hide: INTRODUCED_FRIENDS,
+          offer: { node: PYRAMIDE, text: SHIKABOOM.replace('\n', ' '), accept: 'Yes' },
+          on: { [`entered:${PYRAMIDE}`]: 'pyramide' },
+        },
+        'key-on-floor': {
+          enter: [{ goto: MAROKKANERGASSE }],
+          hide: INTRODUCED_FRIENDS,
+          hints: { [MAROKKANERGASSE]: 'Something shines on the floor…' },
+          pickups: [{ item: ADULT_KEY, node: MAROKKANERGASSE, x: 6.5, y: 7.6, radius: 0.8 }],
+          on: { [`pickup:${ADULT_KEY}`]: { to: 'portal-open', do: [{ flag: 'route.adult' }] } },
+        },
+        'portal-open': {
+          hide: INTRODUCED_FRIENDS,
+          hints: { [MAROKKANERGASSE]: 'A portal has appeared. Élodie, walk into it!' },
+          zones: [{ id: 'young-adult-portal', node: MAROKKANERGASSE, x: 9, y: 7.8, radius: 0.9, look: 'portal', arrive: { x: 6.2, y: 7.3 } }],
+          on: { 'zone:young-adult-portal': { to: 'done', do: [{ goto: 'hub' }] } },
+        },
+        done: { hide: INTRODUCED_FRIENDS },
       },
     },
   },

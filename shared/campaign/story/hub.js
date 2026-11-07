@@ -16,6 +16,7 @@ export const REUNIONS = Object.freeze([
   { id: 'anna', name: 'Anna', flag: 'person.anna.unlocked' },
   { id: 'nico', name: 'Nico', flag: 'person.nico.unlocked' },
   { id: 'mathieu', name: 'Mathieu', flag: 'person.mathieu.unlocked' },
+  { id: 'johanna', name: 'Johanna', flag: 'person.johanna.unlocked' },
   { id: 'father', name: 'Father', flag: 'person.father.unlocked' },
   { id: 'mother', name: 'Mother', flag: 'person.mother.unlocked' },
 ]);

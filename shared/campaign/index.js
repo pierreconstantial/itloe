@@ -38,13 +38,13 @@ import { emptyFacts, holds, record, settle, safeInventory, addItem, holding, rec
 import { validateContent, zoneAt, roomAt, sceneAt, childrenOf } from './content.js';
 import {
   initialMachines, safeMachines, eventSteps, conditionStep, dueSteps, nextTimer, hintAt, chooserHeld, pickupsAt,
-  zonesAt, npcsAt, hiddenProps, offerAt, objectRules, within, speechAt, choiceIn,
+  zonesAt, npcsAt, hiddenProps, offerAt, objectRules, characterRules, within, speechAt, choiceIn,
 } from './machines.js';
-import { objectAction } from '../interactions.js';
+import { interactionActor, nearbyObject, objectAction } from '../interactions.js';
 import { SAMPLE_CONTENT } from './sample.js';
 
 export { holds, record, settle, emptyFacts, holding, recipients, COUNTER, validateContent, zoneAt, roomAt, sceneAt, childrenOf, SAMPLE_CONTENT };
-export { hintAt, chooserHeld, pickupsAt, zonesAt, npcsAt, hiddenProps, offerAt, objectRules, nextTimer, within, speechAt };
+export { hintAt, chooserHeld, pickupsAt, zonesAt, npcsAt, hiddenProps, offerAt, objectRules, characterRules, nextTimer, within, speechAt };
 
 /** @typedef {import('./types.js').Campaign} Campaign */
 /** @typedef {import('./types.js').CampaignAction} CampaignAction */
@@ -89,6 +89,45 @@ const actingMember = (c, id) => {
 };
 /** The chooser, acting as their character (not a wisp). @param {Campaign} c @param {string} id @param {Content} content */
 const actingChooser = (c, id, content) => actingMember(c, id)?.character === content.chooser;
+
+/**
+ * The party member another player can act on as `character`: in the party, shown as themselves (not a wisp, not
+ * mid-incarnation), and not the actor. Null otherwise.
+ * @param {import('./types.js').Party} party @param {string} character @param {string} actorId @returns {string | null}
+ */
+export function characterTarget(party, character, actorId) {
+  const id = party.order.find((p) => !party.players[p].left && party.players[p].character === character);
+  if (!id || id === actorId) return null;
+  const statuses = party.players[id].statuses ?? [];
+  return statuses.includes('wisp') || statuses.includes('incarnating') ? null : id;
+}
+
+/**
+ * The story action a member can use at `pos`, in the order the phone offers them: an item on the floor (the
+ * chooser), a story object nearby, a story action on the closest character in `reach` (the server's list, closest
+ * first). Null when there is none: then the furniture's action, or the group actions, which any story action hides.
+ * One rule for the phone's button and the server's refusal of a group action. The caller checks no minigame runs.
+ * @param {{ facts: import('./types.js').Facts, at: { node: string } }} c the campaign, or a client's view of it
+ * @param {Content} content @param {import('./types.js').PartyMember} member
+ * @param {{ x: number, y: number }} pos @param {readonly string[]} reach
+ * @returns {{ pickup: import('./types.js').Pickup } | { object: string, action: import('../interactions.js').ObjectAction }
+ *   | { character: string, action: import('../interactions.js').ObjectAction } | null}
+ */
+export function storyActionAt(c, content, member, pos, reach) {
+  const pickup = member.character === content.chooser ? pickupsAt(c.facts, content, c.at.node).find((p) => within(p, pos)) : undefined;
+  if (pickup) return { pickup };
+  const actor = interactionActor(member, c.facts);
+  const rules = objectRules(c.facts, content);
+  const object = nearbyObject(sceneAt(content, c.facts, c.at.node), pos, actor, rules);
+  const action = object ? objectAction(object.id, actor, rules) : null;
+  if (object && action?.event) return { object: object.id, action };
+  const onCharacters = characterRules(c.facts, content);
+  for (const character of reach) {
+    const onCharacter = objectAction(character, actor, onCharacters);
+    if (onCharacter) return { character, action: onCharacter };
+  }
+  return null;
+}
 
 /** Adds one news entry with the next seq. @param {Campaign} c
  * @param {{ t: 'unlocked', node: string } | { t: 'item', item: string, to: CharacterId[] } | { t: 'cutscene', id: string }} entry
@@ -650,7 +689,15 @@ function step(c, a, content, now) {
     case 'use': {
       // a story machine's object action, offered to this member now (the server checked they stand next to it)
       const actor = actingMember(c, a.id);
-      if (!actor || c.at.activity || typeof a.object !== 'string' || typeof a.action !== 'string') return c;
+      if (!actor || c.at.activity || typeof a.action !== 'string') return c;
+      if ('character' in a) {
+        // an action on a character: the server checked they stand within reach of each other
+        if (typeof a.character !== 'string' || !characterTarget(c.party, a.character, a.id)) return c;
+        const action = objectAction(a.character, actor, characterRules(c.facts, content));
+        if (!action?.event || action.key !== a.action) return c;
+        return fire(c, `${a.action}:${a.character}`, content, now);
+      }
+      if (typeof a.object !== 'string') return c;
       const action = objectAction(a.object, actor, objectRules(c.facts, content));
       if (!action?.event || action.key !== a.action) return c;
       return fire(c, `${a.action}:${a.object}`, content, now);

@@ -1,5 +1,6 @@
-/** `event`: a story machine's action, sent to the campaign as `use`; `speaker: 'object'`: the prop says the feedback.
- * @typedef {{ key: string, text: string, feedback: string, event?: true, speaker?: 'object' }} ObjectAction */
+/** `event`: a story machine's action, sent to the campaign as `use`; `speaker`: the prop (`'object'`) or the
+ * character acted on (`'target'`) says the feedback, not the actor.
+ * @typedef {{ key: string, text: string, feedback: string, event?: true, speaker?: 'object' | 'target' }} ObjectAction */
 /** @typedef {{ statuses?: string[], items?: Record<string, number> }} InteractionCondition */
 /** @typedef {{ when: InteractionCondition, action: ObjectAction | null }} ConditionalAction */
 /** @typedef {{ default: ObjectAction | null, byPlayer?: Record<string, ObjectAction | null>, byCharacter?: Record<string, ObjectAction | null>, variants?: ConditionalAction[] }} ObjectRule */
@@ -50,6 +51,23 @@ export function objectAction(object, actor, rules = OBJECT_ACTIONS) {
   return rule ? resolveObjectAction(rule, actor) : null;
 }
 
+/** The generic actions between characters: one tap acts on everyone in reach (a group hug). They fire no story event
+ *  and save nothing; a story action available to the player hides them. */
+export const GROUP_ACTIONS = Object.freeze([
+  Object.freeze({ key: 'hug', emoji: '🤗', label: 'Hug' }),
+  Object.freeze({ key: 'high-five', emoji: '✋', label: 'High five' }),
+  Object.freeze({ key: 'cheers', emoji: '🍻', label: 'Cheers' }),
+]);
+/** @param {unknown} key */
+export const groupAction = (key) => GROUP_ACTIONS.find((a) => a.key === key) ?? null;
+
+/** How far a player reaches: from their feet to a prop's base, or to another character's feet. */
+export const REACH = 0.8;
+
+/** Another character's feet within reach of a player's. @param {{x: number, y: number}} a @param {{x: number, y: number}} b */
+export const feetInReach = (a, b) => Number.isFinite(a.x) && Number.isFinite(a.y) && Number.isFinite(b.x) && Number.isFinite(b.y)
+  && Math.hypot(a.x - b.x, a.y - b.y) < REACH;
+
 /** Find the closest physical prop by distance from the player's feet to its base.
  * @param {import('./scene.js').Scene} scene @param {{x: number, y: number}} position
  * @param {(prop: import('./scene.js').Prop) => boolean} eligible
@@ -57,7 +75,7 @@ export function objectAction(object, actor, rules = OBJECT_ACTIONS) {
 function closestProp(scene, position, eligible) {
   if (!Number.isFinite(position.x) || !Number.isFinite(position.y)) return null;
   let best = null;
-  let bestDistance = 0.8;
+  let bestDistance = REACH;
   for (const prop of scene.props) {
     if (!eligible(prop)) continue;
     const base = prop.solid ?? prop.box;

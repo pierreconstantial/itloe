@@ -100,6 +100,7 @@ MachineState = {
   hints?:       Record<NodeId, string>,                       // the line shown at those nodes
   holdChooser?: NodeId,                                       // the chooser cannot walk or jump there
   objects?:     Record<PropId, { actions: ObjectAction[] }>,  // what players can do with those props
+  characters?:  Record<CharacterId, { actions: ObjectAction[] }>,  // what players can do with those characters
   pickups?:     Pickup[],                                     // items lying on the floor
   zones?:       Zone[],                                       // spots the chooser can walk into
   npcs?:        Record<PropId, Npc>,                          // what those props say and show
@@ -110,7 +111,7 @@ MachineState = {
 }
 
 Transition   = StateId | { to: StateId, do?: Effect[] }
-ObjectAction = { key, text, say?, speaker?: 'object', by?: 'chooser' | 'anyone' | CharacterId, if?: Condition }
+ObjectAction = { key, text, say?, speaker?: 'object' | 'target', by?: 'chooser' | 'anyone' | CharacterId, if?: Condition }
 Pickup       = { item: ItemId, node: NodeId, x, y, radius }
 Zone         = { id, node: NodeId, x, y, radius, look?: string, arrive?: { x, y } }
 Npc          = { say?: string, blink?: true, emote?: 'joy' | 'love' | 'surprise' | 'anger' }
@@ -124,6 +125,12 @@ What each part does:
   shows `say` (a toast on their phone; on the TV a speech bubble over the prop with `speaker: 'object'`, else over
   the player; `\n` breaks lines), then fires the event `<key>:<propId>`. A state's `objects` replace the shared
   furniture's action for the same prop.
+- **Actions on characters.** As object actions, on another player's character instead of a prop: offered when the
+  target is shown as themselves (not a wisp, not mid-incarnation) and its feet are within 0.8 of the player's, while no
+  minigame runs. Using one fires `<key>:<characterId>` (e.g. `kiss:pierre`). `say` shows over the player, or over
+  the target with `speaker: 'target'`. On the phone, a story object in reach comes first, then a story action on the
+  closest character, then the furniture. A prop's id can't be a character's (validation checks it). Talking to Pierre
+  in the flat (his backgammon offer again), the kiss at the Shelter.
 - **Pickups.** Only the chooser picks up, within `radius` of `x, y`. The item goes to the chooser's inventory,
   then the event `pickup:<item>` fires. The state must leave on that event (validation checks it), or the item
   would stay on the floor forever. Several items on the floor at once: chain states, each next state listing
@@ -159,6 +166,7 @@ time the state was entered. Every machine of the content is there from the start
 | Event key | Fired when |
 |---|---|
 | `<actionKey>:<propId>` | A player uses a machine's object action (e.g. `give:tram-5-weird-man`) |
+| `<actionKey>:<characterId>` | A player uses a machine's action on a character (e.g. `kiss:pierre`) |
 | `pickup:<itemId>` | The chooser picks up an item |
 | `zone:<zoneId>` | The chooser walks into a zone |
 | `cutscene:<cutsceneId>` | A TV finished playing that cutscene (a visible TV must be connected: the machine waits until one plays it). A TV plays one scripted cutscene at a time: don't queue two in one step |
@@ -214,7 +222,6 @@ with a misuse of another field (e.g. an `after` for in-game time: see Patterns).
 
 | Story need | Missing |
 |---|---|
-| Backgammon, table football | The minigames themselves (`docs/minigames.md`) |
 | The tram quiz's three topics, chosen by Élodie | Quiz settings a machine can set (today: the tableau's fixed `settings`) |
 
 ## Example: Tschick-Toni
@@ -258,10 +265,10 @@ toni: {
 Pure and deterministic, as before: no I/O, no clock. The server adds its time to every action (`action.now`).
 
 - `machines.js` reads machines: current states, the transitions an event, a condition or the time triggers,
-  and the queries everyone uses: `hintAt`, `objectRules`, `pickupsAt`, `zonesAt`, `hiddenProps`, `npcsAt`,
+  and the queries everyone uses: `hintAt`, `objectRules`, `characterRules`, `pickupsAt`, `zonesAt`, `hiddenProps`, `npcsAt`,
   `offerAt`, `chooserHeld`, `nextTimer`, `within`. `index.js` applies transitions and effects, and answers
   `choiceAt(campaign, content, status?)` (a client passes its view's minigame status: its campaign has no minigame state).
-- Actions added: `use { id, object, action }`, `pickup { id, item }`, `zone { id, zone }`, `choose { id, option }`, `tick` (takes the due
+- Actions added: `use { id, object, action }` (or `use { id, character, action }` on a character), `pickup { id, item }`, `zone { id, zone }`, `choose { id, option }`, `tick` (takes the due
   `after` transitions), `gm { op: 'machine', machine, state }` (the game master sets a state; that state's
   `enter` effects run, no transition's `do`). Removed: `portal`, `collect`.
 - Order inside one transition: the transition's `do`, the new state's `enter`, then the facts settle (node
