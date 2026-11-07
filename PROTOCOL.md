@@ -398,7 +398,7 @@ its live state about 20 times a second:
 // next touch is a power shot; "seen": the last "n" received from each phone; "lag": what each phone measured.
 ```
 
-- **Campaign:** each player scores their team's goals; ranks follow (the winning team's players share first place).
+- **Campaign:** each player scores their team's goals; ranks are set when the match ends: the winning team's players share first place, a team with nobody left loses even when ahead, and a draw ranks everyone first.
 
 ### Show the join QR again (any player, any moment)
 

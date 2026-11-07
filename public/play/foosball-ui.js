@@ -5,7 +5,7 @@
 // snapshots carry that number back is this phone's lag, shown here and sent along for the TV's readout.
 import { addStylesheet } from './dom.js';
 import * as haptics from './haptics.js';
-import { FOOSBALL_SETTINGS_SCHEMA, ROLES, TEAM_COLORS, TEAM_NAMES, holders, summarizeFoosballSettings } from '../../shared/foosball.js';
+import { FOOSBALL_SETTINGS_SCHEMA, ROLES, TEAM_COLORS, TEAM_NAMES, forfeitLine, holders, summarizeFoosballSettings, winner } from '../../shared/foosball.js';
 
 /** The round's view: its state without the seed (server/foosball.ts). @typedef {Omit<import('../../shared/foosball.js').FoosballState, 'seed'>} View */
 
@@ -175,12 +175,14 @@ export const FOOSBALL_SCREEN = {
     };
   },
 
-  /** The winning team as the title. */
+  /** The winning team as the title, and why when the other had nobody left. */
   podium(round) {
     const s = /** @type {View} */ (round.view);
-    const won = s.score.a === s.score.b ? null : s.score.a > s.score.b ? 'a' : 'b';
+    const won = winner(s);
+    const why = forfeitLine(s);
     return {
       title: won ? `${TEAM_NAMES[won]} wins! 🎉` : "It's a draw!",
+      ...(why ? { kicker: why } : {}),
       rowExtra: (id) => ` · ${TEAM_NAMES[s.players[id].team]}`,
     };
   },

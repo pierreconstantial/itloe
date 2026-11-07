@@ -28,17 +28,18 @@ import { mergeBySchema, settingsProblems } from './settings.js';
  *   behind: 'block' | 'kick', deadAfter: number }} FoosballSettings
  */
 /**
- * @typedef {{ character: CharacterId, name: string, color: number, team: Team, score: number,
+ * @typedef {{ character: CharacterId, name: string, color: number, team: Team, score: number, rank?: number,
  *   left?: boolean, done?: boolean, retired?: boolean }} FoosballPlayer
  */
 /**
- * A match. `players[id].score`: their team's goals, so the shared ranking puts a team's players together;
- * `goals`: every goal in order, with the player whose rod touched the ball last.
+ * A match. `players[id].score`: their team's goals; `rank`: set when the match ends, from its winner (`ended`), and
+ * the shared ranking reads it; `goals`: every goal in order, with the player whose rod touched the ball last;
+ * `forfeit`: the team that had nobody left, which lost.
  * @typedef {{
  *   kind: 'foosball', seed: number, settings: FoosballSettings,
  *   order: string[], players: Record<string, FoosballPlayer>,
  *   score: Record<Team, number>, goals: { team: Team, by: string | null }[],
- *   endReason: 'gm' | 'left' | null,
+ *   endReason: 'gm' | 'left' | null, forfeit: Team | null,
  * }} FoosballState
  */
 /**
@@ -291,11 +292,38 @@ export function startFoosball({ seed, settings, players }) {
   });
   return {
     kind: 'foosball', seed, settings, order: players.map((p) => p.id), players: all,
-    score: { a: 0, b: 0 }, goals: [], endReason: null,
+    score: { a: 0, b: 0 }, goals: [], endReason: null, forfeit: null,
   };
 }
 
 const running = (/** @type {FoosballState} */ s) => s.endReason === null;
+
+/** A team with nobody playing any more, or null. @param {FoosballState} s @returns {Team | null} */
+const emptied = (s) => TEAMS.find((team) => !s.order.some((id) => s.players[id].team === team && !s.players[id].done)) ?? null;
+
+/**
+ * The team that won a finished match: the other one when a team had nobody left, else the one with more goals;
+ * null on a draw. It reads only what can't change once the match is over.
+ * @param {Pick<FoosballState, 'forfeit' | 'score'>} s @returns {Team | null}
+ */
+export function winner(s) {
+  if (s.forfeit) return s.forfeit === 'a' ? 'b' : 'a';
+  return s.score.a === s.score.b ? null : s.score.a > s.score.b ? 'a' : 'b';
+}
+
+/** Why a forfeited match was lost, for the podiums; null otherwise. @param {Pick<FoosballState, 'forfeit'>} s @returns {string | null} */
+export const forfeitLine = (s) => (s.forfeit ? `${TEAM_NAMES[s.forfeit]} has nobody left: ${TEAM_NAMES[s.forfeit === 'a' ? 'b' : 'a']} wins.` : null);
+
+/**
+ * The match over, however it ended: every player ranked by their team, the winner's first (on a draw, all first).
+ * @param {FoosballState} s @param {'gm' | 'left'} endReason @param {Team | null} [forfeit] @returns {FoosballState}
+ */
+function ended(s, endReason, forfeit = null) {
+  const over = { ...s, endReason, forfeit };
+  const won = winner(over);
+  const players = Object.fromEntries(Object.entries(s.players).map(([id, p]) => [id, { ...p, rank: won === null || p.team === won ? 1 : 2 }]));
+  return { ...over, players };
+}
 
 /** @param {FoosballState} s @param {FoosballAction} a @param {import('./minigames.js').RoundCtx} ctx @returns {FoosballState} */
 export function reduceFoosball(s, a, ctx) {
@@ -309,7 +337,7 @@ export function reduceFoosball(s, a, ctx) {
     }
 
     case 'endGame':
-      return ctx.gameMasterId !== null && a.id === ctx.gameMasterId ? { ...s, endReason: 'gm' } : s;
+      return ctx.gameMasterId !== null && a.id === ctx.gameMasterId ? ended(s, 'gm') : s;
 
     default:
       return s;
@@ -321,8 +349,11 @@ export const FOOSBALL_RULES = {
   init: startFoosball,
   players: { min: MIN_PLAYERS, max: MAX_PLAYERS },
   reduce: reduceFoosball,
-  // the rods pass on by themselves (holders); a team with nobody left ends the match
-  out: (s) => (TEAMS.some((team) => !s.order.some((id) => s.players[id].team === team && !s.players[id].done)) ? { ...s, endReason: 'left' } : s),
+  // the rods pass on by themselves (holders); a team with nobody left loses, and the match ends
+  out: (s) => {
+    const gone = emptied(s);
+    return gone ? ended(s, 'left', gone) : s;
+  },
   status: (s) => (s?.kind !== 'foosball' ? null : running(s) ? 'running' : 'finished'),
   result: (s) => ({
     ranking: ranking(s).map((r) => ({ character: s.players[r.id].character, score: r.score, rank: r.rank })),
