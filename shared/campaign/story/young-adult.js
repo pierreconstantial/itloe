@@ -161,10 +161,12 @@ export const YOUNG_ADULT = {
       // only through the tram's offer, and its lobby opens at once
       enterWhen: { machine: 'tram', in: ['offered'] }, startsOnEnter: true,
     },
-    // the tram's destinations (the `tram` machine's choice): no doors; Back walks to the tram stop
+    // the tram's destinations (the `tram` machine's choice); the Shelter also has a door at night; Back walks to the stop
     [SHELTER]: {
       id: SHELTER, kind: 'world', parent: TRAM_5, title: 'The Shelter',
       room: SHELTER, unlock: { all: [{ unlocked: TRAM_5 }, { flag: 'young-adult.shelter.open' }] },
+      // its painted entrance on Wallensteinplatz (tram-5-night-shelter-open): once open, Élodie walks in too
+      door: { x: 13.3, y: 5.6, w: 1.3, h: 0.8 },
       back: '← Back to Tram 5',
       hints: [{ text: 'Élodie can return to Tram 5.' }],
     },
@@ -215,8 +217,9 @@ export const YOUNG_ADULT = {
   },
   machines: {
     // The painted tram: talking to it offers Élodie a quiz for 30 seconds; accepting enters its tableau. Once a
-    // round has finished, she chooses where the tram goes: her flat (until the kiss), the Shelter once it is open,
-    // Marokkanergasse after the kiss. Leaving the quiz another way (the game master) cancels the ride.
+    // round has finished, she chooses where the tram goes: her flat (until the kiss), Marokkanergasse after the kiss.
+    // Never the Shelter: Élodie walks in through its door at night. Leaving the quiz another way (the game master)
+    // cancels the ride.
     tram: {
       initial: 'waiting',
       states: {
@@ -236,13 +239,11 @@ export const YOUNG_ADULT = {
             at: TRAM_QUIZ, text: 'Where does the tram take you?',
             options: [
               { key: 'flat', text: '🏠 Élodie’s flat', if: { not: { flag: KISSED } } },
-              { key: 'shelter', text: '🎸 The Shelter', if: { flag: 'young-adult.shelter.open' } },
               { key: 'marokkanergasse', text: '🏡 Marokkanergasse', if: { flag: KISSED } },
             ],
           },
           on: {
             'choose:flat': { to: 'waiting', do: [{ goto: FLAT }] },
-            'choose:shelter': { to: 'waiting', do: [{ goto: SHELTER }] },
             'choose:marokkanergasse': { to: 'waiting', do: [{ goto: MAROKKANERGASSE }] },
             [`entered:${TRAM_5}`]: 'waiting',
           },
@@ -471,6 +472,23 @@ export const YOUNG_ADULT = {
           on: { 'zone:young-adult-portal': { to: 'done', do: [{ goto: 'hub' }] } },
         },
         done: { hide: INTRODUCED_FRIENDS },
+      },
+    },
+    // Walking out: the flat's front door (up its steps) and the Shelter's stair lead back to Tram 5, like a door.
+    // Out of the Shelter, Élodie stands in front of its entrance, clear of its door.
+    exits: {
+      initial: 'open',
+      states: {
+        open: {
+          zones: [
+            { id: 'flat-exit', node: FLAT, x: 2.25, y: 5.8, radius: 0.6, arrive: { x: 3.8, y: 7.4 } },
+            { id: 'shelter-exit', node: SHELTER, x: 6.2, y: 4.8, radius: 0.55, arrive: { x: 13.9, y: 7.1 } },
+          ],
+          on: {
+            'zone:flat-exit': { to: 'open', do: [{ goto: TRAM_5 }] },
+            'zone:shelter-exit': { to: 'open', do: [{ goto: TRAM_5 }] },
+          },
+        },
       },
     },
     // Tram 5's passers-by answer whoever talks to them. At night (the Shelter open) the lady and the kid are gone;

@@ -203,19 +203,18 @@ const hubTvImage = (): Shot => ({
   planned: false, asset: true, mime: 'image/png',
 });
 
-/** The destination sheet appears only after a tram quiz. */
+/** The destination question appears only after a tram quiz (the `tram` machine's choice): no Dismiss. */
 const tramMenu = (destinations: string[]) => phone('elodie', `
   <h2>Tram 5</h2>
-  <p class="hint">Quiz complete. Where shall we go?</p>
+  <p class="hint">Where does the tram take you?</p>
   <div class="card list">
-    ${destinations.map((name) => `<button class="primary">🚋 ${name}</button>`).join('')}
-  </div>
-  <button class="ghost">Stay at Wallensteinplatz</button>`);
+    ${destinations.map((name) => `<button class="primary">${name}</button>`).join('')}
+  </div>`);
 
 const youngAdult: Sequence = {
   id: 'young-adult',
   title: 'Young Adult',
-  intro: 'Élodie’s Young Adult story runs from Wallensteinplatz through her flat, The Shelter and Marokkanergasse. The backgrounds are game assets; the conversations, puzzles, tram quizzes and minigames shown here are planned.',
+  intro: 'Élodie’s Young Adult story runs from Wallensteinplatz through her flat, The Shelter and Marokkanergasse. The backgrounds are game assets and the phones are mock-ups of what the game shows. Everything here is in the game except the tram quiz’s three topics and the explanation after each answer, which are planned.',
   content: '',
   phones: [],
   async run(b) {
@@ -224,42 +223,42 @@ const youngAdult: Sequence = {
     await b.frame('Élodie’s dream apartment · hub. The current pixel-art background has one large interior door, plants, art posters, an oriental rug and a sunny terrace for four with beer and an ashtray. The door leads to Young Adult.',
       [async () => hubTvImage()]);
 
-    await b.frame('Tram 5 · young-adult/tram-5. Élodie arrives alone at Wallensteinplatz. A dog barks at Tschick-Toni as he tries to break into a Zigarettenautomat with a crowbar; The Shelter is closed.',
+    await b.frame('Tram 5 · young-adult/tram-5. Élodie arrives alone at Wallensteinplatz. A dog barks at Tschick-Toni as he tries to break into a Zigarettenautomat with a crowbar; The Shelter is closed. The passers-by answer when talked to: the lady has a word about Élodie’s shoes, the kid eats an ice cream, the lazy man says “Heute nicht.”',
       [art('tram-5-shelter-closed-v5.png'), elo('<h2>Wallensteinplatz</h2><p>🐕 A dog barks at Tschick-Toni by the cigarette machine.</p><button class="primary">Talk to Tschick-Toni</button>')]);
     await b.frame('Tschick-Toni asks, “Host a Tschick? I brauch dringend ane!” Élodie has no cigarette yet. Later, giving him one makes him say “Oida, geil!”, disappear and leave his crowbar.',
       [art('tram-5-shelter-closed-v5.png'), elo('<h2>Tschick-Toni · Zigarettenautomat</h2><div class="card">“Host a Tschick? I brauch dringend ane!”</div><button disabled>Give a cigarette</button>')]);
-    await b.frame('Élodie interacts with Tram 5. Every journey begins with a quiz: she chooses one of three topics, then everyone who is not hidden may answer five questions.',
+    await b.frame('Élodie talks to the painted tram: “A ticket for a quiz!” (Accept or Dismiss). Every journey is a five-question quiz. Planned: she first chooses one of three topics, as here.',
       [art('tram-5-shelter-closed-v5.png'), elo('<h2>Tram 5 · quiz</h2><p>Choose a topic</p><div class="card list"><button>Topic 1</button><button>Topic 2</button><button>Topic 3</button></div><p class="hint">5 questions · all visible players can answer</p>')]);
-    await b.frame('After every answer, the quiz shows the correct answer and an explanation in the style Élodie likes. After question five, the first available destination is Élodie’s flat.',
-      [art('tram-5-shelter-closed-v5.png'), () => b.mockPhone('elodie', tramMenu(['Appart Elo 1']))]);
+    await b.frame('After every answer, the quiz shows the correct answer (planned: an explanation in the style Élodie likes). After the quiz, Élodie chooses where the tram goes: at first, only her flat.',
+      [art('tram-5-shelter-closed-v5.png'), () => b.mockPhone('elodie', tramMenu(['🏠 Élodie’s flat']))]);
 
     await b.frame('Élodie’s flat · young-adult/appart-elo-1. The partly underground room is dark when she arrives. She can switch on the floor lamp.',
       [art('appart-elo-1-lamp-off-v2.png'), elo('<h2>Élodie’s room</h2><button class="primary">Turn on the lamp</button>')]);
     await b.frame('The TV offers Columbo on YouTube or TV5 Monde for one in-game hour. Reading a book advances two hours. The beer bottles are empty: “Pierre said he\'d bring beer.” A cracked floorboard traps a Shelter ticket; it needs a tool.',
       [art('appart-elo-1-basement-v1.png'), elo('<h2>Explore the room</h2><div class="card list"><button>Watch Columbo on YouTube</button><button>Watch TV5 Monde · 1 hour</button><button>Read a book · 2 hours</button><button>Examine empty beer bottles</button><button>Inspect cracked floorboard</button></div><p class="hint">“There\'s a piece of paper stuck under the parquet floor. I can\'t pull it out.”</p>')]);
-    await b.frame('After three in-game hours, regardless of puzzle progress, Pierre arrives with beer: “I brought beers and cigarettes! But first, let\'s play backgammon.” The only reply is “Yes”; every non-hidden player joins the game.',
-      [art('appart-elo-1-basement-v1.png'), elo('<h2>Pierre arrives</h2><div class="card">“I brought beers and cigarettes! But first, let\'s play backgammon.”</div><button class="primary">Yes</button>')]);
+    await b.frame('After three in-game hours, regardless of puzzle progress, Pierre arrives with beer, his wisp becoming him: “I brought beers and cigarettes! But first, let\'s play backgammon.” Élodie answers Yes, which opens the backgammon lobby, or Dismiss; talking to Pierre asks again.',
+      [art('appart-elo-1-basement-v1.png'), elo('<h2>Pierre arrives</h2><div class="card">Pierre: “Let\'s play backgammon!”</div><button class="primary">🎲 Yes</button><button>Dismiss</button><p class="hint">💬 Talk to Pierre asks again</p>')]);
     await b.frame('Backgammon ends. Pierre returns to wisp mode. A pack of cigarettes and some beers appear on the floor for Élodie to pick up.',
       [art('appart-elo-1-basement-v1.png'), elo('<h2>After backgammon</h2><div class="card list"><button>Pick up cigarettes</button><button>Pick up beers</button></div>')]);
 
     await b.frame('The Shelter ticket puzzle: Élodie returns to Tram 5, gives the man a cigarette, hears “Oida, geil!”, and picks up the crowbar he leaves. The dog drew her to him.',
       [art('tram-5-shelter-closed-v5.png'), elo('<h2>By the Zigarettenautomat</h2><div class="card">“Oida, geil!”</div><button class="primary">Pick up crowbar</button>')]);
-    await b.frame('A second tram quiz takes Élodie back to her flat. She uses the crowbar to lift the cracked floorboard and takes the concert ticket. The Shelter becomes an available destination.',
+    await b.frame('A second tram quiz takes Élodie back to her flat. She uses the crowbar to lift the cracked floorboard and takes the concert ticket: The Shelter opens. She walks out through the flat’s front door, back to Wallensteinplatz.',
       [art('appart-elo-1-basement-v1.png'), elo('<h2>Cracked floorboard</h2><button class="primary">Use crowbar</button><div class="card">🎟 The Shelter concert ticket</div>')]);
-    await b.frame('Wallensteinplatz at night: The Shelter is now open. After another five-question tram quiz, Élodie can choose The Shelter.',
-      [art('tram-5-night-shelter-open-v6.png'), () => b.mockPhone('elodie', tramMenu(['Appart Elo 1', 'The Shelter']))]);
+    await b.frame('Wallensteinplatz at night: The Shelter is now open. Tschick-Toni is long gone, but his dog is back, chasing a rat by the cigarette machine. The lady and the kid have gone home; the lazy man stays, having drunk too much. Élodie walks into The Shelter’s entrance; the tram never goes there.',
+      [art('tram-5-night-shelter-open-v6.png'), elo('<h2>Wallensteinplatz · night</h2><p>🎸 The Shelter is open: walk into its entrance.</p><p class="hint">🐕 Wuff! · 🐀</p>')]);
 
-    await b.frame('The Shelter · young-adult/shelter. Élodie goes down the steep stair into the rock and punk bar. Pierre proposes multiplayer table football, or baby-foot.',
-      [art('shelter-interior-playable-v3.png'), elo('<h2>The Shelter</h2><div class="card">Pierre: “Let\'s play baby-foot.”</div><button class="primary">Play table football</button>')]);
-    await b.frame('After the table-football match, Pierre becomes kissable. Kissing him unlocks Marokkanergasse and makes Élodie’s original flat inaccessible.',
+    await b.frame('The Shelter · young-adult/shelter. Élodie goes down the steep stair into the rock and punk bar (walking back up it leads out to Wallensteinplatz). Pierre is there as himself: “Élodie! A game of table football?” Yes opens its lobby, for everyone, wisps too; after Dismiss, talking to Pierre or using the table asks again. Holding the beers, Élodie can give him one (“Prost! 🍺”). The barman, the punk, the drinker and the dancers answer too.',
+      [art('shelter-interior-playable-v3.png'), elo('<h2>The Shelter</h2><div class="card">Pierre: “Élodie! A game of table football?”</div><button class="primary">⚽ Yes</button><button>Dismiss</button><p class="hint">🍺 Give Pierre a beer · 💬 Talk to Pierre</p>')]);
+    await b.frame('After a finished match, back in the bar, Élodie stands next to Pierre and kisses him (her action on him). The kiss unlocks Marokkanergasse and makes Élodie’s original flat inaccessible.',
       [art('shelter-interior-playable-v3.png'), elo('<h2>Pierre</h2><button class="primary">Kiss Pierre</button><p class="hint">Marokkanergasse unlocked · Élodie’s flat closed</p>')]);
     await b.frame('One final tram quiz leads to Marokkanergasse. The destination menu now offers Marokkanergasse and no longer offers Élodie’s original flat.',
-      [art('tram-5-night-shelter-open-v6.png'), () => b.mockPhone('elodie', tramMenu(['The Shelter', 'Marokkanergasse']))]);
+      [art('tram-5-night-shelter-open-v6.png'), () => b.mockPhone('elodie', tramMenu(['🏡 Marokkanergasse']))]);
 
-    await b.frame('Marokkanergasse · young-adult/appart-pierre. There is no normal exit. Nico and Mathieu are NPCs who may be controlled by connected players; Johanna and the Shikababe gang are here too. Anyone Élodie approaches invites her to Pyramide.',
-      [art('marokkanergasse-eureka-v1.png'), elo('<h2>Marokkanergasse</h2><div class="card">Nico · Mathieu · Johanna · Shikababe</div><p>“Shikababy Shikaboom! Let\'s play a Pyramide game!”</p><button class="primary">Yes</button><button>Dismiss</button>')]);
-    await b.frame('“Yes” starts the multiplayer Pyramide word game using the shared game engine. “Dismiss” closes the invitation; Élodie can speak to someone again.',
-      [art('marokkanergasse-eureka-v1.png'), elo('<h2>Pyramide</h2><button class="primary">Yes · start game</button><button>Dismiss</button>')]);
+    await b.frame('Marokkanergasse · young-adult/appart-pierre. There is no normal exit. Johanna, Nico and Mathieu stand in the room as NPCs; their players are still wisps. Each answers with their own line and invites Élodie to Pyramide.',
+      [art('marokkanergasse-eureka-v1.png'), elo('<h2>Marokkanergasse</h2><div class="card">Johanna: “Shikababy Shikaboom!” · Nico: “Hej hej! A Pyramide?” · Mathieu: “Allez, une petite Pyramide ?”</div><p>“Shikababy Shikaboom! Let\'s play a Pyramide game!”</p><button class="primary">Yes</button><button>Dismiss</button>')]);
+    await b.frame('“Yes” opens the Pyramide lobby. As it opens, Johanna, Nico and Mathieu are introduced: their NPCs leave and their players’ wisps become them for good, to play, move and talk. “Dismiss” closes the invitation; talking to one of them asks again. Once they are themselves, anyone next to one of them can “🎶 Shikaboom!”.',
+      [art('marokkanergasse-eureka-v1.png'), elo('<h2>Pyramide</h2><button class="primary">Yes · start game</button><button>Dismiss</button><p class="hint">🎶 Shikaboom! with Johanna, Nico or Mathieu</p>')]);
     await b.frame('After Pyramide, a special key appears on the floor. Élodie picks it up to unlock the Adult Age door in the hub. A portal then appears in the apartment; she enters it to return to the hub and complete Young Adult.',
       [art('marokkanergasse-eureka-v1.png'), elo('<h2>Young Adult complete</h2><button class="primary">Pick up Adult Age key</button><button>Enter portal to the hub</button>')]);
   },
@@ -410,7 +409,7 @@ function pyramidePlay(b: Board) {
 const pyramide: Sequence = {
   id: 'pyramide',
   title: 'Pyramide with Nico',
-  intro: 'Pyramide has no place in the story yet, so it runs from its development start, in a placeholder room. That start has no story wisps: Anna is an eligible player who takes no spot, and a wisp once the round runs. Nico plays as his character here; in the story he joins from Sweden and is a wisp until this reunion, which is why the last slide is planned. The words are the storyboard’s own small list, so each clue fits its word.',
+  intro: 'Pyramide’s place in the story is Marokkanergasse (see Young Adult). Here it runs from its development start, in a placeholder room. That start has no story wisps: Anna is an eligible player who takes no spot, and a wisp once the round runs. Nico plays as his character here; in the story he joins from Sweden and is a wisp until Pyramide opens at Marokkanergasse. The words are the storyboard’s own small list, so each clue fits its word.',
   content: 'minigame:pyramide',
   env: { BLOKO_PYRAMIDE_DIR: WORD_BANK },
   phones: ['pierre', 'elodie', 'nico', 'sol', 'anna'],
@@ -513,7 +512,7 @@ const pyramide: Sequence = {
     await b.frame('Pierre goes back to the lobby and ends Pyramide (two taps): everyone is back in the main game’s room.',
       [b.tv, () => b.real('pierre')]);
 
-    await b.frame('Planned: back in the main game, the reward. Nico’s phone counts down 3, 2, 1 and his wisp turns into his character for good. This waits for Pyramide’s place in the story.',
+    await b.frame('In the story, the reunion comes as Pyramide opens at Marokkanergasse: Nico’s phone counts down 3, 2, 1 and his wisp turns into his character for good (with Johanna and Mathieu). Shown here as a mock-up, since this run starts outside the story.',
       [() => b.mockTv(tv('Young adulthood in Vienna', `<div class="col" style="justify-content:flex-end"><div class="players">
           ${['elodie', 'pierre', 'sol', 'nico'].map((w) => `<figure>${avatar(w, 9)}<figcaption>${player(w)}${w === 'nico' ? ' 🎉' : ''}</figcaption></figure>`).join('')}</div></div>`, wisp('anna', 80, 40))),
         () => b.mockPhone('nico', phone('nico', `<div style="flex:1;display:grid;place-items:center"><b style="font-size:140px;color:var(--accent)">1</b></div><p class="hint" style="text-align:center">You’re becoming Nico…</p>`, { wisp: true }))]);
