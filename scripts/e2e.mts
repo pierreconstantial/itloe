@@ -313,8 +313,8 @@ await playToDone(Acur, idA, B, rnd);
 await B.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished');
 check(B.lastView().phase === 'finished', 'second game played to the podium');
 ib = B.mark(); N.send({ t: 'leave' });
-const vLeft = await B.waitFor((m) => m.t === 'view' && !blocksOf(m)?.players[idN], ib);
-check(!vLeft.minigame.view.players.some((p: any) => p.id === idN), 'leaving on the podium → off the podium and the lobby\'s list');
+const vLeft = await B.waitFor((m) => m.t === 'view' && blocksOf(m)?.players[idN]?.left, ib);
+check(!vLeft.minigame.view.players.some((p: any) => p.id === idN), 'leaving on the podium → still on it, marked left, off the lobby\'s list');
 N.ws.close();
 
 // --- Play again: back to the lobby, then start at once ---

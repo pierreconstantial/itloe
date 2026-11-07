@@ -7,9 +7,9 @@
 //
 // Actions (ids injected by the server, never from the wire):
 //   goal { team, by }    the server code's live match: `team` scored; `by`: the player whose rod touched it last
-//   leave { id }         someone stopped being eligible, or was taken out: their rods pass to their teammates;
-//                        a team with nobody left loses, and the match ends
 //   endGame { id }       the game master: the match ends with the score so far
+// A player who leaves or is taken out (marked by the plain lobby, `out`) passes their rods to their teammates; a team
+// with nobody left loses, and the match ends.
 // A refused action returns the same state.
 
 import { CHARACTERS } from './characters.js';
@@ -29,7 +29,7 @@ import { mergeBySchema, settingsProblems } from './settings.js';
  */
 /**
  * @typedef {{ character: CharacterId, name: string, color: number, team: Team, score: number,
- *   left?: boolean, done?: boolean }} FoosballPlayer
+ *   left?: boolean, done?: boolean, retired?: boolean }} FoosballPlayer
  */
 /**
  * A match. `players[id].score`: their team's goals, so the shared ranking puts a team's players together;
@@ -43,7 +43,6 @@ import { mergeBySchema, settingsProblems } from './settings.js';
  */
 /**
  * @typedef {{ t: 'goal', team: Team, by: string | null }
- *   | { t: 'leave', id: string }
  *   | { t: 'endGame', id: string }
  *   | { t: 'timeUp', deadline: number }} FoosballAction
  */
@@ -309,14 +308,6 @@ export function reduceFoosball(s, a, ctx) {
       return { ...s, score, players, goals: [...s.goals, { team: a.team, by: a.by }] };
     }
 
-    case 'leave': {
-      const p = s.players[a.id];
-      if (!p || p.left) return s;
-      const players = { ...s.players, [a.id]: { ...p, left: true, done: true } };
-      const emptied = TEAMS.some((team) => !s.order.some((id) => players[id].team === team && !players[id].done));
-      return { ...s, players, endReason: emptied ? 'left' : null };
-    }
-
     case 'endGame':
       return ctx.gameMasterId !== null && a.id === ctx.gameMasterId ? { ...s, endReason: 'gm' } : s;
 
@@ -330,6 +321,8 @@ export const FOOSBALL_RULES = {
   init: startFoosball,
   players: { min: MIN_PLAYERS, max: MAX_PLAYERS },
   reduce: reduceFoosball,
+  // the rods pass on by themselves (holders); a team with nobody left ends the match
+  out: (s) => (TEAMS.some((team) => !s.order.some((id) => s.players[id].team === team && !s.players[id].done)) ? { ...s, endReason: 'left' } : s),
   status: (s) => (s?.kind !== 'foosball' ? null : running(s) ? 'running' : 'finished'),
   result: (s) => ({
     ranking: ranking(s).map((r) => ({ character: s.players[r.id].character, score: r.score, rank: r.rank })),

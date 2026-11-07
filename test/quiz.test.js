@@ -2,10 +2,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { startQuiz, reduceQuiz as reduceRound, quizRanking, resolvePending, mergeQuizSettings, pointsFor, SCORING, QUIZ_DEFAULTS } from '../shared/quiz/index.js';
+import { MINIGAMES } from '../shared/minigames.js';
 
 /** @typedef {import('../shared/quiz/index.js').QuizState} QuizState */
 /** The reducer, with the game master the campaign passes: 'a'. */
 const reduceQuiz = (/** @type {QuizState} */ s, /** @type {import('../shared/quiz/index.js').QuizAction} */ a) => reduceRound(s, a, { gameMasterId: 'a' });
+/** A plain lobby action on a running quiz (leave, retire), the quiz after it. @param {QuizState} round @param {any} a */
+const lobbyReduce = (round, a) => /** @type {QuizState} */ (MINIGAMES.quiz.reduce(
+  /** @type {any} */ ({ stage: 'running', seed: 0, settings: {}, players: [], ready: [], holders: {}, round }), a, { gameMasterId: 'a' }).round);
 
 const T0 = 1_700_000_000_000;
 /** 6 candidates: 4 with choices, 2 text-only. */
@@ -165,7 +169,7 @@ test('endGame: the game master, from question (round dropped) or reveal (kept)',
 test('leave: mid-quiz marks left, closes the round if they were the last awaited', () => {
   let s = choiceRound();
   s = reduceQuiz(s, { t: 'answer', id: 'a', choice: 1, now: T0 + 1000, verdict: 'right' });
-  s = reduceQuiz(s, { t: 'leave', id: 'b' });
+  s = lobbyReduce(s, { t: 'leave', id: 'b' });
   assert.equal(s.players.b.left, true);
   assert.equal(s.phase, 'reveal', 'nobody else to wait for');
   assert.equal(reduceQuiz(s, { t: 'answer', id: 'b', choice: 1, now: T0 + 2000, verdict: 'right' }), s);

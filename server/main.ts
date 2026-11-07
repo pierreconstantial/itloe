@@ -805,8 +805,8 @@ function handleMessage(ws: WebSocket, m: any): void {
 
   switch (m.t) {
     case 'leave':
-      // leaving the EVENING (a running minigame hears their leave: its lobby drops them, a block game marks
-      // them done); the stored id must not rejoin, so the socket goes back to being a stranger
+      // leaving the EVENING (a running minigame hears their leave: its lobby drops them and marks
+      // them out of its round); the stored id must not rejoin, so the socket goes back to being a stranger
       if (apply({ t: 'leave', id })) detach(id);
       return;
 

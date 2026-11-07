@@ -57,11 +57,11 @@ test('quiz under way: a newcomer waits for the next round', () => {
   assert.ok(c.party.players.a && !quiz(c).players.a, 'joined the evening, not seated mid-quiz');
 });
 
-test('taking a player out of a quiz counts as their leaving: the game master only, while it runs', () => {
+test('taking a player out of a quiz: retired, not left; the game master only, while it runs', () => {
   let c = startQuizRound(inQuiz());
   assert.equal(run(c, act({ t: 'retire', id: 's', target: 'e' })), c, 'a guest can\'t');
   c = run(c, act({ t: 'retire', id: 'p', target: 's' }));
-  assert.equal(quiz(c).players.s.left, true, 'Sol is out of the quiz');
+  assert.deepEqual([quiz(c).players.s.retired, quiz(c).players.s.done, quiz(c).players.s.left], [true, true, false], 'Sol is out of the quiz, taken out');
   assert.equal(quiz(c).players.s.score, 0, '…and keeps a score for the podium');
   assert.equal(c.party.players.s.left, false, '…but still in the evening');
   assert.equal(run(c, act({ t: 'retire', id: 'p', target: 's' })), c, 'twice: nothing more');
@@ -71,6 +71,7 @@ test('taking a player out of a quiz counts as their leaving: the game master onl
   assert.equal(quiz(c).phase, 'reveal', 'the round no longer waits for Sol');
   c = run(c, act({ t: 'endGame', id: 'p' }));
   assert.equal(minigameStatus(c), 'podium');
+  assert.equal(quiz(c).players.s.retired, true, 'the podium shows Sol out');
   assert.equal(run(c, act({ t: 'retire', id: 'p', target: 'e' })), c, 'on the podium: refused');
 });
 

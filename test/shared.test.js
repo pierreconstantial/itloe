@@ -6,6 +6,7 @@ import { PIECES, PIECE_SETS, handAt } from '../shared/pieces.js';
 import {
   DEFAULT_SETTINGS, startGame, newPlayer, normalizeSettings, placementScore, ranking, reduce as reduceGame,
 } from '../shared/game.js';
+import { MINIGAMES } from '../shared/minigames.js';
 
 /** @typedef {import('../shared/game.js').State} State */
 /** @typedef {import('../shared/game.js').Player} Player */
@@ -484,40 +485,45 @@ test('endReason stuck when everyone is stuck (also before the bell)', () => {
   assert.equal(reduce(end, { t: 'timeUp', deadline: 99 }), end); // late bell is a no-op
 });
 
-// ---------- leave ----------
+// ---------- leave (through the plain lobby, which marks it) ----------
 
 /** A round under way with a (game master), b, c. @returns {State} */
 const game3 = () => started(['pierre', 'elodie', 'sol']);
 
-test('leave: unknown or already-removed id → same state', () => {
-  /** @type {State} */
-  const s = { ...game3(), phase: 'finished' };
-  assert.equal(reduce(s, { t: 'leave', id: 'nobody' }), s);
-  const gone = reduce(s, { t: 'leave', id: 'b' });
-  assert.equal(reduce(gone, { t: 'leave', id: 'b' }), gone);
+/** The round in a plain lobby, its players listed. @param {State} round @returns {any} */
+const inLobby = (round) => ({
+  stage: round.phase === 'playing' ? 'running' : 'podium', seed: 0, settings: {}, ready: [], holders: {},
+  players: round.order.map((id) => ({ id, character: round.players[id].character })), round,
+});
+/** `id` leaves the evening: the round after it. @param {State} round @param {string} id */
+const leave = (round, id) => /** @type {State} */ (MINIGAMES.blocks.reduce(inLobby(round), { t: 'leave', id }, { gameMasterId: 'a' }).round);
+
+test('leave: unknown or already-left id → same state', () => {
+  const s = game3();
+  assert.equal(leave(s, 'nobody'), s);
+  const gone = leave(s, 'b');
+  assert.equal(leave(gone, 'b'), gone);
 });
 
 test('leave while playing: marked done, last kept, game goes on', () => {
   let s = game3();
   s = reduce(s, { t: 'place', id: 'a', piece: 0, x: 0, y: 0 });
   const lastA = s.players.a.last;
-  const left = reduce(s, { t: 'leave', id: 'a' });
+  const left = leave(s, 'a');
   assert.equal(left.phase, 'playing');
   assert.deepEqual(left.order, ['a', 'b', 'c']); // stays on the boards / podium
   assert.equal(left.players.a.done, true);
   assert.equal(left.players.a.last, lastA);
   assert.equal(left.players.a.score, s.players.a.score);
   assert.equal(left.endReason, null);
-  assert.equal(reduce(left, { t: 'leave', id: 'a' }), left); // second leave → no-op
   assert.equal(reduce(left, { t: 'place', id: 'a', piece: 1, x: 3, y: 3 }), left); // frozen
 });
 
 test('leave while playing: the last leave finishes the game', () => {
   let s = game3();
-  s = reduce(s, { t: 'leave', id: 'b' });
-  s = reduce(s, { t: 'leave', id: 'a' });
+  s = leave(leave(s, 'b'), 'a');
   assert.equal(s.phase, 'playing');
-  s = reduce(s, { t: 'leave', id: 'c' }); // everyone done → finished
+  s = leave(s, 'c'); // everyone done → finished
   assert.equal(s.phase, 'finished');
   assert.equal(s.endReason, 'stuck');
 });
@@ -525,16 +531,19 @@ test('leave while playing: the last leave finishes the game', () => {
 test('leave while playing by a stuck player still marks them left', () => {
   let s = game3();
   s = { ...s, players: { ...s.players, a: { ...s.players.a, done: true } } };
-  const left = reduce(s, { t: 'leave', id: 'a' });
+  const left = leave(s, 'a');
   assert.notEqual(left, s);
   assert.equal(left.players.a.left, true); // stuck, then left: now marked as departed
   assert.equal(left.players.a.board, s.players.a.board);
 });
 
-test('leave in finished: removed from the podium', () => {
-  /** @type {State} */
-  const fin = { ...game3(), phase: 'finished' };
-  const s = reduce(fin, { t: 'leave', id: 'a' });
-  assert.deepEqual(s.order, ['b', 'c']);
-  assert.deepEqual(ranking(s).map((r) => r.id).sort(), ['b', 'c']);
+test('leave on the podium: still on it, marked left, still ranked; not back in the lobby', () => {
+  const two = started(['pierre', 'elodie']);
+  const fin = reduce(two, { t: 'endGame', id: 'a' });
+  const lobby = MINIGAMES.blocks.reduce(inLobby(fin), { t: 'leave', id: 'b' }, { gameMasterId: 'a' });
+  const s = /** @type {State} */ (lobby.round);
+  assert.deepEqual(s.order, ['a', 'b'], 'still a two-player game: no solo best (server/blocks.ts)');
+  assert.equal(s.players.b.left, true);
+  assert.deepEqual(ranking(s).map((r) => r.id).sort(), ['a', 'b']);
+  assert.deepEqual(MINIGAMES.blocks.reduce(lobby, { t: 'lobby', id: 'a' }, { gameMasterId: 'a' }).ready, ['a']);
 });

@@ -24,6 +24,12 @@ const ok = (s, a) => {
   assert.notEqual(next, s, `${JSON.stringify(a)}: accepted`);
   return next;
 };
+/** A plain lobby action on a running round (leave, retire), the round after it. @param {BackgammonState} round @param {any} a @returns {BackgammonState} */
+const lobbyOk = (round, a) => {
+  const next = minigame('backgammon')?.reduce({ stage: 'running', seed: 0, settings: {}, players: [], ready: [], holders: {}, round }, a, CTX).round;
+  assert.notEqual(next, round, `${JSON.stringify(a)}: accepted`);
+  return next;
+};
 /** @param {BackgammonState} s @param {BackgammonAction} a */
 const refused = (s, a) => assert.equal(R.reduce(s, a, CTX), s, `${JSON.stringify(a)}: refused`);
 
@@ -110,21 +116,21 @@ test('time up: games are decided on the position at the start of the turn, by ch
 test('a player who leaves or is taken out loses their games; fewer than two players ends the group phase', () => {
   let s = start(4, { minutes: 0, games: 1 });
   const p4board = s.boards.findIndex((b) => b.a === 'p4' || b.b === 'p4');
-  s = ok(s, { t: 'leave', id: 'p4' });
+  s = lobbyOk(s, { t: 'leave', id: 'p4' });
   assert.equal(s.boards[p4board].end?.how, 'left', 'their game ends at once');
   const lost = s.games.filter((g) => g.a === 'p4' || g.b === 'p4');
   assert.equal(lost.length, 3, 'their game and both games still to play');
   assert.ok(lost.every((g) => g.winner !== 'p4' && g.points === 1));
   assert.equal(s.players.p4.left, true);
   assert.equal(R.status(s), 'running', 'three players carry on');
-  s = ok(s, { t: 'retire', id: 'p1', target: 'p3' });
-  s = ok(s, { t: 'retire', id: 'p1', target: 'p2' });
+  s = lobbyOk(s, { t: 'retire', id: 'p1', target: 'p3' });
+  s = lobbyOk(s, { t: 'retire', id: 'p1', target: 'p2' });
   assert.equal(R.status(s), 'finished');
   assert.equal(s.endReason, 'retired');
 
   // best of 3: the pair stops once one has won twice
   s = start(2, { minutes: 0, games: 3 });
-  s = ok(s, { t: 'leave', id: 'p2' });
+  s = lobbyOk(s, { t: 'leave', id: 'p2' });
   assert.equal(s.games.length, 2);
   assert.equal(R.status(s), 'finished');
   assert.deepEqual(R.result(s, 'node').ranking.map((r) => [r.character, r.score, r.rank]), [['pierre', 2, 1], ['elodie', 0, 2]]);

@@ -87,7 +87,7 @@ export function createQuizUi(io) {
   /** Who answered (question) — chips, never what. @param {QuizView} v @param {RoundView} r */
   function renderAnswered(v, r) {
     const ul = $('quiz-answered');
-    ul.replaceChildren(...v.order.filter((id) => !v.players[id].left).map((id) => {
+    ul.replaceChildren(...v.order.filter((id) => !v.players[id].done).map((id) => {
       const done = r.answered.includes(id);
       return el('li', done ? 'done' : '', `${done ? '✓ ' : '… '}${v.players[id].name}`);
     }));
@@ -98,7 +98,7 @@ export function createQuizUi(io) {
     buildQuestion(r);
     $('quiz-category').textContent = r.question.category ? `${r.question.category}${r.question.level ? ` · ${'★'.repeat(r.question.level)}` : ''}` : '';
     $('quiz-q').textContent = frenchSpaces(r.question.q);
-    const out = !!v.players[meId]?.left; // taken out by the game master: no more answers, the score counts
+    const out = !!v.players[meId]?.done; // taken out by the game master: no more answers, the score counts
     const sent = out || r.answered.includes(meId) || mine?.key === roundKey(r);
     const asChoice = !!r.question.choices;
     const seated = !!v.players[meId]; // the game master may sit a round out: nothing to answer with

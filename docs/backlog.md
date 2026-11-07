@@ -25,7 +25,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Story opening in a browser test](#story-opening-in-a-browser-test) | No browser test plays the opening past its block game | P1 | Open | Low |
 | [Pyramide in the story](#pyramide-in-the-story) | Pyramide has no tableau in the story yet | P1 | Needs decision | Low |
 | [Apartment drawings cover avatars](#apartment-drawings-cover-avatars) | The cats, friends, keepsakes and key are always drawn over avatars | P2 | Open | Low |
-| [Players who leave or are taken out](#players-who-leave-or-are-taken-out) | Each minigame handles leaving and taking out its own way; two podium bugs come from it | P2 | Open | Medium |
 | [Trim the e2e suites and share their setup](#trim-the-e2e-suites-and-share-their-setup) | The suites re-check what unit tests pin and each copy their setup | P2 | Open | Medium |
 | [Browser suites ignore page errors](#browser-suites-ignore-page-errors) | The phone and TV suites pass when a page throws | P2 | Open | Low |
 | [Backgammon's restart and hidden dice untested](#backgammons-restart-and-hidden-dice-untested) | No test resumes a backgammon round or checks its view hides the dice | P2 | Open | Low |
@@ -88,15 +87,6 @@ This is Pierre's content.
 In the apartment, the cats, friends, keepsakes and the key are drawn after the depth-sorted list of props and avatars (`public/screen/party-room.js`). An avatar walking in front of a cat still has the cat drawn over it.
 
 **Recommendation:** make them props of the apartment's scene (`apartment-room` in `shared/campaign/story/hub.js`), so they sort with the avatars like the party room's furniture.
-
-### Players who leave or are taken out
-
-Each minigame's round rules handle a player who leaves or is taken out in their own way (`shared/game.js`, `shared/quiz/index.js`, `shared/pyramide.js`, `shared/backgammon.js`, `shared/foosball.js`), and the plain lobby offers `retire: true` for rules that take the game master's "Take a player out" themselves. Two bugs come from the differences:
-
-- A blocks player who leaves on the podium is removed from it, where the other minigames mark them left. In a two-player game, the remaining player's podium then shows "New best!" for a score that was never recorded (`isSolo` in `server/blocks.ts`), and the podium no longer matches the recorded result.
-- The quiz is the only minigame without `retire: true`, so a quiz player taken out is recorded as having left, and the TV podium never shows them "out".
-
-**Decision (Konstantin):** the plain lobby marks `left`, `retired` and `done` on the round's players itself (the fields `RoundPlayers` already defines in `shared/minigames.js`), and each round's rules supply one hook for what it means: blocks checks whether everyone is done, the quiz may reveal early, Pyramide ends the round, backgammon and table football award forfeits. The `retire` option goes. Update `docs/minigames.md` with it.
 
 ### Trim the e2e suites and share their setup
 

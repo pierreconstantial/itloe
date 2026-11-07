@@ -6,8 +6,10 @@
 // A quiz starts with startQuiz on question 1 (the campaign hands in the players, the settings, the time
 // and the candidate questions); phases: question → reveal → question → … → finished (the podium).
 //
+// A player who leaves or is taken out (marked by the plain lobby, `out`) answers no more; the round closes if
+// they were the last one awaited.
+//
 // Actions (ids, now, deadline and verdicts are injected by the server, never from the wire):
-//   leave { id }                    marked left; the round closes if they were the last one awaited
 //   answer { id, choice | text, now, verdict }   once per round, before the deadline
 //   close { deadline }              server: the round's timer rang (stale deadlines are ignored)
 //   verdict { target, ok, index, questionId }   server: the async judge decided an 'uncertain' answer of that
@@ -38,7 +40,11 @@ import { mergeBySchema, settingsProblems } from '../settings.js';
  *   deadline: number, answers: Record<string, Answer>, credited: boolean }} Round
  * perm: displayed position → the bank's choice index (choices shuffled per round); null for text
  */
-/** @typedef {{ id: string, character: CharacterId, name: string, color: number, score: number, correct: number, left: boolean }} QuizPlayer */
+/**
+ * `done`: out (left, or taken out: `retired`), no more answers.
+ * @typedef {{ id: string, character: CharacterId, name: string, color: number, score: number, correct: number, left: boolean,
+ *   done?: boolean, retired?: boolean }} QuizPlayer
+ */
 /**
  * @typedef {{
  *   kind: 'quiz',
@@ -54,8 +60,7 @@ import { mergeBySchema, settingsProblems } from '../settings.js';
  * }} QuizState
  */
 /**
- * @typedef {{ t: 'leave', id: string }
- *   | { t: 'answer', id: string, choice?: number, text?: string, now: number, verdict: Verdict }
+ * @typedef {{ t: 'answer', id: string, choice?: number, text?: string, now: number, verdict: Verdict }
  *   | { t: 'close', deadline: number }
  *   | { t: 'verdict', target: string, ok: boolean | null, index: number, questionId: string }
  *   | { t: 'override', id: string, target: string, ok: boolean }
@@ -148,7 +153,7 @@ export function startQuiz({ seed, settings, players, now, inputs }) {
 export const quizRunning = (s) => s.phase === 'question' || s.phase === 'reveal';
 
 /** Seated players who can still answer. @param {QuizState} s */
-const active = (s) => s.order.filter((id) => !s.players[id].left);
+const active = (s) => s.order.filter((id) => !s.players[id].done);
 
 /** Seeded Fisher–Yates. @template T @param {T[]} list @param {() => number} rnd @returns {T[]} */
 function shuffle(list, rnd) {
@@ -242,18 +247,10 @@ const isGameMaster = (ctx, id) => ctx.gameMasterId !== null && ctx.gameMasterId 
  */
 export function reduceQuiz(s, a, ctx) {
   switch (a.t) {
-    case 'leave': {
-      const p = s.players[a.id];
-      if (!p || p.left) return s;
-      const next = { ...s, players: { ...s.players, [a.id]: { ...p, left: true } } };
-      // the leaver was the last one we were waiting for: the round closes
-      return next.phase === 'question' && everyoneAnswered(next) ? reveal(next) : next;
-    }
-
     case 'answer': {
       const r = s.round;
       const p = s.players[a.id];
-      if (s.phase !== 'question' || !r || !p || p.left || r.answers[a.id]) return s;
+      if (s.phase !== 'question' || !r || !p || p.done || r.answers[a.id]) return s;
       if (!Number.isFinite(a.now) || a.now > r.deadline) return s;
       if (!['right', 'wrong', 'uncertain'].includes(a.verdict)) return s;
       /** @type {Answer} */
@@ -344,6 +341,8 @@ export function quizRanking(s) {
 export const QUIZ_RULES = {
   init: startQuiz,
   reduce: reduceQuiz,
+  // the one who went out was the last answer awaited: the round closes
+  out: (s) => (s.phase === 'question' && everyoneAnswered(s) ? reveal(s) : s),
   status: (s) => (quizRunning(s) ? 'running' : s.phase === 'finished' ? 'finished' : null),
   result: (s, node) => {
     const ranking = quizRanking(s);

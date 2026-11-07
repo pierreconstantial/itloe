@@ -32,7 +32,7 @@ import { ranking } from './ranking.js';
  *   streak: number,             // consecutive clearing placements before now
  *   graceLeft: number,          // non-clearing placements still forgiven (reset to rules.grace on a clear)
  *   done: boolean,              // stuck, stopped by the bell, retired, ended by the game master, or left; board frozen
- *   left: boolean,              // left mid-game (still shown until the game ends; not in the rematch)
+ *   left: boolean,              // left the evening (still shown and ranked; not in the rematch)
  *   retired?: boolean,          // taken out by the game master mid-game: still ranked, keeps seat + character (absent on old saves)
  *   last: null | {
  *     n: number,                // per-player move counter (event id — clients react to n changing)
@@ -57,9 +57,7 @@ import { ranking } from './ranking.js';
  *
  * The whole `timeUp` action is SERVER-injected, never from the wire. A round starts with startGame.
  * @typedef {{ t: 'timeUp', deadline: number }
- *   | { t: 'leave', id: string }
  *   | { t: 'endGame', id: string }
- *   | { t: 'retire', id: string, target: string }
  *   | { t: 'place', id: string, piece: 0 | 1 | 2, x: number, y: number }} Action
  */
 
@@ -270,25 +268,6 @@ export function reduce(state, action, ctx) {
       return { ...state, players: allMarkedDone(state), phase: 'finished', endReason: 'gm' };
     }
 
-    case 'retire': {
-      // the game master takes one player out: done (board frozen, still ranked) but NOT left — the seat, the
-      // character and a reconnect stay theirs. The last one out ends the game like getting stuck.
-      if (state.phase !== 'playing' || !isGameMaster(ctx, action.id)) return state;
-      const t = state.players[action.target];
-      if (!t || t.done || t.left) return state;
-      return finishIfAllDone(state, { ...state.players, [t.id]: { ...t, done: true, retired: true } });
-    }
-
-    case 'leave': {
-      const p = state.players[action.id];
-      if (!p || p.left) return state;
-      if (state.phase === 'finished') { // off the podium
-        const { [p.id]: _gone, ...players } = state.players;
-        return { ...state, order: state.order.filter((id) => id !== p.id), players };
-      }
-      return finishIfAllDone(state, { ...state.players, [p.id]: { ...p, done: true, left: true } });
-    }
-
     default:
       return state;
   }
@@ -327,7 +306,8 @@ function finishIfAllDone(state, players) {
 export const BLOCK_RULES = {
   init: startGame,
   reduce,
-  retire: true, // taken out: done, still ranked, the seat kept (not a leave)
+  // left or taken out: done, the board frozen, still ranked; the last one out ends the game like getting stuck
+  out: (s) => finishIfAllDone(s, s.players),
   status: (s) => (s.phase === 'playing' ? 'running' : s.phase === 'finished' ? 'finished' : null),
   result: (s) => ({
     ranking: ranking(s).map((r) => ({ character: s.players[r.id].character, score: r.score, rank: r.rank })),
