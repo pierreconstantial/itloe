@@ -360,11 +360,12 @@ const minigameView = (): MinigameView | null => {
 };
 
 /** `minigame`: the running minigame; `campaign`: the whole evening (TV hub/cutscenes, phone game-master panel), without
- *  the minigame's raw state, which travels only through its server code's view (raw quiz verdicts would leak). */
+ *  the minigame's raw state, which travels only through its server code's view (raw quiz verdicts would leak), and
+ *  without the seed (each minigame's seed comes from it, and with it backgammon's dice). */
 const viewMsg = () => {
-  const { activity: _raw, ...at } = game.campaign.at;
+  const { seed: _seed, at: { activity: _raw, ...at }, ...campaign } = game.campaign;
   return JSON.stringify({
-    t: 'view', minigame: minigameView(), campaign: { ...game.campaign, at }, contentVersion: CONTENT_VERSION,
+    t: 'view', minigame: minigameView(), campaign: { ...campaign, at }, contentVersion: CONTENT_VERSION,
     online: online(), incarnations: Object.fromEntries(incarnations), now: Date.now(),
   });
 };

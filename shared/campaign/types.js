@@ -210,8 +210,9 @@ export {};
 
 /**
  * The campaign as views carry it: without the minigame's raw state (`at.activity`), which travels only
- * through its server code's view (the view's `minigame`).
- * @typedef {Omit<Campaign, 'at'> & { at: Omit<Campaign['at'], 'activity'> }} CampaignView
+ * through its server code's view (the view's `minigame`), and without the seed (each minigame's seed comes from
+ * it, and with it backgammon's dice).
+ * @typedef {Omit<Campaign, 'at' | 'seed'> & { at: Omit<Campaign['at'], 'activity'> }} CampaignView
  */
 
 // ---------------------------------------------------------------- actions (reduceCampaign)

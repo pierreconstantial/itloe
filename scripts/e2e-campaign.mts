@@ -123,7 +123,8 @@ async function restartSame(step: string): Promise<void> {
   const disk = saved();
   const onDisk = core(disk) === core(before);
   if (!onDisk) console.log(`  [${step}] disk ≠ what every client sees:\n    ${diff(JSON.parse(core(before)), JSON.parse(core(disk))).join('\n    ')}`);
-  check(onDisk && disk.seed === before.seed, `${step}: what every client sees is already saved (before the kill)`);
+  check(onDisk, `${step}: what every client sees is already saved (before the kill)`);
+  check(!('seed' in before), `${step}: the campaign on the wire carries no seed (it tells the next dice)`);
   await kill9();
   await boot();
   for (const c of [P, E, T1, T2]) c?.ws.close();
@@ -134,7 +135,7 @@ async function restartSame(step: string): Promise<void> {
   const same = core(camp(T1)) === core(before);
   if (!same) console.log(`  [${step}] resumed ≠ before (T1's last view):\n    ${diff(JSON.parse(core(before)), JSON.parse(core(camp(T1)))).join('\n    ')}`);
   check(same && (await roomCode()) === room, `kill -9 ${step} → same evening resumed`);
-  check(camp(T1).seed === before.seed, `kill -9 ${step} → same campaign seed (next games deal the same)`);
+  check(saved().seed === disk.seed, `kill -9 ${step} → same campaign seed (next games deal the same)`);
 }
 
 const played = (k: any) => k.facts.counters['blocks.played'] ?? 0;
