@@ -189,10 +189,13 @@ same story wisp/incarnation rules as Nico (`person.mathieu.unlocked`). The live 
 characters. Room spawns span x = 2 through x = 14 evenly across the roster at y = 7.6. Minigame
 lobby layouts are unchanged at Pierre's request.
 
+Amendment (2026-11-07, agreed with Pierre): Johanna is phone-selectable, with colour slot 8 and the same
+story wisp/incarnation rules (`person.johanna.unlocked`). The live roster has eight characters.
+
 ```js
 // shared/characters.js (P1)
-// CharacterId = 'pierre' | 'elodie' | 'sol' | 'anna' | 'nico' | 'konz' | 'mathieu'
-// Character = { id, name, color }   // color 1..7 — the character IS the colour slot
+// CharacterId = 'pierre' | 'elodie' | 'sol' | 'anna' | 'nico' | 'konz' | 'mathieu' | 'johanna'
+// Character = { id, name, color }   // color 1..8 — the character IS the colour slot
 export const CHARACTERS = {};        // Record<CharacterId, Character>, insertion order = display order
 export function freeCharacters(state) {}  // → CharacterId[] not picked by any non-left player
 

@@ -214,7 +214,7 @@ with a misuse of another field (e.g. an `after` for in-game time: see Patterns).
 
 | Story need | Missing |
 |---|---|
-| Backgammon, table football | The minigames themselves (`docs/minigames.md`) |
+| Table football at the Shelter | The minigame itself (`docs/minigames.md`) |
 | The tram quiz's three topics, chosen by Élodie | Quiz settings a machine can set (today: the tableau's fixed `settings`) |
 
 ## Example: Tschick-Toni

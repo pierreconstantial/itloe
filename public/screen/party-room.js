@@ -521,16 +521,22 @@ export function createPartyRoom(bg, fg, avatars) {
       g.restore();
     });
 
-  /** prop.kind → art: PROP_PIXELS, the animated ambient people over them, and Johanna's character sprite.
-   *  @type {import('./scene-render.js').PropArt} */
+  /** A character's sprite standing still, facing the room, as a prop. @param {string} sprite */
+  const characterProp = (sprite) =>
+    /** @type {import('./scene-render.js').DrawProp} */ ((g, prop, v) => {
+      const size = SPRITE_SIZE * v.scale;
+      const cx = geo.ox + (prop.box.x + prop.box.w / 2) * v.unit;
+      drawSprite(g, sprite, 'down', 0, cx - size / 2, snapY(v, prop.anchorY) - size, v.scale);
+    });
+
+  /** prop.kind → art: PROP_PIXELS, the animated ambient people over them, and Marokkanergasse's people as their
+   *  character sprites. @type {import('./scene-render.js').PropArt} */
   const PROP_ART = {
     ...Object.fromEntries(Object.entries(PROP_PIXELS).map(([kind, { grid, pal }]) => [kind, pixelProp(grid, pal)])),
     ...Object.fromEntries(Object.entries(AMBIENT_NPCS).map(([id, npc]) => [id, ambientProp(npc)])),
-    'marokkanergasse-johanna': (g, prop, v) => {
-      const size = SPRITE_SIZE * v.scale;
-      const cx = geo.ox + (prop.box.x + prop.box.w / 2) * v.unit;
-      drawSprite(g, 'johanna', 'down', 0, cx - size / 2, snapY(v, prop.anchorY) - size, v.scale);
-    },
+    'marokkanergasse-johanna': characterProp('johanna'),
+    'marokkanergasse-nico': characterProp('nico'),
+    'marokkanergasse-mathieu': characterProp('mathieu'),
   };
 
   // ---- players, doors & object actions ----

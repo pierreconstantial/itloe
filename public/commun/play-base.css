@@ -120,6 +120,7 @@ button.primary:active { transform: scale(0.97); }
 .dot.c5 { background: var(--p5); }
 .dot.c6 { background: var(--p6); }
 .dot.c7 { background: var(--p7); }
+.dot.c8 { background: var(--p8); }
 
 /* ---------- ☰ menu + sheets ---------- */
 
@@ -256,6 +257,7 @@ canvas.avatar {
 .pick-card.c5 { --pc: var(--p5); }
 .pick-card.c6 { --pc: var(--p6); }
 .pick-card.c7 { --pc: var(--p7); }
+.pick-card.c8 { --pc: var(--p8); }
 .pick-card:not(:disabled):active { transform: scale(0.97); border-color: var(--pc); }
 .pick-name { font-size: 18px; font-weight: 700; }
 .pick-badge {

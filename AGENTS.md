@@ -7,6 +7,7 @@
 
 ## Before editing
 
+- `docs/planning/` contains ideas and backlog items.
 - Read the README's “For developers” section for architecture, code conventions, and test commands. Inspect the neighboring implementation and relevant tests before choosing an approach.
 - When adding or changing a minigame, read `docs/minigames.md` first.
 - When adding or changing story content, the campaign engine (`shared/campaign/`), or code that reads the campaign (server, phone, TV), read `docs/story-engine.md` first and follow its rule: the story is data, the code is generic.

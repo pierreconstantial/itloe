@@ -330,7 +330,7 @@ export function createAvatarLayer() {
     const expression = expressions.get(a.id);
     const active = !!expression && expression.until > frameNow;
     if (expression && !active) expressions.delete(a.id);
-    const tints = ['#f6d77c', '#ffe7a8', '#a9e9ff', '#ffc5ef', '#cbb9ff', '#9dffc0', '#ffd2db'];
+    const tints = ['#f6d77c', '#ffe7a8', '#a9e9ff', '#ffc5ef', '#cbb9ff', '#9dffc0', '#ffd2db', '#f3e0b8'];
     const tint = tints[(a.color - 1) % tints.length];
     if (offline.has(a.id)) g.globalAlpha = OFFLINE_ALPHA;
     drawWisp(g, sx, sy, v.unit, frameNow, active, tint, isWalking(a, frameNow));

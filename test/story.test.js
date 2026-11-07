@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   newCampaign, loadCampaign, reduceCampaign, validateContent, holding, gameMasterId, roomAt, sceneAt, objectRules, offerAt,
-  nextTimer, npcsAt, pickupsAt, choiceAt,
+  nextTimer, npcsAt, pickupsAt, choiceAt, zonesAt,
 } from '../shared/campaign/index.js';
 import { objectAction, nearbyObject } from '../shared/interactions.js';
 import { isWalkable } from '../shared/scene.js';
@@ -76,7 +76,7 @@ test('Mathieu can join as the seventh character, resume his saved identity and i
   for (const character of Object.keys(CHARACTERS)) {
     c = act(c, { t: 'join', id: character, character: /** @type {import('../shared/characters.js').CharacterId} */ (character) });
   }
-  assert.equal(c.party.order.length, 7);
+  assert.equal(c.party.order.length, Object.keys(CHARACTERS).length);
   assert.deepEqual(c.party.players.mathieu.statuses, ['wisp']);
   assert.equal(act(c, { t: 'join', id: 'another-mathieu', character: 'mathieu' }), c, 'one holder per character');
   const resumed = loadCampaign(JSON.parse(JSON.stringify(c)), STORY_CONTENT);
@@ -313,6 +313,75 @@ test('Élodie\'s flat: the lamp, time passing by Columbo and books, Pierre after
   assert.equal(holding(c.facts, 'elodie', 'shelter-ticket'), 1);
   assert.equal(c.facts.unlocked.includes('young-adult/shelter'), true, 'the Shelter opens');
   assert.equal(actionOn('appart-elo-1-floorboard'), null, 'once');
+});
+
+test('Young Adult to its end: backgammon with Pierre, the kiss at the Shelter, Pyramide, the key and the portal home', () => {
+  const FLAT = 'young-adult/appart-elo-1', SHELTER = 'young-adult/shelter', MAROK = 'young-adult/appart-pierre';
+  /** A game finished at that tableau (the game master's counter). @param {string} node @returns {import('../shared/campaign/types.js').CampaignStep} */
+  const finished = (node) => ({ t: 'gm', id: 'pierre', op: { op: 'count', counter: `node.${node}.finished`, set: 1 } });
+  let c = act(afterOpening(), { t: 'gm', id: 'pierre', op: { op: 'goto', node: FLAT } });
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'count', counter: 'young-adult.clock.hours', set: 3 } });
+  c = act(c, { t: 'incarnate', id: 'pierre' });
+  // Pierre's backgammon: Yes or Dismiss; dismissed, the offer comes back; Yes opens its lobby; a finished game
+  // sends him back to a wisp, in the flat
+  assert.equal(offerAt(c.facts, STORY_CONTENT, FLAT)?.node, `${FLAT}/backgammon`);
+  const since = c.facts.machines['pierre-visit'].since;
+  c = act(c, { t: 'tick', now: since + 30_000 });
+  assert.equal(offerAt(c.facts, STORY_CONTENT, FLAT), null, 'gone for a moment');
+  c = act(c, { t: 'tick', now: since + 40_000 });
+  assert.equal(offerAt(c.facts, STORY_CONTENT, FLAT)?.node, `${FLAT}/backgammon`, 'and asked again');
+  c = act(c, { t: 'enter', id: 'elodie', node: `${FLAT}/backgammon`, now: since + 41_000 });
+  assert.equal(c.at.node, `${FLAT}/backgammon`);
+  assert.ok(c.at.activity, 'Yes opens the backgammon lobby');
+  c = act(act(c, { t: 'endMinigame', id: 'pierre' }), finished(`${FLAT}/backgammon`));
+  assert.deepEqual([stateOf(c, 'pierre-visit'), c.at.node, c.party.players.pierre.statuses], ['after-backgammon', FLAT, ['wisp']]);
+  assert.deepEqual(pickupsAt(c.facts, STORY_CONTENT, FLAT).map((p) => p.item), ['beers', 'cigarette-pack']);
+
+  // the Shelter: Pierre is there; after the match (the game master, until table football exists) the kiss
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.shelter.open', on: true } });
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'goto', node: SHELTER } });
+  assert.equal(stateOf(c, 'shelter'), 'pierre-here');
+  assert.deepEqual(c.party.players.pierre.statuses, ['wisp', 'incarnating']);
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'machine', machine: 'shelter', state: 'after-match' }, now: 50_000 });
+  assert.deepEqual(choiceAt(c, STORY_CONTENT)?.options.map((o) => o.key), ['kiss', 'kiss-later'], 'Yes or Dismiss');
+  c = act(c, { t: 'choose', id: 'elodie', option: 'kiss-later', now: 51_000 });
+  assert.equal(choiceAt(c, STORY_CONTENT), null);
+  c = act(c, { t: 'tick', now: 81_000 });
+  c = act(c, { t: 'choose', id: 'elodie', option: 'kiss', now: 82_000 });
+  assert.ok(c.facts.flags.includes('young-adult.appart-pierre.open') && c.facts.unlocked.includes(MAROK), 'Marokkanergasse opens');
+
+  // Marokkanergasse: Johanna, Nico and Mathieu stand there as NPCs, Nico's player still a wisp; any of the three
+  // offers Pyramide, and as it opens the three are introduced and their NPCs leave
+  c = act(c, { t: 'join', id: 'nico', character: 'nico' });
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'goto', node: MAROK } });
+  assert.deepEqual(c.party.players.nico.statuses, ['wisp']);
+  const room = sceneAt(STORY_CONTENT, c.facts, MAROK);
+  for (const [prop, at] of /** @type {[string, { x: number, y: number }][]} */ ([
+    ['marokkanergasse-johanna', { x: 13.6, y: 7.4 }], ['marokkanergasse-nico', { x: 3.0, y: 7.5 }], ['marokkanergasse-mathieu', { x: 10.9, y: 7.5 }],
+  ])) {
+    assert.ok(isWalkable(room, at.x, at.y), `${prop}: ${at.x},${at.y} is walkable`);
+    assert.equal(nearbyObject(room, at, c.party.players.elodie, objectRules(c.facts, STORY_CONTENT))?.id, prop);
+  }
+  assert.equal(act(c, { t: 'enter', id: 'elodie', node: `${MAROK}/pyramide` }), c, 'not without the offer');
+  c = act(c, { t: 'use', id: 'elodie', object: 'marokkanergasse-nico', action: 'talk', now: 1000 });
+  assert.equal(offerAt(c.facts, STORY_CONTENT, c.at.node)?.accept, 'Yes');
+  c = act(c, { t: 'enter', id: 'elodie', node: `${MAROK}/pyramide`, now: 2000 });
+  assert.ok(c.at.activity, 'the Pyramide lobby is open');
+  assert.ok(['nico', 'mathieu', 'johanna'].every((who) => c.facts.flags.includes(`person.${who}.unlocked`)), 'the three are introduced');
+  assert.deepEqual(c.party.players.nico.statuses, ['wisp', 'incarnating'], 'Nico’s wisp becomes him');
+  assert.deepEqual(sceneAt(STORY_CONTENT, c.facts, MAROK).props.map((p) => p.id), [], 'their NPCs left the room');
+  c = act(act(c, { t: 'endMinigame', id: 'pierre' }), finished(`${MAROK}/pyramide`));
+  assert.equal(c.at.node, MAROK);
+  const scene = sceneAt(STORY_CONTENT, c.facts, MAROK);
+  const [key] = pickupsAt(c.facts, STORY_CONTENT, MAROK);
+  assert.ok(key?.item === 'young-adult-adult-key' && isWalkable(scene, key.x, key.y), 'the key lies on open floor');
+  c = act(c, { t: 'pickup', id: 'elodie', item: 'young-adult-adult-key' });
+  assert.ok(c.facts.unlocked.includes('memory.adult'), 'the Adult Age door opens');
+  const portal = zonesAt(c.facts, STORY_CONTENT, MAROK)[0];
+  assert.ok(isWalkable(scene, portal.x, portal.y), 'the portal stands on open floor');
+  c = act(c, { t: 'zone', id: 'elodie', zone: portal.id });
+  assert.equal(c.at.node, 'hub');
+  assert.ok(c.facts.done.includes('young-adult'), 'Young Adult is complete');
 });
 
 test('future needs all seven keys, while world entrances remain unassigned', () => {
