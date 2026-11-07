@@ -32,7 +32,7 @@ function el(tag, cls, text) {
   return e;
 }
 
-/** @param {{ send: (msg: unknown) => void }} io */
+/** @param {{ send: (msg: unknown) => boolean }} io */
 export function createQuizUi(io) {
   /** @type {QuizView | null} */ let last = null;
   /** @type {string} */ let meId = '';
@@ -51,8 +51,8 @@ export function createQuizUi(io) {
     const text = input.value.trim();
     const r = last?.round;
     if (!text || !r || last?.phase !== 'question' || mine?.key === roundKey(r)) return;
+    if (!io.send({ t: 'answer', text })) return; // the link is down: not sent, so not shown as sent
     mine = { key: roundKey(r), text };
-    io.send({ t: 'answer', text });
     haptics.buzz('place');
     input.blur(); // the keyboard goes away: the answer is sent
     render(/** @type {QuizView} */ (last), meId);
@@ -62,8 +62,8 @@ export function createQuizUi(io) {
   /** @param {number} choice @param {RoundView} r */
   function pick(choice, r) {
     if (last?.phase !== 'question' || mine?.key === roundKey(r)) return;
+    if (!io.send({ t: 'answer', choice })) return; // the link is down: not sent, so not shown as sent
     mine = { key: roundKey(r), choice };
-    io.send({ t: 'answer', choice });
     haptics.buzz('place');
     render(/** @type {QuizView} */ (last), meId);
   }
