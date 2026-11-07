@@ -35,7 +35,7 @@ import { feetInReach, groupAction, interactionActor, nearbyObject, objectAction 
 import { freshGame, loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import {
   CONTENT, CONTENT_VERSION, IS_STORY, assertContent, reduceCampaign, isUnlocked, minigameStatus, gameMasterId, askedSoFar, zoneAt,
-  sceneAt, chooserHeld, pickupsAt, zonesAt, objectRules, characterRules, characterTarget, nextTimer, within, leads,
+  sceneAt, chooserHeld, pickupsAt, zonesAt, objectRules, characterRules, characterTarget, storyActionAt, nextTimer, within, leads,
   type Campaign, type CampaignAction, type GmOp,
 } from './campaign.ts';
 
@@ -392,9 +392,12 @@ function sendPositions(ws: WebSocket): void {
   for (const [playerId, pos] of positions.entries()) send(ws, posMsg(playerId, pos));
 }
 
+/** A position to the screens; who is in whose reach is read again (the server moves walkers too: a portal's
+ *  arrival, a lobby placing them). */
 function relayPos(playerId: string, pos: Pos): void {
   const msg = posMsg(playerId, pos);
   for (const c of screens) send(c, msg);
+  updateReach();
 }
 
 /** welcome, then the player's own last pos (the one pos a phone receives) so it resumes where its avatar stands. */
@@ -563,12 +566,11 @@ function resetZones(): void {
 function reachOf(id: string): CharacterId[] {
   const c = game.campaign;
   if (c.at.activity || !isMember(id) || wisp(id) || isIncarnating(id)) return [];
-  const scene = sceneAt(CONTENT, c.facts, c.at.node);
-  const here = positions.get(id) ?? spawnAt(scene, party().players[id].character);
+  const here = feetOf(id);
   return party().order.flatMap((other) => {
     const character = party().players[other].character;
     if (!character || characterTarget(party(), character, id) !== other) return [];
-    const there = positions.get(other) ?? spawnAt(scene, character);
+    const there = feetOf(other);
     return feetInReach(here, there) ? [{ character, d: Math.hypot(here.x - there.x, here.y - there.y) }] : [];
   }).sort((a, b) => a.d - b.d).map((r) => r.character);
 }
@@ -585,6 +587,64 @@ function updateReach(): void {
     reachSent.set(id, key);
     send(ws, { t: 'reach', characters });
   }
+}
+
+/** Where a player's feet are: their last position, else their spawn point in the room where the party is. */
+function feetOf(id: string): { x: number, y: number } {
+  const c = game.campaign;
+  return positions.get(id) ?? spawnAt(sceneAt(CONTENT, c.facts, c.at.node), party().players[id].character);
+}
+
+/** One interaction per 700 ms per socket: true and counted when this one may go. */
+function interactionAllowed(ws: WebSocket): boolean {
+  const now = Date.now();
+  if (now - (interactionAt.get(ws) ?? 0) < 700) return false;
+  interactionAt.set(ws, now);
+  return true;
+}
+
+/** A group action (a hug) with everyone in reach; refused while a story action is available to the player
+ *  (storyActionAt, the phone's rule too). Fires no story event, saves nothing. */
+function interactGroup(ws: WebSocket, id: string, key: unknown): void {
+  const a = groupAction(key);
+  const characters = reachOf(id);
+  if (!a || !characters.length) return;
+  if (storyActionAt(game.campaign, CONTENT, party().players[id], feetOf(id), characters)) return;
+  if (!interactionAllowed(ws)) return;
+  sendAll({ t: 'interact', playerId: id, group: a.key, with: characters.map((ch) => characterTarget(party(), ch, id)), at: Date.now() });
+}
+
+/** The story's action on another character within reach (reachOf). */
+function interactCharacter(ws: WebSocket, id: string, character: string): void {
+  const c = game.campaign;
+  if (!reachOf(id).includes(character as CharacterId)) return;
+  const action = objectAction(character, interactionActor(party().players[id], c.facts), characterRules(c.facts, CONTENT));
+  if (!action || !interactionAllowed(ws)) return;
+  sendAll({ t: 'interact', playerId: id, character, target: characterTarget(party(), character, id),
+    action: action.key, feedback: action.feedback, ...(action.speaker ? { speaker: action.speaker } : {}), at: Date.now() });
+  if (action.event) apply({ t: 'use', id, character, action: action.key });
+}
+
+/** An item on the floor within reach (the chooser picks it up), else the nearest object's action (the furniture's,
+ *  or a story machine's). */
+function interactObject(ws: WebSocket, id: string, objectId: unknown): void {
+  const c = game.campaign;
+  const pickup = pickupsAt(c.facts, CONTENT, c.at.node).find((p) => p.item === objectId);
+  if (pickup) {
+    const pos = positions.get(id);
+    if (pos && within(pickup, pos)) apply({ t: 'pickup', id, item: pickup.item });
+    return;
+  }
+  const actor = interactionActor(party().players[id], c.facts);
+  const rules = objectRules(c.facts, CONTENT);
+  const object = nearbyObject(sceneAt(CONTENT, c.facts, c.at.node), feetOf(id), actor, rules);
+  if (!object || object.id !== objectId) return;
+  const action = objectAction(object.id, actor, rules);
+  if (!action || !interactionAllowed(ws)) return;
+  // the event first, so the TV says the line before a machine's change (an NPC leaving) shows
+  sendAll({ t: 'interact', playerId: id, object: object.id, action: action.key, feedback: action.feedback,
+    ...(action.speaker ? { speaker: action.speaker } : {}), at: Date.now() });
+  if (action.event) apply({ t: 'use', id, object: object.id, action: action.key });
 }
 
 function handleMessage(ws: WebSocket, m: any): void {
@@ -633,7 +693,6 @@ function handleMessage(ws: WebSocket, m: any): void {
     positions.set(id, pos);
     relayPos(id, pos);
     walk(id, pos);
-    updateReach();
     return;
   }
 
@@ -674,66 +733,11 @@ function handleMessage(ws: WebSocket, m: any): void {
 
   if (m.t === 'interact') {
     const id = who.get(ws);
-    // the furniture of the room where the party is (roomAt): wherever avatars walk, while no minigame runs (hub,
-    // world, the room at a tableau)
-    if (!id || !isMember(id) || game.campaign.at.activity) return;
-    const member = party().players[id];
-    if (wisp(id) || isIncarnating(id)) return;
-    const c = game.campaign;
-    const actor = interactionActor(member, c.facts);
-    if (m.group !== undefined) {
-      // a group action (a hug) with everyone in reach; none while a story action is available to the player
-      const a = groupAction(m.group);
-      const now = Date.now();
-      if (!a || now - (interactionAt.get(ws) ?? 0) < 700) return;
-      const characters = reachOf(id);
-      if (!characters.length) return;
-      const onCharacters = characterRules(c.facts, CONTENT);
-      if (characters.some((ch) => objectAction(ch, actor, onCharacters))) return;
-      const scene = sceneAt(CONTENT, c.facts, c.at.node);
-      const rules = objectRules(c.facts, CONTENT);
-      const position = positions.get(id) ?? spawnAt(scene, member.character);
-      const object = nearbyObject(scene, position, actor, rules);
-      if (object && objectAction(object.id, actor, rules)?.event) return;
-      if (member.character === CONTENT.chooser && pickupsAt(c.facts, CONTENT, c.at.node).some((p) => within(p, position))) return;
-      interactionAt.set(ws, now);
-      sendAll({ t: 'interact', playerId: id, group: a.key, with: characters.map((ch) => characterTarget(party(), ch, id)), at: now });
-      return;
-    }
-    if (typeof m.character === 'string') {
-      // an action on another character, within reach (reachOf)
-      const now = Date.now();
-      if (now - (interactionAt.get(ws) ?? 0) < 700) return;
-      if (!reachOf(id).includes(m.character)) return;
-      const action = objectAction(m.character, actor, characterRules(c.facts, CONTENT));
-      if (!action) return;
-      interactionAt.set(ws, now);
-      sendAll({ t: 'interact', playerId: id, character: m.character, target: characterTarget(party(), m.character, id),
-        action: action.key, feedback: action.feedback, ...(action.speaker ? { speaker: action.speaker } : {}), at: now });
-      if (action.event) apply({ t: 'use', id, character: m.character, action: action.key });
-      return;
-    }
-    // an item lying on the floor (a story machine's pickup), within reach: the chooser picks it up
-    const pickup = pickupsAt(c.facts, CONTENT, c.at.node).find((p) => p.item === m.object);
-    if (pickup) {
-      const pos = positions.get(id);
-      if (pos && within(pickup, pos)) apply({ t: 'pickup', id, item: pickup.item });
-      return;
-    }
-    const now = Date.now();
-    if (now - (interactionAt.get(ws) ?? 0) < 700) return;
-    const scene = sceneAt(CONTENT, c.facts, c.at.node);
-    const rules = objectRules(c.facts, CONTENT);
-    const position = positions.get(id) ?? spawnAt(scene, member.character);
-    const object = nearbyObject(scene, position, actor, rules);
-    if (!object || object.id !== m.object) return;
-    const action = objectAction(object.id, actor, rules);
-    if (!action) return;
-    interactionAt.set(ws, now);
-    // the event first, so the TV says the line before a machine's change (an NPC leaving) shows
-    sendAll({ t: 'interact', playerId: id, object: object.id, action: action.key, feedback: action.feedback,
-      ...(action.speaker ? { speaker: action.speaker } : {}), at: now });
-    if (action.event) apply({ t: 'use', id, object: object.id, action: action.key });
+    // wherever avatars walk (hub, world, the room at a tableau), while no minigame runs; never a wisp
+    if (!id || !isMember(id) || game.campaign.at.activity || wisp(id) || isIncarnating(id)) return;
+    if (m.group !== undefined) interactGroup(ws, id, m.group);
+    else if (typeof m.character === 'string') interactCharacter(ws, id, m.character);
+    else interactObject(ws, id, m.object);
     return;
   }
 

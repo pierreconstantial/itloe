@@ -9,8 +9,8 @@ import { syncClock, serverNow } from '../commun/clock.js';
 import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.js';
 import { WORLD, spawnPoint } from '../../shared/world.js';
 import {
-  gameMasterId, isWisp, leads, roomAt, sceneAt, hintAt, chooserHeld, pickupsAt, offerAt, objectRules, characterRules, within,
-  choiceAt,
+  gameMasterId, isWisp, leads, roomAt, sceneAt, hintAt, chooserHeld, pickupsAt, offerAt, objectRules, within, choiceAt,
+  storyActionAt,
 } from '../../shared/campaign/index.js';
 import { room as sceneRoom } from '../../shared/scene.js';
 import { interactionActor, nearbyObject, nearbyProp, objectAction, groupAction } from '../../shared/interactions.js';
@@ -525,27 +525,24 @@ function wispNearObject(pos) {
   return !!nearbyProp(sceneAt(content(), campaign.facts, campaign.at.node), pos) || !!pickupNear(pos);
 }
 
-/** What the interact button does at `pos`: pick up an item (the chooser), else the story's action on the nearest
- * object, else its action on the closest character in reach (`reach`), else the nearest furniture's.
- * `story`: a pickup or a story action, which hides the group actions.
+/** What the interact button does at `pos`: the story's action there (storyActionAt: an item to pick up, a story
+ * object, a story action on a character in reach), else the nearest furniture's. `story`: one of the story's, which
+ * hides the group actions.
  * @param {{x: number, y: number}} pos @returns {{ object?: string, character?: string, text: string, story?: true } | null} */
 function actionAt(pos) {
   const mem = member();
   if (!mem || !campaign) return null;
-  const pickup = mem.character === content().chooser ? pickupNear(pos) : null;
-  if (pickup) return { object: pickup.item, text: `${content().items[pickup.item]?.icon ?? '✋'} Pick up ${content().items[pickup.item]?.name ?? pickup.item}`, story: true };
+  const story = minigame ? null : storyActionAt(campaign, content(), mem, pos, reach);
+  if (story && 'pickup' in story) {
+    const item = content().items[story.pickup.item];
+    return { object: story.pickup.item, text: `${item?.icon ?? '✋'} Pick up ${item?.name ?? story.pickup.item}`, story: true };
+  }
+  if (story && 'object' in story) return { object: story.object, text: story.action.text, story: true };
+  if (story) return { character: story.character, text: story.action.text, story: true };
   const actor = interactionActor(mem, campaign.facts);
   const rules = objectRules(campaign.facts, content());
   const object = nearbyObject(roomHere(), pos, actor, rules);
   const action = object ? objectAction(object.id, actor, rules) : null;
-  if (object && action?.event) return { object: object.id, text: action.text, story: true };
-  if (!minigame) {
-    const onCharacters = characterRules(campaign.facts, content());
-    for (const character of reach) {
-      const story = objectAction(character, actor, onCharacters);
-      if (story) return { character, text: story.text, story: true };
-    }
-  }
   return object && action ? { object: object.id, text: action.text } : null;
 }
 

@@ -40,7 +40,7 @@ import {
   initialMachines, safeMachines, eventSteps, conditionStep, dueSteps, nextTimer, hintAt, chooserHeld, pickupsAt,
   zonesAt, npcsAt, hiddenProps, offerAt, objectRules, characterRules, within, speechAt, choiceIn,
 } from './machines.js';
-import { objectAction } from '../interactions.js';
+import { interactionActor, nearbyObject, objectAction } from '../interactions.js';
 import { SAMPLE_CONTENT } from './sample.js';
 
 export { holds, record, settle, emptyFacts, holding, recipients, COUNTER, validateContent, zoneAt, roomAt, sceneAt, childrenOf, SAMPLE_CONTENT };
@@ -100,6 +100,33 @@ export function characterTarget(party, character, actorId) {
   if (!id || id === actorId) return null;
   const statuses = party.players[id].statuses ?? [];
   return statuses.includes('wisp') || statuses.includes('incarnating') ? null : id;
+}
+
+/**
+ * The story action a member can use at `pos`, in the order the phone offers them: an item on the floor (the
+ * chooser), a story object nearby, a story action on the closest character in `reach` (the server's list, closest
+ * first). Null when there is none: then the furniture's action, or the group actions, which any story action hides.
+ * One rule for the phone's button and the server's refusal of a group action. The caller checks no minigame runs.
+ * @param {{ facts: import('./types.js').Facts, at: { node: string } }} c the campaign, or a client's view of it
+ * @param {Content} content @param {import('./types.js').PartyMember} member
+ * @param {{ x: number, y: number }} pos @param {readonly string[]} reach
+ * @returns {{ pickup: import('./types.js').Pickup } | { object: string, action: import('../interactions.js').ObjectAction }
+ *   | { character: string, action: import('../interactions.js').ObjectAction } | null}
+ */
+export function storyActionAt(c, content, member, pos, reach) {
+  const pickup = member.character === content.chooser ? pickupsAt(c.facts, content, c.at.node).find((p) => within(p, pos)) : undefined;
+  if (pickup) return { pickup };
+  const actor = interactionActor(member, c.facts);
+  const rules = objectRules(c.facts, content);
+  const object = nearbyObject(sceneAt(content, c.facts, c.at.node), pos, actor, rules);
+  const action = object ? objectAction(object.id, actor, rules) : null;
+  if (object && action?.event) return { object: object.id, action };
+  const onCharacters = characterRules(c.facts, content);
+  for (const character of reach) {
+    const onCharacter = objectAction(character, actor, onCharacters);
+    if (onCharacter) return { character, action: onCharacter };
+  }
+  return null;
 }
 
 /** Adds one news entry with the next seq. @param {Campaign} c

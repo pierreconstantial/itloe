@@ -82,8 +82,8 @@ const APPART_PIERRE_ROOM = room('young-adult/appart-pierre', { x: 0.5, y: 5.45, 
 
 const FOOSBALL_OFFER = { node: FOOSBALL, text: 'Pierre: “Élodie! A game of table football?”', accept: '⚽ Yes' };
 const PLAY_FOOSBALL = { 'shelter-foosball': { actions: [{ key: 'play', text: '⚽ Play table football' }] } };
-/** Talking to Pierre in the flat: he offers backgammon again. */
-const TALK_TO_PIERRE = { pierre: { actions: [{ key: 'talk', text: '💬 Talk to Pierre', say: 'Let’s play backgammon!', speaker: /** @type {const} */ ('target'), by: /** @type {const} */ ('anyone') }] } };
+/** Élodie talking to Pierre in the flat: he offers backgammon again (her dismissed offer shows again). */
+const TALK_TO_PIERRE = { pierre: { actions: [{ key: 'talk', text: '💬 Talk to Pierre', say: 'Let’s play backgammon!', speaker: /** @type {const} */ ('target') }] } };
 const PIERRE_LINE = 'I brought beers and cigarettes! But first, let’s play backgammon.';
 const BACKGAMMON_OFFER = { node: BACKGAMMON, text: 'Pierre: “Let’s play backgammon!”', accept: '🎲 Yes' };
 
