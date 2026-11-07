@@ -1,5 +1,5 @@
-// A save whose minigame this release does not have stops the boot and is left untouched, and a save it
-// cannot resume starts a fresh evening and is quarantined. Real server, scratch data.
+// A save whose minigame this release does not have stops the boot and is left untouched, and a save whose
+// minigame it cannot resume keeps the evening with that minigame ended. Real server, scratch data.
 // test/fixtures/save-v2-blocks.json is a save as the server wrote it before minigame lobbies, in a timed block game.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -100,17 +100,17 @@ test('a save with a minigame this release does not have stops the boot and is le
   }
 });
 
-test('a save from before minigame lobbies starts a fresh evening and is quarantined, not deleted', { timeout: 20_000 }, async (t) => {
-  const text = await fixture('save-v2-blocks.json');
+test('a save whose minigame this release cannot resume keeps the evening: the minigame ends, the party stays', { timeout: 20_000 }, async (t) => {
+  const text = await fixture('save-v2-blocks.json'); // a round from before minigame lobbies: a fix deployed mid-round
+  const saved = JSON.parse(text);
   const app = await boot(t, text);
   const view = await firstView(app.port, app.running, app.log);
-  assert.equal(view.minigame, null, 'a fresh evening: the room at the start, no minigame');
-  assert.deepEqual(view.campaign.party.order, [], '…with nobody in it yet');
-  assert.match(app.log(), /new evening \(save could not be loaded: the saved minigame is not one this release can resume/);
-  const files = await readdir(app.varDir);
-  const kept = files.filter((f) => f.startsWith('bloko.state.json.corrupt-'));
-  assert.equal(kept.length, 1, `the old save is quarantined next to the new one (${files.join(', ')})`);
-  assert.equal(await readFile(join(app.varDir, kept[0]), 'utf8'), text, 'byte-identical');
+  assert.equal(view.minigame, null, 'the minigame ended…');
+  assert.equal(view.campaign.at.node, saved.campaign.at.node, '…in the room at its tableau');
+  assert.deepEqual(view.campaign.party.order, saved.campaign.party.order, 'the same party');
+  assert.equal((await (await fetch(`http://127.0.0.1:${app.port}/api/join`)).json()).code, saved.room, 'the same room code');
+  assert.match(app.log(), /RESUMED .*its blocks could not be resumed, so it was ended/);
+  assert.deepEqual(await readdir(app.varDir), ['bloko.state.json'], 'nothing quarantined');
 });
 
 test('a save with missing or removed characters starts fresh and keeps the old file', { timeout: 30_000 }, async (t) => {
