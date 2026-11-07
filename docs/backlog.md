@@ -107,7 +107,7 @@ For most of the evening the TV's room redraws everything 60 times a second: abou
 
 The painted rooms (Tram 5, Élodie's flat, the Shelter, Marokkanergasse) block only a few areas: their walkable floor is one rectangle, minus the props' `solid` boxes and the room's extra solids (`room(id, floor, props, solids)` in `shared/campaign/story/young-adult.js`). Everything else painted in the picture can be walked on: players cross the Shelter's chairs and side tables, stand on painted edges and in corners that aren't floor, or half under furniture. Each room needs an invisible exclusion layer drawn over its painting, so the floor where avatars can walk matches what the picture shows.
 
-**Recommendation:** add the missing solids room by room, as story data (the extra solids already are that layer), and give the TV a debug view that draws the walkable floor and the solids over the painting (e.g. `?solids=1`), so they can be tuned by eye. A test per room can keep the doors, zones, pickups and actions reachable from walkable floor, as `test/story.test.js` does for some of them.
+**Recommendation:** add the missing solids room by room, as story data (the extra solids already are that layer), and give the TV a debug view (e.g. `?solids=1`) that draws, semi-transparent over the painting, everything that decides where avatars walk and act: the walkable floor, the room's extra solids, every prop's `solid` box (the vending machine's, Toni's), and in another colour the props' boxes that interactions measure from, so they can all be tuned together by eye. A test per room can keep the doors, zones, pickups and actions reachable from walkable floor, as `test/story.test.js` does for some of them.
 
 ### Guests controlling NPCs
 
