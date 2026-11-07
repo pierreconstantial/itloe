@@ -27,15 +27,15 @@ import { makeRound, roundOf, type Round } from './round.ts';
 import { JOIN_QR_GAP_MS, JOIN_QR_MS } from '../shared/join-qr.js';
 import { cleanSpeech, isEmote, EMOTES } from '../shared/social.js';
 import { CHARACTERS, isCharacterId } from '../shared/characters.js';
-import { INTRO_KEY, INTRO_KEY_SPOT, PORTAL } from '../shared/campaign/story.js';
 import type { CharacterId, TableauPlayers } from '../shared/campaign/types.js';
 import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
-import { holding, isWisp } from '../shared/campaign/index.js';
-import { PARTY_ROOM, spawnAt } from '../shared/scene.js';
+import { isWisp } from '../shared/campaign/index.js';
+import { spawnAt } from '../shared/scene.js';
 import { interactionActor, nearbyObject, objectAction } from '../shared/interactions.js';
 import { freshGame, loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import {
-  CONTENT, CONTENT_VERSION, assertContent, reduceCampaign, isUnlocked, minigameStatus, gameMasterId, askedSoFar, zoneAt, roomAt,
+  CONTENT, CONTENT_VERSION, IS_STORY, assertContent, reduceCampaign, isUnlocked, minigameStatus, gameMasterId, askedSoFar, zoneAt,
+  sceneAt, chooserHeld, pickupsAt, zonesAt, objectRules, nextTimer, within, leads,
   type Campaign, type CampaignAction, type GmOp,
 } from './campaign.ts';
 
@@ -46,8 +46,7 @@ const access = makeAccess(process.env.BLOKO_PUBLIC_ORIGIN, process.env.BLOKO_ACC
 const STARTED_AT = Date.now();
 /** The admin page's server side: its events, the pages' error reports, its routes (snapshot: adminSnapshot). */
 const admin = makeAdmin({ isAdmin: access.isAdmin, clientIp: access.clientIp, snapshot: adminSnapshot, saveFile: STATE_FILE });
-const STORY_MODE = CONTENT.storyId === 'elo-50';
-const TEST_SCENES_ENABLED = STORY_MODE && testScenesEnabled(PORT, process.env.BLOKO_BIND, process.env.BLOKO_VAR, access.origin);
+const TEST_SCENES_ENABLED = IS_STORY && testScenesEnabled(PORT, process.env.BLOKO_BIND, process.env.BLOKO_VAR, access.origin);
 
 // ---------- the evening + change hooks (wrap the engine, never inside it) ----------
 
@@ -132,7 +131,8 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   },
   (_prev, next) => positions.prune(next.party),
   () => placeWalkers(),
-  (prev, next) => { if (prev.at.node !== next.at.node) { resetZones(); tramQuizOffers.clear(); } },
+  (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
+  () => armMachineTimer(),
   (prev, next) => {
     for (const id of next.party.order) {
       const before = prev.party.players[id], after = next.party.players[id];
@@ -143,9 +143,10 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   () => broadcast(),
 ];
 
-/** Runs an action through the campaign engine; returns false when it was refused (state unchanged). */
+/** Runs an action through the campaign engine, with the server's clock (`now`: when a story machine state
+ *  begins); returns false when it was refused (state unchanged). */
 function apply(action: CampaignAction): boolean {
-  const ok = commit(reduceCampaign(game.campaign, action, CONTENT));
+  const ok = commit(reduceCampaign(game.campaign, { ...action, now: Date.now() }, CONTENT));
   const inner = action.t === 'activity' ? action.action as { id?: string } : action;
   admin.log('id' in inner && typeof inner.id === 'string' ? inner.id : null, actionText(action), ok);
   return ok;
@@ -165,6 +166,27 @@ function commit(next: Campaign): boolean {
   game.campaign = next;
   for (const hook of onChange) hook(prev, next);
   return true;
+}
+
+/** The next timed story-machine transition (an NPC leaving after a few seconds): a `tick` at its time. Re-armed
+ *  on every change and at boot, so a restart past it fires it at once. */
+let machineTimer: ReturnType<typeof setTimeout> | null = null;
+let machineTimerAt: number | null = null;
+function armMachineTimer(): void {
+  const at = nextTimer(game.campaign.facts, CONTENT);
+  if (at === machineTimerAt) return;
+  if (machineTimer) clearTimeout(machineTimer);
+  machineTimerAt = at;
+  machineTimer = at === null ? null : setTimeout(() => {
+    machineTimer = null;
+    machineTimerAt = null;
+    // a timer callback has no message handler's try/catch: a content or reducer error must not kill the evening
+    try { apply({ t: 'tick' }); } catch (e) {
+      console.error('[itloe] story timer failed:', e);
+      admin.log(null, `server error on a story timer: ${e instanceof Error ? e.stack ?? e.message : e}`, false);
+    }
+    armMachineTimer();
+  }, Math.max(0, at - Date.now()));
 }
 
 // ---------- timed-pause heartbeat ----------
@@ -226,9 +248,7 @@ function serveTestScene(req: IncomingMessage, res: ServerResponse): boolean {
   const scene = makeTestScene(fresh.campaign, CONTENT, setup);
   // Old simulator tabs belong to the previous scratch room; they must not rejoin the new one.
   for (const ws of wss.clients) ws.terminate();
-  who.clear(); sockets.clear(); screens.clear();
-  zones.clear(); onSpot.clear(); placed.clear(); incarnations.clear(); tramQuizOffers.clear(); chat.length = 0;
-  joinQrUntil = 0; joinQrToken = null;
+  resetEphemeral();
   game.room = fresh.room;
   game.bestPrevious = null;
   commit(scene.campaign);
@@ -272,8 +292,6 @@ const chat: { t: 'say'; playerId: string; text: string; at: number }[] = [];
 const socialAt = new WeakMap<WebSocket, number>();
 const jumpAt = new WeakMap<WebSocket, number>();
 const interactionAt = new WeakMap<WebSocket, number>();
-/** Players who interacted with the painted tram can accept its quiz offer until leaving the scene. */
-const tramQuizOffers = new Set<string>();
 
 /** The join QR on the TVs (showJoin / hideJoin): until when, in epoch ms; until ≤ now = closed.
  *  Ephemeral, like presence and pos. */
@@ -287,6 +305,14 @@ const joinQrMsg = () => JSON.stringify({ t: 'joinQr', until: joinQrUntil, now: D
 const socketInfo = new WeakMap<WebSocket, { since: number, ip: string, agent: string, lastAt: number | null, last: string | null }>();
 /** For the admin page: how many sockets each player has attached since the start (reconnects, reclaims). */
 const attaches = new Map<string, number>();
+/** Forgets the evening's in-memory side (sockets, doors, spots, incarnations, chat, the join QR) when a scene
+ *  shortcut replaces the evening. Every map of in-memory state above belongs here. */
+function resetEphemeral(): void {
+  who.clear(); sockets.clear(); screens.clear();
+  zones.clear(); onSpot.clear(); placed.clear(); incarnations.clear(); chat.length = 0;
+  joinQrUntil = 0; joinQrToken = null;
+}
+
 /** Who a socket is, for the admin page's events: its player, `screen`, or `unjoined` (a phone before its join). */
 const whoIs = (ws: WebSocket): string => who.get(ws) ?? (screens.has(ws) ? 'screen' : 'unjoined');
 
@@ -420,14 +446,27 @@ function joinRefusal(): ErrCode {
 
 const isPlainObject = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
 
-/** Edge-triggered doors: entering one fires `zone.entered` (any member) and, for the chooser on an
- *  unlocked door, `enter` (A1: Élodie walks into a door; the game master can also enter directly). */
+/** The story zone open at a position where the party is (none while a minigame runs). */
+const storyZoneAt = (pos: { x: number, y: number }) => (game.campaign.at.activity === null
+  ? zonesAt(game.campaign.facts, CONTENT, game.campaign.at.node).find((z) => within(z, pos)) : undefined);
+/** What a walker stands in: a story zone (`@id`), else a door's node, else null. */
+const zoneHere = (pos: { x: number, y: number }): string | null => {
+  const z = storyZoneAt(pos);
+  return z ? `@${z.id}` : zoneAt(CONTENT, game.campaign.at.node, pos.x, pos.y);
+};
+
+/** The chooser is held still where a story machine plays a moment (the apparition). */
+const heldStill = (id: string): boolean => party().players[id]?.character === CONTENT.chooser
+  && chooserHeld(game.campaign.facts, CONTENT, game.campaign.at.node);
+
+/** Edge-triggered doors and story zones: entering a door fires `zone.entered` (any member) and, for the chooser
+ *  on an unlocked door, `enter` (A1: Élodie walks into a door; the game master can also enter directly); the
+ *  chooser entering a story machine's zone fires `zone` (a portal), then stands where the zone says. */
 function walk(id: string, pos: Pos): void {
   const c = game.campaign;
   const character = c.party.players[id]?.character;
-  const portalOpen = STORY_MODE && c.at.node === CONTENT.start && c.at.activity === null && c.facts.flags.includes('portal.ready');
-  const inPortal = portalOpen && Math.hypot(pos.x - PORTAL.x, pos.y - PORTAL.y) < PORTAL.radius;
-  const zone = inPortal ? '@portal' : zoneAt(CONTENT, c.at.node, pos.x, pos.y);
+  const storyZone = storyZoneAt(pos);
+  const zone = zoneHere(pos);
   // a walker's first known position (new phone, or after a restart wiped this memory) only sets the
   // baseline: standing in a door is not stepping into it
   const known = zones.has(id);
@@ -436,12 +475,12 @@ function walk(id: string, pos: Pos): void {
   if (!known || !zone || zone === before) return;
   if (!character) return;
   if (wisp(id) || isIncarnating(id)) return;
-  if (zone === '@portal') {
-    if (character !== CONTENT.chooser || !apply({ t: 'portal', id })) return;
-    const arrival: Pos = { x: 6.2, y: 7.3, dir: 'up', moving: false };
+  if (storyZone) {
+    if (character !== CONTENT.chooser || !apply({ t: 'zone', id, zone: storyZone.id }) || !storyZone.arrive) return;
+    const arrival: Pos = { x: storyZone.arrive.x, y: storyZone.arrive.y, dir: 'up', moving: false };
     positions.set(id, arrival);
-    const echo = posMsg(id, arrival);
-    send(sockets.get(id)!, echo);
+    const ws = sockets.get(id);
+    if (ws) send(ws, posMsg(id, arrival));
     relayPos(id, arrival);
     return;
   }
@@ -499,7 +538,7 @@ function placeWalkers(): void {
  *  a door now is does not fire it — only a fresh step in does. */
 function resetZones(): void {
   zones.clear();
-  for (const [id, pos] of positions.entries()) zones.set(id, zoneAt(CONTENT, game.campaign.at.node, pos.x, pos.y));
+  for (const [id, pos] of positions.entries()) zones.set(id, zoneHere(pos));
 }
 
 function handleMessage(ws: WebSocket, m: any): void {
@@ -542,8 +581,7 @@ function handleMessage(ws: WebSocket, m: any): void {
       else onSpot.delete(id); // a wisp's light stands on no spot
       return;
     }
-    if (STORY_MODE && game.campaign.at.node === 'hub' && party().players[id].character === CONTENT.chooser
-      && !game.campaign.facts.flags.includes('apparition.seen')) return;
+    if (heldStill(id)) return;
     const pos = parsePos(m);
     if (!pos) return;
     positions.set(id, pos);
@@ -557,8 +595,7 @@ function handleMessage(ws: WebSocket, m: any): void {
     if (!id || !canMove(party(), id) || round || isIncarnating(id)) return;
     const member = party().players[id];
     if (wisp(id)) return;
-    if (STORY_MODE && game.campaign.at.node === 'hub' && member.character === CONTENT.chooser
-      && !game.campaign.facts.flags.includes('apparition.seen')) return;
+    if (heldStill(id)) return;
     const now = Date.now();
     if (now - (jumpAt.get(ws) ?? 0) < 650) return;
     jumpAt.set(ws, now);
@@ -595,28 +632,29 @@ function handleMessage(ws: WebSocket, m: any): void {
     if (!id || !isMember(id) || game.campaign.at.activity) return;
     const member = party().players[id];
     if (wisp(id) || isIncarnating(id)) return;
-    const actor = interactionActor(member, game.campaign.facts);
-    if (STORY_MODE && m.object === INTRO_KEY && game.campaign.at.node === 'hub') {
-      if (!objectAction(INTRO_KEY, actor) || !game.campaign.facts.flags.includes('apparition.seen')) return;
+    const c = game.campaign;
+    const actor = interactionActor(member, c.facts);
+    // an item lying on the floor (a story machine's pickup), within reach: the chooser picks it up
+    const pickup = pickupsAt(c.facts, CONTENT, c.at.node).find((p) => p.item === m.object);
+    if (pickup) {
       const pos = positions.get(id);
-      if (pos && Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius
-        && holding(game.campaign.facts, CONTENT.chooser, INTRO_KEY) === 0) {
-        apply({ t: 'collect', id, item: INTRO_KEY });
-      }
+      if (pos && within(pickup, pos)) apply({ t: 'pickup', id, item: pickup.item });
       return;
     }
     const now = Date.now();
     if (now - (interactionAt.get(ws) ?? 0) < 700) return;
-    const scene = roomAt(CONTENT, game.campaign.at.node);
+    const scene = sceneAt(CONTENT, c.facts, c.at.node);
+    const rules = objectRules(c.facts, CONTENT);
     const position = positions.get(id) ?? spawnAt(scene, member.character);
-    const object = nearbyObject(scene, position, actor);
+    const object = nearbyObject(scene, position, actor, rules);
     if (!object || object.id !== m.object) return;
-    const action = objectAction(object.id, actor);
+    const action = objectAction(object.id, actor, rules);
     if (!action) return;
     interactionAt.set(ws, now);
-    if (STORY_MODE && object.id === 'tram-5-tram') tramQuizOffers.add(id);
-    const event = { t: 'interact', playerId: id, object: object.id, action: action.key, feedback: action.feedback, at: now };
-    sendAll(event);
+    // the event first, so the TV says the line before a machine's change (an NPC leaving) shows
+    sendAll({ t: 'interact', playerId: id, object: object.id, action: action.key, feedback: action.feedback,
+      ...(action.speaker ? { speaker: action.speaker } : {}), at: now });
+    if (action.event) apply({ t: 'use', id, object: object.id, action: action.key });
     return;
   }
 
@@ -691,22 +729,15 @@ function handleMessage(ws: WebSocket, m: any): void {
 
     case 'enter':
       // the game master, or the chooser, into an unlocked child of where the party is; refused → 'refused'
-      if (STORY_MODE && m.node === 'young-adult/tram-5/quiz') {
-        const gm = gameMaster();
-        if (party().players[id]?.character !== CONTENT.chooser || game.campaign.at.node !== 'young-adult/tram-5'
-          || !tramQuizOffers.has(id) || !gm) { sendErr(ws, 'refused'); return; }
-        if (!apply({ t: 'enter', id, node: m.node })) { sendErr(ws, 'refused'); return; }
-        tramQuizOffers.delete(id);
-        if (!apply({ t: 'startMinigame', id: gm, now: Date.now() })) throw new Error('Tram 5 quiz could not open');
-        return;
-      }
       if (typeof m.node !== 'string' || !apply({ t: 'enter', id, node: m.node })) sendErr(ws, 'refused');
       return;
 
     case 'back':
-      // the game master (the chooser after the portal, while no minigame runs), up one level; a running
+      // the game master (the chooser once they lead the party, while no minigame runs), up one level; a running
       // minigame ends first → 'refused' at the hub
-      if (!apply({ t: 'back', id })) sendErr(ws, id === gameMaster() || (STORY_MODE && party().players[id]?.character === CONTENT.chooser) ? 'refused' : 'not-gm');
+      // the chooser who leads the party is refused like the game master; anyone else may not go back at all
+      if (!apply({ t: 'back', id })) sendErr(ws, id === gameMaster()
+        || (party().players[id]?.character === CONTENT.chooser && leads(game.campaign.facts, CONTENT)) ? 'refused' : 'not-gm');
       return;
 
     case 'gm': {
@@ -908,6 +939,7 @@ function serveReset(req: IncomingMessage, res: ServerResponse): boolean {
 saveGame(game); // a --new start must not let the next plain start resume the old game (and a v1 save is now v2)
 placeWalkers(); // a resumed walkable lobby: its holders on their spots, everyone else on a start position
 for (const id of party().order) scheduleIncarnation(id);
+armMachineTimer(); // a resumed story machine's timer (fires at once if it passed while down)
 // resumed timed game or open quiz question: re-arm (fires at once if the deadline passed while down)
 clock.onChange(null, game.campaign.at);
 

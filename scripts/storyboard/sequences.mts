@@ -41,7 +41,9 @@ async function walk(b: Board, who: string, to: { x: number, y: number }, done?: 
 
 /** The campaign as the TV holds it. */
 const campaign = (b: Board): Promise<any> => b.d.tv.ev('window.bloko.campaign()');
-const hasFlag = (b: Board, flag: string) => async () => !!(await campaign(b))?.facts.flags.includes(flag);
+/** A story machine is in one of these states (docs/story-engine.md). */
+const machineIn = (b: Board, machine: string, ...states: string[]) => async () =>
+  states.includes((await campaign(b))?.facts.machines?.[machine]?.state);
 /** Waits until the TV has no cutscene playing. */
 const cutscenesDone = (b: Board, ms = 60_000) => b.d.tv.waitFor('!window.bloko.cutscene().playing', ms);
 
@@ -175,23 +177,23 @@ const opening: Sequence = {
       [b.tv, () => b.real('pierre'), () => b.real('anna')]);
 
     await endMinigame(b, P);
-    await b.d.tv.waitFor('window.bloko.campaign()?.facts.flags.includes("portal.ready")');
+    await b.d.tv.waitFor('window.bloko.campaign()?.facts.machines.opening.state === "portal-open"');
     await sleep(1500);
     await b.frame('Pierre ends the block game (two taps): everyone is back in the main game’s party room, where a portal has appeared. Only Élodie can walk into it.',
       [b.tv, () => b.real('elodie'), () => b.real('anna')]);
 
-    await walk(b, 'elodie', { x: 8, y: 5.4 }, hasFlag(b, 'portal.entered'));
+    await walk(b, 'elodie', { x: 8, y: 5.4 }, machineIn(b, 'opening', 'apparition', 'key-on-floor', 'done'));
     await sleep(2500);
     await b.frame('Élodie crosses into her dream apartment. Pierre, Sol and Anna become wisps too and follow her, with Nico. A mysterious visitor appears and speaks.',
       [b.tv, () => b.real('elodie'), () => b.real('pierre')]);
 
-    await b.d.tv.waitFor('window.bloko.campaign()?.facts.flags.includes("apparition.seen")', 60_000);
+    await b.d.tv.waitFor('window.bloko.campaign()?.facts.machines.opening.state === "key-on-floor"', 60_000);
     await sleep(1500);
     await b.frame('He leaves the first key. Élodie walks over to it; the wisps float around her and can Shine.',
       [b.tv, () => b.real('elodie'), () => b.real('sol')]);
 
     await walk(b, 'elodie', { x: 6.4, y: 6.6 });
-    await E.tap('Pick up key');
+    await E.tap('Pick up');
     await b.d.tv.waitFor(`(window.bloko.campaign()?.facts.inventory.elodie?.['memory-key-intro'] ?? 0) > 0`);
     await sleep(1500);
     await b.frame('Élodie picks up the key: the large memory door becomes reachable.', [b.tv, () => b.real('elodie')]);

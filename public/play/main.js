@@ -8,11 +8,11 @@ import { initMenu } from './menu.js';
 import { syncClock, serverNow } from '../commun/clock.js';
 import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.js';
 import { WORLD, spawnPoint } from '../../shared/world.js';
-import { roomAt } from '../../shared/campaign/content.js';
-import { gameMasterId, isWisp } from '../../shared/campaign/index.js';
+import {
+  gameMasterId, isWisp, leads, roomAt, sceneAt, hintAt, chooserHeld, pickupsAt, offerAt, objectRules, within,
+} from '../../shared/campaign/index.js';
 import { room as sceneRoom } from '../../shared/scene.js';
 import { interactionActor, nearbyObject, nearbyProp, objectAction } from '../../shared/interactions.js';
-import { INTRO_KEY, INTRO_KEY_SPOT } from '../../shared/campaign/story.js';
 import { createPicker, pickStates, anyPickable } from './picker.js';
 import { createJoystick } from './joystick.js';
 import { avatarCanvas, paintAvatar } from '../commun/avatar.js';
@@ -33,7 +33,7 @@ import { childMarks, content, onContentChange, syncContent, titleOf } from './ca
 /** @typedef {import('./movement.js').Pos} Pos */
 /** A party member in the room at a tableau. @typedef {{ id: string, name: string, color: number, character: CharacterId, left?: boolean, statuses: string[] }} TableauPlayer */
 
-/** What the wisp pad says on the hub (the story's wisps). */
+/** What the wisp pad says outside a minigame (the story's wisps). */
 const WISP_TEXT = 'Move your light on the TV. Tap Shine in the reactions to glow brighter.';
 const TABLEAU_ME_SCALE = 4; // own avatar in the room's header: 64 px
 const TABLEAU_CHIP_SCALE = 2; // other players' avatars: 32 px
@@ -86,8 +86,8 @@ let wantedCharacter = null;
 let pendingPick = null;
 /** Where our avatar stands: from the server's echo after welcome, else our spawn point. @type {Pos | null} */
 let myPos = null;
-/** A server-validated interaction with the tram opens this local choice. */
-let tramQuizOfferOpen = false;
+/** The story offer (offerAt) this phone dismissed; it shows again once it is gone and comes back. @type {object | null} */
+let dismissedOffer = null;
 let incarnationAt = 0;
 let incarnationTimer = /** @type {ReturnType<typeof setInterval> | null} */ (null);
 
@@ -183,8 +183,8 @@ function receive(raw) {
   } else if (m.t === 'say' || m.t === 'chatHistory') {
     social.onMessage(m);
   } else if (m.t === 'interact' && m.playerId === playerId && typeof m.feedback === 'string') {
-    if (m.object === 'tram-5-tram') { tramQuizOfferOpen = true; render(); }
-    else toast(m.feedback);
+    dismissedOffer = null; // using an object again may renew its offer
+    if (m.feedback) toast(m.feedback.replace(/\n/g, ' '));
   } else if (m.t === 'view') {
     syncClock(m.now);
     const prev = minigame;
@@ -201,7 +201,6 @@ function receive(raw) {
       ? PHASE_TOASTS[`${prev.status}>${next ? next.status : 'room'}`] : undefined;
     // the party moved (a door, the game master): say where we are now
     const moved = prevNode !== null && campaign !== null && campaign.at.node !== prevNode && member() ? `→ ${titleOf(campaign.at.node)}` : undefined;
-    if (campaign?.at.node !== prevNode) tramQuizOfferOpen = false;
     if (turn || moved) { menu.close(); toast(/** @type {string} */ (moved ?? turn)); }
     render();
   } else if (m.t === 'err') {
@@ -256,8 +255,6 @@ const gameMaster = () => (campaign ? gameMasterId(campaign.party, content()) : n
 /** The game master's name, for the hints. */
 const gameMasterName = () => CHARACTERS[content().gameMaster].name;
 
-/** The birthday story (its own screens and hints). */
-const isStory = () => campaign?.facts.flags.includes('story.elo-50') ?? false;
 /** Do we show as a wisp now (the story's, or one the running minigame doesn't show)? */
 const amWisp = () => !!playerId && !!campaign && isWisp(campaign.party, playerId, minigame?.shows ?? null);
 /** Do we walk the running minigame's lobby as our character (it shows us, and its lobby is walkable)? */
@@ -267,7 +264,7 @@ const amLobbyWalker = () => !!playerId && !!minigame?.spots && minigame.shows.in
 /** @type {WeakMap<import('../../shared/scene.js').Scene, import('../../shared/scene.js').Scene>} */
 const wispRooms = new WeakMap();
 const roomHere = () => {
-  const base = roomAt(content(), campaign?.at.node);
+  const base = campaign ? sceneAt(content(), campaign.facts, campaign.at.node) : roomAt(content(), null);
   if (!amWisp() && !minigame) return base;
   let scene = wispRooms.get(base);
   if (!scene) { scene = sceneRoom(`${base.id}-wisp`, { x: 0, y: 0, w: WORLD.w, h: WORLD.h }, []); wispRooms.set(base, scene); }
@@ -279,7 +276,7 @@ const isGameMaster = () => playerId !== null && gameMaster() === playerId;
  *  or a player on a minigame's walkable lobby. */
 const canWalk = () => member() !== null && incarnationAt <= serverNow()
   && (amWisp() || minigame === null || amLobbyWalker())
-  && !(isStory() && campaign?.at.node === 'hub' && myCharacter() === 'elodie' && !campaign.facts.flags.includes('apparition.seen'));
+  && !(campaign && myCharacter() === content().chooser && chooserHeld(campaign.facts, content(), campaign.at.node));
 
 /** The latest accepted window from this phone. The server decides whether a request succeeded. */
 let joinShownUntil = 0;
@@ -451,7 +448,7 @@ function render() {
     if (amLobbyWalker()) renderWalkPanel();
     return;
   }
-  if (isStory() && campaign?.at.node === 'hub' && amWisp()) {
+  if (amWisp()) {
     show('wait-lobby'); dockStick('view-wait-lobby'); $('wait-lobby-text').textContent = WISP_TEXT; return;
   }
   show('place'); if (campaign) renderPlace(campaign, mem);
@@ -500,29 +497,37 @@ function dockStick(hostId) {
   updateInteraction();
 }
 
-/** Wisps may shine near visible furniture or the intro key, without using either object.
+/** A pickup lying within reach of `pos` where the party is, or null. @param {{x: number, y: number}} pos */
+const pickupNear = (pos) => (campaign && !minigame
+  ? pickupsAt(campaign.facts, content(), campaign.at.node).find((p) => within(p, pos)) ?? null : null);
+
+/** Wisps may shine near visible furniture or an item on the floor, without using either.
  * @param {{x: number, y: number}} pos */
 function wispNearObject(pos) {
   if (!campaign || minigame) return false; // over a minigame there is no furniture
+  return !!nearbyProp(sceneAt(content(), campaign.facts, campaign.at.node), pos) || !!pickupNear(pos);
+}
 
-  if (nearbyProp(roomAt(content(), campaign.at.node), pos)) return true;
-  return isStory() && campaign.at.node === 'hub' && campaign.facts.flags.includes('apparition.seen')
-    && !campaign.facts.inventory.elodie?.[INTRO_KEY]
-    && Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius;
+/** What the interact button does at `pos`: pick up an item (the chooser), or use the nearest object.
+ * @param {{x: number, y: number}} pos @returns {{ object: string, text: string } | null} */
+function actionAt(pos) {
+  const mem = member();
+  if (!mem || !campaign) return null;
+  const pickup = mem.character === content().chooser ? pickupNear(pos) : null;
+  if (pickup) return { object: pickup.item, text: `${content().items[pickup.item]?.icon ?? '✋'} Pick up ${content().items[pickup.item]?.name ?? pickup.item}` };
+  const actor = interactionActor(mem, campaign.facts);
+  const rules = objectRules(campaign.facts, content());
+  const object = nearbyObject(roomHere(), pos, actor, rules);
+  const action = object ? objectAction(object.id, actor, rules) : null;
+  return object && action ? { object: object.id, text: action.text } : null;
 }
 
 /** Keep one contextual button in step with the avatar's feet, including while the stick is held. */
 function updateInteraction() {
   const character = myCharacter();
-  const inHub = isStory() && campaign?.at.node === 'hub';
   const mem = member();
-  const actor = mem ? interactionActor(mem, campaign?.facts) : null;
   const pos = character && canWalk() ? currentPos(character) : null;
-  const canCollect = inHub && !!objectAction(INTRO_KEY, actor) && pos && campaign?.facts.flags.includes('apparition.seen')
-    && !campaign.facts.inventory.elodie?.[INTRO_KEY]
-    && Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius;
-  const object = pos ? nearbyObject(roomHere(), pos, actor) : null;
-  const action = canCollect ? objectAction(INTRO_KEY, actor) : object ? objectAction(object.id, actor) : null;
+  const action = pos ? actionAt(pos) : null;
   const button = /** @type {HTMLButtonElement} */ ($('btn-interact'));
   const jump = /** @type {HTMLButtonElement} */ ($('btn-jump'));
   jump.hidden = !mem || amWisp() || !canWalk() || !!minigame;
@@ -536,7 +541,8 @@ function updateInteraction() {
     $('object-actions').hidden = button.hidden;
     return;
   }
-  if (campaign?.at.node.startsWith('young-adult') && !action) {
+  // the "walk to an object" prompt belongs to the party room; a story room shows the button only next to something
+  if (!action && campaign && content().nodes[campaign.at.node]?.room) {
     button.hidden = true;
     $('object-actions').hidden = true;
     return;
@@ -550,7 +556,7 @@ function updateInteraction() {
   }
   button.hidden = false;
   $('object-actions').hidden = false;
-  button.dataset.object = canCollect ? INTRO_KEY : object?.id ?? '';
+  button.dataset.object = action?.object ?? '';
   button.disabled = !action || !conn.isOnline();
   button.textContent = action?.text ?? 'Walk to an object';
 }
@@ -566,13 +572,15 @@ function renderWalkPanel() {
  *  @param {Campaign} c @param {PartyMember} mem */
 function renderPlace(c, mem) {
   const here = content().nodes[c.at.node];
-  const atTram = isStory() && c.at.node === 'young-adult/tram-5';
-  $('view-place').classList.toggle('tram-5-compact', atTram);
-  $('place-kind').hidden = atTram;
+  const isChooser = mem.character === content().chooser;
+  // a compact place shows the chooser only the stick and the actions (and the offer)
+  const compact = !!here?.compact && isChooser;
+  $('view-place').classList.toggle('compact', compact);
+  $('place-kind').hidden = compact;
   $('place-kind').textContent = here?.kind === 'hub' ? 'The hub' : here?.kind === 'world' ? 'A world' : '';
   $('place-title').textContent = titleOf(c.at.node);
   const intro = $('place-intro');
-  intro.hidden = atTram || !here?.intro;
+  intro.hidden = compact || !here?.intro;
   intro.textContent = here?.intro ?? '';
 
   // open places only (no spoilers): done ✓, never entered ✨; the locked ones are just counted
@@ -594,33 +602,24 @@ function renderPlace(c, mem) {
     li.textContent = `🔒 ${locked} more to discover`;
     ul.append(li);
   }
-  ul.hidden = atTram || marks.length === 0;
+  ul.hidden = compact || marks.length === 0;
 
   const chooser = CHARACTERS[content().chooser];
-  const isChooser = mem.character === content().chooser;
   const doors = open.length > 0;
-  $('tram-quiz-offer').hidden = !(atTram && isChooser && tramQuizOfferOpen);
+  const offer = offerAt(c.facts, content(), c.at.node);
+  if (!offer) dismissedOffer = null;
+  $('offer').hidden = !(isChooser && offer && offer !== dismissedOffer);
+  if (offer) { $('offer-text').textContent = offer.text; $('offer-accept').textContent = offer.accept; }
+  // the chooser's way back, once they lead the party (before, the game master moves it)
   const back = /** @type {HTMLButtonElement} */ ($('btn-place-back'));
-  back.hidden = !(isStory() && c.at.node.startsWith('young-adult') && isChooser) || atTram;
-  if (!back.hidden) back.textContent = c.at.node === 'young-adult' ? '← Back to Élodie’s dream apartment'
-    : ['young-adult/tram-5', 'young-adult/shelter'].includes(c.at.node) ? '← Stay at Wallensteinplatz'
-      : `← Back to ${here?.parent ? titleOf(here.parent) : 'Tram 5'}`;
-  $('place-hint').hidden = atTram || !(isChooser && doors);
-  $('place-hint').textContent = c.at.node === 'young-adult'
-    ? c.facts.unlocked.includes('young-adult/shelter') ? 'Walk to Tram 5 or the Shelter entrance' : 'Walk to Tram 5'
-    : 'Walk into a door to enter';
-  if (isStory() && c.at.node === 'hub' && !c.facts.flags.includes('apparition.seen')) {
-    $('place-wait').textContent = 'Watch the TV—the visitor is speaking.';
-    dockStick('view-place');
-    return;
-  }
-  if (isStory() && c.at.node === 'hub' && !c.facts.inventory.elodie?.[INTRO_KEY]) {
-    $('place-wait').textContent = 'Walk to the glowing key and pick it up.';
-    dockStick('view-place');
-    return;
-  }
-  $('place-wait').hidden = atTram;
-  $('place-wait').textContent = atTram ? '' : !doors
+  back.hidden = !(isChooser && leads(c.facts, content()) && here?.parent && here.back !== false);
+  if (!back.hidden) back.textContent = here?.back || `← Back to ${titleOf(/** @type {string} */ (here?.parent))}`;
+  // the story's line for this place, else how doors work
+  const hint = hintAt(c.facts, content(), c.at.node);
+  $('place-hint').hidden = compact || !(hint || (isChooser && doors));
+  $('place-hint').textContent = hint ?? 'Walk into a door to enter';
+  $('place-wait').hidden = compact;
+  $('place-wait').textContent = compact || hint ? '' : !doors
     ? (here?.kind === 'tableau' ? 'Eyes on the big screen!' : '')
     : isChooser ? ''
       : isGameMaster() ? `${chooser.name} walks into a door, or you pick one from ☰ 🎲 Game master.`
@@ -658,10 +657,8 @@ function renderTableau(v, me, isGm) {
   const name = screensHere()?.name ?? 'game';
   $('btn-start-minigame').hidden = !isGm;
   $('btn-start-minigame').textContent = `▶ Start the ${name}`;
-  const portalReady = isStory() && campaign?.at.node === content().start && campaign.facts.flags.includes('portal.ready');
-  $('tableau-hint').textContent = portalReady ? (campaign?.facts.flags.includes('portal.entered')
-    ? 'Élodie went through the portal.' : 'A portal has appeared. Élodie, walk into it!')
-    : isGm ? '' : `Waiting for ${gameMasterName()} to start the ${name}…`;
+  const hint = campaign ? hintAt(campaign.facts, content(), campaign.at.node) : null;
+  $('tableau-hint').textContent = hint ?? (isGm ? '' : `Waiting for ${gameMasterName()} to start the ${name}…`);
 }
 
 /** @param {string} text */
@@ -745,13 +742,15 @@ $('btn-jump').addEventListener('click', () => {
   if (canWalk() && !minigame && !amWisp() && conn.isOnline()) send({ t: 'jump' });
 });
 $('btn-place-back').addEventListener('click', () => send({ t: 'back' }));
-$('tram-quiz-accept').addEventListener('click', () => {
-  if (!conn.isOnline() || !tramQuizOfferOpen) return;
-  tramQuizOfferOpen = false;
-  send({ t: 'enter', node: 'young-adult/tram-5/quiz' });
+$('offer-accept').addEventListener('click', () => {
+  const offer = campaign ? offerAt(campaign.facts, content(), campaign.at.node) : null;
+  if (!conn.isOnline() || !offer) return;
+  send({ t: 'enter', node: offer.node });
+});
+$('offer-dismiss').addEventListener('click', () => {
+  dismissedOffer = campaign ? offerAt(campaign.facts, content(), campaign.at.node) : null;
   render();
 });
-$('tram-quiz-dismiss').addEventListener('click', () => { tramQuizOfferOpen = false; render(); });
 $('btn-interact').addEventListener('click', () => {
   if (!canWalk() || !conn.isOnline()) return;
   if (amWisp()) {
@@ -761,18 +760,8 @@ $('btn-interact').addEventListener('click', () => {
   }
   joystick.cancel(); // flush the exact position before the interaction on the same socket
   const character = myCharacter();
-  const mem = member();
-  const actor = mem ? interactionActor(mem, campaign?.facts) : null;
-  if (isStory() && character && objectAction(INTRO_KEY, actor) && campaign?.at.node === 'hub'
-    && !campaign.facts.inventory.elodie?.[INTRO_KEY]
-    && campaign.facts.flags.includes('apparition.seen')) {
-    const pos = currentPos(character);
-    if (Math.hypot(pos.x - INTRO_KEY_SPOT.x, pos.y - INTRO_KEY_SPOT.y) < INTRO_KEY_SPOT.radius) {
-      send({ t: 'interact', object: INTRO_KEY }); return;
-    }
-  }
-  const object = character ? nearbyObject(roomHere(), currentPos(character), actor) : null;
-  if (object) send({ t: 'interact', object: object.id });
+  const action = character ? actionAt(currentPos(character)) : null;
+  if (action) send({ t: 'interact', object: action.object });
   updateInteraction();
 });
 $('btn-play-here').addEventListener('click', () => {

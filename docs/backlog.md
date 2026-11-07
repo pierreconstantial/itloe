@@ -61,28 +61,7 @@ The e2e suites run the sample content (`ITLOE_CONTENT=sample`), except `e2e-phon
 
 In the apartment, the cats, friends, keepsakes and the key are drawn after the depth-sorted list of props and avatars (`public/screen/party-room.js`). An avatar walking in front of a cat still has the cat drawn over it.
 
-**Recommendation:** make them props of the apartment's scene (`APARTMENT_ROOM`), so they sort with the avatars like the party room's furniture.
-
-### Story rules in shared code
-
-The opening's rules are branches on `STORY_MODE` / `storyId === 'elo-50'` spread through shared code:
-- `server/main.ts`: `walk`, `pos`, `interact`, `back`;
-- the campaign reducer, `shared/campaign/index.js`: who may `enter` and `back`, `portal`, `collect`, and `ack` setting `apparition.seen`;
-- `public/play/main.js` (about ten places), `public/screen/main.js`, and the hints in `public/screen/doors.js`.
-
-Each new story step adds more branches in all three layers.
-
-**Recommendation:** decide with Pierre where story rules live before the story grows. Two options:
-- story steps as content data, read by generic engine code;
-- one story module per layer that shared code calls at a few named points.
-
-[Ids in client code](#ids-in-client-code) would fold into it.
-
-### Ids in client code
-
-The clients write content ids into code: node ids (`'hub.false-start'`, `'young-adult'`), the character `'elodie'` where `content.chooser` exists, and the item `'memory-key-intro'`. Renaming a node or item in the content breaks the clients silently.
-
-**Recommendation:** read them from the content (`content.start`, `content.chooser`, item ids from the node that offers them). Do it together with [Story rules in shared code](#story-rules-in-shared-code) if that goes ahead.
+**Recommendation:** make them props of the apartment's scene (`apartment-room` in `shared/campaign/story/hub.js`), so they sort with the avatars like the party room's furniture.
 
 ### Guests controlling NPCs
 
@@ -95,12 +74,6 @@ Guests beyond the opening's four join with a character from the roster as wisps,
 Phones and the TV use the bundled sample content until `/api/content` answers, and the sample names no rooms. So a phone reloaded at the hub walks the party room's furniture until the content arrives, then the apartment's. If the request fails, it stays wrong until the content loads. Before a node's room, the phone chose the room from the campaign's flags, which come with the first view.
 
 **Recommendation:** check on real phones during the manual test whether anyone notices. If it matters, send the node's room with the view, or wait for the content before enabling the joystick.
-
-### Pickup handles one item
-
-The campaign's `collect` action accepts only `memory-key-intro`, at the hub. Each further item to pick up in the story would need its own code.
-
-**Recommendation:** when the story needs a second pickup, make pickups content data: which item, at which node, under which condition. Until then, leave it.
 
 ### Debug accessors show only the party room
 
@@ -120,7 +93,7 @@ Pyramide has no place in the story yet: it runs from its development start only 
 
 This is Pierre's content.
 
-**Recommendation:** Pierre decides which tableau holds Pyramide, in which world, who plays, and whether `person.nico.unlocked` is its reward when he ends it. Then add its content entry in `shared/campaign/story.js`, with a test that the story validates and the reward is recorded.
+**Recommendation:** Pierre decides which tableau holds Pyramide, in which world, who plays, and whether `person.nico.unlocked` is its reward when he ends it. Then add its content entry in `shared/campaign/story/`, with a test that the story validates and the reward is recorded.
 
 ### Smarter guess check in Pyramide
 

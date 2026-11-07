@@ -73,10 +73,11 @@ export function parseTestScene(url: URL, content: Content): SceneSetup | { index
 export function makeTestScene(initial: Campaign, content: Content, setup: SceneSetup): { campaign: Campaign, ids: Record<string, string> } {
   const gm = `test-${randomUUID()}`;
   const ids: Record<string, string> = {};
-  let campaign = reduceCampaign(initial, { t: 'join', id: gm, character: 'pierre' }, content);
-  if (setup.characters.includes('pierre')) ids.pierre = gm;
+  const master = content.gameMaster;
+  let campaign = reduceCampaign(initial, { t: 'join', id: gm, character: master }, content);
+  if (setup.characters.includes(master)) ids[master] = gm;
   for (const who of setup.characters) {
-    if (who === 'pierre') continue;
+    if (who === master) continue;
     const id = `test-${randomUUID()}`;
     ids[who] = id;
     campaign = reduceCampaign(campaign, { t: 'join', id, character: who }, content);
@@ -86,9 +87,11 @@ export function makeTestScene(initial: Campaign, content: Content, setup: SceneS
     if (next === campaign) throw new Error(`Test scene setup refused ${JSON.stringify(op)}`);
     campaign = next;
   };
-  if (setup.scene === 'tram-5') gmOp({ op: 'unlock', node: 'young-adult' });
+  // past the opening: Élodie leads, with the first key (everyone joined above plays as themselves)
+  gmOp({ op: 'machine', machine: 'opening', state: 'done' });
+  gmOp({ op: 'give', item: 'memory-key-intro', to: 'elodie', count: 1 });
   gmOp({ op: 'goto', node: setup.scene === 'tram-5' ? 'young-adult/tram-5' : 'hub' });
-  if (setup.scene === 'tram-5' && setup.characters.includes('pierre') && !setup.statuses.some(({ character }) => character === 'pierre')) {
+  if (setup.scene === 'tram-5' && setup.characters.includes(master) && !setup.statuses.some(({ character }) => character === master)) {
     campaign = reduceCampaign(campaign, { t: 'status', id: gm, status: 'wisp', on: true }, content);
   }
   if (setup.context === 'night') {
@@ -109,7 +112,7 @@ export function makeTestScene(initial: Campaign, content: Content, setup: SceneS
       campaign = reduceCampaign(campaign, { t: 'status', id, status, on: true }, content);
     }
   }
-  if (!setup.characters.includes('pierre')) campaign = reduceCampaign(campaign, { t: 'leave', id: gm }, content);
+  if (!setup.characters.includes(master)) campaign = reduceCampaign(campaign, { t: 'leave', id: gm }, content);
   campaign = reduceCampaign(campaign, { t: 'ack', id: 'screen', upTo: campaign.newsSeq }, content);
   return { campaign, ids };
 }

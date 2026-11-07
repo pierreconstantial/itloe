@@ -1,4 +1,4 @@
-// Contract D v2 + addendum A1 — campaign typedefs (pure data; no code). Everything persisted is
+// Contract D v3 (docs/story-engine.md) — campaign typedefs (pure data; no code). Everything persisted is
 // keyed by STABLE content ids and characters, never by playerIds, except the party roster itself.
 export {};
 
@@ -29,14 +29,21 @@ export {};
  *   | { unlocked: string }                  // node id
  *   | { count: string, gte: number }        // facts.counters[count] >= gte
  *   | { has: string, who?: CharacterId | 'anyone', gte?: number }   // inventory: item id held (default anyone, ≥ 1)
+ *   | { machine: string, in: string[] }    // that story machine's current state is one of `in`
  *   | { all: Condition[] } | { any: Condition[] } | { not: Condition }} Condition
  */
 
 /**
- * Effect, applied once when a node first completes (or by gm).
+ * Effect: a node's rewards (applied once, when it first completes) and a machine's transition and state effects.
+ * `count`, `cutscene`, `goto`, `wisp` and `incarnate` are machine effects only.
  * @typedef {{ flag: string }
  *   | { item: string, to?: RewardTo, count?: number }   // a CATALOGUE item; default to 'chooser', count 1
- *   | { unlock: string }} Effect
+ *   | { unlock: string }
+ *   | { count: string, by?: number, set?: number }      // moves a counter: + by (default 1), or to set (in-game time)
+ *   | { cutscene: string }                              // queues a cutscene news; the TV plays the cutscene of that id
+ *   | { goto: string }                                  // moves the party
+ *   | { wisp: 'others' | CharacterId }                  // every member but the chooser, or that character, becomes a wisp
+ *   | { incarnate: CharacterId }} Effect                // that character's wisp becomes their avatar (the 3-2-1 countdown)
  */
 /**
  * Who gets an item reward: the chooser · rank 1 of the activity that completed the node (all when
@@ -45,7 +52,8 @@ export {};
  */
 /**
  * A real object of the story (Contract F): only catalogue items can exist.
- * @typedef {{ id: string, name: string, icon: string, description: string }} Item
+ * `keepsake: false`: not hung on the dream apartment's wall (the keys).
+ * @typedef {{ id: string, name: string, icon: string, description: string, keepsake?: false }} Item
  */
 
 /**
@@ -78,18 +86,57 @@ export {};
  *   rewards?: Effect[],         // applied ONCE, the first time the node completes
  *   replayable?: boolean,       // can be entered again once done (games: yes)
  *   door?: Door,                // where its door is on the parent's map (hub/world children)
- *   room?: string,              // the room the TV draws here, an id in ROOMS (shared/scene.js); default: the party room
+ *   room?: string,              // the room here, an id in content.rooms; default: the party room
+ *   hints?: { when?: Condition, text: string }[],   // the line shown here, first match (a machine state's hint wins)
+ *   back?: string | false,      // the chooser's back button label, or false: no back button
+ *   compact?: true,             // the chooser's phone shows only the stick and the actions
+ *   enterWhen?: Condition,      // checked on every enter (not monotonic, unlike unlock)
+ *   startsOnEnter?: true,       // a minigame tableau: entering opens its lobby in the same step
  * }} Node
  */
+
+/** A story machine's object action; the first one the character may use and whose `if` holds is offered.
+ * @typedef {{ key: string, text: string, say?: string, speaker?: 'object', by?: 'chooser' | 'anyone' | CharacterId,
+ *   if?: Condition }} MachineAction */
+/** An item lying on the floor, picked up by the chooser. @typedef {{ item: string, node: string, x: number, y: number, radius: number }} Pickup */
+/** A spot the chooser walks into (edge-triggered); `look`: how the TV draws it; `arrive`: where the walker stands after.
+ * @typedef {{ id: string, node: string, x: number, y: number, radius: number, look?: string,
+ *   arrive?: { x: number, y: number } }} Zone */
+/** An NPC prop's line (`blink`: every other few seconds) and emote. @typedef {{ say?: string, blink?: true, emote?: string }} Npc */
+/** The chooser's phone offers to enter `node` (a child of where the party is). @typedef {{ node: string, text: string, accept: string }} Offer */
+/** @typedef {string | { to: string, do?: Effect[] }} Transition */
+/**
+ * @typedef {{
+ *   on?: Record<string, Transition>,                         // event key → transition (docs/story-engine.md, Events)
+ *   when?: { if: Condition, to: string, do?: Effect[] }[],    // condition transitions, checked whenever facts change
+ *   after?: { ms: number, to: string, do?: Effect[] },        // timed transition, from when the state was entered
+ *   enter?: Effect[],
+ *   hints?: Record<string, string>,                           // node id → line
+ *   holdChooser?: string,                                     // node id where the chooser cannot walk
+ *   objects?: Record<string, { actions: MachineAction[] }>,   // prop id → actions
+ *   pickups?: Pickup[],
+ *   zones?: Zone[],
+ *   npcs?: Record<string, Npc>,                               // prop id → line and emote
+ *   speech?: Record<string, string>,                          // character → a line they say over their avatar, once
+ *   hide?: string[],                                          // prop ids gone from their rooms
+ *   offer?: Offer,
+ * }} MachineState
+ */
+/** @typedef {{ initial: string, states: Record<string, MachineState> }} Machine */
 
 /**
  * @typedef {{
  *   start: string,              // where a NEW campaign starts: a minigame's tableau (the false-start block game)
- *   storyId?: string,            // optional live-story marker; absent from the engine's sample fixture
  *   chooser: CharacterId,       // whose walking opens doors ('elodie')
  *   gameMaster: CharacterId,    // who runs the evening ('pierre'): whoever holds this character, never passed on
  *   nodes: Record<string, Node>,
  *   items: Record<string, Item>, // the item catalogue (keys = ids)
+ *   rooms?: Record<string, import('../scene.js').Scene>,  // the rooms nodes name; default room: PARTY_ROOM
+ *   cast?: { opening: CharacterId[], introducedBy: Record<string, string> },  // who plays the opening; flag introducing each
+ *   leadAfter?: Condition,      // once it holds, outside a minigame only the chooser moves the party
+ *   machines?: Record<string, Machine>,
+ *   roomArt?: Record<string, { when?: Condition, src: string }[]>,  // painted backgrounds, first match
+ *   gmPlaces?: string[],        // the game master's place picker (default: the whole tree)
  * }} Content
  */
 
@@ -105,6 +152,7 @@ export {};
  *   seen: string[],                     // nodes the party has entered
  *   asked: string[],                    // quiz question ids already asked this evening (never asked again)
  *   totals: Record<string, Record<string, number>>,  // activity kind ('blocks' | 'quiz') → CharacterId → points
+ *   machines: Record<string, { state: string, since: number }>,  // every content machine's state, since when (server ms)
  * }} Facts
  */
 
@@ -122,7 +170,7 @@ export {};
 /**
  * @typedef {{ seq: number, t: 'unlocked', node: string }
  *   | { seq: number, t: 'item', item: string, to: CharacterId[] }
- *   | { seq: number, t: 'apparition' }} News   // who got it
+ *   | { seq: number, t: 'cutscene', id: string }} News   // who got it
  */
 
 // ---------------------------------------------------------------- the campaign (persisted state)
@@ -167,17 +215,21 @@ export {};
  *   | { op: 'reset-node', node: string }                // forget done/seen + its finished counter (rewards stay applied)
  *   | { op: 'give', item: string, to: CharacterId, count?: number }     // catalogue item, default 1
  *   | { op: 'take', item: string, from: CharacterId, count?: number } // refused when they hold fewer
- *   | { op: 'wisp', character: CharacterId, on: boolean }} GmOp // joined character's Wisp Mode
+ *   | { op: 'wisp', character: CharacterId, on: boolean }  // joined character's Wisp Mode
+ *   | { op: 'machine', machine: string, state: string }} GmOp // put a story machine in a state (its enter effects run)
  */
 
 /**
  * Ids are injected by the server (socket → playerId; ack: 'screen'). `activity` carries a minigame's
- * action already rebuilt field by field by the server (now/deadline/timeUp/inputs server-only).
+ * action already rebuilt field by field by the server (now/deadline/timeUp/inputs server-only). The server also
+ * injects `now` into every action (CampaignStep): the time a machine state is entered from.
  * @typedef {{ t: 'join', id: string, character: CharacterId }
  *   | { t: 'leave', id: string }
  *   | { t: 'enter', id: string, node: string }
- *   | { t: 'portal', id: string }
- *   | { t: 'collect', id: string, item: string }
+ *   | { t: 'use', id: string, object: string, action: string }   // a story machine's object action
+ *   | { t: 'pickup', id: string, item: string }                   // the chooser picks up a pickup where the party is
+ *   | { t: 'zone', id: string, zone: string }                     // the chooser walked into a zone where the party is
+ *   | { t: 'tick' }                                               // fires the due timed transitions
  *   | { t: 'status', id: string, status: string, on: boolean } // internal: add or remove a player status
  *   | { t: 'incarnate', id: string }                            // internal: finish the Wisp countdown
  *   | { t: 'back', id: string }
@@ -188,3 +240,4 @@ export {};
  *   | { t: 'ack', id: 'screen', upTo: number }
  *   | { t: 'gm', id: string, op: GmOp }} CampaignAction
  */
+/** @typedef {CampaignAction & { now?: number }} CampaignStep */

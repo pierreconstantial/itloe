@@ -2,12 +2,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  FEET, PARTY_ROOM, TRAM_5_ROOM, blocked, feetBox, isWalkable, prop, resolve, room, spawnAt, wallsAround,
+  FEET, PARTY_ROOM, blocked, feetBox, isWalkable, prop, resolve, room, spawnAt, wallsAround,
 } from '../shared/scene.js';
 import { WORLD } from '../shared/world.js';
 import { SAMPLE_CONTENT } from '../shared/campaign/index.js';
 import { buildDrawList, drawOrder } from '../public/screen/scene-render.js';
 import { PROP_PIXELS } from '../public/screen/party-room.js';
+import { STORY_CONTENT } from '../shared/campaign/story/index.js';
 
 /** @typedef {import('../shared/scene.js').Scene} Scene */
 
@@ -138,7 +139,7 @@ test('scene prop grids are rectangular and only use their own palette', () => {
       assert.equal(row.length, w, `${id} row ${y} is ${row.length} wide, expected ${w}`);
       for (const ch of row) assert.ok(ch === '.' || ch in pal, `${id} row ${y}: '${ch}' is not in the palette`);
     });
-    const art = [...PARTY_ROOM.props, ...TRAM_5_ROOM.props].find((p) => p.kind === id);
+    const art = [PARTY_ROOM, ...Object.values(STORY_CONTENT.rooms ?? {})].flatMap((r) => r.props).find((p) => p.kind === id);
     assert.ok(art, `${id} is a prop of a scene`);
   }
 });

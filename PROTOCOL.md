@@ -49,17 +49,21 @@ Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness), `/admin/` (adm
 { "t": "takeSpot", "spot": "team1-clue" }                // a player walking a walkable lobby: onto a free spot (below)
 { "t": "say", "text": "Hello!" }                         // joined player; 1–100 printable characters
 { "t": "emote", "kind": "victory" }                      // incarnated: victory | fart | annoy; wisp: shine
-{ "t": "interact", "object": "table" }                    // near an object of the room where the party is (roomAt)
+{ "t": "interact", "object": "table" }                    // near an object of the room where the party is (sceneAt),
+                                                         // or the chooser near an item on the floor: object = item id
 // Speech and emotes are short lived, server relayed events, limited to one per 650 ms per socket.
 // Every `hello` (phones, new devices and screens alike) is answered with { t: "chatHistory", messages: [...] }
 // holding up to 30 recent speech events. The history is in memory only and is cleared by a server restart.
 // Interaction is available while no minigame runs, wherever the party is (hub/world, a scene tableau, the room
 // at a tableau). The server checks the sender's latest position (none yet:
 // their spawn point in the party room) and their statuses and inventory against the closest allowed object,
-// then relays an `interact` event with playerId, object, action, feedback and at. It is limited to one
-// per 700 ms per socket. Object rules live in shared/interactions.js: player override, character
-// override, first matching status/inventory condition, then the default. Each action has key, text,
-// feedback; null denies interaction. Wisps cannot use any object action, even a player override.
+// then relays an `interact` event with playerId, object, action, feedback, at, and `speaker: "object"` when the
+// prop says the feedback (an NPC's line) rather than the player. It is limited to one per 700 ms per socket.
+// Object rules: the furniture's in shared/interactions.js, the story's from its machines' current states
+// (objectRules, docs/story-engine.md): player override, character override, first matching status/inventory
+// condition, then the default. Each action has key, text, feedback; null denies interaction. A story action
+// is then applied to the campaign as `use` (a machine may move on). Wisps cannot use any object action, even a
+// player override. An item lying where the party is (a story pickup) is picked up by the chooser within reach.
 ```
 
 For example, the table is a scene object with `id: "table"` and a `box`, `solid`, `anchorY` and `layer` in
@@ -189,7 +193,9 @@ world units, with the player holding it, or null; who holds it is the minigame's
 { "t": "gm", "op": { "op": "unlock", "node": "teens" } }
                                         // game master only, even while he is a Wisp. A goto while a minigame runs
                                         // ends it first, as back does. Ops: goto / unlock / lock /
-                                        // setFlag / count / reset-node (shapes: shared/campaign/types.js GmOp).
+                                        // setFlag / count / reset-node / give / take / wisp / machine
+                                        // (shapes: shared/campaign/types.js GmOp; machine: put a story machine
+                                        // in a state, docs/story-engine.md).
                                         // Anyone else → err "not-gm"; a GM's no-op is silent, except give/take (Contract F:
                                         // { op:'give', item, to, count? } / { op:'take', item, from, count? }):
                                         // unknown item or character, or taking more than held → err "refused"
@@ -205,10 +211,10 @@ world units, with the player holding it, or null; who holds it is the minigame's
                                         // TV reconnecting mid-cutscene, never drop a cutscene they did not play.
 ```
 
-- **Tram 5 quiz offer:** When Élodie interacts with the tram at `young-adult/tram-5`, the server gives her a
-  quiz offer. Accept sends `enter` for `young-adult/tram-5/quiz`; the server checks that offer, enters the
-  tableau and applies the game master's `startMinigame` in sequence. The quiz opens in its lobby, where eligible
-  players ready up and the game master chooses settings and starts a round. Dismiss sends no campaign action.
+- **Story offers:** a story machine's state can offer the chooser a child node (`offerAt`, e.g. the painted tram's
+  quiz, offered for 30 s after Élodie talks to the tram). Accept sends the ordinary `enter`; the node's `enterWhen`
+  holds only during the offer, and a node with `startsOnEnter` opens its minigame's lobby in the same step (one
+  save). Dismiss sends nothing.
 - **Doors:** `pos` stays ephemeral, but while no minigame runs the server reads it against the current node's doors (`zoneAt`):
   stepping INTO a door (edge, not standing in it) records `zone.entered` for that character, and for the
   content's chooser on an unlocked door applies `enter`. After the party moves, standing where a door
@@ -217,46 +223,37 @@ world units, with the player holding it, or null; who holds it is the minigame's
   in the SAME step, and the minigame's end records them all (`round.finished`) in one step; the server saves once per
   step: a kill -9 persists both or neither, so a restart never counts a round twice.
 
-### Birthday opening (`story.elo-50`)
+### The story on the wire (Contract D v3, docs/story-engine.md)
 
-The opening's tableau names Pierre, Élodie, Sol and Anna (`eligible`) and requires them all ready (`allReady`):
-a round starts only with the four in the party and ready. Once Pierre ends the block game after at least one
-finished round, `campaign.facts.flags` contains `portal.ready`. Nothing refuses another block game there later.
-If everyone leaves during a round or on its podium, the block game stays where it was; Pierre, rejoining, is the
-game master again and ends it. A portal is then drawn in the middle of the room, behind the row where the guests
-start. Elo walks into it with the ordinary
-`pos` message; the server applies the portal transition only for her and queues
-`{ "seq": 1, "t": "apparition" }` in `campaign.news`. The other players gain the persisted `wisp`
-status and appear as small moving lights in the apartment. A later joiner who selects a predefined
-character starts in Wisp Mode unless that character has already been introduced. Wisps have no name
-label, keep a hint of their character's color, and pulse slightly while moving. They can move and send
-`{ "t": "emote", "kind": "shine" }`, which briefly brightens their light. The phone offers Shine
-beside nearby objects, but sends the same emote without interacting with the object. Wisps cannot speak,
-interact with objects or NPCs, or trigger zone/story events. They are eligible for a minigame only where its
-tableau names their character.
-Pierre may still use game-master commands while a Wisp; those commands are separate from Wisp actions.
-The server incarnates a wisp when the story grants its `person.<character>.unlocked` flag (for
-example `person.nico.unlocked`), via its internal status action, or from the GM's `wisp` operation.
-Ordinary player messages cannot change the status. The same GM operation can return a character
-to Wisp Mode. When incarnation begins,
-the campaign persists `statuses: ["wisp", "incarnating"]` and the next `view` includes
-`incarnations: { "<playerId>": { "at": <server epoch ms>, "kind": <emote> } }`.
-Until `at`, the TV draws the wisp, the phone vibrates and displays **3, 2, 1**, and the server
-rejects character actions. At `at`, the server removes both statuses, broadcasts a new `view`,
-then broadcasts the chosen normal `emote`. A restart during the countdown reschedules it from
-the persisted pending status. The screen plays the
-apparition and sends the ordinary `ack` when it ends.
-That acknowledgement adds `apparition.seen` to the persisted facts and reveals the key.
+The story's sequences are machines in the content; their states travel in `campaign.facts.machines`
+(`{ [machine]: { state, since } }`), and the clients derive everything else from the content with the shared
+queries (hints, zones, pickups, NPC lines, hidden props, offers, the held chooser). No message names the story:
 
-```jsonc
-{ "t": "interact", "object": "memory-key-intro" }  // Elo, near the key after the apparition
-{ "t": "enter", "node": "young-adult" }        // normally triggered by Elo walking into Young Adult
-{ "t": "back" }                               // Elo returns from the second room to the apartment
-```
+- the chooser walking into a story zone (the portal) is an ordinary `pos`; the server applies `zone` and, if the
+  zone says so, sends the chooser's new position (`pos` echo) where they arrive;
+- using a story object is an ordinary `interact`; picking up an item on the floor is `interact` with the item id;
+- a scripted cutscene is the news entry `{ "seq": 1, "t": "cutscene", "id": "apparition" }`; the TV plays the
+  cutscene of that id and sends the ordinary `ack`, which moves the machines waiting for it;
+- timed states (an NPC leaving after three seconds) are fired by the server's clock, also after a restart.
 
-The key is stored in `campaign.facts.inventory.elodie`, and Young Adult unlocks from that fact. The six
-memory-world entrances and reunion mini-games are not wired yet; their story specification is in
-`GameStory.md`.
+The opening (`opening` machine): the four play the block game (its tableau names them and requires them all
+ready); when Pierre ends it after a finished round, a portal opens in the room; Élodie walks into it, the others
+become wisps and everyone moves to the dream apartment while the apparition plays (Élodie is held still); then
+the key lies on the floor until she picks it up, which unlocks Young Adult. From the portal on, Élodie alone
+moves the party (`leadAfter`): the game master moves it with `gm goto`.
+
+Wisps: a later joiner who selects a predefined character starts in Wisp Mode unless the story introduced that
+character (`cast`). Wisps have no name label, keep a hint of their character's color, and pulse slightly while
+moving. They can move and send `{ "t": "emote", "kind": "shine" }`, which briefly brightens their light; the phone
+offers Shine beside nearby objects and items. Wisps cannot speak, interact with objects or NPCs, or trigger zones.
+They are eligible for a minigame only where its tableau names their character. Pierre may still use game-master
+commands while a Wisp. The engine incarnates a wisp when the story sets its `person.<character>.unlocked` flag, when a story
+machine's `incarnate` effect names its character (Pierre arriving in Élodie's flat), or from the GM's `wisp`
+operation; a machine's `wisp` effect makes it a wisp again. When incarnation begins, the campaign persists `statuses: ["wisp",
+"incarnating"]` and the next `view` includes `incarnations: { "<playerId>": { "at": <server epoch ms>, "kind":
+<emote> } }`. Until `at`, the TV draws the wisp, the phone vibrates and displays **3, 2, 1**, and the server
+rejects character actions. At `at`, the server removes both statuses, broadcasts a new `view`, then broadcasts the
+chosen normal `emote`. A restart during the countdown reschedules it from the persisted pending status.
 
 ### Quiz (Contract E + addendum E1): a tableau `activity: { kind: 'quiz', settings }`
 

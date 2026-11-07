@@ -268,6 +268,11 @@ can take back a character whose phone is offline.
 
 ### Contract D v2 — campaign: hub, worlds, unlocks (FROZEN 2026-11-04, user approved; changes through the orchestrator)
 
+**Superseded by Contract D v3 (2026-11-07, agreed with Pierre): [docs/story-engine.md](docs/story-engine.md).** The story
+is data (`shared/campaign/story/`): story machines replace the `portal` and `collect` actions and every `storyId`
+branch; nodes, facts and `settle` below still hold, with the additions listed there. Read v3 first; what follows is
+the history of v2.
+
 Amendment (2026-11-06, agreed for `small-improvements`): the game master can send
 `gm { op: 'wisp', character, on }` for any joined character, including during a round.
 Switching Wisp Mode on removes that character from the current round; switching it off

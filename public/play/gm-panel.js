@@ -1,11 +1,11 @@
 // Game-master panel (slice 3): Pierre steers the birthday evening from the ☰ sheet.
-// Enter an unlocked child, go back up, and gm ops (goto / unlock / lock / reset-node / setFlag / count)
-// on ANY node, each confirmed by a second tap. Plus a progress readout (counters, flags, and why a
+// Enter an unlocked child, go back up, and gm ops (goto / unlock / lock / reset-node / setFlag / count / machine)
+// on ANY node or story machine, each confirmed by a second tap. Plus a progress readout (counters, flags, and why a
 // node is or is not unlocked). Everything comes from the content tree and the campaign facts: no node
 // id is written here. Static controls are built once, so a view arriving mid-typing keeps inputs intact.
 import { $ } from './dom.js';
 import { createConfirm } from './confirm.js';
-import { holds, holding } from '../../shared/campaign/index.js';
+import { holds, holding, leads } from '../../shared/campaign/index.js';
 import { childMarks, content, explain, nodeTree, onContentChange, titleOf } from './campaign-view.js';
 import { catalogue } from './bag.js';
 import { CHARACTERS } from '../../shared/characters.js';
@@ -37,7 +37,6 @@ function contentNames() {
 
 /** @param {string} id */
 const nameOf = (id) => CHARACTERS[/** @type {keyof typeof CHARACTERS} */ (id)]?.name ?? id;
-const GAME_START_PICK = '@game-start';
 
 /** @param {HTMLElement} list @param {string[]} values */
 function fillDatalist(list, values) {
@@ -55,14 +54,13 @@ export function createGmPanel(io) {
   let names = contentNames();
 
   const select = /** @type {HTMLSelectElement} */ ($('gm-node'));
-  const chosenNode = () => select.value === GAME_START_PICK ? content().start : select.value;
-  /** The story's GM shortcut list; the sample campaign still exposes its whole content tree. */
+  const chosenNode = () => select.value;
+  /** The content's place shortcuts (gmPlaces), else its whole tree. */
   function fillNodes() {
     const keep = select.value;
-    const places = content().storyId === 'elo-50'
-      ? [{ value: GAME_START_PICK, label: 'Game Start' },
-        { value: content().start, label: titleOf(content().start) },
-        { value: 'young-adult', label: titleOf('young-adult') }]
+    const shortcuts = content().gmPlaces;
+    const places = shortcuts
+      ? shortcuts.map((id) => ({ value: id, label: titleOf(id) }))
       : nodeTree().map(({ node, depth }) => ({ value: node.id, label: `${'  '.repeat(depth)}${node.title}` }));
     select.replaceChildren(...places.map(({ value, label }) => Object.assign(document.createElement('option'), {
       value, textContent: label,
@@ -70,7 +68,25 @@ export function createGmPanel(io) {
     if (keep && places.some(({ value }) => value === keep)) select.value = keep;
   }
   fillNodes();
-  onContentChange(() => { names = contentNames(); fillNodes(); fillItems(); confirm.disarm(); redraw(); });
+  const machineSelect = /** @type {HTMLSelectElement} */ ($('gm-machine'));
+  const stateSelect = /** @type {HTMLSelectElement} */ ($('gm-machine-state'));
+  /** The story's machines, and the picked machine's states. */
+  function fillMachines() {
+    const keep = machineSelect.value;
+    const ids = Object.keys(content().machines ?? {});
+    machineSelect.replaceChildren(...ids.map((id) => Object.assign(document.createElement('option'), { value: id, textContent: id })));
+    if (ids.includes(keep)) machineSelect.value = keep;
+    fillStates();
+  }
+  function fillStates() {
+    const keep = stateSelect.value;
+    const states = Object.keys(content().machines?.[machineSelect.value]?.states ?? {});
+    stateSelect.replaceChildren(...states.map((id) => Object.assign(document.createElement('option'), { value: id, textContent: id })));
+    if (states.includes(keep)) stateSelect.value = keep;
+  }
+  fillMachines();
+  machineSelect.addEventListener('change', fillStates);
+  onContentChange(() => { names = contentNames(); fillNodes(); fillMachines(); fillItems(); confirm.disarm(); redraw(); });
   const itemSelect = /** @type {HTMLSelectElement} */ ($('gm-item'));
   const whoSelect = /** @type {HTMLSelectElement} */ ($('gm-who'));
   const wispSelect = /** @type {HTMLSelectElement} */ ($('gm-wisp-who'));
@@ -132,6 +148,10 @@ export function createGmPanel(io) {
         ? { key: `count:${counter}=${set}`, label: `${counter} = ${set}`, act: () => gm({ op: 'count', counter, set }) }
         : null;
     },
+    machine: () => {
+      const machine = machineSelect.value, state = stateSelect.value;
+      return machine && state ? { key: `machine:${machine}:${state}`, label: `${machine} → ${state}`, act: () => gm({ op: 'machine', machine, state }) } : null;
+    },
     wisp: () => {
       const c = last;
       const member = c?.party.order.map((id) => c.party.players[id]).find((p) => !p.left && p.character === wispSelect.value);
@@ -153,15 +173,18 @@ export function createGmPanel(io) {
     });
   }
   // changing the target disarms (the armed action was for the previous one)
-  for (const el of [select, flagInput, counterInput, countInput, itemSelect, whoSelect, wispSelect]) el.addEventListener('input', () => { confirm.disarm(); redraw(); });
+  for (const el of [select, flagInput, counterInput, countInput, itemSelect, whoSelect, wispSelect, machineSelect, stateSelect]) el.addEventListener('input', () => { confirm.disarm(); redraw(); });
   counterInput.addEventListener('change', () => {
     const v = last?.facts.counters[counterInput.value.trim()];
     if (typeof v === 'number') countInput.value = String(v); // start from the current value
   });
 
+  /** Once the chooser leads the party, the game master moves it with goto (enter and back are the chooser's). */
+  const gmMoves = () => !!last && leads(last.facts, content());
+
   $('gm-back').addEventListener('click', () => {
     const parent = last && content().nodes[last.at.node]?.parent;
-    if (content().storyId === 'elo-50' && parent) gm({ op: 'goto', node: parent });
+    if (gmMoves() && parent && lastStatus === null) gm({ op: 'goto', node: parent });
     else io.send({ t: 'back' });
   });
 
@@ -191,7 +214,7 @@ export function createGmPanel(io) {
         b.disabled = !m.unlocked || playing;
         b.textContent = `${m.unlocked ? '→' : '🔒'} ${m.node.title}${m.done ? ' ✓' : ''}${m.fresh ? ' ✨' : ''}`;
         b.addEventListener('click', () => {
-          if (content().storyId === 'elo-50') gm({ op: 'goto', node: m.node.id });
+          if (gmMoves()) gm({ op: 'goto', node: m.node.id });
           else io.send({ t: 'enter', node: m.node.id });
         });
         return b;
@@ -206,6 +229,9 @@ export function createGmPanel(io) {
       if (b.dataset.gm === 'wisp') b.disabled = !op;
       b.classList.toggle('armed', !!op && confirm.isArmed(op.key));
     }
+
+    const now = f.machines?.[machineSelect.value];
+    $('gm-machine-now').textContent = machineSelect.value ? `${machineSelect.value} is at: ${now?.state ?? '—'}` : 'No story machines.';
 
     const wisp = c.party.order.map((id) => c.party.players[id]).find((p) => !p.left && p.character === wispSelect.value);
     $('gm-wisp-state').textContent = !wisp ? 'No joined characters.' : wisp.statuses.includes('incarnating')

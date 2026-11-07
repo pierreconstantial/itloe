@@ -1,24 +1,17 @@
-/** @typedef {{ key: string, text: string, feedback: string }} ObjectAction */
+/** `event`: a story machine's action, sent to the campaign as `use`; `speaker: 'object'`: the prop says the feedback.
+ * @typedef {{ key: string, text: string, feedback: string, event?: true, speaker?: 'object' }} ObjectAction */
 /** @typedef {{ statuses?: string[], items?: Record<string, number> }} InteractionCondition */
 /** @typedef {{ when: InteractionCondition, action: ObjectAction | null }} ConditionalAction */
 /** @typedef {{ default: ObjectAction | null, byPlayer?: Record<string, ObjectAction | null>, byCharacter?: Record<string, ObjectAction | null>, variants?: ConditionalAction[] }} ObjectRule */
 /** @typedef {{ id: string, character?: string | null, statuses?: string[], inventory?: Record<string, number> }} Actor */
 
-/** Scene objects expose a default action. A null default means only listed players can act. */
-export const TRAM_5_MAN_NAME = 'Tschick-Toni';
-/** @type {Readonly<Record<string, ObjectRule>>} */
+/** The shared furniture's actions. A null default means only listed players can act. Story objects come from
+ *  the content's machines (shared/campaign/machines.js: objectRules), which pass the full rule set here.
+ * @type {Readonly<Record<string, ObjectRule>>} */
 export const OBJECT_ACTIONS = Object.freeze({
   sofa: { default: { key: 'sit', text: '🛋 Sit', feedback: 'Comfy!' } },
   table: { default: { key: 'blow-candles', text: '🎂 Blow candles', feedback: 'Make a wish!' } },
   plant: { default: { key: 'shake', text: '🪴 Shake plant', feedback: 'Rustle!' } },
-  'tram-5-tram': { default: null, byCharacter: { elodie: {
-    key: 'quiz-offer', text: '🚋 Tram 5', feedback: 'A ticket for a quizz!',
-  } } },
-  'tram-5-weird-man': { default: null, byCharacter: { elodie: {
-    key: 'talk', text: `💬 Talk to ${TRAM_5_MAN_NAME}`,
-    feedback: `${TRAM_5_MAN_NAME}: Host a Tschick? I brauch dringend ane!`,
-  } } },
-  'memory-key-intro': { default: null, byCharacter: { elodie: { key: 'collect', text: '🗝️ Pick up key', feedback: 'A key of memory!' } } },
 });
 
 /** @param {Actor | null | undefined} actor @param {InteractionCondition} condition */
@@ -48,10 +41,12 @@ export function interactionActor(member, facts) {
     inventory: facts?.inventory?.[member.character ?? ''] ?? {} };
 }
 
-/** @param {string} object @param {Actor | null | undefined} actor @returns {ObjectAction | null} */
-export function objectAction(object, actor) {
+/** @param {string} object @param {Actor | null | undefined} actor
+ * @param {Readonly<Record<string, ObjectRule>>} [rules] the rules in force (objectRules), default the furniture's
+ * @returns {ObjectAction | null} */
+export function objectAction(object, actor, rules = OBJECT_ACTIONS) {
   if (actor?.statuses?.includes('wisp')) return null;
-  const rule = OBJECT_ACTIONS[object];
+  const rule = rules[object];
   return rule ? resolveObjectAction(rule, actor) : null;
 }
 
@@ -80,5 +75,7 @@ export const nearbyProp = (scene, position) => closestProp(scene, position, () =
 
 /** Find the closest object this actor may use.
  * @param {import('./scene.js').Scene} scene @param {{x: number, y: number}} position
- * @param {Actor | null} [actor] @returns {import('./scene.js').Prop | null} */
-export const nearbyObject = (scene, position, actor = null) => closestProp(scene, position, (prop) => !!objectAction(prop.id, actor));
+ * @param {Actor | null} [actor] @param {Readonly<Record<string, ObjectRule>>} [rules]
+ * @returns {import('./scene.js').Prop | null} */
+export const nearbyObject = (scene, position, actor = null, rules = OBJECT_ACTIONS) =>
+  closestProp(scene, position, (prop) => !!objectAction(prop.id, actor, rules));
