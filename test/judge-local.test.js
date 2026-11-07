@@ -68,6 +68,11 @@ test('numbers and years: exact only, wherever they stand in the text', () => {
   assert.equal(judgeLocal(q('1789'), '1798'), 'wrong');
   assert.equal(judgeLocal(q('1789'), '1788'), 'wrong');
   assert.equal(judgeLocal(q('1789'), '17890'), 'wrong');
+  assert.equal(judgeLocal(q('16 ans'), '15 ans'), 'wrong', 'a typo budget for the words, none for the number');
+  assert.equal(judgeLocal(q('Septembre 1914'), 'septembre 1918'), 'wrong');
+  assert.equal(judgeLocal(q('Septembre 1914'), 'Setpembre 1914'), 'right');
+  assert.equal(judgeLocal(q('200 000'), '300 000'), 'wrong');
+  assert.equal(judgeLocal(q('200 000'), '200000'), 'right', 'digit groups are one number');
 });
 
 test('partial names are uncertain (the game master or a judge decides)', () => {

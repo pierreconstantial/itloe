@@ -4,7 +4,8 @@
 // wrong and lets the game master override on the reveal.
 //
 //   normalize: shared/normalize.js (case, accents, punctuation, one leading French article).
-//   numbers:   an answer made of digits (a year…) must match EXACTLY: 1789 is never 1798.
+//   numbers:   the numbers in an answer (a year, a count, an amount) must match EXACTLY, wherever they
+//              stand: 1789 is never 1798, "16 ans" never "15 ans"; the typo budget is for the words.
 //   distance:  Levenshtein from `fastest-levenshtein` (MIT, zero dependencies, 21 kB), plus one rule of
 //              ours: a single swapped pair of adjacent letters ("Mozatr") is one typo, not two. The
 //              thresholds are data (JUDGE_RULES), relative to the answer's length.
@@ -63,12 +64,18 @@ export function expectedAnswers(q) {
 
 const RANK = { wrong: 0, uncertain: 1, right: 2 };
 
-/** One typed text against one expected spelling. @param {string} text normalized @param {string} expected normalized @returns {LocalVerdict} */
-function against(text, expected) {
-  if (!text || !expected) return 'wrong';
+/** Digit groups as one number ("200 000" → "200000"). @param {string} s normalized */
+const joinThousands = (s) => s.replace(/(\d) (?=\d{3}(?!\d))/g, '$1');
+
+/** One typed text against one expected spelling. @param {string} typed normalized @param {string} wanted normalized @returns {LocalVerdict} */
+function against(typed, wanted) {
+  if (!typed || !wanted) return 'wrong';
+  const text = joinThousands(typed), expected = joinThousands(wanted);
   if (text === expected) return 'right';
-  // numbers (years, counts): exact only, wherever they stand in the text ("en 1789", "1789 !")
-  if (/^\d+$/.test(expected)) return text.split(' ').includes(expected) ? 'right' : 'wrong';
+  // numbers (years, counts, amounts): exact only, wherever they stand in the text ("en 1789", "1789 !", "16 ans")
+  const words = text.split(' ');
+  if (!expected.split(' ').every((w) => !/^\d+$/.test(w) || words.includes(w))) return 'wrong';
+  if (/^\d+$/.test(expected)) return 'right';
   const budget = typoBudget(expected.length);
   const d = distance(text, expected);
   if (d <= budget) return 'right';
