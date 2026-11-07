@@ -123,6 +123,11 @@ const INTRODUCED_FRIENDS = FRIENDS.map(([id]) => id);
 /** Introducing them: their players' wisps become them for good (cast.introducedBy). */
 const INTRODUCE_FRIENDS = ['nico', 'mathieu', 'johanna'].map((who) => ({ flag: `person.${who}.unlocked` }));
 
+/** The painted doors as zones (the `exits` machine): `arrive` is where Élodie then stands, clear of any zone. */
+const FLAT_EXIT = { id: 'flat-exit', node: FLAT, x: 2.25, y: 5.8, radius: 0.6, arrive: { x: 3.8, y: 7.4 } };
+const SHELTER_ENTRANCE = { id: 'shelter-entrance', node: TRAM_5, x: 13.95, y: 6.0, radius: 0.6, arrive: { x: 6.2, y: 5.9 } };
+const SHELTER_EXIT = { id: 'shelter-exit', node: SHELTER, x: 6.2, y: 4.8, radius: 0.55, arrive: { x: 13.9, y: 7.2 } };
+
 /** Toni's prop, and the dog that leaves with him. */
 const TONI = 'tram-5-weird-man';
 const DOG = 'tram-5-dog';
@@ -161,20 +166,21 @@ export const YOUNG_ADULT = {
       // only through the tram's offer, and its lobby opens at once
       enterWhen: { machine: 'tram', in: ['offered'] }, startsOnEnter: true,
     },
-    // the tram's destinations (the `tram` machine's choice); the Shelter also has a door at night; Back walks to the stop
+    // the tram's destinations (the `tram` machine's choice), and the Shelter: no doors, no Back; their painted doors
+    // are story zones (the `exits` machine)
     [SHELTER]: {
       id: SHELTER, kind: 'world', parent: TRAM_5, title: 'The Shelter',
       room: SHELTER, unlock: { all: [{ unlocked: TRAM_5 }, { flag: 'young-adult.shelter.open' }] },
-      // its painted entrance on Wallensteinplatz (tram-5-night-shelter-open): once open, Élodie walks in too
-      door: { x: 13.3, y: 5.6, w: 1.3, h: 0.8 },
-      back: '← Back to Tram 5',
-      hints: [{ text: 'Élodie can return to Tram 5.' }],
+      // in through its entrance on Wallensteinplatz, out up its stair (the `exits` machine's zones)
+      back: false,
+      hints: [{ text: 'The stairs lead back up to Wallensteinplatz.' }],
     },
     [FLAT]: {
       id: FLAT, kind: 'world', parent: TRAM_5, title: 'Appart Elo 1',
       room: FLAT, unlock: { unlocked: TRAM_5 },
-      back: '← Back to Tram 5',
-      hints: [{ text: 'Élodie can return to Tram 5.' }],
+      // out through its front door (the `exits` machine's zone)
+      back: false,
+      hints: [{ text: 'The front door leads out to Tram 5.' }],
     },
     // the Shelter's table football: only through Pierre's offer (the `shelter` machine), and its lobby opens at
     // once. Everyone may play, wisps too, as themselves
@@ -474,19 +480,23 @@ export const YOUNG_ADULT = {
         done: { hide: INTRODUCED_FRIENDS },
       },
     },
-    // Walking out: the flat's front door (up its steps) and the Shelter's stair lead back to Tram 5, like a door.
-    // Out of the Shelter, Élodie stands in front of its entrance, clear of its door.
+    // The rooms' painted doors, as zones: the flat's front door (up its steps) and the Shelter's stair lead out to
+    // Tram 5; at night, the Shelter's entrance on Wallensteinplatz leads in, Élodie arriving at the foot of its stair.
+    // Out of the Shelter, she stands in front of its entrance, clear of it.
     exits: {
-      initial: 'open',
+      initial: 'day',
       states: {
-        open: {
-          zones: [
-            { id: 'flat-exit', node: FLAT, x: 2.25, y: 5.8, radius: 0.6, arrive: { x: 3.8, y: 7.4 } },
-            { id: 'shelter-exit', node: SHELTER, x: 6.2, y: 4.8, radius: 0.55, arrive: { x: 13.9, y: 7.1 } },
-          ],
+        day: {
+          zones: [FLAT_EXIT],
+          on: { 'zone:flat-exit': { to: 'day', do: [{ goto: TRAM_5 }] } },
+          when: [{ if: { flag: 'young-adult.shelter.open' }, to: 'night' }],
+        },
+        night: {
+          zones: [FLAT_EXIT, SHELTER_ENTRANCE, SHELTER_EXIT],
           on: {
-            'zone:flat-exit': { to: 'open', do: [{ goto: TRAM_5 }] },
-            'zone:shelter-exit': { to: 'open', do: [{ goto: TRAM_5 }] },
+            'zone:flat-exit': { to: 'night', do: [{ goto: TRAM_5 }] },
+            'zone:shelter-entrance': { to: 'night', do: [{ goto: SHELTER }] },
+            'zone:shelter-exit': { to: 'night', do: [{ goto: TRAM_5 }] },
           },
         },
       },

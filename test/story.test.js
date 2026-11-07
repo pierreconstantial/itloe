@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  newCampaign, loadCampaign, reduceCampaign, validateContent, holding, gameMasterId, roomAt, sceneAt, objectRules, offerAt, zoneAt,
+  newCampaign, loadCampaign, reduceCampaign, validateContent, holding, gameMasterId, roomAt, sceneAt, objectRules, offerAt,
   nextTimer, npcsAt, pickupsAt, choiceAt, zonesAt, characterRules,
 } from '../shared/campaign/index.js';
 import { objectAction, nearbyObject } from '../shared/interactions.js';
@@ -154,19 +154,25 @@ test('Young Adult: Élodie walks the places, and the flags open the Shelter and 
   assert.equal(act(c, { t: 'enter', id: 'elodie', node: 'young-adult/appart-pierre' }), c, 'Pierre’s flat is still locked');
   c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/appart-elo-1' });
   assert.equal(roomAt(STORY_CONTENT, c.at.node).id, 'young-adult/appart-elo-1');
-  c = act(c, { t: 'back', id: 'elodie' });
+  // no Back: she walks out through the flat's front door
+  assert.equal(act(c, { t: 'back', id: 'elodie' }), c, 'no Back from her flat');
+  c = act(c, { t: 'zone', id: 'elodie', zone: 'flat-exit' });
   assert.equal(c.at.node, 'young-adult/tram-5');
   assert.equal(act(c, { t: 'back', id: 'elodie' }), c, 'no way back from Tram 5 for Élodie');
-  // the Shelter's painted entrance is its door: closed by day, Élodie walks in at night
-  assert.equal(zoneAt(STORY_CONTENT, 'young-adult/tram-5', 13.9, 6.0), 'young-adult/shelter');
-  assert.equal(isWalkable(sceneAt(STORY_CONTENT, c.facts, 'young-adult/tram-5'), 13.9, 6.0), true);
-  assert.equal(act(c, { t: 'enter', id: 'elodie', node: 'young-adult/shelter' }), c, 'closed by day');
+  // the Shelter's painted entrance: closed by day, Élodie walks in at night, arriving at the foot of its stair
+  const zones = (/** @type {Campaign} */ x, /** @type {string} */ node) => zonesAt(x.facts, STORY_CONTENT, node).map((z) => z.id);
+  assert.deepEqual(zones(c, 'young-adult/tram-5'), [], 'closed by day');
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.shelter.open', on: true } });
   assert.ok(c.facts.unlocked.includes('young-adult/shelter'));
-  c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/shelter' });
+  const entrance = zonesAt(c.facts, STORY_CONTENT, 'young-adult/tram-5').find((z) => z.id === 'shelter-entrance');
+  assert.ok(entrance && entrance.arrive && isWalkable(sceneAt(STORY_CONTENT, c.facts, 'young-adult/tram-5'), entrance.x, entrance.y));
+  c = act(c, { t: 'zone', id: 'elodie', zone: 'shelter-entrance' });
   assert.equal(roomAt(STORY_CONTENT, c.at.node).id, 'young-adult/shelter');
-  c = act(c, { t: 'back', id: 'elodie' });
-  assert.equal(c.at.node, 'young-adult/tram-5', 'from the Shelter, back to the tram stop');
+  const exit = zonesAt(c.facts, STORY_CONTENT, 'young-adult/shelter').find((z) => z.id === 'shelter-exit');
+  assert.ok(exit && entrance.arrive && Math.hypot(entrance.arrive.x - exit.x, entrance.arrive.y - exit.y) > exit.radius, 'she arrives by the stair, not on it');
+  assert.equal(act(c, { t: 'back', id: 'elodie' }), c, 'no Back from the Shelter');
+  c = act(c, { t: 'zone', id: 'elodie', zone: 'shelter-exit' });
+  assert.equal(c.at.node, 'young-adult/tram-5', 'up the stair, back to the tram stop');
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'goto', node: 'young-adult' } });
   c = act(c, { t: 'back', id: 'elodie' });
   assert.equal(c.at.node, 'hub');
@@ -220,7 +226,7 @@ test('after the tram quiz Élodie chooses a destination: her flat, then Marokkan
   assert.deepEqual(keys(c), ['flat']);
   assert.equal(act(c, { t: 'choose', id: 'elodie', option: 'shelter' }), c, 'no Shelter by tram');
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'goto', node: 'young-adult/tram-5' } });
-  c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/shelter', now: 6000 });
+  c = act(c, { t: 'zone', id: 'elodie', zone: 'shelter-entrance', now: 6000 });
   assert.equal(c.at.node, 'young-adult/shelter');
   c = act(c, { t: 'zone', id: 'elodie', zone: 'shelter-exit', now: 6500 });
   assert.equal(c.at.node, 'young-adult/tram-5');

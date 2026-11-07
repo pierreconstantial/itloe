@@ -208,7 +208,8 @@ unchanged: `{ always: true }`, `{ flag }`, `{ done: node }`, `{ unlocked: node }
 - **An NPC who leaves.** `npcs` for the reaction, `after` to wait, a state with `hide` (Toni).
 - **Walking out of a room.** A zone at its painted door, its transition a `goto` to the place outside, with `arrive`
   where the chooser then stands (clear of any door there): the flat's front door and the Shelter's stair lead back
-  to Tram 5 (`exits`). The way in is a door on the node (the Shelter's entrance) or a `goto`.
+  to Tram 5 (`exits`), and the node has `back: false`. A way in can be a zone too, with `arrive` where the chooser
+  stands inside (the Shelter's entrance, at night, arriving at the foot of its stair, clear of its exit).
 - **Travel after a minigame.** The tram: `offer` its quiz tableau; on `entered:<tableau>` go to a state with a
   `choice` at that tableau, one option per destination (`if` for those not open yet), each transition a `goto`.
   The destinations have no doors; their `back` walks to the stop. Listen to `entered:<the stop>` too, so a ride
