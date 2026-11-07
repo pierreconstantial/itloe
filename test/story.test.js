@@ -426,6 +426,7 @@ test('a saved opening podium with nobody left resumes there; Pierre, rejoining, 
 test('Young Adult\'s people answer: the passers-by, the dog, the Shelter\'s crowd, Pierre\'s beer, the friends and their Shikaboom', () => {
   const TRAM_5 = 'young-adult/tram-5', SHELTER = 'young-adult/shelter', MAROK = 'young-adult/appart-pierre';
   let c = act(afterOpening(), { t: 'gm', id: 'pierre', op: { op: 'goto', node: TRAM_5 } });
+  assert.ok(!sceneAt(STORY_CONTENT, c.facts, TRAM_5).props.some((p) => p.id === 'tram-5-rat'), 'no rat by day');
   /** Each figure answers from a walkable spot in front of it. @param {string} node @param {[string, string, { x: number, y: number }][]} list */
   const answers = (node, list) => {
     const scene = sceneAt(STORY_CONTENT, c.facts, node);
@@ -441,6 +442,11 @@ test('Young Adult\'s people answer: the passers-by, the dog, the Shelter\'s crow
     ['tram-5-lazy-guy', 'Heute nicht.', { x: 1.4, y: 5.6 }], ['tram-5-dog', 'Wuff!', { x: 10.1, y: 7 }],
   ]);
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.shelter.open', on: true } });
+  // at night the lady and the kid are gone; the lazy man stays, drunk
+  const night = sceneAt(STORY_CONTENT, c.facts, TRAM_5).props.map((p) => p.id);
+  assert.ok(!night.includes('tram-5-old-woman') && !night.includes('tram-5-ice-kid') && night.includes('tram-5-lazy-guy'));
+  assert.ok(night.includes('tram-5-rat'), 'a rat lurks at night');
+  answers(TRAM_5, [['tram-5-lazy-guy', 'Hicks… I hob heit z’vü g’soffn.\nI bleib do. I geh nirgends mehr hin.', { x: 1.4, y: 5.6 }]]);
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'goto', node: SHELTER } });
   answers(SHELTER, [
     ['shelter-bar', 'Barman: Ein Bier? Kommt sofort!', { x: 11.7, y: 5.7 }], ['shelter-hyped-punk', 'Oi! Best gig ever!', { x: 4.3, y: 4.5 }],

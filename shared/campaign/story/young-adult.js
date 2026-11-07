@@ -36,6 +36,8 @@ const TRAM_5_ROOM = room(TRAM_5, { x: 0.5, y: 5.6, w: 15, h: 3.2 }, [
   prop('tram-5-old-woman', { x: 2.45, y: 4.85, w: 0.8, h: 1.2 }, { layer: 'back' }),
   prop('tram-5-ice-kid', { x: 4.25, y: 5.05, w: 0.7, h: 1.0 }, { layer: 'back' }),
   prop('tram-5-lazy-guy', { x: 0.85, y: 5.55, w: 1.05, h: 1.15 }, { layer: 'back' }),
+  // at night only (the `tram-people` machine): a rat lurking by the cigarette machine
+  prop('tram-5-rat', { x: 12.75, y: 7.65, w: 0.6, h: 0.35 }, { layer: 'back' }),
 ]);
 /** The other Young Adult backgrounds use their visible furniture as movement obstacles. */
 const SHELTER_ROOM = room('young-adult/shelter', { x: 0.5, y: 4.4, w: 15, h: 4.4 }, [
@@ -468,15 +470,24 @@ export const YOUNG_ADULT = {
         done: { hide: INTRODUCED_FRIENDS },
       },
     },
-    // Tram 5's passers-by answer whoever talks to them.
+    // Tram 5's passers-by answer whoever talks to them. At night (the Shelter open) the lady and the kid are gone;
+    // the lazy man is still there, and has had a few too many, and a rat lurks by the cigarette machine.
     'tram-people': {
-      initial: 'there',
+      initial: 'day',
       states: {
-        there: {
+        day: {
           objects: {
             'tram-5-old-woman': { actions: [{ key: 'talk', text: '💬 Talk to the lady', say: 'Na, Mädl, der Fünfer kommt eh gleich.\nOba derf ma wirklich mit solchane Schuach aussigeh?', speaker: 'object', by: 'anyone' }] },
             'tram-5-ice-kid': { actions: [{ key: 'talk', text: '💬 Talk to the kid', say: 'Mmh… Eis!', speaker: 'object', by: 'anyone' }] },
             'tram-5-lazy-guy': { actions: [{ key: 'talk', text: '💬 Talk to the man', say: 'Heute nicht.', speaker: 'object', by: 'anyone' }] },
+          },
+          hide: ['tram-5-rat'],
+          when: [{ if: { flag: 'young-adult.shelter.open' }, to: 'night' }],
+        },
+        night: {
+          hide: ['tram-5-old-woman', 'tram-5-ice-kid'],
+          objects: {
+            'tram-5-lazy-guy': { actions: [{ key: 'talk', text: '💬 Talk to the man', say: 'Hicks… I hob heit z’vü g’soffn.\nI bleib do. I geh nirgends mehr hin.', speaker: 'object', by: 'anyone' }] },
           },
         },
       },

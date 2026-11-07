@@ -224,8 +224,22 @@ const outline = '#1f1b2a';
 const skin = '#dba37b';
 const shared = { o: outline, s: skin, e: outline, p: '#3a3549', b: '#26222b', a: '#c69453', w: '#f8deaa' };
 
-/** Ambient art and its quiet two-step movement. Every grid is 16 × 16. */
+/** A small rat seen from the side, facing right (its grid is 16 wide and only a few rows high). */
+const RAT = [
+  '................',
+  '...........oo...',
+  '.......ooooggo..',
+  'pp...oogggggwoo.',
+  '..pooggggggggggr',
+  '.....oo.o..o.o..',
+].map((row) => row.padEnd(16, '.'));
+/** The same rat facing left. */
+const RAT_LEFT = RAT.map((row) => [...row].reverse().join(''));
+
+/** Ambient art and its quiet two-step movement. Every grid is 16 wide and 16 high, but the rat's (low on the
+ *  ground); `scurry` runs to and fro, facing its way (`altGrid` facing left). */
 export const AMBIENT_NPCS = Object.freeze({
+  'tram-5-rat': { grid: RAT, altGrid: RAT_LEFT, pal: { o: '#1d1a1f', g: '#6d6670', w: '#e8e0d0', p: '#c98b93', r: '#d98f9a' }, motion: 'scurry', period: 5200, phase: 0 },
   'tram-5-old-woman': { grid: OLD_WOMAN, pal: { ...shared, h: '#d5d0c4', i: '#eee7d8', c: '#4d7063', d: '#33524b' }, motion: 'nod', period: 2700, phase: 0 },
   'tram-5-ice-kid': { grid: ICE_KID, pal: { ...shared, r: '#c5494d', c: '#4a85a4', i: '#79b5c7' }, motion: 'bounce', period: 1500, phase: 1 },
   'tram-5-lazy-guy': { grid: LAZY_GUY, pal: { ...shared, h: '#393845', c: '#8b6854', i: '#b68d65', d: '#644d47' }, motion: 'nod', period: 4100, phase: 2 },

@@ -510,14 +510,18 @@ export function createPartyRoom(bg, fg, avatars) {
   /** @param {{grid: string[], altGrid?: string[], pal: Record<string, string>, motion: string, period: number, phase: number}} npc */
   const ambientProp = (npc) =>
     /** @type {import('./scene-render.js').DrawProp} */ ((g, prop, v) => {
-      const beat = Math.sin(frameNow * Math.PI * 2 / npc.period + npc.phase);
-      const dx = npc.motion === 'dance' || npc.motion === 'sway' ? Math.round(beat) : 0;
+      const angle = frameNow * Math.PI * 2 / npc.period + npc.phase;
+      const beat = Math.sin(angle);
+      // a scurrying animal runs about 24 pixels each way and faces where it runs
+      const scurry = npc.motion === 'scurry';
+      const dx = scurry ? Math.round(beat * 24) : npc.motion === 'dance' || npc.motion === 'sway' ? Math.round(beat) : 0;
       const dy = npc.motion === 'dance' || npc.motion === 'bounce' ? (beat > 0 ? -1 : 0)
         : npc.motion === 'nod' || npc.motion === 'sip' ? (beat > 0.85 ? 1 : 0) : 0;
+      const alt = scurry ? Math.cos(angle) < 0 : beat > 0;
       const cx = geo.ox + (prop.box.x + prop.box.w / 2) * v.unit;
       g.save();
       g.translate(dx * v.scale, dy * v.scale);
-      paintGrid(g, npc.altGrid && beat > 0 ? npc.altGrid : npc.grid,
+      paintGrid(g, npc.altGrid && alt ? npc.altGrid : npc.grid,
         npc.pal, cx, snapY(v, prop.anchorY), v.scale);
       g.restore();
     });
