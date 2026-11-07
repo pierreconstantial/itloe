@@ -1,7 +1,7 @@
 // Contract C amendment (M3, 2026-11-04) — the single source of movement geometry:
 // the server clamps with it, the phone integrates with it, the TV spawns/interpolates with it.
 
-import { CHARACTERS } from './characters.js';
+import { CHARACTERS, ROSTER_SIZE } from './characters.js';
 
 /**
  * @typedef {import('./characters.js').CharacterId} CharacterId
@@ -22,12 +22,12 @@ export const WALK_SPEED = 4;
 const SPAWN_Y = 7.6;
 
 /**
- * Deterministic spawn point on the row, facing down. Six slots span the room without overlapping.
+ * Deterministic spawn point on the row, facing down. The roster spans the room without overlapping.
  * @param {CharacterId} characterId
  * @returns {Spawn}
  */
 export function spawnPoint(characterId) {
-  const x = 2 + 2.4 * (CHARACTERS[characterId].color - 1);
+  const x = 2 + (WORLD.w - 4) * (CHARACTERS[characterId].color - 1) / (ROSTER_SIZE - 1);
   return { x, y: SPAWN_Y, dir: 'down' };
 }
 

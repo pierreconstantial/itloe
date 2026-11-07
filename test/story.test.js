@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { newCampaign, loadCampaign, reduceCampaign, validateContent, holding, gameMasterId, roomAt } from '../shared/campaign/index.js';
 import { INTRO_KEY, MEMORY_WORLDS, OPENING_PLAYERS, STORY_CONTENT } from '../shared/campaign/story.js';
+import { CHARACTERS } from '../shared/characters.js';
 
 /** @param {import('../shared/campaign/types.js').Campaign} campaign
  * @param {import('../shared/campaign/types.js').CampaignAction} action */
@@ -43,6 +44,24 @@ test('Nico joins as a wisp, stays out of rounds, and incarnates when introduced'
   assert.deepEqual(c.party.players['nico-player'].statuses, []);
   c = act(c, { t: 'status', id: 'nico-player', status: 'wisp', on: true });
   assert.deepEqual(c.party.players['nico-player'].statuses, ['wisp']);
+});
+
+test('Mathieu can join as the seventh character, resume his saved identity and incarnate when introduced', () => {
+  let c = newCampaign(STORY_CONTENT, 42);
+  for (const character of Object.keys(CHARACTERS)) {
+    c = act(c, { t: 'join', id: character, character: /** @type {import('../shared/characters.js').CharacterId} */ (character) });
+  }
+  assert.equal(c.party.order.length, 7);
+  assert.deepEqual(c.party.players.mathieu.statuses, ['wisp']);
+  assert.equal(act(c, { t: 'join', id: 'another-mathieu', character: 'mathieu' }), c, 'one holder per character');
+  const resumed = loadCampaign(JSON.parse(JSON.stringify(c)), STORY_CONTENT);
+  assert.ok(resumed);
+  c = resumed;
+  assert.equal(c.party.players.mathieu.character, 'mathieu');
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'person.mathieu.unlocked', on: true } });
+  assert.deepEqual(c.party.players.mathieu.statuses, ['wisp', 'incarnating']);
+  c = act(c, { t: 'incarnate', id: 'mathieu' });
+  assert.deepEqual(c.party.players.mathieu.statuses, []);
 });
 
 test('birthday content begins with only the block game, no key or memory-world access', () => {

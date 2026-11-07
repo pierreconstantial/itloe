@@ -184,10 +184,15 @@ Sol, Anna, Nico, and Konz, with unique colour slots 1–6. An incarnated player 
 the feet, enter doors, or affect saved state. After ten seconds without movement, speech,
 emotes, or a jump, the TV plays that character's idle scene until the next activity.
 
+Amendment (2026-11-07, agreed with Pierre): Mathieu is phone-selectable, with colour slot 7 and the
+same story wisp/incarnation rules as Nico (`person.mathieu.unlocked`). The live roster has seven
+characters. Room spawns span x = 2 through x = 14 evenly across the roster at y = 7.6. Minigame
+lobby layouts are unchanged at Pierre's request.
+
 ```js
 // shared/characters.js (P1)
-// CharacterId = 'pierre' | 'elodie' | 'sol' | 'anna' | 'nico' | 'konz'
-// Character = { id, name, color }   // color 1..6 — the character IS the colour slot
+// CharacterId = 'pierre' | 'elodie' | 'sol' | 'anna' | 'nico' | 'konz' | 'mathieu'
+// Character = { id, name, color }   // color 1..7 — the character IS the colour slot
 export const CHARACTERS = {};        // Record<CharacterId, Character>, insertion order = display order
 export function freeCharacters(state) {}  // → CharacterId[] not picked by any non-left player
 
@@ -200,7 +205,7 @@ export function freeCharacters(state) {}  // → CharacterId[] not picked by any
 export const WORLD = { w: 16, h: 9 };        // world units, 16:9
 export const WALK_SPEED = 4;                 // units/s
 export function spawnPoint(characterId) {}   // → { x, y, dir } deterministic per character:
-                                             //    x = 2 + 2.4·(color−1), y = 7.6, dir 'down'
+                                             //    x = 2 + 12·(color−1)/(ROSTER_SIZE−1), y = 7.6, dir 'down'
 
 // shared/sprites.js (P4 — ownership exception inside shared/)
 // 16×16 indexed-palette pixel grids, per character: 4 directions × 3 walk frames + 1 idle

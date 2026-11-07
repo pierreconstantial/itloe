@@ -29,3 +29,7 @@
 - When a visual interaction is easy for Pierre to assess and browser testing would require extra setup, ask him to test it directly. Start the game on a free port with a scratch `BLOKO_VAR` first, and give him the screen, phone, or simulator URL he needs. Do not change test infrastructure solely for that visual check.
 - Review the diff and remove unrelated changes or additions unnecessary for the requested outcome. Keep generated saves, screenshots, and dependencies out of commits.
 - Report the resulting behavior, checks run, and any checks that could not run. If work elsewhere already breaks a check, report it without expanding the task into unrelated fixes.
+
+## Local command authorization
+
+- Pierre has authorized commands beginning with `CHROME=` for this project. Treat them as already approved; retain the scratch-save and port restrictions above.

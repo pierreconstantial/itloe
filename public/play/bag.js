@@ -4,6 +4,7 @@
 import { $ } from './dom.js';
 import { content } from './campaign-view.js';
 import { holding } from '../../shared/campaign/index.js';
+import { itemArt } from '../../shared/campaign/item-art.js';
 
 /** @typedef {import('../../shared/campaign/types.js').Item} Item */
 /** @typedef {import('../../shared/campaign/types.js').Facts} Facts */
@@ -42,7 +43,10 @@ export function createBag() {
       ul.replaceChildren(...list.map(({ item, count }) => {
         const li = document.createElement('li');
         li.dataset.item = item.id;
-        const icon = Object.assign(document.createElement('span'), { className: 'bag-icon', textContent: item.icon });
+        const icon = Object.assign(document.createElement('span'), { className: 'bag-icon' });
+        const art = itemArt(item.id);
+        if (art) icon.append(Object.assign(document.createElement('img'), { src: art, alt: '', width: 32, height: 32 }));
+        else icon.textContent = item.icon;
         const text = document.createElement('div');
         text.className = 'bag-text';
         const name = Object.assign(document.createElement('strong'), { textContent: item.name });

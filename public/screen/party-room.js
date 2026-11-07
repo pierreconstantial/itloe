@@ -16,6 +16,8 @@ import { PARTY_ROOM, APARTMENT_ROOM } from '../../shared/scene.js';
 import { WORLD } from '../../shared/world.js';
 import { INTRO_KEY, INTRO_KEY_SPOT, PORTAL } from '../../shared/campaign/story.js';
 import { OBJECT_ACTIONS, TRAM_5_MAN_NAME } from '../../shared/interactions.js';
+import { AMBIENT_NPCS } from './ambient-npcs.js';
+import { drawSprite, SPRITE_SIZE } from '../../shared/sprites.js';
 import { createLoop, py as snapY } from './scene-render.js';
 import { worldView } from './avatar-layer.js';
 
@@ -193,7 +195,26 @@ const TRAM_AUTOMAT = [
 export const PROP_PIXELS = { sofa: { grid: SOFA, pal: SOFA_PAL }, table: { grid: TABLE, pal: TABLE_PAL },
   plant: { grid: PLANT, pal: PLANT_PAL }, 'tram-5-weird-man': { grid: TRAM_MAN, pal: TRAM_MAN_PAL },
   'tram-5-dog': { grid: TRAM_DOG, pal: TRAM_DOG_PAL },
-  'tram-5-cigarette-automat': { grid: TRAM_AUTOMAT, pal: TRAM_AUTOMAT_PAL } };
+  'tram-5-cigarette-automat': { grid: TRAM_AUTOMAT, pal: TRAM_AUTOMAT_PAL },
+  ...Object.fromEntries(Object.entries(AMBIENT_NPCS).map(([id, { grid, pal }]) => [id, { grid, pal }])) };
+
+const TRAM_CROW_PAL = { o: '#1c2031', h: '#343546' };
+const TRAM_CROW_UP = [
+  'o..........o',
+  '.oo......oo.',
+  '...oo..oo...',
+  '....oooo....',
+  '.....oho....',
+  '....oo.oo...',
+];
+const TRAM_CROW_DOWN = [
+  '............',
+  '....oooo....',
+  '...oooooo...',
+  '.oooohooooo.',
+  'oo..oooo..oo',
+  '.....oo.....',
+];
 
 /** @param {number} v @param {number} p */
 const snap = (v, p) => Math.round(v / p) * p;
@@ -267,7 +288,7 @@ export function createPartyRoom(bg, fg, avatars) {
     if (room.id === 'young-adult/tram-5') return base + (shelterOpen ? 'tram-5-night-shelter-open-v6.png' : 'tram-5-shelter-closed-v5.png');
     if (room.id === 'young-adult/shelter') return base + 'shelter-interior-playable-v3.png';
     if (room.id === 'young-adult/appart-elo-1') return base + (eloLampOff ? 'appart-elo-1-lamp-off-v2.png' : 'appart-elo-1-basement-v1.png');
-    if (room.id === 'young-adult/appart-pierre') return base + 'appart-pierre-table-center-v4.png';
+    if (room.id === 'young-adult/appart-pierre') return base + 'marokkanergasse-eureka-v1.png';
     return null;
   }
 
@@ -557,6 +578,21 @@ export function createPartyRoom(bg, fg, avatars) {
       }
     });
 
+  /** @param {{grid: string[], altGrid?: string[], pal: Record<string, string>, motion: string, period: number, phase: number}} npc */
+  const ambientProp = (npc) =>
+    /** @type {import('./scene-render.js').DrawProp} */ ((g, prop, v) => {
+      const beat = Math.sin(frameNow * Math.PI * 2 / npc.period + npc.phase);
+      const dx = npc.motion === 'dance' || npc.motion === 'sway' ? Math.round(beat) : 0;
+      const dy = npc.motion === 'dance' || npc.motion === 'bounce' ? (beat > 0 ? -1 : 0)
+        : npc.motion === 'nod' || npc.motion === 'sip' ? (beat > 0.85 ? 1 : 0) : 0;
+      const cx = geo.ox + (prop.box.x + prop.box.w / 2) * v.unit;
+      g.save();
+      g.translate(dx * v.scale, dy * v.scale);
+      paintGrid(g, npc.altGrid && beat > 0 ? npc.altGrid : npc.grid,
+        npc.pal, cx, snapY(v, prop.anchorY), v.scale);
+      g.restore();
+    });
+
   /** prop.kind → art. The only place this room's furniture is named. @type {import('./scene-render.js').PropArt} */
   const PROP_ART = {
     sofa: pixelProp(SOFA, SOFA_PAL),
@@ -565,6 +601,12 @@ export function createPartyRoom(bg, fg, avatars) {
     'tram-5-weird-man': pixelProp(TRAM_MAN, TRAM_MAN_PAL),
     'tram-5-dog': pixelProp(TRAM_DOG, TRAM_DOG_PAL),
     'tram-5-cigarette-automat': pixelProp(TRAM_AUTOMAT, TRAM_AUTOMAT_PAL),
+    'marokkanergasse-johanna': (g, prop, v) => {
+      const size = SPRITE_SIZE * v.scale;
+      const cx = geo.ox + (prop.box.x + prop.box.w / 2) * v.unit;
+      drawSprite(g, 'johanna', 'down', 0, cx - size / 2, snapY(v, prop.anchorY) - size, v.scale);
+    },
+    ...Object.fromEntries(Object.entries(AMBIENT_NPCS).map(([id, npc]) => [id, ambientProp(npc)])),
   };
 
   // ---- players, doors & object actions ----
@@ -612,7 +654,7 @@ export function createPartyRoom(bg, fg, avatars) {
     // The apartment's sofa and plants are painted into its background; the scene props remain
     // for collision and object interactions without drawing duplicate pixel furniture over them.
     avatars.draw(g, geo, alpha, now, room, room === APARTMENT_ROOM ? {} : PROP_ART);
-    if (room.id === 'young-adult/tram-5') drawTramPeople(g, now);
+    if (room.id === 'young-adult/tram-5') { drawTramPeople(g, now); drawTramCrow(g, now); }
     if (room === APARTMENT_ROOM) {
       drawCats(g, now);
       drawHubPeople(g, now);
@@ -643,6 +685,18 @@ export function createPartyRoom(bg, fg, avatars) {
     };
     if (Math.floor(now / 3600) % 2 === 0) bubble(10.1, 6.95, ['Wuff!']);
     if (tramManSpeechUntil > now) bubble(11.15, 6.35, [TRAM_5_MAN_NAME, 'Host a Tschick?', 'I brauch dringend ane!']);
+  }
+
+  /** A tiny crow crosses the high sky for four seconds, once every 42 seconds. */
+  /** @param {CanvasRenderingContext2D} g @param {number} now */
+  function drawTramCrow(g, now) {
+    const cycle = now % 42_000;
+    if (cycle < 30_000 || cycle >= 34_000) return;
+    const flight = (cycle - 30_000) / 4_000;
+    const x = 16.5 - flight * 17.5;
+    const y = 1.7 + Math.sin(flight * Math.PI * 5) * 0.13;
+    paintGrid(g, Math.floor(cycle / 170) % 2 ? TRAM_CROW_UP : TRAM_CROW_DOWN,
+      TRAM_CROW_PAL, geo.ox + x * geo.unit, geo.oy + y * geo.unit, geo.scale);
   }
 
   /** Friends without a player avatar gather here after their reunion has been earned. */

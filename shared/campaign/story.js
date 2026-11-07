@@ -16,6 +16,7 @@ export const REUNIONS = Object.freeze([
   { id: 'sol', name: 'Sol', flag: 'person.sol.unlocked', game: 'blocks' },
   { id: 'anna', name: 'Anna', flag: 'person.anna.unlocked', game: 'blocks' },
   { id: 'nico', name: 'Nico', flag: 'person.nico.unlocked', game: 'word-clue' },
+  { id: 'mathieu', name: 'Mathieu', flag: 'person.mathieu.unlocked', game: 'word-clue' },
   { id: 'father', name: 'Father', flag: 'person.father.unlocked', game: 'dice' },
   { id: 'mother', name: 'Mother', flag: 'person.mother.unlocked', game: 'yahtzee' },
 ]);
@@ -39,6 +40,10 @@ export const STORY_CONTENT = {
     [INTRO_KEY, { id: INTRO_KEY, name: 'First key of memory', icon: '🗝️', description: 'Left behind by the mysterious visitor.' }],
     ['shelter-ticket', { id: 'shelter-ticket', name: 'The Shelter concert ticket', icon: '🎟️',
       description: 'A ticket to a night at The Shelter.' }],
+    ['young-adult-beer', { id: 'young-adult-beer', name: 'Beer', icon: '🍺', description: 'A bottle Pierre brought to Élodie.' }],
+    ['young-adult-cigarettes', { id: 'young-adult-cigarettes', name: 'Cigarettes', icon: '🚬', description: 'A pack of cigarettes for Tschick-Toni.' }],
+    ['young-adult-crowbar', { id: 'young-adult-crowbar', name: 'Crowbar', icon: '🛠️', description: 'Tschick-Toni left it behind.' }],
+    ['young-adult-adult-key', { id: 'young-adult-adult-key', name: 'Adult Age key', icon: '🗝️', description: 'The key found after the Pyramide game.' }],
     ...MEMORY_WORLDS.map((world, i) => {
       const id = `memory-key-${i + 1}`;
       return [id, { id, name: `Memory key ${i + 1}`, icon: '🗝️', description: `A key from ${world.title.toLowerCase()}.` }];
@@ -78,7 +83,7 @@ export const STORY_CONTENT = {
       room: 'young-adult/appart-elo-1', unlock: { unlocked: 'young-adult/tram-5' },
     },
     'young-adult/appart-pierre': {
-      id: 'young-adult/appart-pierre', kind: 'world', parent: 'young-adult/tram-5', title: 'Appart Pierre',
+      id: 'young-adult/appart-pierre', kind: 'world', parent: 'young-adult/tram-5', title: 'Marokkanergasse',
       room: 'young-adult/appart-pierre', unlock: { all: [{ unlocked: 'young-adult/tram-5' }, { flag: 'young-adult.appart-pierre.open' }] },
     },
     ...Object.fromEntries(MEMORY_WORLDS.map((world, i) => {

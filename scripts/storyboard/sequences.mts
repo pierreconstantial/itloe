@@ -268,11 +268,11 @@ const youngAdult: Sequence = {
       [art('tram-5-night-shelter-open-v6.png'), () => b.mockPhone('elodie', tramMenu(['The Shelter', 'Marokkanergasse']))]);
 
     await b.frame('Marokkanergasse · young-adult/appart-pierre. There is no normal exit. Nico and Mathieu are NPCs who may be controlled by connected players; Johanna and the Shikababe gang are here too. Anyone Élodie approaches invites her to Pyramide.',
-      [art('appart-pierre-table-center-v4.png'), elo('<h2>Marokkanergasse</h2><div class="card">Nico · Mathieu · Johanna · Shikababe</div><p>“Shikababy Shikaboom! Let\'s play a Pyramide game!”</p><button class="primary">Yes</button><button>Dismiss</button>')]);
+      [art('marokkanergasse-eureka-v1.png'), elo('<h2>Marokkanergasse</h2><div class="card">Nico · Mathieu · Johanna · Shikababe</div><p>“Shikababy Shikaboom! Let\'s play a Pyramide game!”</p><button class="primary">Yes</button><button>Dismiss</button>')]);
     await b.frame('“Yes” starts the multiplayer Pyramide word game using the shared game engine. “Dismiss” closes the invitation; Élodie can speak to someone again.',
-      [art('appart-pierre-table-center-v4.png'), elo('<h2>Pyramide</h2><button class="primary">Yes · start game</button><button>Dismiss</button>')]);
+      [art('marokkanergasse-eureka-v1.png'), elo('<h2>Pyramide</h2><button class="primary">Yes · start game</button><button>Dismiss</button>')]);
     await b.frame('After Pyramide, a special key appears on the floor. Élodie picks it up to unlock the Adult Age door in the hub. A portal then appears in the apartment; she enters it to return to the hub and complete Young Adult.',
-      [art('appart-pierre-table-center-v4.png'), elo('<h2>Young Adult complete</h2><button class="primary">Pick up Adult Age key</button><button>Enter portal to the hub</button>')]);
+      [art('marokkanergasse-eureka-v1.png'), elo('<h2>Young Adult complete</h2><button class="primary">Pick up Adult Age key</button><button>Enter portal to the hub</button>')]);
   },
 };
 

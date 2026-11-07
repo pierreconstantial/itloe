@@ -101,6 +101,7 @@
 .bag-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; text-align: left; }
 .bag-items li { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--bg); }
 .bag-icon { font-size: 32px; line-height: 1; }
+.bag-icon img { display: block; width: 32px; height: 32px; image-rendering: pixelated; }
 .bag-text p { margin: 2px 0 0; }
 .bag-count { color: var(--accent); }
 

@@ -264,9 +264,18 @@ export const TRAM_5_ROOM = room('young-adult/tram-5', { x: 0.5, y: 5.6, w: 15, h
     { solid: { x: 10.85, y: 7.3, w: 0.6, h: 0.35 } }),
   prop('tram-5-cigarette-automat', { x: 11.85, y: 5.7, w: 1.05, h: 1.8 },
     { solid: { x: 11.95, y: 7.15, w: 0.85, h: 0.35 } }),
+  prop('tram-5-old-woman', { x: 2.45, y: 4.85, w: 0.8, h: 1.2 }, { layer: 'back' }),
+  prop('tram-5-ice-kid', { x: 4.25, y: 5.05, w: 0.7, h: 1.0 }, { layer: 'back' }),
+  prop('tram-5-lazy-guy', { x: 0.85, y: 5.55, w: 1.05, h: 1.15 }, { layer: 'back' }),
 ]);
 /** Other Young Adult backgrounds use their visible furniture as movement obstacles. */
-export const SHELTER_ROOM = room('young-adult/shelter', { x: 0.5, y: 4.4, w: 15, h: 4.4 }, [], [
+export const SHELTER_ROOM = room('young-adult/shelter', { x: 0.5, y: 4.4, w: 15, h: 4.4 }, [
+  prop('shelter-dancing-girl', { x: 1.55, y: 4.35, w: 0.8, h: 1.05 }, { layer: 'back' }),
+  prop('shelter-dancing-man', { x: 2.65, y: 4.35, w: 0.8, h: 1.05 }, { layer: 'back' }),
+  prop('shelter-barman', { x: 12.9, y: 3.25, w: 0.8, h: 1.05 }, { layer: 'back' }),
+  prop('shelter-beer-guy', { x: 13.7, y: 5.1, w: 0.8, h: 1.15 }, { layer: 'back' }),
+  prop('shelter-hyped-punk', { x: 3.4, y: 5.25, w: 0.9, h: 1.1 }, { layer: 'back' }),
+], [
   { x: 7.1, y: 4.5, w: 2.5, h: 1.2 }, // foosball
   { x: 10.5, y: 4.1, w: 4.8, h: 1.2 }, // bar and pinball machine
   { x: 3.1, y: 6, w: 1.2, h: 0.65 },
@@ -276,11 +285,16 @@ export const APPART_ELO_1_ROOM = room('young-adult/appart-elo-1', { x: 0.5, y: 5
   { x: 5.25, y: 5.15, w: 4.6, h: 1.05 }, // mattress
   { x: 9.9, y: 5.1, w: 1.55, h: 0.9 }, // television
 ]);
-export const APPART_PIERRE_ROOM = room('young-adult/appart-pierre', { x: 0.5, y: 5.05, w: 15, h: 3.75 }, [], [
-  { x: 1.8, y: 5.05, w: 2.1, h: 1.2 }, // sofa
-  { x: 4.2, y: 5.55, w: 2.9, h: 0.55 }, // coffee table; the floor in front stays clear
-  { x: 7.65, y: 5.3, w: 1.2, h: 1.05 }, // armchair
-  { x: 13.9, y: 4.9, w: 1.4, h: 0.75 }, // tiled stove
+export const APPART_PIERRE_ROOM = room('young-adult/appart-pierre', { x: 0.5, y: 5.45, w: 15, h: 3.35 }, [
+  prop('marokkanergasse-johanna', { x: 13.25, y: 6.0, w: 0.9, h: 1.2 }),
+], [
+  { x: 1.3, y: 5.45, w: 0.8, h: 0.3 }, // bookshelf base
+  { x: 2.0, y: 5.8, w: 1.95, h: 0.6 }, // navy armchair
+  { x: 4.0, y: 5.3, w: 0.55, h: 0.45 }, // plant pot
+  { x: 4.55, y: 5.55, w: 0.65, h: 0.25 }, // floor lamp base
+  { x: 5.2, y: 5.15, w: 4.1, h: 0.6 }, // patterned brown sofa
+  { x: 5.65, y: 5.55, w: 3.65, h: 0.75 }, // coffee table; the foreground stays open
+  { x: 9.3, y: 5.35, w: 3.6, h: 0.95 }, // cream-covered sofa
 ]);
 
 /** Every room by its id, which a content node names as its `room` (roomAt in shared/campaign/content.js). */

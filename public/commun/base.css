@@ -6,13 +6,14 @@
   --fg-dim: #9aa4ad;
   --cell: #272e36;       /* empty board cell */
   --accent: #ffd166;
-  /* player colours (colour-blind-safe-ish) — color index 1..6 */
+  /* player colours (colour-blind-safe-ish) — color index 1..7 */
   --p1: #e4572e;
   --p2: #3b8ea5;
   --p3: #f3a712;
   --p4: #9b5de5;
   --p5: #5275ed;
   --p6: #51b975;
+  --p7: #e47b99;
   /* Pyramide's teams: the same colour on the TV and the phones */
   --team1: var(--p1);
   --team2: var(--p2);

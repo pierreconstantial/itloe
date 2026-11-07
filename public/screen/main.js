@@ -21,6 +21,7 @@ import { screenOf } from './minigames.js';
 import { applyJoinQr, joinQrState } from './join-qr.js';
 import { CHARACTERS } from '../../shared/characters.js';
 import { INTRO_KEY, REUNIONS } from '../../shared/campaign/story.js';
+import { itemArt } from '../../shared/campaign/item-art.js';
 
 /** @typedef {import('../../shared/minigames.js').MinigameView} MinigameView */
 
@@ -239,7 +240,9 @@ function showMap(c) {
       const el = h('span', 'map-bag', [
         h('span', 'map-bag-name', [b.name]),
         ...b.items.map((it) => {
-          const i = h('span', 'map-bag-item', [it.icon, ...(it.count > 1 ? [h('sub', '', [`×${it.count}`])] : [])]);
+          const art = itemArt(it.id);
+          const icon = art ? Object.assign(document.createElement('img'), { src: art, alt: '', width: 32, height: 32 }) : it.icon;
+          const i = h('span', 'map-bag-item', [icon, ...(it.count > 1 ? [h('sub', '', [`×${it.count}`])] : [])]);
           i.title = it.name;
           i.dataset.item = it.id;
           return i;

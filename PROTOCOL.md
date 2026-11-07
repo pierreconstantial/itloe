@@ -6,6 +6,10 @@ Static serving: `public/` at `/` (`/` redirects to `/screen/`), and **`shared/` 
 
 Pages: `/screen/` (TV), `/play/` (phones), `/sim/` (dev harness), `/admin/` (admin page).
 
+The selectable roster is Pierre, Élodie, Sol, Anna, Nico, Konz and Mathieu (colour slots 1–7).
+Mathieu uses the existing join/reclaim messages and story wisp/incarnation behaviour, with
+`person.mathieu.unlocked` as his introduction flag.
+
 ## Client → server
 
 ```jsonc

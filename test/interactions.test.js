@@ -62,5 +62,5 @@ test('Élodie can talk to the man and request the tram quiz; the dog and automat
   assert.equal(nearbyObject(TRAM_5_ROOM, { x: 7.5, y: 6.8 }, elo)?.id, 'tram-5-tram');
   assert.equal(objectAction('tram-5-tram', elo)?.feedback, 'A ticket for a quizz!');
   assert.equal(objectAction('tram-5-tram', pierre), null);
-  assert.equal(TRAM_5_ROOM.props.length, 4);
+  assert.equal(TRAM_5_ROOM.props.length, 7);
 });
