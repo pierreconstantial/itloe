@@ -1,12 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createServer } from 'node:net';
 import { OPENING_PLAYERS, INTRO_KEY, STORY_CONTENT } from '../shared/campaign/story/index.js';
 import { gameMasterId } from '../shared/campaign/index.js';
+import { Client, freePort, player, roomCode, screen as screenOf, settled, startServer, stop } from '../scripts/e2e-lib.mts';
 
 const OPENING = /** @type {NonNullable<typeof STORY_CONTENT.machines>} */ (STORY_CONTENT.machines).opening.states;
 const PORTAL = /** @type {NonNullable<typeof OPENING['portal-open']['zones']>} */ (OPENING['portal-open'].zones)[0];
@@ -16,51 +15,22 @@ const stateIn = (view, machine) => view.campaign?.facts.machines[machine]?.state
 
 test('wire: all four can leave the opening podium and rejoin, Pierre ends the block game, Elo reaches the key, Toni leaves on time, the tram takes her home, and she talks to Pierre there and hugs him', { timeout: 30_000 }, async (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'itloe-story-'));
-  const port = await new Promise((resolve) => {
-    const listener = createServer();
-    listener.listen(0, '127.0.0.1', () => {
-      const chosen = /** @type {import('node:net').AddressInfo} */ (listener.address()).port;
-      listener.close(() => resolve(chosen));
-    });
-  });
-  const server = spawn(process.execPath, [new URL('../server/main.ts', import.meta.url).pathname, '--new'], {
-    env: { ...process.env, PORT: String(port), BLOKO_VAR: dir, BLOKO_HOST: '127.0.0.1' }, stdio: 'ignore',
-  });
-  /** @type {WebSocket[]} */ const sockets = [];
-  t.after(() => { for (const ws of sockets) ws.close(); server.kill(); rmSync(dir, { recursive: true, force: true }); });
-  let room;
-  for (let i = 0; i < 100; i++) {
-    try { room = (await (await fetch(`http://127.0.0.1:${port}/api/join`)).json()).code; break; }
-    catch { await new Promise((r) => setTimeout(r, 30)); }
-  }
-  assert.ok(room);
+  const port = await freePort();
+  const url = `ws://127.0.0.1:${port}/ws`;
+  const { proc } = await startServer(port, dir, '', { stdio: 'pipe' }).catch((e) => { rmSync(dir, { recursive: true, force: true }); throw e; });
+  /** @type {Client[]} */ const sockets = [];
+  t.after(async () => { for (const c of sockets) c.ws.close(); await stop(proc); rmSync(dir, { recursive: true, force: true }); });
+  const room = await roomCode(`http://127.0.0.1:${port}`);
 
-  /** @param {string} role @param {string | undefined} [code] */
-  async function connect(role, code) {
-    const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`);
-    sockets.push(ws);
-    /** @type {any[]} */ const messages = [];
-    ws.addEventListener('message', (event) => messages.push(JSON.parse(String(event.data))));
-    await new Promise((resolve, reject) => { ws.onopen = resolve; ws.onerror = reject; });
-    ws.send(JSON.stringify({ t: 'hello', role, ...(code ? { room: code } : {}) }));
-    return { ws, messages, send: (/** @type {object} */ m) => ws.send(JSON.stringify(m)) };
-  }
-  /** @param {{messages: any[]}} client @param {(m: any) => boolean} predicate @param {number} [from] @param {number} [ms] */
-  async function until(client, predicate, from = 0, ms = 2500) {
-    for (let i = 0; i < ms / 10; i++) {
-      const found = client.messages.slice(from).find(predicate);
-      if (found) return found;
-      await new Promise((r) => setTimeout(r, 10));
-    }
-    assert.fail(`timed out; received ${client.messages.slice(from).map((m) => m.t).join(', ')}`);
-  }
-  const screen = await connect('screen');
+  /** @param {Client} client @param {(m: any) => boolean} predicate @param {number} [from] @param {number} [ms] */
+  const until = (client, predicate, from = 0, ms = 2500) => client.waitFor(predicate, from, ms);
+  const screen = await screenOf('tv', url);
+  sockets.push(screen);
   const phones = new Map();
   for (const character of OPENING_PLAYERS) {
-    const phone = await connect('player', room);
-    phone.send({ t: 'join', character });
-    const welcome = await until(phone, (m) => m.t === 'welcome');
-    phones.set(character, { ...phone, id: welcome.playerId });
+    const { c } = await player(character, character, room, url);
+    sockets.push(c);
+    phones.set(character, c);
   }
   const pierre = phones.get('pierre');
   assert.ok(pierre);
@@ -79,21 +49,21 @@ test('wire: all four can leave the opening podium and rejoin, Pierre ends the bl
   }
   for (const character of OPENING_PLAYERS) {
     const phone = phones.get(character);
-    const fromWelcome = phone.messages.length;
+    const left = phone.id;
+    const fromWelcome = phone.mark();
     phone.send({ t: 'join', character });
-    const welcome = await until(phone, (m) => m.t === 'welcome' && m.playerId !== phone.id, fromWelcome);
-    phones.set(character, { ...phone, id: welcome.playerId });
+    await until(phone, (m) => m.t === 'welcome' && m.playerId !== left, fromWelcome);
   }
   // Pierre, rejoined, is the game master again: he ends the block game, and the portal appears
   const rejoined = phones.get('pierre');
-  const fromLobby = rejoined.messages.length;
+  const fromLobby = rejoined.mark();
   rejoined.send({ t: 'lobby' });
   await until(rejoined, (m) => m.t === 'view' && m.minigame?.status === 'lobby', fromLobby);
   rejoined.send({ t: 'endMinigame' });
   await until(screen, (m) => m.t === 'view' && m.minigame === null && stateIn(m, 'opening') === 'portal-open');
   const elo = phones.get('elodie');
   assert.ok(elo);
-  const from = screen.messages.length;
+  const from = screen.mark();
   elo.send({ t: 'pos', x: 6.4, y: 7.6, dir: 'right', moving: false });
   await until(screen, (m) => m.t === 'pos' && m.playerId === elo.id, from);
   elo.send({ t: 'pos', x: PORTAL.x, y: PORTAL.y, dir: 'up', moving: false });
@@ -116,10 +86,10 @@ test('wire: all four can leave the opening podium and rejoin, Pierre ends the bl
   assert.equal(returned.campaign.news.some((/** @type {any} */ n) => n.t === 'cutscene'), false);
   assert.equal(gameMasterId(returned.campaign.party, STORY_CONTENT), phones.get('pierre').id, 'Pierre, rejoined, stays the game master after the portal');
   assert.deepEqual(returned.campaign.party.players[phones.get('pierre').id].statuses, ['wisp'], 'the rejoined Pierre is a wisp');
-  const refusedFrom = elo.messages.length;
+  const refusedFrom = elo.mark();
   elo.send({ t: 'gm', op: { op: 'setFlag', flag: 'gm.pierre.checked', on: true } });
   assert.equal((await until(elo, (m) => m.t === 'err', refusedFrom)).code, 'not-gm');
-  const gmFrom = pierre.messages.length;
+  const gmFrom = pierre.mark();
   pierre.send({ t: 'gm', op: { op: 'setFlag', flag: 'gm.pierre.checked', on: true } });
   await until(pierre, (m) => m.t === 'view' && m.campaign?.facts.flags.includes('gm.pierre.checked'), gmFrom);
 
@@ -131,7 +101,7 @@ test('wire: all four can leave the opening podium and rejoin, Pierre ends the bl
   pierre.send({ t: 'gm', op: { op: 'give', item: 'cigarette-pack', to: 'elodie' } });
   await until(elo, (m) => m.t === 'view' && m.campaign?.facts.inventory.elodie?.['cigarette-pack'] === 1);
   elo.send({ t: 'pos', x: 10.5, y: 8, dir: 'right', moving: false });
-  const givenFrom = elo.messages.length;
+  const givenFrom = elo.mark();
   elo.send({ t: 'interact', object: 'tram-5-weird-man' });
   const thanked = await until(elo, (m) => m.t === 'view' && stateIn(m, 'toni') === 'thanked', givenFrom);
   const gone = await until(elo, (m) => m.t === 'view' && stateIn(m, 'toni') === 'gone', givenFrom, 6000);
@@ -140,7 +110,7 @@ test('wire: all four can leave the opening podium and rejoin, Pierre ends the bl
 
   // the tram: its quiz, then Élodie chooses where it goes (here the game master ends the quiz in its lobby)
   elo.send({ t: 'pos', x: 7.5, y: 6.8, dir: 'up', moving: false });
-  const rideFrom = elo.messages.length;
+  const rideFrom = elo.mark();
   elo.send({ t: 'interact', object: 'tram-5-tram' });
   await until(elo, (m) => m.t === 'view' && stateIn(m, 'tram') === 'offered', rideFrom);
   elo.send({ t: 'enter', node: 'young-adult/tram-5/quiz' });
@@ -155,23 +125,23 @@ test('wire: all four can leave the opening podium and rejoin, Pierre ends the bl
   const me = phones.get('pierre');
   pierre.send({ t: 'gm', op: { op: 'count', counter: 'young-adult.clock.hours', set: 3 } });
   await until(elo, (m) => m.t === 'view' && m.campaign?.party.players[me.id]?.statuses.length === 0, rideFrom, 6000);
-  const reachFrom = elo.messages.length;
+  const reachFrom = elo.mark();
   // open floor, away from the flat's story objects (a story action hides the group actions)
   elo.send({ t: 'pos', x: 8, y: 8.2, dir: 'right', moving: false });
   me.send({ t: 'pos', x: 8.5, y: 8.2, dir: 'left', moving: false });
   await until(elo, (m) => m.t === 'reach' && m.characters.includes('pierre'), reachFrom);
-  const talkFrom = screen.messages.length, eloTalkFrom = elo.messages.length;
+  const talkFrom = screen.mark(), eloTalkFrom = elo.mark();
   elo.send({ t: 'interact', character: 'pierre' });
   const said = await until(screen, (m) => m.t === 'interact' && m.character === 'pierre', talkFrom);
   assert.deepEqual([said.playerId, said.target, said.speaker], [elo.id, me.id, 'target'], 'Pierre answers');
   await until(elo, (m) => m.t === 'view' && stateIn(m, 'pierre-visit') === 'invites', eloTalkFrom);
   // a group hug: refused while a story action on Pierre is available, then with everyone in reach
   await new Promise((r) => setTimeout(r, 750)); // interact's rate limit
-  const hugFrom = screen.messages.length;
+  const hugFrom = screen.mark();
   elo.send({ t: 'interact', group: 'hug' });
-  await new Promise((r) => setTimeout(r, 300));
-  assert.equal(screen.messages.slice(hugFrom).some((m) => m.t === 'interact' && m.group), false, 'the story action hides the hug');
-  const doneFrom = elo.messages.length;
+  await settled([elo], [screen]);
+  assert.equal(screen.since(hugFrom).some((m) => m.t === 'interact' && m.group), false, 'the story action hides the hug');
+  const doneFrom = elo.mark();
   pierre.send({ t: 'gm', op: { op: 'machine', machine: 'pierre-visit', state: 'done' } });
   await until(elo, (m) => m.t === 'view' && stateIn(m, 'pierre-visit') === 'done', doneFrom);
   elo.send({ t: 'interact', group: 'hug' });

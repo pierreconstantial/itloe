@@ -2,64 +2,25 @@
 // reclaim by character, newest-socket-wins (`replaced`), game master reclaim, dead-socket sweep, restart.
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR) so it can kill -9 it.
 // Usage: PORT=3179 node scripts/e2e-presence.mts      (never 3131: that's the live server)
-import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { WebSocket as WsClient } from 'ws';
-import { backToLobby, blocksOf, check, Client, finish, HTTP, legalMoves, lobbyOf, playToDone, sleep, startRound, URL_WS } from './e2e-lib.mts';
+import { backToLobby, blocksOf, check, Client, device as deviceIn, errOf, finish, legalMoves, lobbyOf, playToDone, rejoin as rejoinIn, roomCode, type Server, sleep, startRound, startServer, stop, tap, URL_WS } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
-if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-presence-'));
-const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 
-let server: ChildProcess | null = null;
-let log = '';
-async function boot(fresh = false): Promise<void> {
-  log = '';
-  server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', ITLOE_CONTENT: 'sample' },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  server.stdout!.on('data', (d) => { log += d; });
-  server.stderr!.on('data', (d) => { log += d; });
-  for (let k = 0; k < 100; k++) {
-    try { await fetch(`${HTTP}/api/join`); return; } catch { await sleep(50); }
-  }
-  throw new Error(`server did not come up:\n${log}`);
-}
-async function kill9(): Promise<void> {
-  const s = server!;
-  const gone = new Promise((r) => s.once('exit', r));
-  s.kill('SIGKILL');
-  await gone;
-  server = null;
-}
+let server: Server | null = null;
+const log = () => server?.log() ?? '';
+const boot = async (fresh = false) => { server = await startServer(PORT, VAR, 'sample', { fresh, stdio: 'pipe' }); };
+const kill9 = () => stop(server!.proc, 'SIGKILL');
 
 let room = '';
-/** A device opening the join URL: hello with the room code, no stored id. */
-async function device(label: string): Promise<Client> {
-  const c = new Client(label); await c.open();
-  c.send({ t: 'hello', role: 'player', room });
-  await c.waitFor((m) => m.t === 'view');
-  return c;
-}
-/** Tap a character → the welcome's playerId, or the err code. */
-async function tap(c: Client, character: string): Promise<{ id?: string, err?: string }> {
-  const i = c.mark();
-  c.send({ t: 'join', character });
-  const r = await c.waitFor((m) => m.t === 'welcome' || m.t === 'err', i);
-  return r.t === 'welcome' ? { id: r.playerId } : { err: r.code };
-}
-/** A device with a stored id: hello + playerId. */
-async function rejoin(label: string, playerId: string): Promise<Client> {
-  const c = new Client(label); await c.open();
-  const i = c.mark();
-  c.send({ t: 'hello', role: 'player', room, playerId });
-  await c.waitFor((m) => m.t === 'welcome' && m.playerId === playerId, i);
-  return c;
-}
+/** A device opening the join URL. */
+const device = (label: string) => deviceIn(label, room);
+/** A device with a stored id. */
+const rejoin = (label: string, playerId: string) => rejoinIn(label, playerId, room);
 const closed = async (c: Client) => { c.ws.close(); for (let k = 0; k < 100 && !c.closed; k++) await sleep(10); };
 /** Waits for the screen to see exactly this online list. */
 async function onlineIs(screen: Client, ids: string[], label: string, ms = 2000): Promise<void> {
@@ -81,7 +42,7 @@ const rnd = () => ((seed = (seed * 1103515245 + 12345) >>> 0) / 4294967296);
 
 try {
   await boot(true);
-  room = (await (await fetch(`${HTTP}/api/join`)).json()).code;
+  room = await roomCode();
   let screen = new Client('screen'); await screen.open(); screen.send({ t: 'hello', role: 'screen' });
   const v0 = await screen.waitFor((m) => m.t === 'view');
   check(Array.isArray(v0.online) && v0.online.length === 0 && !('online' in (v0.minigame?.view ?? {})), 'view carries online[] beside the State, empty at first');
@@ -197,19 +158,11 @@ try {
   await startRound(E2, [E2, F2, G]);
   await closed(F2); // sol drops while NOT stuck: the game would wait for her forever
   await onlineIs(screen, [idA, idG], 'controls: a player drops mid-game');
-  const errOf = async (c: Client, msg: object) => {
-    const k = c.mark(); c.send(msg);
-    const r = await c.waitFor((m) => m.t === 'err', k).catch(() => null);
-    return r?.code ?? 'none';
-  };
-  check(await errOf(G, { t: 'retire', target: idF }) === 'not-gm', 'non-game-master retire → err not-gm');
-  check(await errOf(G, { t: 'endGame' }) === 'not-gm', 'non-game-master endGame → err not-gm');
   i = screen.mark(); E2.send({ t: 'retire', target: idF });
   const vr2 = blocksOf(await screen.waitFor((m) => m.t === 'view' && blocksOf(m)?.players[idF]?.done, i));
   const pf = vr2.players[idF];
   check(pf.done && pf.retired && !pf.left && vr2.phase === 'playing', 'game master retires the dropped player → done + retired, not left, game goes on');
-  i = E2.mark(); E2.send({ t: 'retire', target: 'p-nope' }); await sleep(300);
-  check(!E2.since(i).some((m) => m.t === 'err'), "game master's no-op retire (unknown target) → no error");
+  check(await errOf(E2, { t: 'retire', target: 'p-nope' }) === null, "game master's no-op retire (unknown target) → no error");
   const F3 = await device('F3');
   check((await tap(F3, 'sol')).id === idF, 'a retired player keeps the character: tap → reclaim');
   check(F3.lastView().players[idF].retired === true, '…and sees themself out (done) on reconnect');
@@ -219,8 +172,6 @@ try {
   const ve = blocksOf(await screen.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished', i));
   check(ve.endReason === 'gm' && ve.order.every((id: string) => ve.players[id].done && ve.players[id].score === scores[id]),
     'game master endGame → finished, endReason gm, everyone done, scores kept');
-  check(await errOf(E2, { t: 'endGame' }) === 'refused', 'game master endGame on the podium → err refused');
-  check(await errOf(E2, { t: 'retire', target: idG }) === 'refused', 'game master retire on the podium → err refused');
   // solo: a game ended by the game master is a real score → solo best recorded
   await backToLobby(E2);
   i = E2.mark(); F3.send({ t: 'leave' }); G.send({ t: 'leave' });
@@ -289,7 +240,7 @@ try {
 
   for (const c of [E2, F2, F3, G, screen, D, E, F]) c.ws.close();
 } catch (e) {
-  check(false, `crashed: ${(e as Error).message}\n--- server log ---\n${log}`);
+  check(false, `crashed: ${(e as Error).message}\n--- server log ---\n${log()}`);
 } finally {
   if (server) await kill9();
   rmSync(VAR, { recursive: true, force: true });

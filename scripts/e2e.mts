@@ -3,7 +3,7 @@
 // (kill -9 / resume across phases: scripts/e2e-resume.mts, which runs its own server)
 import { PIECES } from '../shared/pieces.js';
 import { CHARACTERS, ROSTER_SIZE } from '../shared/characters.js';
-import { blocksOf, check, Client, finish, gmOf, HTTP, illegalMove, lobbyOf, roomOf, legalMoves, playToDone, settled, sleep, URL_WS } from './e2e-lib.mts';
+import { blocksOf, check, Client, finish, gmOf, HTTP, illegalMove, lobbyOf, roomOf, legalMoves, playToDone, roundTrip, settled, sleep, URL_WS, waitUntil } from './e2e-lib.mts';
 
 let s = 12345;
 const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 4294967296);
@@ -104,7 +104,7 @@ check(!vl.players[idL] && vl.order.join() === `${idA},${idB}`, 'leave in the roo
 L.ws.close();
 const L2 = new Client('L2'); await L2.open();
 i = L2.mark(); L2.send({ t: 'hello', role: 'player', room, playerId: idL });
-await L2.waitFor((m) => m.t === 'view', i); await sleep(150);
+await L2.waitFor((m) => m.t === 'view', i); await roundTrip(L2);
 check(!L2.since(i).some((m) => m.t === 'welcome'), 'left player id → no welcome on rejoin');
 L2.ws.close();
 
@@ -113,25 +113,25 @@ const posOf = (c: Client, from: number, id: string) => c.since(from).filter((m) 
 let is = screen.mark(), ib = B.mark();
 A.send({ t: 'jump', playerId: idB });
 check((await screen.waitFor((m) => m.t === 'jump', is)).playerId === idA, 'jump is bound to the sender and relayed to screens');
-await sleep(100);
+await settled([A], [B]);
 check(!B.since(ib).some((m) => m.t === 'jump'), 'phones do not receive jump');
 is = screen.mark(); ib = B.mark();
 A.send({ t: 'pos', x: 20, y: -1, dir: 'left', moving: true });
 const p1 = await screen.waitFor((m) => m.t === 'pos' && m.playerId === idA, is);
 check(p1.x === 16 && p1.y === 0 && p1.dir === 'left' && p1.moving === true, 'pos relayed to the screen, clamped to the world (20,-1 → 16,0)');
-await sleep(150);
+await settled([A], [B]);
 check(!B.since(ib).some((m) => m.t === 'pos'), 'phones do not receive pos');
 is = screen.mark();
 A.send({ t: 'pos', x: 3, y: 3, dir: 'north', moving: true });
 A.send({ t: 'pos', x: '3', y: 3, dir: 'up', moving: true });
 const U = new Client('U'); await U.open(); U.send({ t: 'hello', role: 'player', room });
 U.send({ t: 'pos', x: 1, y: 1, dir: 'up', moving: false });
-await sleep(200);
+await settled([A, U], [screen]);
 check(screen.since(is).every((m) => m.t !== 'pos'), 'malformed pos and pos from a non-joined socket are dropped');
 U.ws.close();
 is = screen.mark();
 for (let k = 0; k < 45; k++) B.send({ t: 'pos', x: k / 10, y: 2, dir: 'right', moving: true });
-await sleep(300);
+await settled([B], [screen]);
 const burst = posOf(screen, is, idB).length;
 check(burst >= 25 && burst <= 30, `pos flood capped per second (${burst}/45 relayed)`);
 A.send({ t: 'pos', x: 5, y: 4, dir: 'down', moving: true });
@@ -165,8 +165,8 @@ W2.ws.close();
 let ia = A.mark(); ib = B.mark();
 B.send({ t: 'startMinigame' });
 check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'non-game-master startMinigame → err not-gm');
-await sleep(250);
-check(A.since(ia).length === 0, 'non-game-master startMinigame → no broadcast');
+await settled([B], [A]);
+check(!A.since(ia).some((m) => m.t === 'view'), 'non-game-master startMinigame → no broadcast');
 ib = B.mark(); B.send({ t: 'ready', on: true });
 check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-playing', 'ready with no minigame running → err not-playing');
 
@@ -178,8 +178,6 @@ check(lobby0.players.map((p: any) => p.id).join() === `${idA},${idB}` && lobby0.
   'game master startMinigame → the lobby, both eligible, nobody ready, broadcast');
 ib = B.mark(); B.send({ t: 'start' });
 check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'non-game-master start → err not-gm');
-ia = A.mark(); A.send({ t: 'start' });
-check((await A.waitFor((m) => m.t === 'err', ia)).code === 'refused', 'game master start with nobody ready → err refused');
 A.send({ t: 'ready', on: true }); B.send({ t: 'ready', on: true });
 await A.waitFor((m) => m.t === 'view' && lobbyOf(m)?.ready.length === 2);
 
@@ -195,8 +193,8 @@ const seed1 = v0.seed;
 ia = A.mark(); ib = B.mark();
 A.send({ t: 'place', ...illegalMove(A.lastView(), idA) });
 check((await A.waitFor((m) => m.t === 'err', ia)).code === 'bad-place', 'illegal place → err bad-place');
-await sleep(250);
-check(A.since(ia).every((m) => m.t !== 'view') && B.since(ib).length === 0, 'illegal place → no broadcast');
+await settled([A], [B]);
+check(A.since(ia).every((m) => m.t !== 'view') && B.since(ib).every((m) => m.t !== 'view'), 'illegal place → no broadcast');
 ia = A.mark();
 A.send({ t: 'place', piece: 7, x: 0, y: 0 });
 check((await A.waitFor((m) => m.t === 'err', ia)).code === 'bad-place', 'out-of-range piece index → err bad-place');
@@ -233,7 +231,7 @@ check(A2.since(i).some((m) => m.t === 'view') && !A2.since(i).some((m) => m.t ==
 const A3 = new Client('A3'); await A3.open();
 i = A3.mark(); A3.send({ t: 'hello', role: 'player', playerId: idA });
 await A3.waitFor((m) => m.t === 'welcome', i);
-await sleep(200);
+await waitUntil(() => A2.closed, 2000, () => 'the first socket stayed open');
 check(A2.closed && !A3.closed, 'second hello with same playerId closes the first socket');
 check(A3.lastView().order.length === 2, 'no duplicate player created by rejoin');
 const Acur = A3;
@@ -241,7 +239,7 @@ const Acur = A3;
 // unknown playerId → fresh client
 const X = new Client('X'); await X.open();
 i = X.mark(); X.send({ t: 'hello', role: 'player', room, playerId: 'p-nope' });
-await X.waitFor((m) => m.t === 'view', i); await sleep(150);
+await X.waitFor((m) => m.t === 'view', i); await roundTrip(X);
 check(!X.since(i).some((m) => m.t === 'welcome'), 'unknown playerId → no welcome (fresh client)');
 i = X.mark(); X.send({ t: 'join', character: 'anna' });
 // A1: a newcomer joins the EVENING mid-game and watches: welcomed, in the party, not seated in the game
@@ -259,26 +257,13 @@ check(Acur.lastView().players[idA].done && Acur.lastView().phase === 'playing', 
 i = Acur.mark();
 Acur.send({ t: 'place', ...legalMoves({ ...Acur.lastView(), players: { [idA]: { ...Acur.lastView().players[idA], board: new Array(64).fill(0) } } }, idA)[0] });
 check((await Acur.waitFor((m) => m.t === 'err', i)).code === 'bad-place', 'place by done player → err bad-place');
-ib = B.mark();
-B.send({ t: 'lobby' });
-check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'back to the lobby while playing (non-game-master) → err');
 
 const nB = await playToDone(B, idB, Acur, rnd);
 const fin = Acur.lastView();
 await screen.waitFor((m) => m.t === 'view' && blocksOf(m)?.phase === 'finished');
 check(fin.phase === 'finished', `B done after ${nB} moves → phase finished (scores A=${fin.players[idA].score}, B=${fin.players[idB].score})`);
-i = B.mark();
-B.send({ t: 'place', piece: 0, x: 0, y: 0 });
-check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-playing', 'place in finished → err not-playing');
 
 // --- lobby: podium → the lobby, its players ready, newcomers can join, start works again ---
-ib = B.mark();
-B.send({ t: 'lobby' });
-check((await B.waitFor((m) => m.t === 'err', ib)).code === 'not-gm', 'non-game-master lobby → err not-gm');
-i = B.mark(); B.send({ t: 'endMinigame' });
-check((await B.waitFor((m) => m.t === 'err', i)).code === 'not-gm', 'non-game-master endMinigame → err not-gm');
-ia = Acur.mark(); Acur.send({ t: 'endMinigame' });
-check((await Acur.waitFor((m) => m.t === 'err', ia)).code === 'refused', 'game master endMinigame on the podium → err refused');
 ia = Acur.mark(); ib = B.mark();
 Acur.send({ t: 'lobby' });
 const vnMsg = await B.waitFor((m) => m.t === 'view', ib);
@@ -289,17 +274,12 @@ check(!!vn && gmOf(vnMsg) === idA && vn.players.map((p: any) => p.id).join() ===
 check(vn.players[0].character === 'pierre' && vn.players[1].character === 'sol', 'the lobby keeps each character');
 const joinAfter = await (await fetch(`${HTTP}/api/join`)).json();
 check(joinAfter.code === room, 'the lobby keeps the room code');
-ia = Acur.mark();
-Acur.send({ t: 'lobby' });
-check((await Acur.waitFor((m) => m.t === 'err', ia)).code === 'refused', 'game master lobby outside the podium (the lobby) → err refused');
 const N = new Client('N'); await N.open(); N.send({ t: 'hello', role: 'player', room });
 i = N.mark(); N.send({ t: 'join', character: 'anna' });
 const idN = (await N.waitFor((m) => m.t === 'welcome', i)).playerId;
 await Acur.waitFor((m) => m.t === 'view' && lobbyOf(m)?.players.some((p: any) => p.id === idN));
 check(Acur.lastLobby().players.map((p: any) => p.id).join() === `${idA},${idB},${idN}` && !Acur.lastLobby().ready.includes(idN),
   'a newcomer joins the lobby, not ready');
-i = N.mark(); N.send({ t: 'start' });
-check((await N.waitFor((m) => m.t === 'err', i)).code === 'not-gm', 'newcomer (non-game-master) start → err not-gm');
 N.send({ t: 'ready', on: true });
 await settled([N], [Acur]);
 ia = Acur.mark();

@@ -25,8 +25,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Story opening in a browser test](#story-opening-in-a-browser-test) | No browser test plays the opening past its block game | P1 | Open | Low |
 | [Pyramide in the story](#pyramide-in-the-story) | Pyramide has no tableau in the story yet | P1 | Needs decision | Low |
 | [Apartment drawings cover avatars](#apartment-drawings-cover-avatars) | The cats, friends, keepsakes and key are always drawn over avatars | P2 | Open | Low |
-| [Trim the e2e suites and share their setup](#trim-the-e2e-suites-and-share-their-setup) | The suites re-check what unit tests pin and each copy their setup | P2 | Open | Medium |
-| [Browser suites ignore page errors](#browser-suites-ignore-page-errors) | The phone and TV suites pass when a page throws | P2 | Open | Low |
 | [Backgammon's restart and hidden dice untested](#backgammons-restart-and-hidden-dice-untested) | No test resumes a backgammon round or checks its view hides the dice | P2 | Open | Low |
 | [Questions of a dropped round come back](#questions-of-a-dropped-round-come-back) | A round dropped by `back` or `goto` doesn't use up its questions or words | P2 | Open | Low |
 | [TV frame cost unmeasured](#tv-frame-cost-unmeasured) | The room redraws everything at 60 fps; nobody measured it on the evening's laptop | P2 | Open | Low |
@@ -51,7 +49,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Round screens' helpers and wording](#round-screens-helpers-and-wording) | DOM helpers, countdowns and wording repeated across screens and between phone and TV | P3 | Open | Low |
 | [Three meanings of round in the server](#three-meanings-of-round-in-the-server) | `server/round.ts` calls a whole run of a minigame a round | P3 | Open | Low |
 | [Dead code](#dead-code) | Screens only Pierre's phone shows, unused exports and CSS, a duplicate range check | P3 | Open | Low |
-| [Small e2e script bugs](#small-e2e-script-bugs) | `--compare` misses two suites, a suite exiting 75 reruns, a scratch folder leaks | P3 | Open | Low |
 
 ## Items
 
@@ -86,25 +83,6 @@ This is Pierre's content.
 In the apartment, the cats, friends, keepsakes and the key are drawn after the depth-sorted list of props and avatars (`public/screen/party-room.js`). An avatar walking in front of a cat still has the cat drawn over it.
 
 **Recommendation:** make them props of the apartment's scene (`apartment-room` in `shared/campaign/story/hub.js`), so they sort with the avatars like the party room's furniture.
-
-### Trim the e2e suites and share their setup
-
-The unit tests are proportionate; the e2e suites are not. A full run makes about 720 checks, many of them re-checking over sockets what a unit test already pins, and each suite carries its own copy of the setup:
-
-- Server start-up is copied in seven e2e suites and six unit tests that start a real server, because `startServer` in `scripts/e2e-lib.mts` always passes `--new` and suites that restart the server can't use it. `rejoin`, `player`/`tap`, `screen()` and `errOf` are copied too, `errOf` with four different timeouts.
-- There are three ways of driving Chrome (`openPage` in `e2e-lib.mts`, the TV suite's `Page`, the phone suite's own connection) and three wait behaviours: one throws, one returns false, one returns the last snapshot, and several phone helpers carry on silently after a timeout.
-- Re-checks: "a guest gets `not-gm`" about 20 times across six suites (it is one line in `server/plain-lobby.ts`, whose `message` has no unit test); the join QR about 40 times in four places, including a 13 s wait for the card to expire and two 2.2 s sleeps; three real 25 s silent-socket waits for one watchdog module that has a fake-clock unit test; a 70 s timed round in the phone suite that asserts nothing about the timer; the inventory suite's winner tie, which accepts either outcome; the two-tap confirm six times and pinned wording.
-- Flaky: the phone suite's back/forward-cache check failed on its own in 2 of 93 logged runs; it tests Chrome, not the game. `scripts/e2e.mts` uses fixed sleeps for "nothing arrived" checks where `settled()` exists.
-
-**Decision (Konstantin):**
-1. One restartable-server helper (a `fresh` option on `startServer`) and one socket client, shared by the e2e suites and the unit tests that start a real server. Then the TV and phone suites move onto `openPage`, with one wait that fails loudly.
-2. Each rule keeps its unit test plus one wiring check over sockets; the re-checks above go (a unit table over `plainLobbyServer.message` replaces the `not-gm` ones). Expected: about 650 fewer lines, and a full run from about 3 minutes to about 2.
-
-### Browser suites ignore page errors
-
-`scripts/e2e-phone.mts` only logs a page's uncaught exceptions, and `scripts/e2e-tv.mts` empties the TV's error list before its campaign section, so anything thrown during the reloads, the kill -9, the wake and the silent-socket test is discarded. The Pyramide and backgammon suites fail on them.
-
-**Recommendation:** fail every browser suite on a page exception, in one place once the suites share `openPage` ([Trim the e2e suites and share their setup](#trim-the-e2e-suites-and-share-their-setup)).
 
 ### Backgammon's restart and hidden dice untested
 
@@ -257,9 +235,3 @@ Each round's rules still write their own clock (`deadline`, `deadlineAction`, `s
 - CSS: `.settings-line` and `@keyframes pop-in` in `public/commun/screen-main.css`; `.quiz-title` and `.lobby > .quiz-credits` in `public/screen/quiz.css`.
 - `startFoosball` (`shared/foosball.js`) checks the player range that the plain lobby now enforces from its `players`.
 - Apartment drawing in `public/screen/party-room.js` that its painted background replaced (`paintTerrace` and the sofa stretch): check what is still reachable after the story engine.
-
-### Small e2e script bugs
-
-- `--shots`/`--compare`: the runner takes screenshots for every browser suite (`scripts/e2e-run.mts`), but the Pyramide and backgammon suites write to fixed folders of their own and take none, so a comparison reports "no reference folder" for both.
-- `scripts/e2e-slot.sh` treats a suite that exits with code 75 as "slot busy" and runs it again.
-- `scripts/e2e-phone.mts` throws before its `try` on a bare run, leaking its scratch folder.

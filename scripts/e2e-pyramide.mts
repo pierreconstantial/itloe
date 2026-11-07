@@ -8,19 +8,18 @@
 // two rounds. Plays a fixed word bank of its own (BLOKO_PYRAMIDE_DIR), with words no screen has any other
 // reason to show.
 // Usage: start Chrome with --remote-debugging-port=<CDP>, then
-//        PORT=3194 CDP=9222 node scripts/e2e-pyramide.mts      (never PORT 3131: the live server)
-import type { ChildProcess } from 'node:child_process';
+//        PORT=3194 CDP=9222 [SHOTS=dir] node scripts/e2e-pyramide.mts      (never PORT 3131: the live server)
+// SHOTS=<dir> saves screenshots of the lobby, a round and the podiums, each with its visible text (<name>.txt).
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { cdpConnect, check, Client, finish, HTTP, lobbyOf, openPage, type Page, pyramideOf, settingsOf, SOCKET_PROBE, startServer } from './e2e-lib.mts';
+import { cdpConnect, check, Client, finish, HTTP, lobbyOf, openPage, type Page, pyramideOf, settingsOf, type Server, SOCKET_PROBE, startServer, stop } from './e2e-lib.mts';
 import { clueProblem } from '../shared/pyramide.js';
 
 const PORT = process.env.PORT ?? '3141';
-if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const CDP = process.env.CDP ?? '9222';
 const VAR = mkdtempSync(join(tmpdir(), 'itloe-pyramide-'));
-const SHOTS = '/tmp/pyr-shots-e2e';
+const SHOTS = process.env.SHOTS;
 
 // ---------- the word bank: words and clues no screen has another reason to show ----------
 const BANK = {
@@ -48,8 +47,7 @@ function clueFor(word: string): string {
 const WRONG = 'pomme';
 
 // ---------- processes and pages ----------
-let server: ChildProcess | null = null;
-let log = '';
+let server: Server | null = null;
 const pages: Page[] = [];
 let T!: Client; // the screen socket: every view
 let tv!: Page;
@@ -130,7 +128,11 @@ const guess = (s: any, found: boolean) => move(async () => {
 
 // ---------- the lobby ----------
 const SPOTS: Record<string, string> = { 'team1-clue': 'elodie', 'team1-guess': 'pierre', 'team2-clue': 'nico', 'team2-guess': 'sol' };
-const podium = (what: string) => tv.waitFor(`/win!|draw/i.test(document.body.innerText)`, 30_000).then(() => check(true, `${what}: the TV shows the podium`));
+async function podium(what: string, shot: string): Promise<void> {
+  await tv.waitFor(`/win!|draw/i.test(document.body.innerText)`, 30_000);
+  check(true, `${what}: the TV shows the podium`);
+  await tv.shot(shot);
+}
 async function backToLobby(): Promise<any> {
   const i = T.mark();
   await say('pierre', { t: 'lobby' });
@@ -210,8 +212,6 @@ async function duel(): Promise<any> {
 
 try {
   server = await startServer(PORT, join(VAR, 'var'), 'minigame:pyramide', { stdio: 'pipe', env: { ...process.env, BLOKO_PYRAMIDE_DIR: BANK_DIR } });
-  server.stdout!.on('data', (d) => { log += d; });
-  server.stderr!.on('data', (d) => { log += d; });
   const room = (await (await fetch(`${HTTP}/api/join`)).json()).code;
   const cdp = await cdpConnect(CDP);
   const open = async (label: string, phone: boolean) => {
@@ -241,18 +241,23 @@ try {
   for (const [spot, who] of Object.entries(SPOTS)) await say(who, { t: 'takeSpot', spot });
   const held = await T.waitFor((m) => m.t === 'view' && !!m.minigame?.spots && Object.values(holders(m)).every(Boolean), i);
   check(Object.entries(SPOTS).every(([spot, who]) => holders(held)[spot] === seats[who].id), 'lobby: four players on the four spots');
+  await tv.shot('pyramide-lobby');
+  await seats.elodie.page.shot('pyramide-lobby-elodie');
 
   // ---------- a classic round ----------
   i = T.mark();
   await say('pierre', { t: 'start' });
   await untilRound((s) => s.mode === 'classic' && s.endReason === null, i);
   await checkScreens();
+  await tv.shot('pyramide-classic');
+  await seats.elodie.page.shot('pyramide-classic-elodie'); // a clue giver: the word
+  await seats.pierre.page.shot('pyramide-classic-pierre'); // her guesser: no word
   const first = await classic();
   reportScreens('classic round');
   check(first.endReason === 'done' && first.teams.every((t: any) => t.score === 4 && t.done)
     && first.teams[0].used === 8 && first.teams[1].used === 4 && first.players[seats.nico.id].rank === 1 && first.players[seats.pierre.id].rank === 2,
   'classic round played through: both teams found their four words, team 2 with fewer bricks ranks first');
-  await podium('classic round');
+  await podium('classic round', 'pyramide-classic-podium');
 
   // ---------- the lobby again, on the same spots; a bidding duel ----------
   const lobby = await backToLobby();
@@ -269,22 +274,15 @@ try {
   check(second.endReason === 'done' && second.teams.map((t: any) => t.score).join() === '3,2' && second.players[seats.elodie.id].rank === 1 && second.players[seats.sol.id].rank === 2,
     'duel played through: five words with bids, an outbid, a bid of 1 lost, 3 points to 2 → team 1 ranks first');
   check(new Set([...first.drawn, ...second.drawn]).size === first.drawn.length + second.drawn.length, `no word drawn twice across the two rounds (${first.drawn.length} + ${second.drawn.length} words)`);
-  await podium('duel round');
+  await podium('duel round', 'pyramide-duel-podium');
   await backToLobby();
   check(true, 'duel round: back to the lobby');
-
-  const errors = pages.flatMap((p) => p.errors);
-  check(errors.length === 0, `no page threw${errors.length ? `: ${errors[0]}` : ''}`);
 } catch (e) {
-  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${log}`);
+  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${server?.log() ?? ''}`);
 } finally {
   T?.ws.close();
   for (const p of pages) await p.close();
-  if (server && server.exitCode === null) {
-    const gone = new Promise((r) => server!.once('exit', r));
-    server.kill('SIGTERM');
-    await gone;
-  }
+  await stop(server?.proc ?? null);
   rmSync(VAR, { recursive: true, force: true, maxRetries: 5 });
 }
 finish();

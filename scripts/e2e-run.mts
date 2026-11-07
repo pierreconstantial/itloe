@@ -2,7 +2,7 @@
 // then prints one line per suite, the FAIL lines of failed ones, and an overall line; exits 1 on a failure.
 // Usage: npm run e2e [-- [--shots <dir> [--compare <ref>]] <suite>…]      (no suite: all of them)
 //   suites: base resume presence campaign quiz pyramide backgammon inventory tv phone; phone:<n> = ONLY=<n>, tv:<section> = ONLY=<section>
-//   --shots <dir>: SHOTS=<dir>/<suite> for the tv and phone suites (each must be new or empty).
+//   --shots <dir>: SHOTS=<dir>/<suite> for the browser suites (each must be new or empty).
 //   --compare <ref>: then compares those screenshots with <ref>/<suite>, an earlier --shots folder (e2e-compare.mts).
 //   LOCK_MS and E2E_SLOW pass through.
 // Each suite runs as a job through scripts/e2e-slot.sh (the machine's shared slots), all of them in parallel.
@@ -15,7 +15,7 @@ import { createWriteStream, existsSync, mkdirSync, mkdtempSync, readdirSync, rea
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { compareShots } from './e2e-compare.mts';
-import { freePort, killGroups, startChrome, startServer } from './e2e-lib.mts';
+import { freePort, killGroups, startChrome, startServer, stop } from './e2e-lib.mts';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const SELF = new URL(import.meta.url).pathname;
@@ -45,13 +45,6 @@ function parse(spec: string): { suite: string, only?: string } | null {
   return { suite, only };
 }
 
-function stop(proc: ChildProcess | null): Promise<void> {
-  if (!proc || proc.exitCode !== null || proc.signalCode !== null) return Promise.resolve();
-  const gone = new Promise<void>((r) => proc.once('exit', () => r()));
-  proc.kill('SIGTERM');
-  return gone;
-}
-
 // ---------- a job: one suite, inside a slot ----------
 async function job(spec: string): Promise<number> {
   const { suite, only } = parse(spec)!;
@@ -67,7 +60,7 @@ async function job(spec: string): Promise<number> {
       console.log(`e2e-run: Chrome on CDP=${env.CDP}`);
     }
     if (def.server) {
-      server = await startServer(env.PORT!, join(scratch, 'var'), 'sample', { env });
+      server = (await startServer(env.PORT!, join(scratch, 'var'), 'sample', { env })).proc;
     }
     const run = spawn(process.execPath, [join(ROOT, 'scripts', def.script)], { env, stdio: 'inherit' });
     return await new Promise<number>((r) => run.once('exit', (code) => r(code ?? 1)));
@@ -105,7 +98,7 @@ async function runner(args: string[]): Promise<number> {
   const shooting = specs.filter((s) => SUITES[parse(s)!.suite].browser).map((s) => s.replace(':', '-'));
   if (compare && !shots) return usage('--compare needs --shots <dir> for the new screenshots');
   if (compare && !existsSync(compare)) return usage(`no reference folder ${compare}`);
-  if (shots && !shooting.length) return usage('only the tv and phone suites take screenshots');
+  if (shots && !shooting.length) return usage('only the browser suites take screenshots');
   // a fresh folder per suite: no stale screen from an earlier run, and a reference is never overwritten
   const used = shooting.filter((n) => shots && existsSync(join(shots, n)) && readdirSync(join(shots, n)).length);
   if (used.length) return usage(`${used.map((n) => join(shots!, n)).join(', ')} already holds screenshots: pick another --shots folder`);

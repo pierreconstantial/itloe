@@ -3,29 +3,17 @@
 // test/fixtures/save-v2-blocks.json is a save as the server wrote it before minigame lobbies, in a timed block game.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
-import { once } from 'node:events';
 import { copyFile, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
-import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { setTimeout as delay } from 'node:timers/promises';
-import WebSocket from 'ws';
+import { Client, freePort, startServer, stop } from '../scripts/e2e-lib.mts';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const FIXTURES = join(ROOT, 'test', 'fixtures');
 
-async function freePort() {
-  const listener = createServer();
-  listener.listen(0, '127.0.0.1');
-  await once(listener, 'listening');
-  const port = /** @type {import('node:net').AddressInfo} */ (listener.address()).port;
-  await new Promise((resolve) => listener.close(resolve));
-  return port;
-}
-
 /**
- * Starts the server on a scratch data folder holding `save` as its saved evening.
+ * A scratch data folder holding `save` as its saved evening, and the server started on it (or the error it
+ * stopped at its boot with: its exit code and output).
  * @param {import('node:test').TestContext} t @param {string} save the save file's text
  */
 async function boot(t, save) {
@@ -37,43 +25,23 @@ async function boot(t, save) {
   await mkdir(varDir);
   await writeFile(join(varDir, 'bloko.state.json'), save);
   const port = await freePort();
-  const child = spawn(process.execPath, [join(ROOT, 'server/main.ts')], {
-    env: { ...process.env, PORT: String(port), BLOKO_BIND: '127.0.0.1', BLOKO_HOST: '127.0.0.1',
-      BLOKO_VAR: varDir, BLOKO_QUIZ_DIR: quizDir, BLOKO_NEW: '0', ITLOE_CONTENT: 'sample' },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  let log = '';
-  child.stdout?.on('data', (data) => { log += data; });
-  child.stderr?.on('data', (data) => { log += data; });
-  const exited = once(child, 'exit');
+  const started = await startServer(port, varDir, 'sample', { fresh: false, stdio: 'pipe',
+    env: { ...process.env, BLOKO_BIND: '127.0.0.1', BLOKO_QUIZ_DIR: quizDir, BLOKO_NEW: '0' } }).catch((/** @type {Error} */ e) => e);
   t.after(async () => {
-    if (child.exitCode === null && child.signalCode === null) {
-      child.kill();
-      await exited;
-    }
+    if (!(started instanceof Error)) await stop(started.proc);
     await rm(dir, { recursive: true, force: true });
   });
-  return { port, varDir, exited, log: () => log, running: () => child.exitCode === null };
+  return { port, varDir, started };
 }
 
-/** The first message on a socket (the deploy check expects a view), as the server sends it. */
-async function firstView(/** @type {number} */ port, /** @type {() => boolean} */ running, /** @type {() => string} */ log) {
-  for (let i = 0; ; i++) {
-    assert.ok(running(), log());
-    try {
-      await fetch(`http://127.0.0.1:${port}/`, { signal: AbortSignal.timeout(300) });
-      break;
-    } catch {
-      if (i > 200) throw new Error(`server did not start: ${log()}`);
-      await delay(50);
-    }
-  }
-  const socket = new WebSocket(`ws://127.0.0.1:${port}/ws`);
+/** The first message on a socket (the deploy check expects a view), as the server sends it. @param {number} port */
+async function firstView(port) {
+  const c = new Client('tv', `ws://127.0.0.1:${port}/ws`);
+  await c.open();
   try {
-    const [message] = await once(socket, 'message');
-    return JSON.parse(String(message));
+    return await c.waitFor(() => true);
   } finally {
-    socket.terminate();
+    c.ws.close();
   }
 }
 
@@ -89,12 +57,9 @@ test('a save with a minigame this release does not have stops the boot and is le
   for (const [label, save] of [['stored kind', stored]]) {
     const text = JSON.stringify(save);
     const app = await boot(t, text);
-    const timeout = new AbortController();
-    const [code] = await Promise.race([app.exited, delay(10_000, [null], { signal: timeout.signal })])
-      .finally(() => timeout.abort());
-    assert.notEqual(code, null, `${label}: the server must stop at boot\n${app.log()}`);
-    assert.notEqual(code, 0, label);
-    assert.match(app.log(), /"darts"/, `${label}: the error names the kind`);
+    assert.ok(app.started instanceof Error, `${label}: the server must stop at boot`);
+    assert.match(app.started.message, /exited \([1-9]\d*\) before answering/, label);
+    assert.match(app.started.message, /"darts"/, `${label}: the error names the kind`);
     assert.equal(await readFile(join(app.varDir, 'bloko.state.json'), 'utf8'), text, `${label}: the save is untouched`);
     assert.deepEqual(await readdir(app.varDir), ['bloko.state.json'], `${label}: nothing quarantined or written next to it`);
   }
@@ -104,12 +69,13 @@ test('a save whose minigame this release cannot resume keeps the evening: the mi
   const text = await fixture('save-v2-blocks.json'); // a round from before minigame lobbies: a fix deployed mid-round
   const saved = JSON.parse(text);
   const app = await boot(t, text);
-  const view = await firstView(app.port, app.running, app.log);
+  if (app.started instanceof Error) throw app.started;
+  const view = await firstView(app.port);
   assert.equal(view.minigame, null, 'the minigame ended…');
   assert.equal(view.campaign.at.node, saved.campaign.at.node, '…in the room at its tableau');
   assert.deepEqual(view.campaign.party.order, saved.campaign.party.order, 'the same party');
   assert.equal((await (await fetch(`http://127.0.0.1:${app.port}/api/join`)).json()).code, saved.room, 'the same room code');
-  assert.match(app.log(), /RESUMED .*its blocks could not be resumed, so it was ended/);
+  assert.match(app.started.log(), /RESUMED .*its blocks could not be resumed, so it was ended/);
   assert.deepEqual(await readdir(app.varDir), ['bloko.state.json'], 'nothing quarantined');
 });
 
@@ -122,10 +88,11 @@ test('a save with missing or removed characters starts fresh and keeps the old f
         players[Object.keys(players)[0]].character = character;
         const text = JSON.stringify(save);
         const app = await boot(t, text);
-        const view = await firstView(app.port, app.running, app.log);
+        if (app.started instanceof Error) throw app.started;
+        const view = await firstView(app.port);
         assert.equal(view.minigame, null);
         assert.deepEqual(view.campaign.party.order, []);
-        assert.match(app.log(), /save could not be loaded: party member .*not a character of the roster/);
+        assert.match(app.started.log(), /save could not be loaded: party member .*not a character of the roster/);
         const kept = (await readdir(app.varDir)).filter((f) => f.startsWith('bloko.state.json.corrupt-'));
         assert.equal(kept.length, 1);
         assert.equal(await readFile(join(app.varDir, kept[0]), 'utf8'), text);

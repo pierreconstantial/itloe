@@ -1,20 +1,17 @@
 // Inventory end-to-end (Contract F, server side) over real sockets and a server this script kill -9s:
-// rewards land in the right inventory (chooser / winner incl. a tie / all non-left members), survive
-// kill -9 and a reclaim from another device, the game master's gm give/take work and are refused for an unknown
-// item or character, for taking more than held, and for a non-game-master. Uses the sample content (old key →
+// rewards land in the right inventory (chooser / winner / all non-left members), survive
+// kill -9 and a reclaim from another device, the game master's gm give/take work and taking more than held is
+// refused (the other refusals: test/inventory.test.js). Uses the sample content (old key →
 // chooser, ticket → quiz winner, photo → all).
 // Runs its OWN server (child process on PORT, scratch BLOKO_VAR, a fixed quiz bank). Usage:
 //   PORT=3197 node scripts/e2e-inventory.mts      (never 3131: that's the live server)
-import { spawn, type ChildProcess } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { backToLobby, blocksOf, check, Client, endMinigame, finish, HTTP, lobbyOf, quizOf, roomOf, settingsOf, sleep, startRound } from './e2e-lib.mts';
+import { backToLobby, blocksOf, check, Client, endMinigame, errOf, finish, lobbyOf, player as playerIn, quizOf, rejoin, roomCode, roomOf, screen as screenIn, type Server, settingsOf, sleep, startRound, startServer, stop } from './e2e-lib.mts';
 
 const PORT = process.env.PORT ?? '3141';
-if (PORT === '3131') throw new Error('3131 is the live server: pick another PORT');
 const VAR = mkdtempSync(join(tmpdir(), 'bloko-inventory-'));
-const MAIN = new URL('../server/main.ts', import.meta.url).pathname;
 const PLACEHOLDER = new URL('../data/quiz/placeholder.json', import.meta.url).pathname;
 const FIXED_BANK = join(VAR, 'fixed-bank');
 mkdirSync(FIXED_BANK, { recursive: true });
@@ -22,61 +19,21 @@ copyFileSync(PLACEHOLDER, join(FIXED_BANK, 'placeholder.json'));
 const BANK: { q: string, choices?: string[], answer: string | number }[] = JSON.parse(readFileSync(PLACEHOLDER, 'utf8')).questions;
 const QUIZ = 'childhood.quiz';
 
-let server: ChildProcess | null = null;
-let log = '';
-async function boot(fresh = false): Promise<void> {
-  log = '';
-  server = spawn(process.execPath, [MAIN, ...(fresh ? ['--new'] : [])], {
-    env: { ...process.env, PORT, BLOKO_VAR: VAR, BLOKO_HOST: '127.0.0.1', BLOKO_QUIZ_DIR: FIXED_BANK, ITLOE_CONTENT: 'sample' },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  server.stdout!.on('data', (d) => { log += d; });
-  server.stderr!.on('data', (d) => { log += d; });
-  for (let k = 0; k < 100; k++) {
-    try { room = (await (await fetch(`${HTTP}/api/join`)).json()).code; return; } catch { await sleep(50); }
-  }
-  throw new Error(`server did not come up:\n${log}`);
-}
-async function kill9(): Promise<void> {
-  const s = server!;
-  const gone = new Promise((r) => s.once('exit', r));
-  s.kill('SIGKILL');
-  await gone;
-  server = null;
-}
-
+let server: Server | null = null;
+const log = () => server?.log() ?? '';
 let room = '';
+async function boot(fresh = false): Promise<void> {
+  server = await startServer(PORT, VAR, 'sample', { fresh, stdio: 'pipe', env: { ...process.env, BLOKO_QUIZ_DIR: FIXED_BANK } });
+  room = await roomCode();
+}
+const kill9 = () => stop(server!.proc, 'SIGKILL');
+
 const camp = (c: Client): any => [...c.msgs].reverse().find((m) => m.t === 'view')?.campaign;
 const inv = (c: Client): Record<string, Record<string, number>> => camp(c)?.facts.inventory ?? {};
 const until = async (c: Client, pred: (k: any) => boolean, from = 0, ms = 4000) =>
   (await c.waitFor((m) => m.t === 'view' && !!m.campaign && pred(m.campaign), from, ms)).campaign;
-const errOf = async (c: Client, msg: object): Promise<string | null> => {
-  const i = c.mark();
-  c.send(msg);
-  try { return (await c.waitFor((m) => m.t === 'err', i, 700)).code; } catch { return null; }
-};
-async function player(label: string, character: string): Promise<{ c: Client, id: string }> {
-  const c = new Client(label); await c.open();
-  c.send({ t: 'hello', role: 'player', room });
-  const i = c.mark();
-  c.send({ t: 'join', character });
-  return { c, id: (await c.waitFor((m) => m.t === 'welcome', i)).playerId };
-}
-async function rejoin(label: string, playerId: string): Promise<Client> {
-  const c = new Client(label); await c.open();
-  const i = c.mark();
-  c.send({ t: 'hello', role: 'player', playerId });
-  await c.waitFor((m) => m.t === 'welcome' && m.playerId === playerId, i);
-  await c.waitFor((m) => m.t === 'view', i);
-  return c;
-}
-async function screen(): Promise<Client> {
-  const c = new Client('T'); await c.open();
-  const i = c.mark();
-  c.send({ t: 'hello', role: 'screen' });
-  await c.waitFor((m) => m.t === 'view', i);
-  return c;
-}
+const player = (label: string, character: string) => playerIn(label, character, room);
+const screen = () => screenIn('T');
 const gm = (c: Client, op: object) => c.send({ t: 'gm', op });
 
 /** Plays one quiz in childhood.quiz (choice mode, 3 questions), from the game master's start to his end:
@@ -150,9 +107,6 @@ try {
   check(true, 'game master gives a ticket to Sol');
   check(await errOf(P, { t: 'gm', op: { op: 'take', item: 'ticket', from: 'sol', count: 2 } }) === 'refused', 'take more than held → refused (no partial take)');
   check(inv(T).sol?.ticket === 1, '…and nothing was taken');
-  check(await errOf(P, { t: 'gm', op: { op: 'give', item: 'unicorn', to: 'sol' } }) === 'refused', 'unknown item → refused (items must exist)');
-  check(await errOf(P, { t: 'gm', op: { op: 'give', item: 'ticket', to: 'zorro' } }) === 'refused', 'unknown character → refused');
-  check(await errOf(S, { t: 'gm', op: { op: 'give', item: 'ticket', to: 'sol' } }) === 'not-gm', 'give from a non-game-master → not-gm');
   check(await errOf(P, { t: 'gm', op: { op: 'unlock', node: 'hub' } }) === null, 'other no-op gm ops stay silent');
   i = T.mark(); gm(P, { op: 'take', item: 'ticket', from: 'sol' });
   await until(T, (x) => !x.facts.inventory.sol?.ticket, i);
@@ -181,28 +135,9 @@ try {
   check(k.facts.inventory.pierre?.ticket === 1 && !k.facts.inventory.elodie?.ticket && !k.facts.inventory.sol?.ticket, 'quiz won by Pierre → the ticket to the winner only');
   await restart('after the quiz reward');
 
-  // ---------- winner tie (a fresh evening: rewards apply once per node) ----------
-  for (const c of [P, E, S, T]) c.ws.close();
-  await kill9(); await boot(true);
-  ({ c: P, id: idP } = await player('P', 'pierre'));
-  ({ c: E, id: idE } = await player('E', 'elodie'));
-  ({ c: S, id: idS } = await player('S', 'sol'));
-  T = await screen();
-  i = T.mark();
-  gm(P, { op: 'unlock', node: 'childhood' }); gm(P, { op: 'unlock', node: QUIZ }); gm(P, { op: 'goto', node: QUIZ });
-  await T.waitFor((m) => m.t === 'view' && !!roomOf(m) && m.campaign.at.kind === 'quiz', i);
-  // P and E answer right at the same moment → same points → a tie at rank 1
-  await playQuiz(P, [{ c: P, right: true }, { c: E, right: true }, { c: S, right: false }], T);
-  k = await until(T, (x) => x.facts.done.includes(QUIZ));
-  const ranks = quizOf([...T.msgs].reverse().find((m) => m.t === 'view' && quizOf(m)));
-  const tie = ranks.players[idP].score === ranks.players[idE].score;
-  const tickets = [k.facts.inventory.pierre?.ticket ?? 0, k.facts.inventory.elodie?.ticket ?? 0, k.facts.inventory.sol?.ticket ?? 0];
-  check(tie ? tickets.join() === '1,1,0' : tickets.filter((n) => n === 1).length === 1,
-    tie ? `a tie at rank 1 → a ticket for EVERY co-winner (${tickets})` : `no exact tie this run (speed bonus differed by a ms): one winner, one ticket (${tickets})`);
-
   for (const c of [P, E, S, T]) c.ws.close();
 } catch (e) {
-  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${log}`);
+  check(false, `crashed: ${(e as Error).stack ?? e}\n--- server log ---\n${log()}`);
 } finally {
   if (server) await kill9();
   rmSync(VAR, { recursive: true, force: true });
