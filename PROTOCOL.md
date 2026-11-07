@@ -204,7 +204,7 @@ world units, with the player holding it, or null; who holds it is the minigame's
                                         // minigame running (the game master starts it).
 { "t": "back" }                         // game master only (birthday story after the portal: the chooser only, while no
                                         // minigame runs): up one level (tableau → world → hub). A running minigame ends
-                                        // first, as endMinigame (a running round dropped). At the hub → err "refused";
+                                        // first, as endMinigame (a running round dropped, what it asked used up). At the hub → err "refused";
                                         // anyone else → err "not-gm".
 { "t": "gm", "op": { "op": "unlock", "node": "teens" } }
                                         // game master only, even while he is a Wisp. A goto while a minigame runs
@@ -310,7 +310,8 @@ leaves or is taken out answers no more, and the round stops waiting for their an
   and the game master can override it.
 - **Campaign:** a finished quiz round (last question, or the game master's endGame) keeps its result, and the
   quiz's end records it: counters `quiz.played`, `quiz.won.<character>`, `quiz.correct.<character>`, `node.<id>.finished`,
-  totals per character, and the shown question ids appended to `facts.asked` (never asked again).
+  totals per character, and the shown question ids appended to `facts.asked` (never asked again). A round dropped by
+  `back` or a goto appends its shown question ids too, and nothing else.
 
 ### Pyramide: a tableau `activity: { kind: 'pyramide', settings: { mode } }`
 
@@ -340,7 +341,7 @@ Anything refused → `err "refused"`. `retire` and a player leaving end the roun
   each team's current word (`teams[i].word`); Pyramide's screens show it only on its clue givers' phones. Words
   resolved are in the log with their word.
 - **Campaign:** each word drawn, skipped ones too, is reported in the round's `asked` and never drawn again that
-  evening. Each player scores their team's words found (classic) or points (duel); ranks are the teams'.
+  evening, also when the round is dropped. Each player scores their team's words found (classic) or points (duel); ranks are the teams'.
 
 ### Backgammon: a tableau `activity: { kind: 'backgammon', settings: { minutes, games } }`
 

@@ -225,6 +225,7 @@ export function plainLobby(rules) {
       return null;
     },
     result: (s, node) => rules.result(/** @type {R} */ (s.round), node),
+    asked: (s) => (s.stage === 'running' && s.round && rules.asked ? rules.asked(s.round) : []),
     ready: (s) => s.ready,
     startPositions: rules.startPositions ?? PLAIN_LOBBY_START_POSITIONS,
     players: rules.players,

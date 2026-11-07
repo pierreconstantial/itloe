@@ -176,6 +176,28 @@ test('results are kept until the end and recorded then, once, in order: the winn
   assert.equal(runIn(content, ended, { t: 'endMinigame', id: 'p' }), ended, 'recorded once');
 });
 
+test('a quiz round dropped by back or goto uses up the questions it showed: the next run picks outside them', () => {
+  /** @type {Content} */
+  const content = structuredClone(SAMPLE_CONTENT);
+  content.start = 'childhood.quiz';
+  content.nodes.childhood.unlock = { always: true };
+  content.nodes['childhood.quiz'].unlock = { always: true };
+  let c = runIn(content, party(content), { t: 'startMinigame', id: 'p', now: 1 }, act({ t: 'config', id: 'p', patch: { count: 3 } }));
+  c = runIn(content, c, act({ t: 'ready', id: 'e', on: true }));
+  c = runIn(content, c, act({ t: 'start', id: 'p', now: 1000, inputs: candidatesFor(BANK, lobby(c).settings, askedSoFar(c)) }));
+  c = runIn(content, c, act({ t: 'answer', id: 'e', choice: 0, now: 1500, verdict: 'right' }), act({ t: 'next', id: 'p', now: 31_000 }));
+  const shown = lobby(c).round.asked;
+  assert.equal(shown.length, 2, 'two questions shown, one still to come');
+  for (const move of /** @type {CampaignAction[]} */ ([{ t: 'back', id: 'p' }, { t: 'gm', id: 'p', op: { op: 'goto', node: 'hub' } }])) {
+    const moved = runIn(content, c, move);
+    assert.equal(moved.at.activity, null, move.t);
+    assert.deepEqual(moved.facts.asked, shown, `${move.t}: the shown questions, not the one still to come`);
+    assert.equal(moved.facts.counters[COUNTER.played('quiz')], undefined, `${move.t}: the round isn't recorded as played`);
+    const next = candidatesFor(BANK, lobby(c).settings, askedSoFar(moved)).map((q) => q.id);
+    assert.ok(shown.every((/** @type {string} */ id) => !next.includes(id)), `${move.t}: the next run doesn't ask them again`);
+  }
+});
+
 test('the content\'s ready rule: every named character in the party and ready; without names, every eligible player', () => {
   const players = [{ id: 'p', character: 'pierre' }, { id: 'e', character: 'elodie' }];
   assert.equal(readyRuleMet({}, players, []), true, 'no rule');

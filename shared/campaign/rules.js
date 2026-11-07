@@ -32,6 +32,16 @@ export function emptyFacts() {
   return { counters: {}, flags: [], inventory: {}, unlocked: [], done: [], seen: [], asked: [], totals: {}, machines: {} };
 }
 
+/**
+ * The facts with content ids used up this evening (never asked again): the ids not yet among them, appended.
+ * Same object when there are none. @param {Facts} f @param {readonly unknown[]} ids @returns {Facts}
+ */
+export function withAsked(f, ids) {
+  const known = new Set(f.asked);
+  const fresh = ids.filter((id) => typeof id === 'string' && !known.has(id));
+  return fresh.length ? { ...f, asked: [...f.asked, .../** @type {string[]} */ ([...new Set(fresh)])] } : f;
+}
+
 /** How many of an item a character holds. @param {Facts} f @param {string} character @param {string} item */
 export const holding = (f, character, item) => f.inventory?.[character]?.[item] ?? 0;
 
@@ -113,10 +123,7 @@ export function record(f, e) {
         if (r.rank === 1 && e.ranking.length > 1) add[COUNTER.won(e.kind, r.character)] = 1;
       }
       for (const [k, n] of Object.entries(e.counters ?? {})) add[k] = (add[k] ?? 0) + n;
-      const bumped = bump(f, add, e.kind, totals);
-      const known = new Set(f.asked);
-      const fresh = (e.asked ?? []).filter((id) => typeof id === 'string' && !known.has(id));
-      return fresh.length ? { ...bumped, asked: [...f.asked, ...fresh] } : bumped;
+      return withAsked(bump(f, add, e.kind, totals), e.asked ?? []);
     }
     case 'scene.seen':
       return bump(f, { [COUNTER.sceneSeen(e.sceneId)]: 1, ...(e.node ? { [COUNTER.finished(e.node)]: 1 } : {}) });

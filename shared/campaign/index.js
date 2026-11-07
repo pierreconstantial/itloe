@@ -34,7 +34,7 @@ import { CHARACTERS, isCharacterId } from '../characters.js';
 import { minigame } from '../minigames.js';
 import { lobbyWaitsFor } from '../plain-lobby.js';
 import { nextSeed } from '../rng.js';
-import { emptyFacts, holds, record, settle, safeInventory, addItem, holding, recipients, COUNTER } from './rules.js';
+import { emptyFacts, holds, record, settle, safeInventory, addItem, holding, recipients, withAsked, COUNTER } from './rules.js';
 import { validateContent, zoneAt, roomAt, sceneAt, childrenOf } from './content.js';
 import {
   initialMachines, safeMachines, eventSteps, conditionStep, dueSteps, nextTimer, hintAt, chooserHeld, pickupsAt,
@@ -565,13 +565,17 @@ function openMinigame(c, content, now) {
 /**
  * Ends the running minigame: every finished round's result is recorded (round.finished) and settled, in
  * order, so a `winner` reward goes to the round that completed the node; then the room at the tableau. A
- * running round is dropped. No minigame → the same campaign.
+ * running round is dropped, though what it asked is used up (not one this release can't resume: its rules
+ * can't read it). No minigame → the same campaign.
  * @param {Campaign} c @param {Content} content @param {number} now @returns {Campaign}
  */
 function endMinigame(c, content, now) {
-  if (!c.at.activity) return c;
+  const s = c.at.activity;
+  if (!s) return c;
+  const spec = kindOf(c);
+  const dropped = resumable(c.at.kind, s) && spec.status(s) === 'running' ? spec.asked?.(s) ?? [] : [];
   /** @type {Campaign} */
-  let next = { ...c, at: { ...c.at, activity: null, results: [] } };
+  let next = { ...c, at: { ...c.at, activity: null, results: [] }, facts: withAsked(c.facts, dropped) };
   for (const result of c.at.results) {
     /** @type {CampaignEvent} */
     const ev = { t: 'round.finished', kind: /** @type {MinigameKind} */ (c.at.kind), node: c.at.node, ...result };
