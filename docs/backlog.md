@@ -26,7 +26,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Pyramide in the story](#pyramide-in-the-story) | Pyramide has no tableau in the story yet | P1 | Needs decision | Low |
 | [Apartment drawings cover avatars](#apartment-drawings-cover-avatars) | The cats, friends, keepsakes and key are always drawn over avatars | P2 | Open | Low |
 | [Backgammon's restart and hidden dice untested](#backgammons-restart-and-hidden-dice-untested) | No test resumes a backgammon round or checks its view hides the dice | P2 | Open | Low |
-| [Questions of a dropped round come back](#questions-of-a-dropped-round-come-back) | A round dropped by `back` or `goto` doesn't use up its questions or words | P2 | Open | Low |
 | [TV frame cost unmeasured](#tv-frame-cost-unmeasured) | The room redraws everything at 60 fps; nobody measured it on the evening's laptop | P2 | Open | Low |
 | [Guests controlling NPCs](#guests-controlling-npcs) | Players controlling Marokkanergasse's NPCs, Nico and Mathieu | P3 | Needs decision | High |
 | [Room before the content arrives](#room-before-the-content-arrives) | A reloaded phone walks the party room until the content loads | P3 | Open | Low |
@@ -89,12 +88,6 @@ In the apartment, the cats, friends, keepsakes and the key are drawn after the d
 `test/backgammon.test.js` never resumes a round through `loadCampaign` (a restart) and never shifts its deadline, and nothing checks that backgammon's view leaves out `seed` and `rolls` (`server/backgammon.ts`), without which a phone could predict the dice. The campaign suite checks that the campaign's own seed stays off the wire; backgammon's view isn't checked.
 
 **Recommendation:** add both to `test/backgammon.test.js`, as `test/pyramide.test.js` does for its words; the same for table football once it has a clock.
-
-### Questions of a dropped round come back
-
-`askedSoFar` (`shared/campaign/index.js`) counts only finished rounds. When the game master leaves a tableau or takes the party elsewhere (`back`, `gm goto`) while a round runs, the questions that round showed, or the Pyramide words it drew, aren't used up and can come up again that evening.
-
-**Recommendation:** when a running round is dropped, record what it asked in `facts.asked`; each round's rules know it (the quiz's shown questions, Pyramide's drawn words).
 
 ### TV frame cost unmeasured
 

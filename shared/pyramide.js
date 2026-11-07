@@ -422,6 +422,9 @@ export function teamRanks(s) {
   return diff === 0 ? [1, 1] : diff < 0 ? [1, 2] : [2, 1];
 }
 
+/** The words it has drawn so far, skipped ones too. @param {PyramideState} s */
+const askedIn = (s) => [...s.drawn];
+
 /**
  * The round's rules, in the rules list inside a lobby (shared/minigames.js).
  * @type {import('./minigames.js').RoundRules<PyramideState, PyramideAction, PyramideSettings>}
@@ -433,9 +436,10 @@ export const PYRAMIDE_RULES = {
   result: (s) => {
     return {
       ranking: ranking(s).map((r) => ({ character: s.players[r.id].character, score: r.score, rank: r.rank })),
-      endReason: s.endReason, asked: [...s.drawn],
+      endReason: s.endReason, asked: askedIn(s),
     };
   },
+  asked: askedIn,
   settings: (patch, base = PYRAMIDE_DEFAULTS) => mergePyramideSettings(base, patch),
   validateSettings: validatePyramideSettings,
   sampleSettings: { mode: 'classic' },

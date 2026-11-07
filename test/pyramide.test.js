@@ -265,3 +265,15 @@ test('pyramide: a word is never drawn twice in an evening, across rounds; a mode
   assert.ok(!used.includes(next[0]), 'not a word from an earlier round');
   assert.equal(new Set(used).size, used.length);
 });
+
+test('pyramide: a round dropped by the game master\'s back uses up the words it drew; the next run doesn\'t draw them', () => {
+  let c = ok(seated(), 'p', { t: 'start' });
+  const used = [...round(c).drawn];
+  c = run(c, { t: 'back', id: 'p' });
+  assert.deepEqual([c.at.activity, c.facts.asked], [null, used], 'the minigame ended, the words it drew used up');
+  c = run(c, { t: 'enter', id: 'p', node: 'hub.pyramide' }, { t: 'startMinigame', id: 'p', now: 2 },
+    step('e', 'team1-clue'), step('n', 'team1-guess'), step('p', 'team2-clue'), step('s', 'team2-guess'));
+  c = ok(c, 'p', { t: 'start' });
+  const drawable = [...round(c).drawn, ...Object.values(round(c).pool).flat().map((w) => w.id)];
+  assert.ok(used.every((id) => !drawable.includes(id)), 'none of them drawn or drawable again');
+});

@@ -334,6 +334,9 @@ export function quizRanking(s) {
   return ranking(s).map((r) => ({ ...r, correct: s.players[r.id].correct }));
 }
 
+/** The questions it has shown so far. @param {QuizState} s */
+const askedIn = (s) => [...s.asked];
+
 /**
  * The quiz's round rules, in the rules list inside a plain lobby (shared/minigames.js).
  * @type {import('../minigames.js').RoundRules<QuizState, QuizAction, QuizSettings>}
@@ -360,9 +363,10 @@ export const QUIZ_RULES = {
     if (right > 0) counters[QUIZ_COUNTER.nodeCorrect(node)] = right;
     return {
       ranking: ranking.map((r) => ({ character: s.players[r.id].character, score: r.score, rank: r.rank })),
-      endReason: s.endReason, counters, asked: [...s.asked],
+      endReason: s.endReason, counters, asked: askedIn(s),
     };
   },
+  asked: askedIn,
   settings: (patch, base = QUIZ_DEFAULTS) => mergeQuizSettings(base, patch),
   validateSettings: validateQuizSettings,
   sampleSettings: { count: 3, seconds: 20, mode: 'mixed' },

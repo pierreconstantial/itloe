@@ -116,6 +116,7 @@ import { plainLobby } from './plain-lobby.js';
  *   reduce: (s: S, a: A, ctx: RoundCtx) => S,
  *   status: (s: S) => RoundStatus | null,       // null: not a round this release can resume (an older save)
  *   result: (s: S, node: string) => RoundResult,   // once finished; node: the tableau it ran at
+ *   asked?: (s: S) => string[],                 // the content ids it has used up so far (RoundResult `asked`): also a dropped round's
  *   settings: (patch: unknown, base?: T) => T,  // `base` (default: the minigame's defaults) with every valid key of `patch`
  *   validateSettings: (settings: unknown) => string[],   // a content node's settings: problems, as readable lines
  *   sampleSettings: object,                     // the development start's settings (ITLOE_CONTENT=minigame:<kind>)
@@ -143,6 +144,7 @@ import { plainLobby } from './plain-lobby.js';
  *   reduce: (s: S, a: A, ctx: RoundCtx) => S,
  *   status: (s: S) => MinigameStatus | null,    // null: not a state this release can resume (an older save)
  *   result: (s: S, node: string) => RoundResult, // the round's, once it turned `podium`; node: the tableau
+ *   asked?: (s: S) => string[],                 // while a round runs, the content ids it has used up so far (else none)
  *   ready: (s: S) => string[],                  // the players ready for the next round
  *   shows: (s: S) => string[],                  // the players it draws itself (everyone else is a wisp)
  *   spots?: (s: S) => Spot[] | null,            // a walkable lobby: its spots while the players it shows walk, else null
