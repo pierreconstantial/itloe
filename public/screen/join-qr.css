@@ -1,7 +1,10 @@
-/* "Show the QR again": a side card (bottom-right). While it is open (body.join-qr-open) a minigame's
-   screen leaves room for it in its own CSS, so it never covers a board or a question; on the lobby / map /
-   podium it sits on the floor corner. Above the cutscene, which stays centred. */
+/* "Show the QR again": a side card (bottom-right). While it is open (body.join-qr-open) a running minigame's
+   screens reflow to the left of it (#app), so it never covers a board or a question; in the room at a tableau
+   and on the map (body.party) it sits on the floor corner. Above the cutscene, which stays centred. */
 :root { --join-card-w: calc(330 * var(--u)); }
+
+#app { transition: padding-right 0.3s ease; }
+body.join-qr-open:not(.party) #app { padding-right: calc(var(--join-card-w) + 48 * var(--u)); }
 
 .join-qr-card {
   position: fixed; right: calc(24 * var(--u)); bottom: calc(24 * var(--u)); z-index: 30;

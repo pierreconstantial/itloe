@@ -30,7 +30,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Browser suites ignore page errors](#browser-suites-ignore-page-errors) | The phone and TV suites pass when a page throws | P2 | Open | Low |
 | [Backgammon's restart and hidden dice untested](#backgammons-restart-and-hidden-dice-untested) | No test resumes a backgammon round or checks its view hides the dice | P2 | Open | Low |
 | [Questions of a dropped round come back](#questions-of-a-dropped-round-come-back) | A round dropped by `back` or `goto` doesn't use up its questions or words | P2 | Open | Low |
-| [Join QR card covers minigame screens](#join-qr-card-covers-minigame-screens) | On the TV the card covers Pyramide, backgammon and the lobby's panel | P2 | Open | Trivial |
 | [TV frame cost unmeasured](#tv-frame-cost-unmeasured) | The room redraws everything at 60 fps; nobody measured it on the evening's laptop | P2 | Open | Low |
 | [Guests controlling NPCs](#guests-controlling-npcs) | Players controlling Marokkanergasse's NPCs, Nico and Mathieu | P3 | Needs decision | High |
 | [Room before the content arrives](#room-before-the-content-arrives) | A reloaded phone walks the party room until the content loads | P3 | Open | Low |
@@ -128,12 +127,6 @@ The unit tests are proportionate; the e2e suites are not. A full run makes about
 `askedSoFar` (`shared/campaign/index.js`) counts only finished rounds. When the game master leaves a tableau or takes the party elsewhere (`back`, `gm goto`) while a round runs, the questions that round showed, or the Pyramide words it drew, aren't used up and can come up again that evening.
 
 **Recommendation:** when a running round is dropped, record what it asked in `facts.asked`; each round's rules know it (the quiz's shown questions, Pyramide's drawn words).
-
-### Join QR card covers minigame screens
-
-The join QR card sits fixed at the TV's bottom right, above everything. Only `public/screen/blocks.css` and `public/screen/quiz.css` leave room for it, so when someone shows the QR it covers Team 2's pyramid, backgammon's second board and the plain lobby's panel. Inferred from the CSS, not seen.
-
-**Recommendation:** one rule in the frame (on `#app`) in place of the two per-minigame ones.
 
 ### TV frame cost unmeasured
 

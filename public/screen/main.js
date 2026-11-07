@@ -259,8 +259,8 @@ function showMap(c) {
 }
 
 // ---------- "show the QR again" (any player asks; screens get { t:'joinQr', until }) ----------
-// A side card with the join QR + room code + a shrinking bar. While it is open a minigame's screen makes
-// room for it (body.join-qr-open, in its own CSS), so it never covers a board or a question.
+// A side card with the join QR + room code + a shrinking bar. While it is open a running minigame's screens
+// reflow to the left of it (body.join-qr-open, ./join-qr.css), so it never covers a board or a question.
 
 /** @type {import('./join-qr.js').JoinWindow | null} */
 let joinWindow = null;

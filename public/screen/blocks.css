@@ -191,9 +191,6 @@ body.has-countdown .arena { padding-top: calc(118 * var(--u)); }
   50% { transform: translateX(-50%) scale(1.12); }
 }
 
-/* make room for the join QR card: the boards reflow to the left of it */
-body.join-qr-open .arena { padding-right: calc(var(--join-card-w) + 48 * var(--u)); transition: padding-right 0.3s ease; }
-
 @media (prefers-reduced-motion: reduce) {
   .panel.is-danger { animation: none; }
   #countdown.is-urgent { animation: none; }
