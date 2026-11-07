@@ -1,4 +1,4 @@
-// P0 contract — FROZEN. Fully implemented in P0 (P1 covers it with tests).
+// The block board: placing a piece, finding and applying clears, whether a hand still fits.
 // Board = (0 | colorIndex)[] of length size*size, row-major: cell (x, y) = board[y * size + x].
 
 import { PIECES } from './pieces.js';

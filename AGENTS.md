@@ -10,7 +10,7 @@
 - Read the README's “For developers” section for architecture, code conventions, and test commands. Inspect the neighboring implementation and relevant tests before choosing an approach.
 - When adding or changing a minigame, read `docs/minigames.md` first.
 - When adding or changing story content, the campaign engine (`shared/campaign/`), or code that reads the campaign (server, phone, TV), read `docs/story-engine.md` first and follow its rule: the story is data, the code is generic.
-- Read the relevant sections of `PROTOCOL.md` and the contract sections of `BUILD-PLAN.md` when touching messages, shared APIs, or saved state. The wire protocol (`PROTOCOL.md`, Contract B) is not frozen, whatever `BUILD-PLAN.md` says: change it when a change makes sense, and update `PROTOCOL.md` with the code. Do not silently change any other contract marked frozen: raise the proposed change for agreement before implementing it. Draft proposals do not define implemented APIs.
+- Read the relevant sections of `PROTOCOL.md` and the contract sections of `BUILD-PLAN.md` when touching messages, shared APIs, or saved state. No contract is frozen: change one when a change makes sense, and update its documentation with the code. Draft proposals do not define implemented APIs.
 - Check the working tree and preserve unrelated local changes. Follow file ownership assigned for the current task; coordinate changes to files owned by another active contributor.
 
 ## While implementing

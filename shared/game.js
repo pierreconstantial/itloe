@@ -1,4 +1,4 @@
-// P0 contract + Q4 addendum (2026-11-04) — signatures and State/Action shapes FROZEN.
+// The block game's round rules: boards, hands, placements, clears, scores, the settings and the timed mode.
 // Rules: BUILD-PLAN.md «Contract A» (normative) + the Q4 settings/timed-mode addendum.
 
 import { emptyBoard, canPlace, place, findClears, applyClears, anyFit } from './board.js';
