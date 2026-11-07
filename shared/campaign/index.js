@@ -16,6 +16,7 @@
 //   isWisp(party, id, shows)                  → does this member show as a wisp (the story's, or one a minigame doesn't show)
 //   eligibleOf(party, nodeId, content)        → who may play the node's minigame: { id, character }[], party order
 //   readyRuleMet(activity, players, ready)    → the content's ready rule (`allReady`) over a lobby's players
+//   startWaitsFor(minigame, lobby)           → what the game master's Start waits for, for the screens
 //   askedSoFar(campaign)                      → content ids used up this evening, the running minigame's rounds too
 //   holds(cond, facts) · record(facts, event) · settle(facts, content, fromSeq) → { facts, news }
 //   validateContent(content) → string[] · zoneAt(content, nodeId, x, y) → child id | null
@@ -31,6 +32,7 @@
 
 import { CHARACTERS, isCharacterId } from '../characters.js';
 import { minigame } from '../minigames.js';
+import { lobbyWaitsFor } from '../plain-lobby.js';
 import { nextSeed } from '../rng.js';
 import { emptyFacts, holds, record, settle, safeInventory, addItem, holding, recipients, COUNTER } from './rules.js';
 import { validateContent, zoneAt, roomAt, sceneAt, childrenOf } from './content.js';
@@ -201,6 +203,22 @@ export function readyRuleMet(rule, players, ready) {
   return names
     ? names.every((character) => players.some((p) => p.character === character && ready.includes(p.id)))
     : players.every((p) => ready.includes(p.id));
+}
+
+/**
+ * What the game master's Start waits for, or null: a round can start. The main game's rule first, the content's
+ * (`missing`: characters the tableau names who haven't joined; `allReady`: who it names, or everyone, not all
+ * ready), then the minigame's own (`players`: more or fewer ready than a round takes, lobbyWaitsFor). The phone
+ * and the TV word it; the engine (readyRuleMet) and the plain lobby (lobbyWaitsFor) refuse the start on the same
+ * rules.
+ * @param {import('../minigames.js').MinigameView} m @param {{ players: { id: string, character: CharacterId }[], ready: string[] }} lobby
+ * @returns {{ t: 'missing', characters: CharacterId[] } | { t: 'allReady' } | { t: 'players', min: number, max: number, ready: number } | null}
+ */
+export function startWaitsFor(m, lobby) {
+  const missing = (m.required.eligible ?? []).filter((ch) => !lobby.players.some((p) => p.character === ch));
+  if (m.required.allReady && missing.length) return { t: 'missing', characters: missing };
+  if (!readyRuleMet(m.required, lobby.players, lobby.ready)) return { t: 'allReady' };
+  return lobbyWaitsFor(lobby.ready.length, minigame(m.kind)?.players);
 }
 
 /**

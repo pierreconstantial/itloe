@@ -385,11 +385,10 @@ function gone(s, id, why) {
 }
 
 /**
- * A new group phase, its first round being played. null with fewer than MIN_PLAYERS or more than MAX_PLAYERS.
+ * A new group phase, its first round being played: MIN_PLAYERS to MAX_PLAYERS, as `players` in its rules says.
  * @param {import('./minigames.js').RoundStart<Partial<BackgammonSettings>>} start @returns {BackgammonState | null}
  */
 export function startBackgammon({ seed, settings, players, now }) {
-  if (players.length < MIN_PLAYERS || players.length > MAX_PLAYERS) return null;
   /** @type {Record<string, BackgammonPlayer>} */
   const seated = {};
   for (const { id, character } of players) {
@@ -530,6 +529,7 @@ export const BACKGAMMON_RULES = {
   deadlineAction: (deadline) => ({ t: 'timeUp', deadline }),
   shiftDeadline: (s, by) => (running(s) && s.phase === 'playing' && s.deadline !== null ? { ...s, deadline: s.deadline + by } : s),
   retire: true,
+  players: { min: MIN_PLAYERS, max: MAX_PLAYERS },
   describe: (s) => `backgammon round ${s.round}, ${s.phase}, ${s.games.length} games counted`
     + ` (${standings(s).map((r) => `${s.players[r.id].name} ${r.points}`).join(', ')})`,
 };

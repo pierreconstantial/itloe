@@ -468,6 +468,7 @@ export const PYRAMIDE_RULES = {
   shiftDeadline: (s) => s,
   retire: true,
   spots: PYRAMIDE_SPOTS,
+  players: { min: PYRAMIDE_SPOTS.length, max: PYRAMIDE_SPOTS.length }, // a clue giver and a guesser per team
   startPositions: PYRAMIDE_START_POSITIONS,
   describe: (s) => `pyramide ${s.mode} ${s.endReason ? 'finished' : `word ${s.mode === 'duel' ? s.index + 1 : '…'}`}`
     + ` (team 1 ${s.teams[0].score}, team 2 ${s.teams[1].score})`,

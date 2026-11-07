@@ -151,8 +151,9 @@ game master's at the wrong moment → `err "refused"`.
                                        // in a lobby with spots (Pyramide) → err "refused": holding a spot is being ready
 { "t": "config", "patch": { … } }      // game master, in the lobby: the minigame's settings, from its schema; invalid
                                        // keys/values ignored, his no-op patch silent; outside the lobby → err "locked"
-{ "t": "start" }                       // game master, in the lobby, with one ready player or more (and the content's
-                                       // ready rule met): a round with the ready players, in party order; the quiz picks
+{ "t": "start" }                       // game master, in the lobby, with as many ready players as a round takes (one or
+                                       // more; backgammon 2 to 4, Pyramide 4) and the content's ready rule met: a round
+                                       // with the ready players, in party order; the quiz picks
                                        // its questions among the bank's candidates, none left → refused
 { "t": "endGame" }                     // game master, a round running → its podium, endReason "gm"
 { "t": "retire", "target": "p-abc" }   // game master, a round running: the minigame decides what taking a player out
