@@ -118,7 +118,7 @@ the round that completed the node. A minigame ended before any round finished re
 `join` and `leave` act on the EVENING: `join` adds a party member, `leave` leaves the evening (the stored id stops
 rejoining). Every id is injected by the server (socket → playerId; screens: `"screen"`), never taken from the wire.
 
-**Routing.** The server handles `hello`, `join`, `leave`, `enter`, `back`, `gm`, `ack`, `pos`, `say`,
+**Routing.** The server handles `hello`, `join`, `leave`, `enter`, `choose`, `back`, `gm`, `ack`, `pos`, `say`,
 `emote`, `interact`, `showJoin`, `hideJoin`, `takeSpot`, `startMinigame` and `endMinigame` itself:
 
 - `startMinigame`: the game master, in the room at a minigame's tableau: the minigame starts, in its lobby, with
@@ -236,6 +236,8 @@ queries (hints, zones, pickups, NPC lines, hidden props, offers, the held choose
 - the chooser walking into a story zone (the portal) is an ordinary `pos`; the server applies `zone` and, if the
   zone says so, sends the chooser's new position (`pos` echo) where they arrive;
 - using a story object is an ordinary `interact`; picking up an item on the floor is `interact` with the item id;
+- the chooser answering a story choice (`choiceAt`, e.g. where the tram goes after its quiz) sends
+  `{ "t": "choose", "option": "flat" }`; an option not open now, or anyone but the chooser → err `refused`;
 - a scripted cutscene is the news entry `{ "seq": 1, "t": "cutscene", "id": "apparition" }`; the TV plays the
   cutscene of that id and sends the ordinary `ack`, which moves the machines waiting for it;
 - timed states (an NPC leaving after three seconds) are fired by the server's clock, also after a restart.

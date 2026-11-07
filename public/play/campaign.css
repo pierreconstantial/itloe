@@ -44,6 +44,11 @@
 .offer p { margin: 0 0 10px; color: var(--accent); font-weight: 700; }
 .offer div { display: flex; gap: 8px; }
 .offer button { flex: 1; }
+/* the story's choice: pinned over whatever view shows, until the chooser answers */
+.choice { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 20; padding: 12px; border-radius: 12px;
+  background: var(--bg-2); box-shadow: 0 6px 24px rgb(0 0 0 / 0.45); }
+.choice p { margin: 0 0 10px; color: var(--accent); font-weight: 700; }
+.choice div { display: flex; flex-direction: column; gap: 8px; }
 
 /* game-master sheet: rows of small controls (the panel's own rules style only direct buttons) */
 .gm-panel { text-align: left; }

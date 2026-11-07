@@ -20,8 +20,9 @@ export const STORY_CONTENT = {
   },
   // once Élodie went through the portal, she alone moves the party
   leadAfter: { not: { machine: 'opening', in: ['false-start', 'portal-open'] } },
-  // the tram's destinations don't exist yet: the game master takes the party to Tram 5 and the flat
-  gmPlaces: ['hub.false-start', 'hub', 'young-adult', 'young-adult/tram-5', 'young-adult/appart-elo-1'],
+  // where the game master can take the party from his panel, to stand in for what isn't built yet
+  gmPlaces: ['hub.false-start', 'hub', 'young-adult', 'young-adult/tram-5', 'young-adult/appart-elo-1',
+    'young-adult/shelter', 'young-adult/appart-pierre'],
   items: Object.assign({}, ...PARTS.map((p) => p.items)),
   nodes: Object.assign({}, ...PARTS.map((p) => p.nodes)),
   rooms: Object.assign({}, ...PARTS.map((p) => p.rooms)),

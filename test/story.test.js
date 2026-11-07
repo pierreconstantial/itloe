@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   newCampaign, loadCampaign, reduceCampaign, validateContent, holding, gameMasterId, roomAt, sceneAt, objectRules, offerAt,
-  nextTimer, npcsAt, pickupsAt,
+  nextTimer, npcsAt, pickupsAt, choiceAt,
 } from '../shared/campaign/index.js';
 import { objectAction, nearbyObject } from '../shared/interactions.js';
 import { isWalkable } from '../shared/scene.js';
@@ -157,11 +157,13 @@ test('Young Adult: Élodie walks the places, and the flags open the Shelter and 
   c = act(c, { t: 'back', id: 'elodie' });
   assert.equal(c.at.node, 'young-adult/tram-5');
   assert.equal(act(c, { t: 'back', id: 'elodie' }), c, 'no way back from Tram 5 for Élodie');
-  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'goto', node: 'young-adult' } });
   c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.shelter.open', on: true } });
-  c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/shelter' });
+  assert.ok(c.facts.unlocked.includes('young-adult/shelter'));
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'goto', node: 'young-adult/shelter' } }); // the tram's way, in its test
   assert.equal(roomAt(STORY_CONTENT, c.at.node).id, 'young-adult/shelter');
   c = act(c, { t: 'back', id: 'elodie' });
+  assert.equal(c.at.node, 'young-adult/tram-5', 'from the Shelter, back to the tram stop');
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'goto', node: 'young-adult' } });
   c = act(c, { t: 'back', id: 'elodie' });
   assert.equal(c.at.node, 'hub');
   assert.equal(holding(c.facts, 'elodie', INTRO_KEY), 1);
@@ -180,7 +182,60 @@ test('the painted tram offers Élodie its quiz for 30 seconds; accepting opens t
   c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/tram-5/quiz', now: 2000 });
   assert.equal(c.at.node, 'young-adult/tram-5/quiz');
   assert.equal(c.at.activity?.stage, 'lobby', 'the quiz lobby is open');
-  assert.equal(stateOf(c, 'tram'), 'waiting', 'the offer is used');
+  assert.equal(stateOf(c, 'tram'), 'riding', 'the offer is used');
+});
+
+test('after the tram quiz Élodie chooses a destination: her flat, the Shelter once open, Marokkanergasse after the kiss', () => {
+  /** @param {import('../shared/campaign/types.js').Campaign} from */
+  const ride = (from) => {
+    let c = act(from, { t: 'use', id: 'elodie', object: 'tram-5-tram', action: 'ride', now: 1000 });
+    c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/tram-5/quiz', now: 2000 });
+    assert.equal(choiceAt(c, STORY_CONTENT), null, 'no choice before a round has finished');
+    assert.equal(act(c, { t: 'choose', id: 'elodie', option: 'flat' }), c);
+    // the game master ends the lobby: the quiz is over and the choice stands (with a finished round, it shows on the podium)
+    c = act(c, { t: 'endMinigame', id: 'pierre', now: 3000 });
+    return c;
+  };
+  let c = act(afterOpening(), { t: 'enter', id: 'elodie', node: 'young-adult' });
+  c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/tram-5' });
+  c = ride(c);
+  const keys = (/** @type {typeof c} */ x) => choiceAt(x, STORY_CONTENT)?.options.map((o) => o.key);
+  assert.deepEqual(keys(c), ['flat'], 'only her flat at first');
+  assert.equal(act(c, { t: 'choose', id: 'elodie', option: 'shelter' }), c, 'the Shelter is not open yet');
+  assert.equal(act(c, { t: 'choose', id: 'pierre', option: 'flat' }), c, 'Élodie alone chooses');
+  c = act(c, { t: 'choose', id: 'elodie', option: 'flat', now: 4000 });
+  assert.equal(c.at.node, 'young-adult/appart-elo-1');
+  assert.equal(stateOf(c, 'tram'), 'waiting');
+  assert.equal(choiceAt(c, STORY_CONTENT), null);
+
+  // back at the stop on foot; with the ticket found, the Shelter is a destination too
+  c = act(c, { t: 'back', id: 'elodie', now: 5000 });
+  assert.equal(c.at.node, 'young-adult/tram-5');
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.shelter.open', on: true } });
+  c = ride(c);
+  assert.deepEqual(keys(c), ['flat', 'shelter']);
+  c = act(c, { t: 'choose', id: 'elodie', option: 'shelter', now: 6000 });
+  assert.equal(c.at.node, 'young-adult/shelter');
+
+  // after the kiss: Marokkanergasse, and no more flat; Marokkanergasse has no way back
+  c = act(c, { t: 'back', id: 'elodie', now: 7000 });
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.appart-pierre.open', on: true } });
+  c = ride(c);
+  assert.deepEqual(keys(c), ['shelter', 'marokkanergasse']);
+  c = act(c, { t: 'choose', id: 'elodie', option: 'marokkanergasse', now: 8000 });
+  assert.equal(c.at.node, 'young-adult/appart-pierre');
+  assert.equal(act(c, { t: 'back', id: 'elodie' }), c, 'no normal exit');
+});
+
+test('a ride the game master cancels (back to the stop) leaves the tram ready again', () => {
+  let c = act(afterOpening(), { t: 'enter', id: 'elodie', node: 'young-adult' });
+  c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/tram-5' });
+  c = act(c, { t: 'use', id: 'elodie', object: 'tram-5-tram', action: 'ride', now: 1000 });
+  c = act(c, { t: 'enter', id: 'elodie', node: 'young-adult/tram-5/quiz', now: 2000 });
+  c = act(c, { t: 'back', id: 'pierre', now: 3000 });
+  assert.equal(c.at.node, 'young-adult/tram-5');
+  assert.equal(stateOf(c, 'tram'), 'waiting');
+  assert.ok(objectAction('tram-5-tram', c.party.players.elodie, objectRules(c.facts, STORY_CONTENT)), 'she can ride again');
 });
 
 test('Tschick-Toni: a cigarette from the pack, "Oida, geil!", he leaves with his dog, the crowbar stays', () => {

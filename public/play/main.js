@@ -9,7 +9,7 @@ import { syncClock, serverNow } from '../commun/clock.js';
 import { CHARACTERS, ROSTER_SIZE, isCharacterId } from '../../shared/characters.js';
 import { WORLD, spawnPoint } from '../../shared/world.js';
 import {
-  gameMasterId, isWisp, leads, roomAt, sceneAt, hintAt, chooserHeld, pickupsAt, offerAt, objectRules, within,
+  gameMasterId, isWisp, leads, roomAt, sceneAt, hintAt, chooserHeld, pickupsAt, offerAt, objectRules, within, choiceAt,
 } from '../../shared/campaign/index.js';
 import { room as sceneRoom } from '../../shared/scene.js';
 import { interactionActor, nearbyObject, nearbyProp, objectAction } from '../../shared/interactions.js';
@@ -411,6 +411,7 @@ function render() {
 
   // walking stops where it is not allowed (a game under way): final moving:false
   if (!canWalk()) joystick.cancel();
+  renderChoice();
 
   if (!mem) {
     if (roomPrompt) { show('room'); renderRoomPrompt(roomPrompt); return; }
@@ -659,6 +660,28 @@ function renderTableau(v, me, isGm) {
   $('btn-start-minigame').textContent = `▶ Start the ${name}`;
   const hint = campaign ? hintAt(campaign.facts, content(), campaign.at.node) : null;
   $('tableau-hint').textContent = hint ?? (isGm ? '' : `Waiting for ${gameMasterName()} to start the ${name}…`);
+}
+
+/** The choice's buttons as last drawn (rebuilt only when it changes, so a tap is never lost to a re-render). */
+let choiceDrawn = '';
+/** The story's question to the chooser where the party is (choiceAt, e.g. the tram's destination), over any view. */
+function renderChoice() {
+  const choice = campaign && member() && myCharacter() === content().chooser
+    ? choiceAt(campaign, content(), minigame?.status ?? null) : null;
+  $('choice').hidden = !choice;
+  const drawn = choice ? JSON.stringify(choice) : '';
+  if (!choice || drawn === choiceDrawn) { choiceDrawn = drawn; return; }
+  choiceDrawn = drawn;
+  $('choice-text').textContent = choice.text;
+  $('choice-options').replaceChildren(...choice.options.map((o) => {
+    const b = Object.assign(document.createElement('button'), { type: 'button', className: 'primary', textContent: o.text });
+    b.dataset.option = o.key;
+    b.addEventListener('click', () => {
+      if (!conn.isOnline()) { toast('Connection lost. Try again when connected.'); return; }
+      send({ t: 'choose', option: o.key });
+    });
+    return b;
+  }));
 }
 
 /** @param {string} text */

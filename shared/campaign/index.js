@@ -5,7 +5,7 @@
 // PUBLIC API (types in ./types.js; reducers return the SAME object when they refuse an action)
 //   newCampaign(content, seed)               → Campaign in the room at content.start, empty party
 //   loadCampaign(raw, content)               → Campaign; drops ids the content no longer has, re-settles
-//   reduceCampaign(campaign, action, content)→ Campaign; actions: join leave status incarnate enter use pickup zone
+//   reduceCampaign(campaign, action, content)→ Campaign; actions: join leave status incarnate enter use pickup zone choose
 //                                              tick back startMinigame endMinigame activity event ack gm
 //                                              (`action.now`: the server's clock, injected on every action)
 //   activityOf(campaign)                     → the running minigame's state, or null (none runs)
@@ -20,6 +20,7 @@
 //   validateContent(content) → string[] · zoneAt(content, nodeId, x, y) → child id | null
 //   roomAt(content, nodeId) · sceneAt(content, facts, nodeId) → the node's room (without its hidden props)
 //   machines: hintAt chooserHeld pickupsAt zonesAt npcsAt hiddenProps offerAt objectRules nextTimer within
+//   choiceAt(campaign, content, status?)     → the choice the chooser answers now, or null
 //   SAMPLE_CONTENT (placeholder content: the demo and test fixture)
 //
 // Server contract: ids are injected (socket → playerId; ack: 'screen'); `activity.action` is rebuilt
@@ -34,7 +35,7 @@ import { emptyFacts, holds, record, settle, safeInventory, addItem, holding, rec
 import { validateContent, zoneAt, roomAt, sceneAt, childrenOf } from './content.js';
 import {
   initialMachines, safeMachines, eventSteps, conditionStep, dueSteps, nextTimer, hintAt, chooserHeld, pickupsAt,
-  zonesAt, npcsAt, hiddenProps, offerAt, objectRules, within, speechAt,
+  zonesAt, npcsAt, hiddenProps, offerAt, objectRules, within, speechAt, choiceIn,
 } from './machines.js';
 import { objectAction } from '../interactions.js';
 import { SAMPLE_CONTENT } from './sample.js';
@@ -108,6 +109,19 @@ const kindOf = (c) => /** @type {import('../minigames.js').MinigameRules<any, an
  * @param {Campaign} c @returns {import('../minigames.js').MinigameStatus | null}
  */
 export const minigameStatus = (c) => (c.at.activity ? kindOf(c).status(c.at.activity) : null);
+
+/**
+ * The choice the chooser answers now where the party is (a story machine's `choice`), or null. At a minigame's
+ * tableau it waits for the game: while a round runs, or before one has finished, there is none.
+ * @param {{ facts: Facts, at: { node: string, results: readonly unknown[], activity?: unknown } }} c a campaign, or a
+ *   client's copy of it (without the minigame's state: it passes `status`, its view's)
+ * @param {Content} content @param {import('../minigames.js').MinigameStatus | null} [status] the minigame's status there
+ * @returns {import('./types.js').Choice | null}
+ */
+export function choiceAt(c, content, status = c.at.activity ? minigameStatus(/** @type {Campaign} */ (c)) : null) {
+  if (status && (status === 'running' || !c.at.results.length)) return null;
+  return choiceIn(c.facts, content, c.at.node);
+}
 
 /** A saved minigame this release does not have: the save can't be resumed, and must not be dropped. */
 export class UnknownMinigameError extends Error {
@@ -629,6 +643,14 @@ function step(c, a, content, now) {
       if (!actingChooser(c, a.id, content) || c.at.activity) return c;
       if (!zonesAt(c.facts, content, c.at.node).some((z) => z.id === a.zone)) return c;
       return fire(c, `zone:${a.zone}`, content, now);
+    }
+
+    case 'choose': {
+      // the chooser answers the choice asked where the party is (an option open now); a goto among the
+      // transition's effects ends a minigame there first, its rounds recorded
+      if (!actingChooser(c, a.id, content) || typeof a.option !== 'string') return c;
+      if (!choiceAt(c, content)?.options.some((o) => o.key === a.option)) return c;
+      return fire(c, `choose:${a.option}`, content, now);
     }
 
     case 'tick': {

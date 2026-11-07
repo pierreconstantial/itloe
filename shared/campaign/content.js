@@ -215,6 +215,7 @@ function allConditions(content) {
     for (const [sid, st] of Object.entries(m?.states ?? {})) {
       for (const w of st.when ?? []) out.push([`machine "${id}", state "${sid}", when`, w.if]);
       for (const o of Object.values(st.objects ?? {})) for (const a of o.actions ?? []) if (a.if) out.push([`machine "${id}", state "${sid}", action "${a.key}"`, a.if]);
+      for (const o of st.choice?.options ?? []) if (o?.if) out.push([`machine "${id}", state "${sid}", choice "${o.key}"`, o.if]);
     }
   }
   return out;
@@ -240,6 +241,7 @@ function machineErrors(content, knownItem) {
     ...Object.values(st.on ?? {}).flatMap((t) => (t && typeof t === 'object' ? t.do ?? [] : []))]);
   const cutscenes = new Set(allEffects.flatMap((e) => (e && typeof e === 'object' && 'cutscene' in e ? [e.cutscene] : [])));
   const actions = new Set(states.flatMap((st) => Object.entries(st.objects ?? {}).flatMap(([prop, o]) => (o?.actions ?? []).map((a) => `${a.key}:${prop}`))));
+  const choices = new Set(states.flatMap((st) => (st.choice?.options ?? []).map((o) => o?.key)));
   /** Why an event key can never happen, or null. @param {string} event @returns {string | null} */
   const eventError = (event) => {
     const [kind, ...rest] = event.split(':');
@@ -248,6 +250,7 @@ function machineErrors(content, knownItem) {
     if (kind === 'zone') return zoneIds.has(target) ? null : `no zone "${target}"`;
     if (kind === 'pickup') return pickupItems.has(target) ? null : `no pickup of "${target}"`;
     if (kind === 'cutscene') return cutscenes.has(target) ? null : `no cutscene "${target}" is ever played`;
+    if (kind === 'choose') return choices.has(target) ? null : `no choice offers "${target}"`;
     return actions.has(event) ? null : `no object action "${kind}" on "${target}"`;
   };
   for (const [id, m] of Object.entries(content.machines ?? {})) {
@@ -318,6 +321,18 @@ function machineErrors(content, knownItem) {
         }
       }
       if (s.offer && !(nodes[s.offer.node] && typeof s.offer.text === 'string' && typeof s.offer.accept === 'string')) errors.push(`${where}: invalid offer`);
+      if (s.choice) {
+        const { at: node, text, options } = s.choice;
+        if (!nodes[node] || typeof text !== 'string' || !Array.isArray(options) || !options.length) errors.push(`${where}: a choice needs a node (at), a text and options`);
+        const keys = new Set();
+        for (const o of Array.isArray(options) ? options : []) {
+          if (typeof o?.key !== 'string' || !o.key || typeof o.text !== 'string') { errors.push(`${where}: a choice option needs a key and a text`); continue; }
+          if (keys.has(o.key)) errors.push(`${where}: choice option "${o.key}" twice`);
+          keys.add(o.key);
+          if (o.if !== undefined && !isCondition(o.if)) errors.push(`${where}: choice option "${o.key}": invalid if`);
+          if (!s.on?.[`choose:${o.key}`]) errors.push(`${where}: choosing "${o.key}" must leave the state (on "choose:${o.key}")`);
+        }
+      }
     }
   }
   return errors;

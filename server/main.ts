@@ -732,6 +732,11 @@ function handleMessage(ws: WebSocket, m: any): void {
       if (typeof m.node !== 'string' || !apply({ t: 'enter', id, node: m.node })) sendErr(ws, 'refused');
       return;
 
+    case 'choose':
+      // the chooser answers the story's choice where the party is (e.g. the tram's destination); refused → 'refused'
+      if (typeof m.option !== 'string' || !apply({ t: 'choose', id, option: m.option })) sendErr(ws, 'refused');
+      return;
+
     case 'back':
       // the game master (the chooser once they lead the party, while no minigame runs), up one level; a running
       // minigame ends first → 'refused' at the hub

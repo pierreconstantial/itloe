@@ -105,6 +105,11 @@ export {};
  *   arrive?: { x: number, y: number } }} Zone */
 /** An NPC prop's line (`blink`: every other few seconds) and emote. @typedef {{ say?: string, blink?: true, emote?: string }} Npc */
 /** The chooser's phone offers to enter `node` (a child of where the party is). @typedef {{ node: string, text: string, accept: string }} Offer */
+/** One answer of a choice: choosing it is the event `choose:<key>`; shown only while `if` holds.
+ *  @typedef {{ key: string, text: string, if?: Condition }} ChoiceOption */
+/** A question the chooser's phone asks at node `at`, with no Dismiss: one of its open options must be chosen.
+ *  At a minigame's tableau it waits until no round runs and one has finished (the tram's quiz).
+ *  @typedef {{ at: string, text: string, options: ChoiceOption[] }} Choice */
 /** @typedef {string | { to: string, do?: Effect[] }} Transition */
 /**
  * @typedef {{
@@ -121,6 +126,7 @@ export {};
  *   speech?: Record<string, string>,                          // character → a line they say over their avatar, once
  *   hide?: string[],                                          // prop ids gone from their rooms
  *   offer?: Offer,
+ *   choice?: Choice,
  * }} MachineState
  */
 /** @typedef {{ initial: string, states: Record<string, MachineState> }} Machine */
@@ -230,6 +236,7 @@ export {};
  *   | { t: 'use', id: string, object: string, action: string }   // a story machine's object action
  *   | { t: 'pickup', id: string, item: string }                   // the chooser picks up a pickup where the party is
  *   | { t: 'zone', id: string, zone: string }                     // the chooser walked into a zone where the party is
+ *   | { t: 'choose', id: string, option: string }                 // the chooser answered the choice asked where the party is
  *   | { t: 'tick' }                                               // fires the due timed transitions
  *   | { t: 'status', id: string, status: string, on: boolean } // internal: add or remove a player status
  *   | { t: 'incarnate', id: string }                            // internal: finish the Wisp countdown

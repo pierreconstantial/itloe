@@ -10,6 +10,10 @@ const ITEM_ART = '/assets/items/young-adult/';
 const TRAM_5 = 'young-adult/tram-5';
 const TRAM_QUIZ = 'young-adult/tram-5/quiz';
 const FLAT = 'young-adult/appart-elo-1';
+const SHELTER = 'young-adult/shelter';
+const MAROKKANERGASSE = 'young-adult/appart-pierre';
+/** Set by the kiss at the Shelter (not implemented yet): Marokkanergasse opens, Élodie's flat closes. */
+const KISSED = 'young-adult.appart-pierre.open';
 /** In-game time in Élodie's flat: hours that only her actions move (docs/story-engine.md, "In-game time"). */
 const CLOCK = 'young-adult.clock.hours';
 
@@ -86,10 +90,7 @@ export const YOUNG_ADULT = {
       unlock: { has: INTRO_KEY, who: 'elodie' },
       door: { x: 7, y: 4.7, w: 2.3, h: 1.2 },
       back: '← Back to Élodie’s dream apartment',
-      hints: [
-        { when: { unlocked: 'young-adult/shelter' }, text: 'Élodie, walk to Tram 5 or enter the Shelter.' },
-        { text: 'Élodie, walk to Tram 5. The Shelter opens later.' },
-      ],
+      hints: [{ text: 'Élodie, walk to Tram 5.' }],
     },
     [TRAM_5]: {
       id: TRAM_5, kind: 'world', parent: 'young-adult', title: 'Tram 5 — Wallensteinplatz',
@@ -105,22 +106,24 @@ export const YOUNG_ADULT = {
       // only through the tram's offer, and its lobby opens at once
       enterWhen: { machine: 'tram', in: ['offered'] }, startsOnEnter: true,
     },
-    'young-adult/shelter': {
-      id: 'young-adult/shelter', kind: 'world', parent: 'young-adult', title: 'The Shelter',
-      room: 'young-adult/shelter', unlock: { all: [{ unlocked: 'young-adult' }, { flag: 'young-adult.shelter.open' }] },
-      door: { x: 13.2, y: 5.75, w: 2.2, h: 1.05 },
-      back: '← Stay at Wallensteinplatz',
-      hints: [{ text: 'Élodie can return to Wallensteinplatz.' }],
-    },
-    'young-adult/appart-elo-1': {
-      id: 'young-adult/appart-elo-1', kind: 'world', parent: TRAM_5, title: 'Appart Elo 1',
-      room: 'young-adult/appart-elo-1', unlock: { unlocked: TRAM_5 },
+    // the tram's destinations (the `tram` machine's choice): no doors; Back walks to the tram stop
+    [SHELTER]: {
+      id: SHELTER, kind: 'world', parent: TRAM_5, title: 'The Shelter',
+      room: SHELTER, unlock: { all: [{ unlocked: TRAM_5 }, { flag: 'young-adult.shelter.open' }] },
+      back: '← Back to Tram 5',
       hints: [{ text: 'Élodie can return to Tram 5.' }],
     },
-    'young-adult/appart-pierre': {
-      id: 'young-adult/appart-pierre', kind: 'world', parent: TRAM_5, title: 'Marokkanergasse',
-      room: 'young-adult/appart-pierre', unlock: { all: [{ unlocked: TRAM_5 }, { flag: 'young-adult.appart-pierre.open' }] },
+    [FLAT]: {
+      id: FLAT, kind: 'world', parent: TRAM_5, title: 'Appart Elo 1',
+      room: FLAT, unlock: { unlocked: TRAM_5 },
+      back: '← Back to Tram 5',
       hints: [{ text: 'Élodie can return to Tram 5.' }],
+    },
+    // no normal exit (GameStory.md): the completion key and portal will lead on
+    [MAROKKANERGASSE]: {
+      id: MAROKKANERGASSE, kind: 'world', parent: TRAM_5, title: 'Marokkanergasse',
+      room: MAROKKANERGASSE, unlock: { all: [{ unlocked: TRAM_5 }, { flag: KISSED }] },
+      back: false,
     },
   },
   rooms: Object.fromEntries([TRAM_5_ROOM, SHELTER_ROOM, APPART_ELO_1_ROOM, APPART_PIERRE_ROOM].map((r) => [r.id, r])),
@@ -137,7 +140,9 @@ export const YOUNG_ADULT = {
     'young-adult/appart-pierre': [{ src: `${ART}marokkanergasse-eureka-v1.png` }],
   },
   machines: {
-    // The painted tram: talking to it offers Élodie a quiz for 30 seconds; accepting enters its tableau.
+    // The painted tram: talking to it offers Élodie a quiz for 30 seconds; accepting enters its tableau. Once a
+    // round has finished, she chooses where the tram goes: her flat (until the kiss), the Shelter once it is open,
+    // Marokkanergasse after the kiss. Leaving the quiz another way (the game master) cancels the ride.
     tram: {
       initial: 'waiting',
       states: {
@@ -149,7 +154,24 @@ export const YOUNG_ADULT = {
           objects: { 'tram-5-tram': { actions: [{ key: 'ride', text: '🚋 Tram 5' }] } },
           offer: { node: TRAM_QUIZ, text: 'A ticket for a quiz!', accept: 'Accept' },
           after: { ms: 30_000, to: 'waiting' },
-          on: { [`entered:${TRAM_QUIZ}`]: 'waiting', 'ride:tram-5-tram': 'offered' },
+          on: { [`entered:${TRAM_QUIZ}`]: 'riding', 'ride:tram-5-tram': 'offered' },
+        },
+        riding: {
+          hints: { [TRAM_QUIZ]: 'After the quiz, Élodie chooses where the tram goes.' },
+          choice: {
+            at: TRAM_QUIZ, text: 'Where does the tram take you?',
+            options: [
+              { key: 'flat', text: '🏠 Élodie’s flat', if: { not: { flag: KISSED } } },
+              { key: 'shelter', text: '🎸 The Shelter', if: { flag: 'young-adult.shelter.open' } },
+              { key: 'marokkanergasse', text: '🏡 Marokkanergasse', if: { flag: KISSED } },
+            ],
+          },
+          on: {
+            'choose:flat': { to: 'waiting', do: [{ goto: FLAT }] },
+            'choose:shelter': { to: 'waiting', do: [{ goto: SHELTER }] },
+            'choose:marokkanergasse': { to: 'waiting', do: [{ goto: MAROKKANERGASSE }] },
+            [`entered:${TRAM_5}`]: 'waiting',
+          },
         },
       },
     },

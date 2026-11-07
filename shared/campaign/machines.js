@@ -16,6 +16,7 @@ import { OBJECT_ACTIONS } from '../interactions.js';
 /** @typedef {import('./types.js').Zone} Zone */
 /** @typedef {import('./types.js').Npc} Npc */
 /** @typedef {import('./types.js').Offer} Offer */
+/** @typedef {import('./types.js').Choice} Choice */
 /** @typedef {import('../interactions.js').ObjectRule} ObjectRule */
 /** @typedef {import('../interactions.js').ObjectAction} ObjectAction */
 
@@ -134,6 +135,18 @@ export function offerAt(facts, content, node) {
   for (const c of currentStates(facts, content)) {
     const o = c.state.offer;
     if (o && content.nodes[o.node]?.parent === node) return o;
+  }
+  return null;
+}
+
+/** The choice a current state asks at a node, with only its open options; null when none (or none is open).
+ * @param {Facts} facts @param {Content} content @param {string} node @returns {Choice | null} */
+export function choiceIn(facts, content, node) {
+  for (const c of currentStates(facts, content)) {
+    const ch = c.state.choice;
+    if (!ch || ch.at !== node) continue;
+    const options = ch.options.filter((o) => !o.if || holds(o.if, facts));
+    if (options.length) return { ...ch, options };
   }
   return null;
 }

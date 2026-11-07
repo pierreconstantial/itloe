@@ -14,7 +14,7 @@ const KEY_SPOT = /** @type {NonNullable<typeof OPENING['key-on-floor']['pickups'
 /** @param {any} view @param {string} machine */
 const stateIn = (view, machine) => view.campaign?.facts.machines[machine]?.state;
 
-test('wire: all four can leave the opening podium and rejoin, Pierre ends the block game, Elo reaches the key, and Toni leaves on time', { timeout: 20_000 }, async (t) => {
+test('wire: all four can leave the opening podium and rejoin, Pierre ends the block game, Elo reaches the key, Toni leaves on time, and the tram takes her home', { timeout: 20_000 }, async (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'itloe-story-'));
   const port = await new Promise((resolve) => {
     const listener = createServer();
@@ -137,4 +137,16 @@ test('wire: all four can leave the opening podium and rejoin, Pierre ends the bl
   const gone = await until(elo, (m) => m.t === 'view' && stateIn(m, 'toni') === 'gone', givenFrom, 6000);
   const waited = gone.campaign.facts.machines.toni.since - thanked.campaign.facts.machines.toni.since;
   assert.ok(waited >= 3000 && waited < 4500, `Toni leaves about three seconds later (${waited} ms)`);
+
+  // the tram: its quiz, then Élodie chooses where it goes (here the game master ends the quiz in its lobby)
+  elo.send({ t: 'pos', x: 7.5, y: 6.8, dir: 'up', moving: false });
+  const rideFrom = elo.messages.length;
+  elo.send({ t: 'interact', object: 'tram-5-tram' });
+  await until(elo, (m) => m.t === 'view' && stateIn(m, 'tram') === 'offered', rideFrom);
+  elo.send({ t: 'enter', node: 'young-adult/tram-5/quiz' });
+  await until(elo, (m) => m.t === 'view' && m.minigame?.status === 'lobby', rideFrom);
+  pierre.send({ t: 'endMinigame' });
+  await until(elo, (m) => m.t === 'view' && m.minigame === null && stateIn(m, 'tram') === 'riding', rideFrom);
+  elo.send({ t: 'choose', option: 'flat' });
+  await until(elo, (m) => m.t === 'view' && m.campaign?.at.node === 'young-adult/appart-elo-1', rideFrom);
 });

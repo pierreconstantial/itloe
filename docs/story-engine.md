@@ -106,6 +106,7 @@ MachineState = {
   speech?:      Record<CharacterId, string>,                  // a line a character says over their avatar, once
   hide?:        PropId[],                                     // props gone: no art, no collision, no action
   offer?:       { node: NodeId, text: string, accept: string },  // the chooser's phone offers to enter a node
+  choice?:      { at: NodeId, text: string, options: ChoiceOption[] },  // the chooser's phone asks; no Dismiss
 }
 
 Transition   = StateId | { to: StateId, do?: Effect[] }
@@ -113,6 +114,7 @@ ObjectAction = { key, text, say?, speaker?: 'object', by?: 'chooser' | 'anyone' 
 Pickup       = { item: ItemId, node: NodeId, x, y, radius }
 Zone         = { id, node: NodeId, x, y, radius, look?: string, arrive?: { x, y } }
 Npc          = { say?: string, blink?: true, emote?: 'joy' | 'love' | 'surprise' | 'anger' }
+ChoiceOption = { key, text, if?: Condition }
 ```
 
 What each part does:
@@ -139,6 +141,12 @@ What each part does:
 - **Offers.** The chooser's phone shows `text` with an `accept` button and a Dismiss button (always there). Accepting sends an
   ordinary `enter` of `node`, which must be a child of where the party is; pair it with the node's
   `enterWhen` and usually `startsOnEnter`.
+- **Choices.** While the party is at `at`, the chooser's phone shows `text` and one button per option whose `if`
+  holds, over whatever else it shows, with no Dismiss. Choosing fires `choose:<key>`; the state must have a
+  transition for each option (validation checks it). At a minigame's tableau the choice waits for the game: none
+  while a round runs or before one has finished (or the game master ended it). A `goto` in the transition ends the
+  minigame first, its rounds recorded. One option is a question with only "Yes". If no option is open, nothing
+  shows: make sure one always is. The tram's destinations are a choice.
 
 **When two machines say something about the same place or prop:** for hints, the first machine in content order
 wins; for `objects` and `npcs`, the last one wins. Avoid it: one prop, one machine at a time.
@@ -155,6 +163,7 @@ time the state was entered. Every machine of the content is there from the start
 | `zone:<zoneId>` | The chooser walks into a zone |
 | `cutscene:<cutsceneId>` | A TV finished playing that cutscene (a visible TV must be connected: the machine waits until one plays it). A TV plays one scripted cutscene at a time: don't queue two in one step |
 | `entered:<nodeId>` | The party arrived at that node (a door, `back`, `gm goto`, a `goto` effect) |
+| `choose:<optionKey>` | The chooser chose that option of the current choice |
 
 An event reaches each machine's current state only. Every machine with a transition for it takes it, in
 content order.
@@ -189,6 +198,10 @@ unchanged: `{ always: true }`, `{ flag }`, `{ done: node }`, `{ unlocked: node }
 - **Items left on the floor after something.** A state with `pickups`, entered by the transition that ends the
   something. Several items: chain states (see Pickups).
 - **An NPC who leaves.** `npcs` for the reaction, `after` to wait, a state with `hide` (Toni).
+- **Travel after a minigame.** The tram: `offer` its quiz tableau; on `entered:<tableau>` go to a state with a
+  `choice` at that tableau, one option per destination (`if` for those not open yet), each transition a `goto`.
+  The destinations have no doors; their `back` walks to the stop. Listen to `entered:<the stop>` too, so a ride
+  the game master cancels (`back`) leaves the machine ready again.
 - **In-game time.** A counter that only actions move, e.g. `clock.hours`: an object action's transition does
   `{ count: 'clock.hours', by: 1 }` (Columbo: one hour, a book: two), and what waits for the time uses
   `when: [{ if: { count: 'clock.hours', gte: 3 }, to: … }]` (Pierre arrives). Real time never moves it: `after` is
@@ -201,9 +214,8 @@ with a misuse of another field (e.g. an `after` for in-game time: see Patterns).
 
 | Story need | Missing |
 |---|---|
-| A question with only "Yes" (Pierre's backgammon invitation) | An offer without Dismiss |
 | Backgammon, table football | The minigames themselves (`docs/minigames.md`) |
-| Tram travel choosing a destination after the quiz | A destination choice on the phone (today: doors, and `back`) |
+| The tram quiz's three topics, chosen by Élodie | Quiz settings a machine can set (today: the tableau's fixed `settings`) |
 
 ## Example: Tschick-Toni
 
@@ -247,8 +259,9 @@ Pure and deterministic, as before: no I/O, no clock. The server adds its time to
 
 - `machines.js` reads machines: current states, the transitions an event, a condition or the time triggers,
   and the queries everyone uses: `hintAt`, `objectRules`, `pickupsAt`, `zonesAt`, `hiddenProps`, `npcsAt`,
-  `offerAt`, `chooserHeld`, `nextTimer`, `within`. `index.js` applies transitions and effects.
-- Actions added: `use { id, object, action }`, `pickup { id, item }`, `zone { id, zone }`, `tick` (takes the due
+  `offerAt`, `chooserHeld`, `nextTimer`, `within`. `index.js` applies transitions and effects, and answers
+  `choiceAt(campaign, content, status?)` (a client passes its view's minigame status: its campaign has no minigame state).
+- Actions added: `use { id, object, action }`, `pickup { id, item }`, `zone { id, zone }`, `choose { id, option }`, `tick` (takes the due
   `after` transitions), `gm { op: 'machine', machine, state }` (the game master sets a state; that state's
   `enter` effects run, no transition's `do`). Removed: `portal`, `collect`.
 - Order inside one transition: the transition's `do`, the new state's `enter`, then the facts settle (node
@@ -260,7 +273,8 @@ Pure and deterministic, as before: no I/O, no clock. The server adds its time to
 - `validateContent`, run at boot and by `test/story.test.js`, checks every machine: states, transition targets,
   conditions (including that `{ machine, in }` names a real machine and states), effects and their values, nodes,
   items, props, characters, zone and pickup coordinates, that every event in `on` can happen (an object action,
-  zone, pickup, node or cutscene that exists: a typo is reported), that each pickup's state leaves on its pickup,
+  zone, pickup, node, cutscene or choice option that exists: a typo is reported), that each pickup's state leaves
+  on its pickup, that each choice option has its transition,
   and that no initial state has `after`. It cannot check that a cutscene id is in the TV's `CUTSCENES`.
 - `loadCampaign` drops machines the content no longer has, and resets to `initial` a machine whose saved
   state the content no longer has.
