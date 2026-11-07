@@ -1,7 +1,8 @@
 # Proposal: interactions between characters
 
-Status: **Agreed with Konstantin** (his review, 2026-11-07). Story actions are implemented (branch
-`character-interactions`: `PROTOCOL.md`, `docs/story-engine.md`); generic actions are next.
+Status: **Agreed with Konstantin** (his review, 2026-11-07). Implemented on branch `character-interactions`:
+story actions and the group actions (`PROTOCOL.md`, `docs/story-engine.md`). The phone shows the group actions as
+three small buttons (🤗 ✋ 🍻) beside the action button, only with someone in reach.
 Date: 2026-11-07. Author: Pierre (written with Claude).
 
 ## Decisions after Konstantin's review

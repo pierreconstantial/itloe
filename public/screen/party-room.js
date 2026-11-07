@@ -20,6 +20,7 @@ import { AMBIENT_NPCS } from './ambient-npcs.js';
 import { drawSprite, SPRITE_SIZE } from '../../shared/sprites.js';
 import { createLoop, py as snapY } from './scene-render.js';
 import { worldView } from './avatar-layer.js';
+import { groupAction } from '../../shared/interactions.js';
 
 const UPDATE_HZ = 60;       // fixed simulation rate; drawing interpolates between two updates
 
@@ -564,6 +565,12 @@ export function createPartyRoom(bg, fg, avatars) {
     if (typeof m.playerId !== 'string') return;
     const now = performance.now();
     const feedback = typeof m.feedback === 'string' ? m.feedback : '';
+    const group = groupAction(m.group);
+    if (group && Array.isArray(m.with)) {
+      // a group action: its emoji over the player and everyone they reached
+      for (const id of [m.playerId, ...m.with]) if (typeof id === 'string') avatars.say(id, group.emoji, 1800);
+      return;
+    }
     if (typeof m.character === 'string') {
       // an action on another character: the line over the actor, or over the target when the target says it
       const speaker = m.speaker === 'target' && typeof m.target === 'string' ? m.target : m.playerId;

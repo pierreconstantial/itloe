@@ -323,7 +323,9 @@ canvas.avatar {
 .lobby-actions button { touch-action: manipulation; }
 #view-tableau p { margin: 0; }
 
-.object-actions { display: flex; justify-content: center; padding-top: 10px; }
+.object-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; padding-top: 10px; }
+.group-actions { display: flex; gap: 8px; }
+.group-actions button { min-width: 54px; min-height: 54px; font-size: 26px; padding: 0; touch-action: manipulation; }
 #btn-interact { min-width: min(280px, 90%); min-height: 54px; background: var(--accent); color: #201a08; border: 0; font-weight: 800; font-size: 18px; touch-action: manipulation; }
 #btn-interact:disabled { background: var(--bg-2); color: var(--fg-dim); border: 1px solid var(--fg-dim); }
 

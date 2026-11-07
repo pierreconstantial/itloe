@@ -13,7 +13,7 @@ import {
   choiceAt,
 } from '../../shared/campaign/index.js';
 import { room as sceneRoom } from '../../shared/scene.js';
-import { interactionActor, nearbyObject, nearbyProp, objectAction } from '../../shared/interactions.js';
+import { interactionActor, nearbyObject, nearbyProp, objectAction, groupAction } from '../../shared/interactions.js';
 import { createPicker, pickStates, anyPickable } from './picker.js';
 import { createJoystick } from './joystick.js';
 import { avatarCanvas, paintAvatar } from '../commun/avatar.js';
@@ -193,6 +193,11 @@ function receive(raw) {
     running?.screen.message(m); // the running minigame's own; none running: ignored
   } else if (m.t === 'say' || m.t === 'chatHistory') {
     social.onMessage(m);
+  } else if (m.t === 'interact' && groupAction(m.group) && Array.isArray(m.with) && playerId
+    && (m.playerId === playerId || m.with.includes(playerId))) {
+    const a = /** @type {NonNullable<ReturnType<typeof groupAction>>} */ (groupAction(m.group));
+    const name = (/** @type {unknown} */ id) => { const p = campaign?.party.players[String(id)]; return p ? CHARACTERS[p.character]?.name ?? '' : ''; };
+    toast(m.playerId === playerId ? `${a.emoji} ${a.label} with ${m.with.map(name).join(', ')}` : `${a.emoji} ${a.label} from ${name(m.playerId)}`);
   } else if (m.t === 'interact' && m.playerId === playerId && typeof m.feedback === 'string') {
     dismissedOffer = null; // using an object again may renew its offer
     if (m.feedback) toast(m.feedback.replace(/\n/g, ' '));
@@ -522,22 +527,23 @@ function wispNearObject(pos) {
 
 /** What the interact button does at `pos`: pick up an item (the chooser), else the story's action on the nearest
  * object, else its action on the closest character in reach (`reach`), else the nearest furniture's.
- * @param {{x: number, y: number}} pos @returns {{ object?: string, character?: string, text: string } | null} */
+ * `story`: a pickup or a story action, which hides the group actions.
+ * @param {{x: number, y: number}} pos @returns {{ object?: string, character?: string, text: string, story?: true } | null} */
 function actionAt(pos) {
   const mem = member();
   if (!mem || !campaign) return null;
   const pickup = mem.character === content().chooser ? pickupNear(pos) : null;
-  if (pickup) return { object: pickup.item, text: `${content().items[pickup.item]?.icon ?? '✋'} Pick up ${content().items[pickup.item]?.name ?? pickup.item}` };
+  if (pickup) return { object: pickup.item, text: `${content().items[pickup.item]?.icon ?? '✋'} Pick up ${content().items[pickup.item]?.name ?? pickup.item}`, story: true };
   const actor = interactionActor(mem, campaign.facts);
   const rules = objectRules(campaign.facts, content());
   const object = nearbyObject(roomHere(), pos, actor, rules);
   const action = object ? objectAction(object.id, actor, rules) : null;
-  if (object && action?.event) return { object: object.id, text: action.text };
+  if (object && action?.event) return { object: object.id, text: action.text, story: true };
   if (!minigame) {
     const onCharacters = characterRules(campaign.facts, content());
     for (const character of reach) {
       const story = objectAction(character, actor, onCharacters);
-      if (story) return { character, text: story.text };
+      if (story) return { character, text: story.text, story: true };
     }
   }
   return object && action ? { object: object.id, text: action.text } : null;
@@ -553,6 +559,10 @@ function updateInteraction() {
   const jump = /** @type {HTMLButtonElement} */ ($('btn-jump'));
   jump.hidden = !mem || amWisp() || !canWalk() || !!minigame;
   jump.disabled = !conn.isOnline();
+  // the group actions: someone in reach, and no story action available (a story action hides them)
+  const group = !!pos && !!mem && !amWisp() && !minigame && incarnationAt <= serverNow() && reach.length > 0 && !action?.story;
+  $('group-actions').hidden = !group;
+  for (const b of document.querySelectorAll('#group-actions button')) /** @type {HTMLButtonElement} */ (b).disabled = !conn.isOnline();
   if (mem && amWisp()) {
     const near = pos && wispNearObject(pos);
     button.dataset.object = '';
@@ -565,7 +575,7 @@ function updateInteraction() {
   // the "walk to an object" prompt belongs to the party room; a story room shows the button only next to something
   if (!action && campaign && content().nodes[campaign.at.node]?.room) {
     button.hidden = true;
-    $('object-actions').hidden = true;
+    $('object-actions').hidden = !group;
     return;
   }
   if (incarnationAt > serverNow() || minigame) { // over a minigame there is no furniture
@@ -809,6 +819,13 @@ $('btn-interact').addEventListener('click', () => {
   else if (action) send({ t: 'interact', object: action.object });
   updateInteraction();
 });
+for (const b of document.querySelectorAll('#group-actions button')) {
+  b.addEventListener('click', () => {
+    if (!canWalk() || !conn.isOnline() || amWisp()) return;
+    joystick.cancel(); // flush the exact position first, as for the action button
+    send({ t: 'interact', group: /** @type {HTMLElement} */ (b).dataset.group });
+  });
+}
 $('btn-play-here').addEventListener('click', () => {
   replaced = false;
   conn.restart(); // a hello without our old id: the picker shows who can be continued

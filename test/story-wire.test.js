@@ -14,7 +14,7 @@ const KEY_SPOT = /** @type {NonNullable<typeof OPENING['key-on-floor']['pickups'
 /** @param {any} view @param {string} machine */
 const stateIn = (view, machine) => view.campaign?.facts.machines[machine]?.state;
 
-test('wire: all four can leave the opening podium and rejoin, Pierre ends the block game, Elo reaches the key, Toni leaves on time, the tram takes her home, and she talks to Pierre there', { timeout: 30_000 }, async (t) => {
+test('wire: all four can leave the opening podium and rejoin, Pierre ends the block game, Elo reaches the key, Toni leaves on time, the tram takes her home, and she talks to Pierre there and hugs him', { timeout: 30_000 }, async (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'itloe-story-'));
   const port = await new Promise((resolve) => {
     const listener = createServer();
@@ -156,14 +156,27 @@ test('wire: all four can leave the opening podium and rejoin, Pierre ends the bl
   pierre.send({ t: 'gm', op: { op: 'count', counter: 'young-adult.clock.hours', set: 3 } });
   await until(elo, (m) => m.t === 'view' && m.campaign?.party.players[me.id]?.statuses.length === 0, rideFrom, 6000);
   const reachFrom = elo.messages.length;
-  elo.send({ t: 'pos', x: 5, y: 7.6, dir: 'right', moving: false });
-  me.send({ t: 'pos', x: 5.5, y: 7.6, dir: 'left', moving: false });
+  // open floor, away from the flat's story objects (a story action hides the group actions)
+  elo.send({ t: 'pos', x: 8, y: 8.2, dir: 'right', moving: false });
+  me.send({ t: 'pos', x: 8.5, y: 8.2, dir: 'left', moving: false });
   await until(elo, (m) => m.t === 'reach' && m.characters.includes('pierre'), reachFrom);
   const talkFrom = screen.messages.length, eloTalkFrom = elo.messages.length;
   elo.send({ t: 'interact', character: 'pierre' });
   const said = await until(screen, (m) => m.t === 'interact' && m.character === 'pierre', talkFrom);
   assert.deepEqual([said.playerId, said.target, said.speaker], [elo.id, me.id, 'target'], 'Pierre answers');
   await until(elo, (m) => m.t === 'view' && stateIn(m, 'pierre-visit') === 'invites', eloTalkFrom);
+  // a group hug: refused while a story action on Pierre is available, then with everyone in reach
+  await new Promise((r) => setTimeout(r, 750)); // interact's rate limit
+  const hugFrom = screen.messages.length;
+  elo.send({ t: 'interact', group: 'hug' });
+  await new Promise((r) => setTimeout(r, 300));
+  assert.equal(screen.messages.slice(hugFrom).some((m) => m.t === 'interact' && m.group), false, 'the story action hides the hug');
+  const doneFrom = elo.messages.length;
+  pierre.send({ t: 'gm', op: { op: 'machine', machine: 'pierre-visit', state: 'done' } });
+  await until(elo, (m) => m.t === 'view' && stateIn(m, 'pierre-visit') === 'done', doneFrom);
+  elo.send({ t: 'interact', group: 'hug' });
+  const hug = await until(screen, (m) => m.t === 'interact' && m.group === 'hug', hugFrom);
+  assert.deepEqual([hug.playerId, hug.with], [elo.id, [me.id]]);
   // out of reach again: the phone is told
   me.send({ t: 'pos', x: 12, y: 7.6, dir: 'left', moving: false });
   await until(elo, (m) => m.t === 'reach' && m.characters.length === 0, reachFrom + 1);

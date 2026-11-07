@@ -31,7 +31,7 @@ import type { CharacterId, TableauPlayers } from '../shared/campaign/types.js';
 import { canMove, makePositions, parsePos, posMsg, type Pos } from './pos.ts';
 import { isWisp } from '../shared/campaign/index.js';
 import { spawnAt } from '../shared/scene.js';
-import { feetInReach, interactionActor, nearbyObject, objectAction } from '../shared/interactions.js';
+import { feetInReach, groupAction, interactionActor, nearbyObject, objectAction } from '../shared/interactions.js';
 import { freshGame, loadGame, saveGame, STATE_FILE, type Game } from './store.ts';
 import {
   CONTENT, CONTENT_VERSION, IS_STORY, assertContent, reduceCampaign, isUnlocked, minigameStatus, gameMasterId, askedSoFar, zoneAt,
@@ -681,6 +681,25 @@ function handleMessage(ws: WebSocket, m: any): void {
     if (wisp(id) || isIncarnating(id)) return;
     const c = game.campaign;
     const actor = interactionActor(member, c.facts);
+    if (m.group !== undefined) {
+      // a group action (a hug) with everyone in reach; none while a story action is available to the player
+      const a = groupAction(m.group);
+      const now = Date.now();
+      if (!a || now - (interactionAt.get(ws) ?? 0) < 700) return;
+      const characters = reachOf(id);
+      if (!characters.length) return;
+      const onCharacters = characterRules(c.facts, CONTENT);
+      if (characters.some((ch) => objectAction(ch, actor, onCharacters))) return;
+      const scene = sceneAt(CONTENT, c.facts, c.at.node);
+      const rules = objectRules(c.facts, CONTENT);
+      const position = positions.get(id) ?? spawnAt(scene, member.character);
+      const object = nearbyObject(scene, position, actor, rules);
+      if (object && objectAction(object.id, actor, rules)?.event) return;
+      if (member.character === CONTENT.chooser && pickupsAt(c.facts, CONTENT, c.at.node).some((p) => within(p, position))) return;
+      interactionAt.set(ws, now);
+      sendAll({ t: 'interact', playerId: id, group: a.key, with: characters.map((ch) => characterTarget(party(), ch, id)), at: now });
+      return;
+    }
     if (typeof m.character === 'string') {
       // an action on another character, within reach (reachOf)
       const now = Date.now();

@@ -51,6 +51,16 @@ export function objectAction(object, actor, rules = OBJECT_ACTIONS) {
   return rule ? resolveObjectAction(rule, actor) : null;
 }
 
+/** The generic actions between characters: one tap acts on everyone in reach (a group hug). They fire no story event
+ *  and save nothing; a story action available to the player hides them. */
+export const GROUP_ACTIONS = Object.freeze([
+  Object.freeze({ key: 'hug', emoji: '🤗', label: 'Hug' }),
+  Object.freeze({ key: 'high-five', emoji: '✋', label: 'High five' }),
+  Object.freeze({ key: 'cheers', emoji: '🍻', label: 'Cheers' }),
+]);
+/** @param {unknown} key */
+export const groupAction = (key) => GROUP_ACTIONS.find((a) => a.key === key) ?? null;
+
 /** How far a player reaches: from their feet to a prop's base, or to another character's feet. */
 export const REACH = 0.8;
 

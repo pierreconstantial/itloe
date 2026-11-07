@@ -56,6 +56,7 @@ Mathieu and Johanna use the existing join/reclaim messages and story wisp/incarn
 { "t": "interact", "object": "table" }                    // near an object of the room where the party is (sceneAt),
                                                          // or the chooser near an item on the floor: object = item id
 { "t": "interact", "character": "pierre" }                // on another character in reach (the server's `reach`, below)
+{ "t": "interact", "group": "hug" }                       // a group action with everyone in reach: hug | high-five | cheers
 // Speech and emotes are short lived, server relayed events, limited to one per 650 ms per socket.
 // Every `hello` (phones, new devices and screens alike) is answered with { t: "chatHistory", messages: [...] }
 // holding up to 30 recent speech events. The history is in memory only and is cleared by a server restart.
@@ -74,6 +75,11 @@ Mathieu and Johanna use the existing join/reclaim messages and story wisp/incarn
 // `interact` with playerId, character, target (the target's player id), action, feedback, at, and
 // `speaker: "target"` when the target says the feedback; the story action is applied as `use` with `character`.
 // Same rate limit as object actions.
+// A group action (GROUP_ACTIONS in shared/interactions.js) acts on every character in the sender's reach. It is
+// refused while a story action is available to the sender (a pickup, a story object nearby, a story action on a
+// character in reach), fires no story event and saves nothing. The server relays
+// { t: "interact", playerId, group, with: [the reached players' ids], at }; the TV shows the action's emoji over all
+// of them, and their phones a short note. Same rate limit as object actions.
 ```
 
 For example, the table is a scene object with `id: "table"` and a `box`, `solid`, `anchorY` and `layer` in
