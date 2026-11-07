@@ -14,9 +14,8 @@
 //   done { id }                  the player to move, once no move is left: the other side's turn
 //   nextRound { id, now }        the game master, between rounds: the next round, or after the last the podium
 //   timeUp { deadline }          the round's clock: every unfinished game is decided
-//   leave { id }                 someone stopped being eligible: they lose their game and every game left
-//   retire { id, target }        the game master takes a player out: the same
 //   endGame { id }               the game master: the standings so far, the games in progress don't count
+// A player who leaves or is taken out (marked by the plain lobby, `out`) loses their game and every game left.
 // A refused action returns the same state.
 
 import { CHARACTERS } from './characters.js';
@@ -71,8 +70,6 @@ import { mergeBySchema, settingsProblems } from './settings.js';
  *   | { t: 'done', id: string }
  *   | { t: 'nextRound', id: string, now: number }
  *   | { t: 'timeUp', deadline: number }
- *   | { t: 'leave', id: string }
- *   | { t: 'retire', id: string, target: string }
  *   | { t: 'endGame', id: string }} BackgammonAction
  */
 
@@ -356,20 +353,19 @@ function withStandings(s) {
 }
 
 /**
- * A player leaves or is taken out: they lose their game in progress and every game they still had to play,
- * 1 point each to the opponent. With fewer than two players left, the group phase ends.
- * @param {BackgammonState} s @param {string} id @param {'left' | 'retired'} why @returns {BackgammonState}
+ * A player left or was taken out (marked by the plain lobby): they lose their game in progress and every game they
+ * still had to play, 1 point each to the opponent. With fewer than two players left, the group phase ends.
+ * @param {BackgammonState} s @param {string} id @returns {BackgammonState}
  */
-function gone(s, id, why) {
-  const p = s.players[id];
-  s = { ...s, players: { ...s.players, [id]: { ...p, done: true, ...(why === 'left' ? { left: true } : { retired: true }) } } };
+function gone(s, id) {
   const index = s.boards.findIndex((x) => !x.end && (x.a === id || x.b === id));
   if (index >= 0) s = gameOver(s, index, s.boards[index].a === id ? 'b' : 'a', 1, 'left');
   for (const q of s.order) {
     while (q !== id && pairPlays(s, id, q)) s = { ...s, games: [...s.games, { a: q, b: id, winner: q, points: 1, how: 'left', pips: 0 }] };
   }
   s = withStandings(s);
-  return s.order.filter((q) => active(s, q)).length < MIN_PLAYERS ? { ...s, phase: 'results', deadline: null, endReason: why } : s;
+  const endReason = s.players[id].left ? 'left' : 'retired';
+  return s.order.filter((q) => active(s, q)).length < MIN_PLAYERS ? { ...s, phase: 'results', deadline: null, endReason } : s;
 }
 
 /**
@@ -477,19 +473,6 @@ export function reduceBackgammon(s, a, ctx) {
       if (!running(s) || s.phase !== 'playing' || s.deadline === null || a.deadline !== s.deadline) return s;
       return timeUp(s);
 
-    case 'leave': {
-      const p = s.players[a.id];
-      if (!p || p.left) return s;
-      if (!running(s) || p.done) return { ...s, players: { ...s.players, [a.id]: { ...p, left: true, done: true } } };
-      return gone(s, a.id, 'left');
-    }
-
-    case 'retire': {
-      const p = s.players[a.target];
-      if (!isGameMaster(ctx, a.id) || !running(s) || !p || p.done) return s;
-      return gone(s, a.target, 'retired');
-    }
-
     case 'endGame':
       return isGameMaster(ctx, a.id) && running(s) ? { ...s, phase: 'results', deadline: null, endReason: 'gm' } : s;
 
@@ -516,7 +499,7 @@ export const BACKGAMMON_RULES = {
   deadline: (s) => (running(s) && s.phase === 'playing' ? s.deadline : null),
   deadlineAction: (deadline) => ({ t: 'timeUp', deadline }),
   shiftDeadline: (s, by) => (running(s) && s.phase === 'playing' && s.deadline !== null ? { ...s, deadline: s.deadline + by } : s),
-  retire: true,
+  out: gone,
   players: { min: MIN_PLAYERS, max: MAX_PLAYERS },
   describe: (s) => `backgammon round ${s.round}, ${s.phase}, ${s.games.length} games counted`
     + ` (${standings(s).map((r) => `${s.players[r.id].name} ${r.points}`).join(', ')})`,

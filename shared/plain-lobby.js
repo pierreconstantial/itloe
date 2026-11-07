@@ -6,8 +6,8 @@
 //
 // Actions (ids, now and inputs injected by the server, never from the wire):
 //   join { id, character }      the main game: someone became eligible (listed, not ready)
-//   leave { id }                the main game: someone stopped being eligible; passed on to a running round
-//                               or the podium, which decide what it means
+//   leave { id }                the main game: someone stopped being eligible; a player of the round, running or
+//                               on the podium, is marked left (out)
 //   ready { id, on }            an eligible player, in the lobby (refused in a lobby with spots)
 //   spot { id, spot }           the server, in a lobby with spots: an eligible player now stands on that spot, or
 //                               on none (null); a free spot is taken, the one held before is let go
@@ -18,9 +18,12 @@
 //   lobby { id }                the game master, on the podium: back to the lobby; the round's players come back
 //                               ready, except those who left or were taken out, or are no longer eligible; in a
 //                               lobby with spots, they hold the spots they left
-//   retire { id, target }       the game master, while a round runs: the round's own rule (`retire: true`), else
-//                               the target's leave from the round
+//   retire { id, target }       the game master, while a round runs: a player of the round still in it is taken out,
+//                               marked retired (out); anyone else, a no-op
 //   anything else               the running round's own actions (endGame, place, answer, timeUp, …)
+// Out: a player who leaves or is taken out is done for the round. While it runs, the round's rules say what that
+// means (`out`): blocks ends once everyone is done, the quiz stops waiting for their answer, Pyramide ends,
+// backgammon and table football award forfeits. On the podium, a leaver is only marked.
 // The round finishing turns the stage to `podium` in the same step.
 //
 // Walking: the lobby is walkable (MinigameRules `spots`, docs/minigames.md): the eligible players walk it as their
@@ -125,6 +128,21 @@ export function plainLobby(rules) {
   /** @param {S} s @param {any} action @param {RoundCtx} ctx @returns {S} */
   const toRound = (s, action, ctx) => (s.round ? withRound(s, rules.reduce(s.round, action, ctx)) : s);
 
+  /**
+   * A player of the round goes out (left: `left`, taken out: `retired`), marked done; while the round runs, its
+   * rules' `out` says what it means. A player not in the round, or already out that way, changes nothing; nor does
+   * taking out one who is done (stuck, or left).
+   * @param {S} s @param {string} id @param {'left' | 'retired'} how @returns {S}
+   */
+  const out = (s, id, how) => {
+    const round = s.round;
+    if (!round || !round.order.includes(id)) return s;
+    const p = round.players[id];
+    if (p[how] || (how === 'retired' && p.done)) return s;
+    const marked = { ...round, players: { ...round.players, [id]: { ...p, done: true, [how]: true } } };
+    return withRound(s, s.stage === 'running' && !p.done ? rules.out(marked, id) : marked);
+  };
+
   /** @param {S} s @param {PlainLobbyAction | A} action @param {RoundCtx} ctx @returns {S} */
   function reduce(s, action, ctx) {
     const a = /** @type {PlainLobbyAction} */ (action);
@@ -136,7 +154,7 @@ export function plainLobby(rules) {
 
       case 'leave': {
         const listed = s.players.some((p) => p.id === a.id);
-        const next = s.stage === 'lobby' ? s : toRound(s, { t: 'leave', id: a.id }, ctx);
+        const next = s.stage === 'lobby' ? s : out(s, a.id, 'left');
         if (!listed) return next;
         return {
           ...next, players: next.players.filter((p) => p.id !== a.id), ready: next.ready.filter((id) => id !== a.id),
@@ -185,11 +203,8 @@ export function plainLobby(rules) {
         return { ...lobby, ready: s.players.map((p) => p.id).filter(back) };
       }
 
-      case 'retire': {
-        if (s.stage !== 'running') return s;
-        if (rules.retire) return toRound(s, a, ctx);
-        return isGameMaster(ctx, a.id) ? toRound(s, { t: 'leave', id: a.target }, ctx) : s;
-      }
+      case 'retire':
+        return s.stage === 'running' && isGameMaster(ctx, a.id) ? out(s, a.target, 'retired') : s;
 
       default:
         return s.stage === 'running' ? toRound(s, action, ctx) : s;

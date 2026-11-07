@@ -14,9 +14,8 @@
 //   skip { id }                   classic: a clue giver, before the word's first clue: another word of its level
 //   bid { id, n }                 duel: the bidding clue giver, 1..10, strictly lower than the last bid
 //   pass { id }                   duel: the bidding clue giver, after the first bid: the last bid plays
-//   leave { id }                  someone stopped being eligible: the round ends with the scores so far
-//   retire { id, target }         the game master takes a player out: the same
-//   endGame { id }                the game master: the same
+//   endGame { id }                the game master: the round ends with the scores so far
+// A player who leaves or is taken out (marked by the plain lobby, `out`) ends the round the same way.
 // A refused action returns the same state.
 
 import { CHARACTERS } from './characters.js';
@@ -76,8 +75,6 @@ import { mergeBySchema, settingsProblems } from './settings.js';
  *   | { t: 'skip', id: string }
  *   | { t: 'bid', id: string, n: number }
  *   | { t: 'pass', id: string }
- *   | { t: 'leave', id: string }
- *   | { t: 'retire', id: string, target: string }
  *   | { t: 'endGame', id: string }
  *   | { t: 'noClock', deadline: number }} PyramideAction   // noClock: never fired, Pyramide has no deadline
  */
@@ -406,19 +403,6 @@ function reduceStep(s, a, ctx) {
       return duelPlays(logged(s, { team: s.turn, t: 'pass', id: a.id }));
     }
 
-    case 'leave': {
-      const p = s.players[a.id];
-      if (!p || p.left) return s;
-      const next = { ...s, players: { ...s.players, [a.id]: { ...p, left: true, done: true } } };
-      return running(s) ? ended(next, 'left') : next;
-    }
-
-    case 'retire': {
-      const p = s.players[a.target];
-      if (!isGameMaster(ctx, a.id) || !running(s) || !p) return s;
-      return ended({ ...s, players: { ...s.players, [a.target]: { ...p, retired: true, done: true } } }, 'retired');
-    }
-
     case 'endGame':
       return isGameMaster(ctx, a.id) && running(s) ? ended(s, 'gm') : s;
 
@@ -458,7 +442,7 @@ export const PYRAMIDE_RULES = {
   deadline: () => null,
   deadlineAction: (deadline) => ({ t: 'noClock', deadline }),
   shiftDeadline: (s) => s,
-  retire: true,
+  out: (s, id) => ranked(ended(s, s.players[id].left ? 'left' : 'retired')),
   spots: PYRAMIDE_SPOTS,
   players: { min: PYRAMIDE_SPOTS.length, max: PYRAMIDE_SPOTS.length }, // a clue giver and a guesser per team
   startPositions: PYRAMIDE_START_POSITIONS,

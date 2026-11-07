@@ -10,8 +10,8 @@ import { bindScore } from './score-ticker.js';
 
 export const CHOICE_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
-/** Seated players (a left one is gone). @param {QuizView} q */
-export const seatedIds = (q) => q.order.filter((id) => q.players[id] && !q.players[id].left);
+/** Seated players (one who left or was taken out is gone). @param {QuizView} q */
+export const seatedIds = (q) => q.order.filter((id) => q.players[id] && !q.players[id].done);
 
 /**
  * One row per seated player for the reveal.

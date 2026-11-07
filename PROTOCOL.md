@@ -32,13 +32,10 @@ Mathieu and Johanna use the existing join/reclaim messages and story wisp/incarn
 { "t": "start" }
 { "t": "lobby" }
 { "t": "place", "piece": 0, "x": 3, "y": 5 }                // piece = index 0..2 in own hand; (x,y) = piece origin
-{ "t": "leave" }                                            // leaves the evening; a block game: playing → marked done, podium → removed
+{ "t": "leave" }                                            // leaves the evening; in a round, running or on its podium → marked done + left
 { "t": "endGame" }                                          // game master, a block round playing → finished: every not-done player is
                                                             // marked done (board frozen, score kept), endReason "gm"
-{ "t": "retire", "target": "p-abc123" }                     // game master, a block round playing: the target is marked done + retired (board frozen,
-                                                            // still ranked, NOT left: keeps seat + character, can reconnect). Everyone
-                                                            // done → finished, endReason "stuck". Unknown, done or left target →
-                                                            // silent no-op. The game master may retire themself.
+{ "t": "retire", "target": "p-abc123" }                     // game master, a round playing: see Minigames and their lobbies
 { "t": "pos", "x": 7.2, "y": 4.5, "dir": "down", "moving": true }
 { "t": "jump" }                                             // joined, incarnated player while no minigame runs; visual hop only
 // M3 avatar movement — EPHEMERAL, never enters the reducer State. Client-authoritative:
@@ -168,9 +165,11 @@ game master's at the wrong moment → `err "refused"`.
                                        // with the ready players, in party order; the quiz picks
                                        // its questions among the bank's candidates, none left → refused
 { "t": "endGame" }                     // game master, a round running → its podium, endReason "gm"
-{ "t": "retire", "target": "p-abc" }   // game master, a round running: the minigame decides what taking a player out
-                                       // means; without its own rule (the quiz) it is the target's leave from the round:
-                                       // no more answers, the score kept. An unknown, done or left target → silent no-op
+{ "t": "retire", "target": "p-abc" }   // game master, a round running: the target is taken out, marked done + retired
+                                       // (still ranked, NOT left: keeps seat + character, can reconnect); the round's
+                                       // rules say what it means (`out`, docs/minigames.md), like for a player who leaves.
+                                       // An unknown, done or left target → silent no-op. The game master may take
+                                       // himself out
 { "t": "lobby" }                       // game master, on the podium: back to the lobby; the round's players come back
                                        // ready, except who left or was taken out, or is no longer eligible; in a lobby
                                        // with spots, on the spots they left
@@ -277,8 +276,8 @@ chosen normal `emote`. A restart during the countdown reschedules it from the pe
 ### Quiz (Contract E + addendum E1): a tableau `activity: { kind: 'quiz', settings }`
 
 The bank (`data/quiz/*.json`) stays on the server and is never served. While a quiz round runs, its messages
-below go to the quiz (Routing above); block-only messages (`place`) get `err "not-playing"`, and `retire`
-marks the target `left` in the running quiz (the round stops waiting for their answer).
+below go to the quiz (Routing above); block-only messages (`place`) get `err "not-playing"`. A player who
+leaves or is taken out answers no more, and the round stops waiting for their answer.
 
 ```jsonc
 { "t": "start" }                       // game master, in the quiz's lobby: picks `count` questions among the bank (filtered by

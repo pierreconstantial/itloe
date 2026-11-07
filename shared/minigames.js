@@ -58,8 +58,9 @@ import { plainLobby } from './plain-lobby.js';
 /**
  * The round's players, as every minigame's view carries them: the frame's podium, round controls and presence
  * read them, whatever the minigame. `order`: the seated players in party order; `score`: ranked by the shared
- * rule (shared/ranking.js), unless every player has a `rank` of its own (Pyramide's teams, set on the podium); `left`: gone from the evening; `done`: out of this round (stuck, or taken out:
- * `retired`); `endReason`: how a finished round ended (`time`, `gm`, or the minigame's own).
+ * rule (shared/ranking.js), unless every player has a `rank` of its own (Pyramide's teams, set on the podium); `left`: gone from the evening; `done`: out of this round (stuck, left, or taken out:
+ * `retired`); the plain lobby marks `left`, `retired` and their `done`; `endReason`: how a finished round ended (`time`, `gm`, or the
+ * minigame's own).
  * @typedef {{
  *   order: string[],
  *   players: Record<string, { name: string, color: number, score: number, rank?: number, left?: boolean, done?: boolean, retired?: boolean }>,
@@ -122,7 +123,7 @@ import { plainLobby } from './plain-lobby.js';
  *   deadlineAction: (deadline: number) => A,    // fired when it passes; a stale one must be refused
  *   shiftDeadline: (s: S, by: number) => S,     // deadlines moved by a downtime (ms): resume, sleep
  *   resume?: (s: S) => S,                       // what a restart does besides the shift
- *   retire?: true,                              // the reducer takes the game master's retire itself (else: the target's leave)
+ *   out: (s: S, id: string) => S,               // a running round's player just went out, marked left or retired by the plain lobby: what it means
  *   spots?: readonly Omit<Spot, 'holder'>[],    // the lobby's spots: holding one is being ready, with no "I'm ready"
  *   startPositions?: readonly StartPosition[],  // where its lobby's walkers start (MinigameRules; absent: the plain lobby's)
  *   players?: PlayerRange,                      // how many ready players a round takes (absent: one or more)
