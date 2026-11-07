@@ -229,10 +229,9 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 - [docs/minigames.md](docs/minigames.md): adding a minigame: its parts and its lobby, registration lines, what the main game hands it, what shared code offers, the development start and tests.
 - [PROTOCOL.md](PROTOCOL.md): WebSocket messages, HTTP endpoints, trusted inputs, view filtering, and compatibility rules.
 - [SPEC-BLOCKS.md](SPEC-BLOCKS.md): original block-game design and technical direction.
-- [BUILD-PLAN.md](BUILD-PLAN.md): implementation history, contracts, and milestone-specific working agreements.
 - [AGENTS.md](AGENTS.md): instructions for coding agents working in this repository.
 
-The spec and build plan include earlier designs and examples. Quizzes introduce hidden answers and French content; the current wire format uses `t` messages as documented in `PROTOCOL.md`. Historical P1–P4 ownership and commit prefixes belong to those coordinated work packages. For a change to a shared contract, compare its documentation with the current implementation and tests and resolve any discrepancy explicitly. Draft proposals describe future work, not existing interfaces.
+The spec includes earlier designs and examples. Quizzes introduce hidden answers and French content; the current wire format uses `t` messages as documented in `PROTOCOL.md`. For a change to a shared contract, compare its documentation with the current implementation and tests and resolve any discrepancy explicitly.
 
 ### Konstantin's devbox setup
 
