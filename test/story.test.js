@@ -422,3 +422,50 @@ test('a saved opening podium with nobody left resumes there; Pierre, rejoining, 
   const joined = act(back, { t: 'join', id: 'elo-returned', character: 'elodie' });
   assert.equal(act(joined, { t: 'zone', id: 'elo-returned', zone: 'portal' }).at.node, 'hub');
 });
+
+test('Young Adult\'s people answer: the passers-by, the dog, the Shelter\'s crowd, Pierre\'s beer, the friends and their Shikaboom', () => {
+  const TRAM_5 = 'young-adult/tram-5', SHELTER = 'young-adult/shelter', MAROK = 'young-adult/appart-pierre';
+  let c = act(afterOpening(), { t: 'gm', id: 'pierre', op: { op: 'goto', node: TRAM_5 } });
+  /** Each figure answers from a walkable spot in front of it. @param {string} node @param {[string, string, { x: number, y: number }][]} list */
+  const answers = (node, list) => {
+    const scene = sceneAt(STORY_CONTENT, c.facts, node);
+    const rules = objectRules(c.facts, STORY_CONTENT);
+    for (const [prop, line, at] of list) {
+      assert.ok(isWalkable(scene, at.x, at.y), `${prop}: ${at.x},${at.y} is walkable`);
+      assert.equal(nearbyObject(scene, at, c.party.players.elodie, rules)?.id, prop);
+      assert.equal(objectAction(prop, c.party.players.elodie, rules)?.feedback, line);
+    }
+  };
+  answers(TRAM_5, [
+    ['tram-5-old-woman', 'Na, Mädl, der Fünfer kommt eh gleich.', { x: 2.9, y: 5.6 }], ['tram-5-ice-kid', 'Mmh… Eis!', { x: 4.6, y: 5.6 }],
+    ['tram-5-lazy-guy', 'Heute nicht.', { x: 1.4, y: 5.6 }], ['tram-5-dog', 'Wuff!', { x: 10.1, y: 7 }],
+  ]);
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.shelter.open', on: true } });
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'goto', node: SHELTER } });
+  answers(SHELTER, [
+    ['shelter-bar', 'Barman: Ein Bier? Kommt sofort!', { x: 11.7, y: 5.7 }], ['shelter-hyped-punk', 'Oi! Best gig ever!', { x: 4.3, y: 4.5 }],
+    ['shelter-dancing-girl', '♪ ♫ ♪', { x: 2, y: 4.4 }], ['shelter-dancing-man', '♪ ♫ ♪', { x: 3, y: 4.4 }],
+    ['shelter-beer-guy', 'Prost!', { x: 14.1, y: 5.7 }],
+  ]);
+
+  // Pierre at the Shelter: holding the beers, Élodie gives him one, once; then talking to him offers the game again
+  c = act(c, { t: 'incarnate', id: 'pierre' });
+  const onPierre = (/** @type {Campaign} */ x) => objectAction('pierre', x.party.players.elodie, characterRules(x.facts, STORY_CONTENT))?.key;
+  assert.equal(onPierre(c), 'talk', 'no beers: talk');
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'give', item: 'beers', to: 'elodie' } });
+  assert.equal(onPierre(c), 'give-beer');
+  c = act(c, { t: 'use', id: 'elodie', character: 'pierre', action: 'give-beer' });
+  assert.deepEqual([stateOf(c, 'shelter'), onPierre(c)], ['offered', 'talk'], 'once');
+
+  // Marokkanergasse: each friend's own line before Pyramide; once they are themselves, Shikaboom with them
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'young-adult.appart-pierre.open', on: true } });
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'goto', node: MAROK } });
+  const friends = objectRules(c.facts, STORY_CONTENT);
+  assert.deepEqual(['marokkanergasse-johanna', 'marokkanergasse-nico', 'marokkanergasse-mathieu']
+    .map((prop) => objectAction(prop, c.party.players.elodie, friends)?.feedback),
+  ['Shikababy Shikaboom!', 'Hej hej! A Pyramide?', 'Allez, une petite Pyramide ?']);
+  c = act(c, { t: 'join', id: 'nico', character: 'nico' });
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'machine', machine: 'marokkanergasse', state: 'introduced' } });
+  c = act(c, { t: 'incarnate', id: 'nico' });
+  assert.equal(objectAction('nico', c.party.players.elodie, characterRules(c.facts, STORY_CONTENT))?.feedback, 'Shikababy Shikaboom!');
+});

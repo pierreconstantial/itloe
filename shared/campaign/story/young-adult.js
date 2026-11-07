@@ -44,8 +44,10 @@ const SHELTER_ROOM = room('young-adult/shelter', { x: 0.5, y: 4.4, w: 15, h: 4.4
   prop('shelter-barman', { x: 12.9, y: 3.25, w: 0.8, h: 1.05 }, { layer: 'back' }),
   prop('shelter-beer-guy', { x: 13.7, y: 5.1, w: 0.8, h: 1.15 }, { layer: 'back' }),
   prop('shelter-hyped-punk', { x: 3.4, y: 5.25, w: 0.9, h: 1.1 }, { layer: 'back' }),
-  // the painted foosball table: its interaction area, without art
+  // the painted foosball table and the bar's front (the barman stands out of reach behind it): interaction areas,
+  // without art
   prop('shelter-foosball', { x: 7.1, y: 4.5, w: 2.5, h: 1.2 }, { layer: 'back' }),
+  prop('shelter-bar', { x: 10.5, y: 4.1, w: 2.4, h: 1.2 }, { layer: 'back' }),
 ], [
   { x: 7.1, y: 4.5, w: 2.5, h: 1.2 }, // foosball
   { x: 10.5, y: 4.1, w: 4.8, h: 1.2 }, // bar and pinball machine
@@ -80,6 +82,17 @@ const APPART_PIERRE_ROOM = room('young-adult/appart-pierre', { x: 0.5, y: 5.45, 
   { x: 9.3, y: 5.35, w: 3.6, h: 0.95 }, // cream-covered sofa
 ]);
 
+/** Holding the beers, Élodie can give Pierre one first (once); talking to him offers table football again. */
+const BEER_FOR_PIERRE = 'young-adult.shelter.beer-for-pierre';
+const PIERRE_AT_THE_SHELTER = { pierre: { actions: [
+  { key: 'give-beer', text: '🍺 Give Pierre a beer', say: 'Prost! 🍺', speaker: /** @type {const} */ ('target'),
+    if: { all: [{ has: 'beers', who: /** @type {const} */ ('elodie') }, { not: { flag: BEER_FOR_PIERRE } }] } },
+  { key: 'talk', text: '💬 Talk to Pierre', say: 'A game of table football?', speaker: /** @type {const} */ ('target') },
+] } };
+const SHELTER_OFFER_EVENTS = {
+  [`entered:${FOOSBALL}`]: 'match', 'play:shelter-foosball': 'offered', 'talk:pierre': 'offered',
+  'give-beer:pierre': { to: 'offered', do: [{ flag: BEER_FOR_PIERRE }] },
+};
 const FOOSBALL_OFFER = { node: FOOSBALL, text: 'Pierre: “Élodie! A game of table football?”', accept: '⚽ Yes' };
 const PLAY_FOOSBALL = { 'shelter-foosball': { actions: [{ key: 'play', text: '⚽ Play table football' }] } };
 /** Élodie talking to Pierre in the flat: he offers backgammon again (her dismissed offer shows again). */
@@ -88,8 +101,17 @@ const PIERRE_LINE = 'I brought beers and cigarettes! But first, let’s play bac
 const BACKGAMMON_OFFER = { node: BACKGAMMON, text: 'Pierre: “Let’s play backgammon!”', accept: '🎲 Yes' };
 
 /** Marokkanergasse's people: talking to any of them offers Pyramide. */
-const FRIENDS = /** @type {const} */ ([['marokkanergasse-johanna', 'Johanna'], ['marokkanergasse-nico', 'Nico'], ['marokkanergasse-mathieu', 'Mathieu']]);
-const TALK_TO_FRIENDS = Object.fromEntries(FRIENDS.map(([id, name]) => [id, { actions: [{ key: 'talk', text: `💬 Talk to ${name}` }] }]));
+const FRIENDS = /** @type {const} */ ([
+  ['marokkanergasse-johanna', 'Johanna', 'johanna', 'Shikababy Shikaboom!'],
+  ['marokkanergasse-nico', 'Nico', 'nico', 'Hej hej! A Pyramide?'],
+  ['marokkanergasse-mathieu', 'Mathieu', 'mathieu', 'Allez, une petite Pyramide ?'],
+]);
+/** Each of them answers with their own line, and the Pyramide offer follows. */
+const TALK_TO_FRIENDS = Object.fromEntries(FRIENDS.map(([id, name, , line]) => [id,
+  { actions: [{ key: 'talk', text: `💬 Talk to ${name}`, say: line, speaker: /** @type {const} */ ('object') }] }]));
+/** Once they are themselves, in their flat: anyone next to one of them can Shikaboom (it hides the group actions there). */
+const SHIKABOOM_WITH_FRIENDS = Object.fromEntries(FRIENDS.map(([, , character]) => [character,
+  { actions: [{ key: 'shikaboom', text: '🎶 Shikaboom!', say: 'Shikababy Shikaboom!', speaker: /** @type {const} */ ('target'), by: /** @type {const} */ ('anyone') }] }]));
 const SHIKABOOM = 'Shikababy Shikaboom!\nLet’s play a Pyramide game!';
 /** Their NPCs, gone once their players are introduced, as Pyramide opens. */
 const INTRODUCED_FRIENDS = FRIENDS.map(([id]) => id);
@@ -237,6 +259,9 @@ export const YOUNG_ADULT = {
                 { key: 'talk', text: '💬 Talk to Tschick-Toni', say: 'Tschick-Toni:\nHost a Tschick?\nI brauch dringend ane!', speaker: 'object' },
               ],
             },
+            // not while Élodie holds the pack: the dog stands next to Toni, and the cigarette comes first
+            [DOG]: { actions: [{ key: 'pet', text: '🐕 Pet the dog', say: 'Wuff!', speaker: 'object', by: 'anyone',
+              if: { not: { has: 'cigarette-pack', who: 'elodie' } } }] },
           },
           on: { [`give:${TONI}`]: 'thanked' },
         },
@@ -349,7 +374,7 @@ export const YOUNG_ADULT = {
       },
     },
     // The Shelter: Pierre is there again (his wisp becomes his avatar) and offers table football (Yes or Dismiss;
-    // the table offers it again). Yes opens its lobby. After a finished match, back in the bar, Élodie can kiss
+    // talking to him or using the table offers it again; holding the beers, Élodie can give him one first). Yes opens its lobby. After a finished match, back in the bar, Élodie can kiss
     // him (her action on Pierre): Marokkanergasse opens as a tram destination, her flat closes.
     shelter: {
       initial: 'not-yet',
@@ -360,14 +385,16 @@ export const YOUNG_ADULT = {
           speech: { pierre: 'Élodie! A game of table football?' },
           hints: { [SHELTER]: 'Pierre: “Élodie! A game of table football?”' },
           objects: PLAY_FOOSBALL,
+          characters: PIERRE_AT_THE_SHELTER,
           offer: FOOSBALL_OFFER,
-          on: { [`entered:${FOOSBALL}`]: 'match', 'play:shelter-foosball': 'offered' },
+          on: SHELTER_OFFER_EVENTS,
         },
         offered: {
           hints: { [SHELTER]: 'Pierre: “Élodie! A game of table football?”' },
           objects: PLAY_FOOSBALL,
+          characters: PIERRE_AT_THE_SHELTER,
           offer: FOOSBALL_OFFER,
-          on: { [`entered:${FOOSBALL}`]: 'match', 'play:shelter-foosball': 'offered' },
+          on: SHELTER_OFFER_EVENTS,
         },
         match: {
           hints: { [FOOSBALL]: 'Table football at the Shelter.' },
@@ -404,7 +431,6 @@ export const YOUNG_ADULT = {
           on: Object.fromEntries(FRIENDS.map(([id]) => [`talk:${id}`, /** @type {const} */ ('offered')])),
         },
         offered: {
-          npcs: Object.fromEntries(FRIENDS.map(([id]) => [id, { say: SHIKABOOM }])),
           objects: TALK_TO_FRIENDS,
           offer: { node: PYRAMIDE, text: SHIKABOOM.replace('\n', ' '), accept: 'Yes' },
           after: { ms: 30_000, to: 'party' },
@@ -420,23 +446,54 @@ export const YOUNG_ADULT = {
         // the three are themselves now (no NPCs left to talk to): the offer stays until the game is played
         introduced: {
           hide: INTRODUCED_FRIENDS,
+          characters: SHIKABOOM_WITH_FRIENDS,
           offer: { node: PYRAMIDE, text: SHIKABOOM.replace('\n', ' '), accept: 'Yes' },
           on: { [`entered:${PYRAMIDE}`]: 'pyramide' },
         },
         'key-on-floor': {
           enter: [{ goto: MAROKKANERGASSE }],
           hide: INTRODUCED_FRIENDS,
+          characters: SHIKABOOM_WITH_FRIENDS,
           hints: { [MAROKKANERGASSE]: 'Something shines on the floor…' },
           pickups: [{ item: ADULT_KEY, node: MAROKKANERGASSE, x: 6.5, y: 7.6, radius: 0.8 }],
           on: { [`pickup:${ADULT_KEY}`]: { to: 'portal-open', do: [{ flag: 'route.adult' }] } },
         },
         'portal-open': {
           hide: INTRODUCED_FRIENDS,
+          characters: SHIKABOOM_WITH_FRIENDS,
           hints: { [MAROKKANERGASSE]: 'A portal has appeared. Élodie, walk into it!' },
           zones: [{ id: 'young-adult-portal', node: MAROKKANERGASSE, x: 9, y: 7.8, radius: 0.9, look: 'portal', arrive: { x: 6.2, y: 7.3 } }],
           on: { 'zone:young-adult-portal': { to: 'done', do: [{ goto: 'hub' }] } },
         },
         done: { hide: INTRODUCED_FRIENDS },
+      },
+    },
+    // Tram 5's passers-by answer whoever talks to them.
+    'tram-people': {
+      initial: 'there',
+      states: {
+        there: {
+          objects: {
+            'tram-5-old-woman': { actions: [{ key: 'talk', text: '💬 Talk to the lady', say: 'Na, Mädl, der Fünfer kommt eh gleich.', speaker: 'object', by: 'anyone' }] },
+            'tram-5-ice-kid': { actions: [{ key: 'talk', text: '💬 Talk to the kid', say: 'Mmh… Eis!', speaker: 'object', by: 'anyone' }] },
+            'tram-5-lazy-guy': { actions: [{ key: 'talk', text: '💬 Talk to the man', say: 'Heute nicht.', speaker: 'object', by: 'anyone' }] },
+          },
+        },
+      },
+    },
+    // The Shelter's crowd: a drink at the bar, a word with the regulars, a dance on the stage.
+    'shelter-crowd': {
+      initial: 'night',
+      states: {
+        night: {
+          objects: {
+            'shelter-bar': { actions: [{ key: 'order', text: '🍺 Order a drink', say: 'Barman: Ein Bier? Kommt sofort!', speaker: 'object', by: 'anyone' }] },
+            'shelter-hyped-punk': { actions: [{ key: 'talk', text: '💬 Talk to the punk', say: 'Oi! Best gig ever!', speaker: 'object', by: 'anyone' }] },
+            'shelter-beer-guy': { actions: [{ key: 'talk', text: '💬 Talk to the drinker', say: 'Prost!', speaker: 'object', by: 'anyone' }] },
+            'shelter-dancing-girl': { actions: [{ key: 'dance', text: '💃 Dance', say: '♪ ♫ ♪', by: 'anyone' }] },
+            'shelter-dancing-man': { actions: [{ key: 'dance', text: '💃 Dance', say: '♪ ♫ ♪', by: 'anyone' }] },
+          },
+        },
       },
     },
   },
