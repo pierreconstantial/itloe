@@ -30,8 +30,9 @@ const TRAM_5_ROOM = room(TRAM_5, { x: 0.5, y: 5.6, w: 15, h: 3.2 }, [
     { solid: { x: 9.75, y: 7.7, w: 0.7, h: 0.25 } }),
   prop('tram-5-weird-man', { x: 10.55, y: 6.45, w: 1.2, h: 1.2 },
     { solid: { x: 10.85, y: 7.3, w: 0.6, h: 0.35 } }),
+  // blocking a deep strip at its foot: walking behind it stays possible along the wall, without standing half under it
   prop('tram-5-cigarette-automat', { x: 11.85, y: 5.7, w: 1.05, h: 1.8 },
-    { solid: { x: 11.95, y: 7.15, w: 0.85, h: 0.35 } }),
+    { solid: { x: 11.95, y: 6.7, w: 0.85, h: 0.8 } }),
   // ambient people (public/screen/ambient-npcs.js): drawn, no interaction
   prop('tram-5-old-woman', { x: 2.45, y: 4.85, w: 0.8, h: 1.2 }, { layer: 'back' }),
   prop('tram-5-ice-kid', { x: 4.25, y: 5.05, w: 0.7, h: 1.0 }, { layer: 'back' }),
