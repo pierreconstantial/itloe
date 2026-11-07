@@ -6,6 +6,7 @@ import { INTRO_KEY } from './hub.js';
 /** @typedef {import('../types.js').Content} Content */
 
 const ART = '/assets/places/young-adult/';
+const ITEM_ART = '/assets/items/young-adult/';
 const TRAM_5 = 'young-adult/tram-5';
 const TRAM_QUIZ = 'young-adult/tram-5/quiz';
 const FLAT = 'young-adult/appart-elo-1';
@@ -22,9 +23,19 @@ const TRAM_5_ROOM = room(TRAM_5, { x: 0.5, y: 5.6, w: 15, h: 3.2 }, [
     { solid: { x: 10.85, y: 7.3, w: 0.6, h: 0.35 } }),
   prop('tram-5-cigarette-automat', { x: 11.85, y: 5.7, w: 1.05, h: 1.8 },
     { solid: { x: 11.95, y: 7.15, w: 0.85, h: 0.35 } }),
+  // ambient people (public/screen/ambient-npcs.js): drawn, no interaction
+  prop('tram-5-old-woman', { x: 2.45, y: 4.85, w: 0.8, h: 1.2 }, { layer: 'back' }),
+  prop('tram-5-ice-kid', { x: 4.25, y: 5.05, w: 0.7, h: 1.0 }, { layer: 'back' }),
+  prop('tram-5-lazy-guy', { x: 0.85, y: 5.55, w: 1.05, h: 1.15 }, { layer: 'back' }),
 ]);
 /** The other Young Adult backgrounds use their visible furniture as movement obstacles. */
-const SHELTER_ROOM = room('young-adult/shelter', { x: 0.5, y: 4.4, w: 15, h: 4.4 }, [], [
+const SHELTER_ROOM = room('young-adult/shelter', { x: 0.5, y: 4.4, w: 15, h: 4.4 }, [
+  prop('shelter-dancing-girl', { x: 1.55, y: 4.35, w: 0.8, h: 1.05 }, { layer: 'back' }),
+  prop('shelter-dancing-man', { x: 2.65, y: 4.35, w: 0.8, h: 1.05 }, { layer: 'back' }),
+  prop('shelter-barman', { x: 12.9, y: 3.25, w: 0.8, h: 1.05 }, { layer: 'back' }),
+  prop('shelter-beer-guy', { x: 13.7, y: 5.1, w: 0.8, h: 1.15 }, { layer: 'back' }),
+  prop('shelter-hyped-punk', { x: 3.4, y: 5.25, w: 0.9, h: 1.1 }, { layer: 'back' }),
+], [
   { x: 7.1, y: 4.5, w: 2.5, h: 1.2 }, // foosball
   { x: 10.5, y: 4.1, w: 4.8, h: 1.2 }, // bar and pinball machine
   { x: 3.1, y: 6, w: 1.2, h: 0.65 },
@@ -42,11 +53,17 @@ const APPART_ELO_1_ROOM = room(FLAT, { x: 0.5, y: 5.3, w: 15, h: 3.5 }, [
   { x: 5.25, y: 5.15, w: 4.6, h: 1.05 }, // mattress
   { x: 9.9, y: 5.1, w: 1.55, h: 0.9 }, // television
 ]);
-const APPART_PIERRE_ROOM = room('young-adult/appart-pierre', { x: 0.5, y: 5.05, w: 15, h: 3.75 }, [], [
-  { x: 1.8, y: 5.05, w: 2.1, h: 1.2 }, // sofa
-  { x: 4.2, y: 5.55, w: 2.9, h: 0.55 }, // coffee table; the floor in front stays clear
-  { x: 7.65, y: 5.3, w: 1.2, h: 1.05 }, // armchair
-  { x: 13.9, y: 4.9, w: 1.4, h: 0.75 }, // tiled stove
+/** Marokkanergasse (marokkanergasse-eureka-v1.png): Johanna stands by the window. */
+const APPART_PIERRE_ROOM = room('young-adult/appart-pierre', { x: 0.5, y: 5.45, w: 15, h: 3.35 }, [
+  prop('marokkanergasse-johanna', { x: 13.25, y: 6.0, w: 0.9, h: 1.2 }),
+], [
+  { x: 1.3, y: 5.45, w: 0.8, h: 0.3 }, // bookshelf base
+  { x: 2.0, y: 5.8, w: 1.95, h: 0.6 }, // navy armchair
+  { x: 4.0, y: 5.3, w: 0.55, h: 0.45 }, // plant pot
+  { x: 4.55, y: 5.55, w: 0.65, h: 0.25 }, // floor lamp base
+  { x: 5.2, y: 5.15, w: 4.1, h: 0.6 }, // patterned brown sofa
+  { x: 5.65, y: 5.55, w: 3.65, h: 0.75 }, // coffee table; the foreground stays open
+  { x: 9.3, y: 5.35, w: 3.6, h: 0.95 }, // cream-covered sofa
 ]);
 
 /** Toni's prop, and the dog that leaves with him. */
@@ -56,10 +73,12 @@ const DOG = 'tram-5-dog';
 /** @type {Pick<Content, 'items' | 'nodes' | 'rooms' | 'machines' | 'roomArt'>} */
 export const YOUNG_ADULT = {
   items: {
-    'shelter-ticket': { id: 'shelter-ticket', name: 'The Shelter concert ticket', icon: '🎟️', description: 'A ticket to a night at The Shelter.' },
-    'cigarette-pack': { id: 'cigarette-pack', name: 'Pack of cigarettes', icon: '🚬', description: 'Pierre brought them, with the beers.', keepsake: false },
-    crowbar: { id: 'crowbar', name: 'Crowbar', icon: '🔧', description: 'Tschick-Toni left it behind. Good for a stuck floorboard.', keepsake: false },
-    beers: { id: 'beers', name: 'Beers', icon: '🍺', description: 'Pierre brought them, as promised.', keepsake: false },
+    'shelter-ticket': { id: 'shelter-ticket', name: 'The Shelter concert ticket', icon: '🎟️', description: 'A ticket to a night at The Shelter.', art: `${ITEM_ART}shelter-ticket.svg` },
+    'cigarette-pack': { id: 'cigarette-pack', name: 'Pack of cigarettes', icon: '🚬', description: 'Pierre brought them, with the beers.', keepsake: false, art: `${ITEM_ART}cigarettes.svg` },
+    crowbar: { id: 'crowbar', name: 'Crowbar', icon: '🔧', description: 'Tschick-Toni left it behind. Good for a stuck floorboard.', keepsake: false, art: `${ITEM_ART}crowbar.svg` },
+    beers: { id: 'beers', name: 'Beers', icon: '🍺', description: 'Pierre brought them, as promised.', keepsake: false, art: `${ITEM_ART}beer.svg` },
+    // found after the Pyramide game at Marokkanergasse (not given yet)
+    'young-adult-adult-key': { id: 'young-adult-adult-key', name: 'Adult Age key', icon: '🗝️', description: 'The key found after the Pyramide game.', art: `${ITEM_ART}adult-key.svg` },
   },
   nodes: {
     'young-adult': {
@@ -99,7 +118,7 @@ export const YOUNG_ADULT = {
       hints: [{ text: 'Élodie can return to Tram 5.' }],
     },
     'young-adult/appart-pierre': {
-      id: 'young-adult/appart-pierre', kind: 'world', parent: TRAM_5, title: 'Appart Pierre',
+      id: 'young-adult/appart-pierre', kind: 'world', parent: TRAM_5, title: 'Marokkanergasse',
       room: 'young-adult/appart-pierre', unlock: { all: [{ unlocked: TRAM_5 }, { flag: 'young-adult.appart-pierre.open' }] },
       hints: [{ text: 'Élodie can return to Tram 5.' }],
     },
@@ -115,7 +134,7 @@ export const YOUNG_ADULT = {
       { when: { machine: 'flat-lamp', in: ['off'] }, src: `${ART}appart-elo-1-lamp-off-v2.png` },
       { src: `${ART}appart-elo-1-basement-v1.png` },
     ],
-    'young-adult/appart-pierre': [{ src: `${ART}appart-pierre-table-center-v4.png` }],
+    'young-adult/appart-pierre': [{ src: `${ART}marokkanergasse-eureka-v1.png` }],
   },
   machines: {
     // The painted tram: talking to it offers Élodie a quiz for 30 seconds; accepting enters its tableau.

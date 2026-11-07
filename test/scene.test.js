@@ -9,6 +9,7 @@ import { SAMPLE_CONTENT } from '../shared/campaign/index.js';
 import { buildDrawList, drawOrder } from '../public/screen/scene-render.js';
 import { PROP_PIXELS } from '../public/screen/party-room.js';
 import { STORY_CONTENT } from '../shared/campaign/story/index.js';
+import { AMBIENT_NPCS } from '../public/screen/ambient-npcs.js';
 
 /** @typedef {import('../shared/scene.js').Scene} Scene */
 
@@ -141,5 +142,13 @@ test('scene prop grids are rectangular and only use their own palette', () => {
     });
     const art = [PARTY_ROOM, ...Object.values(STORY_CONTENT.rooms ?? {})].flatMap((r) => r.props).find((p) => p.kind === id);
     assert.ok(art, `${id} is a prop of a scene`);
+  }
+  for (const [id, npc] of Object.entries(AMBIENT_NPCS)) {
+    if (!('altGrid' in npc)) continue;
+    assert.equal(npc.altGrid.length, npc.grid.length, `${id} animation keeps its height`);
+    for (const row of npc.altGrid) {
+      assert.equal(row.length, npc.grid[0].length, `${id} animation keeps its width`);
+      for (const ch of row) assert.ok(ch === '.' || ch in npc.pal, `${id} animation uses its palette`);
+    }
   }
 });

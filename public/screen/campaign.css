@@ -20,6 +20,7 @@
   font-size: calc(22 * var(--u)); font-weight: 800; color: #ffe7a8;
 }
 .map-bag-item { font-size: calc(28 * var(--u)); }
+.map-bag-item img { width: 1em; height: 1em; image-rendering: pixelated; vertical-align: middle; }
 .map-bag-item sub { font-size: 0.55em; color: #ffe7a8; }
 
 .cutscene {

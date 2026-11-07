@@ -95,6 +95,7 @@ export function validateContent(content) {
     for (const f of /** @type {const} */ (['name', 'icon', 'description'])) {
       if (typeof it?.[f] !== 'string' || !it[f].trim()) errors.push(`item "${key}": missing ${f}`);
     }
+    if (it?.art !== undefined && (typeof it.art !== 'string' || !it.art.startsWith('/'))) errors.push(`item "${key}": art must be a URL path ("/assets/…")`);
   }
   const knownItem = (/** @type {string} */ id) => !!items?.[id];
   const hubs = ids.filter((id) => nodes[id].parent === null);

@@ -7,6 +7,7 @@ import {
 import { objectAction, nearbyObject } from '../shared/interactions.js';
 import { isWalkable } from '../shared/scene.js';
 import { INTRO_KEY, MEMORY_WORLDS, OPENING_PLAYERS, STORY_CONTENT } from '../shared/campaign/story/index.js';
+import { CHARACTERS } from '../shared/characters.js';
 
 /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
 /** @param {Campaign} campaign @param {import('../shared/campaign/types.js').CampaignStep} action */
@@ -68,6 +69,24 @@ test('Nico joins as a wisp, stays out of rounds, and incarnates when introduced'
   assert.deepEqual(c.party.players['nico-player'].statuses, []);
   c = act(c, { t: 'status', id: 'nico-player', status: 'wisp', on: true });
   assert.deepEqual(c.party.players['nico-player'].statuses, ['wisp']);
+});
+
+test('Mathieu can join as the seventh character, resume his saved identity and incarnate when introduced', () => {
+  let c = newCampaign(STORY_CONTENT, 42);
+  for (const character of Object.keys(CHARACTERS)) {
+    c = act(c, { t: 'join', id: character, character: /** @type {import('../shared/characters.js').CharacterId} */ (character) });
+  }
+  assert.equal(c.party.order.length, 7);
+  assert.deepEqual(c.party.players.mathieu.statuses, ['wisp']);
+  assert.equal(act(c, { t: 'join', id: 'another-mathieu', character: 'mathieu' }), c, 'one holder per character');
+  const resumed = loadCampaign(JSON.parse(JSON.stringify(c)), STORY_CONTENT);
+  assert.ok(resumed);
+  c = resumed;
+  assert.equal(c.party.players.mathieu.character, 'mathieu');
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'person.mathieu.unlocked', on: true } });
+  assert.deepEqual(c.party.players.mathieu.statuses, ['wisp', 'incarnating']);
+  c = act(c, { t: 'incarnate', id: 'mathieu' });
+  assert.deepEqual(c.party.players.mathieu.statuses, []);
 });
 
 test('the opening\'s block game starts a round only with all four in the party and ready', () => {
@@ -181,8 +200,9 @@ test('Tschick-Toni: a cigarette from the pack, "Oida, geil!", he leaves with his
   assert.equal(act(c, { t: 'tick', now: 7999 }), c, 'he stays three seconds');
   c = act(c, { t: 'tick', now: 8000 });
   assert.equal(stateOf(c, 'toni'), 'gone');
-  assert.deepEqual(sceneAt(STORY_CONTENT, c.facts, c.at.node).props.map((p) => p.id), ['tram-5-tram', 'tram-5-cigarette-automat'],
-    'Toni and his dog are gone');
+  const props = sceneAt(STORY_CONTENT, c.facts, c.at.node).props.map((p) => p.id);
+  assert.ok(!props.includes('tram-5-weird-man') && !props.includes('tram-5-dog'), 'Toni and his dog are gone');
+  assert.ok(props.includes('tram-5-cigarette-automat'), 'the automat stays');
   assert.deepEqual(pickupsAt(c.facts, STORY_CONTENT, c.at.node).map((p) => p.item), ['crowbar']);
   c = act(c, { t: 'pickup', id: 'elodie', item: 'crowbar' });
   assert.equal(holding(c.facts, 'elodie', 'crowbar'), 1);

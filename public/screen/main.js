@@ -240,7 +240,9 @@ function showMap(c) {
       const el = h('span', 'map-bag', [
         h('span', 'map-bag-name', [b.name]),
         ...b.items.map((it) => {
-          const i = h('span', 'map-bag-item', [it.icon, ...(it.count > 1 ? [h('sub', '', [`×${it.count}`])] : [])]);
+          const art = it.art;
+          const icon = art ? Object.assign(document.createElement('img'), { src: art, alt: '', width: 32, height: 32 }) : it.icon;
+          const i = h('span', 'map-bag-item', [icon, ...(it.count > 1 ? [h('sub', '', [`×${it.count}`])] : [])]);
           i.title = it.name;
           i.dataset.item = it.id;
           return i;

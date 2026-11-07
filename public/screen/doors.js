@@ -46,10 +46,10 @@ export function nameOf(character, c) {
 }
 
 /**
- * Each present player's items, for the map band: icon + name + count from the catalogue (an item
+ * Each present player's items, for the map band: icon (or art) + name + count from the catalogue (an item
  * that left the catalogue is not shown). Players with an empty bag are left out.
  * @param {Campaign} c @param {Content} content
- * @returns {{ id: string, name: string, color: number, items: { id: string, icon: string, name: string, count: number }[] }[]}
+ * @returns {{ id: string, name: string, color: number, items: { id: string, icon: string, art?: string, name: string, count: number }[] }[]}
  */
 export function bags(c, content) {
   const inv = c.facts.inventory ?? {};
@@ -60,7 +60,7 @@ export function bags(c, content) {
       id: m.id, name: m.name, color: m.color,
       items: Object.entries(inv[/** @type {string} */ (m.character)] ?? {})
         .filter(([item, n]) => n > 0 && content.items?.[item])
-        .map(([item, n]) => ({ id: item, icon: content.items[item].icon, name: content.items[item].name, count: n })),
+        .map(([item, n]) => ({ id: item, icon: content.items[item].icon, art: content.items[item].art, name: content.items[item].name, count: n })),
     }))
     .filter((b) => b.items.length > 0);
 }

@@ -52,8 +52,9 @@ export {};
  */
 /**
  * A real object of the story (Contract F): only catalogue items can exist.
- * `keepsake: false`: not hung on the dream apartment's wall (the keys).
- * @typedef {{ id: string, name: string, icon: string, description: string, keepsake?: false }} Item
+ * `keepsake: false`: not hung on the dream apartment's wall (the keys). `art`: a picture's URL, shown instead of
+ * the icon in the bags.
+ * @typedef {{ id: string, name: string, icon: string, description: string, keepsake?: false, art?: string }} Item
  */
 
 /**

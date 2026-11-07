@@ -16,6 +16,8 @@
 import { PARTY_ROOM } from '../../shared/scene.js';
 import { WORLD } from '../../shared/world.js';
 import { YOUNG_ADULT_PIXELS } from './art/young-adult.js';
+import { AMBIENT_NPCS } from './ambient-npcs.js';
+import { drawSprite, SPRITE_SIZE } from '../../shared/sprites.js';
 import { createLoop, py as snapY } from './scene-render.js';
 import { worldView } from './avatar-layer.js';
 
@@ -127,7 +129,28 @@ const PLANT = [
 /** Every prop grid by prop kind (the party room's furniture, the story's props), also for the test that keeps
  *  them rectangular and inside their palette. */
 export const PROP_PIXELS = { sofa: { grid: SOFA, pal: SOFA_PAL }, table: { grid: TABLE, pal: TABLE_PAL },
-  plant: { grid: PLANT, pal: PLANT_PAL }, ...YOUNG_ADULT_PIXELS };
+  plant: { grid: PLANT, pal: PLANT_PAL }, ...YOUNG_ADULT_PIXELS,
+  ...Object.fromEntries(Object.entries(AMBIENT_NPCS).map(([id, { grid, pal }]) => [id, { grid, pal }])) };
+
+/** The room the crow flies over. */
+const CROW_ROOM = 'young-adult/tram-5';
+const TRAM_CROW_PAL = { o: '#1c2031', h: '#343546' };
+const TRAM_CROW_UP = [
+  'o..........o',
+  '.oo......oo.',
+  '...oo..oo...',
+  '....oooo....',
+  '.....oho....',
+  '....oo.oo...',
+];
+const TRAM_CROW_DOWN = [
+  '............',
+  '....oooo....',
+  '...oooooo...',
+  '.oooohooooo.',
+  'oo..oooo..oo',
+  '.....oo.....',
+];
 
 /** @param {number} v @param {number} p */
 const snap = (v, p) => Math.round(v / p) * p;
@@ -483,8 +506,32 @@ export function createPartyRoom(bg, fg, avatars) {
       }
     });
 
-  /** prop.kind → art, from PROP_PIXELS. @type {import('./scene-render.js').PropArt} */
-  const PROP_ART = Object.fromEntries(Object.entries(PROP_PIXELS).map(([kind, { grid, pal }]) => [kind, pixelProp(grid, pal)]));
+  /** @param {{grid: string[], altGrid?: string[], pal: Record<string, string>, motion: string, period: number, phase: number}} npc */
+  const ambientProp = (npc) =>
+    /** @type {import('./scene-render.js').DrawProp} */ ((g, prop, v) => {
+      const beat = Math.sin(frameNow * Math.PI * 2 / npc.period + npc.phase);
+      const dx = npc.motion === 'dance' || npc.motion === 'sway' ? Math.round(beat) : 0;
+      const dy = npc.motion === 'dance' || npc.motion === 'bounce' ? (beat > 0 ? -1 : 0)
+        : npc.motion === 'nod' || npc.motion === 'sip' ? (beat > 0.85 ? 1 : 0) : 0;
+      const cx = geo.ox + (prop.box.x + prop.box.w / 2) * v.unit;
+      g.save();
+      g.translate(dx * v.scale, dy * v.scale);
+      paintGrid(g, npc.altGrid && beat > 0 ? npc.altGrid : npc.grid,
+        npc.pal, cx, snapY(v, prop.anchorY), v.scale);
+      g.restore();
+    });
+
+  /** prop.kind → art: PROP_PIXELS, the animated ambient people over them, and Johanna's character sprite.
+   *  @type {import('./scene-render.js').PropArt} */
+  const PROP_ART = {
+    ...Object.fromEntries(Object.entries(PROP_PIXELS).map(([kind, { grid, pal }]) => [kind, pixelProp(grid, pal)])),
+    ...Object.fromEntries(Object.entries(AMBIENT_NPCS).map(([id, npc]) => [id, ambientProp(npc)])),
+    'marokkanergasse-johanna': (g, prop, v) => {
+      const size = SPRITE_SIZE * v.scale;
+      const cx = geo.ox + (prop.box.x + prop.box.w / 2) * v.unit;
+      drawSprite(g, 'johanna', 'down', 0, cx - size / 2, snapY(v, prop.anchorY) - size, v.scale);
+    },
+  };
 
   // ---- players, doors & object actions ----
 
@@ -534,6 +581,7 @@ export function createPartyRoom(bg, fg, avatars) {
     // The apartment's sofa and plants are painted into its background; the scene props remain
     // for collision and object interactions without drawing duplicate pixel furniture over them.
     avatars.draw(g, geo, alpha, now, room, room.id === APARTMENT ? {} : PROP_ART);
+    if (room.id === CROW_ROOM) drawTramCrow(g, now);
     if (room.id === APARTMENT) {
       drawCats(g, now);
       drawHubPeople(g, now);
@@ -579,6 +627,18 @@ export function createPartyRoom(bg, fg, avatars) {
         g.fillText(emote, sx, sy + Math.sin(now / 200) * geo.scale * 2);
       }
     }
+  }
+
+  /** A tiny crow crosses the high sky for four seconds, once every 42 seconds. */
+  /** @param {CanvasRenderingContext2D} g @param {number} now */
+  function drawTramCrow(g, now) {
+    const cycle = now % 42_000;
+    if (cycle < 30_000 || cycle >= 34_000) return;
+    const flight = (cycle - 30_000) / 4_000;
+    const x = 16.5 - flight * 17.5;
+    const y = 1.7 + Math.sin(flight * Math.PI * 5) * 0.13;
+    paintGrid(g, Math.floor(cycle / 170) % 2 ? TRAM_CROW_UP : TRAM_CROW_DOWN,
+      TRAM_CROW_PAL, geo.ox + x * geo.unit, geo.oy + y * geo.unit, geo.scale);
   }
 
   /** Friends without a player avatar gather here after their reunion has been earned. */

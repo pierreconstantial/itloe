@@ -23,7 +23,7 @@ import { ranking } from './ranking.js';
  * @typedef {{
  *   id: string,
  *   name: string,               // copied from CHARACTERS[character] when the round starts
- *   color: number,              // 1..6, maps to CSS var --p1..--p6; = CHARACTERS[character].color
+ *   color: number,              // maps to CSS var --pN; = CHARACTERS[character].color
  *   character: CharacterId,
  *   board: number[],            // see board.js
  *   handIndex: number,          // n of the hand currently held (0-based)

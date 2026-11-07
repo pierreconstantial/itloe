@@ -79,7 +79,11 @@ The Young Adult area starts at Tram 5, its entrance and hub. The first named pla
 | Tram 5 (entrance and hub) | `young-adult/tram-5` | [Shelter closed](public/assets/places/young-adult/tram-5-shelter-closed-v5.png), [Shelter open at night](public/assets/places/young-adult/tram-5-night-shelter-open-v6.png) |
 | Shelter | `young-adult/shelter` | [Interior](public/assets/places/young-adult/shelter-interior-playable-v3.png) |
 | Appart Elo 1 | `young-adult/appart-elo-1` | [Lamp on](public/assets/places/young-adult/appart-elo-1-basement-v1.png), [lamp off](public/assets/places/young-adult/appart-elo-1-lamp-off-v2.png) |
-| Appart Pierre | `young-adult/appart-pierre` | [Pierre’s flat](public/assets/places/young-adult/appart-pierre-table-center-v4.png) |
+| Marokkanergasse (Pierre’s apartment) | `young-adult/appart-pierre` | [Eureka living room](public/assets/places/young-adult/marokkanergasse-eureka-v1.png) |
+
+Tram 5 has three quiet passers-by near the stop and café: an older Viennese woman with a cane, a child eating ice cream, and a lazy man. A crow occasionally crosses the sky. The Shelter has two dancers in the dark stage room, a beer drinker, a barman, and a hyped punk. They animate in place and are scenery, leaving the routes and interactive objects clear. Their pixel art is in [ambient-npcs.js](public/screen/ambient-npcs.js).
+
+The Young Adult collectible art is in [public/assets/items/young-adult](public/assets/items/young-adult): beer, cigarettes, crowbar, Shelter ticket, and the Adult Age key. These items are in the catalogue and use the pixel icons in the bag; the pickup and puzzle actions remain part of the planned flow below.
 
 ### Young Adult game flow
 
@@ -98,7 +102,11 @@ Inside, a steep stair behind the entrance door descends into a brick-vaulted roc
 
 Appart Elo 1 is one small room in Élodie's flat, partly underground. A few steps descend from the door. Its windows are narrow and high on the wall. A mattress lies on the floor, with a cathode-ray TV beside it showing TV5MONDE. There are many books, a lamp on the floor, and a beer and ashtray on the floor near the bed. The visual reference is “Cozy Nick Cave Basement Retreat” in Downloads.
 
-Appart Pierre is a warm sitting room in Vienna. Blue evening shows through two tall windows; an ornate green tiled stove glows beside the door to the hall. A cathode-ray television plays TV5MONDE. A sofa and chairs surround a low table with beer, cards and an ashtray, while a few half-unpacked boxes sit near the doorway. There is room to walk around the furniture; the story has no normal exit from this apartment. The original visual reference is `4a754bd8-c82c-4046-be04-36081f51012c.png` in Downloads.
+Marokkanergasse is a dim, intimate Vienna living room lit by a warm floor lamp. A large red-lettered EUREKA film poster hangs above a patterned brown sofa with a blue cushion. A cream-covered sofa with a burnt orange cushion faces a navy wooden armchair. Books, trailing plants, a small giraffe and a speaker fill the shelves on the left. A low wooden coffee table holds a bottle, glasses, cigarettes and an ashtray. The parquet foreground stays clear for the characters to gather and move around the seating group. The story has no normal exit from this apartment. The approved art adapts “Cinematic Eureka Poster Living Room” in Downloads to the game’s pixel style and character scale.
+
+Nico and Johanna’s sprites use “WhatsApp Image 2026-11-06 at 11.16.23 PM” in Downloads as their reference (Nico left, Johanna right). Nico has short dark hair, a goatee, a dark zip sweater with grey shoulder panels and pale jeans. Johanna has long dark-blonde hair, a white coat over black clothes and black boots; she stands beside the right sofa as an NPC. Her four-direction walking sheet is ready for later story interactions.
+
+Mathieu’s sprite uses the bottom-left portrait of “WhatsApp Image 2026-11-06 at 11.20.29 PM” in Downloads: close-cut dark hair, light stubble, a white short-sleeved polo and dark jeans. His sheet includes all four directions and the same walking cycle as Nico. He is selectable on a phone (colour slot 7), joins as a wisp and incarnates when `person.mathieu.unlocked` is set, like Nico.
 
 ### Reunions
 
