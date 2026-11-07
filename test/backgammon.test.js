@@ -1,10 +1,15 @@
 // Backgammon's round rules (shared/backgammon.js): a whole group phase played to its end, the clock, players
-// who leave or are taken out, and the ranking. Fixed seeds; the moves are picked from the ones the rules allow.
+// who leave or are taken out, and the ranking; and in the main game, a restart and the view (server/backgammon.ts).
+// Fixed seeds; the moves are picked from the ones the rules allow.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BACKGAMMON_RULES as R, CHECKERS, OFF, allowedSteps, other, reach, standings } from '../shared/backgammon.js';
 import { minigame } from '../shared/minigames.js';
-import { startWaitsFor } from '../shared/campaign/index.js';
+import { askedSoFar, loadCampaign, minigameStatus, newCampaign, reduceCampaign, startWaitsFor } from '../shared/campaign/index.js';
+import { minigameContent } from '../shared/campaign/sample.js';
+import { makeBackgammonServer } from '../server/backgammon.ts';
+import { plainLobbyServer } from '../server/plain-lobby.ts';
+import { shiftRound } from '../server/resume.ts';
 
 /** @typedef {import('../shared/backgammon.js').BackgammonState} BackgammonState */
 /** @typedef {import('../shared/backgammon.js').BackgammonAction} BackgammonAction */
@@ -164,4 +169,55 @@ test('a round takes 2 to 4 ready players: the lobby refuses another count, and S
   const two = readyFor(2);
   assert.equal(startWaitsFor(view, two), null);
   assert.equal(M.status(M.reduce(two, { t: 'start', id: 'p1', now: 2000 }, CTX)), 'running');
+});
+
+test('backgammon in the main game: a round survives a restart with its remaining time; the view hides the dice', () => {
+  const CONTENT = /** @type {import('../shared/campaign/types.js').Content} */ (minigameContent('backgammon'));
+  const SERVER = plainLobbyServer(makeBackgammonServer());
+  /** @typedef {import('../shared/campaign/types.js').Campaign} Campaign */
+  /** @param {Campaign} c @param {...any} actions @returns {Campaign} */
+  const run = (c, ...actions) => actions.reduce((x, a) => reduceCampaign(x, a, CONTENT), c);
+  /** A phone's message, through the server code, accepted. @param {Campaign} c @param {string} id @param {object} m @param {number} [now] */
+  const send = (c, id, m, now = 1000) => {
+    const reply = SERVER.message(m, { id, now, gameMasterId: 'p', state: /** @type {any} */ (c.at.activity), asked: askedSoFar(c) }, { apply: () => false, send: () => {} });
+    const next = reply && 'action' in reply ? run(c, { t: 'activity', action: reply.action }) : c;
+    assert.notEqual(next, c, `${id} ${JSON.stringify(m)}: accepted`);
+    return next;
+  };
+  /** @param {Campaign} c @returns {BackgammonState} */
+  const round = (c) => /** @type {any} */ (c.at.activity).round;
+  /** A restart: the campaign through JSON and back. @param {Campaign} c */
+  const restarted = (c) => loadCampaign(JSON.parse(JSON.stringify(c)), CONTENT);
+
+  let c = run(newCampaign(CONTENT, 7), { t: 'join', id: 'p', character: 'pierre' }, { t: 'join', id: 'e', character: 'elodie' },
+    { t: 'startMinigame', id: 'p', now: 1 });
+  c = send(send(c, 'p', { t: 'ready', on: true }), 'e', { t: 'ready', on: true });
+  c = send(c, 'p', { t: 'start' });
+  // mid-turn: the opening roll on the board, a move made
+  const b = round(c).boards[0];
+  const dice = /** @type {number[]} */ (b.dice);
+  const mine = b.c[b.turn], theirs = b.c[other(b.turn)];
+  const from = allowedSteps(mine, theirs, dice)[0].from;
+  c = send(c, b[b.turn], { t: 'move', from, to: reach(mine, theirs, dice, from)[0].to });
+  assert.ok(round(c).rolls > 0 && round(c).boards[0].undo.length > 0);
+
+  const { seed: _seed, rolls: _rolls, ...shown } = round(c);
+  assert.deepEqual(/** @type {any} */ (SERVER.view(/** @type {any} */ (c.at.activity))).round, shown, 'the view: the round without what tells the next roll');
+
+  const back = restarted(c);
+  assert.deepEqual(back.at.activity, c.at.activity, 'a running round survives a restart, dice and all');
+
+  // down for 3 minutes: the deadline moves by as much, and the old one is stale
+  const deadline = /** @type {number} */ (round(c).deadline);
+  assert.equal(deadline, 1000 + 8 * 60_000);
+  const savedAt = 2000, downtime = 3 * 60_000;
+  const shifted = shiftRound(/** @type {any} */ (back), savedAt, savedAt + downtime);
+  assert.equal(round(shifted).deadline, deadline + downtime);
+  assert.equal(run(shifted, { t: 'activity', action: { t: 'timeUp', deadline } }), shifted, 'the timer armed before the restart is refused');
+  const timeUp = run(shifted, { t: 'activity', action: { t: 'timeUp', deadline: deadline + downtime } });
+  assert.equal(round(timeUp).phase, 'results');
+
+  c = send(timeUp, 'p', { t: 'endGame' });
+  assert.equal(minigameStatus(c), 'podium');
+  assert.deepEqual(restarted(c).at.activity, c.at.activity, 'the podium survives a restart');
 });

@@ -25,7 +25,6 @@ Work someone noticed but nobody has started. Pick an item, then delete its row a
 | [Story opening in a browser test](#story-opening-in-a-browser-test) | No browser test plays the opening past its block game | P1 | Open | Low |
 | [Pyramide in the story](#pyramide-in-the-story) | Pyramide has no tableau in the story yet | P1 | Needs decision | Low |
 | [Apartment drawings cover avatars](#apartment-drawings-cover-avatars) | The cats, friends, keepsakes and key are always drawn over avatars | P2 | Open | Low |
-| [Backgammon's restart and hidden dice untested](#backgammons-restart-and-hidden-dice-untested) | No test resumes a backgammon round or checks its view hides the dice | P2 | Open | Low |
 | [Questions of a dropped round come back](#questions-of-a-dropped-round-come-back) | A round dropped by `back` or `goto` doesn't use up its questions or words | P2 | Open | Low |
 | [TV frame cost unmeasured](#tv-frame-cost-unmeasured) | The room redraws everything at 60 fps; nobody measured it on the evening's laptop | P2 | Open | Low |
 | [Guests controlling NPCs](#guests-controlling-npcs) | Players controlling Marokkanergasse's NPCs, Nico and Mathieu | P3 | Needs decision | High |
@@ -83,12 +82,6 @@ This is Pierre's content.
 In the apartment, the cats, friends, keepsakes and the key are drawn after the depth-sorted list of props and avatars (`public/screen/party-room.js`). An avatar walking in front of a cat still has the cat drawn over it.
 
 **Recommendation:** make them props of the apartment's scene (`apartment-room` in `shared/campaign/story/hub.js`), so they sort with the avatars like the party room's furniture.
-
-### Backgammon's restart and hidden dice untested
-
-`test/backgammon.test.js` never resumes a round through `loadCampaign` (a restart) and never shifts its deadline, and nothing checks that backgammon's view leaves out `seed` and `rolls` (`server/backgammon.ts`), without which a phone could predict the dice. The campaign suite checks that the campaign's own seed stays off the wire; backgammon's view isn't checked.
-
-**Recommendation:** add both to `test/backgammon.test.js`, as `test/pyramide.test.js` does for its words; the same for table football once it has a clock.
 
 ### Questions of a dropped round come back
 
