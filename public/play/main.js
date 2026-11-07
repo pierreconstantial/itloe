@@ -2,7 +2,7 @@
 // (PROTOCOL.md); a running minigame's screens are its own (./minigames.js), mounted in #view-minigame.
 // Path ../../shared: resolved on disk by tsc, normalized to /shared/ by the browser.
 import { KEYS, load, save, forget } from './storage.js';
-import { $, toast } from './dom.js';
+import { $, toast, oneTap, heardBack } from './dom.js';
 import * as haptics from './haptics.js';
 import { initMenu } from './menu.js';
 import { syncClock, serverNow } from '../commun/clock.js';
@@ -133,7 +133,10 @@ const conn = createConnection({
     $('conn-banner').hidden = up;
     updateInteraction();
     if (!up) resetJoinRequest();
-    if (running) render(); // the minigame's screens hear of it
+    // a pick's welcome or err won't come on the new socket: the picker offers the character again
+    const picking = !up && pendingPick !== null;
+    if (!up) pendingPick = null;
+    if (running || picking) render(); // the minigame's screens hear of it
   },
   onReplaced,
 });
@@ -154,15 +157,16 @@ function onReplaced() {
   render();
 }
 
-/** @param {unknown} msg */
+/** @param {unknown} msg @returns {boolean} false when the link is down: it didn't go out */
 function send(msg) {
-  conn.send(msg);
+  return conn.send(msg);
 }
 
 /** Unknown message types are ignored (PROTOCOL.md forward-compatibility rule). @param {string} raw */
 function receive(raw) {
   /** @type {any} */ let m;
   try { m = JSON.parse(raw); } catch { return; }
+  if (m.t === 'view' || m.t === 'err') heardBack(); // what answers a tap (oneTap)
   if (m.t === 'welcome' && typeof m.playerId === 'string') {
     if (m.playerId !== playerId) myPos = null; // a different player: its own echo or spawn
     playerId = m.playerId;
@@ -220,10 +224,10 @@ function receive(raw) {
 /** @param {CharacterId} character */
 function join(character) {
   wantedCharacter = character;
-  pendingPick = character;
   save(KEYS.character, character);
   $('pick-error').hidden = true;
-  send({ t: 'join', character });
+  if (!send({ t: 'join', character })) return; // the link is down: no "Joining…" that nothing answers
+  pendingPick = character;
   render();
 }
 
@@ -759,7 +763,7 @@ $('room-form').addEventListener('submit', (e) => {
   else { roomPrompt = null; render(); } // nothing picked yet: back to the picker
 });
 
-$('btn-start-minigame').addEventListener('click', () => send({ t: 'startMinigame' }));
+$('btn-start-minigame').addEventListener('click', oneTap(() => send({ t: 'startMinigame' })));
 $('btn-jump').addEventListener('pointerdown', (e) => e.stopPropagation());
 $('btn-jump').addEventListener('click', () => {
   if (canWalk() && !minigame && !amWisp() && conn.isOnline()) send({ t: 'jump' });

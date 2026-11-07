@@ -335,14 +335,19 @@ test('gm: the game master only; goto / unlock / lock (sticks) / setFlag / count 
 
 // ---------------------------------------------------------------- loading a save
 
-test('loadCampaign: a minigame that cannot give a status (a round from before minigame lobbies) is refused', () => {
-  const c = startRound(party());
+test('loadCampaign: a minigame that cannot give a status (from an earlier version) ends as `back` ends one, the evening kept', () => {
+  // one round finished and kept, a second one running
+  const c = startRound(run(startRound(party()), act({ t: 'endGame', id: 'p' }), act({ t: 'lobby', id: 'p' })));
   const old = JSON.parse(JSON.stringify(c));
   old.at.activity = old.at.activity.round; // a round saved without its lobby
-  assert.throws(() => loadCampaign(old, C), /can resume/);
+  const loaded = loadCampaign(old, C, 2000);
+  assert.equal(loaded.at.activity, null, 'the minigame ended…');
+  assert.equal(loaded.at.node, c.at.node, '…the party in the room at its tableau');
+  assert.deepEqual(loaded.party, c.party);
+  assert.equal(loaded.facts.counters['blocks.played'], 1, 'its finished round recorded, the running one dropped');
   const stage = JSON.parse(JSON.stringify(c));
   stage.at.activity.stage = 'podium'; // a podium whose round still runs
-  assert.throws(() => loadCampaign(stage, C), /can resume/);
+  assert.equal(loadCampaign(stage, C, 2000).at.activity, null);
 });
 
 test('content tolerance: unknown ids dropped, settle re-runs, nothing re-locked', () => {

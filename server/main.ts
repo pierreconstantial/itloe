@@ -61,12 +61,24 @@ const party = () => game.campaign.party;
 /** The game master's id (Pierre, by the content), or null while he isn't in the evening. */
 const gameMaster = () => gameMasterId(party(), CONTENT);
 
+/** Runs work the server does for a message or on its own (a timer, a late verdict): a bug in it is logged and
+ *  must not kill the game for everyone, nor again on every restart (a resumed deadline fires at once). */
+function guarded<T>(who: string | null, what: string, work: () => T): T | undefined {
+  try {
+    return work();
+  } catch (e) {
+    console.error(`[itloe] ${what} failed:`, e);
+    admin.log(who, `server error on ${what}: ${e instanceof Error ? e.stack ?? e.message : e}`, false);
+    return undefined;
+  }
+}
+
 // beat() first: after a suspend, the overdue bell may run before the heartbeat; the beat shifts the
 // deadline, so this deadline action no longer matches it and the reducer ignores it (the new one is armed).
-const clock = makeClock((kind, deadline) => {
+const clock = makeClock((kind, deadline) => guarded(null, `the ${kind} deadline`, () => {
   beat();
   if (game.campaign.at.kind === kind) apply({ t: 'activity', action: minigame(kind)!.deadlineAction(deadline) });
-});
+}));
 
 /** The room's avatar positions: in memory only, outside the reducer (see pos.ts). */
 const positions = makePositions<WebSocket>();
@@ -82,11 +94,11 @@ function scheduleIncarnation(id: string): void {
   const kinds = EMOTES.filter((kind) => kind !== 'shine');
   const kind = kinds[Math.floor(Math.random() * kinds.length)];
   incarnations.set(id, { at, kind });
-  setTimeout(() => {
+  setTimeout(() => guarded(id, 'an incarnation', () => {
     if (incarnations.get(id)?.at !== at) return;
     incarnations.delete(id);
     if (apply({ t: 'incarnate', id })) sendAll({ t: 'emote', playerId: id, kind, at: Date.now() });
-  }, 3000);
+  }), 3000);
 }
 
 /** The running minigame's in-memory side (round.ts): its server code's io, with unsaved messages. Null while none runs. */
@@ -96,7 +108,8 @@ const openRound = (c: Campaign): Round<unknown> | null => {
   // Nobody keeps walking in the room while the minigame runs (a phone's last "stop" may arrive after it started).
   for (const [id, pos] of positions.entries()) if (pos.moving) positions.set(id, { ...pos, moving: false });
   return makeRound({
-    apply: (action) => apply({ t: 'activity', action: action as any }),
+    // also from the minigame's own callbacks (the quiz's verdict), outside any message
+    apply: (action) => guarded(null, 'a minigame action', () => apply({ t: 'activity', action: action as any })) ?? false,
     sendAll,
   });
 };
@@ -131,7 +144,8 @@ const onChange: ((prev: Campaign, next: Campaign) => void)[] = [
   },
   (_prev, next) => positions.prune(next.party),
   () => placeWalkers(),
-  (prev, next) => { if (prev.at.node !== next.at.node) resetZones(); },
+  // doors are read only while no minigame runs: at its start and end too (its lobby moves walkers without them)
+  (prev, next) => { if (prev.at.node !== next.at.node || !prev.at.activity !== !next.at.activity) resetZones(); },
   () => armMachineTimer(),
   (prev, next) => {
     for (const id of next.party.order) {
@@ -180,11 +194,7 @@ function armMachineTimer(): void {
   machineTimer = at === null ? null : setTimeout(() => {
     machineTimer = null;
     machineTimerAt = null;
-    // a timer callback has no message handler's try/catch: a content or reducer error must not kill the evening
-    try { apply({ t: 'tick' }); } catch (e) {
-      console.error('[itloe] story timer failed:', e);
-      admin.log(null, `server error on a story timer: ${e instanceof Error ? e.stack ?? e.message : e}`, false);
-    }
+    guarded(null, 'a story timer', () => apply({ t: 'tick' }));
     armMachineTimer();
   }, Math.max(0, at - Date.now()));
 }
@@ -212,7 +222,7 @@ function beat(): void {
   }
   saveGame(game);
 }
-setInterval(beat, BEAT_MS).unref();
+setInterval(() => guarded(null, 'the heartbeat', beat), BEAT_MS).unref();
 
 // ---------- HTTP ----------
 
@@ -350,11 +360,12 @@ const minigameView = (): MinigameView | null => {
 };
 
 /** `minigame`: the running minigame; `campaign`: the whole evening (TV hub/cutscenes, phone game-master panel), without
- *  the minigame's raw state, which travels only through its server code's view (raw quiz verdicts would leak). */
+ *  the minigame's raw state, which travels only through its server code's view (raw quiz verdicts would leak), and
+ *  without the seed (each minigame's seed comes from it, and with it backgammon's dice). */
 const viewMsg = () => {
-  const { activity: _raw, ...at } = game.campaign.at;
+  const { seed: _seed, at: { activity: _raw, ...at }, ...campaign } = game.campaign;
   return JSON.stringify({
-    t: 'view', minigame: minigameView(), campaign: { ...game.campaign, at }, contentVersion: CONTENT_VERSION,
+    t: 'view', minigame: minigameView(), campaign: { ...campaign, at }, contentVersion: CONTENT_VERSION,
     online: online(), incarnations: Object.fromEntries(incarnations), now: Date.now(),
   });
 };
@@ -534,8 +545,9 @@ function placeWalkers(): void {
   }
 }
 
-/** The party moved to another node: every walker's door is re-read on the new map, so standing where
- *  a door now is does not fire it — only a fresh step in does. */
+/** The party moved to another node, or a minigame started or ended: every walker's door is re-read where they
+ *  stand, so standing where a door now is (or the portal, after the opening's game) does not fire it — only a
+ *  fresh step in does. */
 function resetZones(): void {
   zones.clear();
   for (const [id, pos] of positions.entries()) zones.set(id, zoneHere(pos));
@@ -833,13 +845,7 @@ wss.on('connection', (ws, req) => {
     if (m === null || typeof m !== 'object') return;
     const info = socketInfo.get(ws);
     if (info) { info.lastAt = Date.now(); info.last = String(m.t); }
-    try {
-      handleMessage(ws, m);
-    } catch (e) {
-      // a bad message or a reducer bug must not kill the game for everyone
-      console.error('[itloe] message handling failed:', e);
-      admin.log(whoIs(ws), `server error on ${JSON.stringify(m.t)}: ${e instanceof Error ? e.stack ?? e.message : e}`, false);
-    }
+    guarded(whoIs(ws), JSON.stringify(m.t), () => handleMessage(ws, m)); // a bad message or a reducer bug
   });
 
   ws.on('close', () => {

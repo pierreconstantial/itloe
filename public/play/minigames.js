@@ -15,7 +15,7 @@ import { BACKGAMMON_SCREEN } from './backgammon-ui.js';
 /**
  * What the frame offers a minigame's phone screens.
  * @typedef {{
- *   send: (msg: unknown) => void,   // a plain message to the server (PROTOCOL.md)
+ *   send: (msg: unknown) => boolean, // a plain message to the server (PROTOCOL.md); false: the link is down, it didn't go out
  *   meId: () => string,             // this phone's player
  *   isGameMaster: () => boolean,    // is this phone the game master's?
  *   gameMasterName: () => string,   // the game master's name, for the hints

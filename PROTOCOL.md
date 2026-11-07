@@ -386,7 +386,8 @@ loses their game and every game left; with fewer than two players left the group
 // "best" in solo games (below); quiz: the public projection (below); Pyramide: its round without the words still
 // drawable (below); backgammon: its round without the seed and the rolls (below). In a lobby with spots, "ready" is the spots' holders.
 // "campaign" = the whole evening (at.node, at.kind, at.results, party, facts, news, …) WITHOUT the minigame's raw state
-// (`at.activity`): that travels only through "minigame". The saved campaign keeps it.
+// (`at.activity`): that travels only through "minigame"; nor the seed, which each minigame's seed comes from (and with
+// it backgammon's dice). The saved campaign keeps both.
 // "online" lists party members. "contentVersion": the
 // hash served by GET /api/content: re-fetch the content when it changes (content edited + server restarted).
 // broadcast to ALL after every change; "now" = server epoch ms (M2 Q4): clients compute

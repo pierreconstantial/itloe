@@ -36,6 +36,11 @@ export function bindScore(playerId, target, el) {
   if (!rafId) rafId = requestAnimationFrame(tick);
 }
 
+/** Forgets every counter: the next bind of a player starts from 0. */
+export function resetScores() {
+  counters.clear();
+}
+
 function tick() {
   rafId = 0;
   const now = performance.now();

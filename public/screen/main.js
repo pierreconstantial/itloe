@@ -222,9 +222,12 @@ function showMap(c) {
   showWorld(c);
   party.setPlayers(c.party);
   avatars.setStatuses(c.party.players);
-  // the apartment's residents: the people the story introduced who don't play the opening (content.cast)
+  // the apartment's residents: the people the story introduced who don't play the opening (content.cast), unless a
+  // player walks there as them (Nico is a character too)
+  /** @type {Set<string>} */ const walking = new Set(Object.values(c.party.players).filter((m) => !m.left).map((m) => m.character));
   party.setHubPeople(Object.entries(story.cast?.introducedBy ?? {})
-    .filter(([id, flag]) => c.facts.flags.includes(flag) && !story.cast?.opening.includes(/** @type {any} */ (id))).map(([id]) => id));
+    .filter(([id, flag]) => c.facts.flags.includes(flag) && !story.cast?.opening.includes(/** @type {any} */ (id)) && !walking.has(id))
+    .map(([id]) => id));
   // the chooser's keepsakes on the apartment's wall
   party.setDecorations(Object.entries(c.facts.inventory[story.chooser] ?? {})
     .filter(([id, count]) => count > 0 && story.items[id] && story.items[id].keepsake !== false)
