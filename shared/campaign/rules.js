@@ -29,7 +29,7 @@ export const COUNTER = {
 
 /** @returns {Facts} */
 export function emptyFacts() {
-  return { counters: {}, flags: [], inventory: {}, unlocked: [], done: [], seen: [], asked: [], totals: {} };
+  return { counters: {}, flags: [], inventory: {}, unlocked: [], done: [], seen: [], asked: [], totals: {}, machines: {} };
 }
 
 /** How many of an item a character holds. @param {Facts} f @param {string} character @param {string} item */
@@ -72,6 +72,7 @@ export function holds(c, f) {
     if (who === 'anyone') return Object.keys(f.inventory ?? {}).some((ch) => holding(f, ch, c.has) >= need);
     return holding(f, who, c.has) >= need;
   }
+  if ('machine' in c) return Array.isArray(c.in) && c.in.includes(f.machines?.[c.machine]?.state ?? '');
   if ('all' in c) return Array.isArray(c.all) && c.all.every((x) => holds(x, f));
   if ('any' in c) return Array.isArray(c.any) && c.any.some((x) => holds(x, f));
   if ('not' in c) return !holds(c.not, f);

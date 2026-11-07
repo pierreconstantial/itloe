@@ -270,12 +270,87 @@ const DESIGNS = {
   },
 };
 
-// Provisional Nico character art, ready for his story incarnation. His look can be refined with
-// character references; the wisp itself uses the shared light renderer.
+// Nico — short dark hair, a small goatee, charcoal zip sweater with grey shoulder panels,
+// pale jeans and dark shoes. Reference: Nico on the left in the Marokkanergasse photograph.
 DESIGNS.nico = {
-  ...DESIGNS.pierre,
-  palette: { ...DESIGNS.pierre.palette, h: '#c9ab78', H: '#9a7648', c: '#177f72', C: '#0f5e55', a: '#3d756e', A: '#264f4a' },
-  down: ['...oooooooooo...', ...DESIGNS.pierre.down.slice(1)],
+  palette: {
+    o: '#24232b', h: '#303138', H: '#1e222b', s: '#edbd97', e: '#27232b', m: '#a65e56',
+    v: '#58403b', c: '#35404e', C: '#242e3c', k: '#74808a', a: '#c8bc9d',
+    p: '#9aafb9', b: '#41414b',
+  },
+  down: [
+    '................', '....oooooooo....', '...ohhhhhhhho...', '...ohHhhhhHho...',
+    '...ohssssssho...', '...osesssseso...', '...osssssssso...', '...ovssmmssvo...',
+    '...osvsvvsoso...', '....oovvvvoo....', '..oskkcackkkso..', '..occcacacccco..',
+    '..oCCCaCaCCCCo..',
+  ],
+  up: [
+    '................', '....oooooooo....', '...ohhhhhhhho...', '...ohHhhhhHho...',
+    '...ohhhhhhhho...', '...ohhhhhhhho...', '...ohHHHHHHho...', '...oHHHHHHHHo...',
+    '...osssssssso...', '....oossssoo....', '..oskkkkkkkkso..', '..occcccccccco..',
+    '..oCCCCCCCCCCo..',
+  ],
+  right: [
+    '................', '....oooooooo....', '...ohhhhhhhho...', '...ohHhhhhhho...',
+    '...ohhhhhssso...', '...ohhhssesso...', '...ohhhsssssso..', '...ohhvsssmso...',
+    '...ohhsvvvvo....', '....oosvvo......', '....okkkaccso...', '....occcaccco...',
+    '...oCCCCaCCCo...',
+  ],
+};
+
+// Mathieu — close-cut dark hair, light stubble, a white short-sleeved polo and dark jeans.
+// Reference: bottom-left portrait in WhatsApp Image 2026-11-06 at 11.20.29 PM.
+DESIGNS.mathieu = {
+  palette: {
+    o: '#27242d', h: '#3b3030', H: '#25232a', s: '#edbb99', e: '#302833', m: '#a9675d',
+    v: '#bb947c', c: '#e8e7dc', C: '#bfc2bd', k: '#fff5e3', a: '#919c9d',
+    p: '#383b50', b: '#33313c',
+  },
+  down: [
+    '................', '....oooooooo....', '...ohhhhhhhho...', '...ohHhhhhHho...',
+    '...ohssssssho...', '...osesssseso...', '...osssssssso...', '...osssmmssso...',
+    '...osvssssvso...', '....oossssoo....', '..osccksskccso..', '..osccckkcccso..',
+    '..oCCCCaCCCCCo..',
+  ],
+  up: [
+    '................', '....oooooooo....', '...ohhhhhhhho...', '...ohHhhhhHho...',
+    '...ohhhhhhhho...', '...ohhhhhhhho...', '...ohHHHHHHho...', '...oHHHHHHHHo...',
+    '...osssssssso...', '....oossssoo....', '..oscckkkkccso..', '..osccccccccso..',
+    '..oCCCCCCCCCCo..',
+  ],
+  right: [
+    '................', '....oooooooo....', '...ohhhhhhhho...', '...ohHhhhhhho...',
+    '...ohhhhhssso...', '...ohhhssesso...', '...ohhhsssssso..', '...ohhssssmso...',
+    '...oHHsvvvso....', '....oosssso.....', '....occkkccso...', '....occcaccso...',
+    '...oCCCCaCCCo...',
+  ],
+};
+
+// Johanna — dark-blonde hair half tied back, a white wrap coat over a black high-neck top,
+// black trousers and boots. A full NPC sheet; she does not occupy a player roster slot.
+DESIGNS.johanna = {
+  palette: {
+    o: '#29252d', h: '#ac916c', H: '#7e674f', a: '#ddc99b', s: '#f2c7a5', e: '#34303a', m: '#b66c65',
+    c: '#f1e8d5', C: '#c8bfae', k: '#302e38', w: '#fff5e5', p: '#302e39', b: '#26232d',
+  },
+  down: [
+    '................', '................', '....oooooooo....', '...ohhaaahhho...',
+    '..ohhhaaahhhho..', '..ohhssssshhho..', '..ohsessssesho..', '..ohssssssshho..',
+    '..ohhssmmshhho..', '..oHhoooohhHho..', '..ohcckkkccHho..', '..ohcwckcwccso..',
+    '..oCCCwcwCCCCo..',
+  ],
+  up: [
+    '................', '................', '....oooooooo....', '...ohhaaahhho...',
+    '..ohhhaaahhhho..', '..ohhhaaahhhho..', '..ohhHkkHhhhho..', '..ohHHhhHHhhho..',
+    '..ohHhhhhHhhho..', '..ohHhhhhHhhho..', '..ohHhhhhHccso..', '..ohHHhhHHccco..',
+    '..oCCCCCCCCCCo..',
+  ],
+  right: [
+    '................', '................', '....oooooooo....', '...ohhaaahhho...',
+    '..ohhhaaahhho...', '..oHhhhhhsso....', '..oHhhhsesso....', '..ohHhhsssssso..',
+    '..ohHhhhssmso...', '..ohHhhhoooo....', '..ohHhhcckkso...', '..ohHhhccwcco...',
+    '...oCCCCwCCCo...',
+  ],
 };
 
 // Konz's former sprite, restored alongside Nico: blond hair and a teal sweatshirt.

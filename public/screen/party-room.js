@@ -1,10 +1,11 @@
 // M3 party room, M4 (Contract G) the hub's scene: the lobby room with every joined guest's avatar
-// walking in it, among props they collide with and sort against. It draws the party room,
-// the dream apartment and the Young Adult places (ROOMS in shared/scene.js; roomAt picks one).
+// walking in it, among props they collide with and sort against. It draws the party room and the
+// story's rooms (content.rooms; sceneAt picks one, without the props the story hides).
 //
-// This file is ONE room: its backdrop painting, its scene's prop art, the furniture effects of
-// object actions, and the story's drawings (the portal, the cats, the friends, the keepsakes, the
-// key). The avatars are the avatar layer's (./avatar-layer.js), drawn in this room's scene; the
+// This file is ONE room: its backdrop (painted here, or the story's art), its scene's prop art (by prop kind,
+// the story's grids in ./art/), the furniture effects of object actions, and what the story's machines put in
+// it (docs/story-engine.md): zones by their look (a portal), items lying on the floor, NPC lines and emotes.
+// The dream apartment (room id 'apartment-room') adds its cats, friends and keepsakes. The avatars are the avatar layer's (./avatar-layer.js), drawn in this room's scene; the
 // engine itself is generic — geometry in shared/scene.js, draw order and the loop in
 // ./scene-render.js. Three passes per frame:
 //   #party-bg  painted once on resize: wall, floor, window, door, chandelier, bunting, balloons
@@ -12,10 +13,11 @@
 //              list — 'back' props, then 'sorted' props and avatars interleaved by baseline Y,
 //              then 'front' props.
 
-import { PARTY_ROOM, APARTMENT_ROOM } from '../../shared/scene.js';
+import { PARTY_ROOM } from '../../shared/scene.js';
 import { WORLD } from '../../shared/world.js';
-import { INTRO_KEY, INTRO_KEY_SPOT, PORTAL } from '../../shared/campaign/story.js';
-import { OBJECT_ACTIONS } from '../../shared/interactions.js';
+import { YOUNG_ADULT_PIXELS } from './art/young-adult.js';
+import { AMBIENT_NPCS } from './ambient-npcs.js';
+import { drawSprite, SPRITE_SIZE } from '../../shared/sprites.js';
 import { createLoop, py as snapY } from './scene-render.js';
 import { worldView } from './avatar-layer.js';
 
@@ -48,6 +50,10 @@ const SKY = ['#1f2a55', '#2f3570', '#53407e', '#8a4f84', '#c86a6e', '#f09a5c']; 
 const FLAGS = ['#e4572e', '#3b8ea5', '#f3a712', '#9b5de5', '#ff5fa2'];
 const PLANK_W = 3; // art pixels across a plank
 const PLANK_N = 4; // plank length in plank widths
+/** The dream apartment's room id: its painting holds the furniture, and it has its own residents. */
+const APARTMENT = 'apartment-room';
+/** NPC emotes as the TV shows them. @type {Record<string, string>} */
+const NPC_EMOTES = { joy: '😄', love: '❤️', surprise: '😮', anger: '💢' };
 
 // ---- prop art ----------------------------------------------------------------------
 // Pixel grids, same letter-per-pixel convention as shared/sprites.js: '.' is transparent, every
@@ -120,8 +126,31 @@ const PLANT = [
   '....ooooo....',
 ];
 
-/** Every prop grid, for the test that keeps them rectangular and inside their palette. */
-export const PROP_PIXELS = { sofa: { grid: SOFA, pal: SOFA_PAL }, table: { grid: TABLE, pal: TABLE_PAL }, plant: { grid: PLANT, pal: PLANT_PAL } };
+/** Every prop grid by prop kind (the party room's furniture, the story's props), also for the test that keeps
+ *  them rectangular and inside their palette. */
+export const PROP_PIXELS = { sofa: { grid: SOFA, pal: SOFA_PAL }, table: { grid: TABLE, pal: TABLE_PAL },
+  plant: { grid: PLANT, pal: PLANT_PAL }, ...YOUNG_ADULT_PIXELS,
+  ...Object.fromEntries(Object.entries(AMBIENT_NPCS).map(([id, { grid, pal }]) => [id, { grid, pal }])) };
+
+/** The room the crow flies over. */
+const CROW_ROOM = 'young-adult/tram-5';
+const TRAM_CROW_PAL = { o: '#1c2031', h: '#343546' };
+const TRAM_CROW_UP = [
+  'o..........o',
+  '.oo......oo.',
+  '...oo..oo...',
+  '....oooo....',
+  '.....oho....',
+  '....oo.oo...',
+];
+const TRAM_CROW_DOWN = [
+  '............',
+  '....oooo....',
+  '...oooooo...',
+  '.oooohooooo.',
+  'oo..oooo..oo',
+  '.....oo.....',
+];
 
 /** @param {number} v @param {number} p */
 const snap = (v, p) => Math.round(v / p) * p;
@@ -163,10 +192,11 @@ export function createPartyRoom(bg, fg, avatars) {
   let geo = worldView(1, 1, 1);
   let visible = false;
   /** @type {import('../../shared/scene.js').Scene} */ let room = PARTY_ROOM;
-  let portalVisible = false;
-  let keyVisible = false;
-  let shelterOpen = false;
-  let eloLampOff = false;
+  /** The painted background (the story's roomArt), or null: this file paints the room. @type {string | null} */
+  let art = null;
+  /** @type {import('../../shared/campaign/types.js').Zone[]} */ let zones = [];
+  /** @type {{ x: number, y: number, icon: string }[]} */ let pickups = [];
+  /** @type {Record<string, import('../../shared/campaign/types.js').Npc>} */ let npcs = {};
   /** @type {Map<string, HTMLImageElement>} */ const placeImages = new Map();
   /** @type {string[]} */ let hubPeople = [];
   /** @type {{id: string, icon: string}[]} */ let decorations = [];
@@ -188,16 +218,6 @@ export function createPartyRoom(bg, fg, avatars) {
   /** world → CSS px @param {number} x @param {number} y */
   const toScreen = (x, y) => ({ sx: geo.ox + x * geo.unit, sy: geo.oy + y * geo.unit });
 
-  /** Painted backgrounds for the dream apartment and Young Adult places. */
-  function placeBackground() {
-    if (room === APARTMENT_ROOM) return '/assets/places/hub/elodie-dream-apartment-oriental-rug-v2.png';
-    const base = '/assets/places/young-adult/';
-    if (room.id === 'young-adult/tram-5') return base + (shelterOpen ? 'tram-5-night-shelter-open-v6.png' : 'tram-5-shelter-closed-v5.png');
-    if (room.id === 'young-adult/shelter') return base + 'shelter-interior-playable-v3.png';
-    if (room.id === 'young-adult/appart-elo-1') return base + (eloLampOff ? 'appart-elo-1-lamp-off-v2.png' : 'appart-elo-1-basement-v1.png');
-    if (room.id === 'young-adult/appart-pierre') return base + 'appart-pierre-table-center-v4.png';
-    return null;
-  }
 
   // ---- static scene: an Altbau living room in Vienna, decorated for the birthday ----
   // Back wall (pale stucco, cornice, chair rail), a tall casement window on the left and a white
@@ -215,13 +235,13 @@ export function createPartyRoom(bg, fg, avatars) {
     const Y = (/** @type {number} */ u) => snap(geo.oy + u * unit, p);
     const floorTop = Y(SCENE.floorTop);
 
-    const src = placeBackground();
+    const src = art;
     if (src) {
       rect(g, 0, 0, w, h, '#211528');
       let image = placeImages.get(src);
       if (!image) {
         image = new Image();
-        image.onload = () => { if (visible && placeBackground() === src) paintScene(); };
+        image.onload = () => { if (visible && art === src) paintScene(); };
         image.src = src;
         placeImages.set(src, image);
       }
@@ -232,7 +252,7 @@ export function createPartyRoom(bg, fg, avatars) {
     paintWall(g, w, floorTop, p, Y);
     paintFloor(g, floorTop, w, h, p);
     paintWindow(g, X(SCENE.window.x0), X(SCENE.window.x1), Y(SCENE.window.top), floorTop - Y(SCENE.sill) + Y(0), p);
-    if (room === APARTMENT_ROOM) {
+    if (room.id === APARTMENT) {
       paintTerrace(g, X, Y, w, h, floorTop, p);
       paintChandelier(g, X(5.4), Y(SCENE.cornice), Y(SCENE.chandelier.y), p, unit);
       paintLight(g, X(5.4), Y(SCENE.chandelier.y), X(10.5), h, unit);
@@ -446,6 +466,8 @@ export function createPartyRoom(bg, fg, avatars) {
 
   /** @type {Map<string, {started: number, until: number}>} */
   const objectEffects = new Map();
+  /** A prop's own line after someone used it (`speaker: 'object'`): until when. @type {Map<string, { text: string, until: number }>} */
+  const propSpeech = new Map();
 
   /** One prop's art from a pixel grid. @param {string[]} grid @param {Record<string, string>} pal */
   const pixelProp = (grid, pal) =>
@@ -464,7 +486,7 @@ export function createPartyRoom(bg, fg, avatars) {
       } else if (active && prop.id === 'sofa') {
         g.translate(0, Math.abs(Math.sin(elapsed / 110)) * v.scale * 1.5);
       }
-      if (room === APARTMENT_ROOM && prop.id === 'sofa') {
+      if (room.id === APARTMENT && prop.id === 'sofa') {
         g.translate(cx, 0);
         g.scale(1.7, 1);
         g.translate(-cx, 0);
@@ -484,11 +506,31 @@ export function createPartyRoom(bg, fg, avatars) {
       }
     });
 
-  /** prop.kind → art. The only place this room's furniture is named. @type {import('./scene-render.js').PropArt} */
+  /** @param {{grid: string[], altGrid?: string[], pal: Record<string, string>, motion: string, period: number, phase: number}} npc */
+  const ambientProp = (npc) =>
+    /** @type {import('./scene-render.js').DrawProp} */ ((g, prop, v) => {
+      const beat = Math.sin(frameNow * Math.PI * 2 / npc.period + npc.phase);
+      const dx = npc.motion === 'dance' || npc.motion === 'sway' ? Math.round(beat) : 0;
+      const dy = npc.motion === 'dance' || npc.motion === 'bounce' ? (beat > 0 ? -1 : 0)
+        : npc.motion === 'nod' || npc.motion === 'sip' ? (beat > 0.85 ? 1 : 0) : 0;
+      const cx = geo.ox + (prop.box.x + prop.box.w / 2) * v.unit;
+      g.save();
+      g.translate(dx * v.scale, dy * v.scale);
+      paintGrid(g, npc.altGrid && beat > 0 ? npc.altGrid : npc.grid,
+        npc.pal, cx, snapY(v, prop.anchorY), v.scale);
+      g.restore();
+    });
+
+  /** prop.kind → art: PROP_PIXELS, the animated ambient people over them, and Johanna's character sprite.
+   *  @type {import('./scene-render.js').PropArt} */
   const PROP_ART = {
-    sofa: pixelProp(SOFA, SOFA_PAL),
-    table: pixelProp(TABLE, TABLE_PAL),
-    plant: pixelProp(PLANT, PLANT_PAL),
+    ...Object.fromEntries(Object.entries(PROP_PIXELS).map(([kind, { grid, pal }]) => [kind, pixelProp(grid, pal)])),
+    ...Object.fromEntries(Object.entries(AMBIENT_NPCS).map(([id, npc]) => [id, ambientProp(npc)])),
+    'marokkanergasse-johanna': (g, prop, v) => {
+      const size = SPRITE_SIZE * v.scale;
+      const cx = geo.ox + (prop.box.x + prop.box.w / 2) * v.unit;
+      drawSprite(g, 'johanna', 'down', 0, cx - size / 2, snapY(v, prop.anchorY) - size, v.scale);
+    },
   };
 
   // ---- players, doors & object actions ----
@@ -510,12 +552,18 @@ export function createPartyRoom(bg, fg, avatars) {
     avatars.setPlayers(s, room);
   }
 
-  /** @param {any} m a server-validated action at an object */
+  /** @param {any} m a server-validated action at an object: the prop says its line, or the furniture moves and the
+   *  player says the feedback */
   function onInteract(m) {
-    if (typeof m.playerId !== 'string' || typeof m.object !== 'string' || !Object.hasOwn(OBJECT_ACTIONS, m.object)) return;
+    if (typeof m.playerId !== 'string' || typeof m.object !== 'string') return;
     const now = performance.now();
+    const feedback = typeof m.feedback === 'string' ? m.feedback : '';
+    if (m.speaker === 'object') {
+      if (feedback) propSpeech.set(m.object, { text: feedback, until: now + 4000 });
+      return;
+    }
     objectEffects.set(m.object, { started: now, until: now + 2800 });
-    avatars.say(m.playerId, typeof m.feedback === 'string' ? m.feedback : OBJECT_ACTIONS[m.object]?.default?.feedback ?? '', 2000);
+    if (feedback) avatars.say(m.playerId, feedback.replace(/\n/g, ' '), 2000);
   }
 
   // ---- animation: the avatar layer's fixed-step simulation, interpolated drawing ----
@@ -527,17 +575,70 @@ export function createPartyRoom(bg, fg, avatars) {
     g.setTransform(geo.dpr, 0, 0, geo.dpr, 0, 0);
     g.clearRect(0, 0, geo.w, geo.h);
     g.imageSmoothingEnabled = false;
-    if (room !== APARTMENT_ROOM && !room.id.startsWith('young-adult/')) for (const d of doors) drawDoorway(g, d, now);
-    if (portalVisible && room === PARTY_ROOM) drawPortal(g, now);
+    // a painted room has its doors in its painting
+    if (!art) for (const d of doors) drawDoorway(g, d, now);
+    for (const z of zones) drawZone(g, z, now);
     // The apartment's sofa and plants are painted into its background; the scene props remain
     // for collision and object interactions without drawing duplicate pixel furniture over them.
-    avatars.draw(g, geo, alpha, now, room, room === APARTMENT_ROOM ? {} : PROP_ART);
-    if (room === APARTMENT_ROOM) {
+    avatars.draw(g, geo, alpha, now, room, room.id === APARTMENT ? {} : PROP_ART);
+    if (room.id === CROW_ROOM) drawTramCrow(g, now);
+    if (room.id === APARTMENT) {
       drawCats(g, now);
       drawHubPeople(g, now);
       drawDecorations(g);
-      if (keyVisible) drawIntroKey(g, now);
     }
+    for (const p of pickups) drawPickup(g, p, now);
+    drawNpcs(g, now);
+  }
+
+  /** NPC lines over their props: the story's (a dog barking every other few seconds, Toni's thanks) and a prop's
+   *  answer after someone used it; their emotes above. @param {CanvasRenderingContext2D} g @param {number} now */
+  function drawNpcs(g, now) {
+    const bubble = (/** @type {number} */ x, /** @type {number} */ y, /** @type {string[]} */ lines) => {
+      const size = Math.max(12, Math.round(geo.unit * 0.23));
+      g.font = `bold ${size}px monospace`;
+      const width = Math.max(...lines.map((line) => g.measureText(line).width)) + size;
+      const height = lines.length * size * 1.3 + size * 0.5;
+      const cx = geo.ox + x * geo.unit;
+      const top = geo.oy + y * geo.unit - height;
+      const left = Math.max(geo.ox + 5, Math.min(cx - width / 2, geo.ox + WORLD.w * geo.unit - width - 5));
+      g.fillStyle = '#241c2b';
+      g.fillRect(left - 3, top - 3, width + 6, height + 6);
+      g.fillStyle = '#f8e8cf';
+      g.fillRect(left, top, width, height);
+      g.fillStyle = '#241c2b';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      lines.forEach((line, i) => g.fillText(line, left + width / 2, top + size * (i + 0.8) * 1.3));
+    };
+    for (const prop of room.props) {
+      const spoken = propSpeech.get(prop.id);
+      if (spoken && spoken.until <= now) propSpeech.delete(prop.id);
+      const npc = npcs[prop.id];
+      const line = spoken && spoken.until > now ? spoken.text
+        : npc?.say && (!npc.blink || Math.floor(now / 3600) % 2 === 0) ? npc.say : null;
+      const x = prop.box.x + prop.box.w / 2;
+      if (line) bubble(x, prop.box.y - 0.1, line.split('\n'));
+      const emote = npc?.emote ? NPC_EMOTES[npc.emote] ?? npc.emote : null;
+      if (emote) {
+        const { sx, sy } = toScreen(x, prop.box.y - (line ? 1.1 : 0.3));
+        g.font = `${Math.round(geo.unit * 0.6)}px system-ui, sans-serif`;
+        g.textAlign = 'center';
+        g.fillText(emote, sx, sy + Math.sin(now / 200) * geo.scale * 2);
+      }
+    }
+  }
+
+  /** A tiny crow crosses the high sky for four seconds, once every 42 seconds. */
+  /** @param {CanvasRenderingContext2D} g @param {number} now */
+  function drawTramCrow(g, now) {
+    const cycle = now % 42_000;
+    if (cycle < 30_000 || cycle >= 34_000) return;
+    const flight = (cycle - 30_000) / 4_000;
+    const x = 16.5 - flight * 17.5;
+    const y = 1.7 + Math.sin(flight * Math.PI * 5) * 0.13;
+    paintGrid(g, Math.floor(cycle / 170) % 2 ? TRAM_CROW_UP : TRAM_CROW_DOWN,
+      TRAM_CROW_PAL, geo.ox + x * geo.unit, geo.oy + y * geo.unit, geo.scale);
   }
 
   /** Friends without a player avatar gather here after their reunion has been earned. */
@@ -583,9 +684,15 @@ export function createPartyRoom(bg, fg, avatars) {
     });
   }
 
-  /** @param {CanvasRenderingContext2D} g @param {number} now */
-  function drawPortal(g, now) {
-    const { sx, sy } = toScreen(PORTAL.x, PORTAL.y);
+  /** A story zone, by its look (only 'portal' so far; a zone without a look is invisible).
+   * @param {CanvasRenderingContext2D} g @param {import('../../shared/campaign/types.js').Zone} z @param {number} now */
+  function drawZone(g, z, now) {
+    if (z.look === 'portal') drawPortal(g, z, now);
+  }
+
+  /** @param {CanvasRenderingContext2D} g @param {{ x: number, y: number }} at @param {number} now */
+  function drawPortal(g, at, now) {
+    const { sx, sy } = toScreen(at.x, at.y);
     const pulse = 1 + Math.sin(now / 230) * 0.08;
     g.save();
     g.translate(sx, sy); g.scale(pulse, pulse);
@@ -615,12 +722,13 @@ export function createPartyRoom(bg, fg, avatars) {
     }
   }
 
-  /** @param {CanvasRenderingContext2D} g @param {number} now */
-  function drawIntroKey(g, now) {
-    const { sx, sy } = toScreen(INTRO_KEY_SPOT.x, INTRO_KEY_SPOT.y);
+  /** An item lying on the floor, bobbing, to pick up.
+   * @param {CanvasRenderingContext2D} g @param {{ x: number, y: number, icon: string }} p @param {number} now */
+  function drawPickup(g, p, now) {
+    const { sx, sy } = toScreen(p.x, p.y);
     const bob = Math.sin(now / 250) * geo.scale * 2;
     g.font = `${Math.round(geo.unit * 0.55)}px system-ui, sans-serif`;
-    g.textAlign = 'center'; g.fillText('🗝️', sx, sy - geo.unit * 0.3 + bob);
+    g.textAlign = 'center'; g.fillText(p.icon, sx, sy - geo.unit * 0.3 + bob);
     g.font = `800 ${Math.round(geo.unit * 0.2)}px system-ui, sans-serif`;
     g.fillStyle = '#fff3d6'; g.fillText('PICK UP', sx, sy + geo.scale * 2);
   }
@@ -649,9 +757,8 @@ export function createPartyRoom(bg, fg, avatars) {
     for (let x = rx0 + p * 4; x < rx1 - p * 4; x += p * 4) rect(g, x, ry0 + p, p * 2, p, locked ? '#7a6858' : '#e9c46a');
 
     // doorway standing on the rug's back edge
-    const grand = d.id === 'young-adult';
-    const dw = Math.max(p * 14, snap((rx1 - rx0) * (grand ? 0.92 : 0.7), p));
-    const dh = snap(unit * (grand ? 2.65 : 1.75), p);
+    const dw = Math.max(p * 14, snap((rx1 - rx0) * 0.7, p));
+    const dh = snap(unit * 1.75, p);
     const dx0 = snap((rx0 + rx1) / 2 - dw / 2, p), dy1 = ry0 + p * 2, dy0 = dy1 - dh;
     rect(g, dx0 - p * 3, dy0 - p * 3, dw + p * 6, p * 2, PAL.stucco);            // cornice
     rect(g, dx0 - p * 2, dy0 - p, dw + p * 4, dh + p, PAL.frame);                // architrave
@@ -761,27 +868,26 @@ export function createPartyRoom(bg, fg, avatars) {
     if (visible) paintScene();
   }
 
-  /** Story flags select the night Tram 5 and lamp-off room variants. @param {string[]} flags */
-  function setWorldFlags(flags) {
-    const nextShelterOpen = flags.includes('young-adult.shelter.open');
-    const nextLampOff = flags.includes('young-adult.appart-elo-1.lamp-off');
-    if (shelterOpen === nextShelterOpen && eloLampOff === nextLampOff) return;
-    shelterOpen = nextShelterOpen;
-    eloLampOff = nextLampOff;
+  /** The painted background (the story's roomArt for this room now), or null. @param {string | null} src */
+  function setArt(src) {
+    if (art === src) return;
+    art = src;
     if (visible) paintScene();
   }
 
   /** Forget the furniture effects (reconnect); the avatar layer resets its own. */
   function reset() {
     objectEffects.clear();
+    propSpeech.clear();
   }
 
   addEventListener('resize', () => { if (visible) layout(); });
 
   return {
-    setPlayers, setDoors, onInteract, setVisible, setRoom, setWorldFlags,
-    setPortal: (/** @type {boolean} */ on) => { portalVisible = on; },
-    setKey: (/** @type {boolean} */ on) => { keyVisible = on; },
+    setPlayers, setDoors, onInteract, setVisible, setRoom, setArt,
+    setZones: (/** @type {import('../../shared/campaign/types.js').Zone[]} */ list) => { zones = list; },
+    setPickups: (/** @type {{ x: number, y: number, icon: string }[]} */ list) => { pickups = list; },
+    setNpcs: (/** @type {Record<string, import('../../shared/campaign/types.js').Npc>} */ map) => { npcs = map; },
     setHubPeople: (/** @type {string[]} */ people) => { hubPeople = people; },
     setDecorations: (/** @type {{id: string, icon: string}[]} */ items) => { decorations = items; },
     reset,

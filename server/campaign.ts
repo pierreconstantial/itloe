@@ -4,14 +4,16 @@
 import { createHash } from 'node:crypto';
 import {
   newCampaign, loadCampaign, reduceCampaign, activityOf, isUnlocked, minigameStatus, gameMasterId, eligibleOf, askedSoFar,
-  validateContent, zoneAt, roomAt, UnknownMinigameError, SAMPLE_CONTENT,
+  validateContent, zoneAt, roomAt, sceneAt, UnknownMinigameError, SAMPLE_CONTENT,
+  chooserHeld, pickupsAt, zonesAt, objectRules, nextTimer, within, leads,
 } from '../shared/campaign/index.js';
-import { STORY_CONTENT } from '../shared/campaign/story.js';
+import { STORY_CONTENT } from '../shared/campaign/story/index.js';
 import { minigameContent } from '../shared/campaign/sample.js';
 import { MINIGAMES } from '../shared/minigames.js';
 import type { Campaign, CampaignAction, CampaignEvent, Content, GmOp } from '../shared/campaign/types.js';
 
-export { newCampaign, loadCampaign, reduceCampaign, activityOf, isUnlocked, minigameStatus, gameMasterId, eligibleOf, askedSoFar, validateContent, zoneAt, roomAt, UnknownMinigameError };
+export { newCampaign, loadCampaign, reduceCampaign, activityOf, isUnlocked, minigameStatus, gameMasterId, eligibleOf, askedSoFar, validateContent, zoneAt, roomAt, sceneAt, UnknownMinigameError };
+export { chooserHeld, pickupsAt, zonesAt, objectRules, nextTimer, within, leads };
 export type { Campaign, CampaignAction, CampaignEvent, Content, GmOp };
 
 /** The content ITLOE_CONTENT names: the birthday story when unset or empty, `sample` for the engine's
@@ -29,6 +31,8 @@ function contentFor(setting: string | undefined): Content {
 }
 
 export const CONTENT: Content = contentFor(process.env.ITLOE_CONTENT);
+/** The birthday story is playing (its scene shortcuts, server/test-scenes.ts, need it). */
+export const IS_STORY = CONTENT === STORY_CONTENT;
 
 /** Short hash of the content, computed once at boot: views carry it as `contentVersion`, GET /api/content
  *  serves it (body + ETag), so clients re-fetch the content only when it changed (an edit + restart). */

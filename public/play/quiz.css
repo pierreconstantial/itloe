@@ -43,6 +43,7 @@
 .quiz-choice.c4 { border-color: var(--p4); }
 .quiz-choice.c5 { border-color: var(--p5); }
 .quiz-choice.c6 { border-color: var(--p6); }
+.quiz-choice.c7 { border-color: var(--p7); }
 .quiz-choice.mine { background: var(--accent); color: #201a08; }
 .quiz-choice:disabled:not(.mine) { opacity: 0.45; }
 

@@ -9,6 +9,7 @@
 
 - Read the README's “For developers” section for architecture, code conventions, and test commands. Inspect the neighboring implementation and relevant tests before choosing an approach.
 - When adding or changing a minigame, read `docs/minigames.md` first.
+- When adding or changing story content, the campaign engine (`shared/campaign/`), or code that reads the campaign (server, phone, TV), read `docs/story-engine.md` first and follow its rule: the story is data, the code is generic.
 - Read the relevant sections of `PROTOCOL.md` and the contract sections of `BUILD-PLAN.md` when touching messages, shared APIs, or saved state. Do not silently change a contract marked frozen: raise the proposed change for agreement before implementing it. Draft proposals do not define implemented APIs.
 - Check the working tree and preserve unrelated local changes. Follow file ownership assigned for the current task; coordinate changes to files owned by another active contributor.
 
@@ -29,3 +30,7 @@
 - When a visual interaction is easy for Pierre to assess and browser testing would require extra setup, ask him to test it directly. Start the game on a free port with a scratch `BLOKO_VAR` first, and give him the screen, phone, or simulator URL he needs. Do not change test infrastructure solely for that visual check.
 - Review the diff and remove unrelated changes or additions unnecessary for the requested outcome. Keep generated saves, screenshots, and dependencies out of commits.
 - Report the resulting behavior, checks run, and any checks that could not run. If work elsewhere already breaks a check, report it without expanding the task into unrelated fixes.
+
+## Local command authorization
+
+- Pierre has authorized commands beginning with `CHROME=` for this project. Treat them as already approved; retain the scratch-save and port restrictions above.

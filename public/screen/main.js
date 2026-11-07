@@ -14,13 +14,12 @@ import { h } from './dom.js';
 import { createContentSource } from '../commun/content.js';
 import { doorStates, mapCopy, nameOf } from './doors.js';
 import { roomAt } from '../../shared/campaign/content.js';
-import { gameMasterId, isWisp } from '../../shared/campaign/index.js';
+import { gameMasterId, isWisp, sceneAt, hintAt, zonesAt, pickupsAt, npcsAt, holds, speechAt } from '../../shared/campaign/index.js';
 import { room as sceneRoom } from '../../shared/scene.js';
 import { createCutscenes } from './cutscenes.js';
 import { screenOf } from './minigames.js';
 import { applyJoinQr, joinQrState } from './join-qr.js';
 import { CHARACTERS } from '../../shared/characters.js';
-import { INTRO_KEY, REUNIONS } from '../../shared/campaign/story.js';
 
 /** @typedef {import('../../shared/minigames.js').MinigameView} MinigameView */
 
@@ -101,11 +100,22 @@ function applyPresence() {
   minigameAvatars.setOffline(off);
 }
 
-/** The story's start tableau after its first match: no round follows. */
-const portalReady = () => !!campaign?.facts.flags.includes('story.elo-50') && campaign.facts.flags.includes('portal.ready')
-  && campaign.at.node === 'hub.false-start';
-/** The portal stands in the room until Élodie went through it. */
-const portalOpen = () => portalReady() && !campaign?.facts.flags.includes('portal.entered');
+/**
+ * The room where the party is, as the story has it now (docs/story-engine.md): its scene without the hidden props,
+ * its painted art, and what the machines put in it (zones, items on the floor, NPC lines) while no minigame runs.
+ * @param {Campaign} c @param {boolean} [playing] a minigame runs: its screen covers the room
+ */
+function showWorld(c, playing = false) {
+  const facts = /** @type {import('../../shared/campaign/types.js').Facts} */ (c.facts);
+  const content_ = content.get();
+  const scene = sceneAt(content_, facts, c.at.node);
+  party.setRoom(scene);
+  party.setArt(content_.roomArt?.[scene.id]?.find((a) => !a.when || holds(a.when, facts))?.src ?? null);
+  party.setZones(playing ? [] : zonesAt(facts, content_, c.at.node));
+  party.setPickups(playing ? [] : pickupsAt(facts, content_, c.at.node)
+    .map((p) => ({ x: p.x, y: p.y, icon: content_.items[p.item]?.icon ?? '✨' })));
+  party.setNpcs(playing ? {} : npcsAt(facts, content_));
+}
 
 /** What the frame offers a minigame's screen. @type {import('./minigames.js').TvIo} */
 const io = { continuous: () => !gap, gameMasterName: () => CHARACTERS[content.get().gameMaster].name };
@@ -139,9 +149,7 @@ function showMinigame(m, c) {
   const screen = /** @type {import('./minigames.js').TvScreen} */ (screenOf(m.kind));
   shownMinigame = m;
   roomIds = null;
-  party.setRoom(roomAt(content.get(), c.at.node));
-  party.setPortal(false);
-  party.setKey(false);
+  showWorld(c, true);
   minigameAvatars.setPlayers(c.party, roomAt(content.get(), c.at.node));
   minigameWisps = c.party.order.filter((id) => onlineNow.includes(id) && isWisp(c.party, id, m.shows));
   minigameWalkers = [...minigameWisps, ...(m.spots ? m.shows : [])];
@@ -187,15 +195,10 @@ function showRoom(c) {
   roomIds = here;
   const band = /** @type {import('./minigames.js').TvScreen} */ (screenOf(c.at.kind));
   const gm = gameMasterId(c.party, content.get());
+  const hint = hintAt(/** @type {any} */ (c.facts), content.get(), c.at.node);
   app.replaceChildren(renderLobby({ order: here, players: c.party.players }, null, joinInfo,
-    { title: band.title, name: band.name },
-    portalOpen() ? { gameMasterId: gm, status: 'A portal has appeared. Élodie, walk into it!' }
-      : portalReady() ? { gameMasterId: gm, status: 'Élodie went through the portal.' }
-        : { gameMasterId: gm }));
-  party.setRoom(roomAt(content.get(), c.at.node));
-  party.setWorldFlags(c.facts.flags);
-  party.setPortal(portalOpen());
-  party.setKey(false);
+    { title: band.title, name: band.name }, hint ? { gameMasterId: gm, status: hint } : { gameMasterId: gm }));
+  showWorld(c);
   party.setPlayers({ order: here, players: c.party.players });
   avatars.setStatuses(c.party.players);
   party.setDoors([]);
@@ -215,19 +218,17 @@ const showPlace = (c) => (c.at.kind ? showRoom(c) : showMap(c));
 function showMap(c) {
   leaveMinigame();
   roomIds = null;
-  const storyScene = c.facts.flags.includes('story.elo-50') && c.facts.flags.includes('portal.entered');
-  const inApartment = storyScene && c.at.node === 'hub';
-  party.setRoom(roomAt(content.get(), c.at.node));
-  party.setWorldFlags(c.facts.flags);
+  const story = content.get();
+  showWorld(c);
   party.setPlayers(c.party);
   avatars.setStatuses(c.party.players);
-  party.setPortal(false);
-  party.setKey(inApartment && c.facts.flags.includes('apparition.seen') && !(c.facts.inventory.elodie?.[INTRO_KEY] > 0));
-  party.setHubPeople(inApartment ? REUNIONS.filter((person) => c.facts.flags.includes(person.flag)
-    && !['pierre', 'sol', 'anna'].includes(person.id)).map((person) => person.id) : []);
-  party.setDecorations(inApartment ? Object.entries(c.facts.inventory.elodie ?? {})
-    .filter(([id, count]) => count > 0 && !id.startsWith('memory-key-') && content.get().items[id])
-    .map(([id]) => ({ id, icon: content.get().items[id].icon })) : []);
+  // the apartment's residents: the people the story introduced who don't play the opening (content.cast)
+  party.setHubPeople(Object.entries(story.cast?.introducedBy ?? {})
+    .filter(([id, flag]) => c.facts.flags.includes(flag) && !story.cast?.opening.includes(/** @type {any} */ (id))).map(([id]) => id));
+  // the chooser's keepsakes on the apartment's wall
+  party.setDecorations(Object.entries(c.facts.inventory[story.chooser] ?? {})
+    .filter(([id, count]) => count > 0 && story.items[id] && story.items[id].keepsake !== false)
+    .map(([id]) => ({ id, icon: story.items[id].icon })));
   party.setDoors(doorStates(c, content.get()));
   party.setVisible(true);
   document.body.classList.add('party');
@@ -239,7 +240,9 @@ function showMap(c) {
       const el = h('span', 'map-bag', [
         h('span', 'map-bag-name', [b.name]),
         ...b.items.map((it) => {
-          const i = h('span', 'map-bag-item', [it.icon, ...(it.count > 1 ? [h('sub', '', [`×${it.count}`])] : [])]);
+          const art = it.art;
+          const icon = art ? Object.assign(document.createElement('img'), { src: art, alt: '', width: 32, height: 32 }) : it.icon;
+          const i = h('span', 'map-bag-item', [icon, ...(it.count > 1 ? [h('sub', '', [`×${it.count}`])] : [])]);
           i.title = it.name;
           i.dataset.item = it.id;
           return i;
@@ -315,7 +318,8 @@ function canPlayCutscene() {
  */
 function playMoment(m, signal) {
   momentsPlayed++;
-  if (m.apparition) return playApparition(signal);
+  const scripted = m.cutscene ? CUTSCENES[m.cutscene] : undefined;
+  if (scripted) return scripted(signal);
   const box = h('div', 'cutscene', [
     h('p', 'cutscene-headline', [m.headline]),
     ...m.unlocked.map((u) => h('p', `cutscene-line is-${u.kind}`, [`🚪 ${u.title}`])),
@@ -371,6 +375,27 @@ function playApparition(signal) {
   });
 }
 
+/** Story lines already said on this TV (speechAt keys). @type {Set<string>} */
+const saidLines = new Set();
+const STORY_LINE_MS = 8000;
+
+/**
+ * A character's story line (a machine state's `speech`) over their avatar, once, as soon as they show as
+ * themselves (after an incarnation's countdown). @param {Campaign} c
+ */
+function sayStoryLines(c) {
+  for (const line of speechAt(/** @type {import('../../shared/campaign/types.js').Facts} */ (c.facts), content.get())) {
+    if (saidLines.has(line.key)) continue;
+    const id = c.party.order.find((p) => !c.party.players[p].left && c.party.players[p].character === line.character);
+    if (!id || c.party.players[id].statuses.includes('wisp')) continue; // not here, or not yet as themselves
+    saidLines.add(line.key);
+    avatars.say(id, line.text, STORY_LINE_MS);
+  }
+}
+
+/** The story's scripted cutscenes, by the id its `cutscene` effects name. @type {Record<string, (signal: AbortSignal) => Promise<unknown>>} */
+const CUTSCENES = { apparition: playApparition };
+
 const cutscenes = createCutscenes({
   play: playMoment,
   ack: (upTo) => {
@@ -406,6 +431,7 @@ const HANDLERS = {
     }
     gap = false;
     if (campaign) cutscenes.update(campaign.news, campaign.newsSeq);
+    if (campaign && !minigame) sayStoryLines(campaign);
   },
   pos: (msg) => { avatars.onPos(msg); minigameAvatars.onPos(msg); },
   jump: (msg) => avatars.onJump(msg),

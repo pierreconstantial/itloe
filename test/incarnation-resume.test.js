@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:net';
 import { newCampaign, reduceCampaign } from '../shared/campaign/index.js';
-import { STORY_CONTENT } from '../shared/campaign/story.js';
+import { STORY_CONTENT } from '../shared/campaign/story/index.js';
 
 test('a pending Wisp incarnation survives a server restart and finishes after its countdown', { timeout: 12_000 }, async (t) => {
   let campaign = newCampaign(STORY_CONTENT, 7);

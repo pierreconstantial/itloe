@@ -16,8 +16,7 @@ test('object actions default to everyone and can differ or be denied per player'
   const elo = { id: 'p-elo', character: 'elodie' };
   assert.equal(objectAction('sofa', pierre)?.text, '🛋 Sit');
   assert.equal(objectAction('sofa', elo)?.text, '🛋 Sit');
-  assert.equal(objectAction('memory-key-intro', pierre), null);
-  assert.equal(objectAction('memory-key-intro', elo)?.text, '🗝️ Pick up key');
+  assert.equal(objectAction('memory-key-intro', elo), null, 'story objects come from the content, not this table');
 
   const rule = {
     default: { key: 'look', text: 'Look', feedback: 'Seen.' },

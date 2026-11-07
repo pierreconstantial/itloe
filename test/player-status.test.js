@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { gameMasterId, loadCampaign, newCampaign, reduceCampaign } from '../shared/campaign/index.js';
-import { STORY_CONTENT } from '../shared/campaign/story.js';
+import { STORY_CONTENT } from '../shared/campaign/story/index.js';
 
 /** @param {import('../shared/campaign/types.js').Campaign} campaign
  * @param {import('../shared/campaign/types.js').CampaignAction} action */
@@ -13,8 +13,8 @@ test('players keep several statuses across save/load; portal and later joins gra
   c = act(c, { t: 'join', id: 'sol', character: 'sol' });
   c = act(c, { t: 'join', id: 'pierre', character: 'pierre' });
   c = act(c, { t: 'status', id: 'sol', status: 'charged', on: true });
-  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'setFlag', flag: 'portal.ready', on: true } });
-  c = act(c, { t: 'portal', id: 'elo' });
+  c = act(c, { t: 'gm', id: 'pierre', op: { op: 'machine', machine: 'opening', state: 'portal-open' } });
+  c = act(c, { t: 'zone', id: 'elo', zone: 'portal' });
   assert.deepEqual(c.party.players.elo.statuses, []);
   assert.deepEqual(c.party.players.sol.statuses, ['charged', 'wisp']);
   c = act(c, { t: 'join', id: 'anna', character: 'anna' });

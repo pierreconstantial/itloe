@@ -91,8 +91,8 @@ export const SAMPLE_CONTENT = {
 
 /**
  * The development start's content (ITLOE_CONTENT=minigame:<kind>): a hub and one start tableau running
- * that minigame with its sample settings, so a minigame can be tested without playing the opening. No
- * `storyId`: the opening keys on it. A kind not in the rules list → null.
+ * that minigame with its sample settings, so a minigame can be tested without playing the opening (no story
+ * machines, nobody starts as a wisp). A kind not in the rules list → null.
  * @param {string} kind
  * @returns {Content | null}
  */

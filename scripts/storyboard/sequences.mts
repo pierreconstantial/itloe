@@ -44,7 +44,9 @@ async function walk(b: Board, who: string, to: { x: number, y: number }, done?: 
 
 /** The campaign as the TV holds it. */
 const campaign = (b: Board): Promise<any> => b.d.tv.ev('window.bloko.campaign()');
-const hasFlag = (b: Board, flag: string) => async () => !!(await campaign(b))?.facts.flags.includes(flag);
+/** A story machine is in one of these states (docs/story-engine.md). */
+const machineIn = (b: Board, machine: string, ...states: string[]) => async () =>
+  states.includes((await campaign(b))?.facts.machines?.[machine]?.state);
 /** Waits until the TV has no cutscene playing. */
 const cutscenesDone = (b: Board, ms = 60_000) => b.d.tv.waitFor('!window.bloko.cutscene().playing', ms);
 
@@ -162,23 +164,23 @@ const opening: Sequence = {
       [b.tv, () => b.real('pierre'), () => b.real('anna')]);
 
     await endMinigame(b, P);
-    await b.d.tv.waitFor('window.bloko.campaign()?.facts.flags.includes("portal.ready")');
+    await b.d.tv.waitFor('window.bloko.campaign()?.facts.machines.opening.state === "portal-open"');
     await sleep(1500);
     await b.frame('Pierre ends the block game (two taps): everyone is back in the main game’s party room, where a portal has appeared. Only Élodie can walk into it.',
       [b.tv, () => b.real('elodie'), () => b.real('anna')]);
 
-    await walk(b, 'elodie', { x: 8, y: 5.4 }, hasFlag(b, 'portal.entered'));
+    await walk(b, 'elodie', { x: 8, y: 5.4 }, machineIn(b, 'opening', 'apparition', 'key-on-floor', 'done'));
     await sleep(2500);
     await b.frame('Élodie crosses into her dream apartment. Pierre, Sol and Anna become wisps too and follow her, with Nico. A mysterious visitor appears and speaks.',
       [b.tv, () => b.real('elodie'), () => b.real('pierre')]);
 
-    await b.d.tv.waitFor('window.bloko.campaign()?.facts.flags.includes("apparition.seen")', 60_000);
+    await b.d.tv.waitFor('window.bloko.campaign()?.facts.machines.opening.state === "key-on-floor"', 60_000);
     await sleep(1500);
     await b.frame('He leaves the first key. Élodie walks over to it; the wisps float around her and can Shine.',
       [b.tv, () => b.real('elodie'), () => b.real('sol')]);
 
     await walk(b, 'elodie', { x: 6.4, y: 6.6 });
-    await E.tap('Pick up key');
+    await E.tap('Pick up');
     await b.d.tv.waitFor(`(window.bloko.campaign()?.facts.inventory.elodie?.['memory-key-intro'] ?? 0) > 0`);
     await sleep(1500);
     await b.frame('Élodie picks up the key: the large memory door becomes reachable.', [b.tv, () => b.real('elodie')]);
@@ -222,10 +224,10 @@ const youngAdult: Sequence = {
     await b.frame('Élodie’s dream apartment · hub. The current pixel-art background has one large interior door, plants, art posters, an oriental rug and a sunny terrace for four with beer and an ashtray. The door leads to Young Adult.',
       [async () => hubTvImage()]);
 
-    await b.frame('Tram 5 · young-adult/tram-5. Élodie arrives alone at Wallensteinplatz. A dog barks at a man trying to break into a Zigarettenautomat with a crowbar; The Shelter is closed.',
-      [art('tram-5-shelter-closed-v5.png'), elo('<h2>Wallensteinplatz</h2><p>🐕 A dog barks at a man by the cigarette machine.</p><button class="primary">Talk to the man</button>')]);
-    await b.frame('The man asks, “Host a Tschick? I brauch dringend ane!” Élodie has no cigarette yet. Later, giving him one makes him say “Oida, geil!”, disappear and leave his crowbar.',
-      [art('tram-5-shelter-closed-v5.png'), elo('<h2>By the Zigarettenautomat</h2><div class="card">“Host a Tschick? I brauch dringend ane!”</div><button disabled>Give a cigarette</button>')]);
+    await b.frame('Tram 5 · young-adult/tram-5. Élodie arrives alone at Wallensteinplatz. A dog barks at Tschick-Toni as he tries to break into a Zigarettenautomat with a crowbar; The Shelter is closed.',
+      [art('tram-5-shelter-closed-v5.png'), elo('<h2>Wallensteinplatz</h2><p>🐕 A dog barks at Tschick-Toni by the cigarette machine.</p><button class="primary">Talk to Tschick-Toni</button>')]);
+    await b.frame('Tschick-Toni asks, “Host a Tschick? I brauch dringend ane!” Élodie has no cigarette yet. Later, giving him one makes him say “Oida, geil!”, disappear and leave his crowbar.',
+      [art('tram-5-shelter-closed-v5.png'), elo('<h2>Tschick-Toni · Zigarettenautomat</h2><div class="card">“Host a Tschick? I brauch dringend ane!”</div><button disabled>Give a cigarette</button>')]);
     await b.frame('Élodie interacts with Tram 5. Every journey begins with a quiz: she chooses one of three topics, then everyone who is not hidden may answer five questions.',
       [art('tram-5-shelter-closed-v5.png'), elo('<h2>Tram 5 · quiz</h2><p>Choose a topic</p><div class="card list"><button>Topic 1</button><button>Topic 2</button><button>Topic 3</button></div><p class="hint">5 questions · all visible players can answer</p>')]);
     await b.frame('After every answer, the quiz shows the correct answer and an explanation in the style Élodie likes. After question five, the first available destination is Élodie’s flat.',
@@ -255,11 +257,11 @@ const youngAdult: Sequence = {
       [art('tram-5-night-shelter-open-v6.png'), () => b.mockPhone('elodie', tramMenu(['The Shelter', 'Marokkanergasse']))]);
 
     await b.frame('Marokkanergasse · young-adult/appart-pierre. There is no normal exit. Nico and Mathieu are NPCs who may be controlled by connected players; Johanna and the Shikababe gang are here too. Anyone Élodie approaches invites her to Pyramide.',
-      [art('appart-pierre-table-center-v4.png'), elo('<h2>Marokkanergasse</h2><div class="card">Nico · Mathieu · Johanna · Shikababe</div><p>“Shikababy Shikaboom! Let\'s play a Pyramide game!”</p><button class="primary">Yes</button><button>Dismiss</button>')]);
+      [art('marokkanergasse-eureka-v1.png'), elo('<h2>Marokkanergasse</h2><div class="card">Nico · Mathieu · Johanna · Shikababe</div><p>“Shikababy Shikaboom! Let\'s play a Pyramide game!”</p><button class="primary">Yes</button><button>Dismiss</button>')]);
     await b.frame('“Yes” starts the multiplayer Pyramide word game using the shared game engine. “Dismiss” closes the invitation; Élodie can speak to someone again.',
-      [art('appart-pierre-table-center-v4.png'), elo('<h2>Pyramide</h2><button class="primary">Yes · start game</button><button>Dismiss</button>')]);
+      [art('marokkanergasse-eureka-v1.png'), elo('<h2>Pyramide</h2><button class="primary">Yes · start game</button><button>Dismiss</button>')]);
     await b.frame('After Pyramide, a special key appears on the floor. Élodie picks it up to unlock the Adult Age door in the hub. A portal then appears in the apartment; she enters it to return to the hub and complete Young Adult.',
-      [art('appart-pierre-table-center-v4.png'), elo('<h2>Young Adult complete</h2><button class="primary">Pick up Adult Age key</button><button>Enter portal to the hub</button>')]);
+      [art('marokkanergasse-eureka-v1.png'), elo('<h2>Young Adult complete</h2><button class="primary">Pick up Adult Age key</button><button>Enter portal to the hub</button>')]);
   },
 };
 

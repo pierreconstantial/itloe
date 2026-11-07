@@ -1,7 +1,7 @@
 // Campaign map on the TV: which doors the party room shows (the children of the node the party is
 // in) and in which state, derived from campaign.facts. Pure: the party room only draws the result.
 
-import { childrenOf } from '../../shared/campaign/index.js';
+import { childrenOf, hintAt } from '../../shared/campaign/index.js';
 import { CHARACTERS } from '../../shared/characters.js';
 
 /** @typedef {import('../../shared/campaign/types.js').CampaignView} Campaign */
@@ -46,10 +46,10 @@ export function nameOf(character, c) {
 }
 
 /**
- * Each present player's items, for the map band: icon + name + count from the catalogue (an item
+ * Each present player's items, for the map band: icon (or art) + name + count from the catalogue (an item
  * that left the catalogue is not shown). Players with an empty bag are left out.
  * @param {Campaign} c @param {Content} content
- * @returns {{ id: string, name: string, color: number, items: { id: string, icon: string, name: string, count: number }[] }[]}
+ * @returns {{ id: string, name: string, color: number, items: { id: string, icon: string, art?: string, name: string, count: number }[] }[]}
  */
 export function bags(c, content) {
   const inv = c.facts.inventory ?? {};
@@ -60,7 +60,7 @@ export function bags(c, content) {
       id: m.id, name: m.name, color: m.color,
       items: Object.entries(inv[/** @type {string} */ (m.character)] ?? {})
         .filter(([item, n]) => n > 0 && content.items?.[item])
-        .map(([item, n]) => ({ id: item, icon: content.items[item].icon, name: content.items[item].name, count: n })),
+        .map(([item, n]) => ({ id: item, icon: content.items[item].icon, art: content.items[item].art, name: content.items[item].name, count: n })),
     }))
     .filter((b) => b.items.length > 0);
 }
@@ -74,16 +74,9 @@ export function bags(c, content) {
 export function mapCopy(c, content) {
   const node = content.nodes[c.at.node];
   const chooser = Object.values(c.party.players).find((m) => !m.left && m.character === content.chooser);
-  const hint = c.at.node === 'hub' && c.facts.flags.includes('portal.entered')
-    ? !c.facts.flags.includes('apparition.seen') ? 'A visitor is appearing…'
-      : !c.facts.inventory.elodie?.['memory-key-intro'] ? 'Élodie, pick up the key.'
-        : 'Élodie, enter the Young Adult room.'
-    : c.at.node === 'young-adult' ? (c.facts.unlocked.includes('young-adult/shelter')
-      ? 'Élodie, walk to Tram 5 or enter the Shelter.' : 'Élodie, walk to Tram 5. The Shelter opens later.')
-      : c.at.node === 'young-adult/tram-5' ? 'Élodie, choose a destination on your phone.'
-        : c.at.node === 'young-adult/shelter' ? 'Élodie can return to Wallensteinplatz.'
-          : c.at.node.startsWith('young-adult/') ? 'Élodie can return to Tram 5.'
-            : chooser ? `${chooser.name}, walk through a door — or the game master picks one` : 'The game master picks a door';
+  // the story's line for this place (a machine state's, else the node's), else how doors work
+  const hint = hintAt(/** @type {any} */ (c.facts), content, c.at.node)
+    ?? (chooser ? `${chooser.name}, walk through a door — or the game master picks one` : 'The game master picks a door');
   return {
     title: node?.title ?? c.at.node,
     hint,

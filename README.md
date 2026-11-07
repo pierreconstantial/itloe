@@ -60,7 +60,7 @@ Set them in front of `npm start`, e.g. `PORT=8080 npm start`.
 | `BLOKO_VAR` | Folder for saved data (default `var/`). |
 | `BLOKO_QUIZ_DIR` | Folder of the quiz question bank (default `data/quiz/`). |
 | `BLOKO_PYRAMIDE_DIR` | Folder of Pyramide's word list (default `data/pyramide/`). |
-| `ITLOE_CONTENT=sample` | Play the sample content (`shared/campaign/sample.js`) instead of the birthday story (`shared/campaign/story.js`). The end-to-end suites run on it. |
+| `ITLOE_CONTENT=sample` | Play the sample content (`shared/campaign/sample.js`) instead of the birthday story (`shared/campaign/story/`). The end-to-end suites run on it. |
 | `ITLOE_CONTENT=minigame:<kind>` | Start at a hub and one tableau with that minigame and its sample settings (`sampleSettings` in its rules), which Pierre starts from his phone, without the story's opening, e.g. `ITLOE_CONTENT=minigame:quiz BLOKO_VAR="$(mktemp -d)" PORT=3199 npm start -- --new`. An unknown kind, or any `ITLOE_CONTENT` value other than these two, refuses to boot. |
 
 If the laptop has several network connections (Wi-Fi + Ethernet, VPN…), `npm start` asks which one the phones are on. Press Enter for the first one.
@@ -151,7 +151,8 @@ The application runs locally on Node.js 24+, with HTTP and WebSocket traffic on 
 | Location | Responsibility |
 |---|---|
 | `server/` | TypeScript: HTTP, WebSockets, trusted inputs, clocks, persistence, and server integration |
-| `shared/` | JavaScript with JSDoc types: reusable game rules, campaign rules/content, quiz helpers, characters, and scene/sprite helpers |
+| `shared/` | JavaScript with JSDoc types: reusable game rules, the campaign engine and its story machines, quiz helpers, characters, and scene/sprite helpers |
+| `shared/campaign/story/` | The birthday story as data, one file per world: places, rooms, items and story machines ([docs/story-engine.md](docs/story-engine.md)) |
 | `public/play/` | Phone interface and controls |
 | `public/screen/` | TV interface, rendering, audio, and effects |
 | `public/commun/` | Shared browser helpers and CSS |
@@ -189,6 +190,17 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 | `npm start` | The real server (`server/main.ts`, run directly by Node, no build step) |
 
 - **Simulator:** open **/sim/** on a running server: the TV screen plus player phones side by side in one page. The phones get the room code from `/api/join`.
+- **Tram 5 scene shortcuts:** run `BLOKO_VAR="$(mktemp -d /tmp/itloe-scene.XXXXXX)" PORT=3199 npm run start:local -- --new`,
+  then open `http://127.0.0.1:3199/test/young-adult/tram-5/`. The index lists `base` (day, Shelter closed)
+  and `night` (Shelter open, Élodie has a Shelter ticket). Opening a preset starts a fresh scratch evening
+  at Tram 5 and opens `/sim/` with Élodie ready to play and Pierre as game master in wisp mode. Optional query parameters override the setup:
+  `characters=elodie,pierre` (up to four simulator phones), `inventory=elodie:shelter-ticket:1`,
+  `flags=young-adult.shelter.open`, `statuses=pierre:wisp`, and `context=base|night`. Separate entries in a
+  parameter with commas. These URLs work only on a loopback server using a `/tmp/` save folder and a port
+  other than 3131; opening a preset replaces that scratch evening.
+- **Hub scene shortcut:** on the same scratch server, open `http://127.0.0.1:3199/test/hub/` and select `base`.
+  It opens Élodie’s dream apartment with Élodie, Pierre, Sol and Anna already joined. The same `characters`,
+  `inventory`, `flags` and `statuses` overrides apply.
 - **End-to-end tests:** the runner requires Linux, Google Chrome at `/usr/bin/google-chrome` (or `CHROME` set to another Chrome/Chromium executable), and `flock` on `PATH` (provided by util-linux). `npm run e2e` runs every suite; `npm run e2e -- quiz phone:4` runs the named ones. Run it in the foreground: it blocks until all are done (a full run takes about 3 minutes), then prints one line per suite (pass or fail, duration, log file), the FAIL lines of a failed suite, and an overall line; it exits non-zero on a failure. It runs the suites in parallel through the machine's shared slots, and does the setup for you: free ports, headless Chrome for the browser suites, a server for `base`, scratch data folders, all removed afterwards, also after Ctrl-C.
 
   | Suite | Covers |
@@ -213,6 +225,7 @@ Both `public/` and `shared/` are publicly served. Quiz bank data stays on the se
 
 ### Further reading
 
+- [docs/story-engine.md](docs/story-engine.md): the campaign engine and the story as data (Contract D v3): places, story machines (scenes, NPCs, quests, offers), and how to add to the story. Read it before touching story content or code that reads the campaign.
 - [docs/minigames.md](docs/minigames.md): adding a minigame: its parts and its lobby, registration lines, what the main game hands it, what shared code offers, the development start and tests.
 - [PROTOCOL.md](PROTOCOL.md): WebSocket messages, HTTP endpoints, trusted inputs, view filtering, and compatibility rules.
 - [SPEC-BLOCKS.md](SPEC-BLOCKS.md): original block-game design and technical direction.

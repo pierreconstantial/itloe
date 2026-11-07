@@ -81,9 +81,10 @@
         <p id="place-intro" class="dim" hidden></p>
         <ul id="place-children"></ul>
         <p id="place-hint" class="place-hint" hidden>Walk into a door to enter</p>
-        <div id="tram-destinations" class="tram-destinations" hidden>
-          <p>Where shall we go?</p>
-          <div id="tram-destination-buttons"></div>
+        <div id="offer" class="offer" hidden>
+          <p id="offer-text"></p>
+          <div><button id="offer-accept" class="primary" type="button">Accept</button>
+            <button id="offer-dismiss" type="button">Dismiss</button></div>
         </div>
         <button id="btn-place-back" type="button" hidden>← Back to Elo's dream place</button>
         <button type="button" class="bag-open" data-open="bag" hidden>🎒 Bag</button>
@@ -96,6 +97,11 @@
     <div id="view-minigame" hidden></div>
     <!-- the frame's, under a running minigame's screens while this player walks its lobby: #stick-pad docks here -->
     <section id="walk-panel" hidden></section>
+    <!-- the story's question to the chooser (a machine's choice, e.g. where the tram goes): over any view, no Dismiss -->
+    <section id="choice" class="choice" hidden>
+      <p id="choice-text"></p>
+      <div id="choice-options"></div>
+    </section>
 
   </main>
 
@@ -205,6 +211,14 @@
         <button type="button" data-gm="count-set">Set</button>
       </div>
       <datalist id="gm-counters"></datalist>
+
+      <p class="gm-h">Story</p>
+      <div class="gm-row">
+        <select id="gm-machine" aria-label="Story machine"></select>
+        <select id="gm-machine-state" aria-label="State"></select>
+        <button type="button" data-gm="machine">Set</button>
+      </div>
+      <p id="gm-machine-now" class="dim gm-why"></p>
 
       <p class="gm-h">Wisp Mode</p>
       <div class="gm-row">
